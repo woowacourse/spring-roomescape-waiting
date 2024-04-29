@@ -1,0 +1,7 @@
+package roomescape;
+
+public class TokenTestFixture {
+
+    public static final String ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6Iuq0gOumrOyekCIsImVtYWlsIjoiYWRtaW5AYS5jb20iLCJyb2xlIjoiQURNSU4iLCJleHAiOjYyODAwOTMwODAwfQ.G6-29hdF_8f7ZhbU7-QXa8Ha5n-q-hmFkp2BDEBXt7w";
+    public static final String USER_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwibmFtZSI6IuyCrOyaqeyekCIsImVtYWlsIjoidXNlckBhLmNvbSIsInJvbGUiOiJVU0VSIiwiZXhwIjo2MjgwMDkzMDgwMH0.YMWo0Pn21DiG9zPWHRCr9Wzp3I8fqWEPyJnqINr0JeY";
+}
