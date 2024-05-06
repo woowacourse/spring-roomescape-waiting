@@ -1,0 +1,15 @@
+### 1. 테마 추가
+POST {{api}}/themes
+Content-Type: application/json
+
+{
+    "name": "우테코에 어서오세요",
+    "description": "우테코를 탈출하세요",
+    "thumbnail": "https://avatars.githubusercontent.com/u/0"
+}
+
+### 2. 테마 삭제
+DELETE {{api}}/themes/1
+
+### 3. 테마 조회
+GET {{api}}/themes

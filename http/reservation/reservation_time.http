@@ -1,0 +1,21 @@
+### 1-1. 예약 시간 추가 (중복이 없는 경우 200 OK, 중복인 경우 400 Bad Request)
+POST {{api}}/times
+Content-Type: application/json
+
+{
+  "startAt": "10:00"
+}
+
+### 1-2. 예약 시간 추가 (잘못된 포맷의 경우 400 Bad Request)
+POST {{api}}/times
+Content-Type: application/json
+
+{
+  "startAt": "10:60"
+}
+
+### 2. 예약 시간 삭제
+DELETE {{api}}/times/1
+
+### 3. 예약 시간 목록 조회
+GET {{api}}/times
