@@ -1,23 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출
-    */
-    requestRead('/') // 인기 테마 목록 조회 API endpoint
+  const today = new Date();
+  const eightDaysAgo = new Date(today);
+  eightDaysAgo.setDate(today.getDate() - 8);
+  const oneDayAgo = new Date(today);
+  oneDayAgo.setDate(today.getDate() - 1);
+
+  const from = formatDate(eightDaysAgo);
+  const until = formatDate(oneDayAgo);
+  const limit = 10;
+    requestRead(`/themes/popular?from=${from}&until=${until}&limit=${limit}`) // 인기 테마 목록 조회 API endpoint
         .then(render)
         .catch(error => console.error('Error fetching times:', error));
 });
 
+function formatDate(value) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function render(data) {
     const container = document.getElementById('theme-ranking');
 
-    /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출 후 렌더링
-          response 명세에 맞춰 name, thumbnail, description 값 설정
-    */
     data.forEach(theme => {
-        const name = '';
-        const thumbnail = '';
-        const description = '';
+        const name = theme.name;
+        const thumbnail = theme.thumbnail;
+        const description = theme.description;
 
         const htmlContent = `
             <img class="mr-3 img-thumbnail" src="${thumbnail}" alt="${name}">

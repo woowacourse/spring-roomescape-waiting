@@ -36,13 +36,8 @@ function renderTheme(themes) {
   const themeSlots = document.getElementById('theme-slots');
   themeSlots.innerHTML = '';
   themes.forEach(theme => {
-    const name = '';
-    const themeId = '';
-    /*
-    TODO: [3단계] 사용자 예약 - 테마 목록 조회 API 호출 후 렌더링
-          response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-          createSlot('theme', theme name, theme id) 형태로 호출
-    */
+    const name = theme.name;
+    const themeId = theme.id;
     themeSlots.appendChild(createSlot('theme', name, themeId));
   });
 }
@@ -87,11 +82,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-  /*
-  TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-        요청 포맷에 맞게 설정
-  */
-  fetch('/', { // 예약 가능 시간 조회 API endpoint
+  fetch('/times/availability?' + new URLSearchParams({date, themeId}), { // 예약 가능 시간 조회 API endpoint
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -116,13 +107,9 @@ function renderAvailableTimes(times) {
     return;
   }
   times.forEach(time => {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-          response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-    */
-    const startAt = '';
-    const timeId = '';
-    const alreadyBooked = false;
+    const startAt = time.startAt;
+    const timeId = time.id;
+    const alreadyBooked = time.booked;
 
     const div = createSlot('time', startAt, timeId, alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
     timeSlots.appendChild(div);
@@ -158,8 +145,7 @@ function onReservationButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
 
     /*
-    TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-          [5단계] 예약 생성 기능 변경 - 사용자
+    TODO: [5단계] 예약 생성 기능 변경 - 사용자
           request 명세에 맞게 설정
     */
     const reservationData = {
