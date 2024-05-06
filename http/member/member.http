@@ -1,0 +1,27 @@
+### 1. 회원가입
+POST {{api}}/members
+Content-Type: application/json
+
+{
+  "name": "아루",
+  "email": "test@aru.me",
+  "password": "12341234"
+}
+
+### 2. 로그인
+POST {{api}}/login
+Content-Type: application/json
+
+{
+  "email": "test@aru.me",
+  "password": "12341234"
+}
+
+> {%
+ client.test("Validate", function() {
+     client.assert((response.status === 200), "Response status is not 200");
+ })
+ %}
+
+### 3. 로그아웃
+POST {{api}}/logout

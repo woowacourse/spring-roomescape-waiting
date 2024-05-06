@@ -1,0 +1,26 @@
+### 1-1. 사용자 예약 생성
+POST {{api}}/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-12-25",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 1-2. 어드민 예약 생성
+POST {{api}}/admin/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-12-27",
+  "timeId": 1,
+  "themeId": 1,
+  "memberId": 1
+}
+
+### 2. 예약 조회
+GET {{api}}/reservations
+
+### 3. 예약 취소
+DELETE {{api}}/reservations/1
