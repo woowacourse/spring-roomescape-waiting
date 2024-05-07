@@ -3,41 +3,70 @@ package roomescape.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.member.Member;
+import roomescape.model.member.Role;
+import roomescape.model.theme.Theme;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.dao.ReservationDao;
-import roomescape.repository.dao.ReservationTimeDao;
-import roomescape.repository.dto.ReservationRowDto;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationTimeDto;
-import roomescape.service.fakedao.FakeReservationDao;
-import roomescape.service.fakedao.FakeReservationTimeDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Sql("/truncate.sql")
+@SpringBootTest
 class ReservationTimeServiceTest {
 
     private static final int INITIAL_TIME_COUNT = 3;
 
+    @Autowired
     private ReservationTimeService reservationTimeService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
-        ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao(new ArrayList<>(List.of(
-                new ReservationTime(1, LocalTime.of(1, 0)),
-                new ReservationTime(2, LocalTime.of(2, 0)),
-                new ReservationTime(3, LocalTime.of(3, 0)))));
-        ReservationDao reservationDao = new FakeReservationDao(new ArrayList<>(List.of(
-                new ReservationRowDto(1, LocalDate.of(2000, 1, 1), 1L, 1L, 1L),
-                new ReservationRowDto(2, LocalDate.of(2000, 1, 2), 2L, 2L, 2L))));
-        reservationTimeService = new ReservationTimeService(new ReservationTimeRepository(reservationDao, reservationTimeDao));
+        themeRepository.saveAll(List.of(
+                new Theme("n1", "d1", "t1"),
+                new Theme("n2", "d2", "t2")));
+
+        reservationTimeRepository.saveAll(List.of(
+                new ReservationTime(LocalTime.of(1, 0)),
+                new ReservationTime(LocalTime.of(2, 0)),
+                new ReservationTime(LocalTime.of(3, 0))));
+
+        memberRepository.saveAll(List.of(
+                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
+                new Member("우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN)));
+
+        reservationRepository.saveAll(List.of(
+                new Reservation(LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1L, null),
+                        new Theme(1L, null, null, null),
+                        new Member(1L, null, null, null, null)),
+                new Reservation(LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2L, null),
+                        new Theme(2L, null, null, null),
+                        new Member(2L, null, null, null, null))));
     }
 
     @DisplayName("모든 예약 시간을 조회한다.")

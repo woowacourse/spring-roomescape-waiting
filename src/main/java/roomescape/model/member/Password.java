@@ -1,25 +1,22 @@
 package roomescape.model.member;
 
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+
+@Embeddable
 public class Password {
 
-    private final String value;
+    @NotBlank
+    private String password;
 
-    public Password(String value) {
-        validate(value);
-        this.value = value;
+    public Password(String password) {
+        this.password = password;
     }
 
-    private void validate(String value) {
-        validateNull(value);
+    public Password() {
     }
 
-    private void validateNull(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("비밀번호는 null 혹은 빈 문자열일 수 없습니다.");
-        }
-    }
-
-    public String getValue() {
-        return value;
+    public String getPassword() {
+        return password;
     }
 }

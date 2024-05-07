@@ -64,7 +64,7 @@ public class AuthControllerTest {
         String expected = authService.createToken(userDto);
         String actual = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(userDto.getEmail(), userDto.getPassword()))
+                .body(new LoginRequest(userDto.getEmail().getEmail(), userDto.getPassword().getPassword()))
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .when().post("/login")

@@ -3,6 +3,9 @@ package roomescape.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
@@ -11,51 +14,66 @@ import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.dao.MemberDao;
-import roomescape.repository.dao.ReservationDao;
-import roomescape.repository.dao.ReservationTimeDao;
-import roomescape.repository.dao.ThemeDao;
-import roomescape.repository.dto.ReservationRowDto;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
-import roomescape.service.fakedao.FakeMemberDao;
-import roomescape.service.fakedao.FakeReservationDao;
-import roomescape.service.fakedao.FakeReservationTimeDao;
-import roomescape.service.fakedao.FakeThemeDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Sql("/truncate.sql")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationServiceTest {
 
     private static final int INITIAL_RESERVATION_COUNT = 3;
     private static final int INITIAL_TIME_COUNT = 3;
 
+    @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
-        ThemeDao themeDao = new FakeThemeDao(new ArrayList<>(List.of(
-                new Theme(1, "n1", "d1", "t1"),
-                new Theme(2, "n2", "d2", "t2"),
-                new Theme(3, "n3", "d3", "t3"))));
-        ReservationTimeDao reservationTimeDao = new FakeReservationTimeDao(new ArrayList<>(List.of(
-                new ReservationTime(1, LocalTime.of(1, 0)),
-                new ReservationTime(2, LocalTime.of(2, 0)),
-                new ReservationTime(3, LocalTime.now()))));
-        MemberDao memberDao = new FakeMemberDao(new ArrayList<>(List.of(
-                new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
-                new Member(1, "우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN))));
-        ReservationDao reservationDao = new FakeReservationDao(new ArrayList<>(List.of(
-                new ReservationRowDto(1L, LocalDate.of(2000, 1, 1), 1L, 1L, 1L),
-                new ReservationRowDto(2L, LocalDate.of(2000, 1, 2), 2L, 2L, 2L),
-                new ReservationRowDto(3L, LocalDate.of(9999, 9, 9), 1L, 1L, 2L))));
-        reservationService = new ReservationService(new ReservationRepository(reservationDao, reservationTimeDao, themeDao, memberDao));
+        themeRepository.saveAll(List.of(
+                new Theme("n1", "d1", "t1"),
+                new Theme("n2", "d2", "t2"),
+                new Theme("n3", "d3", "t3")));
+
+        reservationTimeRepository.saveAll(List.of(
+                new ReservationTime(LocalTime.of(1, 0)),
+                new ReservationTime(LocalTime.of(2, 0)),
+                new ReservationTime(LocalTime.now())));
+
+        memberRepository.saveAll(List.of(
+                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
+                new Member("우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN)));
+
+        reservationRepository.saveAll(List.of(
+                new Reservation(LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1L, null),
+                        new Theme(1L, null, null, null),
+                        new Member(1L, null, null, null, null)),
+                new Reservation(LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2L, null),
+                        new Theme(2L, null, null, null),
+                        new Member(2L, null, null, null, null)),
+                new Reservation(LocalDate.of(9999, 9, 9),
+                        new ReservationTime(1L, null),
+                        new Theme(1L, null, null, null),
+                        new Member(2L, null, null, null, null))));
     }
 
     @DisplayName("모든 예약을 반환한다.")

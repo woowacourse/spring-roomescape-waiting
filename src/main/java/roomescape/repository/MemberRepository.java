@@ -1,34 +1,17 @@
 package roomescape.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import roomescape.model.member.Email;
 import roomescape.model.member.Member;
-import roomescape.repository.dao.MemberDao;
+import roomescape.model.member.Password;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class MemberRepository {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    private final MemberDao memberDao;
+    Optional<Member> findByEmail(Email email);
 
-    public MemberRepository(MemberDao memberDao) {
-        this.memberDao = memberDao;
-    }
-
-    public Optional<Member> findMemberByEmail(String email) {
-        return memberDao.findByEmail(email);
-    }
-
-    public Optional<Member> findMemberById(long id) {
-        return memberDao.findById(id);
-    }
-
-    public List<Member> findAllMembers() {
-        return memberDao.findAll();
-    }
-
-    public Optional<Member> findMemberByEmailAndPassword(String email, String password) {
-        return memberDao.findByEmailAndPassword(email, password);
-    }
+    Optional<Member> findByEmailAndPassword(Email email, Password password);
 }

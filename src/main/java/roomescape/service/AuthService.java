@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 @Service
 public class AuthService {
 
-    private static final String SECRET_KEY = "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=";
+    private static final String SECRET_KEY = "AttoAndEverInWoowacourseMadeThisApplicationSoHardAndFunny";
 
     private final MemberRepository memberRepository;
 
@@ -24,12 +24,12 @@ public class AuthService {
     }
 
     public String createToken(AuthDto authDto) {
-        Member member = memberRepository.findMemberByEmailAndPassword(authDto.getEmail(), authDto.getPassword())
+        Member member = memberRepository.findByEmailAndPassword(authDto.getEmail(), authDto.getPassword())
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당하는 계정이 없습니다."));
         return Jwts.builder()
                 .subject(String.valueOf(member.getId()))
-                .claim("name", member.getName())
-                .claim("email", member.getEmail())
+                .claim("name", member.getName().getName())
+                .claim("email", member.getEmail().getEmail())
                 .claim("role", member.getRole())
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .compact();

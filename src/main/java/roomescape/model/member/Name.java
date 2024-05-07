@@ -1,25 +1,22 @@
 package roomescape.model.member;
 
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+
+@Embeddable
 public class Name {
 
-    private final String value;
+    @NotBlank
+    private String name;
 
-    public Name(String value) {
-        validate(value);
-        this.value = value;
+    public Name(String name) {
+        this.name = name;
     }
 
-    private void validate(String value) {
-        validateNull(value);
+    public Name() {
     }
 
-    private void validateNull(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("사용자 이름은 null 혹은 빈 문자열일 수 없습니다.");
-        }
-    }
-
-    public String getValue() {
-        return value;
+    public String getName() {
+        return name;
     }
 }

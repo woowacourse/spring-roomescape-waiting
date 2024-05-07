@@ -1,26 +1,28 @@
 package roomescape.service.dto;
 
 import roomescape.controller.request.LoginRequest;
+import roomescape.model.member.Email;
+import roomescape.model.member.Password;
 
 public class AuthDto {
 
-    private final String email;
-    private final String password;
+    private final Email email;
+    private final Password password;
 
     public AuthDto(String email, String password) {
-        this.email = email;
-        this.password = password;
+        this.email = new Email(email);
+        this.password = new Password(password);
     }
 
     public static AuthDto from(LoginRequest loginRequest) {
         return new AuthDto(loginRequest.getEmail(), loginRequest.getPassword());
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getPassword() {
+    public Password getPassword() {
         return password;
     }
 }

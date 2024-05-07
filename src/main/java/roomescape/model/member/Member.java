@@ -1,17 +1,34 @@
 package roomescape.model.member;
 
-import java.util.Objects;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import roomescape.model.Reservation;
 
+import java.util.Objects;
+import java.util.Set;
+
+@Entity
 public class Member {
 
-    private final long id;
-    private final Name name;
-    private final Email email;
-    private final Password password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @NotNull
+    @Embedded
+    private Name name;
+    @NotNull
+    @Embedded
+    private Email email;
+    @NotNull
+    @Embedded
+    private Password password;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservations;
 
     public Member(long id, String name, String email, String password, Role role) {
-        validateRange(id);
         this.id = id;
         this.name = new Name(name);
         this.email = new Email(email);
@@ -19,26 +36,27 @@ public class Member {
         this.role = role;
     }
 
-    private void validateRange(long id) {
-        if (id <= 0) {
-            throw new IllegalStateException("id는 0 이하일 수 없습니다.");
-        }
+    public Member(String name, String email, String password, Role role) {
+        this(0, name, email, password, role);
+    }
+
+    public Member() {
     }
 
     public long getId() {
         return id;
     }
 
-    public String getName() {
-        return name.getValue();
+    public Name getName() {
+        return name;
     }
 
-    public String getEmail() {
-        return email.getValue();
+    public Email getEmail() {
+        return email;
     }
 
-    public String getPassword() {
-        return password.getValue();
+    public Password getPassword() {
+        return password;
     }
 
     public Role getRole() {
@@ -51,9 +69,9 @@ public class Member {
         if (o == null || getClass() != o.getClass()) return false;
         Member member = (Member) o;
         return id == member.id
-                && Objects.equals(name.getValue(), member.name.getValue())
-                && Objects.equals(email.getValue(), member.email.getValue())
-                && Objects.equals(password.getValue(), member.password.getValue())
+                && Objects.equals(name.getName(), member.name.getName())
+                && Objects.equals(email.getEmail(), member.email.getEmail())
+                && Objects.equals(password.getPassword(), member.password.getPassword())
                 && role == member.role;
     }
 

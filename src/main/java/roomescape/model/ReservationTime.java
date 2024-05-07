@@ -1,49 +1,38 @@
 package roomescape.model;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import roomescape.service.dto.ReservationTimeDto;
 
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.Set;
 
+@Entity
 public class ReservationTime {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @NotNull
     private LocalTime startAt;
+    @OneToMany(mappedBy = "time")
+    private Set<Reservation> reservations;
 
     public ReservationTime(long id, LocalTime startAt) {
-        validate(id, startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    private ReservationTime(LocalTime startAt) {
-        validateNull(startAt);
-        this.id = 0;
-        this.startAt = startAt;
+    public ReservationTime(LocalTime startAt) {
+        this(0, startAt);
     }
 
-    private ReservationTime() {
+    public ReservationTime() {
     }
 
     public static ReservationTime from(ReservationTimeDto reservationTimeDto) {
         return new ReservationTime(reservationTimeDto.getStartAt());
-    }
-
-    private void validate(long id, LocalTime startAt) {
-        validateRange(id);
-        validateNull(startAt);
-    }
-
-    private void validateRange(long id) {
-        if (id <= 0) {
-            throw new IllegalStateException("id는 0 이하일 수 없습니다.");
-        }
-    }
-
-    private void validateNull(LocalTime value) {
-        if (value == null) {
-            throw new IllegalStateException("데이터는 null일 수 없습니다.");
-        }
     }
 
     public long getId() {
@@ -65,13 +54,5 @@ public class ReservationTime {
     @Override
     public int hashCode() {
         return Objects.hash(id, startAt);
-    }
-
-    @Override
-    public String toString() {
-        return "ReservationTime{" +
-                "id=" + id +
-                ", startAt=" + startAt +
-                '}';
     }
 }

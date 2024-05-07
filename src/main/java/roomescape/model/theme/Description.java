@@ -1,25 +1,22 @@
 package roomescape.model.theme;
 
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+
+@Embeddable
 public class Description {
 
-    private final String value;
+    @NotBlank
+    private String description;
 
-    public Description(String value) {
-        validate(value);
-        this.value = value;
+    public Description(String description) {
+        this.description = description;
     }
 
-    private void validate(String value) {
-        validateNull(value);
+    public Description() {
     }
 
-    private void validateNull(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("테마 설명문은 null 혹은 빈 문자열일 수 없습니다.");
-        }
-    }
-
-    public String getValue() {
-        return value;
+    public String getDescription() {
+        return description;
     }
 }

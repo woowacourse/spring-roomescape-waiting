@@ -1,25 +1,22 @@
 package roomescape.model.theme;
 
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+
+@Embeddable
 public class Thumbnail {
 
-    private final String value;
+    @NotBlank
+    private String thumbnail;
 
-    public Thumbnail(String value) {
-        validate(value);
-        this.value = value;
+    public Thumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
-    private void validate(String value) {
-        validateNull(value);
+    public Thumbnail() {
     }
 
-    private void validateNull(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("테마 썸네일은 null 혹은 빈 문자열일 수 없습니다.");
-        }
-    }
-
-    public String getValue() {
-        return value;
+    public String getThumbnail() {
+        return thumbnail;
     }
 }

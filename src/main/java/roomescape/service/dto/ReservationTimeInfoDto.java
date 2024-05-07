@@ -9,9 +9,11 @@ public class ReservationTimeInfoDto {
     private final List<ReservationTime> bookedTimes;
     private final List<ReservationTime> notBookedTimes;
 
-    public ReservationTimeInfoDto(List<ReservationTime> bookedTimes, List<ReservationTime> notBookedTimes) {
+    public ReservationTimeInfoDto(List<ReservationTime> bookedTimes, List<ReservationTime> allTimes) {
         this.bookedTimes = bookedTimes;
-        this.notBookedTimes = notBookedTimes;
+        this.notBookedTimes = allTimes.stream()
+                .filter(time -> !bookedTimes.contains(time))
+                .toList();
     }
 
     public List<ReservationTime> getBookedTimes() {

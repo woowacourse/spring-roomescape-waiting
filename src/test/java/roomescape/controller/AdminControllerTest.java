@@ -14,6 +14,7 @@ import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public class AdminControllerTest {
     private final JdbcTemplate jdbcTemplate;
     private final AuthService authService;
     private final SimpleJdbcInsert memberInsertActor;
+    private final SimpleJdbcInsert timeInsertActor;
+    private final SimpleJdbcInsert themeInsertActor;
 
     @Autowired
     public AdminControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
@@ -34,6 +37,12 @@ public class AdminControllerTest {
         this.memberInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("member")
                 .usingGeneratedKeyColumns("id");
+        this.timeInsertActor = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation_time")
+                .usingGeneratedKeyColumns("id");
+        this.themeInsertActor = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("theme")
+                .usingGeneratedKeyColumns("id");
     }
 
     @BeforeEach
@@ -41,11 +50,16 @@ public class AdminControllerTest {
         initDatabase();
         insertMember("에버", "treeboss@gmail.com", "treeboss123!", "USER");
         insertMember("관리자", "admin@gmail.com", "admin123!", "ADMIN");
+        insertTime(LocalTime.of(1, 0));
+        insertTheme("n1", "d1", "t1");
     }
 
     private void initDatabase() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
         jdbcTemplate.execute("TRUNCATE TABLE member RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE theme RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation_time RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation RESTART IDENTITY");
     }
 
     private void insertMember(String name, String email, String password, String role) {
@@ -55,6 +69,20 @@ public class AdminControllerTest {
         parameters.put("password", password);
         parameters.put("role", role);
         memberInsertActor.execute(parameters);
+    }
+
+    private void insertTime(LocalTime startAt) {
+        Map<String, Object> parameters = new HashMap<>(1);
+        parameters.put("start_at", startAt);
+        timeInsertActor.execute(parameters);
+    }
+
+    private void insertTheme(String name, String description, String thumbnail) {
+        Map<String, Object> parameters = new HashMap<>(3);
+        parameters.put("name", name);
+        parameters.put("description", description);
+        parameters.put("thumbnail", thumbnail);
+        themeInsertActor.execute(parameters);
     }
 
     @DisplayName("관리자가 어드민 API 접근에 시도할 경우 예외를 반환하지 않는다.")

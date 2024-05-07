@@ -1,24 +1,25 @@
 package roomescape.service.dto;
 
 import roomescape.controller.request.ThemeRequest;
+import roomescape.model.theme.Name;
 
 public class ThemeDto {
 
     private final Long themeId;
-    private final String name;
+    private final Name name;
     private final String description;
     private final String thumbnail;
 
     private ThemeDto(Long themeId, String name, String description, String thumbnail) {
         this.themeId = themeId;
-        this.name = name;
+        this.name = new Name(name);
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
     public ThemeDto(String name, String description, String thumbnail) {
         this.themeId = null;
-        this.name = name;
+        this.name = new Name(name);
         this.description = description;
         this.thumbnail = thumbnail;
     }
@@ -31,7 +32,7 @@ public class ThemeDto {
         return themeId;
     }
 
-    public String getName() {
+    public Name getName() {
         return name;
     }
 

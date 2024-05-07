@@ -6,9 +6,8 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.member.Member;
-import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
@@ -23,59 +22,47 @@ import java.util.Optional;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public List<Reservation> findAllReservations() {
-        return reservationRepository.findAllReservations();
+        return reservationRepository.findAll();
     }
 
     public Reservation saveReservation(ReservationDto reservationDto) {
         ReservationTime time = findReservationTime(reservationDto);
-        Theme theme = findTheme(reservationDto);
-        Member member = findMember(reservationDto);
 
         LocalDate date = reservationDto.getDate();
         validateIsFuture(date, time.getStartAt());
-        validateDuplication(date, time.getId(), theme.getId());
+        validateDuplication(date, time.getId(), reservationDto.getThemeId());
 
-        Reservation reservation = Reservation.of(reservationDto, time, theme, member);
-        return reservationRepository.saveReservation(reservation);
+        Reservation reservation = Reservation.of(reservationDto, time, reservationDto.getThemeId(), reservationDto.getMemberId());
+        return reservationRepository.save(reservation);
     }
 
     private ReservationTime findReservationTime(ReservationDto reservationDto) {
         long timeId = reservationDto.getTimeId();
-        Optional<ReservationTime> time = reservationRepository.findReservationTimeById(timeId);
+        Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
         return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
-    }
-
-    private Theme findTheme(ReservationDto reservationDto) {
-        long themeId = reservationDto.getThemeId();
-        Optional<Theme> theme = reservationRepository.findThemeById(themeId);
-        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
-    }
-
-    private Member findMember(ReservationDto reservationDto) {
-        long memberId = reservationDto.getMemberId();
-        Optional<Member> member = reservationRepository.findMemberById(memberId);
-        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
     public void deleteReservation(long id) {
         validateExistence(id);
-        reservationRepository.deleteReservationById(id);
+        reservationRepository.deleteById(id);
     }
 
     public ReservationTimeInfoDto findReservationTimesInformation(LocalDate date, long themeId) {
         List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeBooked(date, themeId);
-        List<ReservationTime> notBookedTimes = reservationRepository.findReservationTimeNotBooked(date, themeId);
-        return new ReservationTimeInfoDto(bookedTimes, notBookedTimes);
+        List<ReservationTime> allTimes = reservationTimeRepository.findAll();
+        return new ReservationTimeInfoDto(bookedTimes, allTimes);
     }
 
     public List<Reservation> findReservationsByConditions(long memberId, long themeId, LocalDate from, LocalDate to) {
-        return reservationRepository.findReservationsByMemberIdAndThemeIdAndDate(memberId, themeId, from, to);
+        return reservationRepository.findByMemberIdAndThemeIdAndDate(memberId, themeId, from, to);
     }
 
     private void validateIsFuture(LocalDate date, LocalTime time) {
@@ -87,14 +74,14 @@ public class ReservationService {
     }
 
     private void validateDuplication(LocalDate date, long timeId, long themeId) {
-        boolean isExist = reservationRepository.isExistReservationByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        boolean isExist = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (isExist) {
             throw new DuplicatedException("[ERROR] 중복되는 예약은 추가할 수 없습니다.");
         }
     }
 
     private void validateExistence(long id) {
-        boolean isNotExist = !reservationRepository.isExistReservationById(id);
+        boolean isNotExist = !reservationRepository.existsById(id);
         if (isNotExist) {
             throw new NotFoundException("[ERROR] 존재하지 않는 예약입니다.");
         }

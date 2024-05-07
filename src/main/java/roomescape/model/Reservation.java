@@ -1,5 +1,7 @@
 package roomescape.model;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.service.dto.ReservationDto;
@@ -7,16 +9,25 @@ import roomescape.service.dto.ReservationDto;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @NotNull
     private LocalDate date;
+    @NotNull
+    @ManyToOne
     private ReservationTime time;
+    @NotNull
+    @ManyToOne
     private Theme theme;
+    @NotNull
+    @ManyToOne
     private Member member;
 
-    public Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validate(id, date, time, theme, member);
+    private Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -24,44 +35,17 @@ public class Reservation {
         this.member = member;
     }
 
-    private Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validate(date, time, theme, member);
-        this.id = 0;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.member = member;
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(0, date, time, theme, member);
     }
 
-    private Reservation() {
+    public Reservation() {
     }
 
-    public static Reservation of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
-        return new Reservation(reservationDto.getDate(), time, theme, member);
-    }
-
-    private void validate(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validateRange(id);
-        validate(date, time, theme, member);
-    }
-
-    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validateNull(date);
-        validateNull(time);
-        validateNull(theme);
-        validateNull(member);
-    }
-
-    private void validateRange(long id) {
-        if (id <= 0) {
-            throw new IllegalStateException("id는 0 이하일 수 없습니다.");
-        }
-    }
-
-    private void validateNull(Object value) {
-        if (value == null) {
-            throw new IllegalStateException("데이터는 null일 수 없습니다.");
-        }
+    public static Reservation of(ReservationDto reservationDto, ReservationTime time, long themeId, long memberId) {
+        return new Reservation(reservationDto.getDate(), time,
+                new Theme(themeId, null, null, null),
+                new Member(memberId, null, null, null, null));
     }
 
     public long getId() {
@@ -95,16 +79,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id, date, time, theme, member);
-    }
-
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "id=" + id +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                ", member=" + member +
-                '}';
     }
 }
