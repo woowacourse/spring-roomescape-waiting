@@ -7,20 +7,34 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.member.dto.MemberLoginRequest;
 
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MissionStepTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class AdminEndToEndTest {
 
     @LocalServerPort
     int port;
 
+    String accessToken;
+
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         RestAssured.port = port;
+
+        accessToken = RestAssured
+                .given().log().all()
+                .body(new MemberLoginRequest("redddy@gmail.com", "0000"))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().cookies().extract().cookie("token");
     }
 
     @Test
@@ -29,6 +43,7 @@ class MissionStepTest {
         final Map<String, String> params = Map.of("startAt", "10:00");
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/times")
@@ -36,18 +51,21 @@ class MissionStepTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(8));
+                .body("size()", is(6));
 
         RestAssured.given().log().all()
-                .when().delete("/times/8")
+                .cookie("token", accessToken)
+                .when().delete("/times/6")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().delete("/times/8")
+                .cookie("token", accessToken)
+                .when().delete("/times/6")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -58,6 +76,7 @@ class MissionStepTest {
         final Map<String, String> params = Map.of("name", "v1", "description", "blah", "thumbnail", "dkdk");
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/themes")
@@ -65,18 +84,21 @@ class MissionStepTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(5));
 
         RestAssured.given().log().all()
-                .when().delete("/themes/9")
+                .cookie("token", accessToken)
+                .when().delete("/themes/5")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().delete("/themes/9")
+                .cookie("token", accessToken)
+                .when().delete("/themes/5")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -84,9 +106,10 @@ class MissionStepTest {
     @Test
     @DisplayName("예약 저장 및 삭제")
     void saveAndDeleteReservation() {
-        final Map<String, String> params = Map.of("name", "redddy", "date", "2024-06-13", "timeId", "1", "themeId", "1");
+        final Map<String, String> params = Map.of("date", "2024-06-13", "timeId", "1", "themeId", "1");
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
@@ -94,19 +117,31 @@ class MissionStepTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(7));
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/9")
+                .cookie("token", accessToken)
+                .when().delete("/reservations/7")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/9")
+                .cookie("token", accessToken)
+                .when().delete("/reservations/7")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("로그인 페이지를 반환")
+    void showLoginPage() {
+        RestAssured.given().log().all()
+                .when().get("/login")
+                .then().log().all()
+                .statusCode(200);
     }
 }

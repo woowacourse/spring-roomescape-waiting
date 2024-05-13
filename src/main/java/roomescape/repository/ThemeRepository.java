@@ -9,11 +9,11 @@ public interface ThemeRepository {
 
     List<Theme> findAll();
 
-    Optional<Theme> findById(Long id);
+    Optional<Theme> findById(long id);
 
-    Theme fetchById(Long id);
+    Theme fetchById(long id);
 
     Theme save(Theme theme);
 
-    void delete(Long id);
+    void delete(long id);
 }

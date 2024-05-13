@@ -1,15 +1,18 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.controller.reservation.dto.ReservationRequest;
-import roomescape.controller.reservation.dto.ReservationResponse;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
+import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.DuplicateReservationException;
+import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
 
 import java.time.LocalDateTime;
@@ -21,35 +24,46 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository) {
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public List<ReservationResponse> getReservations() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::from)
+    public List<Reservation> getReservations() {
+        return reservationRepository.findAll()
+                .stream()
                 .toList();
     }
 
-    public ReservationResponse addReservation(final ReservationRequest reservationRequest) {
-        final ReservationTime time = findTime(reservationRequest);
-        final Theme theme = findTheme(reservationRequest);
-
-        final Reservation parsedReservation = reservationRequest.toDomain(time, theme);
-        validateDuplicate(theme, time, parsedReservation);
-        final LocalDateTime reservationDateTime = parsedReservation.getDate().atTime(time.getStartAt());
-        validateBeforeDay(reservationDateTime);
-
-        final Reservation savedReservation = reservationRepository.save(parsedReservation);
-        return ReservationResponse.from(savedReservation);
+    public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
+        validateDateRange(condition);
+        return reservationRepository.searchReservations(condition)
+                .stream()
+                .toList();
     }
 
-    public void deleteReservation(final Long id) {
+    public Reservation addReservation(final CreateReservationRequest reservationRequest) {
+        final ReservationTime time = reservationTimeRepository.fetchById(reservationRequest.timeId());
+        final Theme theme = themeRepository.fetchById(reservationRequest.themeId());
+        final Member member = memberRepository.fetchById(reservationRequest.memberId());
+
+        final Reservation reservation = new Reservation(null, member, reservationRequest.date(), time, theme);
+
+        validateDuplicate(theme, time, reservation);
+        final LocalDateTime reservationDateTime = reservation.getDate().atTime(time.getStartAt());
+        validateBeforeDay(reservationDateTime);
+
+        return reservationRepository.save(reservation);
+    }
+
+    public void deleteReservation(final long id) {
         final Reservation fetchReservation = reservationRepository.fetchById(id);
         reservationRepository.deleteById(fetchReservation.getId());
     }
@@ -60,20 +74,20 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicate(final Theme theme, final ReservationTime time, final Reservation parsedReservation) {
-        final boolean isExistsReservation =
-                reservationRepository.existsByThemesAndDateAndTimeId(theme.getId(), time.getId(),
-                        parsedReservation.getDate());
+    private void validateDuplicate(final Theme theme, final ReservationTime time, final Reservation reservation) {
+        final boolean isExistsReservation = reservationRepository
+                .existsByThemesAndDateAndTimeId(theme.getId(), time.getId(), reservation.getDate());
         if (isExistsReservation) {
             throw new DuplicateReservationException("중복된 시간으로 예약이 불가합니다.");
         }
     }
 
-    private Theme findTheme(final ReservationRequest reservationRequest) {
-        return themeRepository.fetchById(reservationRequest.themeId());
-    }
-
-    private ReservationTime findTime(final ReservationRequest reservationRequest) {
-        return reservationTimeRepository.fetchById(reservationRequest.timeId());
+    private void validateDateRange(final ReservationSearchCondition request) {
+        if (request.dateFrom() == null || request.dateTo() == null) {
+            return;
+        }
+        if (request.dateFrom().isAfter(request.dateTo())) {
+            throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
+        }
     }
 }

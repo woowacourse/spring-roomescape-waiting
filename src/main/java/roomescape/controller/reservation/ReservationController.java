@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
-import roomescape.controller.reservation.dto.ReservationRequest;
+import roomescape.controller.member.dto.LoginMember;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationResponse;
+import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import roomescape.controller.reservation.dto.UserCreateReservationRequest;
+import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -29,19 +33,35 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> getReservations() {
-        return reservationService.getReservations();
+        return reservationService.getReservations()
+                .stream().map(ReservationResponse::from)
+                .toList();
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody
-                                                              @Valid final ReservationRequest request) {
-        final ReservationResponse reservation = reservationService.addReservation(request);
+    public ResponseEntity<ReservationResponse> addReservation(
+            @RequestBody @Valid final UserCreateReservationRequest request,
+            @Valid final LoginMember loginMember) {
+
+        final CreateReservationRequest create = new CreateReservationRequest(loginMember.id(),
+                request.themeId(), request.date(), request.timeId());
+
+        final Reservation reservation = reservationService.addReservation(create);
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
-                .buildAndExpand(reservation.id())
+                .buildAndExpand(reservation.getId())
                 .toUri();
 
         return ResponseEntity.created(uri)
-                .body(reservation);
+                .body(ReservationResponse.from(reservation));
+    }
+
+    @GetMapping(value = "/search", params = {"themeId", "memberId", "dateFrom", "dateTo"})
+    public List<ReservationResponse> searchReservations(
+            final ReservationSearchCondition request) {
+        final List<Reservation> filter = reservationService.searchReservations(request);
+        return filter.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

@@ -36,7 +36,7 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
-    public void deleteTheme(final Long id) {
+    public void deleteTheme(final long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ThemeUsedException("예약된 테마는 삭제할 수 없습니다.");
         }

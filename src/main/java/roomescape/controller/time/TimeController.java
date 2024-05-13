@@ -37,12 +37,12 @@ public class TimeController {
     @GetMapping(value = "/availability", params = {"date", "themeId"})
     public List<AvailabilityTimeResponse> getAvailableTimes(
             @Valid final AvailabilityTimeRequest availabilityTimeRequest) {
-        return timeService.getTimeAvailable(availabilityTimeRequest);
+        return timeService.getAvailableTimes(availabilityTimeRequest);
     }
 
     @PostMapping
-    public ResponseEntity<AvailabilityTimeResponse> addTime(@RequestBody
-                                                            @Valid final CreateTimeRequest createTimeRequest) {
+    public ResponseEntity<AvailabilityTimeResponse> addTime(
+            @RequestBody @Valid final CreateTimeRequest createTimeRequest) {
         final AvailabilityTimeResponse time = timeService.addTime(createTimeRequest);
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(time.id())
@@ -53,7 +53,7 @@ public class TimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTime(@PathVariable("id") final Long id) {
+    public ResponseEntity<Void> deleteTime(@PathVariable("id") final long id) {
         timeService.deleteTime(id);
         return ResponseEntity.noContent()
                 .build();

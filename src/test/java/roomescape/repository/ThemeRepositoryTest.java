@@ -4,16 +4,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ThemeNotFoundException;
 
 import javax.sql.DataSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Sql(scripts = {"/drop.sql", "/schema.sql", "/data.sql"},
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @JdbcTest
 class ThemeRepositoryTest {
 
@@ -40,5 +39,14 @@ class ThemeRepositoryTest {
 
         // then
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 데이터를 조회할 경우 예외가 발생한다.")
+    void findByIdNotPresent() {
+        long id = 100L;
+
+        assertThatThrownBy(() -> themeRepository.fetchById(id))
+                .isInstanceOf(ThemeNotFoundException.class);
     }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
@@ -21,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Sql(scripts = {"/drop.sql", "/schema.sql", "/data.sql"},
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @JdbcTest
 @Import({TimeService.class, H2ReservationRepository.class, H2ReservationTimeRepository.class})
 class TimeServiceTest {
@@ -35,9 +32,11 @@ class TimeServiceTest {
     void getTimes() {
         // given
         List<ReadTimeResponse> expected = List.of(
-                new ReadTimeResponse(1L, "10:15"),
-                new ReadTimeResponse(2L, "11:20"),
-                new ReadTimeResponse(3L, "12:25")
+                new ReadTimeResponse(1L, "15:00"),
+                new ReadTimeResponse(2L, "16:00"),
+                new ReadTimeResponse(3L, "17:00"),
+                new ReadTimeResponse(4L, "18:00"),
+                new ReadTimeResponse(5L, "19:00")
         );
 
         // when
@@ -52,7 +51,7 @@ class TimeServiceTest {
     void addTIme() {
         // given
         CreateTimeRequest request = new CreateTimeRequest(LocalTime.parse("13:30"));
-        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(4L, "13:30", false);
+        AvailabilityTimeResponse expected = new AvailabilityTimeResponse(6L, "13:30", false);
 
         // when
         AvailabilityTimeResponse actual = timeService.addTime(request);
@@ -65,7 +64,7 @@ class TimeServiceTest {
     @DisplayName("존재하는 예약 시간을 삭제한다.")
     void deleteTimePresent() {
         // given
-        Long id = 3L;
+        long id = 5L;
 
         // when & then
         assertThatCode(() -> timeService.deleteTime(id))
@@ -76,7 +75,7 @@ class TimeServiceTest {
     @DisplayName("존재하지 않는 예약 시간을 삭제할 경우 반환 값이 0이다.")
     void deleteTImeNotPresent() {
         // given
-        Long id = 4L;
+        long id = 100L;
 
         // when & then
         assertThatThrownBy(() -> timeService.deleteTime(id))

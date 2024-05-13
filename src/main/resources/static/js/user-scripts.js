@@ -11,7 +11,7 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
       .then(response => {
         if(response.ok) {
           // 로그아웃 성공, 페이지 새로고침 또는 리다이렉트
-          window.location.reload();
+          window.location.href = '/';
         } else {
           // 로그아웃 실패 처리
           console.error('Logout failed');
@@ -74,7 +74,7 @@ function login() {
     })
   })
       .then(response => {
-        if (200 === !response.status) {
+        if (response.status !== 200) {
           alert('Login failed'); // 로그인 실패 시 경고창 표시
           throw new Error('Login failed');
         }

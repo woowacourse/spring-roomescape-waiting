@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.exception.InvalidRequestException;
 import roomescape.repository.H2ReservationRepository;
 import roomescape.repository.H2ThemeRepository;
@@ -15,8 +14,6 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Sql(scripts = {"/drop.sql", "/schema.sql", "/data.sql"},
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @JdbcTest
 @Import({H2ReservationRepository.class, ThemeService.class, H2ThemeRepository.class})
 class ThemeServiceTest {

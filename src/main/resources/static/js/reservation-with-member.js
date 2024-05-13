@@ -27,10 +27,6 @@ function render(data) {
   data.forEach(item => {
     const row = tableBody.insertRow();
 
-    /*
-    TODO: [5단계] 예약 생성 기능 변경 - 관리자
-          예약 목록 조회 API 응답에 맞게 적용
-    */
     row.insertCell(0).textContent = item.id;              // 예약 id
     row.insertCell(1).textContent = item.member.name;     // 사용자 name
     row.insertCell(2).textContent = item.theme.name;      // 테마 name
@@ -196,11 +192,7 @@ function applyFilter(event) {
   const dateFrom = document.getElementById('date-from').value;
   const dateTo = document.getElementById('date-to').value;
 
-  /*
-  TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
-        요청 포맷에 맞게 설정
-  */
-  fetch('/', { // 예약 검색 API 호출
+  fetch('/reservations/search?' + new URLSearchParams({themeId, memberId, dateFrom, dateTo}), { // 예약 검색 API 호출
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

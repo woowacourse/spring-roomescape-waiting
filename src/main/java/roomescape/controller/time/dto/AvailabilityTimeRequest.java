@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public record AvailabilityTimeRequest(
         @NotNull
         LocalDate date,
+
         @NotNull
         Long themeId) {
 }

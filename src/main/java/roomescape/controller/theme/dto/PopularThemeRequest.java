@@ -8,8 +8,10 @@ import java.time.LocalDate;
 public record PopularThemeRequest(
         @NotNull
         LocalDate from,
+
         @NotNull
         LocalDate until,
+
         @NotNull
         @Positive
         Integer limit) {

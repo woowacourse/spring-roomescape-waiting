@@ -35,8 +35,8 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> addTheme(@RequestBody
-                                                  @Valid final CreateThemeRequest createThemeRequest) {
+    public ResponseEntity<ThemeResponse> addTheme(
+            @RequestBody @Valid final CreateThemeRequest createThemeRequest) {
         final ThemeResponse theme = themeService.addTheme(createThemeRequest);
         final URI uri = UriComponentsBuilder.fromPath("/themes/{id}")
                 .buildAndExpand(theme.id())
@@ -47,7 +47,7 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") final Long id) {
+    public ResponseEntity<Void> deleteTheme(@PathVariable("id") final long id) {
         themeService.deleteTheme(id);
         return ResponseEntity.noContent()
                 .build();

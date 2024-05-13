@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 
@@ -11,21 +12,23 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
-    Optional<Reservation> findById(Long id);
+    Optional<Reservation> findById(long id);
 
-    Reservation fetchById(Long id);
+    Reservation fetchById(long id);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTimeId(long timeId);
 
-    boolean existsByThemesAndDateAndTimeId(Long themeId, Long timeId, LocalDate date);
+    boolean existsByThemesAndDateAndTimeId(long themeId, long timeId, LocalDate date);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByThemeId(long themeId);
 
     Reservation save(Reservation reservation);
 
-    void deleteById(Long id);
+    void deleteById(long id);
 
-    List<Theme> findPopularThemes(LocalDate from, LocalDate until, Integer limit);
+    List<Theme> findPopularThemes(LocalDate from, LocalDate until, int limit);
+
+    List<Reservation> searchReservations(ReservationSearchCondition condition);
 }
