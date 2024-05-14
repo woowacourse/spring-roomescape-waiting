@@ -1,17 +1,29 @@
 package roomescape.domain.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.util.Objects;
 
+@Entity
 public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final Name name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    private String name; //todo: 네임 검증 추가
+    private String email;
+    private String password;
+    private Role role;
+
+    public Member() {
+
+    }
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
-        this.name = new Name(name);
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -22,7 +34,7 @@ public class Member {
     }
 
     public String getName() {
-        return name.getName();
+        return name;
     }
 
     public String getEmail() {
@@ -43,20 +55,15 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name)
-                && Objects.equals(email, member.email) && Objects.equals(password, member.password);
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && role == member.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password);
+        return Objects.hash(id, name, email, password, role);
     }
 
     @Override
@@ -66,6 +73,7 @@ public class Member {
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", role=" + role +
                 '}';
     }
 }
