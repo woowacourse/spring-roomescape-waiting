@@ -1,11 +1,35 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
     private static final long NO_ID = 0;
-    private final long id;
-    private final ThemeName name;
-    private final Description description;
-    private final Thumbnail thumbnail;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "NAME"))
+    private ThemeName name;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "DESCRIPTION"))
+    private Description description;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "THUMBNAIL"))
+    private Thumbnail thumbnail;
+
+    public Theme() {
+    }
 
     public Theme(long id, ThemeName name, Description description, Thumbnail thumbnail) {
         this.id = id;

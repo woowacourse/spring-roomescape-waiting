@@ -1,14 +1,20 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embeddable;
 import roomescape.exception.InvalidReservationException;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Thumbnail {
     private static final String THUMBNAIL_REGEX = "^$|(https?|ftp)://.*\\.(jpeg|jpg|png|gif|bmp)$";
-    private final String value;
+
+    private  String value;
+
+    public Thumbnail() {
+    }
 
     public Thumbnail(String value) {
         validate(value);
