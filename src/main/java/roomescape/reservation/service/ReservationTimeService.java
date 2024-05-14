@@ -2,56 +2,49 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationTimeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
+import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
-    private final ReservationTimeDao reservationTimeDao;
-    private final ReservationDao reservationDao;
+
+    private final ReservationService reservationService;
+    private final ReservationTimeRepository reservationTimeRepository;
+
 
     public ReservationTimeService(
-            final ReservationTimeDao reservationTimeDao,
-            final ReservationDao reservationDao
+            final ReservationService reservationService,
+            final ReservationTimeRepository reservationTimeRepository
     ) {
-        this.reservationTimeDao = reservationTimeDao;
-        this.reservationDao = reservationDao;
+        this.reservationService = reservationService;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public ReservationTimeResponse save(final ReservationTimeSaveRequest reservationTimeSaveRequest) {
         ReservationTime reservationTime = reservationTimeSaveRequest.toEntity();
-        return ReservationTimeResponse.from(reservationTimeDao.save(reservationTime));
+        return ReservationTimeResponse.from(reservationTimeRepository.save(reservationTime));
     }
 
     public List<ReservationTimeResponse> getAll() {
-        return reservationTimeDao.getAll()
-                .stream()
+        return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public ReservationTimeDeleteResponse delete(final long id) {
         validateDoesNotExists(id);
-        validateAlreadyHasReservation(id);
-        return new ReservationTimeDeleteResponse(reservationTimeDao.delete(id));
+        reservationService.validateAlreadyHasReservation(id);
+        return new ReservationTimeDeleteResponse(reservationTimeRepository.delete(id));
     }
 
     private void validateDoesNotExists(final long id) {
-        if (reservationTimeDao.findById(id).isEmpty()) {
+        if (reservationTimeRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약 시간이 존재하지 않습니다.");
-        }
-    }
-
-    private void validateAlreadyHasReservation(final long id) {
-        List<Reservation> reservations = reservationDao.findByTimeId(id);
-        if (!reservations.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 }

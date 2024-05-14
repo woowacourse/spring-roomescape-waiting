@@ -87,4 +87,11 @@ public class ReservationService {
         }
         return new ReservationDeleteResponse(reservationDao.delete(id));
     }
+
+    public void validateAlreadyHasReservation(final long id) {
+        List<Reservation> reservations = reservationDao.findByTimeId(id);
+        if (!reservations.isEmpty()) {
+            throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+        }
+    }
 }
