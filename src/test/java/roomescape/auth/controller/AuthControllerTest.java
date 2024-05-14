@@ -10,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.service.AuthService;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public class AuthControllerTest {
     private AuthService authService;
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @LocalServerPort
     private int port;
@@ -37,7 +37,7 @@ public class AuthControllerTest {
         // given
         String email = "test@email.com";
         String password = "12341234";
-        memberDao.insert(new Member("이름", email, password, Role.MEMBER));
+        memberRepository.save(new Member("이름", email, password, Role.MEMBER));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,
@@ -88,7 +88,7 @@ public class AuthControllerTest {
     }
 
     private String getAdminAccessTokenCookie(final String email, final String password) {
-        memberDao.insert(new Member("이름", email, password, Role.ADMIN));
+        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,
@@ -106,7 +106,7 @@ public class AuthControllerTest {
     }
 
     private String getAccessTokenCookieByLogin(final String email, final String password) {
-        memberDao.insert(new Member("이름", email, password, Role.ADMIN));
+        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,

@@ -1,17 +1,29 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 
+@Entity
 public class Member {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private MemberName name;
-    private Email email;
-    private Password password;
+    private String name;
+    private String email;
+    private String password;
+    @Enumerated(value = EnumType.STRING)
     private Role role;
 
+    public Member() {
+    }
+
     public Member(final String name, final String email, final String password, final Role role) {
-        this(null, new MemberName(name), new Email(email), new Password(password), role);
+        this(null, name, email, password, role);
     }
 
     public Member(final Long id, final Member member) {
@@ -19,10 +31,6 @@ public class Member {
     }
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
-        this(id, new MemberName(name), new Email(email), new Password(password), role);
-    }
-
-    public Member(final Long id, final MemberName name, final Email email, final Password password, final Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -44,15 +52,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.value();
+        return name;
     }
 
     public String getEmail() {
-        return email.value();
+        return email;
     }
 
     public String getPassword() {
-        return password.value();
+        return password;
     }
 
     public Role getRole() {

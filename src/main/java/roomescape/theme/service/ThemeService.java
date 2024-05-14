@@ -1,8 +1,10 @@
 package roomescape.theme.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.theme.dao.ThemeDao;
+import roomescape.global.exception.error.ErrorType;
+import roomescape.global.exception.model.NotFoundException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.dto.ThemesResponse;
@@ -12,14 +14,20 @@ import java.util.List;
 
 @Service
 public class ThemeService {
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(final ThemeDao themeDao) {
-        this.themeDao = themeDao;
+    public ThemeService(final ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
+    }
+
+    public Theme findThemeById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorType.THEME_NOT_FOUND,
+                        String.format("테마(Theme) 정보가 존재하지 않습니다. [themeId: %d]", id)));
     }
 
     public ThemesResponse findAllThemes() {
-        List<ThemeResponse> response = themeDao.findAll()
+        List<ThemeResponse> response = themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -32,7 +40,7 @@ public class ThemeService {
         LocalDate endDate = today.minusDays(1);
         int limit = 10;
 
-        List<ThemeResponse> response = themeDao.findByStartDateAndEndDateWithLimit(startDate, endDate, limit)
+        List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate, limit)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -41,12 +49,12 @@ public class ThemeService {
     }
 
     public ThemeResponse addTheme(final ThemeRequest request) {
-        Theme theme = themeDao.insert(new Theme(request.name(), request.description(), request.thumbnail()));
+        Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
 
         return ThemeResponse.from(theme);
     }
 
     public void removeThemeById(final Long id) {
-        themeDao.deleteById(id);
+        themeRepository.deleteById(id);
     }
 }

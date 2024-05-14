@@ -12,9 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -31,7 +31,7 @@ class ThemeControllerTest {
     private int port;
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("모든 테마 정보를 조회한다.")
@@ -168,7 +168,7 @@ class ThemeControllerTest {
     }
 
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberDao.insert(new Member("이름", email, password, Role.ADMIN));
+        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,

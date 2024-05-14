@@ -5,26 +5,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.model.NotFoundException;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@JdbcTest
-@Import({AuthService.class, MemberDao.class, JwtHandler.class, MemberService.class})
+@DataJpaTest
+@Import({AuthService.class, JwtHandler.class, MemberService.class})
 class AuthServiceTest {
 
     @Autowired
     private AuthService authService;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Autowired
     private MemberService memberService;
     @Autowired
@@ -34,7 +35,7 @@ class AuthServiceTest {
     @DisplayName("존재하는 회원의 email, password로 로그인하면 memberId, accessToken을 Response 한다.")
     void loginSuccess() {
         // given
-        Member member = memberDao.insert(new Member("이름", "test@test.com", "12341234", Role.MEMBER));
+        Member member = memberRepository.save(new Member("이름", "test@test.com", "12341234", Role.MEMBER));
 
         // when
         TokenDto response = authService.login(new LoginRequest(member.getEmail(), member.getPassword()));

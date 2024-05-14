@@ -3,23 +3,24 @@ package roomescape.reservation.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,27 +28,30 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@JdbcTest
+@DataJpaTest
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-@Import({ReservationTimeDao.class, ThemeDao.class, ReservationService.class, ReservationDao.class, MemberDao.class, MemberService.class})
+@Import({ReservationService.class, MemberService.class, ReservationTimeService.class, ThemeService.class})
 class ReservationServiceTest {
 
     @Autowired
-    ReservationTimeDao reservationTimeDao;
+    ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    ThemeDao themeDao;
+    ReservationRepository reservationRepository;
     @Autowired
-    MemberDao memberDao;
+    ThemeRepository themeRepository;
+    @Autowired
+    MemberRepository memberRepository;
     @Autowired
     private ReservationService reservationService;
+
 
     @Test
     @DisplayName("동일한 날짜와 시간과 테마에 예약을 생성하면 예외가 발생한다")
     void duplicateTimeReservationAddFail() {
         // given
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(12, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when & then
         reservationService.addReservation(
@@ -63,9 +67,9 @@ class ReservationServiceTest {
     @DisplayName("이미 지난 날짜로 예약을 생성하면 예외가 발생한다")
     void beforeDateReservationFail() {
         // given
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(12, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         LocalDate beforeDate = LocalDate.now().minusDays(1L);
 
         // when & then
@@ -79,9 +83,9 @@ class ReservationServiceTest {
     void beforeTimeReservationFail() {
         // given
         LocalDateTime beforeTime = LocalDateTime.now().minusHours(1L);
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(beforeTime.toLocalTime()));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(beforeTime.toLocalTime()));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when & then
         assertThatThrownBy(() -> reservationService.addReservation(
@@ -94,8 +98,8 @@ class ReservationServiceTest {
     void notExistMemberReservationFail() {
         // given
         LocalDateTime beforeTime = LocalDateTime.now().minusHours(1L);
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(beforeTime.toLocalTime()));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(beforeTime.toLocalTime()));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         Long NotExistMemberId = 1L;
 
         // when & then

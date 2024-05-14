@@ -24,6 +24,8 @@ public enum ErrorType {
     // 404 Not Found
     MEMBER_NOT_FOUND("회원(Member) 정보가 존재하지 않습니다."),
     RESERVATION_NOT_FOUND("예약(Reservation) 정보가 존재하지 않습니다."),
+    RESERVATION_TIME_NOT_FOUND("예약 시간(ReservationTime) 정보가 존재하지 않습니다."),
+    THEME_NOT_FOUND("테마(Theme) 정보가 존재하지 않습니다."),
 
     // 405 Method Not Allowed
     METHOD_NOT_ALLOWED("지원하지 않는 HTTP Method 입니다."),
@@ -34,9 +36,8 @@ public enum ErrorType {
     RESERVATION_DUPLICATED("해당 시간에 이미 예약이 존재합니다."),
     RESERVATION_PERIOD_IN_PAST("이미 지난 시간대는 예약할 수 없습니다."),
 
-    // 500 Internal Server Error
-    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다."),
-    ;
+    // 500 Internal Server Error,
+    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다.");
 
     private final String description;
 

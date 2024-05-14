@@ -12,15 +12,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.theme.dao.ThemeDao;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,13 +34,13 @@ import static org.hamcrest.Matchers.is;
 public class ReservationControllerTest {
 
     @Autowired
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
     @Autowired
-    private ReservationTimeDao reservationTimeDao;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @LocalServerPort
     private int port;
@@ -51,8 +51,8 @@ public class ReservationControllerTest {
     void firstPost() {
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
-        reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
         Map<String, String> reservationParams = Map.of(
                 "name", "썬",
@@ -79,14 +79,14 @@ public class ReservationControllerTest {
         // given
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when
-        reservationDao.insert(new Reservation(LocalDate.now(), reservationTime, theme, member));
-        reservationDao.insert(new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
-        reservationDao.insert(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme, member));
 
         // then
         RestAssured.given().log().all()
@@ -102,12 +102,12 @@ public class ReservationControllerTest {
     @DisplayName("본인의 예약 정보를 삭제할 수 있다.")
     void canRemoveMyReservation() {
         // given
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
 
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Reservation reservation = reservationDao.insert(new Reservation(LocalDate.now(), reservationTime, theme, member));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
 
         // when & then
         RestAssured.given().log().all()
@@ -122,14 +122,14 @@ public class ReservationControllerTest {
     @DisplayName("본인의 예약이 아니면 예약 정보를 삭제할 수 없으며 403 Forbidden 을 Response 받는다.")
     void canRemoveAnotherReservation() {
         // given
-        Member member = memberDao.insert(new Member("name", "member1@email.com", "password", Role.MEMBER));
+        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
         String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
 
-        Member anotherMember = memberDao.insert(new Member("name1", "member2@email.com", "password", Role.MEMBER));
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
+        Member anotherMember = memberRepository.save(new Member("name1", "member2@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
-        Reservation reservation = reservationDao.insert(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
+        Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
 
         // when & then
         RestAssured.given().log().all()
@@ -144,14 +144,14 @@ public class ReservationControllerTest {
     @DisplayName("본인의 예약이 아니더라도 관리자 권한이 있으면 예약 정보를 삭제할 수 있다.")
     void readReservationsSizeAfterPostAndDelete() {
         // given
-        Member member = memberDao.insert(new Member("name", "admin@admin.com", "password", Role.ADMIN));
+        Member member = memberRepository.save(new Member("name", "admin@admin.com", "password", Role.ADMIN));
         String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
 
-        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명", "설명", "썸네일URL"));
-        Member anotherMember = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member anotherMember = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
-        Reservation reservation = reservationDao.insert(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
+        Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
 
         // when & then
         RestAssured.given().log().all()
@@ -162,20 +162,21 @@ public class ReservationControllerTest {
                 .statusCode(204);
     }
 
+    // TODO: [STEP6 필터링 로직] 동적 쿼리로 변경 후 주석 해제
     @Test
     @DisplayName("특정 날짜의 특정 테마 예약 현황을 조회한다.")
     void readReservationByDateAndThemeId() {
         // given
         LocalDate today = LocalDate.now();
-        ReservationTime reservationTime1 = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 00)));
-        ReservationTime reservationTime2 = reservationTimeDao.insert(new ReservationTime(LocalTime.of(17, 30)));
-        ReservationTime reservationTime3 = reservationTimeDao.insert(new ReservationTime(LocalTime.of(18, 30)));
-        Theme theme = themeDao.insert(new Theme("테마명1", "설명", "썸네일URL"));
-        Member member = memberDao.insert(new Member("name", "email@email.com", "password", Role.MEMBER));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 00)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        ReservationTime reservationTime3 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(18, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명1", "설명", "썸네일URL"));
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
-        reservationDao.insert(new Reservation(today.plusDays(1), reservationTime1, theme, member));
-        reservationDao.insert(new Reservation(today.plusDays(1), reservationTime2, theme, member));
-        reservationDao.insert(new Reservation(today.plusDays(1), reservationTime3, theme, member));
+        reservationRepository.save(new Reservation(today.plusDays(1), reservationTime1, theme, member));
+        reservationRepository.save(new Reservation(today.plusDays(1), reservationTime2, theme, member));
+        reservationRepository.save(new Reservation(today.plusDays(1), reservationTime3, theme, member));
 
         // when & then
         RestAssured.given().log().all()
@@ -244,7 +245,7 @@ public class ReservationControllerTest {
     }
 
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberDao.insert(new Member("이름", email, password, Role.ADMIN));
+        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,

@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.repository.MemberRepository;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.is;
 class MemberControllerTest {
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @LocalServerPort
     private int port;
@@ -33,10 +33,10 @@ class MemberControllerTest {
         // given
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
-        memberDao.insert(new Member("이름1", "test@test.com", "password", Role.MEMBER));
-        memberDao.insert(new Member("이름2", "test@test.com", "password", Role.MEMBER));
-        memberDao.insert(new Member("이름3", "test@test.com", "password", Role.MEMBER));
-        memberDao.insert(new Member("이름4", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름3", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름4", "test@test.com", "password", Role.MEMBER));
 
         // when & then
         RestAssured.given().log().all()
@@ -49,7 +49,7 @@ class MemberControllerTest {
     }
 
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {
-        memberDao.insert(new Member("이름", email, password, Role.ADMIN));
+        memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
                 "email", email,
