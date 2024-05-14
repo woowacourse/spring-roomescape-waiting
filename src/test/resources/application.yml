@@ -10,6 +10,14 @@ spring:
   sql:
     init:
       data-locations:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
 
 security:
   jwt:
