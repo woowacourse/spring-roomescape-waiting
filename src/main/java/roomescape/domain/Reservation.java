@@ -20,6 +20,9 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
     public Reservation() {
     }
 
@@ -37,6 +40,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = ReservationStatus.RESERVATION;
     }
 
     private void validateMember(Member member) {
@@ -87,4 +91,7 @@ public class Reservation {
         return theme;
     }
 
+    public ReservationStatus getStatus() {
+        return status;
+    }
 }
