@@ -56,12 +56,12 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAll() {
-        return some().stream()
+        return getAllReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<Reservation> some() {
+    public List<Reservation> getAllReservations() {
         return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .toList();
     }

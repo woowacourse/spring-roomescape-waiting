@@ -81,13 +81,13 @@ public class AdminReservationService {
 
     private List<Reservation> findByDateFromAndDateTo(final LocalDate dateFrom,
                                                       final LocalDate dateTo) {
-        return some().stream()
-                .filter(reservation -> reservation.getDate().isAfter(dateFrom)
-                        && reservation.getDate().isBefore(dateTo))
+        return getAllReservations().stream()
+                .filter(reservation -> (dateFrom == null || reservation.getDate().isAfter(dateFrom))
+                        && (dateTo == null || reservation.getDate().isBefore(dateTo)))
                 .toList();
     }
 
-    public List<Reservation> some() {
+    public List<Reservation> getAllReservations() {
         return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .toList();
     }

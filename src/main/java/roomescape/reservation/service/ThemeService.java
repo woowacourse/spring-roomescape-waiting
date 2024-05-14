@@ -38,7 +38,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findThemeRanking() {
-        Map<Long, List<Reservation>> collect1 = reservationService.some().stream()
+        Map<Long, List<Reservation>> collect1 = reservationService.getAllReservations().stream()
                 .filter(reservation -> reservation.getDate().isBefore(LocalDate.now()) && reservation.getDate()
                         .isAfter(LocalDate.now().minusWeeks(1)))
                 .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()));
