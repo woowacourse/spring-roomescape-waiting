@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     /*
     TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출
     */
-    const today = new Date();
-    const startDay = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const endDay = new Date();
+    const startDay = new Date(endDay.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const startDate = createDate(today);
-    const endDate = createDate(startDate);
+    const endDate = createDate(endDay);
+    const startDate = createDate(startDay);
     const limit = 10;
 
     requestRead(`/themes/popular?startDate=${startDate}&endDate=${endDate}&limit=${limit}`) // 인기 테마 목록 조회 API endpoint
