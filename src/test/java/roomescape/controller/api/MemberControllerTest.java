@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.BaseControllerTest;

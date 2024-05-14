@@ -22,7 +22,6 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;

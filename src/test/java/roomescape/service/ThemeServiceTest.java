@@ -6,18 +6,13 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.config.TestConfig;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 
-@SpringBootTest(classes = TestConfig.class)
-@Transactional
-class ThemeServiceTest {
+class ThemeServiceTest extends BaseServiceTest {
 
     @Autowired
     private ThemeService themeService;

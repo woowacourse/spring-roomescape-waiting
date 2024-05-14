@@ -1,8 +1,5 @@
 package roomescape.controller.api;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
@@ -21,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;

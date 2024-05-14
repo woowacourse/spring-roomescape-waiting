@@ -1,8 +1,6 @@
 package roomescape.controller.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
