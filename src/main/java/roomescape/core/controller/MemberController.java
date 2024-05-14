@@ -72,7 +72,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse> signupProcess(@RequestBody final MemberRequest request) {
         final MemberResponse result = memberService.create(request);
 
-        return ResponseEntity.created(URI.create("/members" + result.getId()))
+        return ResponseEntity.created(URI.create("/members/" + result.getId()))
                 .body(result);
     }
 

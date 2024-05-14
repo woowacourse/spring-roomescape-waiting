@@ -1,16 +1,31 @@
 package roomescape.core.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+    private LocalDate date;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReservationTime time;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Theme theme;
+
+    public Reservation() {
+    }
 
     public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme) {
         this(null, member, date, time, theme);

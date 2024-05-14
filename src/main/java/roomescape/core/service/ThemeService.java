@@ -25,9 +25,9 @@ public class ThemeService {
     public ThemeResponse create(final ThemeRequest request) {
         final Theme theme = new Theme(request.getName(), request.getDescription(), request.getThumbnail());
         validateDuplicatedName(theme);
-        final Long id = themeRepository.save(theme);
+        final Theme savedTheme = themeRepository.save(theme);
 
-        return new ThemeResponse(id, theme);
+        return new ThemeResponse(savedTheme.getId(), theme);
     }
 
     private void validateDuplicatedName(final Theme theme) {
@@ -50,7 +50,8 @@ public class ThemeService {
         final ZoneId kst = ZoneId.of("Asia/Seoul");
         final LocalDate today = LocalDate.now(kst);
         final LocalDate lastWeek = today.minusWeeks(1);
-        return reservationRepository.findPopularTheme(today, lastWeek)
+
+        return themeRepository.findPopularThemeBetween(lastWeek, today)
                 .stream()
                 .map(ThemeResponse::new)
                 .toList();
@@ -58,7 +59,8 @@ public class ThemeService {
 
     @Transactional
     public void delete(final long id) {
-        final int reservationCount = reservationRepository.countByThemeId(id);
+        final Theme theme = themeRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        final int reservationCount = reservationRepository.countByTheme(theme);
         if (reservationCount > 0) {
             throw new IllegalArgumentException("예약 내역이 존재하는 테마는 삭제할 수 없습니다.");
         }
