@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -11,18 +12,11 @@ import roomescape.repository.ThemeRepository;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@JdbcTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ThemeDeleteServiceTest {
 
-    private ThemeDeleteService themeDeleteService;
-
     @Autowired
-    public ThemeDeleteServiceTest(JdbcTemplate jdbcTemplate) {
-        themeDeleteService = new ThemeDeleteService(
-                new ThemeRepository(jdbcTemplate),
-                new ReservationRepository(jdbcTemplate)
-        );
-    }
+    private ThemeDeleteService themeDeleteService;
 
     @Test
     @DisplayName("예약 중이 아닌 테마를 삭제할 시 성공한다.")

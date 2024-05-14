@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
@@ -18,23 +19,24 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@JdbcTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationCreateServiceTest {
 
+    @Autowired
     private ReservationCreateService reservationCreateService;
 
-    @Autowired
-    public ReservationCreateServiceTest(JdbcTemplate jdbcTemplate) {
-        reservationCreateService = new ReservationCreateService(
-                new ReservationCreateValidator(
-                        new ReservationRepository(jdbcTemplate),
-                        new ReservationTimeRepository(jdbcTemplate),
-                        new ThemeRepository(jdbcTemplate),
-                        new MemberRepository(jdbcTemplate)
-                ),
-                new ReservationRepository(jdbcTemplate)
-        );
-    }
+//    @Autowired
+//    public ReservationCreateServiceTest(JdbcTemplate jdbcTemplate) {
+//        reservationCreateService = new ReservationCreateService(
+//                new ReservationCreateValidator(
+//                        new ReservationRepository(jdbcTemplate),
+//                        new ReservationTimeRepository(jdbcTemplate),
+//                        new ThemeRepository(jdbcTemplate),
+//                        new MemberRepository(jdbcTemplate)
+//                ),
+//                new ReservationRepository(jdbcTemplate)
+//        );
+//    }
 
     @Test
     @DisplayName("예약 가능한 시간인 경우 성공한다.")

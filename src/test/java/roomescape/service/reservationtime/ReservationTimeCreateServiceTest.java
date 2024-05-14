@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
@@ -13,17 +14,13 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@JdbcTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationTimeCreateServiceTest {
 
+    @Autowired
     private ReservationTimeCreateService reservationTimeCreateService;
 
-    @Autowired
-    public ReservationTimeCreateServiceTest(JdbcTemplate jdbcTemplate) {
-        reservationTimeCreateService = new ReservationTimeCreateService(
-                new ReservationTimeRepository(jdbcTemplate)
-        );
-    }
+
 
     @Test
     @DisplayName("존재하지 않는 예약 시간인 경우 성공한다")

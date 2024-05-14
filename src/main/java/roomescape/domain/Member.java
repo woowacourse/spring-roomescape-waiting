@@ -1,12 +1,24 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    private String name;
+    private String email;
+    private String password;
+
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
@@ -18,6 +30,10 @@ public class Member {
 
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
+    }
+
+    public Member() {
+
     }
 
     public Long getId() {

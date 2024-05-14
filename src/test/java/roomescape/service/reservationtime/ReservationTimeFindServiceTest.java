@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
@@ -15,17 +17,12 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@JdbcTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeFindServiceTest {
 
-    private ReservationTimeFindService reservationTimeFindService;
-
     @Autowired
-    public ReservationTimeFindServiceTest(JdbcTemplate jdbcTemplate) {
-        reservationTimeFindService = new ReservationTimeFindService(
-                new ReservationTimeRepository(jdbcTemplate)
-        );
-    }
+    private ReservationTimeFindService reservationTimeFindService;
 
     @Test
     @DisplayName("날짜와 테마가 주어지면 각 시간의 예약 여부를 구한다.")
