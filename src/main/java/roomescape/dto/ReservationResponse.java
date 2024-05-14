@@ -12,7 +12,7 @@ public record ReservationResponse(Long id, MemberPreviewResponse member, LocalDa
                 reservation.getId(),
                 MemberPreviewResponse.from(reservation.getMember()),
                 reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
+                ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
     }

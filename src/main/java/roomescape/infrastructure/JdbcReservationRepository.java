@@ -89,12 +89,12 @@ public class JdbcReservationRepository implements ReservationRepository {
         Map<String, Object> params = Map.of(
                 "member_id", reservation.getMember().getId(),
                 "date", reservation.getDate(),
-                "time_id", reservation.getTime().getId(),
+                "time_id", reservation.getReservationTime().getId(),
                 "theme_id", reservation.getTheme().getId()
         );
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
-        return new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(),
+        return new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getReservationTime(),
                 reservation.getTheme());
     }
 
