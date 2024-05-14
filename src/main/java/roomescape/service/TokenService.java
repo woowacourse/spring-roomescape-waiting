@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TokenService {
-    public static final String USER_ID = "user_id";
+    private static final String USER_ID = "user_id";
     private static final String secretKey = "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=";
 
     public String createToken(long id, LocalDateTime createdAt, Duration tokenLifeTime) {
