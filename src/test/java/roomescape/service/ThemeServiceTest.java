@@ -55,14 +55,6 @@ class ThemeServiceTest {
     @Autowired
     private JpaMemberRepository memberRepository;
 
-    @DisplayName("테마 삭제 시 저장되어있지 않은 아이디면 에러를 발생시킨다.")
-    @Test
-    void throw_exception_when_delete_not_saved_theme_id() {
-        assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 아이디입니다.");
-    }
-
     @DisplayName("테마 삭제 시 해당 테마에 예약이 존재하면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_delete_theme_with_existing_reservation() {

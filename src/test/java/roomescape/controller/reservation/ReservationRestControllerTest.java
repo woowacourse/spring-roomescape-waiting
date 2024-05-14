@@ -1,10 +1,7 @@
 package roomescape.controller.reservation;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +23,10 @@ import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -116,7 +117,7 @@ class ReservationRestControllerTest {
                 .getList(".", ReservationResponse.class);
 
         ReservationResponse expectedResponse = new ReservationResponse(
-                1L, new MemberResponse(1L, "재즈"),
+                actualResponse.get(0).getId(), new MemberResponse(1L, "재즈"),
                 new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
                 "2100-08-05",
                 new ReservationTimeResponse(1L, "10:00")
@@ -163,17 +164,20 @@ class ReservationRestControllerTest {
         MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
                 "2100-08-05", 1L);
 
-        RestAssured.given().log().all()
+        Integer id = RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
                 .body(reservationCreate)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract()
+                .body()
+                .path("id");
 
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().delete("/admin/reservations/1")
+                .when().delete("/admin/reservations/" + id)
                 .then().log().all()
                 .statusCode(204);
     }

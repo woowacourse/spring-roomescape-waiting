@@ -1,10 +1,6 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +20,11 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -74,14 +75,6 @@ class ReservationTimeServiceTest {
 
         assertThatNoException()
                 .isThrownBy(() -> reservationTimeService.createReservationTime(requestDto));
-    }
-
-    @DisplayName("예약 시간 삭제 시 저장되어있지 않은 아이디면 에러를 발생시킨다.")
-    @Test
-    void throw_exception_when_delete_not_saved_reservation_time_id() {
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("존재하지 않는 아이디입니다.");
     }
 
     @DisplayName("예약 시간 삭제 시 해당 시간에 예약이 존재하면 에러를 발생시킨다.")

@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -15,6 +12,10 @@ import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ReservationService {
@@ -47,7 +48,9 @@ public class ReservationService {
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
         Reservation reservation = reservationInfo.toReservation();
-        ReservationTime time = reservationTimeRepository.fetchById(reservation.getTimeId());
+        ReservationTime time = reservationTimeRepository.findById(reservation.getTimeId())
+                .orElseThrow(() -> new IllegalArgumentException("예약 하려는 시간이 저장되어 있지 않습니다."));
+        ;
         validatePreviousDate(reservation, time);
 
         if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservation.getDate(), reservation.getTimeId(),
