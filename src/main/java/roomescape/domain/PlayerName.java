@@ -1,13 +1,18 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
+@Embeddable
 public class PlayerName {
     public static final int NAME_MAX_LENGTH = 20;
 
-    private final String name;
+    private String name;
+
+    public PlayerName() {
+    }
 
     public PlayerName(String name) {
         validateNonBlank(name);

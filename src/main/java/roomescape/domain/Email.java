@@ -1,15 +1,20 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
+@Embeddable
 public class Email {
     private static final Pattern EMAIL_REGEX = Pattern.compile("^(.+)@(\\S+)$");
     private static final int MIN_LENGTH = 11;
     private static final int MAX_LENGTH = 40;
 
-    private final String email;
+    private String email;
+
+    public Email() {
+    }
 
     public Email(String email) {
         if (email == null || email.isBlank()) {
