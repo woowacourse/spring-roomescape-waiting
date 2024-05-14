@@ -5,6 +5,19 @@ spring:
   datasource:
     url: jdbc:h2:mem:database
 
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        storage_engine: innodb
+        format_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    show_sql: true
+
   h2:
     console:
       enabled: true
