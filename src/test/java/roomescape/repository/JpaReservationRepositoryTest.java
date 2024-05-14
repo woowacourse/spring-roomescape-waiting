@@ -134,4 +134,23 @@ class JpaReservationRepositoryTest {
 
         Assertions.assertThat(reservations).containsExactly(DEFAULT_RESERVATION);
     }
+
+    @Test
+    @DisplayName("특정 회원의 특정 기간 내의 예약을 잘 조회하는지 확인한다.")
+    void findByMemberAndThemeBetweenDates() {
+        LocalDate startDate = DEFAULT_RESERVATION.getDate();
+        LocalDate endDate = startDate.plusDays(1);
+        LocalDate notOnPeriodDate = startDate.plusDays(2);
+        Reservation notOnPeriodreservation = new Reservation(DEFAULT_MEMBER, notOnPeriodDate,
+                DEFAULT_TIME, DEFAULT_THEME);
+
+        reservationRepository.save(DEFAULT_RESERVATION);
+        reservationRepository.save(notOnPeriodreservation);
+
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
+                DEFAULT_MEMBER.getId(), DEFAULT_THEME.getId(), startDate, endDate);
+
+        Assertions.assertThat(reservations)
+                .containsExactly(DEFAULT_RESERVATION);
+    }
 }
