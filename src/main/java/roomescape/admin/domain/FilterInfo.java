@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.admin.domain;
 
 import java.time.LocalDate;
 import roomescape.global.exception.model.RoomEscapeException;
