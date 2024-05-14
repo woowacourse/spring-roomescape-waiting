@@ -8,17 +8,18 @@ import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.domain.dto.ReservationTimeResponses;
 import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.DuplicateNotAllowException;
-import roomescape.repository.ReservationDao;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ReservationDao reservationDao) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationTimeResponses findAll() {
@@ -47,7 +48,7 @@ public class ReservationTimeService {
     }
 
     private void validateExistReservation(Long id) {
-        if (reservationDao.isExistsTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new DeleteNotAllowException("예약이 등록된 시간은 제거할 수 없습니다.");
         }
     }

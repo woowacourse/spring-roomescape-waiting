@@ -8,17 +8,17 @@ import roomescape.domain.dto.ThemeRequest;
 import roomescape.domain.dto.ThemeResponse;
 import roomescape.domain.dto.ThemeResponses;
 import roomescape.exception.DeleteNotAllowException;
-import roomescape.repository.ReservationDao;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationDao reservationDao) {
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ThemeResponses findAll() {
@@ -46,7 +46,7 @@ public class ThemeService {
     }
 
     private void validateExistReservation(final Long id) {
-        if (reservationDao.isExistsThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new DeleteNotAllowException("예약이 등록된 테마는 제거할 수 없습니다.");
         }
     }

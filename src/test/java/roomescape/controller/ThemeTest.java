@@ -1,6 +1,10 @@
 package roomescape.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+
 import io.restassured.RestAssured;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,11 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.dto.ThemeResponse;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -44,7 +43,9 @@ class ThemeTest {
         String endDate = "2024-05-02";
         String size = "10";
         final List<ThemeResponse> themeResponses = RestAssured.given().log().all()
-                .when().get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}", startDate, endDate, size)
+                .when()
+                .get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}",
+                        startDate, endDate, size)
                 .then().extract().body()
                 .jsonPath().getList("data", ThemeResponse.class);
         ThemeResponse actual = themeResponses.get(0);
@@ -59,7 +60,9 @@ class ThemeTest {
         String endDate = "2024-05-02";
         String count = "10";
         RestAssured.given().log().all()
-                .when().get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}", invalidStartDate, endDate, count)
+                .when()
+                .get("/themes/rank?startDate={startDate}&endDate={endDate}&size={count}",
+                        invalidStartDate, endDate, count)
                 .then().log().all()
                 .statusCode(400)
                 .body(containsString("startDate"));
