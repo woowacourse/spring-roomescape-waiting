@@ -19,6 +19,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -46,17 +47,6 @@ class ReservationServiceTest extends ServiceTest {
     MemberReservationRepository memberReservationRepository;
     @Autowired
     ReservationService reservationService;
-
-//    @BeforeEach
-//    void setUp() {
-//        reservationRepository = new FakeReservationDao();
-//        reservationTimeRepository = new FakeReservationTimeDao(reservationRepository);
-//        memberReservationRepository = new FakeMemberReservationDao();
-//        themeRepository = new FakeThemeDao(memberReservationRepository);
-//        memberRepository = new FakeMemberDao();
-//        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-//                memberRepository, memberReservationRepository);
-//    }
 
     @DisplayName("예약 생성에 성공한다.")
     @Test
@@ -257,5 +247,31 @@ class ReservationServiceTest extends ServiceTest {
         assertThat(reservationService.findMemberReservations(
                 new ReservationQueryRequest(theme.getId(), member.getId(), LocalDate.now(),
                         LocalDate.now().plusDays(1)))).hasSize(0);
+    }
+
+    @DisplayName("나의 예약 조회에 성공한다.")
+    @Test
+    void myReservations() {
+        //given
+        Member member = memberRepository.save(
+                new Member(getMemberClover().getName(), getMemberClover().getEmail(), "1234",
+                        getMemberClover().getRole()));
+        ReservationTime time = reservationTimeRepository.save(getNoon());
+        Theme theme1 = themeRepository.save(getTheme1());
+        Theme theme2 = themeRepository.save(getTheme2());
+        Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
+        Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
+
+        memberReservationRepository.save(new MemberReservation(member, reservation1));
+        memberReservationRepository.save(new MemberReservation(member, reservation2));
+
+        //when
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(member);
+
+        //then
+        assertAll(
+                () -> assertThat(myReservations).hasSize(2),
+                ()-> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
+        );
     }
 }

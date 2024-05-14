@@ -9,6 +9,7 @@ import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
+import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -45,6 +46,13 @@ public class ReservationService {
                         request.getEndDate())
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findMyReservations(Member member) {
+        return memberReservationRepository.findAllByMember(member)
+                .stream()
+                .map(MyReservationResponse::from)
                 .toList();
     }
 

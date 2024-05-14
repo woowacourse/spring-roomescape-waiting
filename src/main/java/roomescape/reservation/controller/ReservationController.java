@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.global.annotation.LoginUser;
 import roomescape.member.domain.Member;
+import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -61,5 +62,16 @@ public class ReservationController {
     @GetMapping("/reservation")
     public String getReservationPage() {
         return "reservation";
+    }
+
+
+    @GetMapping("/reservation-mine")
+    public String getMyPage() {
+        return "reservation-mine";
+    }
+
+    @GetMapping("/reservations/my")
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser Member member) {
+        return ResponseEntity.ok(reservationService.findMyReservations(member));
     }
 }

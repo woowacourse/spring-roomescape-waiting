@@ -179,4 +179,17 @@ class ReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @DisplayName("내 예약 조회 페이지 조회 시 200을 반환한다.")
+    @Test
+    void getMyReservationPage() {
+        //given
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/reservations/my")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
