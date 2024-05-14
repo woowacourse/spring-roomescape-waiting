@@ -17,6 +17,7 @@ import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
 import roomescape.domain.Reservation;
+import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -43,8 +44,7 @@ public class ReservationController {
     public List<MyReservationResponse> getMineReservation(final LoginMember member) {
         List<Reservation> reservations = reservationService.getReservationsByMember(member);
         return reservations.stream()
-                .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                        reservation.getDate(), reservation.getTime().getStartAt(), "예약"))
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
