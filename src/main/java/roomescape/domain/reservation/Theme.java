@@ -10,10 +10,10 @@ public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
 
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
@@ -23,7 +23,6 @@ public class Theme {
     }
 
     protected Theme() {
-        this(null, null, null, null);
     }
 
     public Long getId() {
