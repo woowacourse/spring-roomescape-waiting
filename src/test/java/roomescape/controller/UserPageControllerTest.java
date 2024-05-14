@@ -59,14 +59,15 @@ class UserPageControllerTest {
     @Test
     @DisplayName("로그인 후 로그아웃")
     void logout() {
-        RestAssured.given().log().all()
-                .contentType("application/json")
+        final String accessToken = RestAssured.given().log().all()
                 .body(request)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
-                .then().log().all()
-                .statusCode(200);
+                .then().log().cookies().extract().cookie("token");
 
         RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .when().post("/logout")
                 .then().log().all()
                 .statusCode(200);
