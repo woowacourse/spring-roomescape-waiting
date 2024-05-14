@@ -1,12 +1,14 @@
 ## 기능 요구 사항
-### 사용자 예약 조회하기
+
+- [x] 사용자 예약을 조회한다.
+
 - Request
 ```
 GET /reservations/mine HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 host: localhost:8080
 ```
-- Respnse
+- Response
 ```
 HTTP/1.1 200 
 Content-Type: application/json
