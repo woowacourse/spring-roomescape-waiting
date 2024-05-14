@@ -7,13 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Member {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
@@ -25,6 +26,7 @@ public class Member {
     @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
     @Enumerated(EnumType.STRING)
+    @Column(name = "member_role")
     private Role role;
 
     public Member(
