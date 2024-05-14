@@ -4,20 +4,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.dto.TimeSlotResponses;
-import roomescape.service.TimeService;
+import roomescape.domain.dto.ReservationTimeResponses;
+import roomescape.service.ReservationTimeService;
 
 @RestController
 @RequestMapping("/times")
 public class ClientTimeController {
-    private final TimeService timeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public ClientTimeController(TimeService timeService) {
-        this.timeService = timeService;
+    public ClientTimeController(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @GetMapping
-    public ResponseEntity<TimeSlotResponses> findAll() {
-        return ResponseEntity.ok(timeService.findAll());
+    public ResponseEntity<ReservationTimeResponses> findAll() {
+        return ResponseEntity.ok(reservationTimeService.findAll());
     }
 }

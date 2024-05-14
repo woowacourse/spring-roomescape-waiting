@@ -6,20 +6,20 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.BookResponses;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.TimeDao;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class BookService {
-    private final TimeDao timeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public BookService(final ReservationDao reservationDao, final TimeDao timeDao) {
-        this.timeDao = timeDao;
+    public BookService(final ReservationTimeRepository reservationTimeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public BookResponses findAvaliableBookList(final LocalDate date, final Long themeId) {
-        List<ReservationTime> reservationReservationTimes = timeDao.findByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes = timeDao.findAll();
+    public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
+        List<ReservationTime> reservationReservationTimes = reservationTimeRepository.findByDateAndThemeId(date,
+                themeId);
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         final List<BookResponse> bookResponses = reservationTimes.stream().map(timeSlot -> {
             Boolean alreadyBooked = reservationReservationTimes.stream()
                     .anyMatch(reservationTimeSlot -> reservationTimeSlot.getId().equals(timeSlot.getId()));

@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
@@ -8,6 +10,7 @@ import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 @Entity
 public class ReservationTime {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
 
@@ -23,16 +26,8 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(Long id, String startAt) {
-        this(id, LocalTime.parse(startAt));
-    }
-
-    public ReservationTime(String startAt) {
+    public ReservationTime(LocalTime startAt) {
         this(null, startAt);
-    }
-
-    public boolean isTimeBeforeNow() {
-        return startAt.isBefore(LocalTime.now());
     }
 
     public Long getId() {

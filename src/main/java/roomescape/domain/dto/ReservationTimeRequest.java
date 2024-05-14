@@ -4,8 +4,8 @@ import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
-public record TimeSlotRequest(LocalTime startAt) {
-    public TimeSlotRequest {
+public record ReservationTimeRequest(LocalTime startAt) {
+    public ReservationTimeRequest {
         isValid(startAt);
     }
 
@@ -15,7 +15,7 @@ public record TimeSlotRequest(LocalTime startAt) {
         }
     }
 
-    public ReservationTime toEntity(Long id) {
-        return new ReservationTime(id, startAt);
+    public ReservationTime toEntity() {
+        return new ReservationTime(startAt);
     }
 }

@@ -1,26 +1,25 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.domain.dto.TimeSlotRequest;
-import roomescape.domain.dto.TimeSlotResponse;
+import roomescape.domain.dto.ReservationTimeRequest;
+import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.exception.DeleteNotAllowException;
-
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class TimeServiceTest {
-    private final TimeService service;
+class ReservationTimeServiceTest {
+    private final ReservationTimeService service;
 
     @Autowired
-    public TimeServiceTest(final TimeService service) {
+    public ReservationTimeServiceTest(final ReservationTimeService service) {
         this.service = service;
     }
 
@@ -40,12 +39,12 @@ class TimeServiceTest {
     void given_timeSlotRequestWithInitialSize_when_create_then_returnTimeSlotResponseAndSaveDb() {
         //given
         long initialSize = getTimeSlotSize();
-        TimeSlotRequest timeSlotRequest = new TimeSlotRequest(LocalTime.parse("11:22"));
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.parse("11:22"));
         //when
-        final TimeSlotResponse timeSlotResponse = service.create(timeSlotRequest);
+        final ReservationTimeResponse reservationTimeResponse = service.create(reservationTimeRequest);
         long afterCreateSize = getTimeSlotSize();
         //then
-        assertThat(timeSlotResponse.id()).isEqualTo(afterCreateSize);
+        assertThat(reservationTimeResponse.id()).isEqualTo(afterCreateSize);
         assertThat(afterCreateSize).isEqualTo(initialSize + 1);
     }
 
