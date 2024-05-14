@@ -54,18 +54,6 @@ public class Reservation {
         return date.isBefore(today) || date.equals(today);
     }
 
-    public Long getReservationTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
     public String getMemberName() {
         return member.getName();
     }

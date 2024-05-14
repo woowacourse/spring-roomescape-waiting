@@ -106,8 +106,8 @@ class ReservationRepositoryTest extends RepositoryTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(1);
-            softly.assertThat(reservations.get(0).getMemberId()).isEqualTo(1);
-            softly.assertThat(reservations.get(0).getThemeId()).isEqualTo(1);
+            softly.assertThat(reservations.get(0).getMember().getId()).isEqualTo(1);
+            softly.assertThat(reservations.get(0).getTheme().getId()).isEqualTo(1);
             softly.assertThat(reservations.get(0).getDate()).isEqualTo(MIA_RESERVATION_DATE);
         });
     }
