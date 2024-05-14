@@ -100,4 +100,18 @@ class ViewTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @Test
+    @DisplayName("[3 - Step2] 사용자 예약 목록 페이지를 조회한다.")
+    void getMyReservationsPage() {
+        Member admin = createTestAdmin();
+        String token = createTestToken(admin);
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        RestAssured.given().log().all()
+                .cookie(cookie)
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
