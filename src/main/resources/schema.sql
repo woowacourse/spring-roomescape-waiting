@@ -14,7 +14,7 @@ CREATE TABLE reservation_time
     PRIMARY KEY (id)
 );
 
-CREATE TABLE theme
+CREATE TABLE IF NOT EXISTS theme
 (
     id          BIGINT       NOT NULL AUTO_INCREMENT,
     name        VARCHAR(30)  NOT NULL UNIQUE,
