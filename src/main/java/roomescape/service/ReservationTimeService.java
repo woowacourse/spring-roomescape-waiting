@@ -57,17 +57,14 @@ public class ReservationTimeService {
     }
 
     public void deleteTime(Long id) {
-        validateDeleteTime(id);
-        reservationTimeRepository.deleteById(id);
-    }
-
-    private void validateDeleteTime(Long id) {
         ReservationTime foundTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
 
         if (reservationRepository.existByTime(foundTime)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
         }
+
+        reservationTimeRepository.delete(foundTime);
     }
 
     public List<ReservationTimeBookedResponse> getTimesWithBooked(

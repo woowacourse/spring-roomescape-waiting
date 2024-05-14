@@ -35,11 +35,10 @@ public class MemberService {
     }
 
     public void withdraw(Long id) {
-        if (memberRepository.findById(id).isEmpty()) {
-            throw new RoomEscapeBusinessException("회원이 존재하지 않습니다.");
-        }
+        Member foundMember = memberRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
 
-        memberRepository.deleteById(id);
+        memberRepository.delete(foundMember);
     }
 
     public MemberResponse findByEmailAndPassword(String email, String password) {

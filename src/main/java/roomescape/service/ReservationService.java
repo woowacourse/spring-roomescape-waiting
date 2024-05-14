@@ -62,11 +62,10 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
-            throw new RoomEscapeBusinessException("존재하지 않는 예약입니다.");
-        }
+        Reservation foundReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
 
-        reservationRepository.deleteById(id);
+        reservationRepository.delete(foundReservation);
     }
 
     public List<ReservationResponse> findReservationsByCondition(
