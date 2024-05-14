@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import io.jsonwebtoken.Claims;
-import roomescape.model.User;
+import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class JwtTokenProviderTest {
@@ -22,9 +22,9 @@ class JwtTokenProviderTest {
     @DisplayName("주어진 사용자로 토큰을 생성한다.")
     @Test
     void should_create_token_when_given_user() {
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
 
-        String token = jwtTokenProvider.createToken(user);
+        String token = jwtTokenProvider.createToken(member);
 
         assertThat(token).isNotBlank();
     }
@@ -32,8 +32,8 @@ class JwtTokenProviderTest {
     @DisplayName("주어진 토큰으로 payload를 반환한다.")
     @Test
     void should_get_payload_when_given_token() {
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
-        String token = jwtTokenProvider.createToken(user);
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
+        String token = jwtTokenProvider.createToken(member);
 
         Claims claims = jwtTokenProvider.getPayload(token);
 

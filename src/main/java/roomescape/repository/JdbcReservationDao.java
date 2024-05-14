@@ -16,7 +16,7 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.model.User;
+import roomescape.model.Member;
 
 @Repository
 public class JdbcReservationDao implements ReservationDao {
@@ -39,7 +39,7 @@ public class JdbcReservationDao implements ReservationDao {
                             resultSet.getString("description"),
                             resultSet.getString("thumbnail")
                     ),
-                    new User(
+                    new Member(
                             resultSet.getLong("user_id"),
                             resultSet.getString("user_name"),
                             Role.valueOf(resultSet.getString("role"))
@@ -77,7 +77,7 @@ public class JdbcReservationDao implements ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN users AS u ON r.user_id = u.id
+                INNER JOIN members AS u ON r.user_id = u.id
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
@@ -100,7 +100,7 @@ public class JdbcReservationDao implements ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN users AS u ON r.user_id = u.id
+                INNER JOIN members AS u ON r.user_id = u.id
                 WHERE th.id = ? AND u.id = ? 
                 AND r.date BETWEEN ? AND ?
                 """;

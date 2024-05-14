@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.UserLoginRequest;
 import roomescape.controller.response.UserNameResponse;
-import roomescape.model.User;
+import roomescape.model.Member;
 import roomescape.service.AuthService;
 import roomescape.service.UserService;
 
@@ -31,20 +31,20 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody UserLoginRequest request, HttpServletResponse response) {
-        User user = userService.findUserByEmailAndPassword(request);
-        Cookie cookie = authService.createCookieByUser(user);
+        Member member = userService.findUserByEmailAndPassword(request);
+        Cookie cookie = authService.createCookieByUser(member);
         response.addCookie(cookie);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<UserNameResponse> login(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(new UserNameResponse(user.getName()));
+    public ResponseEntity<UserNameResponse> login(@AuthenticationPrincipal Member member) {
+        return ResponseEntity.ok(new UserNameResponse(member.getName()));
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<Member>> getAllUsers() {
+        List<Member> members = userService.findAllUsers();
+        return ResponseEntity.ok(members);
     }
 }

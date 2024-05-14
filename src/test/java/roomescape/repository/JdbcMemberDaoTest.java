@@ -20,11 +20,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.test.annotation.DirtiesContext;
 
-import roomescape.model.User;
+import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class JdbcUserDaoTest {
+class JdbcMemberDaoTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -51,19 +51,19 @@ class JdbcUserDaoTest {
     @DisplayName("아이디와 비밀번호로 사용자를 조회한다.")
     @Test
     void should_find_user_when_given_email_and_password() {
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
-        insertUser(user);
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
+        insertUser(member);
 
-        Optional<User> optionalUser = userDao.findUserByEmailAndPassword("sun@email.com", "1234");
+        Optional<Member> optionalUser = userDao.findUserByEmailAndPassword("sun@email.com", "1234");
 
-        assertThat(optionalUser).contains(user);
+        assertThat(optionalUser).contains(member);
     }
 
     @DisplayName("아이디로 사용자 이름을 조회한다.")
     @Test
     void should_find_username_when_given_user_id() {
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
-        insertUser(user);
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
+        insertUser(member);
 
         Optional<String> userNameByUserId = userDao.findUserNameByUserId(1L);
 
@@ -73,30 +73,30 @@ class JdbcUserDaoTest {
     @DisplayName("아이디로 사용자를 조회한다.")
     @Test
     void should_find_user_when_given_user_id() {
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
-        insertUser(user);
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
+        insertUser(member);
 
-        Optional<User> userById = userDao.findUserById(1L);
+        Optional<Member> userById = userDao.findUserById(1L);
 
-        assertThat(userById).contains(user);
+        assertThat(userById).contains(member);
     }
 
     @DisplayName("모든 사용자를 조회한다.")
     @Test
     void should_find_all_user() {
-        User user1 = new User(1L, "썬", MEMBER, "sun@email.com", "1111");
-        User user2 = new User(2L, "배키", MEMBER, "dmsgml@email.com", "2222");
-        insertUser(user1);
-        insertUser(user2);
+        Member member1 = new Member(1L, "썬", MEMBER, "sun@email.com", "1111");
+        Member member2 = new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222");
+        insertUser(member1);
+        insertUser(member2);
 
-        List<User> allUsers = userDao.findAllUsers();
+        List<Member> allMembers = userDao.findAllUsers();
 
-        assertThat(allUsers).contains(user1, user2);
+        assertThat(allMembers).contains(member1, member2);
     }
 
 
-    private void insertUser(User user) {
-        SqlParameterSource parameters = new BeanPropertySqlParameterSource(user);
+    private void insertUser(Member member) {
+        SqlParameterSource parameters = new BeanPropertySqlParameterSource(member);
         insertActor.execute(parameters);
     }
 }

@@ -6,17 +6,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-import roomescape.model.User;
+import roomescape.model.Member;
 import roomescape.repository.UserDao;
 
 public class FakeUserDao implements UserDao {
 
-    private final List<User> users = new ArrayList<>();
+    private final List<Member> members = new ArrayList<>();
     private final AtomicLong atomicLong = new AtomicLong(1L);
 
     @Override
-    public Optional<User> findUserByEmailAndPassword(String email, String password) {
-        return users.stream()
+    public Optional<Member> findUserByEmailAndPassword(String email, String password) {
+        return members.stream()
                 .filter(user -> Objects.equals(user.getEmail(), email)
                         && Objects.equals(user.getPassword(), password))
                 .findAny();
@@ -24,30 +24,30 @@ public class FakeUserDao implements UserDao {
 
     @Override
     public Optional<String> findUserNameByUserId(Long userId) {
-        return users.stream()
+        return members.stream()
                 .filter(user -> Objects.equals(user.getId(), userId))
-                .map(User::getName)
+                .map(Member::getName)
                 .findAny();
     }
 
     @Override
-    public Optional<User> findUserById(Long userId) {
-        return users.stream()
+    public Optional<Member> findUserById(Long userId) {
+        return members.stream()
                 .filter(user -> Objects.equals(user.getId(), userId))
                 .findAny();
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return users;
+    public List<Member> findAllUsers() {
+        return members;
     }
 
-    public void addUser(User user) {
-        users.add(user);
+    public void addUser(Member member) {
+        members.add(member);
     }
 
     public void clear() {
         atomicLong.set(1L);
-        users.clear();
+        members.clear();
     }
 }

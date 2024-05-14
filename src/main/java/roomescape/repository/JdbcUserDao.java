@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.model.Role;
-import roomescape.model.User;
+import roomescape.model.Member;
 
 @Repository
 public class JdbcUserDao implements UserDao {
@@ -20,8 +20,8 @@ public class JdbcUserDao implements UserDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertActor;
 
-    private static final RowMapper<User> userRowMapper = (resultSet, rowNum) ->
-            new User(
+    private static final RowMapper<Member> userRowMapper = (resultSet, rowNum) ->
+            new Member(
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
                     Role.valueOf(resultSet.getString("role")),
@@ -37,7 +37,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public Optional<User> findUserByEmailAndPassword(String email, String password) {
+    public Optional<Member> findUserByEmailAndPassword(String email, String password) {
         String sql = "SELECT id, name, role, email, password FROM users WHERE email = ? AND password = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, userRowMapper, email, password));
@@ -57,7 +57,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public Optional<User> findUserById(Long userId) {
+    public Optional<Member> findUserById(Long userId) {
         String sql = "SELECT id, name, role, email, password FROM users WHERE id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, userRowMapper, userId));
@@ -67,7 +67,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public List<User> findAllUsers() {
+    public List<Member> findAllUsers() {
         String sql = "SELECT id, name, role, email, password FROM users";
         return jdbcTemplate.query(sql, userRowMapper);
     }

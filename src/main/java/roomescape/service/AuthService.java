@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.BadRequestException;
+import roomescape.model.Member;
 import roomescape.model.Role;
-import roomescape.model.User;
 
 @Service
 public class AuthService {
@@ -22,8 +22,8 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
-    public Cookie createCookieByUser(User user) {
-        String jwtToken = tokenProvider.createToken(user);
+    public Cookie createCookieByUser(Member member) {
+        String jwtToken = tokenProvider.createToken(member);
         Cookie cookie = new Cookie(COOKIE_NAME, jwtToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");

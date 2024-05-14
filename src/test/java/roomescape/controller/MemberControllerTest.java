@@ -10,10 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.UserLoginRequest;
-import roomescape.model.User;
+import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class UserControllerTest {
+class MemberControllerTest {
 
     @DisplayName("로그인 요청시 쿠키를 응답한다.")
     @Test
@@ -66,6 +66,6 @@ class UserControllerTest {
                 .contentType(ContentType.JSON)
                 .when().get("/members")
                 .then().statusCode(200)
-                .extract().jsonPath().getList(".", User.class);
+                .extract().jsonPath().getList(".", Member.class);
     }
 }

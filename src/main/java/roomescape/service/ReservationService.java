@@ -16,7 +16,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.model.User;
+import roomescape.model.Member;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
@@ -48,20 +48,20 @@ public class ReservationService {
         return reservationDao.searchReservation(themeId, memberId, dateFrom, dateTo);
     }
 
-    public Reservation addReservation(ReservationRequest request, User user) {
+    public Reservation addReservation(ReservationRequest request, Member member) {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId(),
                 request.themeId());
         Theme theme = themeDao.findThemeById(request.themeId());
-        Reservation reservation = new Reservation(request.date(), reservationTime, theme, user);
+        Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         return reservationDao.addReservation(reservation);
     }
 
     public Reservation addReservation(AdminReservationRequest request) {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId(), request.themeId());
         Theme theme = themeDao.findThemeById(request.themeId());
-        User user = userDao.findUserById(request.memberId())
+        Member member = userDao.findUserById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(request.memberId())));
-        Reservation reservation = new Reservation(request.date(), reservationTime, theme, user);
+        Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         return reservationDao.addReservation(reservation);
     }
 

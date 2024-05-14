@@ -1,21 +1,37 @@
 package roomescape.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 import roomescape.exception.BadRequestException;
 
-public class User {
+@Entity
+public class Member {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Enumerated(EnumType.STRING)
     private Role role;
     private String email;
     private String password;
+    @OneToMany(mappedBy = "member")
+    private List<Reservation> reservations = new ArrayList<>();
 
-    private User() {
+    protected Member() {
     }
 
-    public User(Long id, String name, Role role, String email, String password) {
+    public Member(Long id, String name, Role role, String email, String password) {
         validateNullOrBlank(name, "name");
         this.id = id;
         this.name = name;
@@ -24,7 +40,7 @@ public class User {
         this.password = password;
     }
 
-    public User(Long id, String name, Role role) {
+    public Member(Long id, String name, Role role) {
         this(id, name, role, null, null);
     }
 
@@ -54,6 +70,10 @@ public class User {
         return role;
     }
 
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -62,15 +82,16 @@ public class User {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        User user = (User) object;
-        return Objects.equals(getId(), user.getId()) && Objects.equals(getName(), user.getName())
-                && getRole() == user.getRole() && Objects.equals(getEmail(), user.getEmail())
-                && Objects.equals(getPassword(), user.getPassword());
+        Member member = (Member) object;
+        return Objects.equals(getId(), member.getId()) && Objects.equals(getName(), member.getName())
+                && getRole() == member.getRole() && Objects.equals(getEmail(), member.getEmail())
+                && Objects.equals(getPassword(), member.getPassword())
+                && Objects.equals(reservations, member.reservations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getRole(), getEmail(), getPassword());
+        return Objects.hash(getId(), getName(), getRole(), getEmail(), getPassword(), reservations);
     }
 
     @Override

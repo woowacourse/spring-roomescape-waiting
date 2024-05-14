@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import roomescape.controller.request.UserLoginRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
-import roomescape.model.User;
+import roomescape.model.Member;
 import roomescape.service.fake.FakeUserDao;
 
-class UserServiceTest {
+class MemberServiceTest {
 
     private final FakeUserDao userDao = new FakeUserDao();
     private final UserService userService = new UserService(userDao);
@@ -30,20 +30,20 @@ class UserServiceTest {
     @DisplayName("아이디와 비밀번호가 같은 유저가 존재하면 해당 유저를 반환한다.")
     @Test
     void should_find_user_when_user_exist() {
-        User user = new User(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(user);
+        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
+        userDao.addUser(member);
         UserLoginRequest request = new UserLoginRequest("1234", "hello@email.com");
 
-        User finduser = userService.findUserByEmailAndPassword(request);
+        Member finduser = userService.findUserByEmailAndPassword(request);
 
-        assertThat(finduser).isEqualTo(user);
+        assertThat(finduser).isEqualTo(member);
     }
 
     @DisplayName("아이디와 비밀번호 같은 유저가 없으면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_user_not_exist() {
-        User user = new User(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(user);
+        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
+        userDao.addUser(member);
         UserLoginRequest request = new UserLoginRequest("1111", "sun@email.com");
 
         assertThatThrownBy(() -> userService.findUserByEmailAndPassword(request))
@@ -53,8 +53,8 @@ class UserServiceTest {
     @DisplayName("아이디를 통해 사용자 이름을 조회한다.")
     @Test
     void should_find_username_when_give_id() {
-        User user = new User(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(user);
+        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
+        userDao.addUser(member);
 
         String userNameById = userService.findUserNameById(1L);
 
@@ -71,12 +71,12 @@ class UserServiceTest {
     @DisplayName("아이디를 통해 사용자 이름을 조회한다.")
     @Test
     void should_find_user_when_give_id() {
-        User user = new User(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(user);
+        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
+        userDao.addUser(member);
 
-        User userById = userService.findUserById(1L);
+        Member memberById = userService.findUserById(1L);
 
-        assertThat(userById).isEqualTo(user);
+        assertThat(memberById).isEqualTo(member);
     }
 
     @DisplayName("주어진 아이디에 해당하는 사용자가 없으면 예외가 발생한다.")
@@ -89,11 +89,11 @@ class UserServiceTest {
     @DisplayName("모든 사용자를 조회한다.")
     @Test
     void should_find_all_users() {
-        userDao.addUser(new User(1L, "썬", MEMBER, "sun@email.com", "1111"));
-        userDao.addUser(new User(2L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        userDao.addUser(new Member(1L, "썬", MEMBER, "sun@email.com", "1111"));
+        userDao.addUser(new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222"));
 
-        List<User> users = userService.findAllUsers();
+        List<Member> members = userService.findAllUsers();
 
-        assertThat(users).hasSize(2);
+        assertThat(members).hasSize(2);
     }
 }

@@ -22,10 +22,10 @@ import roomescape.controller.response.IsReservedTimeResponse;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
+import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.model.User;
 import roomescape.service.fake.FakeReservationDao;
 import roomescape.service.fake.FakeReservationTimeDao;
 
@@ -112,7 +112,7 @@ class ReservationTimeServiceTest {
                 new Reservation(now().plusDays(2),
                         reservationTime,
                         new Theme("name", "공포", "미스터리"),
-                        new User(1L, "배키", MEMBER, "dmsgml@email.com", "1234")));
+                        new Member(1L, "배키", MEMBER, "dmsgml@email.com", "1234")));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1))
                 .isInstanceOf(BadRequestException.class)

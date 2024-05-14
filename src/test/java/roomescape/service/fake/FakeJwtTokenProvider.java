@@ -9,7 +9,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import roomescape.model.User;
+import roomescape.model.Member;
 import roomescape.service.TokenProvider;
 
 public class FakeJwtTokenProvider implements TokenProvider {
@@ -17,10 +17,10 @@ public class FakeJwtTokenProvider implements TokenProvider {
     private String secretKey = "eyJhbGciOiJIUzI1NiIsInR5WIiOiIiLCJuYW1lIjoiSm9obiBEb24k1fagApg3qLWiB8Kt59Lno";
 
     @Override
-    public String createToken(User user) {
-        Map<String, ?> claims = createClaimsByUser(user);
+    public String createToken(Member member) {
+        Map<String, ?> claims = createClaimsByUser(member);
         return Jwts.builder()
-                .subject(user.getId().toString())
+                .subject(member.getId().toString())
                 .claims(claims)
                 .signWith(getSecretKey())
                 .compact();
@@ -36,9 +36,9 @@ public class FakeJwtTokenProvider implements TokenProvider {
                 .getPayload();
     }
 
-    private Map<String, Object> createClaimsByUser(User user) {
+    private Map<String, Object> createClaimsByUser(Member member) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().toString());
+        claims.put("role", member.getRole().toString());
         return claims;
     }
 

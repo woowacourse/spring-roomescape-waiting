@@ -24,11 +24,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.test.annotation.DirtiesContext;
 
+import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.model.User;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -147,9 +147,9 @@ class JdbcReservationDaoTest {
     void should_add_reservation() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "에버", "공포", "공포.jpg");
-        User user = new User(1L, "썬", MEMBER, "sun@email.com", "1234");
+        Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
         Reservation reservation =
-                new Reservation(LocalDate.of(2024, 9, 1), reservationTime, theme, user);
+                new Reservation(LocalDate.of(2024, 9, 1), reservationTime, theme, member);
 
         reservationDao.addReservation(reservation);
 
