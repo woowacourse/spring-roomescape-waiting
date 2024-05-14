@@ -10,7 +10,7 @@
 ## 2단계
 
 - [ ] 내 예약 목록 조회 API를 구현한다
-- [ ] 내 예약 확인 페이지를 제공한다
+- [x] 내 예약 확인 페이지를 제공한다
     - `GET /reservation-mine` 요청시 `reservation-mine.html` 페이지 응답
 
 # API 명세
