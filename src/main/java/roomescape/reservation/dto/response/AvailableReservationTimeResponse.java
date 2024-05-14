@@ -7,7 +7,7 @@ import java.time.LocalTime;
 
 public record AvailableReservationTimeResponse(
         Long id,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
         LocalTime startAt,
         boolean isReserved
 ) {
