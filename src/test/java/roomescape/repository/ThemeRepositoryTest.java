@@ -4,7 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.domain.Theme;
 import roomescape.service.exception.ThemeNotFoundException;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,7 +21,15 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("모든 테마 목록을 조회한다.")
     void findAll() {
-        assertThat(themeRepository.findAll()).isEmpty();
+        // given
+        final List<Theme> expected = List.of(
+                new Theme(1L, null, null, null),
+                new Theme(2L, null, null, null),
+                new Theme(3L, null, null, null),
+                new Theme(4L, null, null, null)
+        );
+
+        assertThat(themeRepository.findAll()).isEqualTo(expected);
     }
 
     @Test
