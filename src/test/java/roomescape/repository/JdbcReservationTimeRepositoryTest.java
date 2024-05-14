@@ -98,6 +98,11 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     @DisplayName("예약 시간을 삭제한다.")
     void deleteById() {
+        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
+
+        reservationTimeRepository.deleteById(1L);
+
+        assertThat(reservationTimeRepository.findAll()).isEmpty();
     }
 
     @Test

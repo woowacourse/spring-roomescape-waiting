@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -37,10 +37,15 @@ class JdbcReservationRepositoryTest {
 
         Reservation reservation = new Reservation(null, LocalDate.of(2024, 5, 4), member, time, theme);
 
-        reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
 
-        int count = JdbcTestUtils.countRowsInTable(jdbcTemplate, "reservation");
-        assertThat(count).isEqualTo(1);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(saved.getId()).isNotNull();
+            softly.assertThat(saved.getDate()).isEqualTo("2024-05-04");
+            softly.assertThat(saved.getTime().getStartAt()).isEqualTo("10:00");
+            softly.assertThat(saved.getMember().getEmail()).isEqualTo("example@gmail.com");
+            softly.assertThat(saved.getStatus()).isEqualTo(Status.WAITING);
+        });
     }
 
     @Test
