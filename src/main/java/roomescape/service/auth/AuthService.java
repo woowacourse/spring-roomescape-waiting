@@ -46,7 +46,8 @@ public class AuthService {
 
     public MemberResponse create(SignUpRequest signUpRequest) {
         validateEmail(signUpRequest.email());
-        Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.GUEST));
+        Member member = memberRepository.save(
+                new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.GUEST));
         return new MemberResponse(member);
     }
 

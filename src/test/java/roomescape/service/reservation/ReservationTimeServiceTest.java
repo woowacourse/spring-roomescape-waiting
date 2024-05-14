@@ -1,5 +1,10 @@
 package roomescape.service.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +14,17 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.*;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
 import roomescape.service.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.service.reservation.dto.ReservationTimeCreateRequest;
 import roomescape.service.reservation.dto.ReservationTimeReadRequest;
 import roomescape.service.reservation.dto.ReservationTimeResponse;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql(scripts = {"classpath:truncate-with-guests.sql"})
@@ -86,7 +90,8 @@ class ReservationTimeServiceTest {
     void cannotDeleteTime() {
         //given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime("10:00"));
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
+        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
         reservationRepository.save(new Reservation("2222-10-04", member, reservationTime, theme));
 
@@ -102,17 +107,21 @@ class ReservationTimeServiceTest {
         //given
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime("10:00"));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(new ReservationTime("11:00"));
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
+        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
         String date = "2222-10-04";
         reservationRepository.save(new Reservation(date, member, bookedReservationTime, theme));
 
         //when
-        List<AvailableReservationTimeResponse> result = reservationTimeService.findAvailableTimes(new ReservationTimeReadRequest(date, theme.getId()));
+        List<AvailableReservationTimeResponse> result = reservationTimeService.findAvailableTimes(
+                new ReservationTimeReadRequest(date, theme.getId()));
 
         //then
-        boolean isBookedOfBookedTime = result.stream().filter(time -> time.id() == bookedReservationTime.getId()).findFirst().get().alreadyBooked();
-        boolean isBookedOfUnBookedTime = result.stream().filter(time -> time.id() == notBookedReservationTime.getId()).findFirst().get().alreadyBooked();
+        boolean isBookedOfBookedTime = result.stream().filter(time -> time.id() == bookedReservationTime.getId())
+                .findFirst().get().alreadyBooked();
+        boolean isBookedOfUnBookedTime = result.stream().filter(time -> time.id() == notBookedReservationTime.getId())
+                .findFirst().get().alreadyBooked();
         assertAll(
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(isBookedOfUnBookedTime).isFalse(),

@@ -1,9 +1,8 @@
 package roomescape.service.reservation.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.reservation.Reservation;
-
 import java.time.LocalDate;
+import roomescape.domain.reservation.Reservation;
 
 public record ReservationResponse(
         long id,

@@ -1,5 +1,10 @@
 package roomescape.infrastructure;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,12 +16,6 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @Repository
 public class ReservationJdbcRepository implements ReservationRepository {
     private static final String TABLE_NAME = "reservation";
@@ -24,9 +23,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = new ReservationTime(resultSet.getLong("time_id"), resultSet.getString("start_at"));
-        Theme theme = new Theme(resultSet.getLong("theme_id"), resultSet.getString("theme_name"), resultSet.getString("description"), resultSet.getString("thumbnail"));
-        Member member = new Member(resultSet.getLong("member_id"), resultSet.getString("member_name"), resultSet.getString("email"), resultSet.getString("password"), resultSet.getString("role"));
+        ReservationTime reservationTime = new ReservationTime(resultSet.getLong("time_id"),
+                resultSet.getString("start_at"));
+        Theme theme = new Theme(resultSet.getLong("theme_id"), resultSet.getString("theme_name"),
+                resultSet.getString("description"), resultSet.getString("thumbnail"));
+        Member member = new Member(resultSet.getLong("member_id"), resultSet.getString("member_name"),
+                resultSet.getString("email"), resultSet.getString("password"), resultSet.getString("role"));
         Reservation reservation = new Reservation(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("date"),

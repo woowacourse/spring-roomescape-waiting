@@ -1,9 +1,8 @@
 package roomescape.domain.reservation;
 
-import roomescape.domain.member.Member;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.member.Member;
 
 public class Reservation {
     private static final long NO_ID = 0;

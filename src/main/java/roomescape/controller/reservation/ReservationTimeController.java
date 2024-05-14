@@ -1,16 +1,22 @@
 package roomescape.controller.reservation;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.reservation.ReservationTimeService;
 import roomescape.service.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.service.reservation.dto.ReservationTimeCreateRequest;
 import roomescape.service.reservation.dto.ReservationTimeReadRequest;
 import roomescape.service.reservation.dto.ReservationTimeResponse;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/times")
@@ -22,7 +28,8 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> createReservationTime(@RequestBody @Valid ReservationTimeCreateRequest reservationTimeCreateRequest) {
+    public ResponseEntity<ReservationTimeResponse> createReservationTime(
+            @RequestBody @Valid ReservationTimeCreateRequest reservationTimeCreateRequest) {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeCreateRequest);
         return ResponseEntity.created(URI.create("/times/" + reservationTimeResponse.id()))
                 .body(reservationTimeResponse);
@@ -34,8 +41,9 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public List<AvailableReservationTimeResponse> findAvailableReservationTimes(@RequestParam(value = "date") String date,
-                                                                                @RequestParam(value = "themeId") long themeId) {
+    public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
+            @RequestParam(value = "date") String date,
+            @RequestParam(value = "themeId") long themeId) {
         ReservationTimeReadRequest reservationTimeReadRequest = new ReservationTimeReadRequest(date, themeId);
         return reservationTimeService.findAvailableTimes(reservationTimeReadRequest);
     }

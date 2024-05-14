@@ -1,5 +1,8 @@
 package roomescape.infrastructure;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,25 +11,20 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @Repository
 public class MemberJdbcRepository implements MemberRepository {
     private static final String TABLE_NAME = "member";
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final RowMapper<Member> rowMapper = (resultSet, rowNum) -> {
-        Member member = new Member(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("email"),
-                resultSet.getString("password"),
-                resultSet.getString("role"));
-        return member;
-    };
+    private final RowMapper<Member> rowMapper = (resultSet, rowNum) ->
+            new Member(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("email"),
+                    resultSet.getString("password"),
+                    resultSet.getString("role")
+            );
 
     public MemberJdbcRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

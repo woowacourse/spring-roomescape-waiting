@@ -1,17 +1,16 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.Embeddable;
-import roomescape.exception.InvalidReservationException;
-
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import roomescape.exception.InvalidReservationException;
 
 @Embeddable
 public class Thumbnail {
     private static final String THUMBNAIL_REGEX = "^$|(https?|ftp)://.*\\.(jpeg|jpg|png|gif|bmp)$";
 
-    private  String value;
+    private String value;
 
     public Thumbnail() {
     }
@@ -36,8 +35,12 @@ public class Thumbnail {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Thumbnail that = (Thumbnail) o;
         return Objects.equals(value, that.value);
     }

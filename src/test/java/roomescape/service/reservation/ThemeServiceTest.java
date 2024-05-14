@@ -1,5 +1,11 @@
 package roomescape.service.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +15,15 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.*;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
 import roomescape.service.reservation.dto.ThemeRequest;
 import roomescape.service.reservation.dto.ThemeResponse;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql(scripts = {"classpath:truncate-with-guests.sql"})
@@ -40,7 +44,8 @@ class ThemeServiceTest {
     @Test
     void create() {
         //given
-        ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
 
         //when
         ThemeResponse themeResponse = themeService.create(themeRequest);
@@ -53,10 +58,12 @@ class ThemeServiceTest {
     @Test
     void cannotCreateByDuplicatedName() {
         //given
-        Theme theme = new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        Theme theme = new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         themeRepository.save(theme);
 
-        ThemeRequest themeRequest = new ThemeRequest(theme.getName(), "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        ThemeRequest themeRequest = new ThemeRequest(theme.getName(), "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
 
         //when&then
         assertThatThrownBy(() -> themeService.create(themeRequest))
@@ -87,7 +94,7 @@ class ThemeServiceTest {
         themeService.deleteById(theme.getId());
 
         //then
-        assertThat(themeService.findAll()).hasSize(0);
+        assertThat(themeService.findAll()).isEmpty();
     }
 
     @DisplayName("예약이 존재하는 테마를 삭제하면 예외가 발생한다.")
@@ -116,9 +123,15 @@ class ThemeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime("21:25"));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
 
-        reservationRepository.save(new Reservation(LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE), member, reservationTime, theme1));
-        reservationRepository.save(new Reservation(LocalDate.now().minusDays(7).format(DateTimeFormatter.ISO_DATE), member, reservationTime, theme2));
-        reservationRepository.save(new Reservation(LocalDate.now().minusDays(8).format(DateTimeFormatter.ISO_DATE), member, reservationTime, theme3));
+        reservationRepository.save(
+                new Reservation(LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE), member,
+                        reservationTime, theme1));
+        reservationRepository.save(
+                new Reservation(LocalDate.now().minusDays(7).format(DateTimeFormatter.ISO_DATE), member,
+                        reservationTime, theme2));
+        reservationRepository.save(
+                new Reservation(LocalDate.now().minusDays(8).format(DateTimeFormatter.ISO_DATE), member,
+                        reservationTime, theme3));
 
         //when
         List<ThemeResponse> result = themeService.findPopularThemes();
@@ -128,7 +141,8 @@ class ThemeServiceTest {
     }
 
     private Theme createTheme(String name) {
-        Theme theme = new Theme(name, "우테코 레벨2를 탈출하는 내용입니다.", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        Theme theme = new Theme(name, "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return themeRepository.save(theme);
     }
 }

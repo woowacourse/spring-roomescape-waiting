@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.exception.InvalidReservationException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class ThemeNameTest {
     @DisplayName("이름은 1자 미만, 20자 초과일 경우 예외를 발생시킨다.")

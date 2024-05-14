@@ -1,9 +1,8 @@
 package roomescape.domain.member;
 
-import roomescape.exception.InvalidMemberException;
-
 import java.util.List;
 import java.util.Optional;
+import roomescape.exception.InvalidMemberException;
 
 public interface MemberRepository {
     Member save(Member member);
