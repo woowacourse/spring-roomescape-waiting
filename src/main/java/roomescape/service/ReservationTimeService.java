@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
+import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationTimeBookedRequest;
 import roomescape.service.dto.ReservationTimeBookedResponse;
 import roomescape.service.dto.ReservationTimeResponse;
 import roomescape.service.dto.ReservationTimeSaveRequest;
-import roomescape.exception.RoomEscapeBusinessException;
 
 @Service
 public class ReservationTimeService {
@@ -61,24 +62,22 @@ public class ReservationTimeService {
     }
 
     private void validateDeleteTime(Long id) {
-        if (reservationTimeRepository.findById(id).isEmpty()) {
-            throw new RoomEscapeBusinessException("존재하지 않는 시간입니다.");
-        }
+        ReservationTime foundTime = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
 
-        if (reservationRepository.existByTimeId(id)) {
+        if (reservationRepository.existByTime(foundTime)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
         }
     }
 
     public List<ReservationTimeBookedResponse> getTimesWithBooked(
             ReservationTimeBookedRequest reservationTimeBookedRequest) {
-        if (themeRepository.findById(reservationTimeBookedRequest.themeId()).isEmpty()) {
-            throw new IllegalArgumentException("존재하지 않는 테마입니다.");
-        }
+        Theme foundTheme = themeRepository.findById(reservationTimeBookedRequest.themeId())
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
 
-        List<ReservationTime> bookedTimes = reservationRepository.findTimeByDateAndThemeId(
+        List<ReservationTime> bookedTimes = reservationRepository.findTimeByDateAndTheme(
                 reservationTimeBookedRequest.date(),
-                reservationTimeBookedRequest.themeId()
+                foundTheme
         );
         List<ReservationTime> times = reservationTimeRepository.findAll();
 

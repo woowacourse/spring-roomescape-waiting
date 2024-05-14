@@ -53,8 +53,8 @@ public class ReservationService {
     }
 
     private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existByDateAndTimeIdAndThemeId(reservation.getDate(),
-                reservation.getTimeId(), reservation.getThemeId());
+        boolean isReservationExist = reservationRepository.existByDateAndTimeAndTheme(reservation.getDate(),
+                reservation.getTime(), reservation.getTheme());
 
         if (isReservationExist) {
             throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
@@ -76,11 +76,17 @@ public class ReservationService {
             return toReservationResponse(reservations);
         }
 
-        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeIdAndMemberId(
+        Theme foundTheme = themeRepository.findById(reservationConditionRequest.themeId())
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
+
+        Member foundMember = memberRepository.findById(reservationConditionRequest.memberId())
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 회원입니다."));
+
+        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeAndMember(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),
-                reservationConditionRequest.themeId(),
-                reservationConditionRequest.memberId()
+                foundTheme,
+                foundMember
         );
 
         return toReservationResponse(reservations);

@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
+import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.PopularThemeRequest;
 import roomescape.service.dto.ThemeResponse;
 import roomescape.service.dto.ThemeSaveRequest;
-import roomescape.exception.RoomEscapeBusinessException;
 
 @Service
 public class ThemeService {
@@ -47,12 +47,12 @@ public class ThemeService {
     }
 
     private void validateDeleteTheme(Long id) {
-        if (reservationRepository.existByThemeId(id)) {
+        Theme foundTheme = themeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
+
+        if (reservationRepository.existByTheme(foundTheme)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 테마입니다.");
         }
 
-        if (themeRepository.findById(id).isEmpty()) {
-            throw new RoomEscapeBusinessException("존재하지 않는 테마입니다.");
-        }
     }
 }
