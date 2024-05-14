@@ -9,35 +9,42 @@ import static roomescape.fixture.ThemeFixture.getTheme1;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.dao.FakeMemberReservationDao;
-import roomescape.reservation.dao.FakeReservationDao;
-import roomescape.reservation.dao.FakeThemeDao;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.util.ServiceTest;
+
 
 @DisplayName("테마 로직 테스트")
-class ThemeServiceTest {
+class ThemeServiceTest extends ServiceTest {
+    @Autowired
     ReservationRepository reservationRepository;
+    @Autowired
     ThemeRepository themeRepository;
+    @Autowired
+    ReservationTimeRepository timeRepository;
+    @Autowired
     MemberReservationRepository memberReservationRepository;
+    @Autowired
     ThemeService themeService;
 
-    @BeforeEach
-    void setUp() {
-        reservationRepository = new FakeReservationDao();
-        memberReservationRepository = new FakeMemberReservationDao();
-        themeRepository = new FakeThemeDao(memberReservationRepository);
-        themeService = new ThemeService(themeRepository, reservationRepository);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        reservationRepository = new FakeReservationDao();
+//        memberReservationRepository = new FakeMemberReservationDao();
+//        themeRepository = new FakeThemeDao(memberReservationRepository);
+//        themeService = new ThemeService(themeRepository, reservationRepository);
+//    }
 
     @DisplayName("테마 조회에 성공한다.")
     @Test
@@ -91,8 +98,9 @@ class ThemeServiceTest {
     @Test
     void deleteThemeWithReservation() {
         //given
+        ReservationTime time = timeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
-        reservationRepository.save(getNextDayReservation(getNoon(), theme));
+        reservationRepository.save(getNextDayReservation(time, theme));
 
         //when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))

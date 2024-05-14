@@ -1,14 +1,25 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 
+@Entity
 public class Theme {
-    private final Long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private String description;
     private String thumbnail;
+
+    public Theme() {
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validate(name, description, thumbnail);

@@ -11,22 +11,17 @@ import static roomescape.fixture.ThemeFixture.getTheme1;
 
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberSignUp;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
-import roomescape.reservation.dao.FakeMemberDao;
-import roomescape.reservation.dao.FakeMemberReservationDao;
-import roomescape.reservation.dao.FakeReservationDao;
-import roomescape.reservation.dao.FakeReservationTimeDao;
-import roomescape.reservation.dao.FakeThemeDao;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -34,25 +29,32 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.util.ServiceTest;
 
 @DisplayName("예약 시간 로직 테스트")
-class ReservationTimeServiceTest {
+class ReservationTimeServiceTest extends ServiceTest {
+    @Autowired
     ReservationRepository reservationRepository;
+    @Autowired
     ReservationTimeRepository reservationTimeRepository;
+    @Autowired
     ThemeRepository themeRepository;
+    @Autowired
     MemberRepository memberRepository;
+    @Autowired
     MemberReservationRepository memberReservationRepository;
+    @Autowired
     ReservationTimeService reservationTimeService;
 
-    @BeforeEach
-    void setUp() {
-        memberRepository = new FakeMemberDao();
-        reservationRepository = new FakeReservationDao();
-        reservationTimeRepository = new FakeReservationTimeDao(reservationRepository);
-        memberReservationRepository = new FakeMemberReservationDao();
-        themeRepository = new FakeThemeDao(memberReservationRepository);
-        reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        memberRepository = new FakeMemberDao();
+//        reservationRepository = new FakeReservationDao();
+//        reservationTimeRepository = new FakeReservationTimeDao(reservationRepository);
+//        memberReservationRepository = new FakeMemberReservationDao();
+//        themeRepository = new FakeThemeDao(memberReservationRepository);
+//        reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository);
+//    }
 
     @DisplayName("예약 시간 생성에 성공한다.")
     @Test
@@ -100,7 +102,8 @@ class ReservationTimeServiceTest {
     void deleteTimeWithReservation() {
         //given
         ReservationTime time = reservationTimeRepository.save(getNoon());
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, getTheme1()));
+        Theme theme = themeRepository.save(getTheme1());
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.delete(reservation.getId()))
@@ -132,9 +135,9 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
         Member member = memberRepository.save(
-                new MemberSignUp(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
+                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
                         getMemberChoco().getRole()));
-        memberReservationRepository.save(member, reservation);
+        memberReservationRepository.save(new MemberReservation(member, reservation));
 
         //when
         List<AvailableTimeResponse> availableTimes

@@ -54,14 +54,14 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (memberReservationRepository.existBy(date, reservationTime, theme)) {
+        if (memberReservationRepository.existsByReservation_DateAndReservationTimeAndReservationTheme(date, reservationTime, theme)) {
             throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
         }
 
         Reservation reservation = reservationRepository.save(Reservation.create(date, reservationTime, theme));
-        long memberReservationId = memberReservationRepository.save(member, reservation);
+        MemberReservation memberReservation = memberReservationRepository.save(new MemberReservation(member, reservation));
 
-        return ReservationResponse.from(memberReservationId, reservation, member);
+        return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
     @Transactional
@@ -70,14 +70,14 @@ public class ReservationService {
         Theme theme = getTheme(memberReservationRequest.themeId());
         LocalDate date = LocalDate.parse(memberReservationRequest.date());
 
-        if (reservationRepository.existsBy(date, reservationTime, theme)) {
-            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
-        }
+//        if (reservationRepository.existsBy(date, reservationTime, theme) <= 0) {
+//            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
+//        }
 
         Member member = memberRepository.findById(memberReservationRequest.memberId()).orElseThrow();
         Reservation reservation = reservationRepository.save(new Reservation(date, reservationTime, theme));
-        long memberReservationId = memberReservationRepository.save(member, reservation);
-        return ReservationResponse.from(memberReservationId, reservation, member);
+        MemberReservation memberReservation = memberReservationRepository.save(new MemberReservation(member, reservation));
+        return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
     public void deleteMemberReservation(Member member, long memberReservationId) {
@@ -90,8 +90,8 @@ public class ReservationService {
 
     @Transactional
     public void delete(long reservationId) {
-        memberReservationRepository.deleteByReservationId(reservationId);
-        reservationRepository.delete(reservationId);
+        memberReservationRepository.deleteByReservation_Id(reservationId);
+        reservationRepository.deleteById(reservationId);
     }
 
     private ReservationTime getReservationTime(long timeId) {

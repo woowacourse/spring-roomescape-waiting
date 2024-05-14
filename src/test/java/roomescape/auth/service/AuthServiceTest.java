@@ -4,37 +4,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
 
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.auth.service.jwt.FakeTokenProvider;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberSignUp;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.dao.FakeMemberDao;
+import roomescape.util.ServiceTest;
 
 @DisplayName("회원 로직 테스트")
-class AuthServiceTest {
-
+class AuthServiceTest extends ServiceTest {
+    @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
     TokenProvider tokenProvider;
+
+    @Autowired
     AuthService authService;
 
-    @BeforeEach
-    void setUp() {
-        memberRepository = new FakeMemberDao();
-        tokenProvider = new FakeTokenProvider();
-        authService = new AuthService(memberRepository, tokenProvider);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        memberRepository = new FakeMemberDao();
+//        tokenProvider = new FakeTokenProvider();
+//        authService = new AuthService(memberRepository, tokenProvider);
+//    }
 
     @DisplayName("토큰 생성에 성공한다.")
     @Test
@@ -42,7 +46,7 @@ class AuthServiceTest {
         //given
         String password = "1234";
         Member member = memberRepository.save(
-                new MemberSignUp(getMemberChoco().getName(), getMemberChoco().getEmail(), password,
+                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), password,
                         getMemberChoco().getRole()));
         LoginRequest loginRequest = new LoginRequest(member.getEmail(), password);
 
@@ -60,8 +64,8 @@ class AuthServiceTest {
         //given
         String password = "1234";
         Member member = memberRepository.save(
-                new MemberSignUp(getMemberChoco().getName(), getMemberChoco().getEmail(), password,
-                        getMemberChoco().getRole()));
+                new Member(getMemberClover().getName(), getMemberClover().getEmail(), password,
+                        getMemberClover().getRole()));
         String accessToken = tokenProvider.createAccessToken(member.getEmail());
 
         //when
@@ -89,17 +93,17 @@ class AuthServiceTest {
         //given
         String password = "1234";
         SignUpRequest signUpRequest =
-                new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), password);
+                new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), password);
 
         //when
         authService.signUp(signUpRequest);
 
         //then
-        Optional<Member> memberOptional = memberRepository.findBy(getMemberChoco().getEmail());
+        Optional<Member> memberOptional = memberRepository.findByEmail(getMemberClover().getEmail());
 
         assertAll(
                 () -> assertThat(memberOptional).isNotNull(),
-                () -> assertThat(memberOptional.get().getName()).isEqualTo(getMemberChoco().getName())
+                () -> assertThat(memberOptional.get().getName()).isEqualTo(getMemberClover().getName())
         );
     }
 
@@ -109,7 +113,7 @@ class AuthServiceTest {
         //given
         String password = "1234";
         memberRepository.save(
-                new MemberSignUp(getMemberChoco().getName(), getMemberChoco().getEmail(), password, Role.USER));
+                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), password, Role.USER));
         SignUpRequest signUpRequest =
                 new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), password);
 

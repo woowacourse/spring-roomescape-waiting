@@ -6,23 +6,26 @@ import static roomescape.fixture.MemberFixture.getMemberClover;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberSignUp;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.dao.FakeMemberDao;
+import roomescape.util.ServiceTest;
 
-class MemberServiceTest {
+class MemberServiceTest  extends ServiceTest {
+    @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
     MemberService memberService;
 
-    @BeforeEach
-    void setUp() {
-        memberRepository = new FakeMemberDao();
-        memberService = new MemberService(memberRepository);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        memberRepository = new FakeMemberDao();
+//        memberService = new MemberService(memberRepository);
+//    }
 
     @DisplayName("사용자 생성에 성공한다.")
     @Test
@@ -45,9 +48,7 @@ class MemberServiceTest {
         //given
         String password = "1234";
         Member memberClover = getMemberClover();
-        MemberSignUp memberSignUp = new MemberSignUp(
-                memberClover.getName(), memberClover.getEmail(), password, Role.USER);
-        Member member = memberRepository.save(memberSignUp);
+        Member member = memberRepository.save(memberClover);
 
         //when
         Member foundMember = memberService.findById(member.getId());

@@ -53,8 +53,8 @@ class ReservationControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-        memberService.create(
-                new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234"));
+//        memberService.create(
+//                new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), "1234"));
         token = tokenProvider.createAccessToken(getMemberChoco().getEmail());
     }
 

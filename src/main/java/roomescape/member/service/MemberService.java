@@ -7,7 +7,6 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberSignUp;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 
@@ -26,8 +25,7 @@ public class MemberService {
     }
 
     public MemberResponse create(SignUpRequest signUpRequest) {
-        Member member = memberRepository.save(
-                new MemberSignUp(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
+        Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
         return new MemberResponse(member.getId(), member.getName());
     }
 

@@ -1,19 +1,24 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 
+@Embeddable
 public class Name {
     private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9]+(?:\\s+[a-zA-Z가-힣0-9]+)*$");
     private static final int MAX_NAME_LENGTH = 10;
 
-    private final String value;
+    private String name;
 
     public Name(String name) {
         validate(name);
-        this.value = name;
+        this.name = name;
+    }
+
+    public Name() {
     }
 
     private void validate(String name) {
@@ -23,7 +28,7 @@ public class Name {
     }
 
     public String getName() {
-        return value;
+        return name;
     }
 
     @Override
@@ -46,7 +51,7 @@ public class Name {
     @Override
     public String toString() {
         return "Name{" +
-                "name='" + value + '\'' +
+                "name='" + name + '\'' +
                 '}';
     }
 }
