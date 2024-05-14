@@ -48,4 +48,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         return findAllByThemeIdAndMemberIdAndDateBetween(condition.themeId(), condition.memberId(),
                 condition.dateFrom(), condition.dateTo());
     }
+
+    List<Reservation> findAllByMemberId(Long id);
 }

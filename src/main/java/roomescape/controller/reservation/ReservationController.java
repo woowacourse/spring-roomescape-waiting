@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
+import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
@@ -35,6 +36,15 @@ public class ReservationController {
     public List<ReservationResponse> getReservations() {
         return reservationService.getReservations()
                 .stream().map(ReservationResponse::from)
+                .toList();
+    }
+
+    @GetMapping("/mine")
+    public List<MyReservationResponse> getMineReservation(final LoginMember member) {
+        List<Reservation> reservations = reservationService.getReservationsByMember(member);
+        return reservations.stream()
+                .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
+                        reservation.getDate(), reservation.getTime().getStartAt(), "예약"))
                 .toList();
     }
 

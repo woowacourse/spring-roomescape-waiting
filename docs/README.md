@@ -298,7 +298,7 @@ Content-Type: application/json
 **request**
 
 ```http request
-GET /reservations-mine HTTP/1.1
+GET /reservations/mine HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 host: localhost:8080
 ```

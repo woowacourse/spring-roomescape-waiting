@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Member;
@@ -87,5 +88,9 @@ public class ReservationService {
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
         }
+    }
+
+    public List<Reservation> getReservationsByMember(final LoginMember member) {
+        return reservationRepository.findAllByMemberId(member.id());
     }
 }

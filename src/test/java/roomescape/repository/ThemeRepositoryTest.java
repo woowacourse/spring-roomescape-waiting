@@ -21,7 +21,6 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("모든 테마 목록을 조회한다.")
     void findAll() {
-        // given
         final List<Theme> expected = List.of(
                 new Theme(1L, null, null, null),
                 new Theme(2L, null, null, null),
