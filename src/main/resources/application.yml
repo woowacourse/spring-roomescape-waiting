@@ -8,6 +8,14 @@ spring:
   datasource:
     url: jdbc:h2:mem:database
     driverClassName: org.h2.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
 
 logging:
   level:
@@ -18,4 +26,3 @@ security:
   jwt:
     secret-key: abcdefghijklmnopqrstuvwxyz0123456789
     expiration-time: 3600000 # 1 hour
-
