@@ -20,7 +20,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @SpringBootTest
-class JdbcTemplateReservationRepositoryTest {
+class JpaReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -60,11 +60,10 @@ class JdbcTemplateReservationRepositoryTest {
     void findAll() {
         List<Reservation> beforeSave = reservationRepository.findAll();
         reservationRepository.save(DEFAULT_RESERVATION);
-        reservationRepository.save(DEFAULT_RESERVATION);
 
         List<Reservation> afterSave = reservationRepository.findAll();
         Assertions.assertThat(afterSave.size())
-                .isEqualTo(beforeSave.size() + 2);
+                .isEqualTo(beforeSave.size() + 1);
     }
 
     @Test
