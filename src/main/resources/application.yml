@@ -6,6 +6,14 @@ spring:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:roomescape
     username: sa
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
 
 jwt:
   secret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno

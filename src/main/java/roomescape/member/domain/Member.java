@@ -1,12 +1,23 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
+
+@Entity
 public class Member {
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault(value = "'USER'")
+    private Role role;
+
+    public Member() {
+    }
 
     public Member(Long id, String name, String email, String password, Role role) {
         validateNotNull(name, email, password, role);
