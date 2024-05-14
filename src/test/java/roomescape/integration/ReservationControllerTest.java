@@ -37,7 +37,6 @@ import roomescape.service.JwtGenerator;
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ReservationControllerTest {
 
-
     @LocalServerPort
     int port;
 
@@ -128,6 +127,17 @@ public class ReservationControllerTest {
         void getReservationTest() {
             RestAssured.given().log().all()
                     .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(10));
+        }
+
+        @DisplayName("자신의 모든 예약을 조회할 수 있다.")
+        @Test
+        void getMembersReservationTest() {
+            RestAssured.given().log().all()
+                    .cookie("token",token)
+                    .when().get("/member/reservations")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(10));

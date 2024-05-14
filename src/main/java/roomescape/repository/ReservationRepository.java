@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.domain.Duration;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
+import roomescape.dto.ReservationDetailResponse;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -28,4 +29,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
+
+    List<Reservation> findAllByMemberId(long userId);
 }

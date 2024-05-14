@@ -17,6 +17,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
@@ -86,6 +87,8 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
     }
 
+
+
     public List<ReservationResponse> findAll() {
         Reservations reservations = new Reservations(reservationRepository.findAll());
         return reservations.getReservations().stream()
@@ -103,5 +106,11 @@ public class ReservationService {
 
     public void delete(long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
+        return reservationRepository.findAllByMemberId(userId).stream()
+                .map(ReservationDetailResponse::from)
+                .toList();
     }
 }

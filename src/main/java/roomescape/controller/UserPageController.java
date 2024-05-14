@@ -14,4 +14,9 @@ public class UserPageController {
     public String bestThemePage() {
         return "index";
     }
+
+    @GetMapping("/reservation-mine")
+    public String myReservationPage(){
+        return "reservation-mine";
+    }
 }

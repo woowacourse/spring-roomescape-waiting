@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.LoginMember;
 import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -44,6 +45,11 @@ public class ReservationController {
     @GetMapping("/reservations")
     public List<ReservationResponse> findAllReservations() {
         return reservationService.findAll();
+    }
+
+    @GetMapping("/member/reservations")
+    public List<ReservationDetailResponse> findMemberReservations(@Authenticated LoginMember loginMember) {
+        return reservationService.findAllByMemberId(loginMember.getId());
     }
 
     @GetMapping("/reservations/search")
