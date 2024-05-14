@@ -1,11 +1,17 @@
 package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
+@Embeddable
 public class MemberPassword {
 
-    private final String password;
+    private String password;
+
+    public MemberPassword() {
+    }
 
     public MemberPassword(String password) {
         validate(password);
@@ -20,6 +26,10 @@ public class MemberPassword {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

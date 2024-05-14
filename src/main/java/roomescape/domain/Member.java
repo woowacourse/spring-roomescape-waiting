@@ -1,13 +1,33 @@
 package roomescape.domain;
 
+import jakarta.persistence.*;
+
+import java.util.Set;
+
+@Entity
 public class Member {
 
-    private final Long id;
-    private final MemberName name;
-    private final MemberEmail email;
-    private final MemberPassword password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private final MemberRole role;
+    @Embedded
+    private MemberName name;
+
+    @Embedded
+    private MemberEmail email;
+
+    @Embedded
+    private MemberPassword password;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservations;
+
+    public Member() {
+    }
 
     public Member(MemberName name, MemberEmail email, MemberPassword password, MemberRole role) {
         this(null, name, email, password, role);

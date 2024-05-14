@@ -1,11 +1,22 @@
 package roomescape.domain;
 
+import jakarta.persistence.*;
+
+import java.util.Set;
+
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private Set<Reservation> reservations;
+    public Theme() {
+    }
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);

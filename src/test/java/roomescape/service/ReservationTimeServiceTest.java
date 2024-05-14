@@ -1,12 +1,6 @@
 package roomescape.service;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +10,19 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.infrastructure.ReservationRepository;
+import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.service.exception.ReservationExistsException;
 import roomescape.service.request.ReservationTimeAppRequest;
 import roomescape.service.response.ReservationTimeAppResponse;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -42,7 +43,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = new ReservationTime(timeId, startAt);
 
         when(reservationTimeRepository.save(any(ReservationTime.class)))
-            .thenReturn(reservationTime);
+                .thenReturn(reservationTime);
 
         ReservationTimeAppResponse actual = reservationTimeService.save(new ReservationTimeAppRequest(startAt));
         ReservationTimeAppResponse expected = ReservationTimeAppResponse.from(reservationTime);
@@ -56,7 +57,7 @@ class ReservationTimeServiceTest {
     @NullAndEmptySource
     void save_IllegalTimeFormat(String time) {
         assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeAppRequest(time)))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("실패: 이미 존재하는 시간을 추가할 수 없다.")
@@ -64,21 +65,21 @@ class ReservationTimeServiceTest {
     void save_TimeAlreadyExists() {
         String rawTime = "10:00";
 
-        when(reservationTimeRepository.isStartTimeExists(LocalTime.parse(rawTime)))
-            .thenReturn(true);
+        when(reservationTimeRepository.existsByStartAt(LocalTime.parse(rawTime)))
+                .thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.save(new ReservationTimeAppRequest(rawTime)))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("실패: 시간을 사용하는 예약이 존재하는 경우 시간을 삭제할 수 없다.")
     @Test
     void delete_ReservationExists() {
         long timeId = 1L;
-        when(reservationRepository.isTimeIdExists(timeId))
-            .thenReturn(true);
+        when(reservationRepository.existsByTimeId(timeId))
+                .thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.delete(timeId))
-            .isInstanceOf(ReservationExistsException.class);
+                .isInstanceOf(ReservationExistsException.class);
     }
 }

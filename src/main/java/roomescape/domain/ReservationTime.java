@@ -1,12 +1,24 @@
 package roomescape.domain;
 
+import jakarta.persistence.*;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.Set;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
+
+    @OneToMany(mappedBy = "time")
+    private Set<Reservation> reservations;
+
+    public ReservationTime() {
+    }
 
     public ReservationTime(String startAt) {
         this(null, startAt);
