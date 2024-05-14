@@ -55,8 +55,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("정상적인 예약 요청을 받아서 저장한다.")
     void shouldReturnReservationResponseWhenValidReservationRequestSave() {
-        ReservationTime time = reservationTimeRepository.create(new ReservationTime(LocalTime.of(12, 0)));
-        Theme theme = themeRepository.create(new Theme("themeName", "desc", "url"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(new Theme("themeName", "desc", "url"));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         ReservationRequest reservationRequest = new ReservationRequest(
                 member.getId(),
@@ -74,7 +74,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간으로 예약을 생성시 예외가 발생한다.")
     void shouldReturnIllegalArgumentExceptionWhenNotFoundReservationTime() {
-        Theme savedTheme = themeRepository.create(new Theme("test", "test", "test"));
+        Theme savedTheme = themeRepository.save(new Theme("test", "test", "test"));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -90,7 +90,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 테마로 예약을 생성시 예외를 반환한다.")
     void shouldThrowIllegalArgumentExceptionWhenNotFoundTheme() {
-        ReservationTime time = reservationTimeRepository.create(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -103,12 +103,11 @@ class ReservationServiceTest {
                 .hasMessage("존재하지 않는 테마입니다.");
     }
 
-
     @Test
     @DisplayName("중복된 예약을 하는 경우 예외를 반환한다.")
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
-        ReservationTime time = reservationTimeRepository.create(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.create(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -116,7 +115,7 @@ class ReservationServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationRepository.create(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
+        reservationRepository.save(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
 
         assertThatCode(() -> reservationService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -126,8 +125,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("과거 시간을 예약하는 경우 예외를 반환한다.")
     void shouldThrowsIllegalArgumentExceptionWhenReservationDateIsBeforeCurrentDate() {
-        ReservationTime time = reservationTimeRepository.create(new ReservationTime(LocalTime.of(12, 0)));
-        Theme theme = themeRepository.create(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -190,8 +189,8 @@ class ReservationServiceTest {
     }
 
     private Reservation saveReservation() {
-        ReservationTime time = reservationTimeRepository.create(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.create(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         Member member = memberRepository.save(MemberFixture.createMember("아루"));
         Reservation reservation = new Reservation(
                 member,
@@ -200,6 +199,6 @@ class ReservationServiceTest {
                 theme,
                 LocalDateTime.now(clock)
         );
-        return reservationRepository.create(reservation);
+        return reservationRepository.save(reservation);
     }
 }

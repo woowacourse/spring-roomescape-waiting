@@ -15,7 +15,7 @@ values (1, '12:00:00'),
        (4, '15:00:00')
 ;
 
-insert into theme (id, name, description, thumbnail)
+insert into theme (id, name, description, thumbnail_url)
 values (1, '테마1', '테마1 설명',
         'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
        (2, '테마2', '테마2 설명',

@@ -4,20 +4,19 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
 
-public interface ReservationTimeRepository {
-
-    ReservationTime create(ReservationTime reservationTime);
-
-    Optional<ReservationTime> findById(long id);
-
-    List<ReservationTime> findAll();
-
-    void deleteById(long id);
+public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
     boolean existsByStartAt(LocalTime time);
 
+    @Query("""
+            select new roomescape.domain.reservation.TimeSlot(rt, (count(r.id) > 0))
+            from ReservationTime as rt left join Reservation as r
+            on rt = r.time and r.date = :date and r.theme.id = :themeId
+            group by rt.id, rt.startAt
+            """)
     List<TimeSlot> getReservationTimeAvailabilities(LocalDate date, long themeId);
 
     default ReservationTime getById(long id) {
