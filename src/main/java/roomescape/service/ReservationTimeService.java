@@ -26,14 +26,12 @@ public class ReservationTimeService {
     }
 
     public ReservationTime save(String startAt) {
-        ReservationTime newReservationTime = new ReservationTime(startAt);
-        validateDuplication(newReservationTime.getStartAt());
-
-        return reservationTimeRepository.save(newReservationTime);
+        validateDuplication(startAt);
+        return reservationTimeRepository.save(new ReservationTime(startAt));
     }
 
-    private void validateDuplication(LocalTime parsedTime) {
-        if (reservationTimeRepository.existsByStartAt(new Time(parsedTime.toString()))) { // TODO: 인자 구조 개선
+    private void validateDuplication(String rawTime) {
+        if (reservationTimeRepository.existsByStartAt(new Time(rawTime))) {
             throw new RoomescapeException("이미 존재하는 시간은 추가할 수 없습니다.");
         }
     }
@@ -50,9 +48,9 @@ public class ReservationTimeService {
     }
 
     public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
-        // TODO: 인자 구조 개선
-        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new Date(date.toString()),
-            themeId);
+        List<Reservation> reservations =
+            reservationRepository.findAllByDateAndThemeId(new Date(date.toString()), themeId);
+
         List<ReservationTime> reservedTimes = reservations.stream()
             .map(Reservation::getTime)
             .toList();
