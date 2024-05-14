@@ -16,6 +16,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     int countByTime(ReservationTime time);
 
-    @Query("select r.time.id from Reservation r where r.date = :date and r.theme = :theme")
+    @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :date AND r.theme = :theme")
     List<Long> findAllTimeIdsByDateAndThemeId(@Param(value = "date") LocalDate date, @Param(value = "theme")Theme theme);
 }
