@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 
 @SpringBootTest
-class JdbcTemplateMemberRepositoryTest {
+class JpaMemberRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired

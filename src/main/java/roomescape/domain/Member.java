@@ -4,21 +4,37 @@ import static roomescape.domain.Role.MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
 import static roomescape.exception.ExceptionType.INVALID_EMAIL_FORMAT;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import roomescape.exception.RoomescapeException;
 
+@Entity
 public class Member {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@" +
             "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
     //Todo 비밀 번호 형태인지 검증하는 역할을 별도의 도메인으로 분리 : Password 클래스 생성?
     private static final Pattern SHA_256_PATTERN = Pattern.compile("[a-fA-F0-9]{64}");
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String encryptedPassword;
-    private final Role role;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    @Column(name = "password")
+    private String encryptedPassword;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    protected Member() {
+    }
 
     public Member(String name, String email, String encryptedPassword) {
         this(null, name, email, encryptedPassword, MEMBER);
