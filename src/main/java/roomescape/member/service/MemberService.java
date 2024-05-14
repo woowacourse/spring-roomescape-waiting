@@ -1,15 +1,13 @@
 package roomescape.member.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Spliterator;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.controller.dto.request.SignupRequest;
 import roomescape.member.controller.dto.response.MemberResponse;
 import roomescape.member.controller.dto.response.SignupResponse;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 
@@ -21,7 +19,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Member findByEmail(final String email) {
+    public Member findByEmail(final Email email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(
                         "[ERROR] (email : " + email + ") 에 대한 사용자가 존재하지 않습니다.")
