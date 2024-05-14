@@ -1,5 +1,9 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -7,18 +11,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.TimeSlotRequest;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class TimeDao {
-    private static final RowMapper<TimeSlot> rowMapper =
-            (resultSet, rowNum) -> new TimeSlot(
+    private static final RowMapper<ReservationTime> rowMapper =
+            (resultSet, rowNum) -> new ReservationTime(
                     resultSet.getLong("id"),
                     resultSet.getString("start_at")
             );
@@ -34,12 +33,12 @@ public class TimeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public List<TimeSlot> findAll() {
+    public List<ReservationTime> findAll() {
         String sql = "select id, start_at from reservation_time";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Optional<TimeSlot> findById(final Long id) {
+    public Optional<ReservationTime> findById(final Long id) {
         String sql = "select id, start_at from reservation_time where id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, id));
@@ -65,7 +64,7 @@ public class TimeDao {
         return jdbcTemplate.queryForObject(sql, Integer.class, localTime) != 0;
     }
 
-    public List<TimeSlot> findByDateAndThemeId(final LocalDate date, final Long themeId) {
+    public List<ReservationTime> findByDateAndThemeId(final LocalDate date, final Long themeId) {
         String sql = """
                 SELECT
                     t.id as time_id,
@@ -75,6 +74,7 @@ public class TimeDao {
                 INNER JOIN theme as th ON r.theme_id = th.id where date = ? and theme_id = ?
                 """;
         return jdbcTemplate.query(sql, (rowMapper, rowNumber) ->
-                new TimeSlot(rowMapper.getLong("time_id"), LocalTime.parse(rowMapper.getString("time_value"))), date, themeId);
+                        new ReservationTime(rowMapper.getLong("time_id"), LocalTime.parse(rowMapper.getString("time_value"))),
+                date, themeId);
     }
 }

@@ -6,15 +6,15 @@ import java.time.LocalTime;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 @Entity
-public class TimeSlot {
+public class ReservationTime {
     @Id
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot() {
+    public ReservationTime() {
     }
 
-    public TimeSlot(Long id, LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         if (startAt == null) {
             throw new EmptyValueNotAllowedException("startAt");
         }
@@ -23,11 +23,11 @@ public class TimeSlot {
         this.startAt = startAt;
     }
 
-    public TimeSlot(Long id, String startAt) {
+    public ReservationTime(Long id, String startAt) {
         this(id, LocalTime.parse(startAt));
     }
 
-    public TimeSlot(String startAt) {
+    public ReservationTime(String startAt) {
         this(null, startAt);
     }
 

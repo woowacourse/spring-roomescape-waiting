@@ -1,5 +1,7 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -8,11 +10,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Repository
 public class ReservationDao {
@@ -24,8 +23,9 @@ public class ReservationDao {
                             resultSet.getString("name"),
                             resultSet.getString("role")),
                     LocalDate.parse(resultSet.getString("date")),
-                    new TimeSlot(resultSet.getLong("time_id"), resultSet.getString("time_value")),
-                    new Theme(resultSet.getLong("theme_id"), resultSet.getString("theme_name"), resultSet.getString("theme_description"), resultSet.getString("theme_thumbnail"))
+                    new ReservationTime(resultSet.getLong("time_id"), resultSet.getString("time_value")),
+                    new Theme(resultSet.getLong("theme_id"), resultSet.getString("theme_name"),
+                            resultSet.getString("theme_description"), resultSet.getString("theme_thumbnail"))
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -96,7 +96,8 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Integer.class, themeId) != 0;
     }
 
-    public List<Reservation> find(final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
+    public List<Reservation> find(final Long themeId, final Long memberId, final LocalDate dateFrom,
+                                  final LocalDate dateTo) {
         String sql = """
                 SELECT
                 r.id as reservation_id,

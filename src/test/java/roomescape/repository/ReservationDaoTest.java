@@ -1,5 +1,10 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,14 +12,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 class ReservationDaoTest {
@@ -43,7 +42,7 @@ class ReservationDaoTest {
         Reservation reservation = new Reservation(
                 new Member(1L, "poke@test.com", "poke", "role"),
                 LocalDate.parse("2099-01-11"),
-                new TimeSlot(1L, LocalTime.parse("10:00")),
+                new ReservationTime(1L, LocalTime.parse("10:00")),
                 new Theme(1L, "name", "description", "thumbnail"));
         //when, then
         assertThat(reservationDao.create(reservation)).isEqualTo(8);

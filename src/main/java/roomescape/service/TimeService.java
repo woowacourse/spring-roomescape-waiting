@@ -1,7 +1,8 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.TimeSlotRequest;
 import roomescape.domain.dto.TimeSlotResponse;
 import roomescape.domain.dto.TimeSlotResponses;
@@ -9,8 +10,6 @@ import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.DuplicateNotAllowException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.TimeDao;
-
-import java.util.List;
 
 @Service
 public class TimeService {
@@ -33,8 +32,8 @@ public class TimeService {
     public TimeSlotResponse create(TimeSlotRequest timeSlotRequest) {
         validateDuplicatedTime(timeSlotRequest);
         Long id = timeDao.create(timeSlotRequest);
-        TimeSlot timeSlot = timeSlotRequest.toEntity(id);
-        return TimeSlotResponse.from(timeSlot);
+        ReservationTime reservationTime = timeSlotRequest.toEntity(id);
+        return TimeSlotResponse.from(reservationTime);
     }
 
     private void validateDuplicatedTime(TimeSlotRequest timeSlotRequest) {

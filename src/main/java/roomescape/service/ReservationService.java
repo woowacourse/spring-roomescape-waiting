@@ -1,7 +1,13 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationCreateValidator;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
@@ -12,9 +18,6 @@ import roomescape.repository.ReservationDao;
 import roomescape.repository.ThemeDao;
 import roomescape.repository.TimeDao;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Service
 public class ReservationService {
     private final TimeDao timeDao;
@@ -22,7 +25,8 @@ public class ReservationService {
     private final ThemeDao themeDao;
     private final MemberDao memberDao;
 
-    public ReservationService(final TimeDao timeDao, final ReservationDao reservationDao, final ThemeDao themeDao, final MemberDao memberDao) {
+    public ReservationService(final TimeDao timeDao, final ReservationDao reservationDao, final ThemeDao themeDao,
+                              final MemberDao memberDao) {
         this.timeDao = timeDao;
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
@@ -39,16 +43,17 @@ public class ReservationService {
 
     public ReservationResponse create(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
-        final TimeSlot timeSlot = getTimeSlot(reservationRequest);
+        final ReservationTime reservationTime = getTimeSlot(reservationRequest);
         final Theme theme = getTheme(reservationRequest);
         final Member member = getMember(reservationRequest);
-        final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest, timeSlot, theme, member);
+        final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest,
+                reservationTime, theme, member);
         final Reservation newReservation = reservationCreateValidator.create();
         final Long id = reservationDao.create(newReservation);
         return ReservationResponse.from(newReservation.with(id));
     }
 
-    private TimeSlot getTimeSlot(final ReservationRequest reservationRequest) {
+    private ReservationTime getTimeSlot(final ReservationRequest reservationRequest) {
         return timeDao.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new InvalidIdException("timeId", reservationRequest.timeId()));
     }
@@ -64,7 +69,8 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(final ReservationRequest reservationRequest) {
-        if (reservationDao.isExists(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
+        if (reservationDao.isExists(reservationRequest.date(), reservationRequest.timeId(),
+                reservationRequest.themeId())) {
             throw new ReservationFailException("이미 예약이 등록되어 있습니다.");
         }
     }
@@ -73,7 +79,8 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
-    public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
+    public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
+                                                 final LocalDate dateTo) {
         final List<ReservationResponse> reservationResponses = reservationDao.find(themeId, memberId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)

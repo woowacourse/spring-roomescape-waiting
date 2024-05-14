@@ -1,10 +1,8 @@
 package roomescape.domain.dto;
 
-import roomescape.domain.TimeSlot;
-import roomescape.exception.clienterror.EmptyValueNotAllowedException;
-
 import java.time.LocalTime;
-
+import roomescape.domain.ReservationTime;
+import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 public record TimeSlotRequest(LocalTime startAt) {
     public TimeSlotRequest {
@@ -17,7 +15,7 @@ public record TimeSlotRequest(LocalTime startAt) {
         }
     }
 
-    public TimeSlot toEntity(Long id) {
-        return new TimeSlot(id, startAt);
+    public ReservationTime toEntity(Long id) {
+        return new ReservationTime(id, startAt);
     }
 }

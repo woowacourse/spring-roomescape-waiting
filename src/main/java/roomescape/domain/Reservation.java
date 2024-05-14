@@ -14,14 +14,14 @@ public class Reservation {
     private Member member;
     private LocalDate date;
     @ManyToOne
-    private TimeSlot time;
+    private ReservationTime time;
     @ManyToOne
     private Theme theme;
 
     public Reservation() {
     }
 
-    public Reservation(final Long id, final Member member, final LocalDate date, final TimeSlot time,
+    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
         this.id = id;
         this.member = member;
@@ -30,7 +30,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(final Member member, final LocalDate date, final TimeSlot time, final Theme theme) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         this(null, member, date, time, theme);
     }
 
@@ -42,7 +42,7 @@ public class Reservation {
         return date;
     }
 
-    public TimeSlot getTime() {
+    public ReservationTime getTime() {
         return time;
     }
 

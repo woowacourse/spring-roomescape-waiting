@@ -1,14 +1,13 @@
 package roomescape.domain.dto;
 
-import roomescape.domain.TimeSlot;
-
 import java.time.LocalTime;
+import roomescape.domain.ReservationTime;
 
 public record TimeSlotResponse(Long id, LocalTime startAt) {
-    public static TimeSlotResponse from(TimeSlot timeSlot) {
+    public static TimeSlotResponse from(ReservationTime reservationTime) {
         return new TimeSlotResponse(
-                timeSlot.getId(),
-                timeSlot.getStartAt()
+                reservationTime.getId(),
+                reservationTime.getStartAt()
         );
     }
 }
