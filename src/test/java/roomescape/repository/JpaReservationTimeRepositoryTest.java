@@ -19,7 +19,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @SpringBootTest
-class JdbcTemplateReservationTimeRepositoryTest {
+class JpaReservationTimeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
