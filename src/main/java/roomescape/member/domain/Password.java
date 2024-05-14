@@ -1,14 +1,19 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 
+@Embeddable
 public class Password {
 
     private static final Pattern PASSWORD_FORM = Pattern.compile("^(?=.*\\d)(?=.*[a-z])[a-z0-9]*$");
 
-    private final String password;
+    private String password;
+
+    public Password() {
+    }
 
     private Password(String password) {
         this.password = password;

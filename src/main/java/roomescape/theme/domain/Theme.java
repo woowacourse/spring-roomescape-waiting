@@ -1,12 +1,25 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.name.domain.Name;
 
+@Entity
 public class Theme {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private final Name name;
-    private final String description;
-    private final String thumbnail;
+    @Embedded
+    private Name name;
+    private String description;
+    private String thumbnail;
+
+    public Theme() {
+    }
 
     private Theme(long id, Name name, String description, String thumbnail) {
         this.id = id;

@@ -8,7 +8,10 @@ public class Email {
 
     private static final Pattern EMAIL_FORM = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$");
 
-    private final String email;
+    private String email;
+
+    public Email() {
+    }
 
     private Email(String email) {
         this.email = email;

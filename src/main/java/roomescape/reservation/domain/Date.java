@@ -1,12 +1,17 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.reservation.exception.ReservationExceptionCode;
 
+@Embeddable
 public class Date {
 
-    private final LocalDate date;
+    private LocalDate date;
+
+    public Date() {
+    }
 
     private Date(LocalDate date) {
         this.date = date;

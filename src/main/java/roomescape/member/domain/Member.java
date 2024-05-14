@@ -1,24 +1,46 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.member.role.MemberRole;
 import roomescape.name.domain.Name;
 
+@Entity
 public class Member {
 
     private static final String DEFAULT_NAME = "어드민";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private final Name name;
-    private final Email email;
-    private final Password password;
-    private final MemberRole memberRole;
 
-    private Member(long id, String name, Email email, Password password, MemberRole memberRole) {
+    @Embedded
+    private Name name;
+
+    @Embedded
+    private Email email;
+
+    @Embedded
+    private Password password;
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
+
+    public Member() {
+
+    }
+
+    private Member(long id, String name, Email email, Password password, MemberRole role) {
         this.id = id;
         this.name = new Name(name);
         this.email = email;
         this.password = password;
-        this.memberRole = memberRole;
+        this.role = role;
     }
 
     private Member(String name, Email email, Password password, MemberRole role) {
@@ -53,5 +75,9 @@ public class Member {
 
     public String getPassword() {
         return password.getPassword();
+    }
+
+    public MemberRole getRole() {
+        return role;
     }
 }

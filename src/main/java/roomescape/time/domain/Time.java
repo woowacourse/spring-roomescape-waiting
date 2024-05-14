@@ -1,17 +1,30 @@
 package roomescape.time.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.time.exception.TimeExceptionCode;
 
+@Entity
 public class Time {
 
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private final LocalTime startAt;
+
+    @Column(name = "start_at")
+    private LocalTime startAt;
+
+    public Time() {
+    }
 
     public Time(LocalTime startAt) {
         this(0, startAt);

@@ -1,5 +1,12 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -9,13 +16,27 @@ import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private final Date date;
-    private final Time time;
-    private final Theme theme;
-    private final Member member;
+
+    @Embedded
+    private Date date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Time time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Theme theme;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+
+    public Reservation() {
+    }
 
     public Reservation(long id, Date date, Time time, Theme theme, Member member) {
         this.id = id;
@@ -35,6 +56,7 @@ public class Reservation {
     }
 
     public static Reservation saveReservationOf(LocalDate date, long timeId, long themeId, long memberId) {
+        System.out.println("여기서 났나요?");
         return new Reservation(date, timeId, themeId, memberId);
     }
 
