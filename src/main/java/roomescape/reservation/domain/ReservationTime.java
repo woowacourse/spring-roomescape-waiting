@@ -32,14 +32,6 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public static ReservationTime of(final long id, final String start_at) {
-        return new ReservationTime(id, LocalTime.parse(start_at));
-    }
-
-    public ReservationTime assignId(final long id) {
-        return new ReservationTime(id, startAt);
-    }
-
     public long getId() {
         return id;
     }

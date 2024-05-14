@@ -44,16 +44,8 @@ public class Theme {
         this(null, new ThemeName(themeName), description, thumbnail);
     }
 
-    public Theme assignId(final long id) {
-        return new Theme(id, themeName, description, thumbnail);
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public ThemeName getThemeName() {
-        return themeName;
     }
 
     public String getThemeNameValue() {

@@ -1,16 +1,29 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+    @ManyToOne
+    private Member member;
+    private LocalDate date;
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(
             final Long id,
@@ -28,6 +41,9 @@ public class Reservation {
         this.theme = theme;
     }
 
+    public Reservation() {
+    }
+
     private void validateDate(final LocalDate date) {
         if (date == null) {
             throw new IllegalArgumentException("[ERROR] 예약 날짜를 입력해주세요.");
@@ -39,14 +55,6 @@ public class Reservation {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("[ERROR] 현재 날짜보다 이전의 예약 날짜를 선택할 수 없습니다.");
         }
-    }
-
-    public static Reservation of(
-            final long id, final Member member, final String date,
-            final ReservationTime time, final Theme theme
-    ) {
-        LocalDate parsedDate = LocalDate.parse(date);
-        return new Reservation(id, member, parsedDate, time, theme);
     }
 
     public static Reservation of(final Member member, final LocalDate date, final ReservationTime time,
@@ -71,20 +79,12 @@ public class Reservation {
         return Objects.hash(id);
     }
 
-    public Reservation assignId(final long id) {
-        return new Reservation(id, member, date, time, theme);
-    }
-
     public Long getId() {
         return id;
     }
 
     public Member getMember() {
         return member;
-    }
-
-    public long getMemberId() {
-        return member.getId();
     }
 
     public String getName() {

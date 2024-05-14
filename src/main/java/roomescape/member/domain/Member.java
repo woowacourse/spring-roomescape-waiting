@@ -1,5 +1,7 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,10 +16,13 @@ public class Member {
     @GeneratedValue
     private Long id;
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
     private MemberName memberName;
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
     private Email email;
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -36,23 +41,12 @@ public class Member {
     public Member() {
     }
 
-    public static Member of(
-            final long id, final String name, final String email,
-            final String role, final String password
-    ) {
-        return new Member(id, new MemberName(name), new Email(email), new Password(password), Role.from(role));
-    }
-
     public static Member of(final String name, final String email, final String password, final String role) {
         return new Member(null, new MemberName(name), new Email(email), new Password(password), Role.from(role));
     }
 
     public Long getId() {
         return id;
-    }
-
-    public MemberName getMemberName() {
-        return memberName;
     }
 
     public String getNameValue() {
