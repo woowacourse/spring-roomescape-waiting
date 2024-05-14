@@ -1,14 +1,23 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.*;
 import roomescape.global.exception.ViolationException;
 
 import java.time.LocalTime;
 
+@Entity
 public class ReservationTime {
     private static final int TIME_UNIT = 10;
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private LocalTime startAt;
+
+    protected ReservationTime() {
+    }
 
     public ReservationTime(LocalTime startAt) {
         this(null, startAt);

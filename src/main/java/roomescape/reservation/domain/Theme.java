@@ -1,13 +1,25 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.*;
 import roomescape.global.exception.ViolationException;
 
+@Entity
 public class Theme {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String thumbnail;
+
+    protected Theme() {
+    }
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);

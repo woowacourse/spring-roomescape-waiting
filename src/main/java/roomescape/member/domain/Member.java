@@ -1,20 +1,35 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.*;
 import roomescape.global.exception.ViolationException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Entity
 public class Member {
     private static final Pattern NAME_PATTERN = Pattern.compile("^\\d+$");
     private static final int NAME_MAXIMUM_LENGTH = 10;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$");
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private Role role;
+
+    protected Member() {
+    }
 
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
