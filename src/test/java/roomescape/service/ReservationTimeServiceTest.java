@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,9 +18,12 @@ import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
-import roomescape.repository.JdbcReservationTimeRepository;
+import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -44,7 +44,7 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    private JpaReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JpaThemeRepository themeRepository;
@@ -58,7 +58,7 @@ class ReservationTimeServiceTest {
     @DisplayName("중복된 예약 시간을 생성하면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_create_duplicated_reservation_time() {
-        reservationTimeRepository.insertReservationTime(new ReservationTime(1L, "10:00"));
+        reservationTimeRepository.save(new ReservationTime(1L, "10:00"));
 
         ReservationTimeRequest requestDto = new ReservationTimeRequest("10:00");
 
@@ -94,7 +94,7 @@ class ReservationTimeServiceTest {
         Reservation reservation = new Reservation(1L, member, theme, date, time);
 
         memberRepository.insertMember(member);
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
         themeRepository.save(theme);
         reservationRepository.insertReservation(reservation);
 
@@ -107,7 +107,7 @@ class ReservationTimeServiceTest {
     @Test
     void success_delete_reservation_time() {
         ReservationTime time = new ReservationTime(1L, "11:00");
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
 
         assertThatNoException()
                 .isThrownBy(() -> reservationTimeService.deleteReservationTime(1L));

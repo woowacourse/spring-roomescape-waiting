@@ -1,9 +1,6 @@
 package roomescape.service;
 
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,9 +19,12 @@ import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
-import roomescape.repository.JdbcReservationTimeRepository;
+import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -45,7 +45,7 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    private JpaReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JpaThemeRepository themeRepository;
@@ -78,7 +78,7 @@ class ReservationServiceTest {
     @Test
     void throw_exception_when_create_reservation_use_before_date() {
         memberRepository.insertMember(member);
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
         themeRepository.save(theme);
 
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2024-05-07", 1L);
@@ -92,7 +92,7 @@ class ReservationServiceTest {
     @Test
     void throw_exception_when_create_reservation_use_same_theme_and_date_time() {
         memberRepository.insertMember(member);
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
         themeRepository.save(theme);
         Reservation reservation1 = new Reservation(1L, member, theme, date, time);
         reservationRepository.insertReservation(reservation1);
@@ -107,7 +107,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 정상적으로 생성한다.")
     @Test
     void success_create_reservation() {
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
         themeRepository.save(theme);
         memberRepository.insertMember(member);
 
@@ -131,7 +131,7 @@ class ReservationServiceTest {
     void success_delete_reservation() {
         Reservation reservation = new Reservation(1L, member, theme, date, time);
         memberRepository.insertMember(member);
-        reservationTimeRepository.insertReservationTime(time);
+        reservationTimeRepository.save(time);
         themeRepository.save(theme);
         reservationRepository.insertReservation(reservation);
 

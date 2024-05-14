@@ -1,24 +1,25 @@
 package roomescape.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.repository.JdbcReservationRepository;
-import roomescape.repository.JdbcReservationTimeRepository;
+import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ReservationService {
 
     private final JdbcReservationRepository reservationRepository;
-    private final JdbcReservationTimeRepository reservationTimeRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
 
     public ReservationService(JdbcReservationRepository reservationRepository,
-                              JdbcReservationTimeRepository reservationTimeRepository) {
+                              JpaReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
@@ -32,11 +33,9 @@ public class ReservationService {
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
         Reservation reservation = reservationInfo.toReservation();
-        if (!reservationTimeRepository.isTimeExistsByTimeId(reservation.getTimeId())) {
-            throw new IllegalArgumentException("예약 하려는 시간이 저장되어 있지 않습니다.");
-        }
 
-        ReservationTime time = reservationTimeRepository.findReservationTimeById(reservation.getTimeId());
+        ReservationTime time = reservationTimeRepository.findById(reservation.getTimeId())
+                .orElseThrow(() -> new IllegalArgumentException("예약 하려는 시간이 저장되어 있지 않습니다."));
         if (LocalDateTime.of(reservation.getDate(), time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("지나간 날짜와 시간에 대한 예약은 불가능합니다.");
         }

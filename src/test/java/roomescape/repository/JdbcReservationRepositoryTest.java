@@ -1,12 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +14,15 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.rowmapper.MemberRowMapper;
 import roomescape.repository.rowmapper.ReservationRowMapper;
-import roomescape.repository.rowmapper.ReservationTimeRowMapper;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+
+import javax.sql.DataSource;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -34,7 +34,8 @@ class JdbcReservationRepositoryTest {
     @Autowired
     private DataSource dataSource;
     private JdbcReservationRepository reservationRepository;
-    private JdbcReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private JpaReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private JpaThemeRepository themeRepository;
@@ -69,13 +70,12 @@ class JdbcReservationRepositoryTest {
     void setUp() {
         memberRepository = new JdbcMemberRepository(dataSource, new MemberRowMapper());
         reservationRepository = new JdbcReservationRepository(dataSource, new ReservationRowMapper());
-        reservationTimeRepository = new JdbcReservationTimeRepository(dataSource, new ReservationTimeRowMapper());
         initializeTimesAndThemeAndMemberData();
     }
 
     private void initializeTimesAndThemeAndMemberData() {
-        reservationTimeRepository.insertReservationTime(time1);
-        reservationTimeRepository.insertReservationTime(time2);
+        reservationTimeRepository.save(time1);
+        reservationTimeRepository.save(time2);
         themeRepository.save(theme1);
         themeRepository.save(theme2);
         memberRepository.insertMember(member1);
