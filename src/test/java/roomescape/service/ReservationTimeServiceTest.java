@@ -12,15 +12,16 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -50,7 +51,7 @@ class ReservationTimeServiceTest {
     private JpaThemeRepository themeRepository;
 
     @Autowired
-    private JdbcReservationRepository reservationRepository;
+    private JpaReservationRepository reservationRepository;
 
     @Autowired
     private JpaMemberRepository memberRepository;
@@ -89,14 +90,14 @@ class ReservationTimeServiceTest {
     void throw_exception_when_delete_reservation_time_with_existing_reservation() {
         Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
         Theme theme = new Theme(1L, "공포", "공포는 무서워", "hi.jpg");
-        ReservationDate date = new ReservationDate("2025-11-30");
+        LocalDate date = LocalDate.parse("2025-11-30");
         ReservationTime time = new ReservationTime(1L, "11:00");
         Reservation reservation = new Reservation(1L, member, theme, date, time);
 
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        reservationRepository.insertReservation(reservation);
+        reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
                 .isInstanceOf(IllegalArgumentException.class)

@@ -1,12 +1,20 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
@@ -15,6 +23,9 @@ public class ReservationTime {
 
     public ReservationTime(Long id, String startAt) {
         this(id, LocalTime.parse(startAt));
+    }
+
+    protected ReservationTime() {
     }
 
     public Long getId() {

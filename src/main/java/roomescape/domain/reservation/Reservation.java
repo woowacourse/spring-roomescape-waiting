@@ -1,19 +1,37 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final Member member;
-    private final Theme theme;
-    private final ReservationDate date;
-    private final ReservationTime time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public Reservation(Long id, Member member, Theme theme, ReservationDate date,
-                       ReservationTime time) {
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    public Reservation(Long id, Member member, Theme theme, LocalDate date, ReservationTime time) {
         this.id = id;
         this.member = member;
         this.theme = theme;
@@ -27,8 +45,11 @@ public class Reservation {
         this(id,
                 new Member(memberId, email, password, memberName, role),
                 new Theme(themeId, themeName, description, thumbnail),
-                new ReservationDate(date),
+                LocalDate.parse(date),
                 new ReservationTime(timeId, time));
+    }
+
+    protected Reservation() {
     }
 
     public Long getId() {
@@ -56,7 +77,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date.getDate();
+        return date;
     }
 
     public ReservationTime getReservationTime() {

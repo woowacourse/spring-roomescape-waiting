@@ -1,21 +1,22 @@
 package roomescape.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Theme;
-import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.theme.PopularThemeRequest;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
 
+import java.util.List;
+
 @Service
 public class ThemeService {
 
     private final JpaThemeRepository themeRepository;
-    private final JdbcReservationRepository reservationRepository;
+    private final JpaReservationRepository reservationRepository;
 
-    public ThemeService(JpaThemeRepository themeRepository, JdbcReservationRepository reservationRepository) {
+    public ThemeService(JpaThemeRepository themeRepository, JpaReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -42,7 +43,7 @@ public class ThemeService {
     }
 
     public void deleteTheme(long id) {
-        if (reservationRepository.isReservationExistsByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("해당 테마에 예약이 있어 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

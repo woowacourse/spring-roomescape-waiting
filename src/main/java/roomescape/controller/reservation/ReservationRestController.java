@@ -1,9 +1,6 @@
 package roomescape.controller.reservation;
 
 import jakarta.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +19,9 @@ import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @RestController
 public class ReservationRestController {
 
@@ -36,7 +36,7 @@ public class ReservationRestController {
             @RequestParam(name = "member", required = false) Long memberId,
             @RequestParam(name = "theme", required = false) Long themeId,
             @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
-            @RequestParam(name = "end-date", required = false) LocalTime dateTo) {
+            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
 
         ReservationSearchParams request = new ReservationSearchParams(memberId, themeId, dateFrom, dateTo);
         return reservationService.findAllReservations(request);
