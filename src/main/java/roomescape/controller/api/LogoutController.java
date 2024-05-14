@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/logout")
 public class LogoutController {
 
-    // TODO: 로그아웃한 경우 해당 토큰을 만료시키는 로직 추가
-
     @PostMapping
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", null);

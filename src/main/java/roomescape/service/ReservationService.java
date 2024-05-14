@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.domain.reservation.ReservationStatus.*;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -99,7 +99,7 @@ public class ReservationService {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId,
-            new Date(dateFrom.toString()), new Date(dateTo.toString())); // TODO : 제대로 정리;
+            new Date(dateFrom.toString()), new Date(dateTo.toString()));
     }
 
     public List<Reservation> findMyReservations(Long memberId) {
