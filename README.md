@@ -57,6 +57,46 @@
 
 ---
 
+## 나의 예약 조회
+
+### Request
+
+- GET /reservations/me
+- cookie: token={token}
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+[
+  {
+    "reservationId": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "예약"
+  },
+  {
+    "reservationId": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "예약"
+  },
+  {
+    "reservationId": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "예약"
+  }
+]
+```
+
+---
+
 ## 예약 추가
 
 ### Request
