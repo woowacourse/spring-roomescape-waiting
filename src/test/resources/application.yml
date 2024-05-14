@@ -1,0 +1,20 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      data-locations:
+
+logging:
+  level:
+    org.springframework:
+      jdbc: DEBUG
+
+security:
+  jwt:
+    secret-key: abcdefghijklmnopqrstuvwxyz0123456789
+    expiration-time: 3600000 # 1 hour
