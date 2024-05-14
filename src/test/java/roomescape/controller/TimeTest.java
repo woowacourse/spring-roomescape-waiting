@@ -16,9 +16,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class TimeTest {
 
     @LocalServerPort
@@ -46,7 +48,7 @@ class TimeTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(5));
 
         RestAssured.given().log().all()
                 .when().delete("/times/4")

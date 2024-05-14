@@ -15,9 +15,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class ThemeTest {
 
     @LocalServerPort
@@ -35,7 +37,7 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(3));
     }
 
     @DisplayName("theme 등록 및 삭제 요청이 올바르게 동작한다.")
@@ -57,7 +59,7 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(7));
+                .body("size()", is(4));
 
         RestAssured.given().log().all()
                 .when().delete("/themes/4")
