@@ -44,6 +44,7 @@ public class ThemeService {
 
     public List<PopularThemeResponse> findThemesDescOfLastWeekForLimitCount(int limitCount) {
         List<Theme> popularTheme = themeRepository.findPopularThemesDescOfLastWeekForLimit(limitCount);
+
         return popularTheme.stream()
                 .map(PopularThemeResponse::toResponse)
                 .toList();

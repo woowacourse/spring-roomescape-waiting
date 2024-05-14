@@ -45,8 +45,7 @@ public class ReservationApiController {
     public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchCondRequest reservationSearchCondRequest
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCond(
-                reservationSearchCondRequest);
+        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCond(reservationSearchCondRequest);
 
         return ResponseEntity.ok(reservationResponses);
     }
@@ -58,8 +57,7 @@ public class ReservationApiController {
     ) {
         ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
-                .body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
     }
 
     @DeleteMapping("/reservations/{id}")

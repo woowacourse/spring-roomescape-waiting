@@ -21,8 +21,8 @@ public class MemberService {
         if (memberRepository.existsByEmail(member.getEmail())) {
             throw new IllegalArgumentException("중복된 이름 또는 이메일 입니다.");
         }
-
         Member savedMember = memberRepository.save(member);
+
         return MemberResponse.toResponse(savedMember);
     }
 

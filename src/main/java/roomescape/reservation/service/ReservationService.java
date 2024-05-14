@@ -45,8 +45,7 @@ public class ReservationService {
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation getValidatedReservation(ReservationSaveRequest reservationSaveRequest,
-                                                LoginMember loginMember) {
+    private Reservation getValidatedReservation(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -68,8 +67,7 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndReservationTime_StartAt(reservation.getDate(),
-                reservation.getStartAt())) {
+        if (reservationRepository.existsByDateAndReservationTime_StartAt(reservation.getDate(), reservation.getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
         }
     }

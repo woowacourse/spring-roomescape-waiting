@@ -40,6 +40,7 @@ public class MemberLoginApiController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         CookieUtils.clearTokenAndCookie(response);
+
         return ResponseEntity.ok().build();
     }
 }
