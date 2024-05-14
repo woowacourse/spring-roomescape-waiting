@@ -127,4 +127,15 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(409);
     }
+
+    @DisplayName("내 예약 목록을 조회한다")
+    @Test
+    void findMyReservations() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", accessToken)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
