@@ -74,11 +74,26 @@ class JpaReservationRepositoryTest {
         assertThat(reservations).hasSize(2);
     }
 
+    @Test
+    @DisplayName("memberId로 해당 멤버의 예약을 조회한다.")
+    void findAllByMemberIdTest() {
+        Member hodol = memberRepository.save(MemberFixture.createMember("호돌"));
+        Member pk = memberRepository.save(MemberFixture.createMember("피케이"));
+        createReservation(hodol, LocalDate.of(2024, 12, 25));
+        createReservation(pk, LocalDate.of(2025, 1, 1));
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(hodol.getId());
+        assertThat(reservations).hasSize(1);
+    }
+
     private Reservation createReservation() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        LocalDate date = LocalDate.of(2024, 12, 25);
-        Theme theme = themeRepository.save(new Theme("theme1", "desc", "url"));
         Member member = memberRepository.save(MemberFixture.createMember("오리"));
+        LocalDate date = LocalDate.of(2024, 12, 25);
+        return createReservation(member, date);
+    }
+
+    private Reservation createReservation(Member member, LocalDate date) {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(new Theme("theme1", "desc", "url"));
         Reservation reservation = new Reservation(member, date, reservationTime, theme, BASE_TIME);
         entityManager.persist(reservation);
         return reservation;
