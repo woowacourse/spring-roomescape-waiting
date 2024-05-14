@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
@@ -12,25 +13,25 @@ import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
     public ReservationService(
-            final ReservationDao reservationDao,
-            final ReservationTimeDao reservationTimeDao,
-            final ThemeDao themeDao
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository
     ) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
     public ReservationResponse save(final ReservationSaveRequest saveRequest, final Member member) {
@@ -41,36 +42,35 @@ public class ReservationService {
             throw new IllegalArgumentException("[ERROR] 중복된 예약이 존재합니다.");
         }
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme);
-        return ReservationResponse.from(reservationDao.save(reservation));
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private ReservationTime findReservationTimeById(final ReservationSaveRequest reservationSaveRequest) {
-        return reservationTimeDao.findById(reservationSaveRequest.timeId())
+        return reservationTimeRepository.findById(reservationSaveRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
     }
 
     private Theme findThemeById(final ReservationSaveRequest reservationSaveRequest) {
-        return themeDao.findById(reservationSaveRequest.themeId())
+        return themeRepository.findById(reservationSaveRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
     public List<ReservationResponse> getAll() {
-        return reservationDao.getAll()
-                .stream()
+        return some().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<Reservation> some() {
-        return reservationDao.getAll()
-                .stream()
-                .map(ReservationResponse::from)
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .toList();
     }
 
     public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
-        List<Long> usedTimeIds = reservationDao.findTimeIdsByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes = reservationTimeDao.getAll();
+        List<Long> usedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
+        List<ReservationTime> reservationTimes =
+                StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
+                        .toList();
 
         return reservationTimes.stream()
                 .map(time -> new SelectableTimeResponse(
@@ -86,25 +86,25 @@ public class ReservationService {
     }
 
     private boolean hasDuplicateReservation(final LocalDate date, final long timeId, final long themeId) {
-        return !reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
+        return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
     }
 
     public ReservationDeleteResponse delete(final long id) {
-        if (reservationDao.findById(id).isEmpty()) {
+        if (reservationRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약이 존재하지 않습니다.");
         }
-        return new ReservationDeleteResponse(reservationDao.delete(id));
+        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
     }
 
     public void validateAlreadyHasReservationByTimeId(final long id) {
-        List<Reservation> reservations = reservationDao.findByTimeId(id);
+        List<Reservation> reservations = reservationRepository.findByTimeId(id);
         if (!reservations.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 
     public void validateAlreadyHasReservationByThemeId(final long id) {
-        if (!reservationDao.findByThemeId(id).isEmpty()) {
+        if (!reservationRepository.findByThemeId(id).isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 해당 테마를 사용 중인 예약이 있어 삭제할 수 없습니다.");
         }
     }

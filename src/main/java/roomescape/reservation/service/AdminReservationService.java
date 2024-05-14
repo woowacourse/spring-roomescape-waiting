@@ -3,35 +3,35 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberDao;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.AdminReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationTimeDao;
-import roomescape.reservation.repository.ThemeDao;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class AdminReservationService {
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public AdminReservationService(
-            final ReservationDao reservationDao,
-            final ReservationTimeDao reservationTimeDao,
-            final ThemeDao themeDao,
-            final MemberDao memberDao
-    ) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
-        this.memberDao = memberDao;
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public AdminReservationResponse save(final AdminReservationSaveRequest reservationSaveRequest) {
@@ -39,24 +39,24 @@ public class AdminReservationService {
         ReservationTime reservationTime = findReservationTimeById(reservationSaveRequest);
         Theme theme = findThemeById(reservationSaveRequest);
 
-        Reservation reservation = reservationDao.save(
+        Reservation reservation = reservationRepository.save(
                 reservationSaveRequest.toEntity(member, reservationTime, theme)
         );
         return AdminReservationResponse.from(reservation);
     }
 
     private ReservationTime findReservationTimeById(final AdminReservationSaveRequest reservationSaveRequest) {
-        return reservationTimeDao.findById(reservationSaveRequest.timeId())
+        return reservationTimeRepository.findById(reservationSaveRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
     }
 
     private Theme findThemeById(final AdminReservationSaveRequest reservationSaveRequest) {
-        return themeDao.findById(reservationSaveRequest.themeId())
+        return themeRepository.findById(reservationSaveRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
     private Member findMemberById(final AdminReservationSaveRequest reservationSaveRequest) {
-        return memberDao.findById(reservationSaveRequest.memberId())
+        return memberRepository.findById(reservationSaveRequest.memberId())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 회원 번호를 입력하였습니다."));
     }
 
@@ -66,16 +66,29 @@ public class AdminReservationService {
     ) {
         List<Reservation> reservations = new ArrayList<>();
         if (memberId != null) {
-            reservations.addAll(reservationDao.findByMemberId(memberId));
+            reservations.addAll(reservationRepository.findByMemberId(memberId));
         }
         if (themeId != null) {
-            reservations.addAll(reservationDao.findByThemeId(themeId));
+            reservations.addAll(reservationRepository.findByThemeId(themeId));
         }
-        reservations.addAll(reservationDao.findByDateFromAndDateTo(dateFrom, dateTo));
+        reservations.addAll(findByDateFromAndDateTo(dateFrom, dateTo));
 
         return filterResults(reservations, memberId, themeId, dateFrom, dateTo)
                 .stream()
                 .map(AdminReservationResponse::from)
+                .toList();
+    }
+
+    private List<Reservation> findByDateFromAndDateTo(final LocalDate dateFrom,
+                                                      final LocalDate dateTo) {
+        return some().stream()
+                .filter(reservation -> reservation.getDate().isAfter(dateFrom)
+                        && reservation.getDate().isBefore(dateTo))
+                .toList();
+    }
+
+    public List<Reservation> some() {
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
                 .toList();
     }
 
