@@ -20,7 +20,7 @@ public class ReservationTimeDeleteService {
         reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간 아이디 입니다."));
 
-        if (reservationRepository.existsByReservationTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new IllegalArgumentException("이미 예약중인 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);

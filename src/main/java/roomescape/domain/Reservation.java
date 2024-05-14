@@ -1,21 +1,39 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    @ManyToOne
+    private Member member;
+
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation() {
+    }
+
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.theme = theme;
     }
 
@@ -36,7 +54,7 @@ public class Reservation {
     }
 
     public ReservationTime getReservationTime() {
-        return reservationTime;
+        return time;
     }
 
     public Theme getTheme() {
@@ -45,14 +63,19 @@ public class Reservation {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
         Reservation that = (Reservation) object;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date) && Objects.equals(reservationTime, that.reservationTime) && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date)
+                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, reservationTime, theme);
+        return Objects.hash(id, member, date, time, theme);
     }
 }

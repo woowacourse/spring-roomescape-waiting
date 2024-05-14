@@ -20,7 +20,7 @@ public class ThemeDeleteService {
         themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 아이디 입니다."));
 
-        if (reservationRepository.existsByReservationThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("이미 예약중인 테마는 삭제할 수 없습니다.");
         }
 

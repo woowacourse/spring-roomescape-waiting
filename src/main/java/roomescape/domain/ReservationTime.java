@@ -1,12 +1,22 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class ReservationTime {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private final LocalTime startAt;
+    private LocalTime startAt;
+
+    public ReservationTime() {
+    }
 
     public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
@@ -27,8 +37,12 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
         ReservationTime that = (ReservationTime) object;
         return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
     }

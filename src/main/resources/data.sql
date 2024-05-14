@@ -12,6 +12,5 @@ INSERT INTO member (name, email, password, `role`)
 VALUES ('testUser', 'user@naver.com', '1234', 'USER');
 INSERT INTO member (name, email, password, `role`)
 VALUES ('testAdmin', 'admin@naver.com', '1234', 'ADMIN');
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_Id)
+INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (1, CURRENT_DATE + INTERVAL '1' DAY, 1, 1);
-
