@@ -1,0 +1,7 @@
+## 로그인 계정
+- 로그인 가능한 계정
+  - 관리자 계정 - id : admin@abc.com / pw : 아무거나 입력 가능 / name : 관리자
+  - 일반 유저 계정 - id : bri@abc.com / pw : 아무거나 입력 가능 / name : 브리
+  - 일반 유저 계정 - id : brown@abc.com / pw : 아무거나 입력 가능 / name : 브라운
+  - 일반 유저 계정 - id : duck@abc.com / pw : 아무거나 입력 가능 / name : 오리
+- 추후 패스워드 확인 기능 추가 예정
