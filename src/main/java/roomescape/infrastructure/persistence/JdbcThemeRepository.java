@@ -38,7 +38,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         MapSqlParameterSource parameter = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
-                .addValue("thumbnail", theme.getThumbnailUrl());
+                .addValue("thumbnail", theme.getThumbnail());
         long id = jdbcInsert.executeAndReturnKey(parameter)
                 .longValue();
         return theme.withId(id);
