@@ -1,12 +1,18 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class MemberName {
 
-    private final Pattern MEMBER_NAME_FORMAT = Pattern.compile("^[가-힣]+$");
-    private final int NAME_LENGTH = 4;
-    private final String name;
+    private static final Pattern MEMBER_NAME_FORMAT = Pattern.compile("^[가-힣]+$");
+    private static final int NAME_LENGTH = 4;
+
+    private String name;
+
+    public MemberName() {
+    }
 
     public MemberName(String name) {
         validate(name);
