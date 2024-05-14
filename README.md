@@ -8,7 +8,7 @@
 
 ## 1단계 JPA 전환
 
-- [ ] gradle 의존성 추가
+- [x] gradle 의존성 추가
     - as is: spring-boot-stater-jdbc
     - to be: spring-boot-starter-data-jpa
 - [ ] 다른 클래스를 의존하지 않는 클래스 엔티티 설정
