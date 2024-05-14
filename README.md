@@ -19,6 +19,6 @@
     - [x] Theme
     - [x] Time
     - [x] Member
-    - [ ] Reservation
+    - [x] Reservation
 - 추가적인 리팩터링
     - [ ] 멤버에 패스워드 추가

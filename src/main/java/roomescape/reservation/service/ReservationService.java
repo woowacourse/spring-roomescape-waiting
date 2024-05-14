@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.dao.ReservationDao;
+import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSearch;
 import roomescape.reservation.dto.ReservationCreateRequest;
@@ -18,29 +18,29 @@ import roomescape.time.repository.TimeRepository;
 
 @Service
 public class ReservationService {
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
 
-    public ReservationService(ReservationDao reservationDao, MemberRepository memberRepository, TimeRepository timeRepository, ThemeRepository themeRepository) {
-        this.reservationDao = reservationDao;
+    public ReservationService(ReservationRepository reservationRepository, MemberRepository memberRepository, TimeRepository timeRepository, ThemeRepository themeRepository) {
+        this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findReservations() {
-        return reservationDao.findReservations()
+        return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<ReservationResponse> findReservations(ReservationSearchRequest searchRequest) {
-        ReservationSearch reservationSearch = searchRequest.createReservationSearch();
-        return reservationDao.findReservations(reservationSearch)
+    public List<ReservationResponse> findReservations(ReservationSearchRequest request) {
+        ReservationSearch reservationSearch = request.createReservationSearch();
+        return reservationRepository.findAll(request.memberId(), request.themeId(), request.startDate(), request.endDate())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -66,7 +66,7 @@ public class ReservationService {
 
     private ReservationResponse createReservation(Reservation reservation) {
         validateIsAvailable(reservation);
-        Reservation createdReservation = reservationDao.createReservation(reservation);
+        Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
 
@@ -92,6 +92,6 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        reservationDao.deleteReservation(id);
+        reservationRepository.deleteById(id);
     }
 }

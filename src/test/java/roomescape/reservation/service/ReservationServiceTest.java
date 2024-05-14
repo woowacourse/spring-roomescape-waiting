@@ -1,5 +1,14 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.dao.ReservationDao;
+import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -20,20 +29,10 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.repository.TimeRepository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     @Mock
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
     @Mock
     private MemberRepository memberRepository;
     @Mock
@@ -46,7 +45,7 @@ class ReservationServiceTest {
     @DisplayName("모든 예약을 조회할 수 있다.")
     @Test
     void findReservationsTest() {
-        given(reservationDao.findReservations()).willReturn(List.of(
+        given(reservationRepository.findAll()).willReturn(List.of(
                 new Reservation(
                         1L, new Member(1L, "브라운", "brown@abc.com"),
                         LocalDate.of(2024, 8, 15),
@@ -85,7 +84,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
-        given(reservationDao.createReservation(any())).willReturn(new Reservation(
+        given(reservationRepository.save(any())).willReturn(new Reservation(
                 1L, new Member(1L, "브라운", "brown@abc.com"),
                 LocalDate.of(2024, 8, 15),
                 new ReservationTime(1L, LocalTime.of(19, 0)),
