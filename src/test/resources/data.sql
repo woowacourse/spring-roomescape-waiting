@@ -1,7 +1,7 @@
-INSERT INTO reservation_time(start_at) VALUES('10:00');
-INSERT INTO reservation_time(start_at) VALUES('11:00');
-INSERT INTO reservation_time(start_at) VALUES('12:00');
-INSERT INTO reservation_time(start_at) VALUES('13:00');
+INSERT INTO time_slot(start_at) VALUES('10:00');
+INSERT INTO time_slot(start_at) VALUES('11:00');
+INSERT INTO time_slot(start_at) VALUES('12:00');
+INSERT INTO time_slot(start_at) VALUES('13:00');
 
 INSERT INTO member(name,email,password,role) VALUES('어드민','testDB@email.com','1234','ADMIN');
 
