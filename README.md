@@ -5,7 +5,7 @@
 - [x] gradle 의존성을 추가한다
 - [x] 엔티티를 매핑한다
 - [x] 연관관계를 매핑한다
-- [ ] Dao 클래스를 JpaRepository를 상속받는 Repository로 대체한다
+- [x] Dao 클래스를 JpaRepository를 상속받는 Repository로 대체한다
 
 ## 2단계
 
