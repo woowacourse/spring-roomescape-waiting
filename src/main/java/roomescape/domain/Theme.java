@@ -1,16 +1,28 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
+@Entity
 public class Theme {
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
-    private final Long id;
-    private final ThemeName name;
-    private final String description;
-    private final String thumbnailUrl;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private ThemeName name;
+    private String description;
+    private String thumbnailUrl;
+
+    public Theme() {
+    }
 
     public Theme(ThemeName name, String description, String thumbnail) {
         this(null, name, description, thumbnail);

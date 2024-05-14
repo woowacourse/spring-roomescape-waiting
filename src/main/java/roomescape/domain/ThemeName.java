@@ -1,17 +1,22 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
+@Embeddable
 public class ThemeName {
     private static final int NAME_MAX_LENGTH = 20;
 
-    private final String name;
+    private String name;
 
     public ThemeName(String name) {
         validateNonBlank(name);
         validateLength(name);
         this.name = name;
+    }
+
+    public ThemeName() {
     }
 
     public String asText() {
