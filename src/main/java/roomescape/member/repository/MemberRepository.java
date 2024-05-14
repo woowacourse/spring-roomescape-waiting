@@ -1,4 +1,4 @@
-package roomescape.member.dao;
+package roomescape.member.repository;
 
 import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;
