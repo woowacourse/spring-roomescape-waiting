@@ -37,4 +37,12 @@ public class RoomescapeExceptionHandler {
                 .status(e.getHttpStatus())
                 .body(new ErrorResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handle(Exception e) {
+        logger.error(getStackTrace(e));
+        return ResponseEntity
+                .status(500)
+                .body(new ErrorResponse("서버에 오류가 발생했습니다."));
+    }
 }
