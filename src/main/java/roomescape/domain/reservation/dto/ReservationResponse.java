@@ -1,14 +1,15 @@
 package roomescape.domain.reservation.dto;
 
-import java.util.List;
 import roomescape.domain.member.dto.MemberResponse;
 import roomescape.domain.reservation.domain.reservation.Reservation;
-import roomescape.domain.reservation.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
 
+import java.time.LocalDate;
+import java.util.List;
+
 public record ReservationResponse(Long id,
-                                  ReservationDate date,
+                                  LocalDate date,
                                   ReservationTime time,
                                   Theme theme,
                                   MemberResponse memberResponse) {
@@ -20,7 +21,7 @@ public record ReservationResponse(Long id,
                 reservation.getMemberRole()
         );
         return new ReservationResponse(reservation.getId(),
-                reservation.getReservationDate(),
+                reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
                 memberResponse);

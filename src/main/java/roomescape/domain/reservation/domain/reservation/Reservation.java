@@ -1,24 +1,35 @@
 package roomescape.domain.reservation.domain.reservation;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import jakarta.persistence.*;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.domain.Role;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
 
-public class Reservation {
+import java.time.LocalDate;
+import java.util.Objects;
 
-    private final Long id;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final Member member;
+@Entity
+public class Reservation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate date; //todo: reservationDate 검증
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
+    @ManyToOne
+    private Member member;
+
+    public Reservation() {
+
+    }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.member = member;
-        this.date = new ReservationDate(date);
+        this.date = date;
         this.time = time;
         this.theme = theme;
     }
@@ -43,12 +54,8 @@ public class Reservation {
         return member.getName();
     }
 
-    public ReservationDate getReservationDate() {
-        return date;
-    }
-
     public LocalDate getDate() {
-        return date.getDate();
+        return date;
     }
 
     public ReservationTime getTime() {
