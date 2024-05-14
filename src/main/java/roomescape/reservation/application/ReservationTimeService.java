@@ -57,7 +57,7 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(LocalDate date, Theme theme) {
-        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAllTimeIdsByDateAndThemeId(date, theme));
+        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAllTimeIdsByDateAndTheme(date, theme));
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream()

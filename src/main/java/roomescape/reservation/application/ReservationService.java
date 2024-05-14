@@ -51,7 +51,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findAllByMember(Member loginMember) {
-        return reservationRepository.findAllByMember(loginMember);
+        return reservationRepository.findAllByMemberWithDetails(loginMember);
     }
 
     @Transactional

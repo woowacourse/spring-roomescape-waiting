@@ -145,7 +145,7 @@ class ReservationRepositoryTest extends RepositoryTest {
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
 
         // when
-        List<Long> reservationsByDateAndThemeId = reservationRepository.findAllTimeIdsByDateAndThemeId(
+        List<Long> reservationsByDateAndThemeId = reservationRepository.findAllTimeIdsByDateAndTheme(
                 MIA_RESERVATION_DATE, wootecoTheme);
 
         // then
@@ -161,7 +161,7 @@ class ReservationRepositoryTest extends RepositoryTest {
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, tommy));
 
         //when
-        List<Reservation> reservations = reservationRepository.findAllByMember(mia);
+        List<Reservation> reservations = reservationRepository.findAllByMemberWithDetails(mia);
 
         //then
         assertThat(reservations).hasSize(2);

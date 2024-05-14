@@ -26,7 +26,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                             @Param(value = "to") LocalDate toDate);
 
     @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :date AND r.theme = :theme")
-    List<Long> findAllTimeIdsByDateAndThemeId(@Param(value = "date") LocalDate date, @Param(value = "theme") Theme theme);
+    List<Long> findAllTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date, @Param(value = "theme") Theme theme);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -35,7 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.member
             WHERE r.member = :member
             """)
-    List<Reservation> findAllByMember(@Param(value = "member") Member member);
+    List<Reservation> findAllByMemberWithDetails(@Param(value = "member") Member member);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
