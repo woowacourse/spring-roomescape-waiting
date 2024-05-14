@@ -1,14 +1,18 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import roomescape.exception.InvalidMemberException;
 
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+@Embeddable
 public class Email {
-    private final static String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-    private final String value;
+    private static final Pattern EMAIL_REGEX = Pattern.compile("^\\w+@\\w+\\.\\w+$");
+
+    private String value;
+
+    public Email() {
+    }
 
     public Email(String value) {
         validate(value);
@@ -16,9 +20,7 @@ public class Email {
     }
 
     private void validate(String value) {
-        Pattern pattern = Pattern.compile(EMAIL_REGEX);
-        Matcher matcher = pattern.matcher(value);
-        if (!matcher.matches()) {
+        if (!EMAIL_REGEX.matcher(value).matches()) {
             throw new InvalidMemberException("유효하지 않은 이메일입니다.");
         }
     }
@@ -30,8 +32,12 @@ public class Email {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Email email = (Email) o;
         return Objects.equals(value, email.value);
     }

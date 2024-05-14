@@ -1,13 +1,18 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import roomescape.exception.InvalidMemberException;
 
-import java.util.Objects;
-
+@Embeddable
 public class Password {
     private static final int MINIMUM_PASSWORD_LENGTH = 6;
     private static final int MAXIMUM_PASSWORD_LENGTH = 12;
-    private final String value;
+
+    private String value;
+
+    public Password() {
+    }
 
     public Password(String value) {
         validate(value);
@@ -27,8 +32,12 @@ public class Password {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Password password = (Password) o;
         return Objects.equals(value, password.value);
     }
