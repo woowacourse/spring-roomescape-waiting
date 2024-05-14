@@ -15,6 +15,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 @Service
@@ -99,5 +100,13 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(id);
+    }
+
+    public List<PersonalReservationResponse> getReservationsByMemberId(long id) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
+
+        return reservations.stream()
+                .map(PersonalReservationResponse::from)
+                .toList();
     }
 }

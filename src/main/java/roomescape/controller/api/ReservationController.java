@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
 import roomescape.security.Auth;
@@ -38,6 +39,14 @@ public class ReservationController {
     ) {
         List<ReservationResponse> reservationResponses = reservationService
                 .getReservationsByConditions(memberId, themeId, dateFrom, dateTo);
+
+        return ResponseEntity.ok(reservationResponses);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<PersonalReservationResponse>> getMyReservations(@Auth Accessor accessor) {
+        List<PersonalReservationResponse> reservationResponses = reservationService
+                .getReservationsByMemberId(accessor.id());
 
         return ResponseEntity.ok(reservationResponses);
     }
