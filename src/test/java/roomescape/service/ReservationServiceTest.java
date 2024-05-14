@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,17 +12,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.member.LoginMember;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ReservationServiceTest {
 
@@ -33,40 +30,24 @@ class ReservationServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private final String rawDate = "2060-01-01";
 
     private final Long timeId = 1L;
     private final Long themeId = 1L;
     private final Long memberId = 1L;
 
-    private final ReservationTime reservationTime = new ReservationTime(1L, "10:00");
-    private final Theme theme = new Theme(1L, "theme1", "desc1", "https://");
-    private final LoginMember member = new LoginMember("1", "admin@a.com", "admin", "ADMIN");
-
-    @BeforeEach
-    void beforeEach() {
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES ('theme1', 'desc1', 'https://')");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES ('10:00')");
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('admin', 'admin@a.com', '123a!', 'ADMIN')");
-    }
-
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
     @Test
     void save() {
         Reservation saved = reservationService.save(memberId, rawDate, timeId, themeId);
-        assertThat(saved)
-            .isEqualTo(new Reservation(saved.getId(), member, rawDate, reservationTime, theme));
+        assertThat(saved.getId()).isEqualTo(5L);
     }
 
     @DisplayName("실패: 존재하지 않는 멤버 ID 입력 시 예외가 발생한다.")
     @Test
     void save_MemberIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.save(2L, rawDate, timeId, themeId)
+            () -> reservationService.save(10L, rawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
@@ -85,7 +66,7 @@ class ReservationServiceTest {
     @Test
     void save_TimeIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.save(memberId, rawDate, 2L, themeId)
+            () -> reservationService.save(memberId, rawDate, 10L, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다.");
     }

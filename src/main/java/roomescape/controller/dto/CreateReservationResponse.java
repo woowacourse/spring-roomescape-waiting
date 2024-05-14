@@ -14,7 +14,7 @@ public record CreateReservationResponse(Long id,
     public static CreateReservationResponse from(Reservation reservation) {
         return new CreateReservationResponse(
             reservation.getId(),
-            reservation.getLoginMember().getName(),
+            reservation.getMember().getName(),
             reservation.getDate(),
             reservation.getTime().getStartAt(),
             reservation.getTheme().getName()

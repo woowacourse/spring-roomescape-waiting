@@ -1,7 +1,9 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.theme.Name;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
@@ -29,16 +31,16 @@ public class ThemeService {
     }
 
     private void validateDuplication(String name) {
-        if (themeRepository.isExists(name)) {
+        if (themeRepository.existsByName(new Name(name))) {
             throw new RoomescapeException("같은 이름의 테마가 이미 존재합니다.");
         }
     }
 
-    public int delete(Long id) {
-        if (reservationRepository.isThemeIdUsed(id)) {
+    public void delete(Long id) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new RoomescapeException("해당 테마를 사용하는 예약이 존재하여 삭제할 수 없습니다.");
         }
-        return themeRepository.deleteById(id);
+        themeRepository.deleteById(id);
     }
 
     public List<Theme> findAll() {
@@ -46,6 +48,8 @@ public class ThemeService {
     }
 
     public List<Theme> findPopular() {
-        return themeRepository.findPopular(POPULAR_START_DATE, POPULAR_END_DATE, POPULAR_THEME_COUNT);
+        LocalDate start = LocalDate.now().minusDays(POPULAR_START_DATE);
+        LocalDate end = LocalDate.now().minusDays(POPULAR_END_DATE);
+        return themeRepository.findPopular(start, end, POPULAR_THEME_COUNT);
     }
 }

@@ -1,33 +1,55 @@
 package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
-import static roomescape.TokenTestFixture.ADMIN_TOKEN;
-import static roomescape.TokenTestFixture.USER_TOKEN;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationControllerTest {
 
+    private String adminToken;
+    private String userToken;
+
+    @BeforeEach
+    void login() {
+        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
+        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+
+        adminToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(admin)
+            .when().post("/login")
+            .then().extract().cookie("token");
+
+        userToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(user)
+            .when().post("/login")
+            .then().extract().cookie("token");
+    }
+
     @DisplayName("성공: 예약 삭제 -> 204")
     @Test
     void delete() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().delete("/admin/reservations/3")
             .then().log().all()
             .statusCode(204);
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
             .body("id", contains(1, 2, 4));
@@ -37,7 +59,7 @@ class AdminReservationControllerTest {
     @Test
     void delete_ByUnauthorizedUser() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().delete("/admin/reservations/3")
             .then().log().all()
             .statusCode(401);
@@ -47,7 +69,7 @@ class AdminReservationControllerTest {
     @Test
     void findAll() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(200)
@@ -58,7 +80,7 @@ class AdminReservationControllerTest {
     @Test
     void findAll_ByUnauthorizedUser() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(401);

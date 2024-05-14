@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.LoginCheckResponse;
 import roomescape.controller.dto.LoginRequest;
-import roomescape.domain.member.LoginMember;
+import roomescape.domain.member.Member;
 import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.LoginService;
 
@@ -41,8 +41,8 @@ public class LoginController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<LoginCheckResponse> checkLogin(@AuthenticationPrincipal LoginMember member) {
-        if (member == null || member.getId() == null) {
+    public ResponseEntity<LoginCheckResponse> checkLogin(@AuthenticationPrincipal Member member) {
+        if (member == null || member.getId() == null || member.getId() == -1L) {
             return ResponseEntity.ok(new LoginCheckResponse("", ""));
         }
         return ResponseEntity.ok(new LoginCheckResponse(member.getName(), member.getRole()));

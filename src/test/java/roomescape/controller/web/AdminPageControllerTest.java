@@ -1,21 +1,46 @@
 package roomescape.controller.web;
 
-import static roomescape.TokenTestFixture.ADMIN_TOKEN;
-import static roomescape.TokenTestFixture.USER_TOKEN;
-
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@Sql(value = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminPageControllerTest {
+
+    private String adminToken;
+    private String userToken;
+
+    @BeforeEach
+    void login() {
+        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
+        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+
+        adminToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(admin)
+            .when().post("/login")
+            .then().extract().cookie("token");
+
+        userToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(user)
+            .when().post("/login")
+            .then().extract().cookie("token");
+    }
 
     @DisplayName("성공: 관리자가 /admin 페이지 접속 -> 200")
     @Test
     void getAdminPage_Admin_Ok() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin")
             .then().log().all()
             .statusCode(200);
@@ -25,7 +50,7 @@ class AdminPageControllerTest {
     @Test
     void getAdminPage_User_Unauthorized() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().get("/admin")
             .then().log().all()
             .statusCode(401);
@@ -35,7 +60,7 @@ class AdminPageControllerTest {
     @Test
     void getReservationPage_Admin_Ok() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin/reservation")
             .then().log().all()
             .statusCode(200);
@@ -45,7 +70,7 @@ class AdminPageControllerTest {
     @Test
     void getReservationPage_User_Unauthorized() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().get("/admin/reservation")
             .then().log().all()
             .statusCode(401);
@@ -55,7 +80,7 @@ class AdminPageControllerTest {
     @Test
     void getReservationTimePage_Admin_Ok() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin/time")
             .then().log().all()
             .statusCode(200);
@@ -65,7 +90,7 @@ class AdminPageControllerTest {
     @Test
     void getReservationTimePage_User_Unauthorized() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().get("/admin/time")
             .then().log().all()
             .statusCode(401);
@@ -75,7 +100,7 @@ class AdminPageControllerTest {
     @Test
     void getThemePage_Admin_Ok() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/admin/theme")
             .then().log().all()
             .statusCode(200);
@@ -85,7 +110,7 @@ class AdminPageControllerTest {
     @Test
     void getThemePage_User_Unauthorized() {
         RestAssured.given().log().all()
-            .cookie("token", USER_TOKEN)
+            .cookie("token", userToken)
             .when().get("/admin/theme")
             .then().log().all()
             .statusCode(401);

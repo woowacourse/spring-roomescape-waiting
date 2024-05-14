@@ -10,32 +10,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.member.LoginMember;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private final String name = "themeName";
     private final String description = "themeDesc";
@@ -75,10 +60,8 @@ class ThemeServiceTest {
     @DisplayName("실패: 이름이 동일한 방탈출 테마를 저장하면 예외 발생")
     @Test
     void save_DuplicatedName() {
-        themeService.save(name, description, thumbnail);
-
         assertThatThrownBy(
-            () -> themeService.save(name, "d", "https://d")
+            () -> themeService.save("theme1", "d", "https://d")
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("같은 이름의 테마가 이미 존재합니다.");
     }
@@ -86,21 +69,7 @@ class ThemeServiceTest {
     @DisplayName("실패: 예약에 사용되는 테마 삭제 시도 시 예외 발생")
     @Test
     void delete_ReservationExists() {
-        Theme savedTheme = themeService.save(name, description, thumbnail);
-
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime("10:00"));
-
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('admin', 'admin@a.com', '123a!', 'ADMIN')");
-
-        reservationRepository.save(new Reservation(
-            new LoginMember("1", "admin@a.com", "admin", "ADMIN"),
-            "2060-01-01",
-            savedTime,
-            savedTheme)
-        );
-
-        assertThatThrownBy(() -> themeService.delete(savedTheme.getId()))
+        assertThatThrownBy(() -> themeService.delete(1L))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 테마를 사용하는 예약이 존재하여 삭제할 수 없습니다.");
     }

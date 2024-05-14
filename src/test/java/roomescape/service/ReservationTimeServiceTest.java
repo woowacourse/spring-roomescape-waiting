@@ -12,34 +12,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.member.LoginMember;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final String rawTime = "19:00";
 
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private final String rawTime = "10:00";
 
     @DisplayName("성공: 예약 시간을 저장하고, id 값과 함께 반환한다.")
     @Test
@@ -72,24 +59,8 @@ class ReservationTimeServiceTest {
     @DisplayName("실패: 시간을 사용하는 예약이 존재하는 경우 시간을 삭제할 수 없다.")
     @Test
     void delete_ReservationExists() {
-        ReservationTime savedTime = reservationTimeService.save(rawTime);
-
-        Theme savedTheme = themeRepository.save(
-            new Theme("themeName", "themeDesc", "https://")
-        );
-
-        jdbcTemplate.update(
-            "INSERT INTO member(name, email, password, role) VALUES ('admin', 'admin@a.com', '123a!', 'ADMIN')");
-
-        reservationRepository.save(new Reservation(
-            new LoginMember("1", "admin@a.com", "admin", "ADMIN"),
-            "2060-01-01",
-            savedTime,
-            savedTheme)
-        );
-
         assertThatThrownBy(
-            () -> reservationTimeService.delete(savedTime.getId())
+            () -> reservationTimeService.delete(1L)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 시간을 사용하는 예약이 존재하여 삭제할 수 없습니다.");
     }

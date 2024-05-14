@@ -1,8 +1,11 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.global.exception.RoomescapeException;
 
+@Embeddable
 public class Password {
 
     private static final int MIN_LENGTH = 1;
@@ -10,11 +13,15 @@ public class Password {
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
         String.format("^(?=.*[a-zA-Z])(?=.*[0-9]).{%d,%d}$", MIN_LENGTH, MAX_LENGTH));
 
-    private final String value;
+    @Column(name = "password")
+    private String value;
 
     public Password(String value) {
         validate(value);
         this.value = value;
+    }
+
+    protected Password() {
     }
 
     private void validate(String value) {

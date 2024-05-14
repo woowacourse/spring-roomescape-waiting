@@ -2,10 +2,10 @@ package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static roomescape.TokenTestFixture.ADMIN_TOKEN;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,11 +13,25 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateTimeRequest;
+import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationTimeControllerTest {
+
+    private String adminToken;
+
+    @BeforeEach
+    void login() {
+        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
+
+        adminToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(admin)
+            .when().post("/login")
+            .then().extract().cookie("token");
+    }
 
     @DisplayName("성공: 예약 시간 저장 -> 201")
     @Test
@@ -25,7 +39,7 @@ class AdminReservationTimeControllerTest {
         CreateTimeRequest request = new CreateTimeRequest("00:00");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/times")
@@ -39,14 +53,14 @@ class AdminReservationTimeControllerTest {
     @Test
     void delete() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .when().delete("/admin/times/2")
             .then().log().all()
             .statusCode(204);
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .when().get("/admin/times")
             .then().log().all()
@@ -58,7 +72,7 @@ class AdminReservationTimeControllerTest {
     @Test
     void findAll() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .when().get("/admin/times")
             .then().log().all()
@@ -73,7 +87,7 @@ class AdminReservationTimeControllerTest {
         CreateTimeRequest request = new CreateTimeRequest("24:00");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/times")
@@ -86,7 +100,7 @@ class AdminReservationTimeControllerTest {
     @Test
     void delete_ReservationExists() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .when().delete("/admin/times/1")
             .then().log().all()
@@ -100,7 +114,7 @@ class AdminReservationTimeControllerTest {
         CreateTimeRequest request = new CreateTimeRequest("10:00");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/times")

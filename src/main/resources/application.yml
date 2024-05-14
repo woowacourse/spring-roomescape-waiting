@@ -1,4 +1,13 @@
 spring:
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+
   profiles:
     active: local
     include: test

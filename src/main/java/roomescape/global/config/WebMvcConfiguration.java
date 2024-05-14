@@ -15,11 +15,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final HandlerInterceptor checkUserInterceptor;
 
     public WebMvcConfiguration(
-        HandlerMethodArgumentResolver argumentResolver,
+        HandlerMethodArgumentResolver authenticationPrincipalArgumentResolver,
         HandlerInterceptor checkRoleInterceptor,
         HandlerInterceptor checkUserInterceptor) {
 
-        this.argumentResolver = argumentResolver;
+        this.argumentResolver = authenticationPrincipalArgumentResolver;
         this.checkRoleInterceptor = checkRoleInterceptor;
         this.checkUserInterceptor = checkUserInterceptor;
     }

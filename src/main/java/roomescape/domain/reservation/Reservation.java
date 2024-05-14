@@ -1,28 +1,48 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.domain.member.LoginMember;
+import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final LoginMember loginMember;
-    private final Date date;
-    private final ReservationTime time;
-    private final Theme theme;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public Reservation(LoginMember loginMember, String rawDate, ReservationTime time, Theme theme) {
-        this(null, loginMember, rawDate, time, theme);
+    @ManyToOne
+    private Member member;
+
+    @Embedded
+    private Date date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation(Member Member, String rawDate, ReservationTime time, Theme theme) {
+        this(null, Member, rawDate, time, theme);
     }
 
-    public Reservation(Long id, LoginMember loginMember, String rawDate, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme) {
         this.id = id;
-        this.loginMember = loginMember;
+        this.member = Member;
         this.date = new Date(rawDate);
         this.time = time;
         this.theme = theme;
+    }
+
+    protected Reservation() {
     }
 
     public Long getId() {
@@ -30,7 +50,7 @@ public class Reservation {
     }
 
     public String getName() {
-        return loginMember.getName();
+        return member.getName();
     }
 
     public LocalDate getDate() {
@@ -45,8 +65,8 @@ public class Reservation {
         return theme;
     }
 
-    public LoginMember getLoginMember() {
-        return loginMember;
+    public Member getMember() {
+        return member;
     }
 
     @Override
@@ -58,13 +78,11 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(loginMember, that.loginMember)
-            && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-            && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, loginMember, date, time, theme);
+        return Objects.hash(id);
     }
 }

@@ -12,16 +12,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.domain.member.LoginMember;
 import roomescape.domain.member.Member;
 import roomescape.global.exception.AuthorizationException;
 
 @Component
 public class JwtManager {
-
-    private static final String CLAIM_NAME = "name";
-    private static final String CLAIM_EMAIL = "email";
-    private static final String CLAIM_ROLE = "role";
 
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
@@ -34,25 +29,22 @@ public class JwtManager {
 
         return Jwts.builder()
             .setSubject(member.getId().toString())
-            .claim(CLAIM_NAME, member.getName())
-            .claim(CLAIM_EMAIL, member.getEmail())
-            .claim(CLAIM_ROLE, member.getRole())
             .setExpiration(validity)
             .signWith(SignatureAlgorithm.HS256, secretKey)
             .compact();
     }
 
-    public LoginMember findMember(HttpServletRequest request) {
-        LoginMember defaultMember = new LoginMember("-1", "", "", "NOT_REGISTERED");
+    public Long parseToken(HttpServletRequest request) {
+        Long defaultId = -1L;
 
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return defaultMember;
+            return defaultId;
         }
 
         String token = extractTokenFromCookies(cookies);
         if (token == null) {
-            return defaultMember;
+            return defaultId;
         }
 
         return parse(token);
@@ -67,19 +59,13 @@ public class JwtManager {
         return "";
     }
 
-    private LoginMember parse(String token) {
+    private Long parse(String token) {
         try {
             Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
-
-            String id = claims.getSubject();
-            String name = claims.get(CLAIM_NAME, String.class);
-            String email = claims.get(CLAIM_EMAIL, String.class);
-            String role = claims.get(CLAIM_ROLE, String.class);
-
-            return new LoginMember(id, email, name, role);
+            return Long.valueOf(claims.getSubject());
         } catch (ExpiredJwtException e) {
             throw new AuthorizationException("토큰이 만료되었습니다.");
         } catch (UnsupportedJwtException | MalformedJwtException e) {

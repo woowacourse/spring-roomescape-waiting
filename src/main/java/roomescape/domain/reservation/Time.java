@@ -1,13 +1,17 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 import roomescape.global.exception.RoomescapeException;
 
+@Embeddable
 public class Time {
 
-    private final LocalTime time;
+    @Column(name = "start_at")
+    private LocalTime time;
 
     public Time(String rawTime) {
         try {
@@ -15,6 +19,9 @@ public class Time {
         } catch (DateTimeParseException | NullPointerException e) {
             throw new RoomescapeException("잘못된 시간 형식입니다.");
         }
+    }
+
+    protected Time() {
     }
 
     public boolean isBefore(LocalTime localTime) {

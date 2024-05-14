@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.member.LoginMember;
 import roomescape.global.exception.AuthorizationException;
 
 @Component
@@ -18,8 +17,8 @@ public class CheckUserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        LoginMember member = jwtManager.findMember(request);
-        if (member.isNotRegistered()) {
+        Long memberId = jwtManager.parseToken(request);
+        if (memberId == -1L) {
             throw new AuthorizationException("로그인 후 이용하세요.");
         }
         return true;

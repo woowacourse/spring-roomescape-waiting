@@ -7,16 +7,19 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.domain.member.LoginMember;
+import roomescape.domain.member.Member;
 import roomescape.global.auth.JwtManager;
+import roomescape.service.MemberService;
 
 @Component
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final JwtManager jwtManager;
+    private final MemberService memberService;
 
-    public AuthenticationPrincipalArgumentResolver(JwtManager jwtManager) {
+    public AuthenticationPrincipalArgumentResolver(JwtManager jwtManager, MemberService memberService) {
         this.jwtManager = jwtManager;
+        this.memberService = memberService;
     }
 
     @Override
@@ -25,13 +28,14 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     }
 
     @Override
-    public LoginMember resolveArgument(
+    public Member resolveArgument(
         MethodParameter parameter,
         ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest,
         WebDataBinderFactory binderFactory) {
 
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        return jwtManager.findMember(request);
+        Long memberId = jwtManager.parseToken(request);
+        return memberService.findById(memberId);
     }
 }

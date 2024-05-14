@@ -1,17 +1,24 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.global.exception.RoomescapeException;
 
+@Embeddable
 public class Thumbnail {
 
     private static final String PREFIX = "https://";
 
-    private final String url;
+    @Column(name = "thumbnail")
+    private String url;
 
     public Thumbnail(String url) {
         validate(url);
         this.url = url;
+    }
+
+    protected Thumbnail() {
     }
 
     private void validate(String url) {

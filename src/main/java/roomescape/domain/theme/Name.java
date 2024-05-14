@@ -1,17 +1,24 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.global.exception.RoomescapeException;
 
+@Embeddable
 public class Name {
 
     private static final int MAX_NAME_LENGTH = 20;
 
-    private final String value;
+    @Column(name = "name")
+    private String value;
 
     public Name(String value) {
         validate(value);
         this.value = value;
+    }
+
+    protected Name() {
     }
 
     private void validate(String value) {

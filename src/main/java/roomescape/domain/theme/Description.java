@@ -1,17 +1,24 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.global.exception.RoomescapeException;
 
+@Embeddable
 public class Description {
 
     private static final int MAX_DESCRIPTION_LENGTH = 50;
 
-    private final String value;
+    @Column(name = "description")
+    private String value;
 
     public Description(String value) {
         validate(value);
         this.value = value;
+    }
+
+    protected Description() {
     }
 
     private void validate(String value) {

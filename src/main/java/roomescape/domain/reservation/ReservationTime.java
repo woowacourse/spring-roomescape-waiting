@@ -1,13 +1,23 @@
 package roomescape.domain.reservation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final Time startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private Time startAt;
 
     public ReservationTime(String startAt) {
         this(null, startAt);
@@ -16,6 +26,9 @@ public class ReservationTime {
     public ReservationTime(Long id, String startAt) {
         this.id = id;
         this.startAt = new Time(startAt);
+    }
+
+    protected ReservationTime() {
     }
 
     public boolean isBeforeNow() {

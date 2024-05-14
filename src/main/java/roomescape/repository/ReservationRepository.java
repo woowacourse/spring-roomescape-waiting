@@ -1,24 +1,22 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 
-public interface ReservationRepository {
+@Repository
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAll();
+    Boolean existsByTimeId(Long id);
 
-    Reservation save(Reservation reservation);
+    Boolean existsByThemeId(Long id);
 
-    int deleteById(Long id);
+    Boolean existsByDateAndTimeIdAndThemeId(Date date, Long timeId, Long themeId);
 
-    Boolean isTimeIdUsed(Long id);
+    List<Reservation> findAllByDateAndThemeId(Date date, Long themeId);
 
-    Boolean isThemeIdUsed(Long id);
-
-    Boolean isDuplicated(String rawDate, Long timeId, Long themeId);
-
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
-
-    List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetween(Long themeId, Long memberId, Date dateFrom,
+        Date dateTo);
 }

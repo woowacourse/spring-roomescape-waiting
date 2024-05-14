@@ -1,27 +1,41 @@
 package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
-import static roomescape.TokenTestFixture.ADMIN_TOKEN;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class UserThemeControllerTest {
 
+    private String userToken;
+
+    @BeforeEach
+    void login() {
+        LoginRequest user = new LoginRequest("user@a.com", "123a!");
+
+        userToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(user)
+            .when().post("/login")
+            .then().extract().cookie("token");
+    }
+
     @DisplayName("성공: 테마 조회 -> 200")
     @Test
     void findAll() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", userToken)
             .contentType(ContentType.JSON)
             .when().get("/themes")
             .then().log().all()

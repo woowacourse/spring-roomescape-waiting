@@ -2,10 +2,10 @@ package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static roomescape.TokenTestFixture.ADMIN_TOKEN;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,11 +13,25 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateThemeRequest;
+import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminThemeControllerTest {
+
+    private String adminToken;
+
+    @BeforeEach
+    void login() {
+        LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
+
+        adminToken = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(admin)
+            .when().post("/login")
+            .then().extract().cookie("token");
+    }
 
     @DisplayName("성공: 테마 생성 -> 201")
     @Test
@@ -25,7 +39,7 @@ class AdminThemeControllerTest {
         CreateThemeRequest request = new CreateThemeRequest("theme4", "desc4", "https://url4");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/themes")
@@ -41,13 +55,13 @@ class AdminThemeControllerTest {
     @Test
     void delete() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().delete("/admin/themes/2")
             .then().log().all()
             .statusCode(204);
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().get("/themes")
             .then().log().all()
             .statusCode(200)
@@ -60,7 +74,7 @@ class AdminThemeControllerTest {
         CreateThemeRequest request = new CreateThemeRequest("theme4", "desc4", "hello.jpg");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/themes")
@@ -75,7 +89,7 @@ class AdminThemeControllerTest {
         CreateThemeRequest request = new CreateThemeRequest("theme1", "It's so fun", "https://url1");
 
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/admin/themes")
@@ -88,7 +102,7 @@ class AdminThemeControllerTest {
     @Test
     void delete_ReservationExists() {
         RestAssured.given().log().all()
-            .cookie("token", ADMIN_TOKEN)
+            .cookie("token", adminToken)
             .when().delete("/admin/themes/1")
             .then().log().all()
             .statusCode(400)

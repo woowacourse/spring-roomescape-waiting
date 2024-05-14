@@ -2,9 +2,9 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.member.LoginMember;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -34,7 +34,7 @@ public class ReservationService {
     }
 
     public Reservation save(Long memberId, String date, Long timeId, Long themeId) {
-        LoginMember member = findMember(memberId);
+        Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
         Reservation reservation = new Reservation(member, date, time, theme);
@@ -45,7 +45,7 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private LoginMember findMember(Long memberId) {
+    private Member findMember(Long memberId) {
         if (memberId == null) {
             throw new RoomescapeException("사용자 ID는 null일 수 없습니다.");
         }
@@ -57,22 +57,16 @@ public class ReservationService {
         if (timeId == null) {
             throw new RoomescapeException("시간 ID는 null일 수 없습니다.");
         }
-        try {
-            return reservationTimeRepository.findById(timeId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new RoomescapeException("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다.");
-        }
+        return reservationTimeRepository.findById(timeId)
+            .orElseThrow(() -> new RoomescapeException("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다."));
     }
 
     private Theme findTheme(Long themeId) {
         if (themeId == null) {
             throw new RoomescapeException("테마 ID는 null일 수 없습니다.");
         }
-        try {
-            return themeRepository.findById(themeId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다.");
-        }
+        return themeRepository.findById(themeId)
+            .orElseThrow(() -> new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다."));
     }
 
     private void validatePastReservation(LocalDate date, ReservationTime time) {
@@ -85,13 +79,13 @@ public class ReservationService {
     }
 
     private void validateDuplication(String rawDate, Long timeId, Long themeId) {
-        if (reservationRepository.isDuplicated(rawDate, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(new Date(rawDate), timeId, themeId)) {
             throw new RoomescapeException("해당 시간에 예약이 이미 존재합니다.");
         }
     }
 
-    public int delete(Long id) {
-        return reservationRepository.deleteById(id);
+    public void delete(Long id) {
+        reservationRepository.deleteById(id);
     }
 
     public List<Reservation> findAll() {
@@ -102,6 +96,7 @@ public class ReservationService {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
-        return reservationRepository.findAllBy(themeId, memberId, dateFrom, dateTo);
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId,
+            new Date(dateFrom.toString()), new Date(dateTo.toString())); // TODO : 제대로 정리;
     }
 }
