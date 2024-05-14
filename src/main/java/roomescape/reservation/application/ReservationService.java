@@ -43,7 +43,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAllWithDetails();
     }
 
     public List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate fromDate, LocalDate toDate) {

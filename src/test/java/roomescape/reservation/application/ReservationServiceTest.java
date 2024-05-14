@@ -157,6 +157,9 @@ class ReservationServiceTest extends ServiceTest {
         List<Reservation> reservations = reservationService.findAllByMember(mia);
 
         // then
-        assertThat(reservations).hasSize(1);
+        assertThat(reservations).hasSize(1)
+                .extracting(Reservation::getMember)
+                .extracting(Member::getName)
+                .contains(MIA_NAME);
     }
 }

@@ -71,12 +71,12 @@ class ReservationRepositoryTest extends RepositoryTest {
 
     @Test
     @DisplayName("모든 예약 목록을 조회한다.")
-    void findAll() {
+    void findAllWithDetails() {
         // given
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
 
         // when
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAllWithDetails();
 
         // then
         assertSoftly(softly -> {
