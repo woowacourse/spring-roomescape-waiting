@@ -1,9 +1,6 @@
 package roomescape.service;
 
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,11 +17,14 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -54,7 +54,7 @@ class ReservationServiceTest {
     private JdbcReservationRepository reservationRepository;
 
     @Autowired
-    private JdbcMemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     private final Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
     private final ReservationTime time = new ReservationTime(1L, "11:00");

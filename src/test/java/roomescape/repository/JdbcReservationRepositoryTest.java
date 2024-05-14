@@ -1,12 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +14,14 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.rowmapper.ReservationRowMapper;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+
+import javax.sql.DataSource;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -41,7 +42,7 @@ class JdbcReservationRepositoryTest {
     private JpaThemeRepository themeRepository;
 
     @Autowired
-    private JdbcMemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     private final String startAt1 = "13:00";
     private final String startAt2 = "15:00";

@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +16,13 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -52,7 +52,7 @@ class ThemeServiceTest {
     private JdbcReservationRepository reservationRepository;
 
     @Autowired
-    private JdbcMemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     @DisplayName("테마 삭제 시 저장되어있지 않은 아이디면 에러를 발생시킨다.")
     @Test

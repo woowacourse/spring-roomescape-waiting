@@ -1,24 +1,25 @@
 package roomescape.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberPassword;
 import roomescape.global.JwtManager;
-import roomescape.repository.JdbcMemberRepository;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.exception.UnauthorizedEmailException;
 import roomescape.service.exception.UnauthorizedPasswordException;
 
+import java.util.List;
+
 @Service
 public class MemberService {
 
-    private final JdbcMemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
     private final JwtManager jwtManager;
 
-    public MemberService(JdbcMemberRepository memberRepository, JwtManager jwtManager) {
+    public MemberService(JpaMemberRepository memberRepository, JwtManager jwtManager) {
         this.memberRepository = memberRepository;
         this.jwtManager = jwtManager;
     }

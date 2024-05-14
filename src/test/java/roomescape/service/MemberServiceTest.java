@@ -1,9 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,11 +13,15 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JdbcMemberRepository;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.exception.UnauthorizedEmailException;
 import roomescape.service.exception.UnauthorizedPasswordException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -45,7 +45,7 @@ class MemberServiceTest {
     private JwtManager jwtManager;
 
     @Autowired
-    private JdbcMemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     private final Member member1 = new Member(null, "t1@t1.com", "123", "러너덕", "MEMBER");
     private final Member member2 = new Member(null, "t2@t2.com", "124", "재즈", "MEMBER");

@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,11 +16,14 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
+import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -53,7 +53,7 @@ class ReservationTimeServiceTest {
     private JdbcReservationRepository reservationRepository;
 
     @Autowired
-    private JdbcMemberRepository memberRepository;
+    private JpaMemberRepository memberRepository;
 
     @DisplayName("중복된 예약 시간을 생성하면 에러를 발생시킨다.")
     @Test
