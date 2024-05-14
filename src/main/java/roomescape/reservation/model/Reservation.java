@@ -1,5 +1,10 @@
 package roomescape.reservation.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -7,12 +12,23 @@ import roomescape.member.domain.Member;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.theme.model.Theme;
 
+@Entity
 public class Reservation {
-    private final Long id;
-    private final Member member;
-    private final LocalDate date;
-    private final ReservationTime reservationTime;
-    private final Theme theme;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    private Member member;
+
+    private LocalDate date;
+
+    @ManyToOne
+    private ReservationTime reservationTime;
+
+    @ManyToOne
+    private Theme theme;
 
     public Reservation(final Long id,
                        final Member member,
@@ -29,6 +45,9 @@ public class Reservation {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+    }
+
+    protected Reservation() {
     }
 
     public static Reservation of(final Long id,
@@ -69,9 +88,10 @@ public class Reservation {
     private static void checkTimeToCreateIsPastWhenSameDate(final LocalDateTime now,
                                                             final LocalDate dateToCreate,
                                                             final ReservationTime timeToCreate) {
-        LocalDateTime newDateTime = LocalDateTime.of(dateToCreate, timeToCreate.getTime());
+        LocalDateTime newDateTime = LocalDateTime.of(dateToCreate, timeToCreate.getStartAt());
         if (newDateTime.isEqual(now) || newDateTime.isBefore(now)) {
-            throw new IllegalArgumentException(newDateTime + "는 현재보다 동일하거나 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
+            throw new IllegalArgumentException(
+                    newDateTime + "는 현재보다 동일하거나 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
         }
     }
 

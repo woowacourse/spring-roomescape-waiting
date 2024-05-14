@@ -21,7 +21,6 @@ import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
 import roomescape.fixture.MemberFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.JdbcMemberRepository;
 import roomescape.member.repository.MemberRepository;
 
 @ActiveProfiles("test")
@@ -34,10 +33,11 @@ class AuthServiceTest {
     private final TokenProvider tokenProvider;
 
     @Autowired
-    AuthServiceTest(final JdbcTemplate jdbcTemplate, final DataSource dataSource) {
-        this.memberRepository = new JdbcMemberRepository(jdbcTemplate, dataSource);
+    AuthServiceTest(final JdbcTemplate jdbcTemplate, final DataSource dataSource,
+                    final MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
         this.tokenProvider = new JwtTokenProvider(new TokenProperties("asdf", 1000));
-        this.authService = new AuthService(memberRepository, tokenProvider);
+        this.authService = new AuthService(this.memberRepository, tokenProvider);
     }
 
     @Test

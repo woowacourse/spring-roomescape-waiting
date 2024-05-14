@@ -63,7 +63,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeUsage(final Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalStateException("식별자 " + id + "인 시간을 사용 중인 예약이 존재합니다. 삭제가 불가능합니다.");
         }
     }

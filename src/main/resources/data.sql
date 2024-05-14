@@ -23,19 +23,19 @@ INSERT INTO theme (name, description, thumbnail) VALUES ('오락', '재밌어', 
 INSERT INTO theme (name, description, thumbnail) VALUES ('판타지', '말이 안돼', 'https://i.postimg.cc/8k2PQ4yv/theme.jpg');
 INSERT INTO theme (name, description, thumbnail) VALUES ('감성', '감동적', 'https://sherlock-holmes.co.kr/attach/theme/16788523411.jpg');
 
-INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hihi@naver.com', 'hihi');
-INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
-INSERT INTO member (name, role, email, password) values ( '포비', 'USER', 'test@naver.com', 'hihi');
+INSERT INTO member (name, member_role, email, password) values ( '몰리', 0, 'hihi@naver.com', 'hihi');
+INSERT INTO member (name, member_role, email, password) values ( '비밥', 1, 'bibap@naver.com', 'hihi');
+INSERT INTO member (name, member_role, email, password) values ( '포비', 1, 'test@naver.com', 'hihi');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-04-25', 3, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-26', 4, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-27', 5, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-04-28', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-29', 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-30', 3, 3);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-05-01', 4, 3);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-05-02', 5, 4);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-05-03', 1, 4);
-INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-05-04', 2, 5);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, 1);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-04-25', 3, 1);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-26', 4, 1);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-27', 5, 2);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-04-28', 1, 2);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-29', 2, 2);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-30', 3, 3);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-05-01', 4, 3);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-05-02', 5, 4);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-05-03', 1, 4);
+-- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 3, '2024-05-04', 2, 5);

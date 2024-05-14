@@ -7,6 +7,6 @@ public record CreateReservationTimeResponse(Long id, LocalTime startAt) {
     public static CreateReservationTimeResponse from(final ReservationTime reservationTime) {
         return new CreateReservationTimeResponse(
                 reservationTime.getId(),
-                reservationTime.getTime());
+                reservationTime.getStartAt());
     }
 }

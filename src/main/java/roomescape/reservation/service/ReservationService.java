@@ -44,14 +44,14 @@ public class ReservationService {
         Member member = findMember(authInfo.getMemberId());
 
         checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
-                reservationTime.getTime());
+                reservationTime.getStartAt());
         Reservation reservation = createReservationRequest.toReservation(member, reservationTime, theme);
         return CreateReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private void checkAlreadyExistReservation(final CreateReservationRequest createReservationRequest,
                                               final LocalDate date, final String themeName, final LocalTime time) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(
                 createReservationRequest.date(),
                 createReservationRequest.timeId(),
                 createReservationRequest.themeId())) {
@@ -107,7 +107,7 @@ public class ReservationService {
 
     public List<FindReservationResponse> searchBy(final Long themeId, final Long memberId,
                                                   final LocalDate dateFrom, final LocalDate dateTo) {
-        return mapToFindReservationResponse(reservationRepository.searchBy(themeId, memberId, dateFrom, dateTo));
+        return mapToFindReservationResponse(reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
     }
 
     private List<FindReservationResponse> mapToFindReservationResponse(final List<Reservation> reservations) {

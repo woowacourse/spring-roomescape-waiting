@@ -33,7 +33,7 @@ class AdminIntegrationTest {
 
     private String getTokenByLogin() {
         jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'admin@naver.com', 'hihi')");
+                "INSERT INTO member (name, role, email, password) values ( '비밥', 1, 'admin@naver.com', 'hihi')");
 
         return RestAssured
                 .given().log().all()
@@ -50,7 +50,7 @@ class AdminIntegrationTest {
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
         jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
         jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -242,7 +242,7 @@ class AdminIntegrationTest {
         // jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
         jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
         jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -267,7 +267,7 @@ class AdminIntegrationTest {
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
         // jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
         jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -291,7 +291,7 @@ class AdminIntegrationTest {
     void createReservationByAdmin_WhenMemberNotExist() {
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
         jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        // jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        // jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");

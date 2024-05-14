@@ -7,7 +7,7 @@ public record FindAvailableTimesResponse(Long id, LocalTime startAt, Boolean alr
     public static FindAvailableTimesResponse from(final ReservationTime reservationTime, final Boolean alreadyBooked) {
         return new FindAvailableTimesResponse(
                 reservationTime.getId(),
-                reservationTime.getTime(),
+                reservationTime.getStartAt(),
                 alreadyBooked);
     }
 }

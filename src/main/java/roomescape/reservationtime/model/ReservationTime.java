@@ -1,21 +1,31 @@
 package roomescape.reservationtime.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class ReservationTime {
-    private final Long id;
-    private final LocalTime time;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime time) {
-        validateReservationTimeIsNull(time);
+    public ReservationTime(final Long id, final LocalTime startAt) {
+        validateReservationTimeIsNull(startAt);
 
         this.id = id;
-        this.time = time;
+        this.startAt = startAt;
+    }
+
+    protected ReservationTime() {
     }
 
     public static ReservationTime of(final Long id, final ReservationTime reservationTime) {
-        return new ReservationTime(id, reservationTime.getTime());
+        return new ReservationTime(id, reservationTime.getStartAt());
     }
 
     private void validateReservationTimeIsNull(final LocalTime time) {
@@ -25,7 +35,7 @@ public class ReservationTime {
     }
 
     public boolean isNotAfter(final LocalTime time) {
-        return this.time.isBefore(time) || isSameStartAt(time);
+        return this.startAt.isBefore(time) || isSameStartAt(time);
     }
 
     public boolean isSameTo(final Long timeId) {
@@ -33,15 +43,15 @@ public class ReservationTime {
     }
 
     public boolean isSameStartAt(final LocalTime time) {
-        return Objects.equals(this.time, time);
+        return Objects.equals(this.startAt, time);
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalTime getTime() {
-        return time;
+    public LocalTime getStartAt() {
+        return startAt;
     }
 
     @Override

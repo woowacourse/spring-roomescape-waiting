@@ -8,6 +8,6 @@ public record CreateTimeOfReservationResponse(Long id,
     public static CreateTimeOfReservationResponse from(final ReservationTime reservationTime) {
         return new CreateTimeOfReservationResponse(
                 reservationTime.getId(),
-                reservationTime.getTime());
+                reservationTime.getStartAt());
     }
 }

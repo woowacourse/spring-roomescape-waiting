@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @ActiveProfiles("test")
-@JdbcTest
+//@JdbcTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public @interface JdbcRepositoryTest {
 }

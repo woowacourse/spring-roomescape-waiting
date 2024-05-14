@@ -1,13 +1,28 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import roomescape.reservation.model.Reservation;
 
+@Entity
 public class Member {
-    private final Long id;
-    private final String name;
-    private final MemberRole memberRole;
-    private final String email;
-    private final String password;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private MemberRole memberRole;
+    private String email;
+    private String password;
+
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservation = new HashSet<>();
 
     public Member(final Long id, final String name, final MemberRole memberRole, final String email, final String password) {
         validateNameIsNull(name);
@@ -20,6 +35,10 @@ public class Member {
         this.memberRole = memberRole;
         this.email = email;
         this.password = password;
+    }
+
+    protected Member() {
+
     }
 
     private void validateNameIsNull(final String name) {

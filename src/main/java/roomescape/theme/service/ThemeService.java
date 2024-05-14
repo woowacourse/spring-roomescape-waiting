@@ -2,6 +2,7 @@ package roomescape.theme.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.dto.request.CreateThemeRequest;
@@ -35,8 +36,8 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<FindPopularThemesResponse> getPopularThemes(int size) {
-        return themeRepository.findOrderByReservation(size).stream()
+    public List<FindPopularThemesResponse> getPopularThemes(Pageable pageable) {
+        return themeRepository.findAllOrderByReservationCount(pageable).stream()
                 .map(FindPopularThemesResponse::from)
                 .toList();
     }
