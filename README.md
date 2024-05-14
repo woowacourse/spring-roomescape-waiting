@@ -9,7 +9,7 @@
 ## 1단계 요구사항
 - 엔티티 매핑
   - [x] Theme
-  - [ ] Time
+  - [x] Time
   - [ ] Member
 - 연관관계 매핑
   - [ ] Reservation

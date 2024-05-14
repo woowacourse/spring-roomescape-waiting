@@ -7,7 +7,7 @@ CREATE TABLE member
     PRIMARY KEY (id)
 );
 
-CREATE TABLE reservation_time
+CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     start_at TIME         NOT NULL UNIQUE,
