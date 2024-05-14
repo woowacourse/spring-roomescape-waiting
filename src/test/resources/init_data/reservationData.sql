@@ -1,3 +1,7 @@
+INSERT INTO member (name, email, password, role)
+VALUES ('a1', 'a1@email.com', 'a1', 'ADMIN');
+
+
 INSERT INTO reservation_time (start_at)
 VALUES ('10:00:00'),
        ('11:00:00'),
@@ -28,11 +32,7 @@ VALUES ('hi1', 'happy1', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2
        ('hi12', 'happy12', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg');
 
 
-INSERT INTO member (name, email, password, role)
-VALUES ('a1', 'a1@email.com', 'a1', 'admin');
-
-
-INSERT INTO reservation (reservation_date, member_id, time_id, theme_id)
+INSERT INTO reservation (date, member_id, time_id, theme_id)
 VALUES ('2024-04-25', 1, 1, 1),
        ('2024-04-25', 1, 1, 2),
        ('2024-04-25', 1, 2, 2),
