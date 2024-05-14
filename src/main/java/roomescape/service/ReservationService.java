@@ -23,6 +23,7 @@ import roomescape.exception.time.NotFoundTimeException;
 import roomescape.web.dto.request.reservation.ReservationRequest;
 import roomescape.web.dto.request.reservation.ReservationSearchCond;
 import roomescape.web.dto.response.reservation.ReservationResponse;
+import roomescape.web.dto.response.reservation.UserReservationResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +45,13 @@ public class ReservationService {
                         cond.themeName())
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<UserReservationResponse> findAllByMemberId(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(UserReservationResponse::from)
                 .toList();
     }
 

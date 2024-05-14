@@ -14,8 +14,10 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     Optional<Reservation> findById(Long id);
 
+    @Query(value = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?", nativeQuery = true)
     List<Long> findTimeIdByDateAndThemeId(LocalDate date, Long themeId);
 
+    List<Reservation> findAllByMemberId(Long memberId);
 
     @Query(value = """
             SELECT reservation.id, reservation.date,
