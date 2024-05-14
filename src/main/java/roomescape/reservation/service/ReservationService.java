@@ -1,7 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.dao.MemberDao;
 import roomescape.member.domain.Member;
@@ -11,24 +9,27 @@ import roomescape.reservation.domain.ReservationSearch;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.dao.TimeDao;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final MemberDao memberDao;
     private final TimeDao timeDao;
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
 
-    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, TimeDao timeDao, ThemeDao themeDao) {
+    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, TimeDao timeDao, ThemeRepository themeRepository) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
         this.timeDao = timeDao;
-        this.themeDao = themeDao;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findReservations() {
@@ -81,7 +82,7 @@ public class ReservationService {
     }
 
     private Theme findThemeByThemeId(Long themeId) {
-        return themeDao.findThemeById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 테마가 존재하지 않습니다."));
     }
 

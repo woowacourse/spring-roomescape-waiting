@@ -14,8 +14,11 @@
     - [x] Time
     - [x] Member
 - 연관관계 매핑
+    - [x] Reservation
+- DAO -> CrudRepository (JpaRepository) 로 전환
+    - [x] Theme
+    - [ ] Time
+    - [ ] Member
     - [ ] Reservation
-- Repository 전환
-    - [ ] DAO -> CrudRepository (JpaRepository) 로 전환
 - 추가적인 리팩터링
     - [ ] 멤버에 패스워드 추가

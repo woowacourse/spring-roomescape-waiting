@@ -1,26 +1,27 @@
 package roomescape.theme.service;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.PopularThemePeriod;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ThemeService {
     private static final int COUNT_OF_POPULAR_THEME = 10;
 
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(ThemeDao themeDao) {
-        this.themeDao = themeDao;
+    public ThemeService(ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
     }
 
     public List<ThemeResponse> findThemes() {
-        return themeDao.findThemes()
+        return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -31,18 +32,18 @@ public class ThemeService {
         LocalDate startDate = popularThemePeriod.getStartDate();
         LocalDate endDate = popularThemePeriod.getEndDate();
 
-        return themeDao.findThemesSortedByCountOfReservation(startDate, endDate, COUNT_OF_POPULAR_THEME)
+        return themeRepository.findThemesSortedByCountOfReservation(startDate, endDate, COUNT_OF_POPULAR_THEME)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public ThemeResponse createTheme(ThemeCreateRequest request) {
-        Theme createdTheme = themeDao.createTheme(request.createTheme());
+        Theme createdTheme = themeRepository.save(request.createTheme());
         return ThemeResponse.from(createdTheme);
     }
 
     public void deleteTheme(Long id) {
-        themeDao.deleteTheme(id);
+        themeRepository.deleteById(id);
     }
 }

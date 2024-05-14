@@ -1,14 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +13,22 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.dao.TimeDao;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeResponse;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -38,7 +39,7 @@ class ReservationServiceTest {
     @Mock
     private TimeDao timeDao;
     @Mock
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
     @InjectMocks
     private ReservationService reservationService;
 
@@ -82,7 +83,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeDao.findTimeById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
-        given(themeDao.findThemeById(1L))
+        given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
         given(reservationDao.createReservation(any())).willReturn(new Reservation(
                 1L, new Member(1L, "브라운", "brown@abc.com"),
@@ -134,7 +135,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeDao.findTimeById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
-        given(themeDao.findThemeById(1L)).willReturn(Optional.empty());
+        given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -150,7 +151,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeDao.findTimeById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
-        given(themeDao.findThemeById(1L))
+        given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
