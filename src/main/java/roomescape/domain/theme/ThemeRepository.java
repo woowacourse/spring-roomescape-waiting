@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
@@ -27,7 +28,11 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                 ORDER BY COUNT(th.id) DESC
                 LIMIT :limit
             """, nativeQuery = true)
-    List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
+    List<Theme> findPopularThemes(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("limit") int limit
+    );
 
     boolean existsByName(String name);
 }

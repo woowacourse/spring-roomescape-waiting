@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
@@ -26,7 +27,10 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             ON r.time.id = rt.id AND r.date = :date AND r.theme.id = :themeId
             GROUP BY rt.id, rt.startAt
             """)
-    List<AvailableReservationTimeDto> findAvailableReservationTimes(LocalDate date, long themeId);
+    List<AvailableReservationTimeDto> findAvailableReservationTimes(
+            @Param("date") LocalDate date,
+            @Param("themeId") Long themeId
+    );
 
     boolean existsByStartAt(LocalTime startAt);
 }

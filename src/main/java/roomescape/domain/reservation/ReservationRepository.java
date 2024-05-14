@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -18,7 +19,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (:dateFrom IS NULL OR r.date >= :dateFrom)
                 AND (:dateTo IS NULL OR r.date <= :dateTo)
             """)
-    List<Reservation> findAllByConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllByConditions(
+            @Param("memberId") Long memberId,
+            @Param("themeId") Long themeId,
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDate dateTo
+    );
 
     boolean existsByTimeId(long id);
 
