@@ -1,16 +1,29 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import roomescape.exception.BadRequestException;
 
+@Entity
 public class Member {
 
     private static final String EMAIL_PATTERN = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$";
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
+    public Member() {
+    }
 
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
