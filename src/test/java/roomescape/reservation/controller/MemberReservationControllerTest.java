@@ -242,7 +242,7 @@ class MemberReservationControllerTest {
     void readMemberReservations() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
-                .when().get("/reservations-mine")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
