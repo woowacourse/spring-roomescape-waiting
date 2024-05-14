@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.application.dto.MemberResponse;
 import roomescape.application.dto.TokenRequest;
 import roomescape.application.dto.TokenResponse;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.domain.MemberQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
@@ -42,7 +43,7 @@ public class AuthService {
     }
 
     private Member getMemberBy(String email) {
-        return memberQueryRepository.findByEmail(email)
+        return memberQueryRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER,
                         String.format("존재하지 않는 회원입니다. 입력한 회원 email:%s", email)));
     }

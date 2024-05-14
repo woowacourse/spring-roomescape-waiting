@@ -33,7 +33,7 @@ public class ReservationTimeService {
                     String.format("중복된 예약 시간입니다. 요청 예약 시간:%s", startAt));
         }
 
-        ReservationTime reservationTime = reservationTimesRepository.create(request.toReservationTime());
+        ReservationTime reservationTime = reservationTimesRepository.save(request.toReservationTime());
         return ReservationTimeResponse.from(reservationTime);
     }
 
@@ -42,10 +42,10 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public void deleteById(long id) {
+    public void deleteById(Long id) {
         ReservationTime findReservationTime = reservationTimesRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
-        long reservedCount = reservationQueryRepository.findReservationCountByTimeId(id);
+        Long reservedCount = reservationQueryRepository.countByTimeId(id);
         if (reservedCount > 0) {
             throw new RoomescapeException(RoomescapeErrorCode.ALREADY_RESERVED,
                     String.format("해당 예약 시간에 연관된 예약이 존재하여 삭제할 수 없습니다. 삭제 요청한 시간:%s", findReservationTime.getStartAt()));

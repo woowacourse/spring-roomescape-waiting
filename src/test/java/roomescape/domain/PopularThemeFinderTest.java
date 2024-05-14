@@ -8,7 +8,11 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Page;
 import roomescape.application.ServiceTest;
+import roomescape.config.TestConfig;
 
 @ServiceTest
 public class PopularThemeFinderTest {
@@ -34,20 +38,16 @@ public class PopularThemeFinderTest {
     @DisplayName("현재 날짜 이전 1주일 동안 가장 예약이 많이 된 테마 10개를 내림차순 정렬하여 조회한다.")
     @Test
     void shouldReturnThemesWhenFindPopularThemes() {
-        ReservationTime reservationTime1 = reservationTimeRepository.findById(1L).orElseThrow();
-        ReservationTime reservationTime2 = reservationTimeRepository.findById(2L).orElseThrow();
-        ReservationTime reservationTime3 = reservationTimeRepository.findById(3L).orElseThrow();
-        Theme theme1 = themeRepository.create(ThemeFixture.of("test1", "test1", "test1"));
-        Theme theme2 = themeRepository.create(ThemeFixture.of("test2", "test2", "test2"));
-        Theme theme3 = themeRepository.create(ThemeFixture.of("test3", "test3", "test3"));
-        Member member = memberCommandRepository.create(MemberFixture.defaultValue());
-        reservationCommandRepository.create(createReservation(member, reservationTime1, theme1));
-        reservationCommandRepository.create(createReservation(member, reservationTime2, theme2));
-        reservationCommandRepository.create(createReservation(member, reservationTime3, theme2));
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<Theme> themes = themeRepository.findAll();
+        Member member = memberCommandRepository.findAll().get(0);
+        reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
+        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
+        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
 
         List<Theme> popularThemes = popularThemeFinder.findThemes();
 
-        assertThat(popularThemes).containsExactly(theme2, theme1);
+        assertThat(popularThemes).containsExactly(themes.get(1), themes.get(0));
     }
 
     private Reservation createReservation(Member member, ReservationTime reservationTime, Theme theme) {

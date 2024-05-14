@@ -46,7 +46,7 @@ public class ReservationFactory {
     }
 
     private void validateUniqueReservation(ReservationRequest request) {
-        if (reservationQueryRepository.existBy(request.date(), request.timeId(), request.themeId())) {
+        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");
         }
     }

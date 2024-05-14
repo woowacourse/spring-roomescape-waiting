@@ -32,7 +32,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(LoginMember member, ReservationRequest request) {
         Reservation reservation = reservationFactory.create(member.id(), request);
-        return ReservationResponse.from(reservationCommandRepository.create(reservation));
+        return ReservationResponse.from(reservationCommandRepository.save(reservation));
     }
 
     @Transactional

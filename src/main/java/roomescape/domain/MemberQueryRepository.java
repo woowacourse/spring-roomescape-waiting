@@ -1,13 +1,8 @@
 package roomescape.domain;
 
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemberQueryRepository {
-
-    Optional<Member> findById(Long id);
-
-    Optional<Member> findByEmail(String email);
-
-    List<Member> findAll();
+public interface MemberQueryRepository extends JpaRepository<Member, Long> {
+    Optional<Member> findByEmail(Email email);
 }

@@ -1,6 +1,6 @@
 package roomescape.domain;
 
-public interface MemberCommandRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    Member create(Member member);
+public interface MemberCommandRepository extends JpaRepository<Member, Long> {
 }

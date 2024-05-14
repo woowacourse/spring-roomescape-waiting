@@ -1,8 +1,6 @@
 package roomescape.domain;
 
-public interface ReservationCommandRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    Reservation create(Reservation reservation);
-
-    void deleteById(long id);
+public interface ReservationCommandRepository extends JpaRepository<Reservation, Long> {
 }

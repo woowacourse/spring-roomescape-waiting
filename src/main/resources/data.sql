@@ -5,10 +5,10 @@ values ('수달', 'sudal@wooteco.com', 'wootecoCrew6!', 'BASIC'),
        ('운영자', 'admin@wooteco.com', 'wootecoCrew6!', 'ADMIN');
 
 insert into reservation_time (start_at)
-values ('12:00:00'),
-       ('13:00:00'),
-       ('14:00:00'),
-       ('15:00:00');
+values ('12:30:00'),
+       ('13:30:00'),
+       ('14:30:00'),
+       ('15:30:00');
 
 insert into theme (name, description, thumbnail)
 values ('테마1', '테마1 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
