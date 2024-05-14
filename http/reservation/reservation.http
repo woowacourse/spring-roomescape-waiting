@@ -24,3 +24,6 @@ GET {{api}}/reservations
 
 ### 3. 예약 취소
 DELETE {{api}}/reservations/1
+
+### 4. 나의 예약 조회
+GET {{api}}/reservations/me
