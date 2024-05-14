@@ -1,24 +1,22 @@
 package roomescape.member.role;
 
+import jakarta.persistence.Embeddable;
 import java.util.Arrays;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 
 public enum MemberRole {
 
-    NON_MEMBER("nonMember"),
-    MEMBER("member"),
-    ADMIN("admin");
+    NON_MEMBER,
+    MEMBER,
+    ADMIN;
 
-    private final String roleName;
-
-    MemberRole(String roleName) {
-        this.roleName = roleName;
+    MemberRole() {
     }
 
     public static MemberRole findMemberRole(String role) {
         return Arrays.stream(MemberRole.values())
-                .filter(memberRole -> memberRole.roleName.equals(role))
+                .filter(memberRole -> memberRole.name().equals(role))
                 .findAny()
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_ROLE_NOT_EXIST_EXCEPTION));
     }
