@@ -18,6 +18,8 @@ public class Member {
     private MemberName name;
     @Embedded
     private MemberEmail email;
+    @Embedded
+    private MemberPassword password;
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
