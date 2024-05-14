@@ -23,6 +23,7 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -248,5 +249,25 @@ class ReservationControllerTest extends ControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("사용자의 예약 목록 GET 요청 시 상태코드 200을 반환한다.")
+    void findMyReservations() throws Exception {
+        // given
+        ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
+
+        BDDMockito.given(reservationService.findAllByMember(any()))
+                .willReturn(List.of(expectedReservation));
+
+        // when & then
+        mockMvc.perform(get("/reservations/mine").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].theme").value(WOOTECO_THEME_NAME))
+                .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()))
+                .andExpect(jsonPath("$[0].time").value(MIA_RESERVATION_TIME.toString()))
+                .andExpect(jsonPath("$[0].status").value(ReservationStatus.BOOKING.name()));
     }
 }

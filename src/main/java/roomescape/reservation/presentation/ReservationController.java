@@ -13,6 +13,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
@@ -48,7 +49,9 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
         List<Reservation> reservations = reservationService.findAll();
-        return ResponseEntity.ok(reservations.stream().map(ReservationResponse::from).toList());
+        return ResponseEntity.ok(reservations.stream()
+                .map(ReservationResponse::from)
+                .toList());
     }
 
     @GetMapping("/searching")
@@ -68,5 +71,13 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
+        List<Reservation> reservations = reservationService.findAllByMember(loginMember);
+        return ResponseEntity.ok(reservations.stream()
+                .map(MyReservationResponse::from)
+                .toList());
     }
 }
