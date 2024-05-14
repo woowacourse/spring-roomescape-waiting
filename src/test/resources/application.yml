@@ -8,7 +8,6 @@ spring:
     defer-datasource-initialization: true
   sql:
     init:
-      schema-locations: classpath:/schema.sql
       data-locations: classpath:/truncate.sql
 
 
