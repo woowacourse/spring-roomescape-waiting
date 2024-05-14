@@ -1,16 +1,33 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.*;
 import roomescape.exception.AuthorizationException;
 
 import java.util.Objects;
 
+@Entity
 public class Member {
 
-    private final Long id;
-    private final Name name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @Column(nullable = false)
+    private Name name;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
+    public Member() {
+    }
 
     public Member(final Long id, final Name name, final String email) {
         this(id, name, email, null, null);

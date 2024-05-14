@@ -1,14 +1,20 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Name {
 
     private static final Pattern NAME_PATTERN = Pattern.compile("^\\d+$");
 
-    private final String name;
+    private String name;
+
+    public Name() {
+    }
 
     public Name(final String name) {
         validate(name);
