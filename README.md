@@ -1,7 +1,7 @@
 # 요구사항 문서
 
 - [x] JdbcTemplate 대신 Spring Data JPA 사용하도록 변경
-- [ ] 내 예약 목록을 조회하는 API 구현
+- [x] 내 예약 목록을 조회하는 API 구현
 
 # API 명세
 

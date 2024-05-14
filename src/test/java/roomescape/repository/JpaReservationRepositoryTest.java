@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
 import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
 import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
@@ -122,5 +123,15 @@ class JpaReservationRepositoryTest {
                 () -> Assertions.assertThat(reservationRepository.existsByTheme(new Theme(2L, DEFAULT_THEME)))
                         .isFalse()
         );
+    }
+
+    @Test
+    @DisplayName("특정 회원의 예약을 잘 조회하는지 확인한다.")
+    void findByMemberId() {
+        reservationRepository.save(DEFAULT_RESERVATION);
+
+        List<Reservation> reservations = reservationRepository.findByMemberId(DEFAULT_MEMBER.getId());
+
+        Assertions.assertThat(reservations).containsExactly(DEFAULT_RESERVATION);
     }
 }

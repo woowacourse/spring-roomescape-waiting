@@ -50,6 +50,13 @@ public class CollectionReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByMemberId(long memberId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getReservationMember().getId() == memberId)
+                .toList();
+    }
+
+    @Override
     public boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime) {
         return reservations.stream()
                 .filter(reservation -> theme.equals(reservation.getTheme()))

@@ -33,6 +33,11 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByMemberId(long memberId) {
+        return jpaReservationDao.findAllByReservationMember_Id(memberId);
+    }
+
+    @Override
     public boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime) {
         return jpaReservationDao.existsByThemeAndDateAndTime(theme, date, reservationTime);
     }
