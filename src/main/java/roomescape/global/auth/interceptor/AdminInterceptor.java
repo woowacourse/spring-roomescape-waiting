@@ -47,18 +47,18 @@ public class AdminInterceptor implements HandlerInterceptor {
                     Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
 
                     Member member = memberService.findMemberById(memberId);
-                    return checkRole(member, memberId);
+                    return checkRole(member);
                 }
             }
         }
         throw new UnauthorizedException(ErrorType.INVALID_TOKEN, "JWT 토큰이 존재하지 않거나 유효하지 않습니다.");
     }
 
-    private boolean checkRole(final Member member, final Long memberId) {
+    private boolean checkRole(final Member member) {
         if (member.isRole(Role.ADMIN)) {
             return true;
         }
         throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
-                String.format("회원 권한이 존재하지 않아 접근할 수 없습니다. [memberId: %d, Role: %s]", memberId, member.getRole()));
+                String.format("회원 권한이 존재하지 않아 접근할 수 없습니다. [memberId: %d, Role: %s]", member.getId(), member.getRole()));
     }
 }

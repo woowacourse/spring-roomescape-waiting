@@ -6,6 +6,7 @@
 |----------|--------|---------------------------------------------------------|-----------------------|----------------------------------------|-------------------|
 |          | GET    | `/`                                                     | 인기 테마 페이지 요청          | `templates/index.html`                 | `@Controller`     |
 |          | GET    | `/reservation`                                          | 사용자 예약 페이지 요청         | `templates/reservation.html`           | `@Controller`     |
+|          | GET    | `/reservation-mine`                                     | 내 예약 조회 페이지 요청        | `templates/reservation-mine.html`      | `@Controller`     |
 | `ADMIN`  | GET    | `/admin`                                                | 어드민 페이지 요청            | `templates/admin/index.html`           | `@Controller`     |
 | `ADMIN`  | GET    | `/admin/reservation`                                    | 예약 관리 페이지 요청          | `templates/admin/reservation-new.html` | `@Controller`     |
 | `ADMIN`  | GET    | `/admin/reservationTime`                                | 예약 시간 관리 페이지 요청       | `templates/admin/reservationTime.html` | `@Controller`     |
@@ -13,9 +14,10 @@
 |          | GET    | `/login`                                                | 로그인 페이지 요청            | `templates/login.html`                 | `@Controller`     |
 |          | POST   | `/login`                                                | 로그인 요청                |                                        | `@RestController` |
 |          | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
-|          | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
-|          | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
-|          | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
+| `MEMBER` | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
+| `ADMIN`  | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
+| `MEMBER` | GET    | `/reservations-mine`                                    | 내 예약 정보 조회            |                                        | `@RestController` |
+| `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
 |          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`  | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
 | `MEMBER` | POST   | `/reservations`                                         | 예약 추가                 |                                        | `@RestController` |
 |          | DELETE | `/reservations/{id}`                                    | 예약 취소                 |                                        | `@RestController` |
@@ -128,6 +130,48 @@ Content-Type: application/json
             "id": 1,
             "startAt": "10:00"
         }
+    }
+]
+```
+
+---
+
+### 내 예약 정보 조회 API
+
+- Request
+
+```
+GET /reservations-mine HTTP/1.1
+Cookie: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM;
+```
+
+- Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "reservationId": 1,
+        "theme": "테마1",
+        "date": "2024-03-01",
+        "time": "10:00",
+        "status": "예약"
+    },
+    {
+        "reservationId": 2,
+        "theme": "테마2",
+        "date": "2024-03-01",
+        "time": "12:00",
+        "status": "예약"
+    },
+    {
+        "reservationId": 3,
+        "theme": "테마3",
+        "date": "2024-03-01",
+        "time": "14:00",
+        "status": "예약"
     }
 ]
 ```

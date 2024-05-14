@@ -5,6 +5,7 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -26,7 +27,7 @@ public record ReservationRequest(
         }
     }
 
-    public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member) {
-        return new Reservation(this.date, reservationTime, theme, member);
+    public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
+        return new Reservation(this.date, reservationTime, theme, member, status);
     }
 }

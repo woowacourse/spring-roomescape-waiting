@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface ReservationRepository extends JpaRepository<Reservation,Long>, JpaSpecificationExecutor<Reservation> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
     List<Reservation> findByReservationTime(ReservationTime reservationTime);
 
@@ -38,4 +38,6 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long>, 
     }
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
+
+    List<Reservation> findByMember(Member member);
 }

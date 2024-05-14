@@ -1,6 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 public class Reservation {
@@ -28,20 +31,27 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus reservationStatus;
 
     public Reservation() {
     }
 
     public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
-        this(null, date, reservationTime, theme, member);
+        this(null, date, reservationTime, theme, member, ReservationStatus.RESERVED);
     }
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
+    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
+        this(null, date, reservationTime, theme, member, status);
+    }
+
+    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
+        this.reservationStatus = status;
 
         validateBlank();
     }
@@ -63,6 +73,18 @@ public class Reservation {
 
     public ReservationTime getReservationTime() {
         return reservationTime;
+    }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public LocalTime getStartAt() {
+        return reservationTime.getStartAt();
+    }
+
+    public boolean isReserved() {
+        return reservationStatus == ReservationStatus.RESERVED;
     }
 
     public Theme getTheme() {

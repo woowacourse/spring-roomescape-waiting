@@ -10,10 +10,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.MemberReservationResponse;
+import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfoResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
@@ -108,7 +111,8 @@ public class ReservationService {
         validateDateAndTime(requestDate, requestReservationTime, now);
         validateReservationDuplicate(request, theme);
 
-        Reservation savedReservation = reservationRepository.save(request.toEntity(requestReservationTime, theme, member));
+        // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
+        Reservation savedReservation = reservationRepository.save(request.toEntity(requestReservationTime, theme, member, ReservationStatus.RESERVED));
         return ReservationResponse.from(savedReservation);
     }
 
@@ -154,5 +158,15 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
         return new ReservationsResponse(response);
+    }
+
+    public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
+        Member member = memberService.findMemberById(memberId);
+        List<Reservation> reservations = reservationRepository.findByMember(member);
+        List<MemberReservationResponse> responses = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            responses.add(MemberReservationResponse.from(reservation));
+        }
+        return new MemberReservationsResponse(responses);
     }
 }

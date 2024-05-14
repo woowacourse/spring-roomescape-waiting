@@ -46,6 +46,8 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    // TODO: 로그아웃, 회원가입 구현
+
     private TokenDto getTokenFromCookie(final HttpServletRequest request) {
         String accessToken = "";
         String refreshToken = "";

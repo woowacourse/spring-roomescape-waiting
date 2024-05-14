@@ -15,6 +15,7 @@ import roomescape.global.auth.annotation.Admin;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.dto.response.ApiResponse;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
@@ -35,6 +36,11 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationsResponse> getAllReservations() {
         return ApiResponse.success(reservationService.findAllReservations());
+    }
+
+    @GetMapping("/reservations-mine")
+    public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
+        return ApiResponse.success(reservationService.findReservationByMemberId(memberId));
     }
 
     @GetMapping("/reservations/themes/{themeId}/times")

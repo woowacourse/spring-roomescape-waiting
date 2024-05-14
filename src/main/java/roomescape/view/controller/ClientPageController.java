@@ -15,4 +15,10 @@ public class ClientPageController {
     public String showReservationPage() {
         return "reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String showReservationMinePage() {
+        return "/reservation-mine";
+    }
+
 }
