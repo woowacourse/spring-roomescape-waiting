@@ -1,14 +1,16 @@
 # 기능 구현
 
 ## 1단계
+
 - [ ] gradle 의존성을 추가한다
 - [ ] 엔티티를 매핑한다
 - [ ] 연관관계를 매핑한다
 
 ## 2단계
+
 - [ ] 내 예약 목록 조회 API를 구현한다
 - [ ] 내 예약 확인 페이지를 제공한다
-  - `GET /reservation-mine` 요청시 `reservation-mine.html` 페이지 응답
+    - `GET /reservation-mine` 요청시 `reservation-mine.html` 페이지 응답
 
 # API 명세
 
@@ -164,9 +166,8 @@ Content-Type: application/json
 Request
 
 ```
-GET /reservations-mine HTTP/1.1
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
-host: localhost:8080
+GET /reservations-mine
+cookie: token=hello.example.token
 ```
 
 Response

@@ -1,0 +1,24 @@
+### 로그인 API
+POST {{base-url}}/login
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "1234"
+}
+
+### 로그아웃 API
+POST {{base-url}}/logout
+
+### 인증 정보 조회 API
+GET {{base-url}}/login/check
+
+### 회원가입 API
+POST {{base-url}}/signup
+Content-Type: application/json
+
+{
+  "email": "user2@gmail.com",
+  "password": "1234",
+  "name": "사용자2"
+}
