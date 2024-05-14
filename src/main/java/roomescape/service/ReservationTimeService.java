@@ -4,9 +4,11 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.domain.Theme;
+import roomescape.repository.ThemeRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.service.dto.request.AvailableTimeRequest;
@@ -19,10 +21,13 @@ public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationTimeService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
+    public ReservationTimeService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository,
+                                  ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
     }
 
     public ReservationTimeResponse createReservationTime(ReservationTimeRequest reservationTimeRequest) {
@@ -33,19 +38,22 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAllReservationTimes();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public List<AvailableTimeResponse> findAvailableTimes(AvailableTimeRequest availableTimeRequest) {
-        List<Reservation> reservations = reservationRepository.findReservationsByDateAndThemeId(
+        Theme findTheme = themeRepository.findById(availableTimeRequest.themeId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(
                 availableTimeRequest.date(),
-                availableTimeRequest.themeId()
+                findTheme
         );
 
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAllReservationTimes();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return reservationTimes.stream()
                 .map(reservationTime ->  AvailableTimeResponse. of(
@@ -62,7 +70,7 @@ public class ReservationTimeService {
 
     public void deleteReservationTime(Long id) {
         try {
-            reservationTimeRepository.delete(id);
+            reservationTimeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ExceptionCode.TIME_IN_USE);
         }

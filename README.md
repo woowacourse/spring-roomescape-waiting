@@ -5,3 +5,8 @@
   - [x] Member
   - [x] Reservation
 - [x] 연관관계 매핑
+- [x] JDBC JPA로 전환
+  - [x] Theme
+  - [x] Time
+  - [x] Member
+  - [x] Reservation

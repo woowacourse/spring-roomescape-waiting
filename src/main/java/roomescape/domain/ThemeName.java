@@ -6,7 +6,10 @@ public class ThemeName {
 
     private static final int MAX_NAME_LENGTH = 20;
 
-    private final String value;
+    private String value;
+
+    public ThemeName() {
+    }
 
     public ThemeName(String value) {
         validate(value);

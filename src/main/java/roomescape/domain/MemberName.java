@@ -8,7 +8,10 @@ public class MemberName {
     private static final String REGEX = "^[가-힣a-zA-Z]+$";
     private static final Pattern PATTERN = Pattern.compile(REGEX);
 
-    private final String value;
+    private String value;
+
+    public MemberName() {
+    }
 
     public MemberName(String value) {
         validate(value);

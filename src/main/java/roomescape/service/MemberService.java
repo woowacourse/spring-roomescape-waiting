@@ -2,7 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.MemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.MemberRequest;
 import roomescape.service.dto.response.MemberResponse;
 
@@ -20,7 +20,7 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAllMembers() {
-        return memberRepository.findAllMembers().stream()
+        return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }

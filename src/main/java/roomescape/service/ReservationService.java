@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.service.dto.request.ReservationConditionRequest;
@@ -47,7 +47,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
 
-        if (reservationRepository.existByTimeIdAndDate(reservationRequest.themeId(), reservationRequest.date())) {
+        if (reservationRepository.existsByTimeAndDate(reservationTime, reservationRequest.date())) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
@@ -65,18 +65,24 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAllReservations();
+        List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public void deleteReservation(Long id) {
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
     }
 
     public List<ReservationResponse> findAllReservationsByCondition(ReservationConditionRequest condition) {
-        List<Reservation> reservations = reservationRepository.findAllReservationsByCondition(condition.themeId(), condition.memberId(), condition.dateFrom(), condition.dateTo());
+        Theme findTheme = themeRepository.findById(condition.themeId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        Member findMember = memberRepository.findById(condition.memberId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(
+                findTheme, findMember, condition.dateFrom(), condition.dateTo());
+
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

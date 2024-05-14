@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 
@@ -26,7 +26,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeRepository.findAllThemes();
+        List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -47,6 +47,6 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 }

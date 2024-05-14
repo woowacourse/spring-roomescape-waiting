@@ -9,9 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Member {
@@ -21,7 +19,7 @@ public class Member {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
 
     private String email;
@@ -30,9 +28,6 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
 
     public Member() {
     }

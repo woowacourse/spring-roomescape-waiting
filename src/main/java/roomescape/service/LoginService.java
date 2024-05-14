@@ -3,7 +3,7 @@ package roomescape.service;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.infrastructure.TokenProvider;
@@ -29,7 +29,7 @@ public class LoginService {
     }
 
     private Member findMemberBy(String email) {
-        return memberRepository.findByEmail(email)
+        return memberRepository.findMemberByEmail(email)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
     }
 

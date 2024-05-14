@@ -7,10 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Theme {
@@ -20,15 +17,12 @@ public class Theme {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "theme_name", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private ThemeName name;
 
     private String description;
 
     private String thumbnail;
-
-    @OneToMany(mappedBy = "theme")
-    private Set<Reservation> reservations = new HashSet<>();
 
     public Theme() {
     }
