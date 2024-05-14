@@ -44,8 +44,8 @@ class ThemeRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Test
     @DisplayName("id로 엔티티를 찾는다.")
+    @Test
     void findByIdTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         Theme savedTheme = themeRepository.save(theme);
@@ -58,8 +58,8 @@ class ThemeRepositoryTest {
         );
     }
 
-    @Test
     @DisplayName("이름으로 엔티티를 찾는다.")
+    @Test
     void findByIdNameTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         Theme savedTheme = themeRepository.save(theme);
@@ -72,8 +72,8 @@ class ThemeRepositoryTest {
         );
     }
 
-    @Test
     @DisplayName("전체 엔티티를 조회한다.")
+    @Test
     void findAllTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         themeRepository.save(theme);
@@ -103,8 +103,8 @@ class ThemeRepositoryTest {
         assertThat(exist).isTrue();
     }
 
+    @DisplayName("n일 이후의 날짜를 기준으로 n개의 인기 테마를 조회한다.")
     @Test
-    @DisplayName("최근 1주일을 기준하여 예약이 많은 순으로 10개의 테마를 조회한다.")
     void findTopTenThemesDescendingOfLastWeekTest() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
@@ -131,7 +131,8 @@ class ThemeRepositoryTest {
         reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
 
-        List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(2);
+        LocalDate dateFrom = LocalDate.now(). minusWeeks(1);
+        List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, 2);
 
         assertAll(
                 () -> assertThat(themes.get(0).getName()).isEqualTo("액션"),
@@ -139,8 +140,8 @@ class ThemeRepositoryTest {
         );
     }
 
-    @Test
     @DisplayName("id를 받아 삭제한다.")
+    @Test
     void deleteTest() {
         Theme theme = themeRepository.save(
                 new Theme(

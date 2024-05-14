@@ -1,5 +1,6 @@
 package roomescape.reservation.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,10 +19,10 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             from theme t
             join reservation r
             on r.theme_id = t.id
-            where r.date between timestampadd(week, -1, current_timestamp()) and current_timestamp()
+            where r.date >= ?
             group by t.id
             order by cnt desc
             limit ?;
                """, nativeQuery = true)
-    List<Theme> findPopularThemesDescOfLastWeekForLimit(int limitCount);
+    List<Theme> findPopularThemesDescOfLastWeekForLimit(LocalDate dateFrom, int limitCount);
 }
