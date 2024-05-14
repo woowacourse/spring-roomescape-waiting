@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
-import roomescape.repository.H2ReservationRepository;
-import roomescape.repository.H2ReservationTimeRepository;
 import roomescape.service.exception.TimeNotFoundException;
 import roomescape.service.exception.TimeUsedException;
 
@@ -21,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
-@Import({TimeService.class, H2ReservationRepository.class, H2ReservationTimeRepository.class})
+@Import(TimeService.class)
 class TimeServiceTest {
 
     @Autowired
@@ -72,7 +70,7 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 시간을 삭제할 경우 반환 값이 0이다.")
+    @DisplayName("존재하지 않는 예약 시간을 삭제할 경우 예외가 발생한다.")
     void deleteTImeNotPresent() {
         // given
         long id = 100L;

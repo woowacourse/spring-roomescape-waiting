@@ -1,24 +1,19 @@
 package roomescape.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Member;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository {
-
-    List<Member> findAll();
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
-    Member fetchByEmail(String email);
+    default Member fetchByEmail(String email) {
+        return findByEmail(email).orElseThrow();
+    }
 
-    Optional<Member> findById(long id);
-
-    Member fetchById(long id);
-
-    Member save(Member member);
-
-    void delete(String email);
-
+    default Member fetchById(long id) {
+        return findById(id).orElseThrow();
+    }
 }

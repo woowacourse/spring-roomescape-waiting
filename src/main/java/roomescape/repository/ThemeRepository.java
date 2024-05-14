@@ -1,19 +1,12 @@
 package roomescape.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ThemeNotFoundException;
 
-import java.util.List;
-import java.util.Optional;
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-public interface ThemeRepository {
-
-    List<Theme> findAll();
-
-    Optional<Theme> findById(long id);
-
-    Theme fetchById(long id);
-
-    Theme save(Theme theme);
-
-    void delete(long id);
+    default Theme fetchById(long id) {
+        return findById(id).orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
+    }
 }

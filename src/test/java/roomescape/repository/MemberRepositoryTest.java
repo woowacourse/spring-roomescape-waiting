@@ -8,14 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationTimeRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
-    ReservationTimeRepository timeRepository;
+    private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("모든 예약 시간 목록을 조회한다.")
+    @DisplayName("모든 회원 목록을 조회한다.")
     void findAll() {
-        assertThat(timeRepository.findAll()).isEmpty();
+        assertThat(memberRepository.findAll()).isEmpty();
     }
 }

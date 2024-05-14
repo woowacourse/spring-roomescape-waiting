@@ -41,7 +41,7 @@ public class ThemeService {
             throw new ThemeUsedException("예약된 테마는 삭제할 수 없습니다.");
         }
         final Theme findTheme = themeRepository.fetchById(id);
-        themeRepository.delete(findTheme.getId());
+        themeRepository.deleteById(findTheme.getId());
     }
 
     public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until,

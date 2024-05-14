@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.exception.InvalidRequestException;
-import roomescape.repository.H2ReservationRepository;
-import roomescape.repository.H2ThemeRepository;
 import roomescape.service.exception.ThemeUsedException;
 
 import java.time.LocalDate;
@@ -15,7 +13,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
-@Import({H2ReservationRepository.class, ThemeService.class, H2ThemeRepository.class})
+@Import(ThemeService.class)
 class ThemeServiceTest {
 
     @Autowired

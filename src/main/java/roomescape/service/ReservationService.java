@@ -37,9 +37,7 @@ public class ReservationService {
     }
 
     public List<Reservation> getReservations() {
-        return reservationRepository.findAll()
-                .stream()
-                .toList();
+        return reservationRepository.findAll();
     }
 
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
@@ -52,7 +50,7 @@ public class ReservationService {
     public Reservation addReservation(final CreateReservationRequest reservationRequest) {
         final ReservationTime time = reservationTimeRepository.fetchById(reservationRequest.timeId());
         final Theme theme = themeRepository.fetchById(reservationRequest.themeId());
-        final Member member = memberRepository.fetchById(reservationRequest.memberId());
+        final Member member = memberRepository.findById(reservationRequest.memberId()).get();
 
         final Reservation reservation = new Reservation(null, member, reservationRequest.date(), time, theme);
 
@@ -76,7 +74,7 @@ public class ReservationService {
 
     private void validateDuplicate(final Theme theme, final ReservationTime time, final Reservation reservation) {
         final boolean isExistsReservation = reservationRepository
-                .existsByThemesAndDateAndTimeId(theme.getId(), time.getId(), reservation.getDate());
+                .existsByThemeIdAndTimeIdAndDate(theme.getId(), time.getId(), reservation.getDate());
         if (isExistsReservation) {
             throw new DuplicateReservationException("중복된 시간으로 예약이 불가합니다.");
         }
