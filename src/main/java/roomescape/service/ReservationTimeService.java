@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationTime;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
@@ -10,7 +11,6 @@ import roomescape.service.request.ReservationTimeAppRequest;
 import roomescape.service.response.BookableReservationTimeAppResponse;
 import roomescape.service.response.ReservationTimeAppResponse;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
@@ -54,8 +54,8 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<BookableReservationTimeAppResponse> findAllWithBookAvailability(LocalDate date, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
+    public List<BookableReservationTimeAppResponse> findAllWithBookAvailability(String date, Long themeId) {
+        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new ReservationDate(date), themeId);
         List<ReservationTime> reservedTimes = reservations.stream()
                 .map(Reservation::getReservationTime)
                 .toList();
