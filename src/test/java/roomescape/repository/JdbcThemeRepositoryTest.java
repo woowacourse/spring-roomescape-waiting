@@ -122,7 +122,7 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마를 삭제한다.")
     void deleteById() {
         jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail)"
-                + " VALUES (1, '테마1', '테마1 설명', 'https://example1.com')");
+                + " VALUES (1L, '테마1', '테마1 설명', 'https://example1.com')");
 
         themeRepository.deleteById(1L);
 
