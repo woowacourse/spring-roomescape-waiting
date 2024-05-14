@@ -2,13 +2,12 @@ package roomescape.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
@@ -28,11 +27,11 @@ public class JwtTokenProvider {
         long now = new Date().getTime();
 
         return Jwts.builder()
-                .claim(CLAIM_ID_KEY, member.getId())
+                .claim(CLAIM_ID_KEY, member.getId().toString()) // TODO: double로 자동 형변환 되는 현상 알아보기
                 .claim(CLAIM_EMAIL_KEY, member.getEmail())
                 .claim(CLAIM_ROLE_KEY, member.getRole().name())
                 .setExpiration(new Date(now + expiredPeriod))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
@@ -53,13 +52,10 @@ public class JwtTokenProvider {
     }
 
     private Claims parseJwt(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (SignatureException exception) {
-            throw new UnauthorizedException("인증 정보가 올바르지 않습니다.");
-        }
+        return Jwts.parserBuilder()
+                .setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
