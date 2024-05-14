@@ -4,6 +4,14 @@ spring:
       enabled: true
   datasource:
     url: jdbc:h2:mem:database
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: false
 
 
 jwt:
