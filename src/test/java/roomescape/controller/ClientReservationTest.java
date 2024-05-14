@@ -17,8 +17,9 @@ import roomescape.dto.response.TimeSlotResponse;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ClientReservationTest {
+
     @LocalServerPort
-    int port;
+    private int port;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +47,8 @@ class ClientReservationTest {
     @DisplayName("사용자 예약 시 부적절한 입력값이 들어 올 경우 400오류를 반환한다.")
     @ParameterizedTest
     @CsvSource({"2099-01-11,test", "1111-22-33,1", "1111-22-33,test", ","})
-    void given_when_booksWithInvalidDateAndThemeId_then_statusCodeIsBadRequest(String invalidDate, String invalidThemeId) {
+    void given_when_booksWithInvalidDateAndThemeId_then_statusCodeIsBadRequest(String invalidDate,
+                                                                               String invalidThemeId) {
         RestAssured.given().log().all()
                 .when().get("/books/%s/%s".formatted(invalidDate, invalidThemeId))
                 .then().log().all()

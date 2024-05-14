@@ -17,6 +17,7 @@ import roomescape.service.TimeService;
 @RestController
 @RequestMapping("/times")
 public class TimeController {
+
     private final TimeService timeService;
 
     public TimeController(TimeService timeService) {

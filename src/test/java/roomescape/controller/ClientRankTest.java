@@ -15,8 +15,9 @@ import roomescape.dto.response.ThemeResponse;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ClientRankTest {
+
     @LocalServerPort
-    int port;
+    private int port;
 
     @BeforeEach
     void setUp() {
@@ -26,7 +27,7 @@ class ClientRankTest {
     @DisplayName("랭크를 조회하면 현재 날짜 기준 일주일 동안의 인기 테마를 확인할 수 있다.")
     @Test
     void given_when_ranks_then_statusCodeIsOk() {
-        final List<ThemeResponse> themeResponses = RestAssured.given().log().all()
+        List<ThemeResponse> themeResponses = RestAssured.given().log().all()
                 .when().get("/ranks")
                 .then().extract().body()
                 .jsonPath().getList("", ThemeResponse.class);

@@ -9,6 +9,7 @@ import roomescape.domain.Theme;
 
 @Repository
 public class RankDao {
+
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Theme> rowMapper =
             (resultSet, rowNum) -> new Theme(
@@ -18,11 +19,11 @@ public class RankDao {
                     resultSet.getString("thumbnail")
             );
 
-    public RankDao(final JdbcTemplate jdbcTemplate) {
+    public RankDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Theme> findTopTenByDate(final LocalDate fromDate, final LocalDate toDate) {
+    public List<Theme> findTopTenByDate(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                  select theme.id, theme.name, theme.description, theme.thumbnail
                  from theme

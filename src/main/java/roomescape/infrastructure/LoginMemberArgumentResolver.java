@@ -13,24 +13,25 @@ import roomescape.service.MemberService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+
     private final MemberService memberService;
     private final TokenGenerator tokenGenerator;
 
-    public LoginMemberArgumentResolver(final MemberService memberService, final TokenGenerator tokenGenerator) {
+    public LoginMemberArgumentResolver(MemberService memberService, TokenGenerator tokenGenerator) {
         this.memberService = memberService;
         this.tokenGenerator = tokenGenerator;
     }
 
     @Override
-    public boolean supportsParameter(final MethodParameter parameter) {
+    public boolean supportsParameter(MethodParameter parameter) {
         return parameter.getParameterType().equals(LoginMember.class);
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-        final HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        final String token = tokenGenerator.getTokenFromCookies(request);
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        String token = tokenGenerator.getTokenFromCookies(request);
 
         try {
             return memberService.findLoginMemberByToken(token);

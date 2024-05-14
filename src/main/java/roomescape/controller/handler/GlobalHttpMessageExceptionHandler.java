@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalHttpMessageExceptionHandler {
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadableException(final HttpMessageNotReadableException ex) {
+    public ResponseEntity<String> handleHttpMessageNotReadableException() {
         String errorMessage = "[ERROR] 적절하지 않은 입력값 입니다";
         return ResponseEntity.badRequest().body(errorMessage);
     }

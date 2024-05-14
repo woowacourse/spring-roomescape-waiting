@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import roomescape.domain.TimeSlot;
 
 public record TimeSlotRequest(@JsonFormat(pattern = "HH:mm") LocalTime startAt) {
+
     public TimeSlotRequest {
         isValid(startAt);
     }

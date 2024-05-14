@@ -13,7 +13,7 @@ public class ThemeService {
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
 
-    public ThemeService(final ThemeDao themeDao, final ReservationDao reservationDao) {
+    public ThemeService(ThemeDao themeDao, ReservationDao reservationDao) {
         this.themeDao = themeDao;
         this.reservationDao = reservationDao;
     }
@@ -25,23 +25,23 @@ public class ThemeService {
                 .toList();
     }
 
-    public ThemeResponse findById(final Long id) {
+    public ThemeResponse findById(Long id) {
         Theme theme = themeDao.findById(id);
         return ThemeResponse.from(theme);
     }
 
-    public ThemeResponse create(final ThemeRequest themeRequest) {
+    public ThemeResponse create(ThemeRequest themeRequest) {
         Long id = themeDao.create(themeRequest);
         Theme theme = themeRequest.toEntity(id);
         return ThemeResponse.from(theme);
     }
 
-    public void delete(final Long id) {
+    public void delete(Long id) {
         validateExistReservation(id);
         themeDao.delete(id);
     }
 
-    private void validateExistReservation(final Long id) {
+    private void validateExistReservation(Long id) {
         if (reservationDao.isExistsThemeId(id)) {
             throw new IllegalArgumentException("[ERROR] 예약이 등록된 테마는 제거할 수 없습니다");
         }

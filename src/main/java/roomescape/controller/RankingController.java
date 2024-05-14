@@ -11,9 +11,10 @@ import roomescape.service.RankService;
 @RestController
 @RequestMapping("/ranks")
 public class RankingController {
+
     private final RankService rankService;
 
-    public RankingController(final RankService rankService) {
+    public RankingController(RankService rankService) {
         this.rankService = rankService;
     }
 

@@ -18,6 +18,7 @@ import roomescape.dto.request.ReservationRequest;
 
 @Repository
 public class ReservationDao {
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
     private final RowMapper<Reservation> rowMapper =
@@ -37,7 +38,7 @@ public class ReservationDao {
             );
 
 
-    public ReservationDao(final JdbcTemplate jdbcTemplate) {
+    public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
@@ -46,7 +47,7 @@ public class ReservationDao {
     }
 
 
-    public Long create(final ReservationRequest reservationRequest) {
+    public Long create(ReservationRequest reservationRequest) {
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("member_id", reservationRequest.memberId())
                 .addValue("date", reservationRequest.date())
@@ -55,7 +56,7 @@ public class ReservationDao {
         return jdbcInsert.executeAndReturnKey(parameterSource).longValue();
     }
 
-    public void delete(final Long id) {
+    public void delete(Long id) {
         String sql = "delete from reservation where id = ?";
         jdbcTemplate.update(sql, id);
     }
@@ -65,28 +66,28 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public boolean isExists(final LocalDate date, final Long timeId, final Long themeId) {
+    public boolean isExists(LocalDate date, Long timeId, Long themeId) {
         String sql = buildCountQuery();
         return jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId) != 0;
     }
 
-    public boolean isExistsTimeId(final Long timeId) {
+    public boolean isExistsTimeId(Long timeId) {
         String sql = "select exists(select 1 from reservation where time_id = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
     }
 
-    public boolean isExistsThemeId(final Long themeId) {
+    public boolean isExistsThemeId(Long themeId) {
         String sql = "select exists(select 1 from reservation where theme_id = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public List<Reservation> findByDateAndThemeId(final LocalDate date, final Long themeId) {
+    public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
         String sql = buildSelectQuery() + " where date = ? and theme_id = ?";
         return jdbcTemplate.query(sql, rowMapper, date, themeId);
     }
 
-    public List<Reservation> findAllByMemberAndDateAndTheme(final Long memberId, final Long themeId,
-                                                            final String dateFrom, final String dateTo) {
+    public List<Reservation> findAllByMemberAndDateAndTheme(Long memberId, Long themeId,
+                                                            String dateFrom, String dateTo) {
         String sql = buildSelectQuery() + buildConditionQuery(memberId, themeId, dateFrom, dateTo);
         return jdbcTemplate.query(sql, rowMapper);
     }
@@ -123,9 +124,9 @@ public class ReservationDao {
                 """;
     }
 
-    private String buildConditionQuery(final Long memberId, final Long themeId, final String dateFrom,
-                                       final String dateTo) {
-        final List<String> whereQuery = new ArrayList<>();
+    private String buildConditionQuery(Long memberId, Long themeId, String dateFrom,
+                                       String dateTo) {
+        List<String> whereQuery = new ArrayList<>();
 
         if (memberId != null) {
             whereQuery.add("r.member_id = " + memberId);

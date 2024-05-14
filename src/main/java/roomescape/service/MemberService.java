@@ -12,30 +12,28 @@ import roomescape.repository.MemberDao;
 
 @Service
 public class MemberService {
-    private final String TEST_EMAIL = "test@email.com";
-    private final String TEST_PASSWORD = "1234";
 
     private final TokenGenerator tokenGenerator;
     private final MemberDao memberDao;
 
-    public MemberService(final TokenGenerator tokenGenerator, final MemberDao memberDao) {
+    public MemberService(TokenGenerator tokenGenerator, MemberDao memberDao) {
         this.tokenGenerator = tokenGenerator;
         this.memberDao = memberDao;
     }
 
-    public TokenResponse createToken(final TokenRequest tokenRequest) {
+    public TokenResponse createToken(TokenRequest tokenRequest) {
         Member member = memberDao.findByEmailAndPassword(tokenRequest.email(), tokenRequest.password());
         String accessToken = tokenGenerator.createToken(tokenRequest.email(), member.getRole().name());
         return TokenResponse.from(accessToken);
     }
 
-    public MemberResponse findMemberByToken(final String token) {
+    public MemberResponse findMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
         Member member = memberDao.findByEmail(email);
         return MemberResponse.from(member);
     }
 
-    public LoginMember findLoginMemberByToken(final String token) {
+    public LoginMember findLoginMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
         Member member = memberDao.findByEmail(email);
         return LoginMember.from(member);

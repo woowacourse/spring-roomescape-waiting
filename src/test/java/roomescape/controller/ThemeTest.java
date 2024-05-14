@@ -19,8 +19,9 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeTest {
+
     @LocalServerPort
-    int port;
+    private int port;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +79,8 @@ class ThemeTest {
     @DisplayName("테마 등록 시 빈 값이 한 개 이상 포함되어 있을 경우 400 오류를 반환한다.")
     @ParameterizedTest
     @CsvSource({",test,test", "test,,test", "test,test,"})
-    void given_when_saveThemeWithEmptyValues_then_statusCodeIsBadRequest(String name, String description, String thumbNail) {
+    void given_when_saveThemeWithEmptyValues_then_statusCodeIsBadRequest(String name, String description,
+                                                                         String thumbNail) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("description", description);
@@ -96,7 +98,8 @@ class ThemeTest {
     @DisplayName("테마 등록 시 썸네일 주소가 올바르지 않을 경우 400 오류를 반환한다.")
     @ParameterizedTest
     @CsvSource({"test,test,test", "test,test,123"})
-    void given_when_saveThemeWithInvalidThumbnail_then_statusCodeIsBadRequest(String name, String description, String thumbNail) {
+    void given_when_saveThemeWithInvalidThumbnail_then_statusCodeIsBadRequest(String name, String description,
+                                                                              String thumbNail) {
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
         params.put("description", description);

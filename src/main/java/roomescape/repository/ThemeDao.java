@@ -12,6 +12,7 @@ import roomescape.dto.request.ThemeRequest;
 
 @Repository
 public class ThemeDao {
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
     private final RowMapper<Theme> rowMapper =
@@ -22,7 +23,7 @@ public class ThemeDao {
                     resultSet.getString("thumbnail")
             );
 
-    public ThemeDao(final JdbcTemplate jdbcTemplate) {
+    public ThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
@@ -35,7 +36,7 @@ public class ThemeDao {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Long create(final ThemeRequest themeRequest) {
+    public Long create(ThemeRequest themeRequest) {
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("name", themeRequest.name())
                 .addValue("description", themeRequest.description())
@@ -43,12 +44,12 @@ public class ThemeDao {
         return jdbcInsert.executeAndReturnKey(parameterSource).longValue();
     }
 
-    public void delete(final Long id) {
+    public void delete(Long id) {
         String sql = "delete from theme where id = ?";
         jdbcTemplate.update(sql, id);
     }
 
-    public Theme findById(final Long id) {
+    public Theme findById(Long id) {
         String sql = "select id, name, description, thumbnail from theme where id = ?";
         return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }

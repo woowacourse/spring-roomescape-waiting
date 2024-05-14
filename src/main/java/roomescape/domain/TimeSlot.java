@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.time.LocalTime;
 
 public class TimeSlot {
+
     private final Long id;
     private final LocalTime startAt;
 

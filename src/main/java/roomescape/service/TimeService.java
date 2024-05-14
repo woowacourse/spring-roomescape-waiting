@@ -10,6 +10,7 @@ import roomescape.repository.TimeDao;
 
 @Service
 public class TimeService {
+
     private final TimeDao timeDao;
     private final ReservationDao reservationDao;
 

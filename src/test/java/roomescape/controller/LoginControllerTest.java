@@ -18,11 +18,12 @@ import roomescape.dto.response.MemberResponse;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class LoginControllerTest {
+
     private static final String EMAIL = "testDB@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort
-    int port;
+    private int port;
 
     @BeforeEach
     void setUp() {

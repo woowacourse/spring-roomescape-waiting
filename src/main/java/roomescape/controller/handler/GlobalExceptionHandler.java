@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler({IllegalArgumentException.class, NumberFormatException.class, BadRequestException.class})
-    public ResponseEntity<String> badRequestException(final Exception ex) {
+    public ResponseEntity<String> badRequestException(Exception ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }

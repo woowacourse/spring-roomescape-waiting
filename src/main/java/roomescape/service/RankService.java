@@ -11,14 +11,16 @@ import roomescape.repository.RankDao;
 public class RankService {
     private final RankDao rankDao;
 
-    public RankService(final RankDao rankDao) {
+    public RankService(RankDao rankDao) {
         this.rankDao = rankDao;
     }
 
     public List<ThemeResponse> getPopularThemeList() {
         LocalDate currentDate = LocalDate.now();
-        final List<Theme> topTenByDate = rankDao.findTopTenByDate(currentDate.minusWeeks(1),
-                currentDate.minusDays(1));
+        List<Theme> topTenByDate = rankDao.findTopTenByDate(
+                currentDate.minusWeeks(1),
+                currentDate.minusDays(1)
+        );
         return topTenByDate.stream().map(ThemeResponse::from).toList();
     }
 }

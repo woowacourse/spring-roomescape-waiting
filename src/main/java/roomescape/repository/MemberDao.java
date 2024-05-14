@@ -10,6 +10,7 @@ import roomescape.domain.Role;
 
 @Repository
 public class MemberDao {
+
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<Member> rowMapper =
             (resultSet, rowNum) -> new Member(
@@ -20,16 +21,16 @@ public class MemberDao {
                     Role.valueOf(resultSet.getString("role"))
             );
 
-    public MemberDao(final JdbcTemplate jdbcTemplate) {
+    public MemberDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Member findById(final Long id) {
+    public Member findById(Long id) {
         String sql = "select id, name, email, password, role from member where id =?";
         return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 
-    public Member findByEmail(final String email) {
+    public Member findByEmail(String email) {
         String sql = "select id, name, email, password, role from member where email = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, email);
@@ -38,7 +39,7 @@ public class MemberDao {
         }
     }
 
-    public Member findByEmailAndPassword(final String email, final String password) {
+    public Member findByEmailAndPassword(String email, String password) {
         String sql = "select id, name, email, password, role from member where email = ? and password = ?";
         try {
             return jdbcTemplate.queryForObject(sql, rowMapper, email, password);

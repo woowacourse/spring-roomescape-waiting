@@ -12,11 +12,13 @@ import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class AdminPageTest {
+class AdminPageTest {
+
     private static final String EMAIL = "testDB@email.com";
     private static final String PASSWORD = "1234";
+
     @LocalServerPort
-    int port;
+    private int port;
     private String accessToken;
 
     @BeforeEach

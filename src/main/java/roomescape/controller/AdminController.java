@@ -13,15 +13,17 @@ import roomescape.service.ReservationService;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
+
     private final ReservationService reservationService;
 
-    public AdminController(final ReservationService reservationService) {
+    public AdminController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createAdminReservation(@RequestBody final ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createAdminReservation(@RequestBody ReservationRequest request) {
         ReservationResponse reservationResponse = reservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
     }
 }

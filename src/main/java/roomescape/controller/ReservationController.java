@@ -21,22 +21,25 @@ import roomescape.service.ReservationService;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+
     private final ReservationService reservationService;
 
-    public ReservationController(final ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
-    @PostMapping()
-    public ResponseEntity<ReservationResponse> createReservationByClient(@Valid @RequestBody final MemberReservationRequest memberRequest,
-                                                                         final LoginMember member) {
+    @PostMapping
+    public ResponseEntity<ReservationResponse> createReservationByClient(
+            @Valid @RequestBody MemberReservationRequest memberRequest,
+            LoginMember member) {
         ReservationRequest reservationRequest = new ReservationRequest(member.id(), memberRequest.date(),
                 memberRequest.timeId(), memberRequest.themeId());
         ReservationResponse reservationResponse = reservationService.create(reservationRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ReservationResponse>> readReservations() {
         List<ReservationResponse> reservations = reservationService.findEntireReservationList();
         return ResponseEntity.ok(reservations);
@@ -44,16 +47,15 @@ public class ReservationController {
 
     @GetMapping(params = {"memberId", "themeId", "dateFrom", "dateTo"})
     public ResponseEntity<List<ReservationResponse>> findAllByMemberAndThemeAndPeriod(
-            @RequestParam(required = false, name = "memberId") final Long memberId,
-            @RequestParam(required = false, name = "themeId") final Long themeId,
-            @RequestParam(required = false, name = "dateFrom") final String dateFrom,
-            @RequestParam(required = false, name = "dateTo") final String dateTo) {
-        return ResponseEntity.ok(
-                reservationService.findDistinctReservations(memberId, themeId, dateFrom, dateTo));
+            @RequestParam(required = false, name = "memberId") Long memberId,
+            @RequestParam(required = false, name = "themeId") Long themeId,
+            @RequestParam(required = false, name = "dateFrom") String dateFrom,
+            @RequestParam(required = false, name = "dateTo") String dateTo) {
+        return ResponseEntity.ok(reservationService.findDistinctReservations(memberId, themeId, dateFrom, dateTo));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -14,8 +14,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenGenerator {
 
-    public static final String COOKIE_NAME = "token";
-    public static final String ADMIN = "ADMIN";
+    private static final String COOKIE_NAME = "token";
+    private static final String ADMIN = "ADMIN";
+
     private final String secretKey = "secret-token-test";
     private final long validityInMilliseconds = 3600000;
 
@@ -40,7 +41,7 @@ public class TokenGenerator {
                 .getBody().getSubject();
     }
 
-    public String getTokenFromCookies(final HttpServletRequest request) {
+    public String getTokenFromCookies(HttpServletRequest request) {
         return Arrays.stream(request.getCookies())
                 .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
                 .findFirst()
@@ -48,9 +49,9 @@ public class TokenGenerator {
                 .orElseThrow(() -> new IllegalArgumentException("로그인 토큰이 없습니다"));
     }
 
-    public void validateTokenRole(final String token) {
-        final Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-        final boolean isAdmin = ADMIN.equals(claims.getBody().get("role"));
+    public void validateTokenRole(String token) {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+        boolean isAdmin = ADMIN.equals(claims.getBody().get("role"));
 
         if (!isAdmin) {
             throw new JwtException("해당 기능에 접근하려면 관리자 권한이 필요합니다.");

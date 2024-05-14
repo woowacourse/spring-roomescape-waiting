@@ -17,9 +17,10 @@ import roomescape.service.ThemeService;
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
+
     private final ThemeService themeService;
 
-    public ThemeController(final ThemeService themeService) {
+    public ThemeController(ThemeService themeService) {
         this.themeService = themeService;
     }
 
@@ -30,13 +31,13 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> create(@RequestBody final ThemeRequest themeRequest) {
+    public ResponseEntity<ThemeResponse> create(@RequestBody ThemeRequest themeRequest) {
         ThemeResponse themeResponse = themeService.create(themeRequest);
         return ResponseEntity.created(URI.create("/themes/" + themeResponse.id())).body(themeResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable final Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         themeService.delete(id);
         return ResponseEntity.noContent().build();
     }

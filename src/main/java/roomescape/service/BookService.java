@@ -11,15 +11,16 @@ import roomescape.repository.TimeDao;
 
 @Service
 public class BookService {
+
     private final ReservationDao reservationDao;
     private final TimeDao timeDao;
 
-    public BookService(final ReservationDao reservationDao, final TimeDao timeDao) {
+    public BookService(ReservationDao reservationDao, TimeDao timeDao) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
     }
 
-    public List<BookResponse> findAvaliableBookList(final LocalDate date, final Long themeId) {
+    public List<BookResponse> findAvaliableBookList(LocalDate date, Long themeId) {
         List<Reservation> reservations = reservationDao.findByDateAndThemeId(date, themeId);
         List<TimeSlot> timeSlots = timeDao.findAll();
 

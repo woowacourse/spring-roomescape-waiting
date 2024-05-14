@@ -7,15 +7,16 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
 public record ReservationRequest(Long memberId, LocalDate date, Long timeId, Long themeId) {
+
     public ReservationRequest {
         isValid(memberId, date, timeId, themeId);
     }
 
-    public Reservation toEntity(final Long id, final Member member, final TimeSlot time, final Theme theme) {
+    public Reservation toEntity(Long id, Member member, TimeSlot time, Theme theme) {
         return new Reservation(id, member, date, time, theme);
     }
 
-    private void isValid(final Long memberId, final LocalDate date, final Long timeId, final Long themeId) {
+    private void isValid(Long memberId, LocalDate date, Long timeId, Long themeId) {
         if (memberId == null) {
             throw new IllegalArgumentException("[ERROR] 예약자는 비워둘 수 없습니다.");
         }
