@@ -17,7 +17,6 @@ import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.Status;
 import roomescape.service.ReservationService;
 
 import java.net.URI;

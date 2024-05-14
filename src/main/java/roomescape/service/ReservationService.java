@@ -41,17 +41,19 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public List<Reservation> getReservationsByMember(final LoginMember member) {
+        return reservationRepository.findAllByMemberId(member.id());
+    }
+
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
         validateDateRange(condition);
-        return reservationRepository.searchReservations(condition)
-                .stream()
-                .toList();
+        return reservationRepository.searchReservations(condition);
     }
 
     public Reservation addReservation(final CreateReservationRequest reservationRequest) {
         final ReservationTime time = reservationTimeRepository.fetchById(reservationRequest.timeId());
         final Theme theme = themeRepository.fetchById(reservationRequest.themeId());
-        final Member member = memberRepository.findById(reservationRequest.memberId()).get();
+        final Member member = memberRepository.fetchById(reservationRequest.memberId());
 
         final Reservation reservation = new Reservation(null, member, reservationRequest.date(), time, theme);
 
@@ -88,9 +90,5 @@ public class ReservationService {
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
         }
-    }
-
-    public List<Reservation> getReservationsByMember(final LoginMember member) {
-        return reservationRepository.findAllByMemberId(member.id());
     }
 }
