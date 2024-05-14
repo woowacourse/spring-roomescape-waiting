@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.reservation.MemberReservationRequest;
+import roomescape.core.dto.reservation.MyReservationResponse;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservation.ReservationResponse;
 import roomescape.core.service.ReservationService;
@@ -53,6 +54,11 @@ public class ReservationController {
             @RequestParam(required = false, name = "dateTo") final String dateTo) {
         return ResponseEntity.ok(
                 reservationService.findAllByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo));
+    }
+
+    @GetMapping("/private")
+    public ResponseEntity<List<MyReservationResponse>> findAllByLoginMember(LoginMember loginMember) {
+        return ResponseEntity.ok(reservationService.findAllByMember(loginMember));
     }
 
     @DeleteMapping("/{id}")

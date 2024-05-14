@@ -81,4 +81,9 @@ public class MemberController {
         final List<MemberResponse> memberResponses = memberService.findAll();
         return ResponseEntity.ok().body(memberResponses);
     }
+
+    @GetMapping("/reservation/mine")
+    public String findMyReservations() {
+        return "reservation-mine";
+    }
 }

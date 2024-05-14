@@ -16,6 +16,8 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                                                             final LocalDate dateFrom,
                                                             final LocalDate dateTo);
 
+    List<Reservation> findAllByMember(final Member member);
+
     Integer countByTime(final ReservationTime reservationTime);
 
     Integer countByTheme(final Theme theme);

@@ -8,6 +8,8 @@ import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
 import roomescape.core.domain.Theme;
+import roomescape.core.dto.member.LoginMember;
+import roomescape.core.dto.reservation.MyReservationResponse;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservation.ReservationResponse;
 import roomescape.core.repository.MemberRepository;
@@ -64,6 +66,15 @@ public class ReservationService {
         return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findAllByMember(LoginMember loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(IllegalArgumentException::new);
+        return reservationRepository.findAllByMember(member)
+                .stream()
+                .map(MyReservationResponse::new)
                 .toList();
     }
 
