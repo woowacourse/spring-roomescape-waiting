@@ -63,10 +63,6 @@ public class Reservation {
         this(null, member, date, reservationTime, theme);
     }
 
-    public Reservation(Long id, Reservation reservation) {
-        this(id, reservation.member, reservation.date, reservation.time, reservation.theme);
-    }
-
     public boolean isSameMember(Reservation other) {
         return member.isSameMember(other.member);
     }
