@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.domain.Token;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.provider.model.TokenProvider;
+import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Member;
+import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -18,7 +21,10 @@ public class AuthService {
     }
 
     public Token login(LoginRequest loginRequest) {
-        long memberId = memberRepository.findIdByEmailAndPassword(loginRequest.email(), loginRequest.password());
-        return tokenProvider.getAccessToken(memberId);
+        Member member = memberRepository.findMemberByEmail_EmailAndPassword_Password(loginRequest.email(),
+                        loginRequest.password())
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
+
+        return tokenProvider.getAccessToken(member.getId());
     }
 }

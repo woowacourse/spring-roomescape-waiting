@@ -8,7 +8,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
@@ -19,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
@@ -56,7 +59,7 @@ class TimeServiceTest {
     @Test
     @DisplayName("시간을 찾는다.")
     void findReservationTimes() {
-        when(timeRepository.findAllReservationTimesInOrder())
+        when(timeRepository.findAllByOrderByStartAt())
                 .thenReturn(List.of(time));
 
         List<TimeResponse> timeResponses = timeService.findReservationTimes();
@@ -93,8 +96,11 @@ class TimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        when(reservationRepository.existByTimeId(1L))
-                .thenReturn(true);
+        List<Reservation> reservations = new ArrayList<>();
+        reservations.add(Reservation.saveReservationOf(LocalDate.now(), 1, 1, 1));
+
+        when(reservationRepository.findByTimeId(1L))
+                .thenReturn(reservations);
 
         Throwable reservationExistAtTime = assertThrows(
                 RoomEscapeException.class,

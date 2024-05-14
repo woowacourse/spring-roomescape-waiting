@@ -2,8 +2,11 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginCheckResponse;
 import roomescape.member.dto.MemberResponse;
+import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.role.MemberRole;
 
@@ -17,19 +20,24 @@ public class MemberService {
     }
 
     public MemberLoginCheckResponse findLoginMemberInfo(long id) {
-        String name = memberRepository.findNameById(id);
-        return new MemberLoginCheckResponse(name);
+        Member member = memberRepository.findMemberById(id)
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.ID_AND_PASSWORD_NOT_MATCH_OR_EXIST));
+
+        return new MemberLoginCheckResponse(member.getName());
     }
 
     public List<MemberResponse> findMembersId() {
-        List<Long> ids = memberRepository.findAllId();
+        List<Member> members = memberRepository.findAll();
 
-        return ids.stream()
-                .map(MemberResponse::new)
+        return members.stream()
+                .map(member -> new MemberResponse(member.getId()))
                 .toList();
     }
 
     public MemberRole findMemberRole(long id) {
-        return memberRepository.findRoleById(id);
+        Member member = memberRepository.findMemberById(id)
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_ROLE_NOT_EXIST_EXCEPTION));
+
+        return MemberRole.findMemberRole(member.getRole().name());
     }
 }

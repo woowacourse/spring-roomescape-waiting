@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;
@@ -27,6 +28,7 @@ public class ThemeService {
     }
 
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
+        themeRepository.existsById(1L);
         Theme theme = themeRequest.toTheme();
         Theme savedTheme = themeRepository.save(theme);
         return ThemeResponse.fromTheme(savedTheme);
@@ -35,10 +37,10 @@ public class ThemeService {
     public List<ThemeRankResponse> findRankedThemes(LocalDate today) {
         LocalDate beforeOneWeek = today.minusDays(NUMBER_OF_ONE_WEEK);
 
-        List<Theme> rankedThemes = reservationRepository.findThemeByDateOrderByThemeIdCountLimit(beforeOneWeek, today,
-                TOP_THEMES_LIMIT);
+        List<Theme> rankedThemes = reservationRepository.findAllByDateOrderByThemeIdCountLimit(beforeOneWeek, today);
 
         return rankedThemes.stream()
+                .limit(TOP_THEMES_LIMIT)
                 .map(ThemeRankResponse::fromTheme)
                 .toList();
     }
@@ -51,9 +53,9 @@ public class ThemeService {
     }
 
     public void removeTheme(long id) {
-        boolean isThemeReservationExist = reservationRepository.existByThemeId(id);
+        List<Reservation> reservation = reservationRepository.findByThemeId(id);
 
-        if (isThemeReservationExist) {
+        if (!reservation.isEmpty()) {
             throw new RoomEscapeException(ThemeExceptionCode.USING_THEME_RESERVATION_EXIST);
         }
         themeRepository.deleteById(id);
