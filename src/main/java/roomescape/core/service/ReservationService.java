@@ -69,8 +69,9 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findAllByMember(LoginMember loginMember) {
-        Member member = memberRepository.findById(loginMember.getId())
+    @Transactional(readOnly = true)
+    public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
+        final Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(IllegalArgumentException::new);
         return reservationRepository.findAllByMember(member)
                 .stream()

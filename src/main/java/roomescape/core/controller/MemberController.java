@@ -31,6 +31,11 @@ public class MemberController {
         return "reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String findMyReservations() {
+        return "reservation-mine";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -80,10 +85,5 @@ public class MemberController {
     public ResponseEntity<List<MemberResponse>> findMembers() {
         final List<MemberResponse> memberResponses = memberService.findAll();
         return ResponseEntity.ok().body(memberResponses);
-    }
-
-    @GetMapping("/reservation-mine")
-    public String findMyReservations() {
-        return "reservation-mine";
     }
 }
