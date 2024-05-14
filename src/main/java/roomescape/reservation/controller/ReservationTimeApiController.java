@@ -38,17 +38,17 @@ public class ReservationTimeApiController {
             @RequestParam("date") LocalDate date,
             @RequestParam("theme-id") Long themeId
     ) {
-        List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
+        List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date,
+                themeId);
 
         return ResponseEntity.ok(availableTimes);
     }
 
     @PostMapping("/times")
     public ResponseEntity<TimeResponse> save(@Valid @RequestBody TimeSaveRequest timeSaveRequest) {
-        Long saveId = reservationTimeService.save(timeSaveRequest);
-        TimeResponse timeResponse = reservationTimeService.findById(saveId);
+        TimeResponse timeResponse = reservationTimeService.save(timeSaveRequest);
 
-        return ResponseEntity.created(URI.create("/times/" + saveId)).body(timeResponse);
+        return ResponseEntity.created(URI.create("/times/" + timeResponse.id())).body(timeResponse);
     }
 
     @DeleteMapping("/times/{id}")

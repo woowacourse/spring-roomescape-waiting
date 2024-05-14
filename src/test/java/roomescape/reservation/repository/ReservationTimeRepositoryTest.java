@@ -1,6 +1,13 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,8 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
@@ -19,8 +25,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 
-@JdbcTest
-@Import({ReservationTimeRepository.class, ThemeRepository.class, ReservationRepository.class, MemberRepository.class})
+@DataJpaTest
 class ReservationTimeRepositoryTest {
 
     @Autowired
@@ -35,58 +40,56 @@ class ReservationTimeRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @DisplayName("id로 예약 시간을 조회한다.")
     @Test
-    @DisplayName("id 로 엔티티를 찾는다.")
     void findByIdTest() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
-        Long timeId = reservationTimeRepository.save(reservationTime);
-        ReservationTime findReservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime savedReservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime findReservationTime = reservationTimeRepository.findById(savedReservationTime.getId()).get();
 
-        assertThat(findReservationTime.getId()).isEqualTo(timeId);
+        assertThat(findReservationTime.getStartAt()).isEqualTo(HOUR_10);
     }
 
-    @Test
     @DisplayName("전체 엔티티를 조회한다.")
+    @Test
     void findAllTest() {
-        ReservationTime reservationTime1 = new ReservationTime(LocalTime.now());
-        ReservationTime reservationTime2 = new ReservationTime(LocalTime.now());
-        reservationTimeRepository.save(reservationTime1);
-        reservationTimeRepository.save(reservationTime2);
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
-        assertThat(reservationTimes.size()).isEqualTo(2);
+        assertThat(reservationTimes.size()).isEqualTo(1);
     }
 
+    @DisplayName("예약시간 id로 예약이 참조된 예약시간들을 찾는다.")
     @Test
-    @DisplayName("예약시간 ID로 예약이 참조된 예약시간들을 찾는다.")
     void findReservationInSameIdTest() {
-        Long themeId = themeRepository.save(
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
-
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "hogi@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
-        boolean exist = !reservationTimeRepository.findReservationTimesThatReservationReferById(timeId).isEmpty();
+        boolean exist = !reservationTimeRepository.findReservationTimesThatReservationReferById(reservationTime.getId())
+                .isEmpty();
 
         assertThat(exist).isTrue();
     }
 
+    @DisplayName("id를 받아 예약 시간을 삭제한다.")
     @Test
-    @DisplayName("id를 받아 삭제한다.")
     void deleteTest() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
-        Long timeId = reservationTimeRepository.save(reservationTime);
-        reservationTimeRepository.delete(timeId);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        reservationTimeRepository.deleteById(savedReservationTime.getId());
+
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         assertThat(reservationTimes.size()).isEqualTo(0);

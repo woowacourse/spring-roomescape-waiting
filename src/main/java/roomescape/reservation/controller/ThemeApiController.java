@@ -29,7 +29,8 @@ public class ThemeApiController {
     public ResponseEntity<List<PopularThemeResponse>> findTopTenThemesOfLastWeek(
             @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
     ) {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(limitCount);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(
+                limitCount);
 
         return ResponseEntity.ok(popularThemeResponses);
     }
@@ -43,10 +44,9 @@ public class ThemeApiController {
 
     @PostMapping("/themes")
     public ResponseEntity<ThemeResponse> save(@Valid @RequestBody ThemeSaveRequest themeSaveRequest) {
-        Long saveId = themeService.save(themeSaveRequest);
-        ThemeResponse themeResponse = themeService.findById(saveId);
+        ThemeResponse themeResponse = themeService.save(themeSaveRequest);
 
-        return ResponseEntity.created(URI.create("/themes/" + saveId)).body(themeResponse);
+        return ResponseEntity.created(URI.create("/themes/" + themeResponse.id())).body(themeResponse);
     }
 
     @DeleteMapping("/themes/{id}")

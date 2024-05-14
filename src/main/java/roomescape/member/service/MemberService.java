@@ -16,13 +16,14 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Long save(MemberSignUpRequest memberSignUpRequest) {
+    public MemberResponse save(MemberSignUpRequest memberSignUpRequest) {
         Member member = memberSignUpRequest.toMember();
-        if (memberRepository.existNameOrEmail(member)) {
+        if (memberRepository.existsByEmail(member.getEmail())) {
             throw new IllegalArgumentException("중복된 이름 또는 이메일 입니다.");
         }
 
-        return memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
+        return MemberResponse.toResponse(savedMember);
     }
 
     public List<MemberResponse> findAll() {

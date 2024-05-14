@@ -35,8 +35,8 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
     ) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         Cookie[] cookies = request.getCookies();
-
         String token = CookieUtils.extractTokenFromCookie(cookies);
+
         return jwtTokenProvider.getMember(token);
     }
 }

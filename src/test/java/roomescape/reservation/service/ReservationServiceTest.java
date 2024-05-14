@@ -1,6 +1,15 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.JOJO_EMAIL;
+import static roomescape.util.Fixture.JOJO_NAME;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -47,44 +56,42 @@ class ReservationServiceTest {
         databaseCleaner.cleanUp();
     }
 
-    @Test
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
+    @Test
     void notExistReservationTimeIdExceptionTest() {
-        Theme theme = new Theme(new ThemeName("공포"), new Description("호러 방탈출"), "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme);
+        themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        LoginMember loginMember = new LoginMember(1L, Role.MEMBER,"카키", "kaki@email.com");
+        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
     @DisplayName("중복된 예약이 있다면 예외가 발생한다.")
+    @Test
     void duplicateReservationExceptionTest() {
-        Theme theme = new Theme(new ThemeName("공포"), new Description("호러 방탈출"), "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme);
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        LocalTime localTime = LocalTime.parse("10:00");
-        ReservationTime reservationTime = new ReservationTime(localTime);
-        Long timeId = reservationTimeRepository.save(reservationTime);
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Member member = new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234");
-        memberRepository.save(member);
+        memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LocalDate localDate = LocalDate.now();
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, themeId, timeId);
-        LoginMember loginMember = new LoginMember(1L, member.getRole(), member.getName(), member.getEmail());
+        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
         reservationService.save(reservationSaveRequest, loginMember);
 
-        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, themeId, timeId);
+        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(),
+                reservationTime.getId());
         assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
     @DisplayName("예약 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
+    @Test
     void findByIdExceptionTest() {
         assertThatThrownBy(() -> reservationService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);

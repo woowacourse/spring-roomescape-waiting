@@ -1,6 +1,13 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.auth.Role;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -51,41 +57,36 @@ class ThemeServiceTest {
         databaseCleaner.cleanUp();
     }
 
-    @Test
     @DisplayName("중복된 테마 이름을 추가할 수 없다.")
+    @Test
     void duplicateThemeNameExceptionTest() {
-        ThemeSaveRequest theme1 = new ThemeSaveRequest("공포", "무서운 테마", "https://ab.com/1x.png");
-        themeService.save(theme1);
+        ThemeSaveRequest themeSaveRequest = new ThemeSaveRequest(HORROR_THEME_NAME, HORROR_DESCRIPTION, THUMBNAIL);
+        themeService.save(themeSaveRequest);
 
-        ThemeSaveRequest theme2 = new ThemeSaveRequest("공포", "무서움", "https://cd.com/2x.jpg");
-        assertThatThrownBy(() -> themeService.save(theme2))
+        assertThatThrownBy(() -> themeService.save(themeSaveRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
     @DisplayName("테마 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
+    @Test
     void findByIdExceptionTest() {
         assertThatThrownBy(() -> themeService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
     @DisplayName("이미 해당 테마로 예약 되있을 경우 삭제 시 예외가 발생한다.")
+    @Test
     void deleteExceptionTest() {
-        Long themeId = themeRepository.save(
-                new Theme(new ThemeName("공포"), new Description("호러 방탈출"), "http://asdf.jpg"));
-        Theme theme = themeRepository.findById(themeId).get();
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long memberId = memberRepository.save(new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime);
-        reservationRepository.save(reservation);
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10));
 
-        assertThatThrownBy(() -> themeService.delete(themeId))
+        assertThatThrownBy(() -> themeService.delete(theme.getId()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

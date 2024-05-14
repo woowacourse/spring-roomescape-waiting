@@ -35,14 +35,16 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Long save(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+    public ReservationResponse save(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
         Reservation reservation = getValidatedReservation(reservationSaveRequest, loginMember);
         validateDuplicateReservation(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-        return reservationRepository.save(reservation);
+        return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation getValidatedReservation(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+    private Reservation getValidatedReservation(ReservationSaveRequest reservationSaveRequest,
+                                                LoginMember loginMember) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -64,7 +66,8 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existReservation(reservation)) {
+        if (reservationRepository.existsByDateAndReservationTime_StartAt(reservation.getDate(),
+                reservation.getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
         }
     }
@@ -82,13 +85,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest reservationSearchCondRequest) {
-        return reservationRepository.findAllByThemeIdAndMemberIdAndBetweenStartDateAndEndDate(reservationSearchCondRequest).stream()
+    public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
+        return reservationRepository.findAllByTheme_IdAndMember_IdAndDateBetween(
+                        request.themeId(),
+                        request.memberId(),
+                        request.dateFrom(),
+                        request.dateTo()
+                ).stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
 
     public void delete(Long id) {
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
     }
 }

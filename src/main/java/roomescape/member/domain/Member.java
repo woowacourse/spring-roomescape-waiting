@@ -10,10 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import roomescape.auth.Role;
 import roomescape.reservation.domain.Reservation;
 
 @Entity
+@DynamicInsert
 public class Member {
 
     @Id
@@ -21,6 +24,7 @@ public class Member {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
+    @ColumnDefault("'MEMBER'")
     private Role role;
 
     @Embedded

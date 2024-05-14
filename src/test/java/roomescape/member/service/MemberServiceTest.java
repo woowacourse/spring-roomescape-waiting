@@ -1,6 +1,9 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,14 +37,9 @@ class MemberServiceTest {
     @DisplayName("중복된 이름 또는 이메일로 회원가입할 수 없다.")
     @Test
     void save() {
-        String name = "카키";
-        String email = "kaki@email.com";
-        String password = "1234";
+        memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Member member = new Member(new MemberName(name), email, password);
-        memberRepository.save(member);
-
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(name, email, password);
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
 
         assertThatThrownBy(() -> memberService.save(memberSignUpRequest))
                 .isInstanceOf(IllegalArgumentException.class);

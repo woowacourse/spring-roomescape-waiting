@@ -48,10 +48,9 @@ public class ReservationApiController {
             @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember
     ) {
-        Long id = reservationService.save(reservationSaveRequest, loginMember);
-        ReservationResponse reservationResponse = reservationService.findById(id);
+        ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
     }
 
 

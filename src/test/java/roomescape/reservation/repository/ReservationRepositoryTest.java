@@ -1,6 +1,13 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,8 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
@@ -20,8 +26,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.ReservationSearchCondRequest;
 
-@JdbcTest
-@Import({ReservationRepository.class, ThemeRepository.class, ReservationTimeRepository.class, MemberRepository.class})
+@DataJpaTest
 public class ReservationRepositoryTest {
 
     @Autowired
@@ -36,23 +41,20 @@ public class ReservationRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @DisplayName("전체 예약 시간 조회한다.")
     @Test
-    @DisplayName("DB 조회 테스트")
     void findAllTest() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long themeId = themeRepository.save(
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
 
@@ -61,79 +63,72 @@ public class ReservationRepositoryTest {
         assertThat(reservations.size()).isEqualTo(1);
     }
 
-    @Test
     @DisplayName("id 값을 받아 Reservation 반환")
+    @Test
     void findByIdTest() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long themeId = themeRepository.save(
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, reservationTime));
+        Reservation findReservation = reservationRepository.findById(savedReservation.getId()).get();
 
-        Long reservationId = reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
-        Reservation findReservation = reservationRepository.findById(reservationId).get();
-
-        assertThat(findReservation.getId()).isEqualTo(reservationId);
+        assertThat(findReservation.getMember().getEmail()).isEqualTo(savedReservation.getMember().getEmail());
     }
 
-    @Test
     @DisplayName("날짜와 테마 아이디로 예약 시간 아이디들을 조회한다.")
+    @Test
     void findTimeIdsByDateAndThemeIdTest() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long themeId = themeRepository.save(
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime);
-        reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, reservationTime));
 
-        List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(reservation.getDate(), themeId);
+        List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(savedReservation.getDate(),
+                theme.getId());
 
-        assertThat(timeIds).containsExactly(timeId);
+        assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
     @Test
     @DisplayName("이미 저장된 예약일 경우 true를 반환한다.")
     void existReservationTest() {
-        Long themeId = themeRepository.save(
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, reservationTime));
 
-        Long reservationId = reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
-        Reservation findReservation = reservationRepository.findById(reservationId).get();
-
-        boolean exist = reservationRepository.existReservation(findReservation);
+        boolean exist = reservationRepository.existsByDateAndReservationTime_StartAt(savedReservation.getDate(),
+                savedReservation.getStartAt());
 
         assertThat(exist).isTrue();
     }
@@ -141,53 +136,60 @@ public class ReservationRepositoryTest {
     @Test
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
     void findAllByThemeIdAndMemberIdAndBetweenStartDateAndEndDate() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long themeId = themeRepository.save(
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDate oneWeekLater = LocalDate.now().plusWeeks(1);
         reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime));
         reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime));
 
-        ReservationSearchCondRequest reservationSearchCondRequest = new ReservationSearchCondRequest(themeId, memberId, LocalDate.now(), tomorrow);
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndBetweenStartDateAndEndDate(reservationSearchCondRequest);
+        ReservationSearchCondRequest request = new ReservationSearchCondRequest(
+                theme.getId(),
+                member.getId(),
+                LocalDate.now(),
+                tomorrow
+        );
+
+        List<Reservation> reservations = reservationRepository.findAllByTheme_IdAndMember_IdAndDateBetween(
+                request.themeId(),
+                request.memberId(),
+                request.dateFrom(),
+                request.dateTo()
+        );
 
         assertThat(reservations).hasSize(1);
     }
 
     @Test
-    @DisplayName("DB 삭제 테스트")
+    @DisplayName("예약 삭제 테스트")
     void deleteTest() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long themeId = themeRepository.save(
+        Theme theme = themeRepository.save(
                 new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
                 )
         );
-        Theme theme = themeRepository.findById(themeId).get();
 
-        Long memberId = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Long reservationId = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime));
-        reservationRepository.delete(reservationId);
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, reservationTime)
+        );
+        reservationRepository.deleteById(savedReservation.getId());
+
         List<Reservation> reservations = reservationRepository.findAll();
 
         assertThat(reservations.size()).isEqualTo(0);

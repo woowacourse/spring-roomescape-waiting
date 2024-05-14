@@ -2,6 +2,13 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME_NAME;
+import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.auth.Role;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -53,68 +59,50 @@ class ReservationTimeServiceTest {
         databaseCleaner.cleanUp();
     }
 
-    @Test
     @DisplayName("예약 시간 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
+    @Test
     void findByIdExceptionTest() {
         assertThatThrownBy(() -> reservationTimeService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
     @DisplayName("예약 가능한 시간을 조회한다.")
+    @Test
     void findAvailableTimesTest() {
-        Long time1Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
-        ReservationTime reservationTime1 = reservationTimeRepository.findById(time1Id).get();
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        Long time2Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("11:00")));
-        ReservationTime reservationTime2 = reservationTimeRepository.findById(time2Id).get();
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime hour11 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("11:00")));
 
-        Long themeId = themeRepository.save(
-                new Theme(
-                        new ThemeName("공포"),
-                        new Description("무서운 테마"),
-                        "https://i.pinimg.com/236x.jpg"
-                )
-        );
-        Theme theme = themeRepository.findById(themeId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Long memberId = memberRepository.save(new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
-
-        Reservation reservation = new Reservation(
-                member,
-                LocalDate.now(),
-                theme,
-                reservationTime1
-        );
-        reservationRepository.save(reservation);
+        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10));
 
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
-                reservation.getDate(), themeId);
+                reservation.getDate(),
+                theme.getId()
+        );
 
         assertThat(availableTimes).containsExactly(
-                AvailableReservationTimeResponse.toResponse(reservationTime1, true),
-                AvailableReservationTimeResponse.toResponse(reservationTime2, false)
+                AvailableReservationTimeResponse.toResponse(hour10, true),
+                AvailableReservationTimeResponse.toResponse(hour11, false)
         );
     }
 
-    @Test
     @DisplayName("이미 해당 시간으로 예약 되있을 경우 삭제 시 예외가 발생한다.")
+    @Test
     void deleteExceptionTest() {
-        Long themeId = themeRepository.save(
-                new Theme(new ThemeName("공포"), new Description("호러 방탈출"), "http://asdf.jpg"));
-        Theme theme = themeRepository.findById(themeId).get();
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Long memberId = memberRepository.save(new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234"));
-        Member member = memberRepository.findById(memberId).get();
+        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime);
-        reservationRepository.save(reservation);
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10));
 
-        assertThatThrownBy(() -> reservationTimeService.delete(timeId))
+        assertThatThrownBy(() -> reservationTimeService.delete(hour10.getId()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
