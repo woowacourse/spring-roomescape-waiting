@@ -2,22 +2,14 @@ package roomescape.repository;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.domain.time.ReservationTime;
 
-public interface ReservationTimeRepository {
+@Repository
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    Long save(ReservationTime reservationTime);
+   List<ReservationTime> findByIdNotIn(List<Long> ids);
 
-    List<ReservationTime> findAll();
-
-    Optional<ReservationTime> findById(Long id);
-
-   List<ReservationTime> findByIdsNotIn(List<Long> ids);
-
-    void delete(Long id);
-
-    Boolean existId(Long id);
-
-    Boolean existTime(LocalTime time);
+    boolean existsByStartAt(LocalTime time);
 }

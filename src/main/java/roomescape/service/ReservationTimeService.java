@@ -26,7 +26,7 @@ public class ReservationTimeService {
     public Long addReservationTime(ReservationTimeRequest reservationTimeRequest) {
         validateTimeDuplicate(reservationTimeRequest.startAt());
         ReservationTime reservationTime = reservationTimeRequest.toEntity();
-        return reservationTimeRepository.save(reservationTime);
+        return reservationTimeRepository.save(reservationTime).getId();
     }
 
     public List<ReservationTimeResponse> getAllReservationTimes() {
@@ -43,7 +43,7 @@ public class ReservationTimeService {
 
     public List<ReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = findTimeIdForDateAndTheme(date, themeId);
-        List<ReservationTime> availableTimes = reservationTimeRepository.findByIdsNotIn(bookedTimeIds);
+        List<ReservationTime> availableTimes = reservationTimeRepository.findByIdNotIn(bookedTimeIds);
         return availableTimes.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
@@ -71,7 +71,7 @@ public class ReservationTimeService {
     }
 
     private void validateTimeDuplicate(LocalTime time) {
-        if (reservationTimeRepository.existTime(time)) {
+        if (reservationTimeRepository.existsByStartAt(time)) {
             throw new IllegalArgumentException(
                     "[ERROR] 이미 등록된 시간은 등록할 수 없습니다.",
                     new Throwable("등록 시간 : " + time)
