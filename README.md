@@ -17,8 +17,8 @@
     - [x] Reservation
 - DAO -> CrudRepository (JpaRepository) 로 전환
     - [x] Theme
-    - [ ] Time
-    - [ ] Member
+    - [x] Time
+    - [x] Member
     - [ ] Reservation
 - 추가적인 리팩터링
     - [ ] 멤버에 패스워드 추가

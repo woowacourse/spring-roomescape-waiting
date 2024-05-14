@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
 import java.util.Objects;
 
 @Entity
@@ -53,7 +52,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email.email();
+        return email.value();
     }
 
     public MemberRole getRole() {
@@ -70,8 +69,8 @@ public class Member {
         }
         Member member = (Member) object;
         return Objects.equals(id, member.id)
-                && Objects.equals(name, member.name)
-                && Objects.equals(email, member.email);
+               && Objects.equals(name, member.name)
+               && Objects.equals(email, member.email);
     }
 
     @Override

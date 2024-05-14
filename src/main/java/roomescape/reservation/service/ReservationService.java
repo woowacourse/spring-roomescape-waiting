@@ -1,7 +1,9 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.member.dao.MemberDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
@@ -14,20 +16,17 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
 
-    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, TimeRepository timeRepository, ThemeRepository themeRepository) {
+    public ReservationService(ReservationDao reservationDao, MemberRepository memberRepository, TimeRepository timeRepository, ThemeRepository themeRepository) {
         this.reservationDao = reservationDao;
-        this.memberDao = memberDao;
+        this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
     }
@@ -72,7 +71,7 @@ public class ReservationService {
     }
 
     private Member findMemberByMemberId(Long memberId) {
-        return memberDao.findMemberById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
     }
 

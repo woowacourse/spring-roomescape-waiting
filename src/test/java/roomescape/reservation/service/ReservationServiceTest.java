@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.member.dao.MemberDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.dao.ReservationDao;
@@ -35,7 +35,7 @@ class ReservationServiceTest {
     @Mock
     private ReservationDao reservationDao;
     @Mock
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Mock
     private TimeRepository timeRepository;
     @Mock
@@ -79,7 +79,7 @@ class ReservationServiceTest {
     void createReservationTest() {
         LocalDate date = LocalDate.now().plusDays(7);
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
-        given(memberDao.findMemberById(1L))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
@@ -105,7 +105,7 @@ class ReservationServiceTest {
     void createReservationTest_whenMemberNotExist() {
         LocalDate date = LocalDate.now().plusDays(7);
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
-        given(memberDao.findMemberById(1L)).willReturn(Optional.empty());
+        given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -117,7 +117,7 @@ class ReservationServiceTest {
     void createReservationTest_whenTimeNotExist() {
         LocalDate date = LocalDate.now().plusDays(7);
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
-        given(memberDao.findMemberById(1L))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeRepository.findById(1L)).willReturn(Optional.empty());
 
@@ -131,7 +131,7 @@ class ReservationServiceTest {
     void createReservationTest_whenThemeNotExist() {
         LocalDate date = LocalDate.now().plusDays(7);
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
-        given(memberDao.findMemberById(1L))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
@@ -147,7 +147,7 @@ class ReservationServiceTest {
     void createReservationTest_whenDateTimeIsBefore() {
         LocalDate date = LocalDate.now().minusDays(7);
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
-        given(memberDao.findMemberById(1L))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
         given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));

@@ -3,28 +3,28 @@ package roomescape.auth.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoggedInMember;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.member.dao.MemberDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 
 @Service
 public class AuthService {
     private final TokenProvider tokenProvider;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
-    public AuthService(TokenProvider tokenProvider, MemberDao memberDao) {
+    public AuthService(TokenProvider tokenProvider, MemberRepository memberRepository) {
         this.tokenProvider = tokenProvider;
-        this.memberDao = memberDao;
+        this.memberRepository = memberRepository;
     }
 
     public String createToken(LoginRequest request) {
-        Member member = memberDao.findMemberByEmail(request.email())
+        Member member = memberRepository.findByEmailValue(request.email())
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
         return tokenProvider.createToken(member.getId());
     }
 
     public LoggedInMember findLoggedInMember(String token) {
         Long memberId = tokenProvider.findMemberId(token);
-        Member member = memberDao.findMemberById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
         return LoggedInMember.from(member);
     }
