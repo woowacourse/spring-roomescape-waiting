@@ -5,17 +5,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.repository.MemberRepository;
 import roomescape.domain.Reservation;
-import roomescape.repository.ReservationRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.domain.Theme;
-import roomescape.repository.ThemeRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
+import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
@@ -85,6 +86,15 @@ public class ReservationService {
 
         return reservations.stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findAllByMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        return reservations.stream()
+                .map(MyReservationResponse::from)
                 .toList();
     }
 }

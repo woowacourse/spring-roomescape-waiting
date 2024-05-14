@@ -20,4 +20,9 @@ public class UserPageController {
     public String indexPage() {
         return "index";
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "reservation-mine";
+    }
 }
