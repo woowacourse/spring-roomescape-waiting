@@ -2,6 +2,7 @@ package roomescape.service;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.login.LoginMember;
@@ -43,12 +44,13 @@ public class AuthService {
     }
 
     private Member authenticateUser(LoginRequest request) {
-        Member member = getMemberByEmail(request.email());
+        Email email = new Email(request.email());
+        Member member = getMemberByEmail(email);
         validatePassword(request, member);
         return member;
     }
 
-    private Member getMemberByEmail(String email) {
+    private Member getMemberByEmail(Email email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "[ERROR] 등록된 아이디가 아닙니다.",
