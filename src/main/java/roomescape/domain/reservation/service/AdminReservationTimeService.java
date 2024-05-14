@@ -1,11 +1,12 @@
 package roomescape.domain.reservation.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
 import roomescape.domain.reservation.repository.ReservationTimeRepository;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.util.List;
 
 @Service
 public class AdminReservationTimeService {
@@ -21,10 +22,11 @@ public class AdminReservationTimeService {
     }
 
     public ReservationTime addReservationTime(ReservationTimeAddRequest reservationTimeAddRequest) {
-        if (reservationTimeRepository.existByStartAt(reservationTimeAddRequest.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(reservationTimeAddRequest.startAt())) {
             throw new EscapeApplicationException("이미 존재하는 예약시간은 추가할 수 없습니다.");
         }
-        return reservationTimeRepository.insert(reservationTimeAddRequest.toEntity());
+
+        return reservationTimeRepository.save(reservationTimeAddRequest.toEntity());
     }
 
     public void removeReservationTime(Long id) {
