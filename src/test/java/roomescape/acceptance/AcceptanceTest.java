@@ -2,6 +2,7 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.http.Cookie;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.assertj.core.api.StandardSoftAssertionsProvider;
@@ -15,8 +16,11 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.MemberJoinRequest;
 import roomescape.member.dto.response.MemberResponse;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.dto.request.ThemeSaveRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.ThemeResponse;
 
@@ -68,6 +72,19 @@ public abstract class AcceptanceTest {
                 .then().extract()
                 .as(MemberResponse.class);
         return new Member(response.id(), response.name(), response.email(), request.password(), USER);
+    }
+
+    protected Long createTestReservation(Long timeId, Long themeId, String token) {
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
+        Cookie cookie = new Cookie.Builder("token", token).build();
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract().as(ReservationResponse.class)
+                .id();
     }
 
     protected Member createTestAdmin() {

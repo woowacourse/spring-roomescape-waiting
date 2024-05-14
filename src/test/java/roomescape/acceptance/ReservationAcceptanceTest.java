@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestFactory;
 import roomescape.global.dto.ErrorResponse;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 
 import java.util.Arrays;
@@ -168,5 +169,36 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                     .extracting(ReservationResponse::id)
                     .isNotNull();
         });
+    }
+
+    @Test
+    @DisplayName("[3 - Step2] 사용자의 예약 목록을 조회한다.")
+    void findMyReservations() {
+        // given
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+        Member member = createTestMember();
+        String token = createTestToken(member);
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        createTestReservation(timeId, themeId, token);
+
+        //  when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .cookie(cookie)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .extract();
+        List<MyReservationResponse> myReservationResponses = Arrays.stream(response.as(MyReservationResponse[].class))
+                .toList();
+
+        // then
+        assertSoftly(softly -> {
+            checkHttpStatusOk(softly, response);
+            softly.assertThat(myReservationResponses).hasSize(1)
+                    .extracting(MyReservationResponse::reservationId)
+                    .isNotNull();
+        });
+
     }
 }
