@@ -1,5 +1,7 @@
 package roomescape.domain.dto;
 
+import roomescape.domain.Member;
+import roomescape.domain.Password;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 public record SignupRequest(String email, String password, String name) {
@@ -13,5 +15,9 @@ public record SignupRequest(String email, String password, String name) {
         if (value == null || value.trim().isEmpty()) {
             throw new EmptyValueNotAllowedException(fieldName);
         }
+    }
+
+    public Member toEntity(Password password) {
+        return new Member(email, password, name, "USER");
     }
 }

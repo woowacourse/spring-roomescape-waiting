@@ -17,7 +17,7 @@ class ReservationCreateValidatorTest {
     private final ReservationTime reservationTime = new ReservationTime(reservationRequest.timeId(),
             LocalTime.parse("10:00"));
     private final Theme theme = new Theme(reservationRequest.themeId(), "themeName", "description", "thumbnail");
-    private final Member member = new Member(reservationRequest.memberId(), "poke@test.com", "poke", "role");
+    private final Member member = new Member("poke@test.com", new Password("password", "salt"), "poke", "role");
 
     @DisplayName("예약 요청 값, 테마, 시간 객체를 통해 객체 생성에 성공한다.")
     @Test

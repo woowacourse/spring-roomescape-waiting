@@ -13,7 +13,7 @@ import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
-import roomescape.repository.MemberDao;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ThemeDao;
 import roomescape.repository.TimeDao;
@@ -23,14 +23,14 @@ public class ReservationService {
     private final TimeDao timeDao;
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
     public ReservationService(final TimeDao timeDao, final ReservationDao reservationDao, final ThemeDao themeDao,
-                              final MemberDao memberDao) {
+                              final MemberRepository memberRepository) {
         this.timeDao = timeDao;
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
-        this.memberDao = memberDao;
+        this.memberRepository = memberRepository;
     }
 
     public ReservationResponses findEntireReservationList() {
@@ -64,7 +64,7 @@ public class ReservationService {
     }
 
     private Member getMember(final ReservationRequest reservationRequest) {
-        return memberDao.findById(reservationRequest.memberId())
+        return memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new InvalidIdException("memberId", reservationRequest.memberId()));
     }
 
