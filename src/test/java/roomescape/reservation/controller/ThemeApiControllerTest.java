@@ -58,8 +58,8 @@ class ThemeApiControllerTest extends IntegrationTest {
                 .header("Location", "/themes/1");
     }
 
-    @Test
     @DisplayName("테마를 성공적으로 제거하면 204 응답을 받는다.")
+    @Test
     void delete() {
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())

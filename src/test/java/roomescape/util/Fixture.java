@@ -2,7 +2,6 @@ package roomescape.util;
 
 public class Fixture {
 
-
     public static final String HORROR_THEME_NAME = "공포";
     public static final String HORROR_DESCRIPTION = "공포";
     public static final String THUMBNAIL = "https://i.pinimg.com/236x.jpg";

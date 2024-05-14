@@ -29,8 +29,7 @@ public class ThemeApiController {
     public ResponseEntity<List<PopularThemeResponse>> findTopTenThemesOfLastWeek(
             @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
     ) {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(
-                limitCount);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(limitCount);
 
         return ResponseEntity.ok(popularThemeResponses);
     }

@@ -18,8 +18,8 @@ import roomescape.util.Fixture;
 
 class ReservationTest {
 
-    @Test
     @DisplayName("현재 날짜보다 이전 날짜로 예약시 예외가 발생한다.")
+    @Test
     void createReservationByLastDate() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
 

@@ -137,8 +137,8 @@ public class ReservationRepositoryTest {
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
-    @Test
     @DisplayName("이미 저장된 예약일 경우 true를 반환한다.")
+    @Test
     void existReservationTest() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
@@ -161,8 +161,8 @@ public class ReservationRepositoryTest {
         assertThat(exist).isTrue();
     }
 
-    @Test
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
+    @Test
     void findAllByThemeIdAndMemberIdAndBetweenStartDateAndEndDate() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
@@ -198,8 +198,8 @@ public class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
     }
 
-    @Test
     @DisplayName("예약 삭제 테스트")
+    @Test
     void deleteTest() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 

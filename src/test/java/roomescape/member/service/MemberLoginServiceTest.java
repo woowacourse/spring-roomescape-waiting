@@ -2,6 +2,9 @@ package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,30 +36,22 @@ class MemberLoginServiceTest {
     @DisplayName("로그인에 성공하면 토큰을 발급한다.")
     @Test
     void createMemberToken() {
-        String name = "카키";
-        String email = "kaki@email.com";
-        String password = "1234";
-
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(name, email, password);
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
         memberService.save(memberSignUpRequest);
 
-        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(email, password);
+        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(KAKI_EMAIL, KAKI_PASSWORD);
         String memberToken = memberLoginService.createMemberToken(memberLoginRequest);
 
         assertThat(memberToken).isNotNull();
     }
 
-    @DisplayName("이메일과 비밀번호가 일치하는 회원을 조회한다.")
+    @DisplayName("이메일과 비밀번호가 일치하지 않으면 예외가 발생한다.")
     @Test
     void findByEmailAndPasswordExceptionTest() {
-        String name = "카키";
-        String email = "kaki@email.com";
-        String password = "1234";
-
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(name, email, password);
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
         memberService.save(memberSignUpRequest);
 
-        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(email, "abcd");
+        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(KAKI_EMAIL, "abcd");
 
         assertThatThrownBy(() -> memberLoginService.findByEmailAndPassword(memberLoginRequest))
                 .isInstanceOf(IllegalArgumentException.class);

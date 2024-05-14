@@ -12,9 +12,9 @@ import roomescape.reservation.dto.ReservationSearchCondRequest;
 
 class DateRangeValidatorTest {
 
+    @DisplayName("기간이 30일을 넘지 않으면 true, 넘으면 false를 반환한다.")
     @ParameterizedTest
     @CsvSource({"'2024-05-01', '2024-05-31', true", "'2024-05-01', '2024-06-01', false"})
-    @DisplayName("기간이 30일을 넘지 않으면 true, 넘으면 false를 반환한다.")
     void isValid(LocalDate dateFrom, LocalDate dateTo, boolean expected) {
         ReservationSearchCondRequest reservationSearchCondRequest = new ReservationSearchCondRequest(
                 1L, 1L, dateFrom, dateTo
