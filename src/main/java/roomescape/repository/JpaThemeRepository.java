@@ -1,11 +1,10 @@
 package roomescape.repository;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Theme;
-
-import java.util.List;
 
 @Repository
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
@@ -20,4 +19,9 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT :themeCount;
             """, nativeQuery = true)
     List<Theme> findTopThemesDescendingByDescription(String startDate, String endDate, int themeCount);
+
+    default Theme fetchById(long themeId) {
+        return findById(themeId).orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
+    }
+
 }
