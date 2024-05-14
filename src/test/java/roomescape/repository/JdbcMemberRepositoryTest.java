@@ -8,22 +8,20 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 
-@JdbcTest
+@DataJpaTest
 class JdbcMemberRepositoryTest {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final JdbcMemberRepository memberRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdbcMemberRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.memberRepository = new JdbcMemberRepository(jdbcTemplate);
-    }
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("회원을 추가한다.")

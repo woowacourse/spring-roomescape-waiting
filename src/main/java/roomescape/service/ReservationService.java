@@ -62,9 +62,9 @@ public class ReservationService {
             Long themeId,
             Long memberId
     ) {
-        Member member = memberRepository.getById(memberId);
-        ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
-        Theme theme = themeRepository.getById(themeId);
+        Member member = memberRepository.getByIdentifier(memberId);
+        ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
+        Theme theme = themeRepository.getByIdentifier(themeId);
 
         Reservation reservation = new Reservation(date, member, reservationTime, theme);
 
@@ -85,8 +85,8 @@ public class ReservationService {
     private void validateDuplicatedReservation(Reservation reservation) {
         if (reservationRepository.existsByReservation(
                 reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getThemeId()
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
         )) {
             throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
         }

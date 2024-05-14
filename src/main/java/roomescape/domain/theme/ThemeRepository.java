@@ -3,26 +3,31 @@ package roomescape.domain.theme;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Theme save(Theme theme);
-
-    List<Theme> findAll();
-
-    default Theme getById(Long id) {
+    default Theme getByIdentifier(Long id) {
         return findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
     }
 
-    Optional<Theme> findById(Long id);
-
+    @Query(value = """
+                SELECT
+                th.id,
+                th.name,
+                th.description,
+                th.thumbnail
+                FROM Theme AS th
+                JOIN Reservation AS r
+                ON th.id = r.theme_id
+                WHERE r.date BETWEEN :startDate AND :endDate
+                GROUP BY th.id
+                ORDER BY COUNT(th.id) DESC
+                LIMIT :limit
+            """, nativeQuery = true)
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
-
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
 
     boolean existsByName(String name);
 }

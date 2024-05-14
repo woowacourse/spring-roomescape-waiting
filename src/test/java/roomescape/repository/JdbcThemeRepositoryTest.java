@@ -9,23 +9,21 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 
-@JdbcTest
+@DataJpaTest
 class JdbcThemeRepositoryTest {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ThemeRepository themeRepository;
 
     @Autowired
-    public JdbcThemeRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.themeRepository = new JdbcThemeRepository(jdbcTemplate);
-    }
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @Test
     @DisplayName("테마를 추가한다.")

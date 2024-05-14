@@ -2,20 +2,32 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation);
-
+    @Query("""
+                SELECT
+                   r
+                FROM  Reservation r
+                JOIN r.member
+                JOIN r.time
+                JOIN r.theme
+                WHERE (:memberId IS NULL OR r.member.id = :memberId)
+                AND (:themeId IS NULL OR r.theme.id = :themeId)
+                AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+                AND (:dateTo IS NULL OR r.date <= :dateTo)
+            """)
     List<Reservation> findAllByConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    void deleteById(Long id);
+    boolean existsByTimeId(long id);
 
-    boolean existsById(Long id);
+    boolean existsByThemeId(long id);
 
-    boolean existsByTimeId(Long id);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    boolean existsByThemeId(Long id);
-
-    boolean existsByReservation(LocalDate date, Long timeId, Long themeId);
+    default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
+        return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
 }

@@ -9,7 +9,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import roomescape.domain.member.Member;
@@ -19,17 +19,14 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-@JdbcTest
+@DataJpaTest
 class JdbcReservationRepositoryTest {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ReservationRepository reservationRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.reservationRepository = new JdbcReservationRepository(jdbcTemplate);
-    }
+    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 추가한다.")

@@ -10,22 +10,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.AvailableReservationTimeDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 
-@JdbcTest
+@DataJpaTest
 class JdbcReservationTimeRepositoryTest {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdbcReservationTimeRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.reservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
-    }
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Test
     @DisplayName("예약 시간을 추가한다.")

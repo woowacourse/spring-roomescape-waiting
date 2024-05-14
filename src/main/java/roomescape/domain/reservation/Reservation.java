@@ -104,23 +104,11 @@ public class Reservation {
         return member;
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
     public ReservationTime getTime() {
         return time;
     }
 
-    public Long getTimeId() {
-        return time.getId();
-    }
-
     public Theme getTheme() {
         return theme;
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
     }
 }
