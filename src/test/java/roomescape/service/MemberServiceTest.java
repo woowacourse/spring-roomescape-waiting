@@ -54,7 +54,7 @@ class MemberServiceTest {
     @DisplayName("이메일이 중복인 회원을 생성하면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_create_duplicated_member_email() {
-        memberRepository.insertMember(member1);
+        memberRepository.save(member1);
 
         MemberCreateRequest requestDto = new MemberCreateRequest("t1@t1.com", "11", "워니");
 
@@ -85,7 +85,7 @@ class MemberServiceTest {
     @DisplayName("로그인 시 비밀번호가 일치하지 않으면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_is_mismatched_password() {
-        memberRepository.insertMember(member3);
+        memberRepository.save(member3);
 
         MemberLoginRequest requestDto = new MemberLoginRequest("t3@t3.com", "1212");
 
@@ -97,7 +97,7 @@ class MemberServiceTest {
     @DisplayName("로그인이 정상적으로 완료되고 토큰을 발급한다.")
     @Test
     void success_login() {
-        Member savedMember = memberRepository.insertMember(member3);
+        Member savedMember = memberRepository.save(member3);
         String expectedToken = jwtManager.generateToken(savedMember);
         MemberLoginRequest requestDto = new MemberLoginRequest("t3@t3.com", "125");
 

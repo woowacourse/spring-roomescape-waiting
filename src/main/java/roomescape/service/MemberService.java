@@ -24,14 +24,14 @@ public class MemberService {
     }
 
     public void signup(MemberCreateRequest request) {
-        if (memberRepository.isMemberExistsByEmail(request.getEmail())) {
+        if (memberRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 가입되어 있는 이메일 주소입니다.");
         }
-        memberRepository.insertMember(request.toMember());
+        memberRepository.save(request.toMember());
     }
 
     public String login(MemberLoginRequest request) {
-        Member member = memberRepository.findMemberByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UnauthorizedEmailException("이메일이 존재하지 않습니다."));
 
         MemberPassword requestPassword = new MemberPassword(request.getPassword());
@@ -42,7 +42,7 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAllMemberNames() {
-        return memberRepository.findAllMemberNames().stream()
+        return memberRepository.findAll().stream()
                 .map(MemberResponse::new)
                 .toList();
     }

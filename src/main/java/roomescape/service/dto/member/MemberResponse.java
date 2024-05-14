@@ -1,7 +1,7 @@
 package roomescape.service.dto.member;
 
 import roomescape.controller.helper.LoginMember;
-import roomescape.domain.member.MemberInfo;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
 public class MemberResponse {
@@ -14,8 +14,8 @@ public class MemberResponse {
         this.name = name;
     }
 
-    public MemberResponse(MemberInfo memberInfo) {
-        this(memberInfo.getId(), memberInfo.getName());
+    public MemberResponse(Member member) {
+        this(member.getId(), member.getName());
     }
 
     public MemberResponse(LoginMember member) {

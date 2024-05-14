@@ -1,13 +1,18 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
+@Embeddable
 public class MemberPassword {
 
-    private final String value;
+    private String value;
 
     public MemberPassword(String value) {
         this.value = value;
+    }
+
+    protected MemberPassword() {
     }
 
     public boolean isMismatchedPassword(MemberPassword other) {

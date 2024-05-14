@@ -1,12 +1,23 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
 
-    private final Long id;
-    private final String email;
-    private final MemberPassword password;
-    private final String name;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String email;
+
+    @Embedded
+    private MemberPassword password;
+    private String name;
+    private Role role;
 
     public Member(Long id, String email, MemberPassword password, String name, Role role) {
         this.id = id;
@@ -34,6 +45,9 @@ public class Member {
                 name,
                 Role.MEMBER
         );
+    }
+
+    protected Member() {
     }
 
     public boolean isMismatchedPassword(MemberPassword other) {
