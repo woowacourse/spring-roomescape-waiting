@@ -3,7 +3,7 @@ package roomescape.auth.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.JwtTokenProvider;
@@ -13,13 +13,12 @@ import roomescape.auth.dto.LoginResponse;
 import roomescape.auth.dto.SignupRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.member.repository.MemberDao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@JdbcTest
-@Import(value = {AuthService.class, JwtTokenProvider.class, MemberDao.class})
+@DataJpaTest
+@Import(value = {AuthService.class, JwtTokenProvider.class})
 @Sql(value = {"/recreate_table.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("인증 서비스")
 class AuthServiceTest {

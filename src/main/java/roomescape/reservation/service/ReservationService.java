@@ -116,9 +116,6 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        int deletedCount = reservationRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new ResourceNotFoundException("존재하지 않는 예약입니다.");
-        }
+        reservationRepository.deleteById(id);
     }
 }

@@ -3,17 +3,14 @@ package roomescape.reservation.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixtures;
 import roomescape.reservation.domain.Reservation;
-import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.repository.ReservationDao;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.time.domain.ReservationTime;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
@@ -23,8 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.Fixtures.themeFixture;
 
-@JdbcTest
-@Import(ReservationDao.class)
+@DataJpaTest
 @DisplayName("예약 DAO")
 @Sql(value = {"/recreate_table.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationDaoTest {

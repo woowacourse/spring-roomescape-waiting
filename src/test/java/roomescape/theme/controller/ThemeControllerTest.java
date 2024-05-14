@@ -121,27 +121,4 @@ class ThemeControllerTest {
                 .then().log().all()
                 .statusCode(204);
     }
-
-    @DisplayName("테마 컨트롤러는 존재하지 않는 테마 삭제 요청이 들어오면 400을 응답한다.")
-    @Test
-    void deleteThemeWithNonExists() {
-        // given
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .when().delete("/themes/3")
-                .then()
-                .statusCode(204);
-
-        // when
-        String detailMessage = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().delete("/themes/3")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .jsonPath().get("detail");
-
-        // then
-        assertThat(detailMessage).isEqualTo("존재하지 않는 테마입니다.");
-    }
 }

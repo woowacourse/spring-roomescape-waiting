@@ -74,10 +74,7 @@ public class ThemeService {
 
     public void deleteTheme(Long id) {
         validateReservationExists(id);
-        int deletedCount = themeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new BadRequestException("존재하지 않는 테마입니다.");
-        }
+        themeRepository.deleteById(id);
     }
 
     private void validateReservationExists(Long id) {

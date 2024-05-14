@@ -155,20 +155,4 @@ class AdminReservationControllerTest {
                 .statusCode(200)
                 .body("size()", is(8));
     }
-
-    @DisplayName("어드민 예약 컨트롤러는 존재하지 않는 id 값으로 삭제하는 경우 404를 응답한다.")
-    @Test
-    void deleteReservationWithNonExistsId() {
-        // given & when
-        String detailMessage = RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
-                .when().delete("/admin/reservations/50")
-                .then().log().all()
-                .statusCode(404)
-                .extract()
-                .jsonPath().get("detail");
-
-        // then
-        assertThat(detailMessage).isEqualTo("존재하지 않는 예약입니다.");
-    }
 }

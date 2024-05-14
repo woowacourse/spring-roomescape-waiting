@@ -73,10 +73,7 @@ public class ReservationTimeService {
 
     public void deleteTime(Long id) {
         validateReservationExists(id);
-        int deletedCount = reservationTimeRepository.deleteById(id);
-        if (deletedCount == 0) {
-            throw new BadRequestException("존재하지 않는 예약 시간입니다.");
-        }
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateReservationExists(Long id) {

@@ -3,19 +3,17 @@ package roomescape.time.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.time.domain.ReservationTime;
 
-import javax.sql.DataSource;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@JdbcTest
+@DataJpaTest
 @Sql(scripts = {"/recreate_table.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("예약 시간 DAO")
 class ReservationTimeDaoTest {
@@ -23,8 +21,8 @@ class ReservationTimeDaoTest {
     private final ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    public ReservationTimeDaoTest(JdbcTemplate jdbcTemplate, DataSource dataSource) {
-        this.reservationTimeRepository = new ReservationTimeDao(jdbcTemplate, dataSource);
+    public ReservationTimeDaoTest(ReservationTimeRepository reservationTimeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     @DisplayName("예약 시간 DAO는 생성 요청이 들어오면 DB에 값을 저장한다.")

@@ -247,8 +247,7 @@ class ReservationServiceTest {
     @Test
     void deleteReservation() {
         // given
-        Mockito.when(reservationRepository.deleteById(id)).
-                thenReturn(1);
+        Mockito.doNothing().when(reservationRepository).deleteById(id);
 
         // when & then
         assertThatCode(() -> reservationService.deleteReservation(id))

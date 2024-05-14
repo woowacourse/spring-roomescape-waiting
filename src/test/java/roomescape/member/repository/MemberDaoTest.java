@@ -3,9 +3,7 @@ package roomescape.member.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixtures;
 import roomescape.member.domain.Member;
@@ -15,20 +13,16 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DataJpaTest
 @DisplayName("사용자 DAO")
 @Sql(value = {"/recreate_table.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@JdbcTest
 class MemberDaoTest {
 
     private final MemberRepository memberRepository;
-    private final SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
-    public MemberDaoTest(JdbcTemplate jdbcTemplate) {
-        this.memberRepository = new MemberDao(jdbcTemplate);
-        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("member")
-                .usingGeneratedKeyColumns("id");
+    public MemberDaoTest(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     @DisplayName("사용자 DAO는 생성 요청이 들어오면 DB에 값을 저장한다.")

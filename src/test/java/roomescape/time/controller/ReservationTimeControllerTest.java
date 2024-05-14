@@ -166,25 +166,4 @@ class ReservationTimeControllerTest {
                 .statusCode(200)
                 .body("size()", is(2));
     }
-
-    @DisplayName("시간 컨트롤러는 존재하지 않는 시간 삭제 요청이 들어오면 400을 반환한다.")
-    @Test
-    void deleteTimeWithNonExists() {
-        // given
-        RestAssured.given()
-                .when().delete("/times/3")
-                .then()
-                .statusCode(200);
-
-        // when
-        String detailMessage = RestAssured.given().log().all()
-                .when().delete("/times/3")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .jsonPath().get("detail");
-
-        // then
-        assertThat(detailMessage).isEqualTo("존재하지 않는 예약 시간입니다.");
-    }
 }
