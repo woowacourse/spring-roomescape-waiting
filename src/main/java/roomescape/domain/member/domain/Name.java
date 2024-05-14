@@ -1,11 +1,18 @@
 package roomescape.domain.member.domain;
 
-import java.util.Objects;
+import jakarta.persistence.Embeddable;
 import roomescape.global.exception.EscapeApplicationException;
 
+import java.util.Objects;
+
+@Embeddable
 public class Name {
 
-    private final String name;
+    private String name;
+
+    public Name() {
+
+    }
 
     public Name(String name) {
         validateNonBlank(name);

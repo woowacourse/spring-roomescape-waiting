@@ -1,9 +1,6 @@
 package roomescape.domain.member.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 
@@ -12,7 +9,8 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name; //todo: 네임 검증 추가
+    @Embedded
+    private Name name; //todo: 네임 검증 추가
     private String email;
     private String password;
     private Role role;
@@ -23,7 +21,7 @@ public class Member {
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
-        this.name = name;
+        this.name = new Name(name);
         this.email = email;
         this.password = password;
         this.role = role;
@@ -34,7 +32,7 @@ public class Member {
     }
 
     public String getName() {
-        return name;
+        return name.getName();
     }
 
     public String getEmail() {
@@ -70,10 +68,11 @@ public class Member {
     public String toString() {
         return "Member{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", name=" + name +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +
                 '}';
     }
 }
+
