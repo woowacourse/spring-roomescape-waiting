@@ -1,12 +1,18 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class ThemeName {
 
-    private final Pattern THEME_NAME_FORMAT = Pattern.compile("^[가-힣0-9a-zA-Z\\s]+$");
-    private final int NAME_LENGTH = 10;
-    private final String name;
+    private static final Pattern THEME_NAME_FORMAT = Pattern.compile("^[가-힣0-9a-zA-Z\\s]+$");
+    private static final int NAME_LENGTH = 10;
+
+    private String name;
+
+    public ThemeName() {
+    }
 
     public ThemeName(String name) {
         validate(name);

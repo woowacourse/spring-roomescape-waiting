@@ -1,12 +1,18 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Description {
 
-    private final Pattern DESCRIPTION_FORMAT = Pattern.compile("^[가-힣0-9\\s.,]+$");
-    private final int NAME_LENGTH = 50;
-    private final String text;
+    private static final Pattern DESCRIPTION_FORMAT = Pattern.compile("^[가-힣0-9\\s.,]+$");
+    private static final int NAME_LENGTH = 50;
+
+    private String text;
+
+    public Description() {
+    }
 
     public Description(final String text) {
         validate(text);

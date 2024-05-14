@@ -7,7 +7,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
+import java.util.Set;
 import roomescape.auth.Role;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class Member {
@@ -21,11 +25,15 @@ public class Member {
 
     @Embedded
     private MemberName name;
+
     private String email;
+
     private String password;
 
-    public Member() {
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservations = new HashSet<>();
 
+    public Member() {
     }
 
     public Member(MemberName name, String email, String password) {
