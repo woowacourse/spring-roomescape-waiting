@@ -25,6 +25,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.MemberResponse;
+import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
@@ -98,6 +99,37 @@ class ReservationControllerTest extends BaseControllerTest {
         });
     }
 
+    @Test
+    @DisplayName("나의 예약들을 조회한다")
+    void getMyReservations() {
+        addReservation();
+
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .extract();
+
+        List<PersonalReservationResponse> reservationResponses = response.jsonPath()
+                .getList(".", PersonalReservationResponse.class);
+
+        PersonalReservationResponse reservationResponse = reservationResponses.get(0);
+
+        MemberResponse memberResponse = reservationResponse.member();
+        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
+        ThemeResponse themeResponse = reservationResponse.theme();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+            softly.assertThat(reservationResponses).hasSize(1);
+
+            softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
+            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "user@gmail.com", "유저", Role.USER));
+            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
+            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
+            softly.assertThat(reservationResponse.status()).isEqualTo("예약 대기");
+        });
+    }
 
     private void addReservation() {
         ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 9), 1L, 1L);

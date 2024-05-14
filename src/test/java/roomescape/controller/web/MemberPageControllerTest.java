@@ -17,7 +17,8 @@ class MemberPageControllerTest extends BaseControllerTest {
             "/",
             "/reservation",
             "/login",
-            "/signup"
+            "/signup",
+            "/reservation-mine"
     })
     void pageTest(String path) {
         ExtractableResponse<Response> response = RestAssured.given().log().all()
