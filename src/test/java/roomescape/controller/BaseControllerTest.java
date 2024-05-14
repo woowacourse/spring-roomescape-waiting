@@ -29,9 +29,6 @@ public abstract class BaseControllerTest {
     @LocalServerPort
     private int port;
 
-    @SpyBean
-    protected TokenProvider tokenProvider;
-
     protected String token;
 
     @BeforeEach
