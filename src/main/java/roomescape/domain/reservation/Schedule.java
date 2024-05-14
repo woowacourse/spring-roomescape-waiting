@@ -1,15 +1,47 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
+@Entity
 public class Schedule {
-    private final ReservationDate date;
-    private final ReservationTime time;
+    private static final long NO_ID = 0;
 
-    public Schedule(ReservationDate date, ReservationTime time) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "DATE"))
+    private ReservationDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+
+    @OneToMany(mappedBy = "schedule")
+    private List<Reservation> reservations;
+
+    public Schedule() {
+    }
+
+    public Schedule(long id, ReservationDate date, ReservationTime time) {
+        this.id = id;
         this.date = date;
         this.time = time;
+    }
+
+    public Schedule(ReservationDate date, ReservationTime time) {
+        this(NO_ID, date, time);
     }
 
     public LocalDate getDate() {
