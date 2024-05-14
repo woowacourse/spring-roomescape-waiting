@@ -13,6 +13,8 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findAllByReservationMember_Id(long memberId);
 
+    List<Reservation> findAllByDateAndTheme_Id(LocalDate date, long themeId);
+
     boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 
     boolean existsByTime(ReservationTime reservationTime);

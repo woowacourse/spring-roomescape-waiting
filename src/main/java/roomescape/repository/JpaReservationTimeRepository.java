@@ -5,16 +5,21 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.repository.jpa.JpaReservationDao;
 import roomescape.repository.jpa.JpaReservationTimeDao;
 
 @Repository
 public class JpaReservationTimeRepository implements ReservationTimeRepository {
     private final JpaReservationTimeDao jpaReservationTimeDao;
+    private final JpaReservationDao jpaReservationDao;
 
-    public JpaReservationTimeRepository(JpaReservationTimeDao jpaReservationTimeDao) {
+    public JpaReservationTimeRepository(JpaReservationTimeDao jpaReservationTimeDao,
+                                        JpaReservationDao jpaReservationDao) {
         this.jpaReservationTimeDao = jpaReservationTimeDao;
+        this.jpaReservationDao = jpaReservationDao;
     }
 
     @Override
@@ -39,7 +44,10 @@ public class JpaReservationTimeRepository implements ReservationTimeRepository {
 
     @Override
     public List<ReservationTime> findUsedTimeByDateAndTheme(LocalDate date, Theme theme) {
-        return jpaReservationTimeDao.findUsedTimeByDateAndThemeId(date, theme.getId());
+        return jpaReservationDao.findAllByDateAndTheme_Id(date, theme.getId())
+                .stream()
+                .map(Reservation::getReservationTime)
+                .toList();
     }
 
     @Override
