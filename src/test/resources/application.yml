@@ -1,0 +1,15 @@
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:roomescape
+    username: sa
+  sql:
+    init:
+      mode: never
+
+jwt:
+  secret: secreteKey
+  expired-period: 3600000
