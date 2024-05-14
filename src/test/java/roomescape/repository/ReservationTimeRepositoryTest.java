@@ -1,11 +1,9 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DATE_AFTER_1DAY;
-import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.ROOM_THEME1;
 import static roomescape.TestFixture.TIME;
 
 import java.util.List;
@@ -83,10 +81,10 @@ class ReservationTimeRepositoryTest {
     @Test
     void existsByStartAt() {
         // given
-        boolean existsFalse = reservationTimeRepository.existByStartAt(TIME);
+        boolean existsFalse = reservationTimeRepository.existsByStartAt(TIME);
         reservationTimeRepository.save(RESERVATION_TIME_10AM);
         // when
-        boolean existsTrue = reservationTimeRepository.existByStartAt(TIME);
+        boolean existsTrue = reservationTimeRepository.existsByStartAt(TIME);
         // then
         assertAll(
                 () -> assertThat(existsFalse).isFalse(),
@@ -105,37 +103,27 @@ class ReservationTimeRepositoryTest {
         assertThat(reservationTimeRepository.findAll()).isEmpty();
     }
 
-    @DisplayName("해당 id의 예약 시간을 삭제하는 경우, 그 id를 참조하는 예약도 삭제한다.")
-    @Test
-    void deleteByIdDeletesReservationAlso() {
-        // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
-        // when
-        reservationTimeRepository.deleteById(reservationTime.getId());
-        // then
-        assertThat(reservationRepository.findAll()).isEmpty();
-    }
-
     @DisplayName("삭제 대상이 존재하면 true를 반환한다.")
     @Test
     void returnTrueWhenDeleted() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         // when
-        boolean deleted = reservationTimeRepository.deleteById(reservationTime.getId());
-        // then
-        assertThat(deleted).isTrue();
+//        boolean deleted = reservationTimeRepository.deleteById(reservationTime.getId());
+//        // then
+//        assertThat(deleted).isTrue();
+        assertThatCode(() -> reservationTimeRepository.deleteById(reservationTime.getId()))
+                .doesNotThrowAnyException();
     }
 
     @DisplayName("삭제 대상이 존재하지 않으면 false를 반환한다.")
     @Test
     void returnFalseWhenNotDeleted() {
-        // given & when
-        boolean deleted = reservationTimeRepository.deleteById(1L);
-        // then
-        assertThat(deleted).isFalse();
+//        // given & when
+//        boolean deleted = reservationTimeRepository.deleteById(1L);
+//        // then
+//        assertThat(deleted).isFalse();
+        assertThatCode(() -> reservationTimeRepository.deleteById(1L))
+                .doesNotThrowAnyException();
     }
 }

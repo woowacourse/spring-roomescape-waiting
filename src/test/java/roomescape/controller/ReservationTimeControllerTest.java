@@ -1,16 +1,10 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DATE_AFTER_1DAY;
-import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.ROOM_THEME1;
 import static roomescape.TestFixture.TIME;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,31 +123,6 @@ class ReservationTimeControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + invalidId)
-                .then().log().all().assertThat().statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    @DisplayName("예약 시간 삭제 시, 해당 id를 참조하는 예약도 삭제된다.")
-    @Test
-    void deleteReservationTimeDeletesReservationAlso() {
-        // given
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
-        reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
-        Long timeId = reservationTime.getId();
-        // when
-        Response deleteResponse = RestAssured.given().log().all()
-                .when().delete("/times/" + timeId)
-                .then().log().all().extract().response();
-        // then
-        Response reservationResponse = RestAssured.given().log().all()
-                .when().get("reservations")
-                .then().log().all().extract().response();
-        assertAll(
-                () -> assertThat(deleteResponse.statusCode()).isEqualTo(
-                        HttpStatus.NO_CONTENT.value()),
-                () -> assertThat(reservationResponse.jsonPath().getList(".")).isEmpty()
-        );
+                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 }

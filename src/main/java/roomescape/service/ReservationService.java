@@ -4,7 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -14,6 +16,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationSpecification;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.RoomThemeRepository;
 import roomescape.service.dto.request.ReservationCreateRequest;
@@ -46,9 +49,23 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+        Map<String, Object> searchKeys = new HashMap<>();
         validateDateCondition(dateFrom, dateTo);
 
-        return reservationRepository.findBy(themeId, memberId, dateFrom, dateTo)
+        if (themeId != null) {
+            searchKeys.put("themeId", themeId);
+        }
+
+        if (memberId != null) {
+            searchKeys.put("memberId", memberId);
+        }
+
+        if (dateFrom != null && dateTo != null) {
+            searchKeys.put("dateFrom", dateFrom);
+            searchKeys.put("dateTo", dateTo);
+        }
+
+        return reservationRepository.findAll(ReservationSpecification.searchReservation(searchKeys))
                 .stream().map(ReservationResponse::from)
                 .toList();
     }
@@ -75,8 +92,8 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public boolean deleteById(Long id) {
-        return reservationRepository.deleteById(id);
+    public void deleteById(Long id) {
+        reservationRepository.deleteById(id);
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {
@@ -93,7 +110,7 @@ public class ReservationService {
     }
 
     private void validateDuplicatedDateTime(LocalDate date, Long timeId, Long themeId) {
-        boolean exists = reservationRepository.existsByDateTime(date, timeId, themeId);
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (exists) {
             throw new BadRequestException("중복된 시간과 날짜에 대한 예약을 생성할 수 없습니다.");
         }

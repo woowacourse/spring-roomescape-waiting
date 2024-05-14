@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.RoomTheme;
@@ -23,7 +24,10 @@ public class RoomThemeService {
     }
 
     public List<RoomThemeResponse> findByRanking() {
-        return roomThemeRepository.findAllRanking()
+        LocalDate toDate = LocalDate.now();
+        LocalDate fromDate = toDate.minusDays(8);
+
+        return roomThemeRepository.findAllRanking(fromDate, toDate)
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();
@@ -35,7 +39,7 @@ public class RoomThemeService {
         return RoomThemeResponse.from(savedRoomTheme);
     }
 
-    public boolean deleteById(Long id) {
-        return roomThemeRepository.deleteById(id);
+    public void deleteById(Long id) {
+        roomThemeRepository.deleteById(id);
     }
 }

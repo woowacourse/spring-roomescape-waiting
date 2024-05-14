@@ -41,12 +41,12 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
-    public boolean deleteById(long id) {
-        return reservationTimeRepository.deleteById(id);
+    public void deleteById(long id) {
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateDuplicatedTime(LocalTime startAt) {
-        boolean exists = reservationTimeRepository.existByStartAt(startAt);
+        boolean exists = reservationTimeRepository.existsByStartAt(startAt);
         if (exists) {
             throw new BadRequestException("중복된 시간을 생성할 수 없습니다.");
         }
@@ -56,7 +56,7 @@ public class ReservationTimeService {
             ReservationAvailabilityTimeRequest timeRequest)
     {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByTheme(timeRequest.themeId());
+        List<Reservation> reservations = reservationRepository.findByThemeId(timeRequest.themeId());
 
         return reservationTimes.stream()
                 .map(reservationTime -> {

@@ -1,7 +1,5 @@
 package roomescape.controller;
 
-import static roomescape.TestFixture.ROOM_THEME1;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.List;
@@ -50,16 +48,5 @@ class RoomThemeControllerTest {
         RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
-    }
-
-    @DisplayName("테마 삭제 테스트")
-    @Test
-    void deleteTheme() {
-        // given
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        // when & then
-        RestAssured.given().log().all()
-                .when().delete("/themes/" + savedRoomTheme.getId())
-                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 }

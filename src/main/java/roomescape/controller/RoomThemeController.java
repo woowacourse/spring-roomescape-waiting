@@ -43,10 +43,7 @@ public class RoomThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoomTheme(@PathVariable Long id) {
-        boolean isDeleted = roomThemeService.deleteById(id);
-        if (isDeleted) {
-            return ResponseEntity.noContent().build();
-        }
+        roomThemeService.deleteById(id);
         return ResponseEntity.notFound().build();
     }
 }

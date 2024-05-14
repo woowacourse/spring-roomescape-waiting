@@ -4,16 +4,21 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.LoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AdminPageControllerTest {
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -23,6 +28,7 @@ class AdminPageControllerTest {
     @DisplayName("Admin Page 홈화면 접근 성공 테스트")
     @Test
     void responseAdminPage() {
+        System.out.println("test : " + memberRepository.findAll().size());
         String accessToken = RestAssured
                 .given().log().all()
                 .body(new LoginRequest("zeze@gmail.com", "zeze"))

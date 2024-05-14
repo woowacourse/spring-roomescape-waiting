@@ -233,7 +233,7 @@ class ReservationControllerTest {
         // when & then
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + invalidId)
-                .then().log().all().assertThat().statusCode(HttpStatus.NOT_FOUND.value());
+                .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     private Map createReservationRequest(Member member, String date) {

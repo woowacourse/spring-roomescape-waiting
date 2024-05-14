@@ -4,9 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.util.List;
 import roomescape.exception.BadRequestException;
 
 @Entity
+@Table(name = "theme")
 public class RoomTheme {
 
     @Id
@@ -15,6 +19,8 @@ public class RoomTheme {
     private String name;
     private String description;
     private String thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private List<Reservation> reservationList;
 
     public RoomTheme() {
 
