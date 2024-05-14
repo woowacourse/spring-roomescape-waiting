@@ -9,7 +9,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -19,6 +18,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.dto.response.PersonalReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 class ReservationServiceTest extends BaseServiceTest {
@@ -37,9 +37,6 @@ class ReservationServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Test
     @DisplayName("예약들을 조회한다.")
@@ -125,5 +122,37 @@ class ReservationServiceTest extends BaseServiceTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).isEmpty();
+    }
+
+    @Test
+    @DisplayName("나의 예약들을 조회한다.")
+    void getReservationsByMemberId() {
+        Member member = memberRepository.save(new Member("new@gmail.com", "password", "nickname", Role.USER));
+        Theme theme = themeRepository.save(new Theme("테마", "테마 설명", "https://example.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
+
+        Reservation reservation = new Reservation(
+                LocalDate.of(2024, 4, 9),
+                member,
+                time,
+                theme
+        );
+        reservationRepository.save(reservation);
+
+        List<PersonalReservationResponse> responses = reservationService.getReservationsByMemberId(member.getId());
+
+        SoftAssertions.assertSoftly(
+                softly -> {
+                    softly.assertThat(responses).hasSize(1);
+                    softly.assertThat(responses.get(0).date()).isEqualTo("2024-04-09");
+                    softly.assertThat(responses.get(0).theme().id()).isEqualTo(theme.getId());
+                    softly.assertThat(responses.get(0).theme().name()).isEqualTo("테마");
+                    softly.assertThat(responses.get(0).theme().description()).isEqualTo("테마 설명");
+                    softly.assertThat(responses.get(0).theme().thumbnail()).isEqualTo("https://example.com");
+                    softly.assertThat(responses.get(0).time().id()).isEqualTo(time.getId());
+                    softly.assertThat(responses.get(0).time().startAt()).isEqualTo("10:30");
+                    softly.assertThat(responses.get(0).status()).isEqualTo("예약 대기");
+                }
+        );
     }
 }
