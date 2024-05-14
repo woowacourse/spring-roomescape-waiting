@@ -1,13 +1,20 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Password {
+
     private static final int MAX_PASSWORD_LENGTH = 20;
 
-    private final String value;
+    private String value;
 
     public Password(final String value) {
         validatePassword(value);
         this.value = value;
+    }
+
+    public Password() {
     }
 
     private void validatePassword(final String value) {

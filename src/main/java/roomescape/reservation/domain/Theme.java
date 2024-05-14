@@ -1,10 +1,20 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
-    private final Long id;
-    private final ThemeName themeName;
-    private final String description;
-    private final String thumbnail;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+    @Embedded
+    private ThemeName themeName;
+    private String description;
+    private String thumbnail;
 
     public Theme(final Long id, final ThemeName themeName, final String description, final String thumbnail) {
         validateDescription(description);
@@ -13,6 +23,9 @@ public class Theme {
         this.themeName = themeName;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    public Theme() {
     }
 
     private void validateDescription(final String description) {
