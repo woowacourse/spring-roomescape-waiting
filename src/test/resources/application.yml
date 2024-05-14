@@ -1,0 +1,12 @@
+spring:
+  sql:
+    init:
+      schema-locations: classpath:/schema.sql
+      data-locations: classpath:/truncate.sql
+datasource:
+  url: jdbc:h2:mem:database
+security:
+  jwt:
+    token:
+      secret-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+      expire-length: 3600000
