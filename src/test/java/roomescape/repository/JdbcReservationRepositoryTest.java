@@ -22,7 +22,6 @@ import roomescape.domain.reservation.Theme;
 import roomescape.repository.rowmapper.MemberRowMapper;
 import roomescape.repository.rowmapper.ReservationRowMapper;
 import roomescape.repository.rowmapper.ReservationTimeRowMapper;
-import roomescape.repository.rowmapper.ThemeRowMapper;
 import roomescape.service.dto.reservation.ReservationSearchParams;
 
 @TestExecutionListeners(value = {
@@ -36,6 +35,8 @@ class JdbcReservationRepositoryTest {
     private DataSource dataSource;
     private JdbcReservationRepository reservationRepository;
     private JdbcReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
     private JdbcThemeRepository themeRepository;
     private JdbcMemberRepository memberRepository;
 
@@ -69,15 +70,14 @@ class JdbcReservationRepositoryTest {
         memberRepository = new JdbcMemberRepository(dataSource, new MemberRowMapper());
         reservationRepository = new JdbcReservationRepository(dataSource, new ReservationRowMapper());
         reservationTimeRepository = new JdbcReservationTimeRepository(dataSource, new ReservationTimeRowMapper());
-        themeRepository = new JdbcThemeRepository(dataSource, new ThemeRowMapper());
         initializeTimesAndThemeAndMemberData();
     }
 
     private void initializeTimesAndThemeAndMemberData() {
         reservationTimeRepository.insertReservationTime(time1);
         reservationTimeRepository.insertReservationTime(time2);
-        themeRepository.insertTheme(theme1);
-        themeRepository.insertTheme(theme2);
+        themeRepository.save(theme1);
+        themeRepository.save(theme2);
         memberRepository.insertMember(member1);
         memberRepository.insertMember(member2);
     }

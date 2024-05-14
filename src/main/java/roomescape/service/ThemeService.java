@@ -21,14 +21,14 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        return themeRepository.findAllThemes()
+        return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
 
     public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
-        List<Theme> topBookedThemes = themeRepository.findTopThemesDescendingByReservationCount(
+        List<Theme> topBookedThemes = themeRepository.findTopThemesDescendingByDescription(
                 request.getStartDate(), request.getEndDate(), request.getCount());
 
         return topBookedThemes.stream()
@@ -37,17 +37,14 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(ThemeRequest request) {
-        Theme theme = themeRepository.insertTheme(request.toTheme());
+        Theme theme = themeRepository.save(request.toTheme());
         return new ThemeResponse(theme);
     }
 
     public void deleteTheme(long id) {
-        if (!themeRepository.isThemeExistsById(id)) {
-            throw new IllegalArgumentException("존재하지 않는 아이디입니다.");
-        }
         if (reservationRepository.isReservationExistsByThemeId(id)) {
             throw new IllegalArgumentException("해당 테마에 예약이 있어 삭제할 수 없습니다.");
         }
-        themeRepository.deleteThemeById(id);
+        themeRepository.deleteById(id);
     }
 }

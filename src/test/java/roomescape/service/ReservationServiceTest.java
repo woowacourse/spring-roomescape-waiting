@@ -65,7 +65,7 @@ class ReservationServiceTest {
     @Test
     void throw_exception_when_create_reservation_use_unsaved_time() {
         memberRepository.insertMember(member);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
 
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
 
@@ -79,7 +79,7 @@ class ReservationServiceTest {
     void throw_exception_when_create_reservation_use_before_date() {
         memberRepository.insertMember(member);
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
 
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2024-05-07", 1L);
 
@@ -93,7 +93,7 @@ class ReservationServiceTest {
     void throw_exception_when_create_reservation_use_same_theme_and_date_time() {
         memberRepository.insertMember(member);
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
         Reservation reservation1 = new Reservation(1L, member, theme, date, time);
         reservationRepository.insertReservation(reservation1);
 
@@ -108,7 +108,7 @@ class ReservationServiceTest {
     @Test
     void success_create_reservation() {
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
         memberRepository.insertMember(member);
 
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
@@ -132,7 +132,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, member, theme, date, time);
         memberRepository.insertMember(member);
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
         reservationRepository.insertReservation(reservation);
 
         assertThatNoException()

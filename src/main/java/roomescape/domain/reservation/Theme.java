@@ -1,7 +1,15 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Theme {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id;
     private final String name;
     private final String description;
@@ -12,6 +20,10 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    protected Theme() {
+        this(null, null, null, null);
     }
 
     public Long getId() {

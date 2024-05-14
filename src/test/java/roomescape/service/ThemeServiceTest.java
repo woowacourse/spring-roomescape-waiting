@@ -73,7 +73,7 @@ class ThemeServiceTest {
 
         memberRepository.insertMember(member);
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
         reservationRepository.insertReservation(reservation);
 
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
@@ -85,7 +85,7 @@ class ThemeServiceTest {
     @Test
     void success_delete_theme() {
         Theme theme = new Theme(1L, "공포", "공포는 무서워", "hi.jpg");
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
 
         assertThatNoException()
                 .isThrownBy(() -> themeService.deleteTheme(1L));

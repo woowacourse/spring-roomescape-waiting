@@ -95,7 +95,7 @@ class ReservationTimeServiceTest {
 
         memberRepository.insertMember(member);
         reservationTimeRepository.insertReservationTime(time);
-        themeRepository.insertTheme(theme);
+        themeRepository.save(theme);
         reservationRepository.insertReservation(reservation);
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))

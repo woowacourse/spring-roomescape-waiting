@@ -20,7 +20,6 @@ import roomescape.domain.reservation.Theme;
 import roomescape.repository.rowmapper.MemberRowMapper;
 import roomescape.repository.rowmapper.ReservationRowMapper;
 import roomescape.repository.rowmapper.ReservationTimeRowMapper;
-import roomescape.repository.rowmapper.ThemeRowMapper;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -32,6 +31,8 @@ class JdbcReservationTimeRepositoryTest {
     @Autowired
     private DataSource dataSource;
     private JdbcReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
     private JdbcThemeRepository themeRepository;
     private JdbcReservationRepository reservationRepository;
     private JdbcMemberRepository memberRepository;
@@ -54,7 +55,6 @@ class JdbcReservationTimeRepositoryTest {
     @BeforeEach
     void setUp() {
         reservationTimeRepository = new JdbcReservationTimeRepository(dataSource, new ReservationTimeRowMapper());
-        themeRepository = new JdbcThemeRepository(dataSource, new ThemeRowMapper());
         reservationRepository = new JdbcReservationRepository(dataSource, new ReservationRowMapper());
         memberRepository = new JdbcMemberRepository(dataSource, new MemberRowMapper());
     }
@@ -149,8 +149,8 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime savedTime1 = reservationTimeRepository.insertReservationTime(time1);
         ReservationTime savedTime2 = reservationTimeRepository.insertReservationTime(time2);
         ReservationTime savedTime3 = reservationTimeRepository.insertReservationTime(time3);
-        Theme savedTheme1 = themeRepository.insertTheme(theme1);
-        Theme savedTheme2 = themeRepository.insertTheme(theme2);
+        Theme savedTheme1 = themeRepository.save(theme1);
+        Theme savedTheme2 = themeRepository.save(theme2);
         Member savedMember1 = memberRepository.insertMember(member1);
         Member savedMember2 = memberRepository.insertMember(member2);
         Member savedMember3 = memberRepository.insertMember(member3);
