@@ -11,8 +11,8 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.dao.TimeDao;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.TimeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,14 +21,14 @@ import java.util.List;
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final MemberDao memberDao;
-    private final TimeDao timeDao;
+    private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
 
-    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, TimeDao timeDao, ThemeRepository themeRepository) {
+    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, TimeRepository timeRepository, ThemeRepository themeRepository) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
-        this.timeDao = timeDao;
+        this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
     }
 
@@ -77,7 +77,7 @@ public class ReservationService {
     }
 
     private ReservationTime findTimeByTimeId(Long timeId) {
-        return timeDao.findTimeById(timeId)
+        return timeRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약 시간이 존재하지 않습니다."));
     }
 

@@ -16,9 +16,9 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.dao.TimeDao;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeResponse;
+import roomescape.time.repository.TimeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,7 +37,7 @@ class ReservationServiceTest {
     @Mock
     private MemberDao memberDao;
     @Mock
-    private TimeDao timeDao;
+    private TimeRepository timeRepository;
     @Mock
     private ThemeRepository themeRepository;
     @InjectMocks
@@ -81,7 +81,7 @@ class ReservationServiceTest {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
         given(memberDao.findMemberById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
-        given(timeDao.findTimeById(1L))
+        given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
@@ -119,7 +119,7 @@ class ReservationServiceTest {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
         given(memberDao.findMemberById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
-        given(timeDao.findTimeById(1L)).willReturn(Optional.empty());
+        given(timeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -133,7 +133,7 @@ class ReservationServiceTest {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
         given(memberDao.findMemberById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
-        given(timeDao.findTimeById(1L))
+        given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
         given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
@@ -149,7 +149,7 @@ class ReservationServiceTest {
         ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
         given(memberDao.findMemberById(1L))
                 .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
-        given(timeDao.findTimeById(1L))
+        given(timeRepository.findById(1L))
                 .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
