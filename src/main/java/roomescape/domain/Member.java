@@ -1,11 +1,27 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String email;
+    @Column(unique = true) // TODO: DB 제약조건 필요성 고려해보기
+    private String email; // TODO: @UniqueConstraint 달았을 때 쿼리랑 비교해보기
     private String password;
+    @Enumerated(EnumType.STRING)
     private MemberRole role;
+
+    public Member() {
+    }
 
     public Member(Long id, String name, String email, String password, MemberRole role) {
         this.id = id;
