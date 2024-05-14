@@ -1,11 +1,13 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
@@ -14,6 +16,7 @@ import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
+import roomescape.service.dto.UserReservationResponse;
 
 @Service
 public class ReservationService {
@@ -96,4 +99,18 @@ public class ReservationService {
                 .map(ReservationResponse::new)
                 .toList();
     }
+
+    public List<UserReservationResponse> findAllUserReservation(Long memberId) {
+        // TODO: 중복 메소드 분리
+        Member foundMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
+
+        // TODO: member 안에 List<Reservation> vs 단방향 엔티티 관계
+        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(foundMember, LocalDate.now());
+
+        return reservations.stream()
+                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
+                .toList();
+    }
 }
+

@@ -34,4 +34,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTheme(Theme theme);
 
+    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date);
 }
