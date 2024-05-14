@@ -1,16 +1,38 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
-    private final Long id;
-    private final PlayerName name;
-    private final Email email;
-    private final Password password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private PlayerName name;
+    @Embedded
+    @AttributeOverride(name = "address", column = @Column(name = "email"))
+    private Email email;
+    @Embedded
+    private Password password;
+
+    public Member() {
+    }
 
     public Member(Long id, PlayerName name, Email email, Password password) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public Member(PlayerName name, Email email, Password password) {
+        this(null, name, email, password);
     }
 
     public Member(String name, String email, String password) {
@@ -25,8 +47,8 @@ public class Member {
         return id.equals(memberId);
     }
 
-    public boolean matchPassword(String otherPassword) {
-        return password.matches(otherPassword);
+    public boolean matchPassword(Password otherPassword) {
+        return password.equals(otherPassword);
     }
 
     public Long getId() {
