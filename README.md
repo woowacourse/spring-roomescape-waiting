@@ -1,6 +1,7 @@
 # 요구사항 문서
 
-- [ ] JdbcTemplate 대신 Spring Data JPA 사용하도록 변경
+- [x] JdbcTemplate 대신 Spring Data JPA 사용하도록 변경
+- [ ] 내 예약 목록을 조회하는 API 구현
 
 # API 명세
 
@@ -318,4 +319,43 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
 {
   "name": "어드민"
 }
+```
+
+## 내 예약 조회 API
+
+### Request
+
+> GET /reservations/mine HTTP/1.1
+> cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+> host: localhost:8080
+
+### Response
+
+> HTTP/1.1 200
+> Content-Type: application/json
+
+``` JSON 
+[
+    {
+        "reservationId": 1,
+        "theme": "테마1",
+        "date": "2024-03-01",
+        "time": "10:00",
+        "status": "예약"
+    },
+    {
+        "reservationId": 2,
+        "theme": "테마2",
+        "date": "2024-03-01",
+        "time": "12:00",
+        "status": "예약"
+    },
+    {
+        "reservationId": 3,
+        "theme": "테마3",
+        "date": "2024-03-01",
+        "time": "14:00",
+        "status": "예약"
+    }
+]
 ```
