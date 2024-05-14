@@ -3,7 +3,7 @@ package roomescape.dto.reservationtime;
 import java.time.LocalTime;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.ReservationTime.ReservationTime;
+import roomescape.domain.time.ReservationTime;
 
 public record ReservationTimeRequest(
         @JsonFormat(pattern = "HH:mm")

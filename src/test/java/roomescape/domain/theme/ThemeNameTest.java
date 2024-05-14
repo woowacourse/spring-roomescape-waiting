@@ -1,4 +1,4 @@
-package roomescape.domain.Theme;
+package roomescape.domain.theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

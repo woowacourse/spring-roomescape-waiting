@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTime.ReservationTime;
+import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
 
 @Repository

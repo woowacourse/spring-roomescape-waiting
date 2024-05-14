@@ -1,4 +1,4 @@
-package roomescape.domain.Reservation;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import jakarta.persistence.Entity;
@@ -6,9 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import roomescape.domain.ReservationTime.ReservationTime;
-import roomescape.domain.Theme.Theme;
 import roomescape.domain.member.Member;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
 
 @Entity
 public class Reservation {

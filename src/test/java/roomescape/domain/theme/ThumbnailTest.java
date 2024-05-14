@@ -1,4 +1,4 @@
-package roomescape.domain.Theme;
+package roomescape.domain.theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -7,15 +7,15 @@ import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class DescriptionTest {
+class ThumbnailTest {
 
     @Test
-    void 설명이_10자_미만일_경우_예외_발생() {
+    void 썸네일이_비어있을_경우_예외_발생() {
         //given
-        String name = "123456789";
+        String thumbnail = "";
 
         //when, then
-        assertThatThrownBy(() -> new Description(name))
+        assertThatThrownBy(() -> new Thumbnail(thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
