@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.request.ReservationTimeSaveRequest;
@@ -17,9 +19,11 @@ import java.util.List;
 @RequestMapping("/times")
 public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService, ThemeService themeService) {
         this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
     }
 
     @PostMapping
@@ -48,6 +52,7 @@ public class ReservationTimeController {
     @GetMapping("/available")
     public ResponseEntity<List<AvailableReservationTimeResponse>> findAllByDateAndThemeId(
             @RequestParam LocalDate date, @RequestParam Long themeId) {
-        return ResponseEntity.ok(reservationTimeService.findAvailableReservationTimes(date, themeId));
+        Theme theme = themeService.findById(themeId);
+        return ResponseEntity.ok(reservationTimeService.findAvailableReservationTimes(date, theme));
     }
 }

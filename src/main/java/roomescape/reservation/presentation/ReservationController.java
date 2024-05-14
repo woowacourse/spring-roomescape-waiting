@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
@@ -23,13 +24,14 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final MemberService memberService;
 
-    public ReservationController(ReservationService reservationService,
-                                 ReservationTimeService reservationTimeService,
-                                 ThemeService themeService) {
+    public ReservationController(ReservationService reservationService, ReservationTimeService reservationTimeService,
+                                 ThemeService themeService, MemberService memberService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.memberService = memberService;
     }
 
     @PostMapping
@@ -53,8 +55,10 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> findReservationsByMemberIdAndThemeIdAndDateBetween(
             @RequestParam Long memberId, @RequestParam Long themeId,
             @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
-        List<Reservation> reservations = reservationService.findAllByMemberIdAndThemeIdAndDateBetween(
-                memberId, themeId, fromDate, toDate);
+        Member member = memberService.findById(memberId);
+        Theme theme = themeService.findById(themeId);
+        List<Reservation> reservations = reservationService.findAllByMemberAndThemeAndDateBetween(
+                member, theme, fromDate, toDate);
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)
                 .toList());

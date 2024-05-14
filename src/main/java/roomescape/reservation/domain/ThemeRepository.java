@@ -1,20 +1,17 @@
 package roomescape.reservation.domain;
 
-import roomescape.reservation.domain.Theme;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    Theme save(Theme theme);
-
-    List<Theme> findAll();
-
-    Optional<Theme> findById(Long id);
-
-    void deleteById(Long id);
-
-    List<Theme> findAllByDateBetweenAndOrderByReservationCount(LocalDate startDate, LocalDate endDate, int limit);
+    // Todo: limit(10개) 적용
+    @Query("""
+            select th as reservation_count from Theme th left outer join Reservation r on r.theme = th and r.date >= :start and r.date <= :end group by th.id, th.name, th.description, th.thumbnail order by count(r.id) desc
+            """)
+    List<Theme> findAllByDateBetweenAndOrderByReservationCount(@Param(value = "start") LocalDate startDate, @Param(value = "end") LocalDate endDate);
 }

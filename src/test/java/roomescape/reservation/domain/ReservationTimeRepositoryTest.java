@@ -1,10 +1,9 @@
 package roomescape.reservation.domain;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RepositoryTest;
-import roomescape.reservation.persistence.ReservationTimeDao;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,12 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 
 class ReservationTimeRepositoryTest extends RepositoryTest {
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @BeforeEach
-    void setUp() {
-        this.reservationTimeRepository = new ReservationTimeDao(dataSource);
-    }
 
     @Test
     @DisplayName("예약 시간을 저장한다.")

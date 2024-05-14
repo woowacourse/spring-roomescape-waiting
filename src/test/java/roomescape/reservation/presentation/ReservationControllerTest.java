@@ -18,6 +18,7 @@ import roomescape.common.ControllerTest;
 import roomescape.common.TestWebMvcConfiguration;
 import roomescape.global.config.WebMvcConfiguration;
 import roomescape.global.exception.NotFoundException;
+import roomescape.member.application.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
@@ -55,6 +56,9 @@ class ReservationControllerTest extends ControllerTest {
     @MockBean
     private ThemeService themeService;
 
+    @MockBean
+    private MemberService memberService;
+
     @Test
     @DisplayName("예약 목록 GET 요청 시 상태코드 200을 반환한다.")
     void findReservations() throws Exception {
@@ -83,7 +87,7 @@ class ReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
 
-        BDDMockito.given(reservationService.findAllByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
+        BDDMockito.given(reservationService.findAllByMemberAndThemeAndDateBetween(any(), any(), any(), any()))
                 .willReturn(List.of(expectedReservation));
 
         // when & then

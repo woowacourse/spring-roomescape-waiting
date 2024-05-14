@@ -13,6 +13,7 @@ import roomescape.auth.presentation.LoginMemberArgumentResolver;
 import roomescape.common.ControllerTest;
 import roomescape.global.config.WebMvcConfiguration;
 import roomescape.reservation.application.ReservationTimeService;
+import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
@@ -36,7 +37,10 @@ import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 )
 class ReservationTimeControllerTest extends ControllerTest {
     @MockBean
-    protected ReservationTimeService reservationTimeService;
+    private ReservationTimeService reservationTimeService;
+
+    @MockBean
+    private ThemeService themeService;
 
     @Test
     @DisplayName("예약 시간 POST 요청 시 상태코드 201을 반환한다.")
@@ -137,7 +141,7 @@ class ReservationTimeControllerTest extends ControllerTest {
     void findAllByDateAndThemeId() throws Exception {
         // given
         long themeId = 1L;
-        BDDMockito.given(reservationTimeService.findAvailableReservationTimes(MIA_RESERVATION_DATE, themeId))
+        BDDMockito.given(reservationTimeService.findAvailableReservationTimes(any(), any()))
                 .willReturn(List.of(AvailableReservationTimeResponse.of(new ReservationTime(MIA_RESERVATION_TIME), true)));
 
         // when & then

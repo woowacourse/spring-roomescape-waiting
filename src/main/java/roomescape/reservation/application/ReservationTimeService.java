@@ -7,6 +7,7 @@ import roomescape.global.exception.ViolationException;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 
 import java.time.LocalDate;
@@ -49,14 +50,14 @@ public class ReservationTimeService {
     }
 
     private void validateHasReservation(ReservationTime reservationTime) {
-        int reservationCount = reservationRepository.countByTimeId(reservationTime.getId());
+        int reservationCount = reservationRepository.countByTime(reservationTime);
         if (reservationCount > 0) {
             throw new ViolationException("해당 예약 시간의 예약 건이 존재합니다.");
         }
     }
 
-    public List<AvailableReservationTimeResponse> findAvailableReservationTimes(LocalDate date, Long themeId) {
-        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAllTimeIdsByDateAndThemeId(date, themeId));
+    public List<AvailableReservationTimeResponse> findAvailableReservationTimes(LocalDate date, Theme theme) {
+        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAllTimeIdsByDateAndThemeId(date, theme));
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream()

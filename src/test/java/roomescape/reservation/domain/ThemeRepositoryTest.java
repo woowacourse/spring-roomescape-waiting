@@ -1,39 +1,31 @@
 package roomescape.reservation.domain;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RepositoryTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.persistence.MemberDao;
-import roomescape.reservation.persistence.ReservationDao;
-import roomescape.reservation.persistence.ReservationTimeDao;
-import roomescape.reservation.persistence.ThemeDao;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.*;
-import static roomescape.member.domain.Role.USER;
 
 class ThemeRepositoryTest extends RepositoryTest {
+    @Autowired
     private ThemeRepository themeRepository;
-    private ReservationTimeRepository reservationTimeRepository;
-    private MemberRepository memberRepository;
-    private ReservationRepository reservationRepository;
 
-    @BeforeEach
-    void setUp() {
-        this.themeRepository = new ThemeDao(dataSource);
-        this.reservationTimeRepository = new ReservationTimeDao(dataSource);
-        this.memberRepository = new MemberDao(dataSource);
-        this.reservationRepository = new ReservationDao(dataSource);
-    }
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("테마를 저장한다.")
@@ -119,7 +111,7 @@ class ThemeRepositoryTest extends RepositoryTest {
         LocalDate endDate = today.minusDays(1);
 
         // when
-        List<Theme> allOrderByReservationCountInLastWeek = themeRepository.findAllByDateBetweenAndOrderByReservationCount(startDate, endDate, 10);
+        List<Theme> allOrderByReservationCountInLastWeek = themeRepository.findAllByDateBetweenAndOrderByReservationCount(startDate, endDate);
 
         // then
         assertThat(allOrderByReservationCountInLastWeek).extracting(Theme::getId)

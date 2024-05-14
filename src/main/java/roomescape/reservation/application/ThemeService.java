@@ -45,6 +45,6 @@ public class ThemeService {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(DAYS_TO_SUBTRACT_AT_START_POPULAR);
         LocalDate endDate = today.minusDays(DAYS_TO_SUBTRACT_AT_END_POPULAR);
-        return themeRepository.findAllByDateBetweenAndOrderByReservationCount(startDate, endDate, NUMBER_OF_POPULAR);
+        return themeRepository.findAllByDateBetweenAndOrderByReservationCount(startDate, endDate);
     }
 }

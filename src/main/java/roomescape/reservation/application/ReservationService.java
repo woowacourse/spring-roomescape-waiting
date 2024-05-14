@@ -3,8 +3,10 @@ package roomescape.reservation.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ViolationException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,8 +35,8 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(Reservation reservation) {
-        boolean existReservationInSameTime = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId());
+        boolean existReservationInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
         if (existReservationInSameTime) {
             throw new ViolationException("해당 시간대에 예약이 모두 찼습니다.");
         }
@@ -44,9 +46,8 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId,
-                                                                               LocalDate fromDate, LocalDate toDate) {
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, fromDate, toDate);
+    public List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate fromDate, LocalDate toDate) {
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 
     @Transactional

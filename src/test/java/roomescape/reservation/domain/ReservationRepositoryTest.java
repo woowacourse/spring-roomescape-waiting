@@ -3,13 +3,10 @@ package roomescape.reservation.domain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RepositoryTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.persistence.MemberDao;
-import roomescape.reservation.persistence.ReservationDao;
-import roomescape.reservation.persistence.ReservationTimeDao;
-import roomescape.reservation.persistence.ThemeDao;
 
 import java.util.List;
 
@@ -18,7 +15,17 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.*;
 
 class ReservationRepositoryTest extends RepositoryTest {
+    @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     private ReservationTime reservationTime;
     private Theme wootecoTheme;
@@ -28,11 +35,6 @@ class ReservationRepositoryTest extends RepositoryTest {
 
     @BeforeEach
     void setUp() {
-        this.reservationRepository = new ReservationDao(dataSource);
-
-        ReservationTimeRepository reservationTimeRepository = new ReservationTimeDao(dataSource);
-        ThemeRepository themeRepository = new ThemeDao(dataSource);
-        MemberRepository memberRepository = new MemberDao(dataSource);
         this.reservationTime = reservationTimeRepository.save(new ReservationTime(MIA_RESERVATION_TIME));
         this.wootecoTheme = themeRepository.save(WOOTECO_THEME());
         this.horrorTheme = themeRepository.save(HORROR_THEME());
@@ -60,8 +62,8 @@ class ReservationRepositoryTest extends RepositoryTest {
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
 
         // when
-        boolean existByDateAndTimeIdAndThemeId = reservationRepository.existByDateAndTimeIdAndThemeId(
-                MIA_RESERVATION_DATE, reservationTime.getId(), wootecoTheme.getId());
+        boolean existByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeAndTheme(
+                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
 
         // then
         assertThat(existByDateAndTimeIdAndThemeId).isTrue();
@@ -98,8 +100,8 @@ class ReservationRepositoryTest extends RepositoryTest {
         reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, horrorTheme));
 
         // when
-        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
-                1L, 1L, MIA_RESERVATION_DATE, MIA_RESERVATION_DATE.plusDays(1));
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                mia, wootecoTheme, MIA_RESERVATION_DATE, MIA_RESERVATION_DATE.plusDays(1));
 
         // then
         assertSoftly(softly -> {
@@ -127,11 +129,9 @@ class ReservationRepositoryTest extends RepositoryTest {
     @Test
     @DisplayName("timeId에 해당하는 예약 건수를 조회한다.")
     void countByTimeId() {
-        // given
-        long timeId = 2L;
-
+        //giv
         // when
-        int count = reservationRepository.countByTimeId(timeId);
+        int count = reservationRepository.countByTime(reservationTime);
 
         // then
         assertThat(count).isEqualTo(0);
@@ -146,7 +146,7 @@ class ReservationRepositoryTest extends RepositoryTest {
 
         // when
         List<Long> reservationsByDateAndThemeId = reservationRepository.findAllTimeIdsByDateAndThemeId(
-                MIA_RESERVATION_DATE, wootecoTheme.getId());
+                MIA_RESERVATION_DATE, wootecoTheme);
 
         // then
         assertThat(reservationsByDateAndThemeId).hasSize(2);

@@ -126,8 +126,8 @@ class ReservationServiceTest extends ServiceTest {
         Reservation tommyReservation = reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
 
         // when
-        List<Reservation> reservations = reservationService.findAllByMemberIdAndThemeIdAndDateBetween(
-                miaReservation.getMemberId(), miaReservation.getThemeId(), miaReservation.getDate(), tommyReservation.getDate());
+        List<Reservation> reservations = reservationService.findAllByMemberAndThemeAndDateBetween(
+                miaReservation.getMember(), miaReservation.getTheme(), miaReservation.getDate(), tommyReservation.getDate());
 
         // then
         assertThat(reservations).hasSize(1)

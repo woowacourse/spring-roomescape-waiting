@@ -99,7 +99,7 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         // when
         List<AvailableReservationTimeResponse> availableReservationTimes
-                = reservationTimeService.findAvailableReservationTimes(MIA_RESERVATION_DATE, miaReservation.getThemeId());
+                = reservationTimeService.findAvailableReservationTimes(MIA_RESERVATION_DATE, miaReservation.getTheme());
 
         // then
         assertAll(() -> {
