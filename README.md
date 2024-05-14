@@ -11,4 +11,4 @@
 ## 2단계 요구 사항
 
 - [ ] 내 예약 목록을 조회하는 API를 구현
-    - [ ] reservation-mine.js, reservation-mine.html 파일 추가
+- [x] reservation-mine.js, reservation-mine.html 파일 추가
