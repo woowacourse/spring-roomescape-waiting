@@ -24,6 +24,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.ThemeSaveRequest;
@@ -84,7 +85,7 @@ class ThemeServiceTest {
 
         Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10, Status.SUCCESS));
 
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
                 .isInstanceOf(IllegalArgumentException.class);

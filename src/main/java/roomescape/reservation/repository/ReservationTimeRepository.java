@@ -7,6 +7,6 @@ import roomescape.reservation.domain.ReservationTime;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    @Query("select t from ReservationTime t join Reservation r ON t.id = r.id WHERE t.id = :id")
+    @Query("select t from ReservationTime t join Reservation r on t.id = r.reservationTime.id where t.id = :id")
     List<ReservationTime> findReservationTimesThatReservationReferById(Long id);
 }

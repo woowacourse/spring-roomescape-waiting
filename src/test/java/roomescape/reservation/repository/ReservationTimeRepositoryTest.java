@@ -22,6 +22,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 
@@ -75,7 +76,8 @@ class ReservationTimeRepositoryTest {
 
         Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
+
         boolean exist = !reservationTimeRepository.findReservationTimesThatReservationReferById(reservationTime.getId())
                 .isEmpty();
 

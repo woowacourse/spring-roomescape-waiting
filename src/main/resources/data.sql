@@ -1,8 +1,8 @@
 -- 회원
 INSERT INTO member (name, email, password, role)
 VALUES
-('러너덕', 'duck@email.com', '1234', 'ADMIN'),
 ('카키', 'kaki@email.com', '1234', default),
+('러너덕', 'duck@email.com', '1234', 'ADMIN'),
 ('솔라', 'solar@email.com', '1234', default),
 ('브라운', 'brown@email.com', '1234', default),
 ('네오', 'neo@email.com', '1234', default),
@@ -49,30 +49,30 @@ VALUES
 ALTER TABLE theme ALTER COLUMN id RESTART WITH 16;
 
 -- 예약
-INSERT INTO reservation (member_id, date, time_id, theme_id)
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
 VALUES
-(1, CURRENT_DATE, 1, 1),
-(2, CURRENT_DATE, 1, 2),
-(3, CURRENT_DATE, 1, 3),
-(4, CURRENT_DATE, 1, 4),
-(5, CURRENT_DATE, 1, 5),
-(6, CURRENT_DATE, 1, 6),
-(7, CURRENT_DATE, 1, 7),
-(8, CURRENT_DATE, 1, 8),
-(9, CURRENT_DATE, 1, 9),
-(1, DATEADD('DAY', 1, CURRENT_DATE), 10, 10),
-(2, DATEADD('DAY', 1, CURRENT_DATE), 1, 11),
-(3, DATEADD('DAY', 1, CURRENT_DATE), 2, 12),
-(4, DATEADD('DAY', 1, CURRENT_DATE), 3, 13),
-(5, DATEADD('DAY', 1, CURRENT_DATE), 4, 14),
-(1, DATEADD('DAY', 2, CURRENT_DATE), 5, 15),
-(2, DATEADD('DAY', 2, CURRENT_DATE), 6, 1),
-(3, DATEADD('DAY', 2, CURRENT_DATE), 7, 2),
-(4, DATEADD('DAY', 2, CURRENT_DATE), 8, 3),
-(1, DATEADD('DAY', 3, CURRENT_DATE), 9, 4),
-(2, DATEADD('DAY', 3, CURRENT_DATE), 10, 5),
-(3, DATEADD('DAY', 3, CURRENT_DATE), 1, 6),
-(1, DATEADD('DAY', 4, CURRENT_DATE), 2, 7),
-(2, DATEADD('DAY', 4, CURRENT_DATE), 3, 1),
-(1, DATEADD('DAY', 5, CURRENT_DATE), 4, 1);
+(1, CURRENT_DATE, 1, 1, 'SUCCESS'),
+(2, CURRENT_DATE, 1, 2, 'SUCCESS'),
+(3, CURRENT_DATE, 1, 3, 'SUCCESS'),
+(4, CURRENT_DATE, 1, 4, 'SUCCESS'),
+(5, CURRENT_DATE, 1, 5, 'SUCCESS'),
+(6, CURRENT_DATE, 1, 6, 'SUCCESS'),
+(7, CURRENT_DATE, 1, 7, 'SUCCESS'),
+(8, CURRENT_DATE, 1, 8, 'SUCCESS'),
+(9, CURRENT_DATE, 1, 9, 'SUCCESS'),
+(1, DATEADD('DAY', 1, CURRENT_DATE), 10, 10, 'SUCCESS'),
+(2, DATEADD('DAY', 1, CURRENT_DATE), 1, 11, 'SUCCESS'),
+(3, DATEADD('DAY', 1, CURRENT_DATE), 2, 12, 'SUCCESS'),
+(4, DATEADD('DAY', 1, CURRENT_DATE), 3, 13, 'SUCCESS'),
+(5, DATEADD('DAY', 1, CURRENT_DATE), 4, 14, 'SUCCESS'),
+(1, DATEADD('DAY', 2, CURRENT_DATE), 5, 15, 'SUCCESS'),
+(2, DATEADD('DAY', 2, CURRENT_DATE), 6, 1, 'SUCCESS'),
+(3, DATEADD('DAY', 2, CURRENT_DATE), 7, 2, 'SUCCESS'),
+(4, DATEADD('DAY', 2, CURRENT_DATE), 8, 3, 'SUCCESS'),
+(1, DATEADD('DAY', 3, CURRENT_DATE), 9, 4, 'SUCCESS'),
+(2, DATEADD('DAY', 3, CURRENT_DATE), 10, 5, 'SUCCESS'),
+(3, DATEADD('DAY', 3, CURRENT_DATE), 1, 6, 'SUCCESS'),
+(1, DATEADD('DAY', 4, CURRENT_DATE), 2, 7, 'SUCCESS'),
+(2, DATEADD('DAY', 4, CURRENT_DATE), 3, 1, 'SUCCESS'),
+(1, DATEADD('DAY', 5, CURRENT_DATE), 4, 1, 'SUCCESS');
 ALTER TABLE reservation ALTER COLUMN id RESTART WITH 25;

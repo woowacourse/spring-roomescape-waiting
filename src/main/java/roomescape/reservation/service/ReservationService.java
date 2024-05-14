@@ -7,7 +7,9 @@ import roomescape.member.dto.LoginMember;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
 import roomescape.reservation.dto.ReservationSearchCondRequest;
@@ -53,7 +55,7 @@ public class ReservationService {
 
         Member member = getValidatedMemberByRole(reservationSaveRequest, loginMember);
 
-        return reservationSaveRequest.toReservation(member, theme, reservationTime);
+        return reservationSaveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
     }
 
     private Member getValidatedMemberByRole(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
@@ -82,6 +84,13 @@ public class ReservationService {
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::toResponse)
+                .toList();
+    }
+
+    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
+        return reservationRepository.findAllByMember_Id(loginMember.id())
+                .stream()
+                .map(MemberReservationResponse::toResponse)
                 .toList();
     }
 

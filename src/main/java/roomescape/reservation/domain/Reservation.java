@@ -1,6 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,23 +34,29 @@ public class Reservation {
     @JoinColumn(name = "time_id")
     private ReservationTime reservationTime;
 
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
+
     public Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
         validateLastDate(date);
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
+        this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime,
+                       Status status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
+        this.status = status;
     }
 
     private void validateLastDate(LocalDate date) {
@@ -69,6 +77,10 @@ public class Reservation {
         return theme;
     }
 
+    public String getThemeName() {
+        return theme.getName();
+    }
+
     public LocalDate getDate() {
         return date;
     }
@@ -79,5 +91,9 @@ public class Reservation {
 
     public LocalTime getStartAt() {
         return reservationTime.getStartAt();
+    }
+
+    public String getStatusDisplayName() {
+        return status.getDisplayName();
     }
 }

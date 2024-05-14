@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.LoginMember;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
 import roomescape.reservation.dto.ReservationSearchCondRequest;
@@ -33,6 +34,13 @@ public class ReservationApiController {
         return ResponseEntity.ok(reservationResponses);
     }
 
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(LoginMember loginMember) {
+        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
+
+        return ResponseEntity.ok(memberReservationResponses);
+    }
+
     @GetMapping("/reservations/search")
     public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchCondRequest reservationSearchCondRequest
@@ -50,9 +58,9 @@ public class ReservationApiController {
     ) {
         ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
     }
-
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {

@@ -32,6 +32,18 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.OK.value());
     }
 
+    @DisplayName("회원별 예약 목록 조회에 성공하면 200 응답을 받는다.")
+    @Test
+    void findMemberReservations() {
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .accept(ContentType.JSON)
+                .when()
+                .get("/reservations-mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
+    }
+
     @DisplayName("테마 아이디, 회원 아이디, 기간 조건 조회에 성공하면 200 응답을 받는다.")
     @Test
     void findAllBySearchCond() {
