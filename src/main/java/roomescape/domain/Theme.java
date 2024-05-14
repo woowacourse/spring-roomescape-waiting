@@ -1,13 +1,37 @@
 package roomescape.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final ThemeName name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "theme_name", nullable = false))
+    private ThemeName name;
+
+    private String description;
+
+    private String thumbnail;
+
+    @OneToMany(mappedBy = "theme")
+    private Set<Reservation> reservations = new HashSet<>();
+
+    public Theme() {
+    }
 
     public Theme(Long id, ThemeName name, String description, String thumbnail) {
         validateBlank(description, thumbnail);
@@ -24,6 +48,7 @@ public class Theme {
     public Theme(String name, String description, String thumbnail) {
         this(null, new ThemeName(name), description, thumbnail);
     }
+
     private void validateBlank(String description, String thumbnail) {
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("테마 설명은 필수로 입력해야 합니다.");

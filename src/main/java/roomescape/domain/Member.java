@@ -1,14 +1,41 @@
 package roomescape.domain;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.util.Objects;
+import java.util.Set;
 
+@Entity
 public class Member {
 
-    private final Long id;
-    private final MemberName name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
+    private MemberName name;
+
+    private String email;
+
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @OneToMany(mappedBy = "member")
+    private Set<Reservation> reservations;
+
+    public Member() {
+    }
 
     public Member(Long id, MemberName name, String email, String password, Role role) {
         this.id = id;

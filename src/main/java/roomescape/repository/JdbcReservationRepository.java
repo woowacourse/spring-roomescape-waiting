@@ -58,7 +58,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         SqlParameterSource parameterSource = new BeanPropertySqlParameterSource(reservation);
         Number id = jdbcInsert.executeAndReturnKey(parameterSource);
-        return new Reservation(id.longValue(), reservation.getMember(), reservation.getReservationDate(),
+        return new Reservation(id.longValue(), reservation.getMember(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme());
     }
 

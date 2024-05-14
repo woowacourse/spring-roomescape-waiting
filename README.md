@@ -1,3 +1,7 @@
 - [x] gradle 의존성 추가
-- [ ] 엔티티 매핑
-- [ ] 연관관계 매핑
+- [x] 엔티티 매핑
+  - [x] Theme
+  - [x] Time
+  - [x] Member
+  - [x] Reservation
+- [x] 연관관계 매핑
