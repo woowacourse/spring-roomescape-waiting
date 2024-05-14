@@ -20,14 +20,13 @@ import roomescape.domain.Theme;
 import roomescape.fixture.ThemeFixture;
 
 @SpringBootTest
-class JdbcTemplateThemeRepositoryTest {
-
+class JpaThemeRepositoryTest {
     @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private JpaThemeRepository themeRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

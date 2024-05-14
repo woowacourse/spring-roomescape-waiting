@@ -5,14 +5,24 @@ import static roomescape.exception.ExceptionType.EMPTY_NAME;
 import static roomescape.exception.ExceptionType.EMPTY_THUMBNAIL;
 import static roomescape.exception.ExceptionType.NOT_URL_BASE_THUMBNAIL;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+
+    protected Theme() {
+    }
 
     public Theme(long id, Theme theme) {
         this(id, theme.name, theme.description, theme.thumbnail);
