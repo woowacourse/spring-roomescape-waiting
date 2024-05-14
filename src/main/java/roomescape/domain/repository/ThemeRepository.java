@@ -3,13 +3,25 @@ package roomescape.domain.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+
 import roomescape.domain.Theme;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends CrudRepository<Theme, Long> {
     List<Theme> findAll();
 
     Optional<Theme> findById(Long id);
 
+    @Query(value = """
+             SELECT theme.id, theme.name, theme.description, theme.thumbnail
+                            FROM reservation
+                            LEFT JOIN theme ON theme.id=reservation.theme_id
+                            WHERE reservation.date >= ? AND reservation.date <= ?
+                            GROUP BY theme.id
+                            ORDER BY COUNT(*) DESC
+                            LIMIT ?;
+            """, nativeQuery = true)
     List<Theme> findThemesByPeriodWithLimit(String startDate, String endDate, int limit);
 
     Theme save(Theme theme);

@@ -82,9 +82,9 @@ class MemberServiceTest {
     @DisplayName("모든 사용자들을 반환한다")
     void findAllMember_ShouldReturnAllMembers() {
         // given
-        memberRepository.save(dummyMember);
-        memberRepository.save(dummyMember);
-        memberRepository.save(dummyMember);
+        memberRepository.save(new Member("a", "b", "c"));
+        memberRepository.save(new Member("a", "b", "c"));
+        memberRepository.save(new Member("a", "b", "c"));
 
         // when
         List<MemberResponse> responses = memberService.findAllMember();
@@ -111,11 +111,12 @@ class MemberServiceTest {
     @DisplayName("중복된 이메일은 회원가입에 실패한다")
     void signup_ShouldThrowException_WhenDuplicatedEmail() {
         // given
+        SignupRequest signupRequest = new SignupRequest("name2", "email@email.com", "password");
         memberRepository.save(new Member("name", "email@email.com", "password"));
 
         // when & then
         Assertions.assertThatThrownBy(
-                        () -> memberService.signup(new SignupRequest("name2", "email@email.com", "password")))
+                        () -> memberService.signup(signupRequest))
                 .isInstanceOf(DuplicatedEmailException.class);
     }
 

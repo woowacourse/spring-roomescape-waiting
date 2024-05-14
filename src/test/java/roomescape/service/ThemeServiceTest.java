@@ -18,6 +18,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.policy.FixedDateWeeklyRankingPolicy;
+import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
@@ -33,6 +34,8 @@ class ThemeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @AfterEach
     void tearDown() {
@@ -109,7 +112,8 @@ class ThemeServiceTest {
     }
 
     private void creatReservation(int day, ReservationTime reservationTime, Theme theme) {
+        Member member = memberRepository.save(new Member("a", "b", "C"));
         reservationRepository.save(
-                new Reservation(LocalDate.of(2023, FEBRUARY, day), reservationTime, theme, new Member("a", "b", "C")));
+                new Reservation(LocalDate.of(2023, FEBRUARY, day), reservationTime, theme, member));
     }
 }
