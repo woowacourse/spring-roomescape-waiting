@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
@@ -45,6 +46,6 @@ public class ThemeService {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(DAYS_TO_SUBTRACT_AT_START_POPULAR);
         LocalDate endDate = today.minusDays(DAYS_TO_SUBTRACT_AT_END_POPULAR);
-        return themeRepository.findAllByDateBetweenAndOrderByReservationCount(startDate, endDate);
+        return themeRepository.findAllByDateBetweenOrderByReservationCount(startDate, endDate, PageRequest.of(0, NUMBER_OF_POPULAR));
     }
 }
