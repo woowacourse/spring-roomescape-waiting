@@ -3,20 +3,12 @@ package roomescape.time.domain;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
 import roomescape.time.dto.ReservationTimeWithBookStatusResponse;
 
-public interface ReservationTimeRepository {
-
-    List<ReservationTime> findAll();
-
-    Optional<ReservationTime> findById(Long id);
+public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
 
     List<ReservationTimeWithBookStatusResponse> findByDateAndThemeIdWithBookStatus(LocalDate date, Long themeId);
 
-    ReservationTime save(ReservationTime reservationTime);
-
     boolean existByStartAt(LocalTime startAt);
-
-    void deleteById(Long id);
 }
