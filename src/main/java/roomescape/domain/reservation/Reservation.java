@@ -5,6 +5,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.member.Member;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
@@ -29,6 +30,10 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Theme theme;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status = ReservationStatus.RESERVATION;
 
     public Reservation() {
     }
@@ -85,6 +90,10 @@ public class Reservation {
         return theme.getId();
     }
 
+    public String getThemeName() {
+        return theme.getName();
+    }
+
     public Long getId() {
         return id;
     }
@@ -105,8 +114,16 @@ public class Reservation {
         return time;
     }
 
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
     public Theme getTheme() {
         return theme;
+    }
+
+    public String getStatus() {
+        return status.getValue();
     }
 
     @Override

@@ -4,9 +4,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.reservation.Reservation;
+import roomescape.dto.auth.LoginMember;
+import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationExistenceCheck;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.repository.ReservationRepository;
 
 import java.util.List;
 
@@ -17,9 +20,11 @@ public class ReservationService {
     private static final int MAX_RESERVATIONS_PER_TIME = 1;
 
     private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationService(final ReservationDao reservationDao) {
+    public ReservationService(ReservationDao reservationDao, ReservationRepository reservationRepository) {
         this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationResponse create(final Reservation reservation) {
@@ -27,7 +32,7 @@ public class ReservationService {
                 = new ReservationExistenceCheck(reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId());
         final List<Reservation> existingReservations = reservationDao.findAllBy(reservationExistenceCheck);
         validateDuplicatedReservation(existingReservations);
-        return ReservationResponse.from(reservationDao.save(reservation));
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private void validateDuplicatedReservation(final List<Reservation> existingReservations) {
@@ -58,5 +63,12 @@ public class ReservationService {
             throw new IllegalArgumentException("해당 ID의 예약이 없습니다.");
         }
         reservationDao.deleteById(id);
+    }
+
+    public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
+        final List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+        return reservations.stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 }
