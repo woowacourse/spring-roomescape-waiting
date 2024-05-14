@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 
-@Entity(name = "time")
+@Entity
 public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
