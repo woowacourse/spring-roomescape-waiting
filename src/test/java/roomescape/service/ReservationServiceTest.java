@@ -1,16 +1,16 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.config.TestConfig;
 import roomescape.domain.member.Member;
@@ -128,7 +128,7 @@ class ReservationServiceTest {
 
         reservationService.deleteReservationById(savedReservation.getId());
 
-        int count = JdbcTestUtils.countRowsInTable(jdbcTemplate, "reservation");
-        Assertions.assertThat(count).isZero();
+        List<Reservation> reservations = reservationRepository.findAll();
+        assertThat(reservations).isEmpty();
     }
 }

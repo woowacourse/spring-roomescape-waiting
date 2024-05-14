@@ -77,8 +77,9 @@ class JdbcReservationRepositoryTest {
 
         reservationRepository.deleteById(1L);
 
-        int count = JdbcTestUtils.countRowsInTable(jdbcTemplate, "reservation");
-        assertThat(count).isZero();
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        assertThat(reservations).isEmpty();
     }
 
     @Test

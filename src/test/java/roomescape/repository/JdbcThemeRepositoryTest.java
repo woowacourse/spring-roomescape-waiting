@@ -126,8 +126,8 @@ class JdbcThemeRepositoryTest {
 
         themeRepository.deleteById(1L);
 
-        int count = JdbcTestUtils.countRowsInTable(jdbcTemplate, "theme");
-        assertThat(count).isEqualTo(0);
+        List<Theme> themes = themeRepository.findAll();
+        assertThat(themes).isEmpty();
     }
 
     @Test
