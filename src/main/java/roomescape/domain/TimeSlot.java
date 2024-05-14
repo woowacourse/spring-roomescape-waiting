@@ -1,12 +1,18 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import java.time.LocalTime;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
-import java.time.LocalTime;
-
+@Entity
 public class TimeSlot {
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    private Long id;
+    private LocalTime startAt;
+
+    public TimeSlot() {
+    }
 
     public TimeSlot(Long id, LocalTime startAt) {
         if (startAt == null) {

@@ -1,20 +1,28 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import roomescape.exception.ErrorType;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 import roomescape.exception.clienterror.InvalidIdException;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+@Entity
 public class Member {
+    //TODO: 실제 삽입하는 데이터와 불일치 해결 (패스워드)
     private static final String ADMIN_ROLE = "ADMIN";
     private static Pattern EMAIL_REGEX = Pattern.compile("^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$");
-    private final Long id;
-    private final String email;
-    private final String name;
-    private final String role;
+
+    @Id
+    private Long id;
+    private String email;
+    private String name;
+    private String role;
+
+    public Member() {
+    }
 
     public Member(final Long id, final String email, final String name, String role) {
         validId("id", id);

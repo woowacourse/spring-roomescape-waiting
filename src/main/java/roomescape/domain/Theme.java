@@ -1,12 +1,19 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
+@Entity
 public class Theme {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+
+    public Theme() {
+    }
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateEmpty("name", name);
