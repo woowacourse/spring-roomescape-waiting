@@ -1,0 +1,24 @@
+### 회원 가입 API
+POST http://localhost:8080/members
+Content-Type: application/json
+
+{
+  "name" : "어드민",
+  "email": "admin@email.com",
+  "password": "password"
+}
+
+### 로그인 API
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "password": "password"
+}
+
+### 인증 정보 조회 API
+GET http://localhost:8080/login/member
+
+### 로그아웃
+POST http://localhost:8080/logout
