@@ -9,6 +9,11 @@ public class RoomescapeException extends RuntimeException {
         this.exceptionType = exceptionType;
     }
 
+    public RoomescapeException(ExceptionType exceptionType, Throwable cause) {
+        super(cause);
+        this.exceptionType = exceptionType;
+    }
+
     @Override
     public String getMessage() {
         return exceptionType.getMessage();

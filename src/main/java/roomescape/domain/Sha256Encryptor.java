@@ -23,8 +23,7 @@ public class Sha256Encryptor {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            throw new RoomescapeException(ENCRYPT_FAIL);
+            throw new RoomescapeException(ENCRYPT_FAIL, e);
         }
     }
 }
