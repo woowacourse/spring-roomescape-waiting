@@ -1,5 +1,7 @@
 package roomescape.acceptance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -9,6 +11,7 @@ import roomescape.application.member.dto.request.MemberRegisterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.request.ThemeRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
 
@@ -47,5 +50,25 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .when().delete("/reservations/{id}", response.id())
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("나의 예약 목록을 조회한다.")
+    void findMyReservations() {
+        long themeId = fixture.createTheme(new ThemeRequest("name", "desc", "url")).id();
+        long timeId = fixture.createReservationTime(10, 0).id();
+        fixture.registerMember(new MemberRegisterRequest("name", "email@mail.com", "12341234"));
+        String token = fixture.loginAndGetToken("email@mail.com", "12341234");
+        fixture.createReservation(token, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
+
+        ReservationStatusResponse[] responses = RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(ReservationStatusResponse[].class);
+
+        assertThat(responses).hasSize(1);
     }
 }
