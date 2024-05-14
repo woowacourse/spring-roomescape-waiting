@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
-                SELECT
-                   r
-                FROM  Reservation r
-                JOIN r.member
-                JOIN r.time
-                JOIN r.theme
+                SELECT r
+                FROM Reservation r
+                JOIN FETCH r.member m
+                JOIN FETCH r.time t
+                JOIN FETCH r.theme th
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
                 AND (:themeId IS NULL OR r.theme.id = :themeId)
                 AND (:dateFrom IS NULL OR r.date >= :dateFrom)

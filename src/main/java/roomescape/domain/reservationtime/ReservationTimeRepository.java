@@ -17,9 +17,9 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
     @Query("""
             SELECT
                   new roomescape.domain.reservationtime.AvailableReservationTimeDto(
-                  rt.id,
-                  rt.startAt,
-                  CASE WHEN COUNT(r.id) > 0 THEN true ELSE false END
+                      rt.id,
+                      rt.startAt,
+                      CASE WHEN COUNT(r.id) > 0 THEN true ELSE false END
                   )
             FROM ReservationTime rt
             LEFT JOIN Reservation r
