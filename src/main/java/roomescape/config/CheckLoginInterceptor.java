@@ -15,6 +15,8 @@ import java.util.Arrays;
 
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
+    public static final String LOGIN_MEMBER = "loginMember";
+
     private final MemberService memberService;
 
     public CheckLoginInterceptor(final MemberService memberService) {
@@ -33,7 +35,7 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
         try {
             final Member member = memberService.findMemberByToken(token);
             final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getRole().name());
-            request.setAttribute("loginMember", loginMember);
+            request.setAttribute(LOGIN_MEMBER, loginMember);
         } catch (final InvalidTokenException | MemberNotFoundException e) {
             response.sendRedirect("/login");
             return false;
