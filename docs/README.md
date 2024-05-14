@@ -290,6 +290,51 @@ Content-Type: application/json
 </details>
 
 <details>
+<summary>GET <code>/reservations/mine</code> 나의 예약들 조회 API</summary>
+
+#### Request
+
+"token"인 쿠키 필요
+나의 예약들을 조회한다.
+
+```http
+GET /reservations/mine HTTP/1.1
+```
+
+#### Response
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+[
+  {
+    "id": 1,
+    "date": "2023-08-05",
+    "time" : {
+        "id": 1,
+        "startAt" : "10:00"
+    },
+    "theme" : {
+        "id": 1,
+        "name": "테마1",
+        "thumbnail": "https://example.com/thumbnail.jpg"
+    }, 
+    "member" : {
+        "id": 1,
+        "email": "user@gmail.com",
+        "name": "브라운",
+        "role": "USER"
+    }
+    "status": "예약 대기"
+  }
+]
+```
+
+</details>
+
+
+<details>
 <summary>DELETE <code>/reservations/{id}</code> 예약 삭제 API</summary>
 
 #### Request
