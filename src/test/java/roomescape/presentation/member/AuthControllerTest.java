@@ -35,7 +35,7 @@ class AuthControllerTest extends ControllerTest {
     @Test
     @DisplayName("로그인 시, 토큰이 담긴 쿠키를 반환한다.")
     void cookieOnLoginTest() throws Exception {
-        MemberLoginRequest request = new MemberLoginRequest("test@mail.com", "1234");
+        MemberLoginRequest request = new MemberLoginRequest("test@mail.com", "12341234");
         given(memberService.login(request))
                 .willReturn(new TokenResponse("this-is-token"));
         String requestJson = objectMapper.writeValueAsString(request);

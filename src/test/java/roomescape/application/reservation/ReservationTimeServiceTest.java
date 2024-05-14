@@ -86,10 +86,10 @@ class ReservationTimeServiceTest {
     void shouldThrowsExceptionReservationWhenReservedInTime() {
         ReservationTime time = createTime(10, 0);
         long timeId = time.getId();
-        Theme theme = themeRepository.create(new Theme("테마1", "테마1 설명", "url"));
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "url"));
         Member member = MemberFixture.createMember("오리");
         Member savedMember = memberRepository.save(member);
-        reservationRepository.create(new Reservation(
+        reservationRepository.save(new Reservation(
                 savedMember, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock)
         ));
         assertThatCode(() -> reservationTimeService.deleteById(timeId))
@@ -99,6 +99,6 @@ class ReservationTimeServiceTest {
 
     private ReservationTime createTime(int hour, int minute) {
         LocalTime startAt = LocalTime.of(hour, minute);
-        return reservationTimeRepository.create(new ReservationTime(startAt));
+        return reservationTimeRepository.save(new ReservationTime(startAt));
     }
 }

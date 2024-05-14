@@ -3,22 +3,22 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
 
-public interface ReservationRepository {
-
-    Reservation create(Reservation reservation);
-
-    Optional<Reservation> findById(long id);
-
-    List<Reservation> findAll();
-
-    void deleteById(long id);
+public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
     boolean existsByTimeId(long timeId);
 
-    boolean existsBy(LocalDate date, long timeId, long themeId);
+    boolean existsByThemeId(long themeId);
 
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    @Query("""
+            select r from Reservation as r
+            where r.member.id = :memberId and r.theme.id = :themeId
+            and r.date between :startDate and :endDate
+            """)
     List<Reservation> findByMemberAndThemeBetweenDates(Long memberId, Long themeId,
                                                        LocalDate startDate, LocalDate endDate);
 

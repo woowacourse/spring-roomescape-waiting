@@ -1,6 +1,5 @@
 package roomescape.application.reservation;
 
-import roomescape.exception.UnAuthorizedException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +17,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.domain.role.RoleRepository;
+import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class ReservationService {
@@ -49,10 +49,11 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         Reservation reservation = request.toReservation(member, reservationTime, theme, LocalDateTime.now(clock));
 
-        if (reservationRepository.existsBy(reservation.getDate(), reservationTime.getId(), theme.getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservationTime.getId(),
+                theme.getId())) {
             throw new IllegalArgumentException("이미 존재하는 예약입니다.");
         }
-        return ReservationResponse.from(reservationRepository.create(reservation));
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {

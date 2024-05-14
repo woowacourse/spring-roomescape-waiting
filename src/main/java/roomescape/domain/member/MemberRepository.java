@@ -1,26 +1,20 @@
 package roomescape.domain.member;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
 
-public interface MemberRepository {
+public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
-    Member save(Member member);
+    boolean existsByEmail(Email email);
 
-    List<Member> findAll();
-
-    Optional<Member> findById(long id);
-
-    boolean existsByEmail(String email);
-
-    Optional<Member> findByEmail(String email);
+    Optional<Member> findByEmail(Email email);
 
     default Member getById(long id) {
         return findById(id).orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
     }
 
-    default Member getByEmail(String email) {
+    default Member getByEmail(Email email) {
         return findByEmail(email).orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
     }
 }

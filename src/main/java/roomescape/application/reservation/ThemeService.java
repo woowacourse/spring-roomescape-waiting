@@ -7,21 +7,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ThemeRequest;
 import roomescape.application.reservation.dto.response.ThemeResponse;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @Service
 public class ThemeService {
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
     private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository, Clock clock) {
+    public ThemeService(ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository,
+                        Clock clock) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
         this.clock = clock;
     }
 
     public ThemeResponse create(ThemeRequest request) {
-        Theme savedTheme = themeRepository.create(request.toTheme());
+        Theme savedTheme = themeRepository.save(request.toTheme());
         return ThemeResponse.from(savedTheme);
     }
 
@@ -34,7 +39,7 @@ public class ThemeService {
 
     @Transactional
     public void deleteById(long id) {
-        if (themeRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("연관된 예약이 존재하여 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

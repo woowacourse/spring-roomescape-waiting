@@ -58,6 +58,6 @@ class ThemeServiceTest {
     }
 
     private Theme createTheme() {
-        return themeRepository.create(new Theme("테마", "테마 설명", "url"));
+        return themeRepository.save(new Theme("테마", "테마 설명", "url"));
     }
 }

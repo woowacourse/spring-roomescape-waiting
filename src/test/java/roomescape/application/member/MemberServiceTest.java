@@ -12,6 +12,7 @@ import roomescape.application.auth.TokenManager;
 import roomescape.application.member.dto.request.MemberLoginRequest;
 import roomescape.application.member.dto.request.MemberRegisterRequest;
 import roomescape.application.member.dto.response.TokenResponse;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.role.MemberRole;
@@ -52,7 +53,7 @@ class MemberServiceTest {
         String email = "test@test.com";
         MemberRegisterRequest request = new MemberRegisterRequest("hello", email, "12341234");
         memberService.register(request);
-        Optional<Member> actual = memberRepository.findByEmail(email);
+        Optional<Member> actual = memberRepository.findByEmail(new Email("test@test.com"));
         assertThat(actual).isPresent();
     }
 
