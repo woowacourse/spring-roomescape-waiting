@@ -23,6 +23,7 @@ public class Reservation {
     @JoinColumn(name = "time_id")
     private ReservationTime time;
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     public Reservation(
@@ -99,15 +100,7 @@ public class Reservation {
         return time;
     }
 
-    public long getTimeId() {
-        return time.getId();
-    }
-
     public Theme getTheme() {
         return theme;
-    }
-
-    public long getThemeId() {
-        return theme.getId();
     }
 }

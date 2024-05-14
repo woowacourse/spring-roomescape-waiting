@@ -6,4 +6,4 @@
     - [x] gradle 의존성 추가
     - [x] JPA를 활용한 Repository 구성
     - [x] Theme, Time, Member 엔티티 설정
-    - [ ] Reservation 연관관계 매핑
+    - [x] Reservation 연관관계 매핑
