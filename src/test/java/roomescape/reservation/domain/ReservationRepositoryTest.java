@@ -151,4 +151,19 @@ class ReservationRepositoryTest extends RepositoryTest {
         // then
         assertThat(reservationsByDateAndThemeId).hasSize(2);
     }
+
+    @Test
+    @DisplayName("사용자의 예약 목록을 조회한다.")
+    void findAllByMember() {
+        //given
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, tommy));
+
+        //when
+        List<Reservation> reservations = reservationRepository.findAllByMember(mia);
+
+        //then
+        assertThat(reservations).hasSize(2);
+    }
 }

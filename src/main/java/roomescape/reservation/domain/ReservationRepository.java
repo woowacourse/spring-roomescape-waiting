@@ -18,4 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :date AND r.theme = :theme")
     List<Long> findAllTimeIdsByDateAndThemeId(@Param(value = "date") LocalDate date, @Param(value = "theme")Theme theme);
+
+    List<Reservation> findAllByMember(Member member);
 }

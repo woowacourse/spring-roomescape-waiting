@@ -26,6 +26,10 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
+
     protected Reservation() {
     }
 
@@ -43,6 +47,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = ReservationStatus.BOOKING;
     }
 
     public boolean isBeforeOrOnToday(LocalDate today) {
@@ -83,5 +88,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }
