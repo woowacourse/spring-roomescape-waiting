@@ -38,4 +38,21 @@ public class Email {
     public String getAddress() {
         return address;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Email other = (Email) o;
+        return address.equals(other.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address);
+    }
 }

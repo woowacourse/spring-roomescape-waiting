@@ -32,4 +32,21 @@ public class Password {
     public String getPassword() {
         return password;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Password other = (Password) o;
+        return password.equals(other.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(password);
+    }
 }
