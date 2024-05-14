@@ -18,6 +18,7 @@ import roomescape.reservation.repository.ThemeDao;
 
 @Service
 public class ReservationService {
+
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
@@ -60,6 +61,13 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<Reservation> some() {
+        return reservationDao.getAll()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
         List<Long> usedTimeIds = reservationDao.findTimeIdsByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeDao.getAll();
@@ -88,10 +96,16 @@ public class ReservationService {
         return new ReservationDeleteResponse(reservationDao.delete(id));
     }
 
-    public void validateAlreadyHasReservation(final long id) {
+    public void validateAlreadyHasReservationByTimeId(final long id) {
         List<Reservation> reservations = reservationDao.findByTimeId(id);
         if (!reservations.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+        }
+    }
+
+    public void validateAlreadyHasReservationByThemeId(final long id) {
+        if (!reservationDao.findByThemeId(id).isEmpty()) {
+            throw new IllegalArgumentException("[ERROR] 해당 테마를 사용 중인 예약이 있어 삭제할 수 없습니다.");
         }
     }
 }

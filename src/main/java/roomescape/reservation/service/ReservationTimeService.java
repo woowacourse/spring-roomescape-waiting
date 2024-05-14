@@ -38,8 +38,8 @@ public class ReservationTimeService {
 
     public ReservationTimeDeleteResponse delete(final long id) {
         validateDoesNotExists(id);
-        reservationService.validateAlreadyHasReservation(id);
-        return new ReservationTimeDeleteResponse(reservationTimeRepository.delete(id));
+        reservationService.validateAlreadyHasReservationByTimeId(id);
+        return new ReservationTimeDeleteResponse(reservationTimeRepository.deleteById(id)); // TODO: 지워진 행의 개수 반환하는지 확인 필요
     }
 
     private void validateDoesNotExists(final long id) {
