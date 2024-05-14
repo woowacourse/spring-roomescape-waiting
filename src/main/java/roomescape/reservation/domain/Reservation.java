@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,7 +33,7 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     public Reservation(

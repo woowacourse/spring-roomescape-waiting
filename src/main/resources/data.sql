@@ -7,7 +7,7 @@
     insert into member(member_name, email, password, member_role) values
         ('anna', 'anna@gmail.com', 'password', 'ADMIN'),
         ('parang', 'parang@gmail.com', 'password', 'MEMBER');
-    insert into reservation(date, time_id, theme_id, member_id) values
-        ('2024-12-12', 1, 1, 1),
-        ('2024-12-23', 2, 3, 1),
-        ('2024-12-25', 3, 2, 2);
+    insert into reservation(date, time_id, theme_id, member_id, status) values
+        ('2024-12-12', 1, 1, 1, 'RESERVATION'),
+        ('2024-12-23', 2, 3, 1, 'RESERVATION'),
+        ('2024-12-25', 3, 2, 2, 'RESERVATION');
