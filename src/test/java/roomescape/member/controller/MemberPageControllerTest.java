@@ -30,4 +30,37 @@ class MemberPageControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.HTML);
     }
+
+    @DisplayName("/reservation을 요청하면 html을 반환한다.")
+    @Test
+    void userReservationPage() {
+        RestAssured.given().log().all()
+                .when()
+                .get("/reservation")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(ContentType.HTML);
+    }
+
+    @DisplayName("/reservation-mine을 요청하면 html을 반환한다.")
+    @Test
+    void myReservationPage() {
+        RestAssured.given().log().all()
+                .when()
+                .get("/reservation-mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(ContentType.HTML);
+    }
+
+    @DisplayName("/을 요청하면 html을 반환한다.")
+    @Test
+    void popularPage() {
+        RestAssured.given().log().all()
+                .when()
+                .get("/")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(ContentType.HTML);
+    }
 }

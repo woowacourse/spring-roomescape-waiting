@@ -21,6 +21,11 @@ public class MemberPageController {
         return "reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String myReservationPage() {
+        return "reservation-mine";
+    }
+
     @GetMapping("/")
     public String popularPage() {
         return "index";
