@@ -28,19 +28,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDateBetweenAndThemeAndMember(LocalDate startDate, LocalDate endDate, Theme theme,
                                                              Member member);
 
-    @Query("select case when(count(r) > 0) then true else false end from Reservation r where r.time = :time")
-    boolean existByTime(ReservationTime time);
+    boolean existsByTime(ReservationTime time);
 
-    @Query("""
-            select case when(count(r) > 0) then true else false end
-            from Reservation r
-            where r.time = :time
-                    and r.date = :date
-                    and r.theme = :theme""")
-    boolean existByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-
-    @Query("select case when(count(r) > 0) then true else false end from Reservation r where r.theme = :theme")
-    boolean existByTheme(Theme theme);
+    boolean existsByTheme(Theme theme);
 
 }

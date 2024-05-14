@@ -53,7 +53,7 @@ public class ReservationService {
     }
 
     private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existByDateAndTimeAndTheme(reservation.getDate(),
+        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(reservation.getDate(),
                 reservation.getTime(), reservation.getTheme());
 
         if (isReservationExist) {

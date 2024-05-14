@@ -56,16 +56,16 @@ class ReservationTimeRepositoryTest extends IntegrationTestSupport {
 
     @DisplayName("특정 시간 존재 여부 확인")
     @Test
-    void existByStartAtTrue() {
-        boolean existByStartAt = reservationTimeRepository.existByStartAt(LocalTime.parse("10:00"));
+    void existsByStartAtTrue() {
+        boolean existByStartAt = reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"));
 
         assertThat(existByStartAt).isTrue();
     }
 
     @DisplayName("특정 시간 존재 여부 확인")
     @Test
-    void existByStartAtFalse() {
-        boolean existByStartAt = reservationTimeRepository.existByStartAt(LocalTime.parse("06:00"));
+    void existsByStartAtFalse() {
+        boolean existByStartAt = reservationTimeRepository.existsByStartAt(LocalTime.parse("06:00"));
 
         assertThat(existByStartAt).isFalse();
     }

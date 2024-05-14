@@ -48,7 +48,7 @@ public class ReservationTimeService {
     }
 
     private void validateUniqueReservationTime(ReservationTime reservationTime) {
-        boolean isTimeExist = reservationTimeRepository.existByStartAt(reservationTime.getStartAt());
+        boolean isTimeExist = reservationTimeRepository.existsByStartAt(reservationTime.getStartAt());
 
         if (isTimeExist) {
             throw new RoomEscapeBusinessException("중복된 시간입니다.");
@@ -60,7 +60,7 @@ public class ReservationTimeService {
         ReservationTime foundTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
 
-        if (reservationRepository.existByTime(foundTime)) {
+        if (reservationRepository.existsByTime(foundTime)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
         }
 

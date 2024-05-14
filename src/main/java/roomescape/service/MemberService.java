@@ -19,7 +19,7 @@ public class MemberService {
 
     public MemberResponse join(MemberJoinRequest memberRequest) {
         Member member = memberRequest.toUserMember();
-        if (memberRepository.existByEmail(member.getEmail())) {
+        if (memberRepository.existsByEmail(member.getEmail())) {
             throw new RoomEscapeBusinessException("중복된 이메일입니다.");
         }
 
