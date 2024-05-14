@@ -56,7 +56,7 @@ public class ReservationController {
                 reservationService.findAllByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo));
     }
 
-    @GetMapping("/private")
+    @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findAllByLoginMember(LoginMember loginMember) {
         return ResponseEntity.ok(reservationService.findAllByMember(loginMember));
     }

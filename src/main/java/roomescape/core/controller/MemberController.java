@@ -82,7 +82,7 @@ public class MemberController {
         return ResponseEntity.ok().body(memberResponses);
     }
 
-    @GetMapping("/reservation/mine")
+    @GetMapping("/reservation-mine")
     public String findMyReservations() {
         return "reservation-mine";
     }
