@@ -60,6 +60,20 @@ class ReservationIntegrationTest extends IntegrationTest {
     }
 
     @Nested
+    @DisplayName("내 예약 목록 조회 API")
+    class FindMyReservation {
+        @Test
+        void 내_예약_목록을_조회할_수_있다() {
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .when().get("/reservations-mine")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+    }
+
+    @Nested
     @DisplayName("사용자 예약 추가 API")
     class SaveReservation {
         Map<String, String> params = new HashMap<>();
