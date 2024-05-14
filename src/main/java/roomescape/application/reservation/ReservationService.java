@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationFilterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -68,6 +69,13 @@ public class ReservationService {
         return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
+        return reservationRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(ReservationStatusResponse::from)
                 .toList();
     }
 
