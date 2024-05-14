@@ -1,0 +1,20 @@
+### 시간 목록 조회 API
+GET http://localhost:8080/times
+
+### 시간 추가 API (어드민)
+POST http://localhost:8080/admin/times
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDA4IiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.QBXPFjmHn0iteRzHlr0Pml3EJLOOW8QKYcT8FY9sTszJluHU0hC3frCUNIEc5A5h0hmJFZD1e4j2y3aj5u8uDg;
+host: localhost:8080
+Content-Type: application/json
+
+{
+  "startAt": "10:00"
+}
+
+### 시간 삭제 API (어드민)
+DELETE http://localhost:8080/admin/times/1001
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDA4IiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.QBXPFjmHn0iteRzHlr0Pml3EJLOOW8QKYcT8FY9sTszJluHU0hC3frCUNIEc5A5h0hmJFZD1e4j2y3aj5u8uDg;
+host: localhost:8080
+
+### 예약 가능한 시간 조회 API
+GET http://localhost:8080/times/available?date=2024-05-04&themeId=1000
