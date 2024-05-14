@@ -50,6 +50,10 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 
+    public List<Reservation> findAllByMember(Member loginMember) {
+        return reservationRepository.findAllByMember(loginMember);
+    }
+
     @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);

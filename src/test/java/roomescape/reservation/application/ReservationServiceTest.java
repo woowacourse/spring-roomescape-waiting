@@ -145,4 +145,18 @@ class ReservationServiceTest extends ServiceTest {
         assertThatCode(() -> reservationService.delete(reservation.getId()))
                 .doesNotThrowAnyException();
     }
+
+    @Test
+    @DisplayName("사용자의 예약 목록을 조회한다.")
+    void findAllByMember() {
+        // given
+        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
+
+        // when
+        List<Reservation> reservations = reservationService.findAllByMember(mia);
+
+        // then
+        assertThat(reservations).hasSize(1);
+    }
 }
