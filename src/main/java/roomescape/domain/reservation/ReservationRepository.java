@@ -8,6 +8,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    List<Reservation> findAllByMemberId(long id);
+
+    boolean existsByTimeId(long id);
+
+    boolean existsByThemeId(long id);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
     @Query("""
                 SELECT r
                 FROM Reservation r
@@ -26,15 +34,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateTo") LocalDate dateTo
     );
 
-    boolean existsByTimeId(long id);
-
-    boolean existsByThemeId(long id);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
-
     default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
         return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
-
-    List<Reservation> findAllByMemberId(long id);
 }

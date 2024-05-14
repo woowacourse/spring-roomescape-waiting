@@ -10,10 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    default ReservationTime getByIdentifier(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
-    }
+    boolean existsByStartAt(LocalTime startAt);
 
     @Query("""
             SELECT
@@ -32,5 +29,8 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             @Param("themeId") Long themeId
     );
 
-    boolean existsByStartAt(LocalTime startAt);
+    default ReservationTime getByIdentifier(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
+    }
 }

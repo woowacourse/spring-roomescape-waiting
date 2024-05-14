@@ -6,6 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+    Optional<Member> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
     default Member getByIdentifier(long id) {
         return findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 id의 회원이 존재하지 않습니다."));
@@ -15,8 +19,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         return findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException("해당 이메일의 회원이 존재하지 않습니다."));
     }
-
-    Optional<Member> findByEmail(String email);
-
-    boolean existsByEmail(String email);
 }

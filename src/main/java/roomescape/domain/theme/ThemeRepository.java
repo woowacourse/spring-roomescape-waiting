@@ -9,10 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    default Theme getByIdentifier(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
-    }
+    boolean existsByName(String name);
 
     @Query(value = """
                 SELECT
@@ -34,5 +31,8 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             @Param("limit") int limit
     );
 
-    boolean existsByName(String name);
+    default Theme getByIdentifier(Long id) {
+        return findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
+    }
 }
