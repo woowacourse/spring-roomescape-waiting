@@ -1,18 +1,39 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public class Member {
 
     private static final int EMAIL_MAX_LENGTH = 255;
     private static final int PASSWORD_MAX_LENGTH = 255;
     private static final int NAME_MAX_LENGTH = 30;
 
-    private final Long id;
-    private final String email;
-    private final String password;
-    private final String name;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, length = NAME_MAX_LENGTH)
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    protected Member() {
+    }
 
     public Member(String email, String password, String name, Role role) {
         this(null, email, password, name, role);
