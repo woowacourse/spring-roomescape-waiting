@@ -39,7 +39,7 @@ class ReservationTimeApiControllerTest extends IntegrationTest {
         saveAdminMemberAsDuck();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
-        saveReservationAsDateNow();
+        saveSuccessReservationAsDateNow();
 
         RestAssured.given()
                 .param("date", LocalDate.now().toString())

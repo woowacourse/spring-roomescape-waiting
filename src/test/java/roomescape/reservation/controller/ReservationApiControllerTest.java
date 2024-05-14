@@ -50,7 +50,7 @@ class ReservationApiControllerTest extends IntegrationTest {
         saveAdminMemberAsDuck();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
-        saveReservationAsDateNow();
+        saveSuccessReservationAsDateNow();
 
         String yesterday = LocalDate.now().minusDays(1).toString();
         String tomorrow = LocalDate.now().plusDays(1).toString();

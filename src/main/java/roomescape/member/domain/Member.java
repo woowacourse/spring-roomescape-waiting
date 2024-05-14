@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,13 +8,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import roomescape.auth.Role;
-import roomescape.reservation.domain.Reservation;
 
 @Entity
 @DynamicInsert
@@ -28,14 +25,14 @@ public class Member {
     private Role role;
 
     @Embedded
+    @Column(nullable = false)
     private MemberName name;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String password;
-
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations = new HashSet<>();
 
     public Member() {
     }

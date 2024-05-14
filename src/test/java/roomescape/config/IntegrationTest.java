@@ -72,8 +72,8 @@ public class IntegrationTest {
         jdbcTemplate.update(sql);
     }
 
-    protected void saveReservationAsDateNow() {
-        String sql = "insert into reservation (member_id, date, theme_id, time_id) values (1, CURRENT_DATE, 1, 1)";
+    protected void saveSuccessReservationAsDateNow() {
+        String sql = "insert into reservation (member_id, date, theme_id, time_id, status) values (1, CURRENT_DATE, 1, 1, 'SUCCESS')";
 
         jdbcTemplate.update(sql);
     }

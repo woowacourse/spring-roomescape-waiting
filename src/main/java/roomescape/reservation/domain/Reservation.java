@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,11 +21,16 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
-    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
@@ -33,9 +39,6 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime reservationTime;
-
-    @Enumerated(value = EnumType.STRING)
-    private Status status;
 
     public Reservation() {
     }
@@ -49,8 +52,7 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime,
-                       Status status) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
         this.id = id;
         this.member = member;
         this.date = date;
