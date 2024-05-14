@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -12,10 +15,6 @@ import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -35,12 +34,11 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        return reservationRepository.findByMember_IdAndTheme_IdAndDateBetween(
+        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(
                         request.memberId(),
                         request.themeId(),
                         request.dateFrom(),
-                        request.dateTo()
-                )
+                        request.dateTo())
                 .stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -48,18 +46,18 @@ public class ReservationService {
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
         Reservation reservation = reservationInfo.toReservation();
-        ReservationTime time = reservationTimeRepository.findById(reservation.getTimeId())
+        ReservationTime time = reservationTimeRepository.findById(reservation.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("예약 하려는 시간이 저장되어 있지 않습니다."));
-        ;
+
         validatePreviousDate(reservation, time);
 
-        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservation.getDate(), reservation.getTimeId(),
-                reservation.getThemeId())) {
+        if (reservationRepository.existsByDateAndThemeIdAndTimeId(reservation.getDate(), reservation.themeId(),
+                reservation.timeId())) {
             throw new IllegalArgumentException("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
         }
 
-        Member member = jpaMemberRepository.fetchById(reservation.getMemberId());
-        Theme theme = jpaThemeRepository.fetchById(reservation.getThemeId());
+        Member member = jpaMemberRepository.fetchById(reservation.memberId());
+        Theme theme = jpaThemeRepository.fetchById(reservation.themeId());
         LocalDate date = reservation.getDate();
         Reservation reservation1 = new Reservation(null, member, theme, date, time);
         Reservation savedReservation = reservationRepository.save(reservation1);

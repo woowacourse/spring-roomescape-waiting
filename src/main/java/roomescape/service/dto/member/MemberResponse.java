@@ -23,7 +23,7 @@ public class MemberResponse {
     }
 
     public MemberResponse(Reservation reservation) {
-        this(reservation.getMemberId(), reservation.getMemberName());
+        this(reservation.memberId(), reservation.memberName());
     }
 
     public long getId() {

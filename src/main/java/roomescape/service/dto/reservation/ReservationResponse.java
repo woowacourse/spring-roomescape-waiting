@@ -26,7 +26,7 @@ public class ReservationResponse {
                 new MemberResponse(reservation),
                 new ThemeResponse(reservation.getTheme()),
                 reservation.getDate().toString(),
-                new ReservationTimeResponse(reservation.getReservationTime()));
+                new ReservationTimeResponse(reservation.getTime()));
     }
 
     public long getId() {

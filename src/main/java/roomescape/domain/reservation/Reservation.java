@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.domain.member.Member;
 
 @Entity
@@ -41,11 +40,13 @@ public class Reservation {
     public Reservation(Long id, Long memberId, String email, String password, String memberName, String role,
                        Long themeId, String themeName, String description, String thumbnail, String date, Long timeId,
                        String time) {
-        this(id,
+        this(
+                id,
                 new Member(memberId, email, password, memberName, role),
                 new Theme(themeId, themeName, description, thumbnail),
                 LocalDate.parse(date),
-                new ReservationTime(timeId, time));
+                new ReservationTime(timeId, time)
+        );
     }
 
     protected Reservation() {
@@ -59,11 +60,7 @@ public class Reservation {
         return member;
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public String getMemberName() {
+    public String memberName() {
         return member.getName();
     }
 
@@ -71,27 +68,23 @@ public class Reservation {
         return theme;
     }
 
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public LocalDate getDate() {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
+    public ReservationTime getTime() {
         return time;
     }
 
-    public LocalTime getLocalTime() {
-        return time.getStartAt();
+    public Long memberId() {
+        return member.getId();
     }
 
-    public Long getTimeId() {
+    public Long themeId() {
+        return theme.getId();
+    }
+
+    public Long timeId() {
         return time.getId();
-    }
-
-    public LocalTime getTimeStartAt() {
-        return time.getStartAt();
     }
 }

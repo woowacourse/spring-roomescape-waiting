@@ -9,14 +9,11 @@ import roomescape.domain.reservation.Reservation;
 @Repository
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
-    // TODO: 메서드명 너무 김
-    List<Reservation> findByMember_IdAndTheme_IdAndDateBetween(Long memberId, Long themeId, LocalDate from,
-                                                               LocalDate to);
+    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate from, LocalDate to);
 
-    // TODO: 언더스코어가 컨벤션에 맞지 않다
-    boolean existsByTime_Id(long timeId);
+    boolean existsByTimeId(long timeId);
 
-    boolean existsByTheme_Id(long themeId);
+    boolean existsByThemeId(long themeId);
 
-    boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 }
