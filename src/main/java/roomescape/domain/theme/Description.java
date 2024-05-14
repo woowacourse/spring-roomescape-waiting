@@ -2,7 +2,10 @@ package roomescape.domain.theme;
 
 public class Description {
 
-    private final String description;
+    private String description;
+
+    public Description() {
+    }
 
     public Description(String description) {
         validateDescription(description);

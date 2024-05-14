@@ -2,7 +2,10 @@ package roomescape.domain.member;
 
 public class Password {
 
-    private final String password;
+    private String password;
+
+    public Password() {
+    }
 
     public Password(String password) {
         validatePassword(password);

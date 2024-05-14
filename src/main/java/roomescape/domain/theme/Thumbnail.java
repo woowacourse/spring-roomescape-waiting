@@ -2,7 +2,10 @@ package roomescape.domain.theme;
 
 public class Thumbnail {
 
-    private final String thumbnail;
+    private  String thumbnail;
+
+    public Thumbnail() {
+    }
 
     public Thumbnail(String thumbnail) {
         validateThumbnail(thumbnail);

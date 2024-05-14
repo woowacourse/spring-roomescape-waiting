@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.repository.ReservationRepository;
@@ -21,9 +22,12 @@ public class ThemeService {
     }
 
     public Long addTheme(ThemeRequest themeRequest) {
-        validateNameDuplicate(themeRequest.name());
+        ThemeName name = new ThemeName(themeRequest.name());
+        validateNameDuplicate(name);
         Theme theme = themeRequest.toEntity();
-        return themeRepository.save(theme);
+
+
+        return themeRepository.save(theme).getId();
     }
 
     public List<ThemeResponse> getAllTheme() {
@@ -50,7 +54,7 @@ public class ThemeService {
     public void deleteTheme(Long id) {
         Theme theme = findThemeById(id);
         validateDeletable(theme);
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 
     private Theme findThemeById(Long themeId) {
@@ -61,8 +65,8 @@ public class ThemeService {
                 ));
     }
 
-    public void validateNameDuplicate(String name) {
-        if (themeRepository.existName(name)) {
+    public void validateNameDuplicate(ThemeName name) {
+        if (themeRepository.existsByName(name)) {
             throw new IllegalArgumentException(
                     "[ERROR] 동일한 이름의 테마가 존재해 등록할 수 없습니다.",
                     new Throwable("theme_name : " + name)

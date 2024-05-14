@@ -2,7 +2,10 @@ package roomescape.domain.theme;
 
 public class ThemeName {
 
-    private final String name;
+    private String name;
+
+    public ThemeName() {
+    }
 
     public ThemeName(String name) {
         validateName(name);

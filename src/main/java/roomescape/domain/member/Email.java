@@ -2,7 +2,10 @@ package roomescape.domain.member;
 
 public class Email {
 
-    private final String email;
+    private String email;
+
+    public Email() {
+    }
 
     public Email(String email) {
         this.email = email;
