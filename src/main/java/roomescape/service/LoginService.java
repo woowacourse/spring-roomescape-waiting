@@ -36,7 +36,7 @@ public class LoginService {
         return jwtGenerator.generateWith(Map.of(
                 "id", findMember.getId(),
                 "name", findMember.getName(),
-                "role", findMember.getRole().getTokenValue()
+                "role", findMember.getRole().name()
         ));
     }
 
@@ -46,7 +46,7 @@ public class LoginService {
             return new LoginMember(
                     claims.get("id", Long.class),
                     claims.get("name", String.class),
-                    Role.findByValue(claims.get("role", String.class))
+                    Role.valueOf(claims.get("role", String.class))
             );
         } catch (ExpiredJwtException e) {
             throw new RoomescapeException(REQUIRED_LOGIN);

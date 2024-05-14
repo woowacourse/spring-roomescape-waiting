@@ -65,7 +65,7 @@ public class ReservationControllerTest {
                 Map.of(
                         "id", defaultMember.getId(),
                         "name", defaultMember.getName(),
-                        "role", defaultMember.getRole().getTokenValue()
+                        "role", defaultMember.getRole().name()
                 )
         );
 
@@ -93,34 +93,34 @@ public class ReservationControllerTest {
         void initData() {
             reservation1 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(5), defaultTime, defaultTheme1,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation2 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(4), defaultTime, defaultTheme1,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation3 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(3), defaultTime, defaultTheme1,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation4 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(2), defaultTime, defaultTheme1,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation5 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(1), defaultTime, defaultTheme1,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
 
             reservation6 = reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultTime, defaultTheme2, defaultMember.getLoginMember()));
+                    new Reservation(LocalDate.now(), defaultTime, defaultTheme1, defaultMember));
             reservation7 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme2,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation8 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme2,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation9 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme2,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
             reservation10 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
-                            defaultMember.getLoginMember()));
+                            defaultMember));
         }
 
         @DisplayName("존재하는 모든 예약을 조회할 수 있다.")
@@ -218,6 +218,8 @@ public class ReservationControllerTest {
         void searchWithDateTest() {
             ReservationResponse[] reservationResponses = RestAssured.given().log().all()
                     .queryParams(Map.of(
+                            "memberId", 1,
+                            "themeId", 1,
                             "dateFrom", reservation3.getDate().toString(),
                             "dateTo", reservation7.getDate().toString()
                     ))
@@ -231,15 +233,16 @@ public class ReservationControllerTest {
                     ReservationResponse.from(reservation3),
                     ReservationResponse.from(reservation4),
                     ReservationResponse.from(reservation5),
-                    ReservationResponse.from(reservation6),
-                    ReservationResponse.from(reservation7)
+                    ReservationResponse.from(reservation6)
             );
         }
 
         @DisplayName("날짜를 입력하지 않고 검색하면 자동으로 오늘의 날짜가 사용된다.")
         @Test
         void searchWithoutDateTest() {
-            ReservationResponse[] reservationResponses = RestAssured.given().log().all()
+            ReservationResponse[] reservationResponses = RestAssured.given()
+                    .param("memberId", 1)
+                    .param("themeId", 1).log().all()
                     .get("/reservations/search")
                     .then().log().all()
                     .statusCode(200)
@@ -256,6 +259,7 @@ public class ReservationControllerTest {
         void searchWithDateAndThemeTest() {
             ReservationResponse[] reservationResponses = RestAssured.given().log().all()
                     .queryParams(Map.of(
+                            "memberId", 1,
                             "themeId", 1,
                             "dateFrom", reservation3.getDate().toString(),
                             "dateTo", reservation7.getDate().toString()
@@ -269,7 +273,8 @@ public class ReservationControllerTest {
             assertThat(reservationResponses).containsExactlyInAnyOrder(
                     ReservationResponse.from(reservation3),
                     ReservationResponse.from(reservation4),
-                    ReservationResponse.from(reservation5)
+                    ReservationResponse.from(reservation5),
+                    ReservationResponse.from(reservation6)
             );
         }
     }

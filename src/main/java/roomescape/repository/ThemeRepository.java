@@ -1,15 +1,10 @@
 package roomescape.repository;
 
-import java.util.Optional;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.domain.Duration;
 import roomescape.domain.Theme;
 import roomescape.domain.Themes;
 
-public interface ThemeRepository {
-    Themes findAll();
-
-    Optional<Theme> findById(long id);
-
-    Theme save(Theme theme);
-
-    void delete(long id);
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 }

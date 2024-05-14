@@ -72,7 +72,7 @@ public class ReservationTimeControllerTest {
 
         LocalDate findDate = LocalDate.of(2024, 5, 4);
         reservationRepository.save(
-                new Reservation(findDate, usedReservationTime, theme, defaultMember.getLoginMember()));
+                new Reservation(findDate, usedReservationTime, theme, defaultMember));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = RestAssured.given().log().all()
@@ -157,7 +157,7 @@ public class ReservationTimeControllerTest {
         @Test
         void deleteUsedTimeTest() {
             reservationRepository.save(
-                    new Reservation(LocalDate.now(), usedReservationTime, defaultTheme, defaultMember.getLoginMember())
+                    new Reservation(LocalDate.now(), usedReservationTime, defaultTheme, defaultMember)
             );
 
             RestAssured.given().log().all()

@@ -13,35 +13,46 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimes;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.CollectionReservationRepository;
-import roomescape.repository.CollectionReservationTimeRepository;
-import roomescape.repository.CollectionThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
+@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationTimeServiceTest {
 
-    private CollectionReservationRepository reservationRepository;
-    private CollectionReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
     private ReservationTimeService reservationTimeService;
+    @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
+    Theme defaultTheme = new Theme("name", "description", "thumbnail");
     @BeforeEach
-    void initService() {
-        themeRepository = new CollectionThemeRepository();
-        reservationRepository = new CollectionReservationRepository();
-        reservationTimeRepository = new CollectionReservationTimeRepository();
-        reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository,
-                themeRepository);
+    void setUp(){
+        defaultTheme = themeRepository.save(defaultTheme);
+        memberRepository.save(Fixture.defaultMember);
     }
-
     @DisplayName("저장된 시간을 모두 조회할 수 있다.")
     @Test
     void findAllTest() {
@@ -74,9 +85,9 @@ class ReservationTimeServiceTest {
         LocalDate selectedDate = LocalDate.of(2024, 1, 1);
 
         reservationRepository.save(new Reservation(selectedDate, reservationTime1, DEFUALT_THEME,
-                Fixture.defaultLoginuser));
+                Fixture.defaultMember));
         reservationRepository.save(new Reservation(selectedDate, reservationTime3, DEFUALT_THEME,
-                Fixture.defaultLoginuser));
+                Fixture.defaultMember));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = reservationTimeService.findByThemeAndDate(selectedDate,
@@ -125,7 +136,7 @@ class ReservationTimeServiceTest {
             reservationTimeService.delete(1L);
 
             //then
-            assertThat(reservationTimeRepository.findAll().getReservationTimes())
+            assertThat(new ReservationTimes(reservationTimeRepository.findAll()).getReservationTimes())
                     .isEmpty();
         }
 
@@ -136,8 +147,8 @@ class ReservationTimeServiceTest {
             reservationRepository.save(new Reservation(
                     LocalDate.now(),
                     new ReservationTime(1L, SAVED_TIME),
-                    new Theme(1L, "name", "description", "thumbnail"),
-                    Fixture.defaultLoginuser
+                    defaultTheme,
+                    Fixture.defaultMember
             ));
 
             //when & then

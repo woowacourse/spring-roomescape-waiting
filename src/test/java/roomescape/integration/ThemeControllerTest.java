@@ -75,49 +75,49 @@ public class ThemeControllerTest {
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, firstTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, firstTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, firstTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(4), defaultReservationTime, firstTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(5), defaultReservationTime, firstTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, secondTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, secondTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, secondTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(4), defaultReservationTime, secondTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, thirdTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, thirdTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, thirdTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, fourthTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, fourthTheme,
-                        defaultMember.getLoginMember()));
+                        defaultMember));
 
         //then
         List<ThemeResponse> themeResponses = RestAssured.given().log().all()
@@ -213,7 +213,7 @@ public class ThemeControllerTest {
         @Test
         void deleteUsedThemeTest() {
             reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultReservationTime, usedTheme, defaultMember.getLoginMember())
+                    new Reservation(LocalDate.now(), defaultReservationTime, usedTheme, defaultMember)
             );
 
             RestAssured.given().log().all()

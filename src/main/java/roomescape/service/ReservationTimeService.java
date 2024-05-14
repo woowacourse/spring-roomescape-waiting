@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimes;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
@@ -42,7 +43,7 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepository.findAll().getReservationTimes().stream()
+        return new ReservationTimes(reservationTimeRepository.findAll()).getReservationTimes().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
@@ -50,9 +51,9 @@ public class ReservationTimeService {
     public List<AvailableTimeResponse> findByThemeAndDate(LocalDate date, long themeId) {
         Theme requestedTheme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Reservations findReservations = reservationRepository.findByThemeAndDate(requestedTheme, date);
+        Reservations findReservations = new Reservations(reservationRepository.findByThemeAndDate(requestedTheme, date));
 
-        return reservationTimeRepository.findAll().getReservationTimes().stream()
+        return new ReservationTimes(reservationTimeRepository.findAll()).getReservationTimes().stream()
                 .map(reservationTime -> AvailableTimeResponse.of(reservationTime, findReservations))
                 .toList();
     }
@@ -61,10 +62,10 @@ public class ReservationTimeService {
         if (isUsedTime(timeId)) {
             throw new RoomescapeException(DELETE_USED_TIME);
         }
-        reservationTimeRepository.delete(timeId);
+        reservationTimeRepository.deleteById(timeId);
     }
 
     private boolean isUsedTime(long timeId) {
-        return reservationRepository.existByTimeId(timeId);
+        return reservationRepository.existsByTimeId(timeId);
     }
 }

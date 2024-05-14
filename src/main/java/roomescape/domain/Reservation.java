@@ -5,18 +5,30 @@ import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
+@Entity
 public class Reservation implements Comparable<Reservation> {
-    private final Long id;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final LoginMember member;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private LocalDate date;
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
+    @ManyToOne
+    private Member member;
 
     public Reservation(long id, Reservation reservationBeforeSave) {
         this(id,
@@ -26,11 +38,11 @@ public class Reservation implements Comparable<Reservation> {
                 reservationBeforeSave.member);
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, LoginMember member) {
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, LoginMember member) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -40,6 +52,10 @@ public class Reservation implements Comparable<Reservation> {
         this.time = time;
         this.theme = theme;
         this.member = member;
+    }
+
+    public Reservation() {
+
     }
 
     private void validateTheme(Theme theme) {
@@ -60,7 +76,7 @@ public class Reservation implements Comparable<Reservation> {
         }
     }
 
-    private void validateMember(LoginMember member) {
+    private void validateMember(Member member) {
         if (member == null) {
             throw new RoomescapeException(EMPTY_MEMBER);
         }
@@ -110,8 +126,8 @@ public class Reservation implements Comparable<Reservation> {
         return id;
     }
 
-    public LoginMember getMember() {
-        return member;
+    public LoginMember getLoginMember() {
+        return member.getLoginMember();
     }
 
     public LocalDate getDate() {

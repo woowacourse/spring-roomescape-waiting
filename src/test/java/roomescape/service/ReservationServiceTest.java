@@ -16,41 +16,50 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
 import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.CollectionMemberRepository;
-import roomescape.repository.CollectionReservationRepository;
-import roomescape.repository.CollectionReservationTimeRepository;
-import roomescape.repository.CollectionThemeRepository;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
+@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationServiceTest {
 
     private final LoginMember loginMember = Fixture.defaultLoginuser;
+    private final Member member = Fixture.defaultMember;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
     private MemberRepository memberRepository;
     private ReservationTime defaultTime = new ReservationTime(LocalTime.now());
     private Theme defaultTheme = new Theme("name", "description", "thumbnail");
 
     @BeforeEach
     void initService() {
-        CollectionReservationTimeRepository reservationTimeRepository = new CollectionReservationTimeRepository();
-        ThemeRepository themeRepository = new CollectionThemeRepository();
-        reservationRepository = new CollectionReservationRepository();
-        memberRepository = new CollectionMemberRepository();
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-                memberRepository);
         defaultTime = reservationTimeRepository.save(defaultTime);
         defaultTheme = themeRepository.save(defaultTheme);
+        memberRepository.save(member);
     }
 
     @DisplayName("지나지 않은 시간에 대한 예약을 생성할 수 있다.")
@@ -67,7 +76,7 @@ class ReservationServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(reservationRepository.findAll().getReservations())
+                () -> assertThat(new Reservations(reservationRepository.findAll()).getReservations())
                         .hasSize(1),
                 () -> assertThat(saved.id()).isEqualTo(1L)
         );
@@ -120,13 +129,13 @@ class ReservationServiceTest {
     void findAllTest() {
         //given
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
-                loginMember));
+                member));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
-                loginMember));
+                member));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
-                loginMember));
+                member));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
-                loginMember));
+                member));
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.findAll();
@@ -144,7 +153,7 @@ class ReservationServiceTest {
 
         @BeforeEach
         void addDefaultReservation() {
-            defaultReservation = new Reservation(defaultDate, defaultTime, defaultTheme, loginMember);
+            defaultReservation = new Reservation(defaultDate, defaultTime, defaultTheme, member);
             defaultReservation = reservationRepository.save(defaultReservation);
         }
 
@@ -165,7 +174,7 @@ class ReservationServiceTest {
             reservationService.delete(1L);
 
             //then
-            assertThat(reservationRepository.findAll().getReservations()).isEmpty();
+            assertThat(new Reservations(reservationRepository.findAll()).getReservations()).isEmpty();
         }
 
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")

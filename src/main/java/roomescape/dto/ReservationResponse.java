@@ -14,7 +14,7 @@ public record ReservationResponse(long id,
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                LoginMemberResponse.from(reservation.getMember())
+                LoginMemberResponse.from(reservation.getLoginMember())
         );
     }
 }

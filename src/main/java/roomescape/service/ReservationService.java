@@ -44,15 +44,16 @@ public class ReservationService {
     public ReservationResponse save(LoginMember loginMember,
                                     ReservationRequest reservationRequest) {
 
-        //todo : 사용자 검증 필요
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
         Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Reservation beforeSaveReservation = reservationRequest.toReservation(loginMember, requestedTime,
+        Member requestedMember = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+        Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
                 requestedTheme);
 
-        Reservations reservations = reservationRepository.findAll();
+        Reservations reservations = new Reservations(reservationRepository.findAll());
         if (reservations.hasSameReservation(beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
@@ -72,9 +73,9 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
         Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
-                requestedMember.getLoginMember());
+                requestedMember);
 
-        Reservations reservations = reservationRepository.findAll();
+        Reservations reservations = new Reservations(reservationRepository.findAll());
         if (reservations.hasSameReservation(beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
@@ -86,7 +87,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAll() {
-        Reservations reservations = reservationRepository.findAll();
+        Reservations reservations = new Reservations(reservationRepository.findAll());
         return reservations.getReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -94,13 +95,13 @@ public class ReservationService {
 
     public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
                                                        LocalDate dateTo) {
-        Reservations reservations = reservationRepository.searchBy(themeId, memberId, dateFrom, dateTo);
+        Reservations reservations = new Reservations(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
         return reservations.getReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public void delete(long reservationId) {
-        reservationRepository.delete(reservationId);
+        reservationRepository.deleteById(reservationId);
     }
 }

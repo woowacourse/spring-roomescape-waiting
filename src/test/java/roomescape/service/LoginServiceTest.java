@@ -12,25 +12,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.Fixture;
 import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.CollectionMemberRepository;
 import roomescape.repository.MemberRepository;
 
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class LoginServiceTest {
 
-    private static final JwtGenerator JWT_GENERATOR = new JwtGenerator("secretKey", 360000);
+    @Autowired
+    private JwtGenerator JWT_GENERATOR;
+    @Autowired
     private MemberRepository memberRepository;
+    @Autowired
     private LoginService loginService;
-
-    @BeforeEach
-    void init() {
-        memberRepository = new CollectionMemberRepository();
-        loginService = new LoginService(memberRepository, JWT_GENERATOR);
-    }
 
     @DisplayName("유저 데이터가 존재할 때")
     @Nested
@@ -88,7 +88,7 @@ class LoginServiceTest {
             String token = JWT_GENERATOR.generateWith(Map.of(
                     "id", defaultUser.getId(),
                     "name", defaultUser.getName(),
-                    "role", defaultUser.getRole().getTokenValue()
+                    "role", defaultUser.getRole().name()
             ));
 
             //when
