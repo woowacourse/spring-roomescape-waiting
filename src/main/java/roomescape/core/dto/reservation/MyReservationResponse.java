@@ -11,7 +11,7 @@ public class MyReservationResponse {
 
     public MyReservationResponse(Reservation reservation) {
         this(reservation.getId(), reservation.getTheme().getName(), reservation.getDateString(),
-                reservation.getReservationTime().getStartAtString(), "예약");
+                reservation.getReservationTime().getStartAtString(), reservation.getStatus().getValue());
     }
 
     public MyReservationResponse(Long reservationId, String theme, String date, String time, String status) {

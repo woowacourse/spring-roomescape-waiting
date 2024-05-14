@@ -14,5 +14,5 @@ VALUES ('테마1', '테마1 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461
        ('테마4', '테마4 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
        ('테마5', '테마5 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id)
-VALUES ('2024-05-07', 1, 1, 1);
+INSERT INTO reservation (date, member_id, time_id, theme_id, status)
+VALUES ('2024-05-07', 1, 1, 1, 'BOOKED');
