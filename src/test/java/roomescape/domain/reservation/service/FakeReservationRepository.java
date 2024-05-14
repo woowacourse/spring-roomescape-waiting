@@ -1,6 +1,10 @@
 package roomescape.domain.reservation.service;
 
-import static roomescape.domain.member.domain.Role.MEMBER;
+import roomescape.domain.member.domain.Member;
+import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.repository.ReservationRepository;
+import roomescape.domain.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -8,11 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.member.domain.Member;
-import roomescape.domain.reservation.domain.reservation.Reservation;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.repository.ReservationRepository;
-import roomescape.domain.theme.domain.Theme;
+
+import static roomescape.domain.member.domain.Role.MEMBER;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -39,7 +40,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         return reservations.values()
                 .stream()
                 .filter(reservation ->
@@ -59,7 +60,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation insert(Reservation reservation) {
+    public Reservation save(Reservation reservation) {
         Long id = reservationAtomicLong.incrementAndGet();
 
         ReservationTime reservationTime = reservation.getTime();
@@ -82,7 +83,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId) {
         return reservations.values().stream()
                 .anyMatch(reservation -> reservation.getTimeId().equals(timeId) && reservation.getDate().equals(date)
                         && reservation.getThemeId().equals(themeId));
@@ -94,7 +95,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTime> findTimesByDateAndTheme(LocalDate date, Long themeId) {
+    public List<ReservationTime> findByDateAndTheme_Id(LocalDate date, Long themeId) {
         return reservations.values()
                 .stream()
                 .filter(reservation ->

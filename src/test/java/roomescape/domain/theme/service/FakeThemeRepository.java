@@ -1,12 +1,13 @@
 package roomescape.domain.theme.service;
 
+import roomescape.domain.theme.domain.Theme;
+import roomescape.domain.theme.repository.ThemeRepository;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.theme.domain.Theme;
-import roomescape.domain.theme.repository.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
     Map<Long, Theme> themes = new HashMap<>();
@@ -19,7 +20,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Theme insert(Theme theme) {
+    public Theme save(Theme theme) {
         long id = atomicLong.incrementAndGet();
         Theme savedTheme = new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
         themes.put(id, savedTheme);

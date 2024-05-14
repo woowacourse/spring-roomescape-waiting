@@ -1,16 +1,17 @@
 package roomescape.domain.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
-
-import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
 
 class AdminReservationTimeServiceTest {
 
@@ -27,7 +28,7 @@ class AdminReservationTimeServiceTest {
     @Test
     void findAllReservationTime() {
         ReservationTime reservationTime = new ReservationTime(1L, TEN_HOUR);
-        fakeReservationTimeRepository.insert(reservationTime);
+        fakeReservationTimeRepository.save(reservationTime);
 
         int actualSize = adminReservationTimeService.findAllReservationTime().size();
 
@@ -49,7 +50,7 @@ class AdminReservationTimeServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_reservation_time_is_duplicated() {
         ReservationTime reservationTime = new ReservationTime(1L, TEN_HOUR);
-        fakeReservationTimeRepository.insert(reservationTime);
+        fakeReservationTimeRepository.save(reservationTime);
         ReservationTimeAddRequest reservationTimeAddRequest = new ReservationTimeAddRequest(LocalTime.of(10, 0));
 
         assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddRequest))
@@ -61,7 +62,7 @@ class AdminReservationTimeServiceTest {
     @Test
     void should_remove_reservation_time_with_exist_id() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        fakeReservationTimeRepository.insert(reservationTime);
+        fakeReservationTimeRepository.save(reservationTime);
 
         adminReservationTimeService.removeReservationTime(1L);
 

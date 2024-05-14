@@ -1,14 +1,5 @@
 package roomescape.domain.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.domain.member.domain.Role.ADMIN;
-import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
-import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
-import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
-
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +13,16 @@ import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.service.FakeThemeRepository;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.member.domain.Role.ADMIN;
+import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
+import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
+import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
 
 class ReservationServiceTest {
 
@@ -53,8 +54,8 @@ class ReservationServiceTest {
     @DisplayName("존재 하지 않는 멤버로 예약 시 예외를 발생합니다.")
     @Test
     void should_throw_exception_when_reserve_with_non_exist_member() {
-        fakeReservationTimeRepository.insert(TEN_RESERVATION_TIME);
-        fakeThemeRepository.insert(DUMMY_THEME);
+        fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
+        fakeThemeRepository.save(DUMMY_THEME);
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);//
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
@@ -65,8 +66,8 @@ class ReservationServiceTest {
     @DisplayName("존재 하지 않는 테마로 예약 시 예외를 발생합니다.")
     @Test
     void should_throw_exception_when_reserve_with_non_exist_theme() {
-        fakeReservationTimeRepository.insert(TEN_RESERVATION_TIME);
-        fakeMemberRepository.insert(ADMIN_MEMBER);
+        fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
+        fakeMemberRepository.save(ADMIN_MEMBER);
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(EscapeApplicationException.class)
@@ -79,8 +80,8 @@ class ReservationServiceTest {
     void should_know_bookable_times() {
         ReservationTime reservationTime = new ReservationTime(null, TEN_HOUR);
         Theme theme = new Theme(null, "테마1", "설명", "썸네일");
-        fakeReservationTimeRepository.insert(reservationTime);
-        fakeReservationRepository.insert(
+        fakeReservationTimeRepository.save(reservationTime);
+        fakeReservationRepository.save(
                 new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER));
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
@@ -94,9 +95,9 @@ class ReservationServiceTest {
     void should_know_not_bookable_times() {
         ReservationTime reservationTime = new ReservationTime(null, TEN_HOUR);
         Theme theme = new Theme(null, "테마1", "설명", "썸네일");
-        fakeReservationTimeRepository.insert(reservationTime);
-        fakeReservationTimeRepository.insert(new ReservationTime(1L, LocalTime.of(11, 0)));
-        fakeReservationRepository.insert(
+        fakeReservationTimeRepository.save(reservationTime);
+        fakeReservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(11, 0)));
+        fakeReservationRepository.save(
                 new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER));
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
@@ -108,8 +109,8 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약시각으로 예약 시 예외가 발생합니다.")
     @Test
     void should_throw_ClientIllegalArgumentException_when_reserve_non_exist_time() {
-        fakeThemeRepository.insert(DUMMY_THEME);
-        fakeMemberRepository.insert(ADMIN_MEMBER);
+        fakeThemeRepository.save(DUMMY_THEME);
+        fakeMemberRepository.save(ADMIN_MEMBER);
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_TWO_DAYS_DATE, 1L, 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
@@ -124,7 +125,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "dummy", "description", "url");
         Member member = new Member(1L, "dummy", "dummy", "dummy", ADMIN);
         Reservation reservation = new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, member);
-        fakeReservationRepository.insert(reservation);
+        fakeReservationRepository.save(reservation);
 
         ReservationAddRequest conflictRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
 

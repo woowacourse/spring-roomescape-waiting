@@ -20,7 +20,7 @@ class MemberServiceTest {
     void setUp() {
         memberRepository = new FakeMemberRepository();
         memberService = new MemberService(memberRepository);
-        memberRepository.insert(ADMIN_MEMBER);
+        memberRepository.save(ADMIN_MEMBER);
     }
 
     @DisplayName("모든 유저를 찾을 수 있습니다.")

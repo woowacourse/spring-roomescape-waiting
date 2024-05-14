@@ -49,7 +49,7 @@ class ThemeServiceTest {
         ThemeRepository themeRepository = new FakeThemeRepository();
         ReservationRepository reservationRepository = new FakeReservationRepository();
         themeService = new ThemeService(themeRepository, reservationRepository);
-        themeRepository.insert(new Theme(1L, "테마1", "테마1설명", "url"));
+        themeRepository.save(new Theme(1L, "테마1", "테마1설명", "url"));
 
         List<Theme> allTheme = themeService.findAllTheme();
 

@@ -1,13 +1,14 @@
 package roomescape.domain.reservation.service;
 
+import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.repository.ReservationTimeRepository;
+
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.repository.ReservationTimeRepository;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 
@@ -39,13 +40,13 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public boolean existByStartAt(LocalTime startAt) {
+    public boolean existsByStartAt(LocalTime startAt) {
         return reservationTimes.values().stream()
                 .anyMatch((reservationTime -> reservationTime.getStartAt().equals(startAt)));
     }
 
     @Override
-    public ReservationTime insert(ReservationTime reservationTime) {
+    public ReservationTime save(ReservationTime reservationTime) {
         Long id = atomicLong.incrementAndGet();
         ReservationTime addReservationTime = new ReservationTime(id, reservationTime.getStartAt());
         reservationTimes.put(id, addReservationTime);
