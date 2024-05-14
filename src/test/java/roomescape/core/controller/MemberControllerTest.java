@@ -135,4 +135,13 @@ class MemberControllerTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @Test
+    @DisplayName("로그인된 회원의 예약 목록 조회 페이지로 이동한다.")
+    void findMyReservation() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

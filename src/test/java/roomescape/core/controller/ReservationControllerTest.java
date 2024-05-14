@@ -256,4 +256,15 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(401);
     }
+
+    @Test
+    @DisplayName("현재 로그인된 회원의 예약 목록을 조회한다.")
+    void findLoginMemberReservation() {
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
 }
