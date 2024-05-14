@@ -1,5 +1,9 @@
 # API 명세
 
+
+<details>
+<summary> 메인 페이지 조회 API </summary>
+
 ### 메인 페이지 조회
 
 #### Request
@@ -14,6 +18,13 @@ GET /admin HTTP/1.1
 HTTP/1.1 200 
 ```
 
+</details>
+
+## 예약
+
+<details>
+<summary> 예약 페이지 조회 API </summary>
+
 ### 예약 페이지 조회
 
 #### Request
@@ -27,6 +38,12 @@ GET /admin/reservation HTTP/1.1
 ```
 HTTP/1.1 200 
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 목록 조회 API </summary>
 
 ### 예약 목록 조회
 
@@ -60,6 +77,12 @@ Content-Type: application/json
     }
 ]
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 단건 조회 API </summary>
 
 ### 예약 단건 조회
 
@@ -91,6 +114,12 @@ Content-Type: application/json
     }
 }
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 검색 API </summary>
 
 ### 예약 검색
 
@@ -124,6 +153,12 @@ Content-Type: application/json
     }
 ]
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 추가 - 사용자 API </summary>
 
 ### 예약 추가 - 사용자
 
@@ -148,6 +183,12 @@ host: localhost:8080
 HTTP/1.1 201
 Location: /reservation/{id}
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 추가 - 관리자 API </summary>
 
 ### 예약 추가 - 관리자
 
@@ -173,6 +214,12 @@ host: localhost:8080
 HTTP/1.1 201
 Location: /reservation/{id}
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 취소 API </summary>
 
 ### 예약 취소
 
@@ -189,6 +236,12 @@ HTTP/1.1 204
 ```
 
 ---
+</details>
+
+## 시간
+
+<details>
+<summary> 시간 목록 조회 API </summary>
 
 ### 시간 목록 조회
 
@@ -211,6 +264,12 @@ Content-Type: application/json
     }
 ]
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 시간 조회 API </summary>
 
 ### 시간 조회
 
@@ -231,6 +290,12 @@ Content-Type: application/json
     "startAt": "10:00"
 }
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 시간 추가 API </summary>
 
 ### 시간 추가
 
@@ -251,6 +316,12 @@ content-type: application/json
 HTTP/1.1 201
 Location: /times/{id}
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 시간 삭제 API </summary>
 
 ### 시간 삭제
 
@@ -266,7 +337,44 @@ DELETE /times/1 HTTP/1.1
 HTTP/1.1 204
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary> 예약 가능 시간 조회 API </summary>
+
+## 예약 가능 시간
+
+### 예약 가능 시간 조회
+
+#### Request
+
+```http request
+GET /reservations/times HTTP/1.1
+```
+
+#### Response
+
+```http request
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "startAt": "10:00",
+        "alreadyBooked": true
+    }
+]
+```
+
+</details>
+
 ## 테마
+
+<details>
+<summary> 테마 조회 API </summary>
 
 ### 테마 조회
 
@@ -291,6 +399,12 @@ Content-Type: application/json
     }
 ]
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 테마 추가 API </summary>
 
 ### 테마 추가
 
@@ -321,6 +435,12 @@ Content-Type: application/json
     "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
 }
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 테마 삭제 API </summary>
 
 ### 테마 삭제
 
@@ -336,7 +456,14 @@ DELETE /themes/1 HTTP/1.1
 HTTP/1.1 204
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary> 사용자 예약 페이지 조회 API </summary>
 ## 사용자 예약
+
 ### 사용자 예약 페이지 조회
 
 #### Request
@@ -351,7 +478,14 @@ GET /reservation HTTP/1.1
 HTTP/1.1 200 
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary> 인기 테마 페이지 조회 API </summary>
 ## 인기 테마
+
 ### 인기 테마 페이지 조회
 
 #### Request
@@ -365,6 +499,12 @@ GET / HTTP/1.1
 ```
 HTTP/1.1 200 
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 인기 테마 상위 10개 조회 API </summary>
 
 ### 인기 테마 상위 10개 조회
 
@@ -387,31 +527,14 @@ GET /themes/popular HTTP/1.1
 ]
 ```
 
-## 예약 가능 시간
-### 예약 가능 시간 조회
-
-#### Request
-
-```http request
-GET /reservations/times HTTP/1.1
-```
-
-#### Response
-
-```http request
-HTTP/1.1 200 
-Content-Type: application/json
-
-[
-    {
-        "id": 1,
-        "startAt": "10:00",
-        "alreadyBooked": true
-    }
-]
-```
+</details>
 
 ## 로그인
+
+<details>
+<summary> 로그인 페이지 조회 API </summary>
+## 로그인
+
 ### 로그인 페이지 조회
 
 #### Request
@@ -425,6 +548,12 @@ GET /login HTTP/1.1
 ```http request
 HTTP/1.1 200 
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 로그인 요청 API </summary>
 
 ### 로그인 요청
 
@@ -449,6 +578,12 @@ Content-Type: application/json
 Keep-Alive: timeout=60
 Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 인증 정보 조회 API </summary>
 
 ### 인증 정보 조회
 
@@ -474,6 +609,12 @@ Transfer-Encoding: chunked
     "name": "어드민"
 }
 ```
+</details>
+
+<br>
+
+<details>
+<summary> 회원 목록 조회 API </summary>
 
 ### 회원 목록 조회
 
@@ -501,3 +642,7 @@ Transfer-Encoding: chunked
     }
 ]
 ```
+
+</details>
+
+<br>
