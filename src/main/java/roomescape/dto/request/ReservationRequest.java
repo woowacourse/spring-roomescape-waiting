@@ -12,8 +12,8 @@ public record ReservationRequest(Long memberId, LocalDate date, Long timeId, Lon
         isValid(memberId, date, timeId, themeId);
     }
 
-    public Reservation toEntity(Long id, Member member, TimeSlot time, Theme theme) {
-        return new Reservation(id, member, date, time, theme);
+    public Reservation toEntity(Member member, TimeSlot time, Theme theme) {
+        return new Reservation(null, member, date, time, theme);
     }
 
     private void isValid(Long memberId, LocalDate date, Long timeId, Long themeId) {

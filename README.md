@@ -11,8 +11,8 @@
 - [x] gradle 의존성 추가
     - as is: spring-boot-stater-jdbc
     - to be: spring-boot-starter-data-jpa
-- [ ] 다른 클래스를 의존하지 않는 클래스 엔티티 설정
-  - [ ] Member
-  - [ ] Theme
-  - [ ] TimeSlot
-- [ ] Reservation 클래스 엔티티 설정
+- [x] 다른 클래스를 의존하지 않는 클래스 엔티티 설정
+  - [x] Member
+  - [x] Theme
+  - [x] TimeSlot
+- [x] Reservation 클래스 엔티티 설정

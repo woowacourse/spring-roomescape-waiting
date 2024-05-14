@@ -5,53 +5,54 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.request.TimeSlotRequest;
 import roomescape.dto.response.TimeSlotResponse;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.TimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.TimeSlotRepository;
 
 @Service
 public class TimeService {
 
-    private final TimeDao timeDao;
-    private final ReservationDao reservationDao;
+    private final TimeSlotRepository timeSlotRepository;
+    private final ReservationRepository reservationRepository;
 
-    public TimeService(TimeDao timeDao, ReservationDao reservationDao) {
-        this.timeDao = timeDao;
-        this.reservationDao = reservationDao;
+    public TimeService(TimeSlotRepository timeSlotRepository, ReservationRepository reservationRepository) {
+        this.timeSlotRepository = timeSlotRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<TimeSlotResponse> findAll() {
-        return timeDao.findAll()
+        return timeSlotRepository.findAll()
                 .stream()
                 .map(TimeSlotResponse::from)
                 .toList();
     }
 
-    public TimeSlotResponse findById(Long id) {
-        TimeSlot timeSlot = timeDao.findById(id);
-        return TimeSlotResponse.from(timeSlot);
-    }
-
     public TimeSlotResponse create(TimeSlotRequest timeSlotRequest) {
         validateDuplicatedTime(timeSlotRequest);
-        Long id = timeDao.create(timeSlotRequest);
-        TimeSlot timeSlot = timeSlotRequest.toEntity(id);
-        return TimeSlotResponse.from(timeSlot);
+        TimeSlot timeSlot = timeSlotRequest.toEntity();
+        TimeSlot createdTimeSlot = timeSlotRepository.save(timeSlot);
+        return TimeSlotResponse.from(createdTimeSlot);
     }
 
     public void delete(Long id) {
         validateExistReservation(id);
-        timeDao.delete(id);
+        timeSlotRepository.deleteById(id);
     }
 
     private void validateDuplicatedTime(TimeSlotRequest timeSlotRequest) {
-        if (timeDao.isExist(timeSlotRequest.startAt())) {
+        if (timeSlotRepository.existsByStartAt(timeSlotRequest.startAt())) {
             throw new IllegalArgumentException("[ERROR] 이미 등록된 시간입니다");
         }
     }
 
     private void validateExistReservation(Long id) {
-        if (reservationDao.isExistsTimeId(id)) {
+        TimeSlot timeSlot = findTimeSlotById(id);
+        if (reservationRepository.existsByTime(timeSlot)) {
             throw new IllegalArgumentException("[ERROR] 예약이 등록된 시간은 제거할 수 없습니다");
         }
+    }
+
+    private TimeSlot findTimeSlotById(long id) {
+        return timeSlotRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간입니다"));
     }
 }

@@ -8,39 +8,42 @@ import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.TokenResponse;
 import roomescape.infrastructure.TokenGenerator;
-import roomescape.repository.MemberDao;
+import roomescape.repository.MemberRepository;
 
 @Service
 public class MemberService {
 
+    private final MemberRepository memberRepository;
     private final TokenGenerator tokenGenerator;
-    private final MemberDao memberDao;
 
-    public MemberService(TokenGenerator tokenGenerator, MemberDao memberDao) {
+    public MemberService(MemberRepository memberRepository, TokenGenerator tokenGenerator) {
+        this.memberRepository = memberRepository;
         this.tokenGenerator = tokenGenerator;
-        this.memberDao = memberDao;
     }
 
     public TokenResponse createToken(TokenRequest tokenRequest) {
-        Member member = memberDao.findByEmailAndPassword(tokenRequest.email(), tokenRequest.password());
+        Member member = memberRepository.findByEmailAndPassword(tokenRequest.email(), tokenRequest.password())
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
         String accessToken = tokenGenerator.createToken(tokenRequest.email(), member.getRole().name());
         return TokenResponse.from(accessToken);
     }
 
     public MemberResponse findMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
-        Member member = memberDao.findByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
         return MemberResponse.from(member);
     }
 
     public LoginMember findLoginMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
-        Member member = memberDao.findByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
         return LoginMember.from(member);
     }
 
     public List<MemberResponse> findAll() {
-        return memberDao.findAll()
+        return memberRepository.findAll()
                 .stream()
                 .map(MemberResponse::from)
                 .toList();

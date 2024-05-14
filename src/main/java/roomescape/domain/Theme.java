@@ -1,11 +1,27 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.Set;
+
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final String thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String description;
+    private String thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private Set<Reservation> reservations;
+
+    public Theme() {
+
+    }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
@@ -28,5 +44,9 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    public Set<Reservation> getReservations() {
+        return reservations;
     }
 }

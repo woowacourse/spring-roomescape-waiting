@@ -10,8 +10,8 @@ public record TimeSlotRequest(@JsonFormat(pattern = "HH:mm") LocalTime startAt) 
         isValid(startAt);
     }
 
-    public TimeSlot toEntity(Long id) {
-        return new TimeSlot(id, startAt);
+    public TimeSlot toEntity() {
+        return new TimeSlot(null, startAt);
     }
 
     private void isValid(LocalTime startAt) {

@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -10,29 +9,29 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.repository.MemberDao;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ThemeDao;
-import roomescape.repository.TimeDao;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.TimeSlotRepository;
 
 @Service
 public class ReservationService {
 
-    private final MemberDao memberDao;
-    private final TimeDao timeDao;
-    private final ReservationDao reservationDao;
-    private final ThemeDao themeDao;
+    private final MemberRepository memberRepository;
+    private final TimeSlotRepository timeSlotRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(MemberDao memberDao, TimeDao timeDao,
-                              ReservationDao reservationDao, ThemeDao themeDao) {
-        this.memberDao = memberDao;
-        this.timeDao = timeDao;
-        this.reservationDao = reservationDao;
-        this.themeDao = themeDao;
+    public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
+                              ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+        this.memberRepository = memberRepository;
+        this.timeSlotRepository = timeSlotRepository;
+        this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findEntireReservationList() {
-        return reservationDao.findAll()
+        return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -40,49 +39,30 @@ public class ReservationService {
 
     public List<ReservationResponse> findDistinctReservations(Long memberId, Long themeId,
                                                               String dateFrom, String dateTo) {
-        return reservationDao.findAllByMemberAndDateAndTheme(memberId, themeId, dateFrom, dateTo)
+        LocalDate from = LocalDate.parse(dateFrom);
+        LocalDate to = LocalDate.parse(dateTo);
+        Member member = findMemberById(memberId);
+        Theme theme = findThemeById(themeId);
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public ReservationResponse create(ReservationRequest reservationRequest) {
-        Member member = memberDao.findById(reservationRequest.memberId());
-        TimeSlot timeSlot = checkTimeSlot(reservationRequest);
-        Theme theme = checkTheme(reservationRequest);
+        Member member = findMemberById(reservationRequest.memberId());
+        TimeSlot timeSlot = findTimeSlotById(reservationRequest.timeId());
+        Theme theme = findThemeById(reservationRequest.themeId());
 
         validate(reservationRequest.date(), timeSlot, theme);
 
-        Long reservationId = reservationDao.create(reservationRequest);
-        Reservation reservation = reservationRequest.toEntity(reservationId, member, timeSlot, theme);
-
-        return ReservationResponse.from(reservation);
+        Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
+        Reservation createdReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(createdReservation);
     }
 
     public void delete(Long id) {
-        reservationDao.delete(id);
-    }
-
-    private TimeSlot checkTimeSlot(ReservationRequest reservationRequest) {
-        TimeSlot timeSlot;
-        try {
-            timeSlot = timeDao.findById(reservationRequest.timeId());
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 예약 시간입니다");
-        }
-
-        return timeSlot;
-    }
-
-    private Theme checkTheme(ReservationRequest reservationRequest) {
-        Theme theme;
-        try {
-            theme = themeDao.findById(reservationRequest.themeId());
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다");
-        }
-
-        return theme;
+        reservationRepository.deleteById(id);
     }
 
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme) {
@@ -90,15 +70,32 @@ public class ReservationService {
         validateDuplicatedReservation(date, timeSlot.getId(), theme.getId());
     }
 
-    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
-        if (reservationDao.isExists(date, timeId, themeId)) {
-            throw new IllegalArgumentException("[ERROR] 예약이 종료되었습니다");
-        }
-    }
-
     private void validateReservation(LocalDate date, TimeSlot time) {
         if (time == null || (time.isTimeBeforeNow() && !date.isAfter(LocalDate.now()))) {
             throw new IllegalArgumentException("[ERROR] 지나간 날짜와 시간으로 예약할 수 없습니다");
         }
+    }
+
+    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
+        TimeSlot timeSlot = findTimeSlotById(timeId);
+        Theme theme = findThemeById(themeId);
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, timeSlot, theme)) {
+            throw new IllegalArgumentException("[ERROR] 예약이 종료되었습니다");
+        }
+    }
+
+    private Member findMemberById(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
+    }
+
+    private TimeSlot findTimeSlotById(long timeId) {
+        return timeSlotRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간 입니다"));
+    }
+
+    private Theme findThemeById(long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다"));
     }
 }

@@ -10,8 +10,8 @@ public record ThemeRequest(String name, String description, String thumbnail) {
         isValid(name, description, thumbnail);
     }
 
-    public Theme toEntity(Long id) {
-        return new Theme(id, name, description, thumbnail);
+    public Theme toEntity() {
+        return new Theme(null, name, description, thumbnail);
     }
 
     private void isValid(String name, String description, String thumbnail) {
