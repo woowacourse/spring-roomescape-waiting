@@ -8,6 +8,7 @@ import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.BookableTimeResponse;
 import roomescape.domain.reservation.dto.BookableTimesRequest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationTimeRepository;
 import roomescape.domain.theme.domain.Theme;
@@ -93,5 +94,11 @@ public class ReservationService {
             throw new EscapeApplicationException("해당 id를 가진 예약이 존재하지 않습니다.");
         }
         reservationRepository.deleteById(id);
+    }
+
+    public List<ReservationMineResponse> findReservationByMemberId(Long memberId) {
+        return reservationRepository.findByMember_Id(memberId).stream()
+                .map(ReservationMineResponse::new)
+                .toList();
     }
 }

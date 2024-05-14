@@ -15,4 +15,9 @@ public class ClientViewController {
     public String loginPage() {
         return "login";
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "reservation-mine";
+    }
 }
