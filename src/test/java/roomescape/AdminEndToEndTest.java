@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -106,7 +108,8 @@ class AdminEndToEndTest {
     @Test
     @DisplayName("예약 저장 및 삭제")
     void saveAndDeleteReservation() {
-        final Map<String, String> params = Map.of("date", "2024-06-13", "timeId", "1", "themeId", "1");
+        final Map<String, String> params = Map.of("date", LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE),
+                "timeId", "1", "themeId", "1");
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)

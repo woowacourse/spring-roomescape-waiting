@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ReservationNotFoundException;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -16,7 +17,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
     default Reservation fetchById(long id) {
-        return findById(id).orElseThrow();
+        return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
 
     boolean existsByTimeId(long timeId);
