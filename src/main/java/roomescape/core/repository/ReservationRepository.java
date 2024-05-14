@@ -2,26 +2,25 @@ package roomescape.core.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.repository.ListCrudRepository;
+import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
+import roomescape.core.domain.ReservationTime;
 import roomescape.core.domain.Theme;
 
-public interface ReservationRepository {
-    Long save(final Reservation reservation);
+public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
+    List<Reservation> findAllByDateAndTheme(final LocalDate date, final Theme theme);
 
-    List<Reservation> findAll();
+    List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member,
+                                                            final Theme theme,
+                                                            final LocalDate dateFrom,
+                                                            final LocalDate dateTo);
 
-    List<Theme> findPopularTheme(final LocalDate today, final LocalDate yesterday);
+    Integer countByTime(final ReservationTime reservationTime);
 
-    List<Reservation> findAllByDateAndThemeId(final String date, long themeId);
+    Integer countByTheme(final Theme theme);
 
-    List<Reservation> findAllByMemberAndThemeAndPeriod(final Long memberId, final Long themeId, final String dateFrom,
-                                                       final String dateTo);
-
-    Integer countByTimeId(final long timeId);
-
-    Integer countByThemeId(final long themeId);
-
-    Integer countByDateAndTimeIdAndThemeId(final String date, final long timeId, final long themeId);
+    Integer countByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme);
 
     void deleteById(final long id);
 }
