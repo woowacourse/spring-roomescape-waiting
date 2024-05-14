@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.ColumnDefault;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -34,6 +35,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 

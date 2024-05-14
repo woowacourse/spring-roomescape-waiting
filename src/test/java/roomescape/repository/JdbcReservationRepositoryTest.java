@@ -121,8 +121,8 @@ class JdbcReservationRepositoryTest {
         ReservationTime reservationTime = createReservationTime();
         Theme theme = createTheme();
 
-        jdbcTemplate.update("INSERT INTO reservation (id, date, member_id, time_id, theme_id) "
-                + "VALUES (1, '2024-05-04', 1, 1, 1)");
+        jdbcTemplate.update("INSERT INTO reservation (id, date, member_id, time_id, theme_id, status) "
+                + "VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED')");
 
         return new Reservation(1L, LocalDate.of(2024, 5, 4), member, reservationTime, theme);
     }

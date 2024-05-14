@@ -87,16 +87,16 @@ class JdbcThemeRepositoryTest {
                            (3, '11:00');
                 """;
         String insertReservationSQL = """
-                    INSERT INTO reservation (id, date, member_id, time_id, theme_id)
-                    VALUES (1, '2024-05-04', 1, 1, 1),
-                           (2, '2024-05-05', 2, 2, 1),
-                           (3, '2024-05-06', 1, 3, 1),
-                           (4, '2024-05-07', 2, 1, 2),
-                           (5, '2024-05-08', 1, 2, 2),
-                           (6, '2024-05-09', 2, 3, 3),
-                           (7, '2024-05-10', 1, 1, 3),
-                           (8, '2024-05-11', 2, 2, 3),
-                           (9, '2024-05-12', 1, 3, 3);
+                    INSERT INTO reservation (id, date, member_id, time_id, theme_id, status)
+                    VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED'),
+                           (2, '2024-05-05', 2, 2, 1, 'RESERVED'),
+                           (3, '2024-05-06', 1, 3, 1, 'RESERVED'),
+                           (4, '2024-05-07', 2, 1, 2, 'RESERVED'),
+                           (5, '2024-05-08', 1, 2, 2, 'RESERVED'),
+                           (6, '2024-05-09', 2, 3, 3, 'RESERVED'),
+                           (7, '2024-05-10', 1, 1, 3, 'RESERVED'),
+                           (8, '2024-05-11', 2, 2, 3, 'RESERVED'),
+                           (9, '2024-05-12', 1, 3, 3, 'RESERVED');
                 """;
 
         jdbcTemplate.update(insertMemberSQL);

@@ -74,9 +74,9 @@ class JdbcReservationTimeRepositoryTest {
                 """;
 
         String insertReservationSQL = """
-                INSERT INTO reservation (id, date, member_id, time_id, theme_id)
-                VALUES (1, '2024-05-04', 1, 1, 1),
-                       (2, '2024-05-04', 1, 3, 1);
+                INSERT INTO reservation (id, date, member_id, time_id, theme_id, status)
+                VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED'),
+                       (2, '2024-05-04', 1, 3, 1, 'RESERVED');
                 """;
 
         jdbcTemplate.update(insertMemberSQL);

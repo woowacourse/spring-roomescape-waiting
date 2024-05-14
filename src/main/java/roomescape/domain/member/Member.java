@@ -29,6 +29,7 @@ public class Member {
     @Column(nullable = false, length = NAME_MAX_LENGTH)
     private String name;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
 
