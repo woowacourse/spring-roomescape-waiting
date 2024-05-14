@@ -33,7 +33,7 @@ class JdbcReservationTimeRepositoryTest {
     private JdbcReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JdbcThemeRepository themeRepository;
+    private JpaThemeRepository themeRepository;
     private JdbcReservationRepository reservationRepository;
     private JdbcMemberRepository memberRepository;
 

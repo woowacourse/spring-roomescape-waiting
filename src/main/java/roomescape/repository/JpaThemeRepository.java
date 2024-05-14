@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Theme;
 
 @Repository
-public interface JdbcThemeRepository extends JpaRepository<Theme, Long> {
+public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("SELECT t FROM Theme t")
     List<Theme> findTopThemesDescendingByDescription(String startDate, String endDate, int count);

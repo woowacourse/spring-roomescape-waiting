@@ -37,7 +37,7 @@ class JdbcReservationRepositoryTest {
     private JdbcReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JdbcThemeRepository themeRepository;
+    private JpaThemeRepository themeRepository;
     private JdbcMemberRepository memberRepository;
 
     private final String startAt1 = "13:00";

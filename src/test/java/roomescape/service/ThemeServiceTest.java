@@ -22,7 +22,7 @@ import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcReservationTimeRepository;
-import roomescape.repository.JdbcThemeRepository;
+import roomescape.repository.JpaThemeRepository;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -46,7 +46,7 @@ class ThemeServiceTest {
     private JdbcReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JdbcThemeRepository themeRepository;
+    private JpaThemeRepository themeRepository;
 
     @Autowired
     private JdbcReservationRepository reservationRepository;
