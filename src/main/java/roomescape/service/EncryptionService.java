@@ -14,7 +14,7 @@ public class EncryptionService {
     @Value("${security.password.salt}")
     private String salt;
 
-    public String getPassword(final String raw) {
+    public String encryptPassword(final String raw) {
         final String rawAndSalt = raw + salt;
         try {
             final MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");

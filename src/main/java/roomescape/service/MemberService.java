@@ -34,14 +34,14 @@ public class MemberService {
         if (findMember.isPresent()) {
             throw new DuplicateEmailException("해당 email로 사용자가 존재합니다.");
         }
-        final String encryptedPassword = encryptionService.getPassword(request.password());
+        final String encryptedPassword = encryptionService.encryptPassword(request.password());
         final Member member = new Member(null, request.name(), request.email(), encryptedPassword, Role.USER);
         return memberRepository.save(member);
     }
 
     public boolean invalidPassword(final String email, final String rawPassword) {
         final Member findMember = memberRepository.fetchByEmail(email);
-        final String encryptedPassword = encryptionService.getPassword(rawPassword);
+        final String encryptedPassword = encryptionService.encryptPassword(rawPassword);
         return !encryptedPassword.equals(findMember.getPassword());
     }
 
