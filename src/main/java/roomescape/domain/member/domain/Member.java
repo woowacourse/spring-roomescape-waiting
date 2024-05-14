@@ -13,6 +13,7 @@ public class Member {
     private Name name; //todo: 네임 검증 추가
     private String email;
     private String password;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public Member() {

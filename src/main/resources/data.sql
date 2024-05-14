@@ -27,16 +27,16 @@ values ('17:00:00');
 
 
 insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-01', '1', '1', '1');
+values ('2024-05-13', '1', '1', '1');
 
 insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-01', '2', '1', '1');
+values ('2024-05-07', '2', '1', '1');
 
 insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-01', '3', '1', '2');
+values ('2024-05-12', '3', '1', '2');
 
 insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-04-30', '1', '2', '2');
+values ('2024-05-07', '1', '2', '2');
 
 insert into reservation(date, time_id, theme_id, member_id)
 values ('2024-04-30', '2', '2', '1');

@@ -37,6 +37,6 @@ public class ThemeService {
     }
 
     public List<Theme> getThemeRanking() {
-        return reservationRepository.findThemeOrderByReservationCount();
+        return themeRepository.findThemeOrderByReservationCount();
     }
 }

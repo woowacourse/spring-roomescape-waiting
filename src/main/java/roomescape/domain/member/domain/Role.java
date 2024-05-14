@@ -1,7 +1,8 @@
 package roomescape.domain.member.domain;
 
-import java.util.Arrays;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.util.Arrays;
 
 public enum Role {
     ADMIN("admin"), MEMBER("member");
