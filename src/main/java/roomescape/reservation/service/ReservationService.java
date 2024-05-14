@@ -7,11 +7,13 @@ import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
+import roomescape.reservation.controller.dto.response.MemberReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -41,7 +43,7 @@ public class ReservationService {
         if (hasDuplicateReservation(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId())) {
             throw new IllegalArgumentException("[ERROR] 중복된 예약이 존재합니다.");
         }
-        Reservation reservation = saveRequest.toEntity(member, reservationTime, theme);
+        Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
@@ -87,6 +89,13 @@ public class ReservationService {
 
     private boolean hasDuplicateReservation(final LocalDate date, final long timeId, final long themeId) {
         return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
+    }
+
+    public List<MemberReservationResponse> findMemberReservations(final long memberId) {
+        return reservationRepository.findByMemberId(memberId)
+                .stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 
     public ReservationDeleteResponse delete(final long id) {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.annotation.AuthenticationPrincipal;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
+import roomescape.reservation.controller.dto.response.MemberReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
@@ -24,6 +25,7 @@ import roomescape.reservation.service.ReservationService;
 @RestController
 @RequestMapping("/reservations")
 public class MemberReservationController {
+
     private final ReservationService reservationService;
 
     public MemberReservationController(final ReservationService reservationService) {
@@ -51,6 +53,12 @@ public class MemberReservationController {
             @RequestParam(name = "themeId") final long themeId
     ) {
         return ResponseEntity.ok(reservationService.findSelectableTimes(date, themeId));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(
+            @AuthenticationPrincipal Member member) {
+        return ResponseEntity.ok(reservationService.findMemberReservations(member.getId()));
     }
 
     @DeleteMapping("/{id}")

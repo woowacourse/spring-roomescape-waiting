@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,22 +18,30 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Member member;
+
     private LocalDate date;
+
     @ManyToOne
     @JoinColumn(name = "time_id")
     private ReservationTime time;
+
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
+
+    @Enumerated
+    private Status status;
 
     public Reservation(
             final Long id,
             final Member member,
             final LocalDate date,
             final ReservationTime time,
-            final Theme theme
+            final Theme theme,
+            final Status status
     ) {
         validateDate(date);
         validateIsNotBeforeReservation(date, time);
@@ -41,6 +50,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public Reservation() {
@@ -60,25 +70,8 @@ public class Reservation {
     }
 
     public static Reservation of(final Member member, final LocalDate date, final ReservationTime time,
-                                 final Theme theme) {
-        return new Reservation(null, member, date, time, theme);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Reservation that = (Reservation) o;
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+                                 final Theme theme, final Status status) {
+        return new Reservation(null, member, date, time, theme, status);
     }
 
     public Long getId() {
@@ -103,5 +96,26 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Reservation that = (Reservation) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

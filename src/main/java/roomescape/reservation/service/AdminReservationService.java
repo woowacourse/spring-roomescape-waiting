@@ -11,6 +11,7 @@ import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest
 import roomescape.reservation.controller.dto.response.AdminReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -18,6 +19,7 @@ import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class AdminReservationService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -40,7 +42,7 @@ public class AdminReservationService {
         Theme theme = findThemeById(reservationSaveRequest);
 
         Reservation reservation = reservationRepository.save(
-                reservationSaveRequest.toEntity(member, reservationTime, theme)
+                reservationSaveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION)
         );
         return AdminReservationResponse.from(reservation);
     }

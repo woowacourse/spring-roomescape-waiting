@@ -14,10 +14,13 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "theme_name", nullable = false))
     private ThemeName themeName;
+
     private String description;
+
     private String thumbnail;
 
     public Theme(final Long id, final ThemeName themeName, final String description, final String thumbnail) {

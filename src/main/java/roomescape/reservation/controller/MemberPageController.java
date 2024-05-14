@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class MemberPageController {
+
     @GetMapping("/")
     public String getHomePage() {
         return "/index";
@@ -23,5 +24,10 @@ public class MemberPageController {
     @GetMapping("/signup")
     public String getSignupPage() {
         return "/signup";
+    }
+
+    @GetMapping("/reservation/me")
+    public String getReservationMinePage() {
+        return "/reservation-mine";
     }
 }
