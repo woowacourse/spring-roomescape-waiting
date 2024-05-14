@@ -23,4 +23,9 @@ public class ClientController {
     public void logout(HttpServletResponse response) {
         response.addCookie(new Cookie("token", ""));
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "reservation-mine";
+    }
 }

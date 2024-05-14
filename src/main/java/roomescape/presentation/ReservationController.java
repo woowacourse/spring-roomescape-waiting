@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.application.dto.LoginMember;
+import roomescape.application.dto.MyReservationResponse;
 import roomescape.application.dto.ReservationCriteria;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
@@ -47,6 +48,12 @@ public class ReservationController {
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllForAdmin(ReservationCriteria reservationCriteria) {
         List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteria);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthenticationPrincipal LoginMember loginMember) {
+        List<MyReservationResponse> responses = reservationService.findMyReservations(loginMember.id());
         return ResponseEntity.ok(responses);
     }
 }

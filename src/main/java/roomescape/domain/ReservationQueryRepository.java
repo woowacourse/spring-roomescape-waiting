@@ -2,8 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.dto.AvailableTimeDto;
@@ -13,6 +11,8 @@ public interface ReservationQueryRepository extends JpaRepository<Reservation, L
     long countByTimeId(long timeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
 
     @Query("select new roomescape.domain.dto.AvailableTimeDto(rt.id, rt.startAt, "
             + "(select count(r) > 0 from Reservation r where r.time.id = rt.id and r.date = :date and r.theme.id = :themeId)) "
