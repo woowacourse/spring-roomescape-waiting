@@ -2,18 +2,19 @@ package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ResourceNotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.member.repository.MemberRepository;
-import roomescape.exception.BadRequestException;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
@@ -101,6 +102,13 @@ public class ReservationService {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+
+    public List<MemberReservationResponse> readMemberReservations(LoginMember loginMember) {
+        return reservationRepository.findByMemberId(loginMember.id()).stream()
+                .map(MemberReservationResponse::from)
+                .toList();
+
     }
 
     public List<ReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {

@@ -90,4 +90,8 @@ public class Reservation {
     public Theme getTheme() {
         return theme;
     }
+
+    public ReservationStatus getStatus() {
+        return status;
+    }
 }
