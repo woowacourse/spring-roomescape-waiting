@@ -1,14 +1,16 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 
 @Entity
 public class Reservation {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     private Member member;
@@ -52,9 +54,5 @@ public class Reservation {
 
     public Long getId() {
         return id;
-    }
-
-    public Reservation with(final Long id) {
-        return new Reservation(id, member, date, time, theme);
     }
 }

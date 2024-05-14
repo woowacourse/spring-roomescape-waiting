@@ -14,27 +14,28 @@ import roomescape.domain.dto.ReservationResponses;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ThemeDao;
-import roomescape.repository.TimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
-    private final TimeDao timeDao;
-    private final ReservationDao reservationDao;
-    private final ThemeDao themeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final TimeDao timeDao, final ReservationDao reservationDao, final ThemeDao themeDao,
-                              final MemberRepository memberRepository) {
-        this.timeDao = timeDao;
-        this.reservationDao = reservationDao;
-        this.themeDao = themeDao;
+    public ReservationService(final ReservationTimeRepository reservationTimeRepository,
+                              final ReservationRepository reservationRepository,
+                              final ThemeRepository themeRepository, final MemberRepository memberRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
     public ReservationResponses findEntireReservationList() {
-        final List<ReservationResponse> reservationResponses = reservationDao.findAll()
+        final List<ReservationResponse> reservationResponses = reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -49,17 +50,17 @@ public class ReservationService {
         final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest,
                 reservationTime, theme, member);
         final Reservation newReservation = reservationCreateValidator.create();
-        final Long id = reservationDao.create(newReservation);
-        return ReservationResponse.from(newReservation.with(id));
+        final Reservation reservation = reservationRepository.save(newReservation);
+        return ReservationResponse.from(reservation);
     }
 
     private ReservationTime getTimeSlot(final ReservationRequest reservationRequest) {
-        return timeDao.findById(reservationRequest.timeId())
+        return reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new InvalidIdException("timeId", reservationRequest.timeId()));
     }
 
     private Theme getTheme(final ReservationRequest reservationRequest) {
-        return themeDao.findById(reservationRequest.themeId())
+        return themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new InvalidIdException("themeId", reservationRequest.themeId()));
     }
 
@@ -69,19 +70,22 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(final ReservationRequest reservationRequest) {
-        if (reservationDao.isExists(reservationRequest.date(), reservationRequest.timeId(),
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(),
+                reservationRequest.timeId(),
                 reservationRequest.themeId())) {
             throw new ReservationFailException("이미 예약이 등록되어 있습니다.");
         }
     }
 
     public void delete(final Long id) {
-        reservationDao.delete(id);
+        reservationRepository.deleteById(id);
     }
 
     public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                                  final LocalDate dateTo) {
-        final List<ReservationResponse> reservationResponses = reservationDao.find(themeId, memberId, dateFrom, dateTo)
+        final List<ReservationResponse> reservationResponses = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+                        themeId, memberId, dateFrom,
+                        dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

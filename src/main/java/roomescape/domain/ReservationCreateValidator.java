@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.exception.ReservationFailException;
 
+// TODO: 예약 생성 로직 위치 확인
 public class ReservationCreateValidator {
     private final ReservationRequest reservationRequest;
     private final ReservationTime reservationTime;
