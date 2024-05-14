@@ -5,13 +5,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 
 @Entity
 public class Reservation {
@@ -98,10 +97,10 @@ public class Reservation {
         }
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id)
-                && Objects.equals(member, that.member)
-                && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+               && Objects.equals(member, that.member)
+               && Objects.equals(date, that.date)
+               && Objects.equals(time, that.time)
+               && Objects.equals(theme, that.theme);
     }
 
     @Override

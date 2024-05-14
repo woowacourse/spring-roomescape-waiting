@@ -2,7 +2,6 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-
 import java.util.Objects;
 
 @Embeddable

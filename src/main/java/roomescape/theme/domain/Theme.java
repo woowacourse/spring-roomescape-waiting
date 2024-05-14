@@ -6,10 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import roomescape.reservation.domain.Reservation;
-
 import java.util.List;
 import java.util.Objects;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class Theme {
@@ -76,9 +75,9 @@ public class Theme {
         }
         Theme theme = (Theme) object;
         return Objects.equals(id, theme.id)
-                && Objects.equals(name, theme.name)
-                && Objects.equals(description, theme.description)
-                && Objects.equals(thumbnail, theme.thumbnail);
+               && Objects.equals(name, theme.name)
+               && Objects.equals(description, theme.description)
+               && Objects.equals(thumbnail, theme.thumbnail);
     }
 
     @Override
