@@ -3,9 +3,19 @@ spring:
     url: jdbc:h2:mem:roomescape
     username: sa
     driverClassName: org.h2.Driver
+
   h2:
     console:
       enabled: true
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop
 
 security:
   jwt:
