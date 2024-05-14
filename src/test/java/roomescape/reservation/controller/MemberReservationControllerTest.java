@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 @Sql(value = {"/recreate_table.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -234,5 +235,16 @@ class MemberReservationControllerTest {
                 .jsonPath().get("detail");
 
         assertThat(detailMessage).isEqualTo("요청에 잘못된 형식의 값이 있습니다.");
+    }
+
+    @DisplayName("내 예약 조회 요청 시 본인의 예약만 응답한다.")
+    @Test
+    void readMemberReservations() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2));
     }
 }
