@@ -1,14 +1,29 @@
 package roomescape.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+import java.util.List;
 import java.util.Objects;
 
+@Entity
 public class Member {
 
-    private final Long id;
-    private final String name;
-    private final String email;
-    private final String password;
-    private final Role role;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+    private Role role;
+    @OneToMany(mappedBy = "member")
+    private List<Reservation> reservations;
+
+    protected Member() {
+    }
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
         this.id = id;
