@@ -1,15 +1,27 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public class Theme {
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final int MAX_THUMBNAIL_URL_LENGTH = 200;
 
-    private final Long id;
-    private final ThemeName name;
-    private final String description;
-    private final String thumbnailUrl;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private ThemeName name;
+    private String description;
+    private String thumbnailUrl;
+
+    public Theme() {
+    }
 
     public Theme(Long id, ThemeName name, String description, String thumbnailUrl) {
         validateDescription(description);

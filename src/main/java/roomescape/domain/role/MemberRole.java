@@ -1,11 +1,19 @@
 package roomescape.domain.role;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import roomescape.domain.member.Member;
 
+@Entity
 public class MemberRole {
-    private final long memberId;
-    private final String name;
-    private final Role role;
+
+    @Id
+    private long memberId;
+    private String name;
+    private Role role;
+
+    public MemberRole() {
+    }
 
     public MemberRole(long memberId, String name, Role role) {
         this.memberId = memberId;

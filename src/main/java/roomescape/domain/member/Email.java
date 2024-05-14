@@ -1,13 +1,19 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Email {
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\w+@\\w+\\.\\w+$");
     private static final int ADDRESS_MAX_LENGTH = 50;
 
-    private final String address;
+    private String address;
+
+    public Email() {
+    }
 
     public Email(String address) {
         validateLength(address);
