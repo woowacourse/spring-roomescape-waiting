@@ -77,8 +77,9 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @DisplayName("예약 삭제")
     @Test
     void deleteReservation() {
+        int size = reservationRepository.findAll().size();
         reservationService.deleteReservation(1L);
-        assertThat(reservationRepository.findAll()).hasSize(12);
+        assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
     @DisplayName("존재하지 않는 예약 삭제")
