@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
 
@@ -37,10 +37,13 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+
     @DisplayName("예약 저장")
     @Test
     void saveReservation() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
         Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
 
@@ -75,7 +78,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void deleteReservation() {
         reservationService.deleteReservation(1L);
-        assertThat(reservationService.findReservationsByCondition(new ReservationConditionRequest(null, null, null, null))).hasSize(12);
+        assertThat(reservationRepository.findAll()).hasSize(12);
     }
 
     @DisplayName("존재하지 않는 예약 삭제")

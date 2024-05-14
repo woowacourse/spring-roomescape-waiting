@@ -92,7 +92,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
     @Test
     void deleteExistReservation() {
         // given
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
         Member member = memberRepository.save(Member.createUser("생강", "email@email.com", "1234"));
         reservationRepository.save(new Reservation(member, LocalDate.parse("2025-05-13"), time, theme));

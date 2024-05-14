@@ -71,12 +71,23 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservationsByCondition(
             ReservationConditionRequest reservationConditionRequest) {
-        return reservationRepository.findByDurationAndThemeIdAndMemberId(
-                        reservationConditionRequest.memberId(),
-                        reservationConditionRequest.themeId(),
-                        reservationConditionRequest.dateFrom(),
-                        reservationConditionRequest.dateTo()
-                ).stream()
+        if (reservationConditionRequest.hasNoneCondition()) {
+            List<Reservation> reservations = reservationRepository.findAll();
+            return toReservationResponse(reservations);
+        }
+
+        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeIdAndMemberId(
+                reservationConditionRequest.dateFrom(),
+                reservationConditionRequest.dateTo(),
+                reservationConditionRequest.themeId(),
+                reservationConditionRequest.memberId()
+        );
+
+        return toReservationResponse(reservations);
+    }
+
+    private List<ReservationResponse> toReservationResponse(List<Reservation> reservations) {
+        return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
     }

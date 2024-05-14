@@ -2,25 +2,45 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-public interface ReservationRepository {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Reservation save(Reservation reservation);
+    @Query("select r.time from Reservation r where r.date = :date and r.theme.id = :themeId")
+    List<ReservationTime> findTimeByDateAndThemeId(LocalDate date, Long themeId);
 
-    Optional<Reservation> findById(Long id);
-
-    List<ReservationTime> findTimeByDateAndThemeId(LocalDate date, Long aLong);
-
+    //TODO existByTime 고려해보기
+    @Query("select case when(count(*)>0) then true else false end from Reservation r where r.time.id = :timeId")
     boolean existByTimeId(Long timeId);
 
+    @Query("""
+            select case when(count(*)>0) then true else false end
+            from Reservation r
+            where r.time.id = :timeId
+                    and r.date = :date
+                    and r.theme.id = :themeId""")
     boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    @Query("select case when(count(*)>0) then true else false end from Reservation r where r.theme.id = :themeId")
     boolean existByThemeId(Long themeId);
 
-    void deleteById(Long id);
-
+    @Query("""
+            select r.theme
+            from Reservation r
+            where r.date between :startDate and :endDate
+            group by r.theme
+            order by count(r) desc
+            limit :limit""")
     List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Integer limit);
 
-    List<Reservation> findByDurationAndThemeIdAndMemberId(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
+
+    @Query("""
+            select r
+            from Reservation r
+            where r.date between :startDate and :endDate
+                and r.theme.id = :themeId
+                and r.member.id = :memberId""")
+    List<Reservation> findByDateBetweenAndThemeIdAndMemberId(LocalDate startDate, LocalDate endDate, Long themeId,
+                                                             Long memberId);
 }

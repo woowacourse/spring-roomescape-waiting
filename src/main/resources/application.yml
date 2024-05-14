@@ -4,6 +4,13 @@ spring:
       enabled: true
   datasource:
     url: jdbc:h2:mem:database
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        ddl-auto: create-drop
+        format_sql: true
 
 security:
   jwt:
@@ -16,3 +23,4 @@ logging:
       springframework:
         jdbc:
           core: TRACE
+
