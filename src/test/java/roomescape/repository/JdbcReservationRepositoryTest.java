@@ -15,7 +15,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Status;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -44,7 +44,7 @@ class JdbcReservationRepositoryTest {
             softly.assertThat(saved.getDate()).isEqualTo("2024-05-04");
             softly.assertThat(saved.getTime().getStartAt()).isEqualTo("10:00");
             softly.assertThat(saved.getMember().getEmail()).isEqualTo("example@gmail.com");
-            softly.assertThat(saved.getStatus()).isEqualTo(Status.WAITING);
+            softly.assertThat(saved.getStatus()).isEqualTo(ReservationStatus.WAITING);
         });
     }
 

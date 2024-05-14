@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import org.hibernate.annotations.ColumnDefault;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -41,7 +40,7 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ReservationStatus status;
 
     protected Reservation() {
     }
@@ -58,7 +57,7 @@ public class Reservation {
         this.member = member;
         this.time = time;
         this.theme = theme;
-        this.status = Status.WAITING;
+        this.status = ReservationStatus.WAITING;
     }
 
     private void validate(LocalDate date, Member member, ReservationTime time, Theme theme) {
@@ -83,10 +82,6 @@ public class Reservation {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
 
         return reservationDateTime.isBefore(dateTime);
-    }
-
-    public void reserve() {
-        this.status = Status.RESERVED;
     }
 
     @Override
@@ -126,7 +121,7 @@ public class Reservation {
         return theme;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 }
