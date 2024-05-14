@@ -17,6 +17,7 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
+import roomescape.service.dto.ReservationMineResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
 
@@ -42,6 +43,13 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.searchAll(memberId, themeId, dateFrom, dateTo);
         return reservations.stream()
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<ReservationMineResponse> findMyReservation(Member member) {
+        List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
+        return reservations.stream()
+                .map(ReservationMineResponse::new)
                 .toList();
     }
 

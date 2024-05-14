@@ -18,6 +18,7 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationMineResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
 
@@ -39,6 +40,13 @@ public class ReservationController {
             @RequestParam(required = false, name = "date-from") LocalDate dateFrom,
             @RequestParam(required = false, name = "date-to") LocalDate dateTo) {
         List<ReservationResponse> response = reservationService.findAllReservation(memberId, themeId, dateFrom, dateTo);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @RoleAllowed
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<ReservationMineResponse>> findMyReservation(@LoginMember Member member) {
+        List<ReservationMineResponse> response = reservationService.findMyReservation(member);
         return ResponseEntity.ok().body(response);
     }
 

@@ -2,7 +2,7 @@
 GET {{base-url}}/reservations?theme-id=1&member-id=1&date-from=2024-05-11&date-to=2024-10-31
 
 ### 내 예약 목록 조회 API
-GET /reservations-mine
+GET {{base-url}}/reservations-mine
 
 ### 예약 추가 API
 POST {{base-url}}/reservations
