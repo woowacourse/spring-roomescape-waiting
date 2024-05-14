@@ -17,7 +17,7 @@ public class AuthService {
     }
 
     public String createToken(LoginRequest request) {
-        Member member = memberRepository.findByEmailValue(request.email())
+        Member member = memberRepository.findByEmailValueAndPasswordValue(request.email(), request.password())
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
         return tokenProvider.createToken(member.getId());
     }

@@ -34,7 +34,8 @@ class AuthServiceTest {
     @Test
     void createTokenTest_whenMemberNotExist() {
         LoginRequest request = new LoginRequest("not_exist@abc.com", "1234");
-        given(memberRepository.findByEmailValue("not_exist@abc.com")).willReturn(Optional.empty());
+        given(memberRepository.findByEmailValueAndPasswordValue("not_exist@abc.com", "1234"))
+                .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.createToken(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -44,7 +45,7 @@ class AuthServiceTest {
     @DisplayName("해당 토큰의 유저를 찾을 수 있다.")
     @Test
     void findLoggedInMemberTest() {
-        String token = makeToken("브리", "bri@abc.com");
+        String token = makeToken("브리", "bri@abc.com", "1234");
         given(memberRepository.findById(1L)).willReturn(Optional.of(new Member(1L, "브리", "bri@abc.com")));
         LoggedInMember expected = new LoggedInMember(1L, "브리", "bri@abc.com", false);
 
@@ -53,9 +54,9 @@ class AuthServiceTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    private String makeToken(String name, String email) {
-        LoginRequest request = new LoginRequest(email, "1234");
-        given(memberRepository.findByEmailValue(email))
+    private String makeToken(String name, String email, String password) {
+        LoginRequest request = new LoginRequest(email, password);
+        given(memberRepository.findByEmailValueAndPasswordValue(email, password))
                 .willReturn(Optional.of(new Member(1L, name, email)));
         return authService.createToken(request);
     }
