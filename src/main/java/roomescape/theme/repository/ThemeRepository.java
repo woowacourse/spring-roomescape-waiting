@@ -1,28 +1,17 @@
 package roomescape.theme.repository;
 
 import java.util.List;
-import org.springframework.stereotype.Repository;
-import roomescape.theme.dao.ThemeDao;
+import java.util.Optional;
+import org.springframework.data.repository.CrudRepository;
 import roomescape.theme.domain.Theme;
 
-@Repository
-public class ThemeRepository {
+public interface ThemeRepository extends CrudRepository<Theme, Long> {
 
-    private final ThemeDao themeDao;
+    Theme save(Theme theme);
 
-    public ThemeRepository(ThemeDao themeDao) {
-        this.themeDao = themeDao;
-    }
+    List<Theme> findAll();
 
-    public Theme save(Theme theme) {
-        return themeDao.save(theme);
-    }
+    Optional<Theme> findById(long id);
 
-    public List<Theme> findAll() {
-        return themeDao.findAllThemes();
-    }
-
-    public void deleteById(long themeId) {
-        themeDao.deleteById(themeId);
-    }
+    void deleteById(long themeId);
 }

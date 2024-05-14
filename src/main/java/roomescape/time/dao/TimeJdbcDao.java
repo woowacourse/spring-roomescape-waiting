@@ -25,7 +25,7 @@ public class TimeJdbcDao implements TimeDao {
     public TimeJdbcDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.jdbcInsert = new SimpleJdbcInsert(dataSource)
-                .withTableName("reservation_time")
+                .withTableName("time")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -39,14 +39,14 @@ public class TimeJdbcDao implements TimeDao {
 
     @Override
     public List<Time> findAllReservationTimesInOrder() {
-        String findAllReservationTimeSql = "SELECT id, start_at FROM reservation_time ORDER BY start_at ASC ";
+        String findAllReservationTimeSql = "SELECT id, start_at FROM time ORDER BY start_at ASC ";
 
         return jdbcTemplate.query(findAllReservationTimeSql, TIME_ROW_MAPPER);
     }
 
     @Override
     public Optional<Time> findById(long reservationTimeId) {
-        String findReservationTimeSql = "SELECT id, start_at FROM reservation_time WHERE id = ?";
+        String findReservationTimeSql = "SELECT id, start_at FROM time WHERE id = ?";
 
         try {
             Time time = jdbcTemplate.queryForObject(findReservationTimeSql, TIME_ROW_MAPPER, reservationTimeId);
@@ -58,7 +58,7 @@ public class TimeJdbcDao implements TimeDao {
 
     @Override
     public Optional<Time> findByStartAt(LocalTime startAt) {
-        String findByStartAtSql = "SELECT id, start_at FROM reservation_time WHERE start_at = ?";
+        String findByStartAtSql = "SELECT id, start_at FROM time WHERE start_at = ?";
 
         try {
             Time time = jdbcTemplate.queryForObject(findByStartAtSql, TIME_ROW_MAPPER, startAt);
@@ -70,7 +70,7 @@ public class TimeJdbcDao implements TimeDao {
 
     @Override
     public void deleteById(long reservationTimeId) {
-        String deleteReservationTimeSql = "DELETE FROM reservation_time WHERE id = ?";
+        String deleteReservationTimeSql = "DELETE FROM time WHERE id = ?";
         jdbcTemplate.update(deleteReservationTimeSql, reservationTimeId);
     }
 }

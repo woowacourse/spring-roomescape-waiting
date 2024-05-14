@@ -3,36 +3,18 @@ package roomescape.time.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Repository;
-import roomescape.time.dao.TimeDao;
+import org.springframework.data.repository.Repository;
 import roomescape.time.domain.Time;
 
-@Repository
-public class TimeRepository {
+public interface TimeRepository extends Repository<Time, Long> {
 
-    private final TimeDao timeDao;
+    Time save(Time time);
 
-    public TimeRepository(TimeDao timeDao) {
-        this.timeDao = timeDao;
-    }
+    List<Time> findAllByOrderByStartAt();
 
-    public Time save(Time time) {
-        return timeDao.save(time);
-    }
+    Optional<Time> findByStartAt(LocalTime startAt);
 
-    public List<Time> findAllReservationTimesInOrder() {
-        return timeDao.findAllReservationTimesInOrder();
-    }
+    Optional<Time> findById(Long id);
 
-    public List<Time> findAllReservationTimes() {
-        return timeDao.findAllReservationTimesInOrder();
-    }
-
-    public Optional<Time> findByStartAt(LocalTime startAt) {
-        return timeDao.findByStartAt(startAt);
-    }
-
-    public void deleteById(long reservationTimeId) {
-        timeDao.deleteById(reservationTimeId);
-    }
+    void deleteById(Long timeId);
 }

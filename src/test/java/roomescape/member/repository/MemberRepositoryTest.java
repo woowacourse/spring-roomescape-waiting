@@ -1,38 +1,29 @@
 package roomescape.member.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.member.dao.MemberJdbcDao;
-import roomescape.member.exception.MemberExceptionCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.member.domain.Member;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Sql(scripts = "/data-test.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class MemberRepositoryTest {
 
-    @InjectMocks
+    @Autowired
     private MemberRepository memberRepository;
 
-    @Mock
-    private MemberJdbcDao memberJdbcDao;
-
     @Test
-    @DisplayName("일치하는 멤버가 없는 경우 예외를 던진다.")
+    @DisplayName("일치하는 멤버를 가져온다.")
     void shouldThrowException_WhenIdNotFound() {
-        when(memberJdbcDao.findIdByEmailAndPassword("email", "password"))
-                .thenReturn(Optional.ofNullable(null));
+        Optional<Member> member = memberRepository.findMemberByEmail_EmailAndPassword_Password("polla@gmail.com",
+                "pollari99");
 
-        Throwable noneMatchMember = assertThrows(RoomEscapeException.class,
-                () -> memberRepository.findIdByEmailAndPassword("email", "password"));
-
-        assertEquals(noneMatchMember.getMessage(), MemberExceptionCode.ID_AND_PASSWORD_NOT_MATCH_OR_EXIST.getMessage());
+        assertTrue(member.isPresent());
     }
 }
