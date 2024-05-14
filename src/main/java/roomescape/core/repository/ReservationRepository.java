@@ -2,13 +2,13 @@ package roomescape.core.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
 import roomescape.core.domain.Theme;
 
-public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findAllByDateAndTheme(final LocalDate date, final Theme theme);
 
     List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member,
