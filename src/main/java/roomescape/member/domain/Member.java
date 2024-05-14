@@ -5,18 +5,18 @@ import java.util.Objects;
 public class Member {
     private final Long id;
     private final MemberName name;
-    private final String email;
+    private final MemberEmail email;
     private final MemberRole role;
 
     public Member(Long id, String name, String email) {
-        this(id, new MemberName(name), email, MemberRole.USER);
+        this(id, new MemberName(name), new MemberEmail(email), MemberRole.USER);
     }
 
     public Member(Long id, String name, String email, String role) {
-        this(id, new MemberName(name), email, MemberRole.valueOf(role));
+        this(id, new MemberName(name), new MemberEmail(email), MemberRole.valueOf(role));
     }
 
-    private Member(Long id, MemberName name, String email, MemberRole role) {
+    private Member(Long id, MemberName name, MemberEmail email, MemberRole role) {
         this.id = Objects.requireNonNull(id);
         this.name = Objects.requireNonNull(name);
         this.email = Objects.requireNonNull(email);
@@ -36,7 +36,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email;
+        return email.email();
     }
 
     public MemberRole getRole() {
