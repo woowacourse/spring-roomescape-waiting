@@ -14,8 +14,8 @@ INSERT INTO member(name, email, password, role)
 VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN'),
        ('사용자', 'user@a.com', '123a!', 'USER');
 
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1),
-       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1),
-       (1, TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1),
-       (2, TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 3);
+INSERT INTO reservation(member_id, date, time_id, theme_id, status)
+VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (1, TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (2, TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 3, 'RESERVED');

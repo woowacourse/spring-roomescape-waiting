@@ -20,8 +20,8 @@ VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN'),
        ('도도', 'dodo@woowahan.com', '123', 'USER'),
        ('제리', 'jerry@woowahan.com', '123', 'ADMIN');
 
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1),
-       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1),
-       (3, TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1),
-       (4, TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 3);
+INSERT INTO reservation(member_id, date, time_id, theme_id, status)
+VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (2, TIMESTAMPADD(DAY, -2, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (3, TIMESTAMPADD(DAY, -3, CURRENT_DATE), 1, 1, 'RESERVED'),
+       (4, TIMESTAMPADD(DAY, -4, CURRENT_DATE), 1, 3, 'RESERVED');

@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import static roomescape.domain.reservation.ReservationStatus.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class ReservationService {
         Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
-        Reservation reservation = new Reservation(member, date, time, theme);
+        Reservation reservation = new Reservation(member, date, time, theme, RESERVED);
 
         validatePastReservation(LocalDate.parse(date), time);
         validateDuplication(date, timeId, themeId);
@@ -98,5 +100,9 @@ public class ReservationService {
         }
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId,
             new Date(dateFrom.toString()), new Date(dateTo.toString())); // TODO : 제대로 정리;
+    }
+
+    public List<Reservation> findMyReservations(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId);
     }
 }

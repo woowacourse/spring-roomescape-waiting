@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -105,5 +106,12 @@ class ReservationServiceTest {
             () -> reservationService.save(memberId, today, savedTime.getId(), themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
+    }
+
+    @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
+    @Test
+    void findMyReservations() {
+        List<Reservation> reservations = reservationService.findMyReservations(1L);
+        assertThat(reservations).hasSize(2);
     }
 }

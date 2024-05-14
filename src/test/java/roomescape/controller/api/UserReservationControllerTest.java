@@ -1,5 +1,6 @@
 package roomescape.controller.api;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -122,5 +123,17 @@ class UserReservationControllerTest {
             .when().post("/reservations")
             .then().log().all()
             .statusCode(400);
+    }
+
+    @DisplayName("성공: 나의 예약 목록 조회 -> 200")
+    @Test
+    void findMyReservations() {
+        RestAssured.given().log().all()
+            .cookie("token", userToken)
+            .contentType(ContentType.JSON)
+            .when().get("/reservations-mine")
+            .then().log().all()
+            .statusCode(200)
+            .body("reservationId", contains(2, 4));
     }
 }
