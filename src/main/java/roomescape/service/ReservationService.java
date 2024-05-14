@@ -25,7 +25,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        return reservationRepository.findReservationsByMemberIdAndThemeIdAndDateBetween(
+        return reservationRepository.findByMember_IdAndTheme_IdAndDateBetween(
                         request.memberId(),
                         request.themeId(),
                         request.dateFrom(),
@@ -45,7 +45,7 @@ public class ReservationService {
             throw new IllegalArgumentException("지나간 날짜와 시간에 대한 예약은 불가능합니다.");
         }
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(
                 reservation.getDate(),
                 reservation.getTimeId(),
                 reservation.getThemeId()

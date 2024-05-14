@@ -19,5 +19,5 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
             ORDER BY COUNT(th.id) DESC
             LIMIT :themeCount;
             """, nativeQuery = true)
-    List<Theme> findTopThemesDescendingByDescription(String startDate, String endDate, int count);
+    List<Theme> findTopThemesDescendingByDescription(String startDate, String endDate, int themeCount);
 }

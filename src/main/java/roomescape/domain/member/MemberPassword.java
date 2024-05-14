@@ -1,26 +1,27 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 @Embeddable
 public class MemberPassword {
 
-    private String value;
+    private String password;
 
-    public MemberPassword(String value) {
-        this.value = value;
+    public MemberPassword(String password) {
+        this.password = password;
     }
 
     protected MemberPassword() {
     }
 
     public boolean isMismatchedPassword(MemberPassword other) {
-        return !Objects.equals(this.value, other.value);
+        return !Objects.equals(this.password, other.password);
     }
 
-    public String getValue() {
-        return value;
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -32,11 +33,11 @@ public class MemberPassword {
             return false;
         }
         MemberPassword that = (MemberPassword) o;
-        return Objects.equals(value, that.value);
+        return Objects.equals(password, that.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(value);
+        return Objects.hashCode(password);
     }
 }

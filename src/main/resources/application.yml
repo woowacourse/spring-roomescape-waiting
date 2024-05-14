@@ -5,6 +5,11 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
+  jpa:
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        show_sql: true
 
 security:
   jwt:

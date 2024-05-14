@@ -11,11 +11,12 @@ import java.util.List;
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
     // TODO: 메서드명 너무 김
-    List<Reservation> findReservationsByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate from, LocalDate to);
+    List<Reservation> findByMember_IdAndTheme_IdAndDateBetween(Long memberId, Long themeId, LocalDate from, LocalDate to);
 
-    boolean existsByTimeId(long timeId);
+    // TODO: 언더스코어가 컨벤션에 맞지 않다
+    boolean existsByTime_Id(long timeId);
 
-    boolean existsByThemeId(long themeId);
+    boolean existsByTheme_Id(long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 }
