@@ -241,4 +241,21 @@ class ReservationServiceTest {
                 .isInstanceOf(DuplicatedException.class)
                 .hasMessage("[ERROR] 이미 해당 시간에 예약이 존재합니다.");
     }
+
+    @DisplayName("사용자가 예약한 예약을 반환한다.")
+    @Test
+    void should_return_member_reservations() {
+        Theme theme1 = themeRepository.findById(1L);
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme1, member));
+
+        List<Reservation> reservations = reservationService
+                .findMemberReservations(member.getId());
+
+        assertThat(reservations).hasSize(2);
+    }
 }

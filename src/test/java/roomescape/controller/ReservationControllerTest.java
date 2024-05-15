@@ -157,4 +157,24 @@ class ReservationControllerTest {
 
         AssertionsForClassTypes.assertThat(isJdbcTemplateInjected).isFalse();
     }
+
+    @DisplayName("로그인 정보에 따른 예약 내역을 조회한다.")
+    @Test
+    void should_find_member_reservation() {
+        UserLoginRequest loginRequest = new UserLoginRequest("1234", "sun@email.com");
+
+        String cookie = RestAssured
+                .given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().header("Set-Cookie");
+
+        RestAssured.given().log().all()
+                .cookie(cookie)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

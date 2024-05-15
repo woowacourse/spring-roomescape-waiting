@@ -27,4 +27,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
+
+    List<Reservation> findAllByMember(Member member);
+
 }

@@ -3,6 +3,8 @@ package roomescape.controller;
 import java.net.URI;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.ReservationRequest;
+import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
+import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 
 @RestController
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final AuthService authService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, AuthService authService) {
         this.reservationService = reservationService;
+        this.authService = authService;
     }
 
     @GetMapping("/reservations")
@@ -33,6 +39,17 @@ public class ReservationController {
         List<ReservationResponse> responses = allReservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(HttpServletRequest request) {
+        Long memberId = authService.findUserIdByCookie(request.getCookies());
+        List<Reservation> memberReservations = reservationService.findMemberReservations(memberId);
+        List<MemberReservationResponse> responses =
+                memberReservations.stream()
+                        .map(MemberReservationResponse::new)
+                        .toList();
         return ResponseEntity.ok(responses);
     }
 

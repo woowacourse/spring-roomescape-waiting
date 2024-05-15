@@ -222,4 +222,28 @@ class ReservationRepositoryTest {
         long count = reservationRepository.countByDateAndTimeAndTheme(day, time1, theme);
         assertThat(count).isEqualTo(1);
     }
+
+    @DisplayName("사용자 아이디에 해당하는 예약을 반환한다.")
+    @Test
+    void should_return_member_reservations() {
+        LocalDate day = LocalDate.of(2024, 5, 15);
+        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
+        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
+        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+
+        entityManager.persist(time1);
+        entityManager.persist(time2);
+        entityManager.persist(theme);
+        entityManager.persist(member);
+
+        Reservation reservation1 = new Reservation(day, time1, theme, member);
+        Reservation reservation2 = new Reservation(day, time2, theme, member);
+
+        entityManager.persist(reservation1);
+        entityManager.persist(reservation2);
+
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        assertThat(reservations).hasSize(2);
+    }
 }
