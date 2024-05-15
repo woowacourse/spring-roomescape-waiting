@@ -6,6 +6,7 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
 import roomescape.auth.core.token.TokenProvider;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 
@@ -22,7 +23,7 @@ public class AuthService {
 
     public LoginResponse login(final LoginRequest loginMemberRequest) {
         String email = loginMemberRequest.email();
-        Member member = memberRepository.findByEmail(email)
+        Member member = memberRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new IllegalArgumentException("로그인하려는 계정이 존재하지 않습니다. 회원가입 후 로그인해주세요."));
         checkInvalidAuthInfo(member, loginMemberRequest.password());
         return new LoginResponse(tokenProvider.createToken(member));

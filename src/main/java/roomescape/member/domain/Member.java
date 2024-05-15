@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +21,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private String email;
+    @Embedded
+    private Email email;
 
     private String password;
 
@@ -31,13 +33,12 @@ public class Member {
     public Member(final Long id, final String name, final Role role, final String email, final String password) {
         validateNameIsNull(name);
         validateRoleIsNull(role);
-        validateEmailIsNull(email);
         validatePasswordIsNull(password);
 
         this.id = id;
         this.name = name;
         this.role = role;
-        this.email = email;
+        this.email = new Email(email);
         this.password = password;
     }
 
@@ -56,20 +57,10 @@ public class Member {
         }
     }
 
-    private void validateEmailIsNull(final String email) {
-        if (email == null) {
-            throw new IllegalArgumentException("회원 생성 시 이메일 필수입니다.");
-        }
-    }
-
     private void validatePasswordIsNull(final String password) {
         if (password == null) {
             throw new IllegalArgumentException("회원 생성 시 비밀번호는 필수입니다.");
         }
-    }
-
-    public static Member of(final Long id, final Member member) {
-        return new Member(id, member.name, member.role, member.email, member.password);
     }
 
     public boolean hasNotSamePassword(final String password) {
@@ -88,7 +79,7 @@ public class Member {
         return role;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 

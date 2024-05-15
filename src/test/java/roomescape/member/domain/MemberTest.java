@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,5 +22,14 @@ class MemberTest {
         String samePassword = "pass";
         Member member = new Member("몰리", Role.USER, "asdf@asdf.com", samePassword);
         assertFalse(member.hasNotSamePassword(samePassword));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 이메일 형식이 아닐 경우, 예외를 반환한다.")
+    void validateEmailInvalidType() {
+        String invalidEmail = "asdasdf.com";
+        assertThatThrownBy(() -> new Member("몰리", Role.USER, invalidEmail, "pass"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(invalidEmail + "은 이메일 형식이 아닙니다.");
     }
 }
