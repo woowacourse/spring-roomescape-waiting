@@ -11,18 +11,17 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.request.TokenRequest;
+import roomescape.service.dto.request.UserReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ReservationTest extends AcceptanceTest{
+class ReservationTest extends AcceptanceTest {
 
     private String accessToken;
 
@@ -36,7 +35,6 @@ class ReservationTest extends AcceptanceTest{
                 .then().log().all()
                 .statusCode(200)
                 .extract().cookie("token");
-
 
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
         RestAssured.given().log().all()
@@ -61,9 +59,6 @@ class ReservationTest extends AcceptanceTest{
                 .body(reservationRequest)
                 .post("/reservations");
     }
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @DisplayName("예약 추가 API 테스트")
     @Test
@@ -186,4 +181,42 @@ class ReservationTest extends AcceptanceTest{
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @DisplayName("사용자별 예약을 조회할 수 있다.")
+    @Test
+    void methodName() {
+        TokenRequest tokenRequest = new TokenRequest("password", "asd@email.com");
+        String userAccessToken = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(tokenRequest)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        ReservationTimeRequest reservationTimeRequest2 = new ReservationTimeRequest(LocalTime.of(12, 0));
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", accessToken)
+                .body(reservationTimeRequest2)
+                .post("/times")
+                .then().log().all()
+                .extract();
+
+        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.of(2030, 12, 12), 2L, 1L);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", userAccessToken)
+                .body(userReservationRequest)
+                .post("/reservations");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", userAccessToken)
+                .get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
 }
