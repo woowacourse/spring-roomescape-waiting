@@ -19,14 +19,4 @@ public record FindReservationResponse(
                 FindThemeOfReservationResponse.from(reservation.getTheme())
         );
     }
-
-    public static FindReservationResponse of(final Long id, Reservation reservation) {
-        return new FindReservationResponse(
-                id,
-                FindMemberOfReservationResponse.from(reservation.getMember()),
-                reservation.getDate(),
-                FindTimeOfReservationsResponse.from(reservation.getReservationTime()),
-                FindThemeOfReservationResponse.from(reservation.getTheme())
-        );
-    }
 }
