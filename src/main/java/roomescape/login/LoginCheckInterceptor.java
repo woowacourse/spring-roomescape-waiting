@@ -2,11 +2,12 @@ package roomescape.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.naming.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.member.service.MemberService;
 import roomescape.util.TokenExtractor;
+
+import javax.naming.AuthenticationException;
 
 @Component
 public class LoginCheckInterceptor implements HandlerInterceptor {

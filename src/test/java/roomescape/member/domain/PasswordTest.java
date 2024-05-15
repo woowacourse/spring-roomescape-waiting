@@ -1,10 +1,10 @@
 package roomescape.member.domain;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exceptions.ValidationException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PasswordTest {
 

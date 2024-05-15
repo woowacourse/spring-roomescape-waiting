@@ -1,13 +1,5 @@
 package roomescape.theme.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static roomescape.InitialDataFixture.INITIAL_THEME_COUNT;
-import static roomescape.InitialDataFixture.NOT_RESERVATION_THEME;
-import static roomescape.InitialDataFixture.THEME_1;
-import static roomescape.InitialDataFixture.THEME_2;
-
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +9,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static roomescape.InitialDataFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -66,7 +64,7 @@ class ThemeServiceTest {
     void findTrendingThemes() {
         List<ThemeResponse> themes = themeService.findTrendingThemes(1L);
 
-        assertThat(themes).containsExactly(new ThemeResponse(THEME_1));
+        assertThat(themes).containsExactly(new ThemeResponse(THEME_3));
     }
 
     @Test
@@ -80,7 +78,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("id값에 맞는 테마를 삭제한다.")
     void deleteTheme() {
-        themeService.deleteTheme(NOT_RESERVATION_THEME.getId());
+        themeService.deleteTheme(NOT_RESERVED_THEME.getId());
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM theme", Integer.class);
 

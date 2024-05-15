@@ -1,14 +1,15 @@
 package roomescape.reservation.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_2;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_1;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.InitialDataFixture.RESERVATION_1;
+import static roomescape.InitialDataFixture.RESERVATION_2;
+import static roomescape.InitialMemberFixture.MEMBER_1;
 
 class ReservationTest {
 
@@ -19,7 +20,7 @@ class ReservationTest {
                 LocalDate.of(2024, 4, 24),
                 null,
                 null,
-                LOGIN_MEMBER_1
+                MEMBER_1
         );
 
         String formatted = reservation.getDate(DateTimeFormatter.ISO_DATE);
@@ -35,7 +36,7 @@ class ReservationTest {
                 RESERVATION_2.getDate(),
                 RESERVATION_2.getTime(),
                 RESERVATION_2.getTheme(),
-                LOGIN_MEMBER_1
+                MEMBER_1
         );
 
         assertThat(RESERVATION_1).isEqualTo(reservation);

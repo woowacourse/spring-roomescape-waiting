@@ -1,17 +1,29 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.*;
+import roomescape.exceptions.MissingRequiredFieldException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import roomescape.exceptions.MissingRequiredFieldException;
+import java.util.Set;
 
+@Entity
 public class ReservationTime {
 
-    private final Long id;
-    private final LocalTime startAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
+
+    @OneToMany(mappedBy = "time")
+    private Set<Reservation> reservations;
+
+    private ReservationTime() {
+    }
 
     public ReservationTime(Long id, LocalTime startAt) {
         validate(startAt);

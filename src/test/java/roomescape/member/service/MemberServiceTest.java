@@ -1,13 +1,5 @@
 package roomescape.member.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_1;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_4;
-import static roomescape.InitialMemberFixture.NOT_SAVED_LOGIN_MEMBER;
-
-import javax.naming.AuthenticationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +8,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.dto.MemberNameResponse;
+
+import javax.naming.AuthenticationException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialMemberFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -29,7 +27,7 @@ class MemberServiceTest {
     void throwExceptionIfNotExistEmail() {
         LoginRequest loginRequest = new LoginRequest(
                 COMMON_PASSWORD.password(),
-                NOT_SAVED_LOGIN_MEMBER.getEmail().email()
+                NOT_SAVED_MEMBER.getEmail().email()
         );
 
         assertThatThrownBy(() -> memberService.createMemberToken(loginRequest))
@@ -41,7 +39,7 @@ class MemberServiceTest {
     void throwExceptionIfInvalidPassword() {
         LoginRequest loginRequest = new LoginRequest(
                 COMMON_PASSWORD.password() + "123",
-                LOGIN_MEMBER_1.getEmail().email()
+                MEMBER_1.getEmail().email()
         );
 
         assertThatThrownBy(() -> memberService.createMemberToken(loginRequest))
@@ -51,7 +49,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("로그인에 성공하면 토큰을 발행한다.")
     void getTokenIfLoginSucceeds() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), LOGIN_MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
 
         String token = memberService.createMemberToken(loginRequest);
 
@@ -68,11 +66,11 @@ class MemberServiceTest {
     @Test
     @DisplayName("토큰에 대응하는 멤버 정보를 가져온다.")
     void getMemberMember() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), LOGIN_MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
         String token = memberService.createMemberToken(loginRequest);
 
         MemberNameResponse memberNameResponse = memberService.getMemberNameResponseByToken(token);
 
-        assertThat(memberNameResponse.name()).isEqualTo(LOGIN_MEMBER_4.getName().name());
+        assertThat(memberNameResponse.name()).isEqualTo(MEMBER_4.getName().name());
     }
 }

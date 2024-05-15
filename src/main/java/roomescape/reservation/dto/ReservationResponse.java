@@ -1,9 +1,10 @@
 package roomescape.reservation.dto;
 
-import java.time.format.DateTimeFormatter;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.dto.ThemeResponse;
+
+import java.time.format.DateTimeFormatter;
 
 public record ReservationResponse(
         Long id,
@@ -17,11 +18,11 @@ public record ReservationResponse(
     public ReservationResponse(Reservation reservation) {
         this(
                 reservation.getId(),
-                reservation.getLoginMember().getName().name(),
+                reservation.getMember().getName().name(),
                 reservation.getDate(DateTimeFormatter.ISO_DATE),
                 new ReservationTimeResponse(reservation.getTime()),
                 new ThemeResponse(reservation.getTheme()),
-                new MemberNameResponse(reservation.getLoginMember())
+                new MemberNameResponse(reservation.getMember())
         );
     }
 }

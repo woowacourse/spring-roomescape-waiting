@@ -1,17 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.InitialDataFixture.INITIAL_RESERVATION_COUNT;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_2;
-import static roomescape.InitialDataFixture.RESERVATION_TIME_1;
-import static roomescape.InitialDataFixture.THEME_1;
-import static roomescape.InitialDataFixture.THEME_2;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_1;
-
-import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +11,25 @@ import roomescape.member.dto.LoginMemberRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialDataFixture.*;
+import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
+import static roomescape.InitialMemberFixture.MEMBER_1;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
 class ReservationServiceTest {
 
     private final LoginMemberRequest loginMemberRequest = new LoginMemberRequest(
-            LOGIN_MEMBER_1.getId(),
-            LOGIN_MEMBER_1.getName().name(),
-            LOGIN_MEMBER_1.getEmail().email(),
-            LOGIN_MEMBER_1.getRole().getDbValue()
+            MEMBER_1.getId(),
+            MEMBER_1.getName().name(),
+            MEMBER_1.getEmail().email(),
+            MEMBER_1.getRole().name(),
+            COMMON_PASSWORD.password()
     );
 
     @Autowired

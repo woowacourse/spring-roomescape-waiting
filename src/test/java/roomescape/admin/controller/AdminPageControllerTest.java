@@ -1,19 +1,18 @@
 package roomescape.admin.controller;
 
-import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_1;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_4;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static roomescape.InitialMemberFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -36,7 +35,7 @@ class AdminPageControllerTest {
     void throwExceptionIfNotAdmin(String url) {
         Map<String, String> memberParam = new HashMap<>();
         memberParam.put("password", COMMON_PASSWORD.password());
-        memberParam.put("email", LOGIN_MEMBER_1.getEmail().email());
+        memberParam.put("email", MEMBER_1.getEmail().email());
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -59,7 +58,7 @@ class AdminPageControllerTest {
     void AdminCanAccessAdminPage(String url) {
         Map<String, String> memberParam = new HashMap<>();
         memberParam.put("password", COMMON_PASSWORD.password());
-        memberParam.put("email", LOGIN_MEMBER_4.getEmail().email());
+        memberParam.put("email", MEMBER_4.getEmail().email());
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

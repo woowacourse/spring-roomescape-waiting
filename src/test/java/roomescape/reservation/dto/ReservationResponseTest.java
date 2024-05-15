@@ -1,14 +1,14 @@
 package roomescape.reservation.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_2;
-
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.theme.dto.ThemeResponse;
+
+import java.time.format.DateTimeFormatter;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.InitialDataFixture.RESERVATION_1;
 
 class ReservationResponseTest {
 
@@ -17,11 +17,11 @@ class ReservationResponseTest {
     void createReservationResponse() {
         ReservationResponse expected = new ReservationResponse(
                 RESERVATION_1.getId(),
-                RESERVATION_1.getLoginMember().getName().name(),
+                RESERVATION_1.getMember().getName().name(),
                 RESERVATION_1.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ReservationTimeResponse(RESERVATION_1.getTime()),
                 new ThemeResponse(RESERVATION_1.getTheme()),
-                new MemberNameResponse(LOGIN_MEMBER_2)
+                new MemberNameResponse(RESERVATION_1.getMember())
         );
 
         ReservationResponse reservationResponse = new ReservationResponse(RESERVATION_1);

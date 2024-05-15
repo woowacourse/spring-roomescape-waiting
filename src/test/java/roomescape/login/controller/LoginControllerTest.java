@@ -1,20 +1,19 @@
 package roomescape.login.controller;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_1;
-import static roomescape.InitialMemberFixture.LOGIN_MEMBER_4;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static roomescape.InitialMemberFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -26,7 +25,7 @@ class LoginControllerTest {
     void login() {
         Map<String, String> memberParam = new HashMap<>();
         memberParam.put("password", COMMON_PASSWORD.password());
-        memberParam.put("email", LOGIN_MEMBER_1.getEmail().email());
+        memberParam.put("email", MEMBER_1.getEmail().email());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -59,6 +58,6 @@ class LoginControllerTest {
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200)
-                .body("name", equalTo(LOGIN_MEMBER_4.getName().name()));
+                .body("name", equalTo(MEMBER_4.getName().name()));
     }
 }

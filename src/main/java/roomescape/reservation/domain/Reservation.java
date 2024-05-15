@@ -1,34 +1,48 @@
 package roomescape.reservation.domain;
 
 
+import jakarta.persistence.*;
+import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import roomescape.member.domain.LoginMember;
-import roomescape.theme.domain.Theme;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final LoginMember loginMember;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate date;
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, LoginMember loginMember) {
+    @ManyToOne
+    private ReservationTime time;
+
+    @ManyToOne
+    private Theme theme;
+
+    @ManyToOne
+    private Member member;
+
+    private Reservation() {
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.loginMember = loginMember;
+        this.member = member;
     }
 
     public Reservation(Long id, Reservation reservation) {
-        this(id, reservation.date, reservation.time, reservation.theme, reservation.loginMember);
+        this(id, reservation.date, reservation.time, reservation.theme, reservation.member);
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, LoginMember loginMember) {
-        this(null, date, time, theme, loginMember);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(null, date, time, theme, member);
     }
 
     public boolean isBeforeNow() {
@@ -59,8 +73,8 @@ public class Reservation {
         return theme;
     }
 
-    public LoginMember getLoginMember() {
-        return loginMember;
+    public Member getMember() {
+        return member;
     }
 
     @Override
