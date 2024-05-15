@@ -2,6 +2,10 @@ package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.Fixture.COOKIE_NAME;
+import static roomescape.Fixture.VALID_MEMBER;
+import static roomescape.Fixture.VALID_RESERVATION;
+import static roomescape.Fixture.VALID_RESERVATION_TIME;
+import static roomescape.Fixture.VALID_THEME;
 import static roomescape.Fixture.VALID_USER_EMAIL;
 import static roomescape.Fixture.VALID_USER_NAME;
 import static roomescape.Fixture.VALID_USER_PASSWORD;
@@ -11,6 +15,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.MemberRole;
 import roomescape.web.controller.request.MemberReservationWebRequest;
 
@@ -18,14 +23,15 @@ class ReservationControllerTest extends ControllerTest {
 
     @BeforeEach
     void setInitialData() {
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "12:00");
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "방탈출1", "설명1",
-            "https://url1");
-        jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)",
-            VALID_USER_NAME.getName(), VALID_USER_EMAIL.getEmail(),
-            VALID_USER_PASSWORD.getPassword(), MemberRole.USER.name());
-        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id) VALUES (?,?,?,?)",
-            "2026-02-01", 1L, 1L, 1L);
+        reservationTimeRepository.save(VALID_RESERVATION_TIME);
+        themeRepository.save(VALID_THEME);
+        memberRepository.save(VALID_MEMBER);
+        reservationRepository.save(VALID_RESERVATION);
+        /*entityManager.persist(VALID_RESERVATION_TIME);
+        entityManager.persist(VALID_THEME);
+        entityManager.persist(VALID_MEMBER);
+        entityManager.persist(VALID_RESERVATION);
+        entityManager.flush();*/
     }
 
     @DisplayName("예약을 저장한다. -> 201")

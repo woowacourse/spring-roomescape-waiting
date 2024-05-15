@@ -1,12 +1,18 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.Fixture.VALID_MEMBER;
+import static roomescape.Fixture.VALID_RESERVATION;
+import static roomescape.Fixture.VALID_RESERVATION_TIME;
+import static roomescape.Fixture.VALID_THEME;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.web.controller.request.ReservationTimeWebRequest;
 
 class ReservationTimeController extends ControllerTest {
@@ -14,8 +20,7 @@ class ReservationTimeController extends ControllerTest {
 
     @BeforeEach
     void setInitialData() {
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "15:00");
+        reservationTimeRepository.save(VALID_RESERVATION_TIME);
     }
 
     @DisplayName("예약 시간을 저장한다 -> 201")
@@ -29,7 +34,7 @@ class ReservationTimeController extends ControllerTest {
             .when().post("/times")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(3));
+            .body("id", is(2));
 
     }
 
@@ -50,11 +55,11 @@ class ReservationTimeController extends ControllerTest {
             .when().get("/times")
             .then().log().all()
             .statusCode(200)
-            .body("size()", is(2));
+            .body("size()", is(1));
 
     }
 
-    @DisplayName("예약 시간 포맷이 잘못되거나, 중복 될 경우 -> 400")
+    @DisplayName("예약 시간 포맷이 잘못될 경우 -> 400")
     @Test
     void create_IllegalTimeFormat() {
         ReservationTimeWebRequest request = new ReservationTimeWebRequest("24:00");
@@ -68,15 +73,26 @@ class ReservationTimeController extends ControllerTest {
 
     }
 
+    @DisplayName("예약 시간이 중복될 경우  -> 400")
+    @Test
+    void create_duplicate() {
+        ReservationTimeWebRequest request = new ReservationTimeWebRequest(VALID_RESERVATION_TIME.getStartAt().toString());
+        System.out.println(reservationTimeRepository.count());
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when().post("/times")
+            .then().log().all()
+            .statusCode(400);
+
+    }
+
     @DisplayName("예약이 존재하는 시간 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "방탈출1", "설명1",
-            "https://url1");
-        jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)", "wiib", "asd@naver.com",
-            "123asd", "ADMIN");
-        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id) VALUES (?,?,?,?)",
-            "2026-02-01", 1L, 1L, 1L);
+        themeRepository.save(VALID_THEME);
+        memberRepository.save(VALID_MEMBER);
+        reservationRepository.save(VALID_RESERVATION);
 
         RestAssured.given().log().all()
             .when().delete("/times/1")

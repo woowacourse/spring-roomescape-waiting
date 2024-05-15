@@ -17,11 +17,13 @@ class ReservationTest {
     @Test
     void create() {
         assertThatCode(
-            () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME))
+            () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
+                ReservationStatus.RESERVED))
             .doesNotThrowAnyException();
 
         assertThatCode(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME))
+            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
+                ReservationStatus.RESERVED))
             .doesNotThrowAnyException();
 
     }
@@ -30,7 +32,7 @@ class ReservationTest {
     @Test
     void create_WithNullDate() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME))
+            () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME, ReservationStatus.RESERVED))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -38,7 +40,7 @@ class ReservationTest {
     @Test
     void create_WithNullTime() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME))
+            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME, ReservationStatus.RESERVED))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -46,7 +48,8 @@ class ReservationTest {
     @Test
     void create_WithNullTheme() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null))
+            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null,
+                ReservationStatus.RESERVED))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -57,7 +60,7 @@ class ReservationTest {
             VALID_MEMBER,
             new ReservationDate("1900-01-01"),
             VALID_RESERVATION_TIME,
-            VALID_THEME);
+            VALID_THEME, ReservationStatus.RESERVED);
 
         assertThat(reservation.isPast()).isTrue();
     }

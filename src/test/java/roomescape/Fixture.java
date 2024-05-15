@@ -7,6 +7,7 @@ import roomescape.domain.MemberPassword;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -25,8 +26,10 @@ public class Fixture {
     public static final Member VALID_MEMBER = new Member(VALID_USER_NAME, VALID_USER_EMAIL,
         VALID_USER_PASSWORD,
         MemberRole.USER);
+
+    public static final Member VALID_ADMIN = new Member(VALID_ADMIN_NAME,VALID_ADMIN_EMAIL,VALID_ADMIN_PASSWORD,MemberRole.ADMIN);
     public static final Reservation VALID_RESERVATION = new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE,
-        VALID_RESERVATION_TIME, VALID_THEME);
+        VALID_RESERVATION_TIME, VALID_THEME, ReservationStatus.RESERVED);
     public static final String COOKIE_NAME = "token";
 
 }

@@ -2,6 +2,10 @@ package roomescape.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static roomescape.Fixture.VALID_MEMBER;
+import static roomescape.Fixture.VALID_RESERVATION;
+import static roomescape.Fixture.VALID_RESERVATION_TIME;
+import static roomescape.Fixture.VALID_THEME;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -9,23 +13,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.MemberEmail;
+import roomescape.domain.MemberName;
+import roomescape.domain.MemberPassword;
+import roomescape.domain.MemberRole;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.web.controller.request.ThemeWebRequest;
 
 
 class ThemeControllerTest extends ControllerTest {
 
     @BeforeEach
-    void setInitialData() {
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "방탈출1", "설명1",
-            "https://url1");
-        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "방탈출2", "설명2",
-            "https://url2");
+    void setInitialData(){
+        themeRepository.save(VALID_THEME);
     }
-
     @DisplayName("테마를 생성한다 -> 201")
     @Test
     void create() {
-        ThemeWebRequest request = new ThemeWebRequest("방탈출", "대충 설명", "https://url.jpg");
+        ThemeWebRequest request = new ThemeWebRequest("test", "대충 설명", "https://url.jpg");
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -33,7 +43,7 @@ class ThemeControllerTest extends ControllerTest {
             .when().post("/themes")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(3));
+            .body("id", is(2));
     }
 
     @DisplayName("테마를 삭제한다 -> 204")
@@ -44,9 +54,9 @@ class ThemeControllerTest extends ControllerTest {
             .then().log().all()
             .statusCode(204);
 
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(id) FROM theme", Long.class);
+        Long count = themeRepository.count();
 
-        assertThat(count).isEqualTo(1L);
+        assertThat(count).isEqualTo(0);
     }
 
     @DisplayName("테마를 조회한다 -> 200")
@@ -57,7 +67,7 @@ class ThemeControllerTest extends ControllerTest {
             .when().get("/themes")
             .then().log().all()
             .statusCode(200)
-            .body("size()", is(2));
+            .body("size()", is(1));
     }
 
     @DisplayName("테마 정보 포맷이 잘못될 경우 -> 400")
@@ -76,7 +86,7 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("중복된 데이터를 추가한다 -> 400")
     @Test
     void create_Duplicate() {
-        ThemeWebRequest request = new ThemeWebRequest("방탈출1", "설명1", "https://url1");
+        ThemeWebRequest request = new ThemeWebRequest(VALID_THEME.getName(),VALID_THEME.getDescription(),VALID_THEME.getThumbnail());
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -102,11 +112,9 @@ class ThemeControllerTest extends ControllerTest {
     @DisplayName("예약이 존재한 상태에서 테마를 삭제한다 -> 400")
     @Test
     void delete_ReservationExists() {
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "12:00");
-        jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)", "wiib", "asd@naver.com",
-            "123asd", "ADMIN");
-        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id) VALUES (?,?,?,?)",
-            "2026-02-01", 1L, 1L, 1L);
+        reservationTimeRepository.save(VALID_RESERVATION_TIME);
+        memberRepository.save(VALID_MEMBER);
+        reservationRepository.save(VALID_RESERVATION);
 
         RestAssured.given().log().all()
             .when().delete("/themes/1")
@@ -116,12 +124,13 @@ class ThemeControllerTest extends ControllerTest {
 
     @DisplayName("상위 10개 인기 테마를 조회 한다. -> 200")
     @Test
-    @Sql({"/popularTestData.sql"})
+    @Sql(value = {"/popularTestData.sql"})
     void findPopularTheme() {
         RestAssured.given().log().all()
             .when().get("/themes/popular")
             .then().log().all()
             .statusCode(200)
-            .body("size()", is(5));
+            .body("size()",is(3))
+            .body("[0].name",is("theme3"));
     }
 }

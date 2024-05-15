@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static roomescape.Fixture.COOKIE_NAME;
+import static roomescape.Fixture.VALID_MEMBER;
 import static roomescape.Fixture.VALID_USER_EMAIL;
 import static roomescape.Fixture.VALID_USER_NAME;
 import static roomescape.Fixture.VALID_USER_PASSWORD;
@@ -21,12 +22,7 @@ class MemberAuthControllerTest extends ControllerTest {
 
     @BeforeEach
     void setInitialData() {
-        jdbcTemplate.update(
-            "INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)",
-            VALID_USER_NAME.getName(),
-            VALID_USER_EMAIL.getEmail(),
-            VALID_USER_PASSWORD.getPassword(),
-            MemberRole.USER.name());
+        memberRepository.save(VALID_MEMBER);
     }
 
     @DisplayName("로그인을 한다. -> 200")
