@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
@@ -29,13 +30,5 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     void deleteByReservation_Id(long reservationId);
 
-    @Query("""
-            SELECT COUNT(mr) > 0 
-            FROM MemberReservation mr 
-            JOIN mr.reservation r
-            JOIN r.time rt
-            JOIN r.theme th
-            WHERE r.date = :date AND rt = :time AND th = :theme
-            """)
-    boolean existsBy(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByReservationAndMember(Reservation reservation, Member member);
 }

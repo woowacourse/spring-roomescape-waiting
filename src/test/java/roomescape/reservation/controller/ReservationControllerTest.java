@@ -93,7 +93,7 @@ class ReservationControllerTest extends ControllerTest {
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 AuthInfo.of(getMemberChoco()),
                 new ReservationRequest(
-                        LocalDate.now().toString(),
+                        LocalDate.now().plusDays(10).toString(),
                         reservationTimeResponse.id(),
                         themeResponse.id())
         );

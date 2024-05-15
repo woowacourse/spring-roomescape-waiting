@@ -61,35 +61,46 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
-        ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
-        Theme theme = getTheme(reservationRequest.themeId());
-        Member member = getMember(authInfo.getId());
-
-        if (memberReservationRepository.existsBy(date,
-                reservationTime, theme)) {
-            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
-        }
-
-        Reservation reservation = reservationRepository.save(Reservation.create(date, reservationTime, theme));
-        MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation));
-
-        return ReservationResponse.from(memberReservation.getId(), reservation, member);
+        return createMemberReservation(
+                authInfo.getId(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId(),
+                date
+        );
     }
 
     @Transactional
     public ReservationResponse createMemberReservation(MemberReservationRequest memberReservationRequest) {
-        ReservationTime reservationTime = getReservationTime(memberReservationRequest.timeId());
-        Theme theme = getTheme(memberReservationRequest.themeId());
         LocalDate date = LocalDate.parse(memberReservationRequest.date());
+        return createMemberReservation(
+                memberReservationRequest.memberId(),
+                memberReservationRequest.timeId(),
+                memberReservationRequest.themeId(),
+                date
+        );
+    }
 
-        Member member = memberRepository.findById(memberReservationRequest.memberId()).orElseThrow();
-        Reservation reservation = reservationRepository.save(new Reservation(date, reservationTime, theme));
+    private ReservationResponse createMemberReservation(long memberId, long timeId, long themeId, LocalDate date) {
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+        Member member = getMember(memberId);
+        Reservation reservation = getReservation(date, reservationTime, theme);
+
+        if (reservation.isPast()) {
+            throw new BusinessException(ErrorType.INVALID_REQUEST_ERROR);
+        }
+
+        if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
+            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
+        }
+
         MemberReservation memberReservation = memberReservationRepository.save(
                 new MemberReservation(member, reservation));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
+
+    // 관리자 삭제 불가 해결하기
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         if (!memberReservation.isMember(Member.of(authInfo))) {
@@ -114,13 +125,18 @@ public class ReservationService {
                 .orElseThrow(() -> new BusinessException(ErrorType.THEME_NOT_FOUND));
     }
 
-    private MemberReservation getMemberReservation(long memberReservationId) {
-        return memberReservationRepository.findById(memberReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_RESERVATION_NOT_FOUND));
-    }
-
     private Member getMember(long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+    }
+
+    private Reservation getReservation(LocalDate date, ReservationTime time, Theme theme) {
+        return reservationRepository.findByDateAndTimeAndTheme(date, time, theme)
+                .orElse(reservationRepository.save(new Reservation(date, time, theme)));
+    }
+
+    private MemberReservation getMemberReservation(long memberReservationId) {
+        return memberReservationRepository.findById(memberReservationId)
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_RESERVATION_NOT_FOUND));
     }
 }
