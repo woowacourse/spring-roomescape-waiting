@@ -6,17 +6,22 @@ spring:
     url: jdbc:h2:mem:database
 
   jpa:
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         storage_engine: innodb
         format_sql: true
         use_sql_comments: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     open-in-view: false
     show_sql: true
+
+  sql:
+    init:
+      mode: always
 
   h2:
     console:

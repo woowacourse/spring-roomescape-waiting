@@ -5,6 +5,29 @@ spring:
   datasource:
     url: jdbc:h2:mem:test
 
+  jpa:
+    defer-datasource-initialization: true
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        storage_engine: innodb
+        format_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show_sql: true
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:test-data.sql
+
+  h2:
+    console:
+      enabled: true
+
 custom:
   security:
     password-encode:
