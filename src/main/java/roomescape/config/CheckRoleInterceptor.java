@@ -3,7 +3,9 @@ package roomescape.config;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.service.MemberService;
@@ -23,6 +25,7 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
             throw new ForbiddenAccessException("관리자만 접근 가능합니다.");
         }
 
+        // TODO: 쿠키 추출 로직 분리
         boolean isAdmin = false;
         for (Cookie cookie : cookies) {
             if ("token".equals(cookie.getName())) {

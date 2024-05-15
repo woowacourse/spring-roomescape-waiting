@@ -75,7 +75,7 @@ public class ReservationService {
         findValidatedReservation(id);
         reservationRepository.deleteById(id);
     }
-
+    // todo: 이거 삭제
     private Reservation findValidatedReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));

@@ -41,6 +41,7 @@ public class ThemeService {
 
     public void deleteThemeById(Long id) {
         findValidatedTheme(id);
+        //todo: 함수 분리
         boolean exist = reservationRepository.existsByThemeId(id);
         if (exist) {
             throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
