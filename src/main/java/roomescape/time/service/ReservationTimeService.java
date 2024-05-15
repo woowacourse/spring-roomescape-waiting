@@ -1,21 +1,28 @@
 package roomescape.time.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DuplicateSaveException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.dto.ReservationTimeAddRequest;
 import roomescape.time.dto.ReservationTimeResponse;
-import roomescape.time.dto.ReservationTimeWithBookStatusResponse;
+import roomescape.time.dto.AvailableTimeResponse;
 
 @Service
 public class ReservationTimeService {
 
-    private ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
-    ReservationTimeService(ReservationTimeRepository reservationTimeRepository) {
+    private final ReservationTimeRepository reservationTimeRepository;
+
+    public ReservationTimeService(ReservationRepository reservationRepository,
+                                  ReservationTimeRepository reservationTimeRepository) {
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
@@ -25,8 +32,22 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<ReservationTimeWithBookStatusResponse> findAllWithBookStatus(LocalDate date, Long themeId) {
-        return reservationTimeRepository.findByDateAndThemeIdWithBookStatus(date, themeId);
+    public List<AvailableTimeResponse> findAllWithBookStatus(LocalDate date, Long themeId) {
+        List<Long> foundReservationTimeIds = reservationRepository
+                .findByDateDateAndThemeId(date, themeId)
+                .stream()
+                .map(Reservation::getTimeId)
+                .toList();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+
+        List<AvailableTimeResponse> availableTimeResponses = new ArrayList<>();
+        for (ReservationTime reservationTime : reservationTimes) {
+            availableTimeResponses.add(new AvailableTimeResponse(
+                            reservationTime,
+                            foundReservationTimeIds.contains(reservationTime.getId())
+            ));
+        }
+        return availableTimeResponses;
     }
 
     public ReservationTimeResponse saveReservationTime(ReservationTimeAddRequest reservationTimeAddRequest) {
