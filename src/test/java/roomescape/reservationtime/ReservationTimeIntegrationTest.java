@@ -79,7 +79,7 @@ class ReservationTimeIntegrationTest {
                 .then().log().all()
 
                 .statusCode(400)
-                .body("detail", equalTo("입력값의 형식이 올바르지 않습니다. 다시 시도해주세요."));
+                .body("detail", equalTo("startAt 필드의 형식이 잘못되었습니다."));
     }
 
     @Test

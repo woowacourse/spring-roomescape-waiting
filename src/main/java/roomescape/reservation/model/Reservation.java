@@ -50,16 +50,6 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation of(final Long id,
-                                 final Reservation reservation) {
-        return new Reservation(
-                id,
-                reservation.getMember(),
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme());
-    }
-
     public static Reservation create(final Member member,
                                      final LocalDate date,
                                      final ReservationTime reservationTime,

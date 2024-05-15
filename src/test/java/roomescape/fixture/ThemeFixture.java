@@ -16,7 +16,7 @@ public class ThemeFixture {
         for (int i = 0; i < count; i++) {
             themes.add(new Theme(
                     null,
-                    String.valueOf(count),
+                    String.valueOf(i),
                     "테마 설명",
                     "테마 포스터")
             );
