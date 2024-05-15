@@ -5,7 +5,12 @@ import java.time.LocalTime;
 public class ReservationTime {
 
     private Long id;
-    private final LocalTime startAt;
+    private LocalTime startAt;
+    @OneToMany(mappedBy = "reservationTime")
+    private List<Reservation> reservations;
+
+    public ReservationTime() {
+    }
 
     public ReservationTime(LocalTime startAt) {
         validateIsNull(startAt);
