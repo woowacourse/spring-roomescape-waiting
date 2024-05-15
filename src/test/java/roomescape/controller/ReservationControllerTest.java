@@ -117,4 +117,21 @@ class ReservationControllerTest extends ControllerTest {
             .then().log().all()
             .statusCode(400);
     }
+
+    @DisplayName("내 예약을 조회한다. -> 200")
+    @Test
+    void getMyReservations() {
+        jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)",
+                "aaa", "aaa@aaa.com",
+                "bbb", MemberRole.USER.name());
+        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
+                "2026-02-01", 1L, 1L, 2L, "RESERVATION");
+
+        RestAssured.given().log().all()
+                .cookie(COOKIE_NAME, getUserToken())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
 }
