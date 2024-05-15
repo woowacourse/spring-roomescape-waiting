@@ -1,9 +1,7 @@
 package roomescape.time.service;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.time.LocalTime;
@@ -18,7 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ConflictException;
 import roomescape.reservation.dao.ReservationJdbcDao;
-import roomescape.time.dao.TimeJdbcDao;
+import roomescape.time.dao.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -30,15 +28,16 @@ class TimeServiceTest {
 
     @InjectMocks
     private TimeService timeService;
-    @Mock
-    private TimeJdbcDao timeJdbcDao;
+
     @Mock
     private ReservationJdbcDao reservationJdbcDao;
+    @Mock
+    private TimeRepository timeRepository;
 
     @Test
     @DisplayName("시간을 추가한다.")
     void addReservationTime() {
-        Mockito.when(timeJdbcDao.save(any()))
+        Mockito.when(timeRepository.save(any(Time.class)))
                 .thenReturn(time);
 
         TimeRequest timeRequest = new TimeRequest(time.getStartAt());
@@ -51,38 +50,36 @@ class TimeServiceTest {
     @Test
     @DisplayName("시간을 찾는다.")
     void findReservationTimes() {
-        Mockito.when(timeJdbcDao.findAllReservationTimesInOrder())
+        Mockito.when(timeRepository.findAllByOrderByStartAtAsc())
                 .thenReturn(List.of(time));
 
         List<TimeResponse> timeResponses = timeService.findReservationTimes();
 
-        Assertions.assertThat(timeResponses.size())
-                .isEqualTo(1);
+        Assertions.assertThat(timeResponses)
+                .hasSize(1);
     }
 
     @Test
     @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
     void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
-        Mockito.when(timeJdbcDao.countByStartAt(any()))
+        Mockito.when(timeRepository.countByStartAt(any(LocalTime.class)))
                 .thenReturn(1);
 
-        assertAll(() -> {
-                      Throwable duplicateStartAt = assertThrows(
-                              ConflictException.class,
-                              () -> timeService.addReservationTime(new TimeRequest(LocalTime.now())));
-                      assertEquals("이미 존재하는 예약 시간입니다.", duplicateStartAt.getMessage());
-                  }
-        );
+        TimeRequest timeRequest = new TimeRequest(LocalTime.now());
+        assertThatThrownBy(() -> timeService.addReservationTime(timeRequest))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 존재하는 예약 시간입니다.");
     }
 
     @Test
     @DisplayName("시간을 지운다.")
     void removeReservationTime() {
         Mockito.doNothing()
-                .when(timeJdbcDao)
+                .when(timeRepository)
                 .deleteById(time.getId());
 
-        assertDoesNotThrow(() -> timeService.removeReservationTime(time.getId()));
+        assertThatCode(() -> timeService.removeReservationTime(time.getId()))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -91,13 +88,9 @@ class TimeServiceTest {
         Mockito.when(reservationJdbcDao.countByTimeId(1L))
                 .thenReturn(1);
 
-        assertAll(() -> {
-                      Throwable reservationExistAtTime = assertThrows(
-                              ConflictException.class,
-                              () -> timeService.removeReservationTime(1L));
-                      assertEquals("삭제를 요청한 시간에 예약이 존재합니다.", reservationExistAtTime.getMessage());
-                  }
-        );
+        assertThatThrownBy(() -> timeService.removeReservationTime(1L))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("삭제를 요청한 시간에 예약이 존재합니다.");
     }
 
 }

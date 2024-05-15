@@ -1,23 +1,33 @@
 package roomescape.time.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.IllegalReservationDateTimeRequestException;
 
+@Entity
 public class Time {
 
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
-    private final LocalTime startAt;
-    private long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalTime startAt;
+
+    public Time() {
+    }
 
     public Time(LocalTime startAt) {
-        this(0, startAt);
+        this(null, startAt);
         validation(startAt);
     }
 
-    public Time(long id, LocalTime startAt) {
+    public Time(Long id, LocalTime startAt) {
         validation(startAt);
         this.id = id;
         this.startAt = startAt;
@@ -32,20 +42,16 @@ public class Time {
         }
     }
 
-    public Time(long id) {
-        this(id, null);
-    }
-
-    public long getId() {
+    public Long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

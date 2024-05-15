@@ -1,13 +1,14 @@
 package roomescape.reservation.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.assertj.core.api.Assertions;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,28 +24,30 @@ import roomescape.reservation.dao.ReservationJdbcDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.dao.ThemeJdbcDao;
+import roomescape.theme.dao.ThemeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.time.dao.TimeJdbcDao;
+import roomescape.time.dao.TimeRepository;
 import roomescape.time.domain.Time;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    private final Reservation reservation = new Reservation(1L, "Dobby", LocalDate.MAX,
-            new Time(1L, LocalTime.of(12, 0)),
-            new Theme(1L, "pollaBang", "폴라 방탈출", "thumbnail"));
+    private final Time time = new Time(1L, LocalTime.of(12, 0));
+    private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
+    private final Reservation reservation = new Reservation(1L, "Dobby", LocalDate.MAX, time, theme);
+
     private final MemberProfileInfo memberProfileInfo = new MemberProfileInfo(1L, "Dobby", "kimdobby@wotaeco.com");
     @InjectMocks
     private ReservationService reservationService;
     @Mock
     private ReservationJdbcDao reservationJdbcDao;
+
     @Mock
-    private TimeJdbcDao timeJdbcDao;
-    @Mock
-    private ThemeJdbcDao themeJdbcDao;
+    private ThemeRepository themeRepository;
     @Mock
     private MemberDao memberDao;
+    @Mock
+    private TimeRepository timeRepository;
 
     @Test
     @DisplayName("예약을 추가한다.")
@@ -52,44 +55,37 @@ class ReservationServiceTest {
         Mockito.when(reservationJdbcDao.save(any()))
                 .thenReturn(reservation);
 
-        Mockito.when(timeJdbcDao.findById(1L))
-                .thenReturn(reservation.getReservationTime());
+        Mockito.when(timeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getReservationTime()));
 
-        Mockito.when(themeJdbcDao.findById(1L))
-                .thenReturn(reservation.getTheme());
+        Mockito.when(themeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getTheme()));
 
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
-                reservation.getMemberName(),
-                reservation.getReservationTime()
-                        .getId(), reservation.getTheme()
+                reservation.getMemberName(), reservation.getReservationTime()
+                .getId(), reservation.getTheme()
                 .getId());
         ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest,
                 memberProfileInfo);
 
-        Assertions.assertThat(reservationResponse.id())
-                .isEqualTo(1);
+        assertThat(reservationResponse.id()).isEqualTo(1);
     }
 
     @Test
     @DisplayName("과거의 날짜를 예약하려고 시도하는 경우 에외를 던진다.")
     void validation_ShouldThrowException_WhenReservationDateIsPast() {
 
-        Mockito.when(timeJdbcDao.findById(1L))
-                .thenReturn(reservation.getReservationTime());
+        Mockito.when(timeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getReservationTime()));
 
-        Mockito.when(themeJdbcDao.findById(1L))
-                .thenReturn(reservation.getTheme());
+        Mockito.when(themeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getTheme()));
 
-        assertThrows(IllegalReservationDateTimeRequestException.class,
-                () -> reservationService.addReservation(
-                        new ReservationRequest(
-                                LocalDate.MIN,
-                                reservation.getMemberName(),
-                                reservation.getReservationTimeId(),
-                                reservation.getThemeId()
-                        ),
-                        memberProfileInfo)
-        );
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.MIN, reservation.getMemberName(),
+                reservation.getReservationTimeId(), reservation.getThemeId());
+
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberProfileInfo)).isInstanceOf(
+                IllegalReservationDateTimeRequestException.class);
 
     }
 
@@ -101,8 +97,7 @@ class ReservationServiceTest {
 
         List<ReservationResponse> reservationResponses = reservationService.findReservations();
 
-        Assertions.assertThat(reservationResponses)
-                .hasSize(1);
+        assertThat(reservationResponses).hasSize(1);
     }
 
     @Test
@@ -112,28 +107,24 @@ class ReservationServiceTest {
                 .when(reservationJdbcDao)
                 .deleteById(reservation.getId());
 
-        assertDoesNotThrow(() -> reservationService.removeReservations(reservation.getId()));
+        assertThatCode(() -> reservationService.removeReservations(reservation.getId())).doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("특정 테마의 예약이 존재하는 시간에 예약을 요청할 때 예외를 던진다.")
     void addReservation_ShouldThrowException_WhenDuplicatedReservationRequestOccurs() {
-        Mockito.when(reservationJdbcDao.findAllByThemeIdAndDate(1L, LocalDate.MAX))
+        Mockito.when(reservationJdbcDao.findAllByThemeIdAndDate(any(Long.class), any(LocalDate.class)))
                 .thenReturn(List.of(reservation));
+        Mockito.when(timeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getReservationTime()));
+        Mockito.when(themeRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getTheme()));
 
-        Mockito.when(timeJdbcDao.findById(1L))
-                .thenReturn(reservation.getReservationTime());
+        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
+                reservation.getMemberName(), reservation.getReservationTimeId(), reservation.getThemeId());
 
-        ReservationRequest reservationRequest = new ReservationRequest(
-                reservation.getDate(),
-                reservation.getMemberName(),
-                reservation.getReservationTimeId(),
-                reservation.getThemeId()
-        );
-
-        assertThrows(ConflictException.class, () ->
-                reservationService.addReservation(reservationRequest, memberProfileInfo)
-        );
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberProfileInfo)).isInstanceOf(
+                ConflictException.class);
     }
 
 }

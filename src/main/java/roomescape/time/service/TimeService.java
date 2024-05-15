@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.reservation.dao.ReservationDao;
-import roomescape.time.dao.TimeDao;
+import roomescape.time.dao.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -13,31 +13,31 @@ import roomescape.time.dto.TimeResponse;
 @Service
 public class TimeService {
 
-    private final TimeDao timeDao;
+    private final TimeRepository timeRepository;
     private final ReservationDao reservationDao;
 
-    public TimeService(TimeDao timeDao, ReservationDao reservationDao) {
-        this.timeDao = timeDao;
+    public TimeService(TimeRepository timeRepository, ReservationDao reservationDao) {
+        this.timeRepository = timeRepository;
         this.reservationDao = reservationDao;
     }
 
     public TimeResponse addReservationTime(TimeRequest timeRequest) {
         validateDuplicateTime(timeRequest.startAt());
         Time reservationTime = new Time(timeRequest.startAt());
-        Time savedReservationTime = timeDao.save(reservationTime);
+        Time savedReservationTime = timeRepository.save(reservationTime);
 
         return TimeResponse.toResponse(savedReservationTime);
     }
 
     private void validateDuplicateTime(LocalTime startAt) {
-        int duplicateTimeCount = timeDao.countByStartAt(startAt);
+        int duplicateTimeCount = timeRepository.countByStartAt(startAt);
         if (duplicateTimeCount > 0) {
             throw new ConflictException("이미 존재하는 예약 시간입니다.");
         }
     }
 
     public List<TimeResponse> findReservationTimes() {
-        List<Time> reservationTimes = timeDao.findAllReservationTimesInOrder();
+        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
 
         return reservationTimes.stream()
                 .map(TimeResponse::toResponse)
@@ -46,7 +46,7 @@ public class TimeService {
 
     public void removeReservationTime(long reservationTimeId) {
         validateReservationExistence(reservationTimeId);
-        timeDao.deleteById(reservationTimeId);
+        timeRepository.deleteById(reservationTimeId);
     }
 
     private void validateReservationExistence(long timeId) {
