@@ -49,13 +49,13 @@ VALUES (DATEADD('DAY', 4, CURRENT_DATE()), 3, 4);
 
 -- 회원 추가
 INSERT INTO member(name, email, password, role)
-VALUES ('초코칩', 'dev.chocochip@gmail.com', '1234', 'USER');
+VALUES ('초코칩', 'dev.chocochip@gmail.com', '$2a$10$hNWX2lluVCgwaorpX8TnZO2XadZKdzI6qCNGoSm/ptdBxvFYAGFw.', 'USER');
 INSERT INTO member(name, email, password, role)
-VALUES ('이든', 'dev.eden@gmail.com', '5678', 'USER');
+VALUES ('이든', 'dev.eden@gmail.com', '$2a$10$opT2WtzYtjCgcWrHAOxe/u7DcNQXPBgoEVjoM8ld8nc1DIaMOfmvm', 'USER');
 INSERT INTO member(name, email, password, role)
-VALUES ('클로버', 'dev.clover@gmail.com', 'asdqwe', 'USER');
+VALUES ('클로버', 'dev.clover@gmail.com', '$2a$10$SpRsR566UrP/bK2pfKJhe.ghb5Y9/GLjXi/kifJ8x53y5opxHqkr6', 'USER');
 INSERT INTO member(name, email, password, role)
-VALUES ('관리자', 'admin@roomescape.com', 'admin', 'ADMIN');
+VALUES ('관리자', 'admin@roomescape.com', '$2a$10$5xUHgA2/scLa/9YzqkCrXuAoIwLYiZTif8F8QrjuFfSFRgsUdJYhC', 'ADMIN');
 
 
 -- 예약 목록 추가

@@ -3,6 +3,7 @@ package roomescape.auth.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Role;
@@ -45,9 +47,15 @@ class AuthControllerTest extends ControllerTest {
     @Test
     void login() {
         //given
+        authService.signUp(new SignUpRequest(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
+
         Map<String, String> params = new HashMap<>();
-        params.put("email", "dev.chocochip@gmail.com");
-        params.put("password", "1234");
+        params.put("email", getMemberChoco().getEmail());
+        params.put("password", getMemberChoco().getPassword());
 
         //when & then
         RestAssured.given().log().all()
@@ -63,12 +71,17 @@ class AuthControllerTest extends ControllerTest {
     Stream<DynamicTest> loginAndCheck() {
         List<String> tokens = new ArrayList<>();
         List<AuthInfo> authInfos = new ArrayList<>();
-        String email = "dev.chocochip@gmail.com";
+        authService.signUp(new SignUpRequest(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
+        String email = getMemberChoco().getEmail();
 
         return Stream.of(
                 dynamicTest("로그인에 성공할 경우, 200을 반환한다.", () -> {
                     //given
-                    String password = "1234";
+                    String password = getMemberChoco().getPassword();
 
                     Map<String, String> params = new HashMap<>();
                     params.put("email", email);
@@ -104,7 +117,6 @@ class AuthControllerTest extends ControllerTest {
                     //when & then
                     assertAll(
                             () -> assertThat(authInfos).hasSize(1),
-                            () -> assertThat(authInfos.get(0).getId()).isEqualTo(1),
                             () -> assertThat(authInfos.get(0).getName()).isEqualTo("초코칩"),
                             () -> assertThat(authInfos.get(0).getRole()).isEqualTo(Role.USER),
                             () -> assertThat(authInfos.get(0).getEmail()).isEqualTo(email)
@@ -118,16 +130,17 @@ class AuthControllerTest extends ControllerTest {
     Stream<DynamicTest> loginAndLogout() {
         List<String> tokens = new ArrayList<>();
         List<String> cookies = new ArrayList<>();
-        String email = "dev.chocochip@gmail.com";
-
+        authService.signUp(new SignUpRequest(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
         return Stream.of(
                 dynamicTest("로그인에 성공할 경우, 200을 반환한다.", () -> {
                     //given
-                    String password = "1234";
-
                     Map<String, String> params = new HashMap<>();
-                    params.put("email", email);
-                    params.put("password", password);
+                    params.put("email", getMemberChoco().getEmail());
+                    params.put("password", getMemberChoco().getPassword());
 
                     //when & then
                     String token = RestAssured.given().log().all()

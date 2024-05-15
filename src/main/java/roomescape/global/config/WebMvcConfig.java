@@ -10,14 +10,14 @@ import roomescape.auth.interceptor.MemberInterceptor;
 import roomescape.auth.resolver.LoginUserArgumentResolver;
 
 @Configuration
-public class WebMvcConfiguration implements WebMvcConfigurer {
+public class WebMvcConfig implements WebMvcConfigurer {
     private final LoginUserArgumentResolver loginUserArgumentResolver;
     private final AdminInterceptor adminInterceptor;
     private final MemberInterceptor memberInterceptor;
 
-    public WebMvcConfiguration(LoginUserArgumentResolver loginUserArgumentResolver,
-                               AdminInterceptor adminInterceptor,
-                               MemberInterceptor memberInterceptor) {
+    public WebMvcConfig(LoginUserArgumentResolver loginUserArgumentResolver,
+                        AdminInterceptor adminInterceptor,
+                        MemberInterceptor memberInterceptor) {
         this.loginUserArgumentResolver = loginUserArgumentResolver;
         this.adminInterceptor = adminInterceptor;
         this.memberInterceptor = memberInterceptor;

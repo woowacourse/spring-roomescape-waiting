@@ -7,7 +7,8 @@ public enum ErrorType {
 
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 유저를 찾을 수 없습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
-    TOKEN_PAYLOAD_EXTRACTION_FAILURE(HttpStatus.UNAUTHORIZED, "토큰 페이로드 추출에 실패했습니다"),
+    TOKEN_PAYLOAD_EXTRACTION_FAILURE(HttpStatus.UNAUTHORIZED, "토큰 페이로드 추출에 실패했습니다."),
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
 
     MISSING_REQUIRED_VALUE_ERROR(HttpStatus.BAD_REQUEST, "필수 요청값이 누락되었습니다."),
     NOT_ALLOWED_PERMISSION_ERROR(HttpStatus.FORBIDDEN, "허용되지 않은 권한입니다."),

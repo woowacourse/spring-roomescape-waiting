@@ -30,6 +30,8 @@ public class MemberReservation {
     }
 
     public boolean isMember(Member member) {
+        System.out.println("MemberReservation = " + this.member);
+        System.out.println("Parameter = " + member);
         return this.member.equals(member);
     }
 

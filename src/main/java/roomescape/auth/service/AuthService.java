@@ -16,16 +16,21 @@ import roomescape.member.domain.repository.MemberRepository;
 public class AuthService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
-    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider) {
+    public AuthService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, TokenProvider tokenProvider) {
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
     }
 
     public void authenticate(LoginRequest loginRequest) {
-        if (!memberRepository.existsByEmailAndPassword(loginRequest.email(), loginRequest.password())) {
-            throw new BusinessException(ErrorType.MEMBER_NOT_FOUND);
+        Member member = memberRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
+            throw new BusinessException(ErrorType.LOGIN_FAILED);
         }
     }
 
@@ -44,7 +49,11 @@ public class AuthService {
         if (memberRepository.existsByEmail(signUpRequest.email())) {
             throw new BusinessException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
-        memberRepository.save(
-                new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
+        memberRepository.save(new Member(
+                signUpRequest.name(),
+                signUpRequest.email(),
+                passwordEncoder.encode(signUpRequest.password()),
+                Role.USER
+        ));
     }
 }

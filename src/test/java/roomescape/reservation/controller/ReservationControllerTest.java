@@ -9,6 +9,7 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +21,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.auth.service.AuthService;
 import roomescape.auth.service.TokenProvider;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
@@ -53,10 +55,18 @@ class ReservationControllerTest extends ControllerTest {
     @Autowired
     TokenProvider tokenProvider;
 
+    @Autowired
+    AuthService authService;
+
     String token;
 
     @BeforeEach
     void setUp() {
+        authService.signUp(new SignUpRequest(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
         token = tokenProvider.createAccessToken(getMemberChoco().getEmail());
     }
 
@@ -68,16 +78,16 @@ class ReservationControllerTest extends ControllerTest {
                 new ReservationTimeRequest("12:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", "2099-08-05");
-        reservation.put("timeId", reservationTimeResponse.id());
-        reservation.put("themeId", themeResponse.id());
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", "2099-08-05");
+        params.put("timeId", reservationTimeResponse.id());
+        params.put("themeId", themeResponse.id());
 
         //when & then
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
-                .body(reservation)
+                .body(params)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -89,9 +99,14 @@ class ReservationControllerTest extends ControllerTest {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
                 new ReservationTimeRequest("12:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+        MemberResponse memberResponseOf = memberService.findAll()
+                .stream()
+                .filter(memberResponse -> Objects.equals(memberResponse.name(), getMemberChoco().getName()))
+                .findAny().orElseThrow();
 
+        Member member = memberService.findById(memberResponseOf.id());
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
-                AuthInfo.of(getMemberChoco()),
+                AuthInfo.of(member),
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),
                         reservationTimeResponse.id(),
@@ -102,7 +117,7 @@ class ReservationControllerTest extends ControllerTest {
                 dynamicTest("타인의 예약 삭제 시, 403을 반환한다.", () -> {
                     //given
                     memberService.create(
-                            new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), "qwer"));
+                            new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), getMemberClover().getPassword()));
 
                     String cloverToken = tokenProvider.createAccessToken(getMemberClover().getEmail());
 

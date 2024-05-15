@@ -48,10 +48,6 @@ public class Reservation {
         }
     }
 
-    public boolean isSame(LocalDate date, ReservationTime time, Theme theme) {
-        return this.date.equals(date) && this.time.equals(time) && this.theme.equals(theme);
-    }
-
     public Long getId() {
         return id;
     }
