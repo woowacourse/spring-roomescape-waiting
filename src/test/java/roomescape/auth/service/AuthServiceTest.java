@@ -41,7 +41,7 @@ class AuthServiceTest {
         when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
         when(jwtTokenProvider.createToken(any(Member.class))).thenReturn(DUMMY_TOKEN);
 
-        LoginRequest request = new LoginRequest("aa@gmail.com", "12");
+        LoginRequest request = new LoginRequest("andole@test.com", "123");
         assertThat(authService.login(request).getAccessToken()).isNotNull();
     }
 
@@ -70,7 +70,7 @@ class AuthServiceTest {
     void should_return_name_response_when_valid_token_check_performed() {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
 
-        assertThat(authService.checkLogin(new Accessor(1L)).name()).isEqualTo("썬");
+        assertThat(authService.checkLogin(new Accessor(1L)).name()).isEqualTo("안돌");
     }
 
     @DisplayName("토큰에서 유저의 아이디를 추출했을 때 그 아이디에 해당하는 회원이 없으면 예외를 발생시킨다")

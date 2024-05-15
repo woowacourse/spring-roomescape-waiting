@@ -10,13 +10,12 @@ ALTER TABLE theme ALTER COLUMN id RESTART;
 DELETE  FROM member;
 ALTER TABLE member ALTER COLUMN id RESTART;
 
-
 INSERT INTO member(name, email, password, role)
-VALUES ('썬', 'aa@gmail.com', '123', 'MEMBER'),
-       ('리비', 'bb@gmail.com', '123', 'MEMBER'),
-       ('도도', 'cc@gmail.com', '123', 'MEMBER'),
-       ('어드민', 'dd@gmail.com', '123', 'ADMIN');
-
+VALUES ('안돌', 'andole@test.com', '123', 'MEMBER'),
+       ('파랑', 'parang@test.com', '123', 'MEMBER'),
+       ('리비', 'libienz@test.com', '123', 'MEMBER'),
+       ('메이슨', 'mason@test.com', '123', 'MEMBER'),
+       ('어드민', 'admin@test.com', '123', 'ADMIN');
 
 INSERT INTO reservation_time (start_at)
 VALUES ('10:00'),
