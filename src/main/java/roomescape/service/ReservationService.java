@@ -28,6 +28,7 @@ public class ReservationService {
                 reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId()
         );
         validateDuplicatedReservation(count);
+        reservation.toReserved();
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 

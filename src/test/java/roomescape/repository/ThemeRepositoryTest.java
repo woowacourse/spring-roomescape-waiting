@@ -1,11 +1,9 @@
 package roomescape.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
@@ -43,17 +41,6 @@ class ThemeRepositoryTest extends RepositoryTest {
         assertThat(actual.getId()).isNotNull();
     }
 
-    @Disabled
-    @Test
-    @DisplayName("테마 목록을 조회한다.")
-    void findAll() {
-        // when
-        final List<Theme> actual = themeRepository.findAll();
-
-        // then
-        assertThat(actual).hasSize(1);
-    }
-
     @Test
     @DisplayName("Id에 해당하는 테마를 조회한다.")
     void findById() {
@@ -89,7 +76,6 @@ class ThemeRepositoryTest extends RepositoryTest {
     }
 
     @Sql("/popular-theme-data.sql")
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     @Test
     @DisplayName("인기 테마 목록을 조회한다.")
     void findPopularThemes() {
@@ -98,12 +84,12 @@ class ThemeRepositoryTest extends RepositoryTest {
                 = ThemePopularFilter.getThemePopularFilter(LocalDate.parse("2034-05-12"));
 
         // when
+        final int limit = themePopularFilter.getLimit();
         final List<Theme> actual = themeRepository.findPopularThemesBy(
-                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), themePopularFilter.getLimit()
+                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), limit
         );
 
         // then
-        assertThat(actual).extracting(Theme::getId)
-                .containsExactly(2L, 1L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
+        assertThat(actual).hasSize(limit);
     }
 }

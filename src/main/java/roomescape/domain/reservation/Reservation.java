@@ -1,8 +1,8 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import roomescape.domain.theme.Theme;
 import roomescape.domain.member.Member;
+import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -33,7 +33,7 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status = ReservationStatus.RESERVATION;
+    private ReservationStatus status;
 
     public Reservation() {
     }
@@ -55,6 +55,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = ReservationStatus.WAITING;
     }
 
     private static LocalDate convertToLocalDate(final String date) {
@@ -78,8 +79,8 @@ public class Reservation {
         return this.time.equals(time) && this.date.equals(date);
     }
 
-    public Long getMemberId() {
-        return member.getId();
+    public void toReserved() {
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getReservationTimeId() {

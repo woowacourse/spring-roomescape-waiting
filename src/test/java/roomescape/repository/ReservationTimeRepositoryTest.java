@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +36,6 @@ class ReservationTimeRepositoryTest extends RepositoryTest {
 
         // when
         assertThat(actual.getId()).isNotNull();
-    }
-
-    @Disabled
-    @Test
-    @DisplayName("예약 시간 목록을 조회한다.")
-    void findAll() {
-        // when
-        final List<ReservationTime> actual = reservationTimeRepository.findAll();
-
-        // then
-        assertThat(actual).hasSize(1);
     }
 
     @Test
