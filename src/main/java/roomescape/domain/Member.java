@@ -1,7 +1,14 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.util.Set;
 
 @Entity
@@ -12,15 +19,19 @@ public class Member {
     private Long id;
 
     @Embedded
+    @Column(nullable = false)
     private MemberName name;
 
     @Embedded
+    @Column(nullable = false, unique = true)
     private MemberEmail email;
 
     @Embedded
+    @Column(nullable = false)
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     private MemberRole role;
 
     @OneToMany(mappedBy = "member")

@@ -1,6 +1,13 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Reservation {
@@ -9,38 +16,42 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
-
+    @Column(nullable = false)
     private ReservationDate date;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
     public Reservation() {
     }
 
-    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
-    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
+        validateStatus(status);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.RESERVATION;
+        this.status = status;
     }
 
     private void validateMember(Member member) {
@@ -64,6 +75,12 @@ public class Reservation {
     private void validateTheme(Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("예약 테마는 비어있을 수 없습니다.");
+        }
+    }
+
+    private void validateStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("예약 상태는 비어있을 수 없습니다.");
         }
     }
 
