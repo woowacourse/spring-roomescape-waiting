@@ -16,6 +16,11 @@ public class ClientPageController {
         return "reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "reservation-mine";
+    }
+
     @GetMapping("/")
     public String indexPage() {
         return "index";

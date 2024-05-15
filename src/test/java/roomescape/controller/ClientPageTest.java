@@ -31,6 +31,15 @@ class ClientPageTest {
                 .statusCode(200);
     }
 
+    @DisplayName("client reservaton mine 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_when_GetClientReservationMinePage_then_statusCodeIsOkay() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
+
     @DisplayName("index 페이지 URL 요청이 올바르게 연결된다.")
     @Test
     void given_when_GetIndexPage_then_statusCodeIsOkay() {
