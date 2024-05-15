@@ -16,8 +16,8 @@ public class DatabaseCleaner {
     }
 
     public void execute() {
-        clearMember();
         clearReservation();
+        clearMember();
         clearTime();
         clearTheme();
     }
@@ -25,11 +25,6 @@ public class DatabaseCleaner {
     private void clearMember() {
         entityManager.createNativeQuery("DELETE FROM member").executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE member ALTER COLUMN id RESTART").executeUpdate();
-    }
-
-    private void clearReservation() {
-        entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
-        entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
     }
 
     private void clearTime() {
@@ -40,5 +35,10 @@ public class DatabaseCleaner {
     private void clearTheme() {
         entityManager.createNativeQuery("DELETE FROM theme").executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE theme ALTER COLUMN id RESTART").executeUpdate();
+    }
+
+    private void clearReservation() {
+        entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
     }
 }

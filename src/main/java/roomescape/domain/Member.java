@@ -14,8 +14,8 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Column(unique = true) // TODO: DB 제약조건 필요성 고려해보기
-    private String email; // TODO: @UniqueConstraint 달았을 때 쿼리랑 비교해보기
+    @Column(unique = true)
+    private String email;
     private String password;
     @Enumerated(EnumType.STRING)
     private MemberRole role;

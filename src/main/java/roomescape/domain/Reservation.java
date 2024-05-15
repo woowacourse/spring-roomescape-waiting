@@ -11,13 +11,10 @@ public class Reservation {
     private Long id;
     private LocalDate date;
     @ManyToOne
-    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
     @ManyToOne
-    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private ReservationTime time;
     @ManyToOne
-    @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Theme theme;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
