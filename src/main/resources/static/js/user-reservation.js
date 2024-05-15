@@ -78,10 +78,6 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-  /*
-  TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-        요청 포맷에 맞게 설정
-  */
   fetch(`/times/available?date=${date}&themeId=${themeId}`, {
     method: 'GET',
     headers: {
@@ -107,11 +103,6 @@ function renderAvailableTimes(times) {
     return;
   }
   times.forEach(time => {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-          response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-    */
-
     const div = createSlot('time', time.startAt, time.timeId, time.alreadyBooked);
     timeSlots.appendChild(div);
   });
@@ -147,12 +138,6 @@ function onReservationButtonClick() {
   const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
   if (selectedDate && selectedThemeId && selectedTimeId) {
-
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-          [5단계] 예약 생성 기능 변경 - 사용자
-          request 명세에 맞게 설정
-    */
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
@@ -191,14 +176,11 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
-    /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
-     */
-    fetch('', {
+    fetch('/reservations/waiting', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

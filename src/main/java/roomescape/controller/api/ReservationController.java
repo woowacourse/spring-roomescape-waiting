@@ -67,9 +67,27 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<Void> addReservationWaiting() {
+        if (true) {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservationById(@PathVariable Long id) {
         reservationService.deleteReservationById(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/waiting")
+    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable Long id) {
+        if (true) {
+            throw new UnsupportedOperationException("Not implemented yet");
+        }
 
         return ResponseEntity.noContent().build();
     }
