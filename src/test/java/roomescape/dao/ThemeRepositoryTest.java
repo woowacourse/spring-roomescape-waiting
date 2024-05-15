@@ -8,6 +8,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.util.DatabaseCleaner;
 
 import java.util.List;
 
@@ -20,11 +21,13 @@ class ThemeRepositoryTest {
     @Autowired
     ReservationInserter reservationInserter;
     @Autowired
+    DatabaseCleaner databaseCleaner;
+    @Autowired
     private ThemeRepository themeRepository;
 
     @BeforeEach
     void setup() {
-        sut.deleteAll();
+        databaseCleaner.initialize();
     }
 
     @Test

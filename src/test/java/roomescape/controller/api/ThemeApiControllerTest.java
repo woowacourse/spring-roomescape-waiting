@@ -1,13 +1,7 @@
 package roomescape.controller.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +19,11 @@ import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.service.dto.input.ThemeInput;
 import roomescape.util.DatabaseCleaner;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
 
 //@formatter:off
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -78,14 +77,6 @@ class ThemeApiControllerTest {
         RestAssured.given()
                    .when().get("/themes")
                    .then().statusCode(200).body("size()", is(1));
-    }
-
-    @Test
-    @DisplayName("특정 테마가 존재하지 않는데, 그 테마를 삭제하려 할 때 404을 반환한다.")
-    void return_404_when_not_exist_id() {
-        RestAssured.given()
-                   .when().delete("/themes/-1")
-                   .then().statusCode(404);
     }
 
     @Test

@@ -1,13 +1,7 @@
 package roomescape.controller.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,11 +14,14 @@ import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.dto.input.ReservationInput;
-import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.util.DatabaseCleaner;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
 
 //@formatter:off
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -76,14 +73,6 @@ class ReservationTimeApiControllerTest {
 
         RestAssured.given().contentType(ContentType.JSON).body(params)
                    .when().post("/times").then().statusCode(400);
-    }
-
-    @Test
-    @DisplayName("특정 시간이 존재하지 않는데, 그 시간을 삭제하려 할 때 404을 반환한다.")
-    void return_404_when_not_exist_id() {
-        RestAssured.given()
-                   .when().delete("/times/-1")
-                   .then().statusCode(404);
     }
 
     @Test

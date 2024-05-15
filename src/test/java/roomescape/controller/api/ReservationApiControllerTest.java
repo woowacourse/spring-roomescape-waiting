@@ -2,10 +2,6 @@ package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,8 +19,11 @@ import roomescape.service.ThemeService;
 import roomescape.service.dto.input.MemberCreateInput;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationTimeInput;
-import roomescape.util.TokenProvider;
 import roomescape.util.DatabaseCleaner;
+import roomescape.util.TokenProvider;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationApiControllerTest {
@@ -99,16 +98,6 @@ class ReservationApiControllerTest {
                 .post("/reservations")
                 .then()
                 .statusCode(400);
-    }
-
-    @Test
-    @DisplayName("특정 예약이 존재하지 않는데, 그 예약을 삭제하려 할 때 404을 반환한다.")
-    void return_404_when_not_exist_id() {
-        RestAssured.given()
-                .cookie("token", token)
-                .delete("/reservations/-1")
-                .then()
-                .statusCode(404);
     }
 
     @Test

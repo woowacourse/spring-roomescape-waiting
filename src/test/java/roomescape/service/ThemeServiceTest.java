@@ -5,10 +5,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.dao.MemberRepository;
+import roomescape.dao.ReservationInserter;
 import roomescape.dao.ReservationRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.domain.user.Member;
 import roomescape.exception.ExistReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
@@ -32,6 +35,10 @@ class ThemeServiceTest {
     ReservationTimeService reservationTimeService;
     @Autowired
     ReservationRepository reservationRepository;
+    @Autowired
+    ReservationInserter reservationInserter;
+    @Autowired
+    MemberRepository memberRepository;
 
     @Autowired
     DatabaseCleaner databaseCleaner;
@@ -87,13 +94,14 @@ class ThemeServiceTest {
 
         final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
                 new ReservationTimeInput("10:00"));
+        final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.from(
                 null,
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput.id(), themeOutput.name(), themeOutput.description(), themeOutput.thumbnail()),
-                MemberFixture.getDomain()
+                member
         ));
         final var themeId = themeOutput.id();
 
@@ -112,27 +120,28 @@ class ThemeServiceTest {
         ));
         final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
                 new ReservationTimeInput("10:00"));
+        final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-01",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
-                MemberFixture.getDomain()
+                member
         ));
         reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-02",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
-                MemberFixture.getDomain()
+                member
         ));
         reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-03",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput2.id(), themeOutput2.name(), themeOutput2.description(), themeOutput2.thumbnail()),
-                MemberFixture.getDomain()
+                member
         ));
 
         final List<ThemeOutput> popularThemes = themeService.getPopularThemes(LocalDate.parse("2024-06-04"));
