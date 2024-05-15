@@ -2,7 +2,7 @@
 INSERT INTO member (name, email, password, role)
 VALUES
 ('카키', 'kaki@email.com', '1234', default),
-('러너덕', 'duck@email.com', '1234', 'ADMIN'),
+('파랑', 'blue@email.com', '1234', 'ADMIN'),
 ('솔라', 'solar@email.com', '1234', default),
 ('브라운', 'brown@email.com', '1234', default),
 ('네오', 'neo@email.com', '1234', default),
