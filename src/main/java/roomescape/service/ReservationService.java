@@ -11,6 +11,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWithRankDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
@@ -68,7 +69,7 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
         Theme theme = themeRepository.getByIdentifier(themeId);
 
-        Reservation reservation = new Reservation(date, member, reservationTime, theme);
+        Reservation reservation = new Reservation(date, member, reservationTime, theme, ReservationStatus.RESERVED);
 
         validateDuplicatedReservation(reservation);
         validateDateTimeNotPassed(reservation);
@@ -91,6 +92,75 @@ public class ReservationService {
                 reservation.getTheme().getId()
         )) {
             throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
+        }
+    }
+
+    @Transactional
+    public ReservationResponse addReservationWaiting(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            Long memberId
+    ) {
+        Member member = memberRepository.getByIdentifier(memberId);
+        ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
+        Theme theme = themeRepository.getByIdentifier(themeId);
+
+        Reservation reservation = new Reservation(
+                date,
+                member,
+                reservationTime,
+                theme,
+                ReservationStatus.WAITING
+        );
+
+        validateDateTimeNotPassed(reservation);
+        validateReservationNotExists(reservation);
+        validateAlreadyReserved(reservation);
+        validateReservationWaitingExists(reservation);
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateReservationNotExists(Reservation reservation) {
+        boolean reservationNotExists = !reservationRepository.existsByReservation(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+
+        if (reservationNotExists) {
+            throw new IllegalArgumentException("예약이 존재하지 않아 예약 대기를 할 수 없습니다.");
+        }
+    }
+
+    private void validateAlreadyReserved(Reservation reservation) {
+        boolean reservationExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getMember().getId(),
+                ReservationStatus.RESERVED
+        );
+
+        if (reservationExists) {
+            throw new IllegalArgumentException("이미 예약을 하셨습니다.");
+        }
+    }
+
+    private void validateReservationWaitingExists(Reservation reservation) {
+        boolean reservationWaitingExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getMember().getId(),
+                ReservationStatus.WAITING
+        );
+
+        if (reservationWaitingExists) {
+            throw new IllegalArgumentException("이미 예약 대기를 하셨습니다.");
         }
     }
 

@@ -21,18 +21,19 @@ class ReservationTest {
     private static final Member MEMBER = new Member("exmaple@gmail.com", "abc123", "구름", Role.USER);
     private static final ReservationTime RESERVATION_TIME = new ReservationTime(LocalTime.of(10, 0));
     private static final Theme THEME = new Theme("테마", "테마 설명", "https://example.com");
+    private static final ReservationStatus STATUS = ReservationStatus.RESERVED;
 
     @Test
     @DisplayName("예약을 생성한다.")
     void create() {
-        assertThatCode(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME))
+        assertThatCode(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, STATUS))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("날짜가 없으면 예외가 발생한다.")
     void validateDate() {
-        assertThatThrownBy(() -> new Reservation(null, MEMBER, RESERVATION_TIME, THEME))
+        assertThatThrownBy(() -> new Reservation(null, MEMBER, RESERVATION_TIME, THEME, STATUS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("날짜는 필수 값입니다.");
     }
@@ -40,7 +41,7 @@ class ReservationTest {
     @Test
     @DisplayName("회원이 없으면 예외가 발생한다.")
     void validateMember() {
-        assertThatThrownBy(() -> new Reservation(DATE, null, RESERVATION_TIME, THEME))
+        assertThatThrownBy(() -> new Reservation(DATE, null, RESERVATION_TIME, THEME, STATUS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("회원은 필수 값입니다.");
     }
@@ -48,7 +49,7 @@ class ReservationTest {
     @Test
     @DisplayName("예약 시간이 없으면 예외가 발생한다.")
     void validateTime() {
-        assertThatThrownBy(() -> new Reservation(DATE, MEMBER, null, THEME))
+        assertThatThrownBy(() -> new Reservation(DATE, MEMBER, null, THEME, STATUS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약 시간은 필수 값입니다.");
     }
@@ -56,15 +57,23 @@ class ReservationTest {
     @Test
     @DisplayName("테마가 없으면 예외가 발생한다.")
     void validateTheme() {
-        assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, null))
+        assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, null, STATUS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("테마는 필수 값입니다.");
     }
 
     @Test
+    @DisplayName("예약 상태가 없으면 예외가 발생한다.")
+    void validateStatus() {
+        assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 상태는 필수 값입니다.");
+    }
+
+    @Test
     @DisplayName("예약 대기에서 예약 상태로 바꾼다.")
     void updateToReserved() {
-        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME);
+        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, ReservationStatus.WAITING);
         reservation.updateToReserved();
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
@@ -73,8 +82,7 @@ class ReservationTest {
     @Test
     @DisplayName("예약 대기가 아니면 예약 상태로 바꿀 수 없다.")
     void updateToReservedWhenNotWaiting() {
-        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME);
-        reservation.updateToReserved();
+        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, ReservationStatus.RESERVED);
 
         assertThatThrownBy(reservation::updateToReserved)
                 .isInstanceOf(IllegalArgumentException.class)

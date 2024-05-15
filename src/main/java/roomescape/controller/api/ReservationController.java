@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.ReservationWaitingRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
@@ -68,12 +69,19 @@ public class ReservationController {
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<Void> addReservationWaiting() {
-        if (true) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
+    public ResponseEntity<ReservationResponse> addReservationWaiting(
+            @RequestBody @Valid ReservationWaitingRequest request,
+            @Auth Accessor accessor
+    ) {
+        ReservationResponse response = reservationService.addReservationWaiting(
+                request.date(),
+                request.timeId(),
+                request.themeId(),
+                accessor.id()
+        );
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.created(URI.create("/reservations/" + response.id() + "/waiting"))
+                .body(response);
     }
 
     @DeleteMapping("/{id}")

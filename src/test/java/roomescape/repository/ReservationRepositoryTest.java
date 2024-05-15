@@ -37,7 +37,8 @@ class ReservationRepositoryTest {
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
 
-        Reservation reservation = new Reservation(null, LocalDate.of(2024, 5, 4), member, time, theme);
+        Reservation reservation = new Reservation(null, LocalDate.of(2024, 5, 4), member, time, theme,
+                ReservationStatus.WAITING);
 
         Reservation saved = reservationRepository.save(reservation);
 
@@ -55,12 +56,8 @@ class ReservationRepositoryTest {
     void findAll() {
         createReservation();
 
-        List<Reservation> reservations = reservationRepository.findAllByConditions(
-                1L,
-                1L,
-                LocalDate.of(2024, 5, 4),
-                LocalDate.of(2024, 5, 4)
-        );
+        List<Reservation> reservations = reservationRepository.findAllByConditions(1L, 1L, LocalDate.of(2024, 5, 4),
+                LocalDate.of(2024, 5, 4));
         Reservation reservation = reservations.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
@@ -81,8 +78,8 @@ class ReservationRepositoryTest {
     @DisplayName("회원 id로 대기 순서를 포함한 예약들을 조회한다.")
     @Sql("/waitings.sql")
     void findReservationWithRanksByMemberId() {
-        List<ReservationWithRankDto> reservationWithRanks = reservationRepository
-                .findReservationWithRanksByMemberId(4L);
+        List<ReservationWithRankDto> reservationWithRanks = reservationRepository.findReservationWithRanksByMemberId(
+                4L);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservationWithRanks).hasSize(3);
@@ -144,7 +141,7 @@ class ReservationRepositoryTest {
         jdbcTemplate.update("INSERT INTO reservation (id, date, member_id, time_id, theme_id, status) "
                 + "VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED')");
 
-        new Reservation(1L, LocalDate.of(2024, 5, 4), member, reservationTime, theme);
+        new Reservation(1L, LocalDate.of(2024, 5, 4), member, reservationTime, theme, ReservationStatus.RESERVED);
     }
 
     private Member createMember() {
@@ -162,8 +159,7 @@ class ReservationRepositoryTest {
     }
 
     private ReservationTime createReservationTime() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) "
-                + "VALUES (1, '10:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) " + "VALUES (1, '10:00')");
 
         return new ReservationTime(1L, LocalTime.of(10, 0));
     }

@@ -46,22 +46,41 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme) {
-        this(null, date, member, time, theme);
+    public Reservation(
+            LocalDate date,
+            Member member,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
+        this(null, date, member, time, theme, status);
     }
 
-    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
-        validate(date, member, time, theme);
+    public Reservation(
+            Long id,
+            LocalDate date,
+            Member member,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
+        validate(date, member, time, theme, status);
 
         this.id = id;
         this.date = date;
         this.member = member;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.WAITING;
+        this.status = status;
     }
 
-    private void validate(LocalDate date, Member member, ReservationTime time, Theme theme) {
+    private void validate(
+            LocalDate date,
+            Member member,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
         if (date == null) {
             throw new IllegalArgumentException("날짜는 필수 값입니다.");
         }
@@ -76,6 +95,10 @@ public class Reservation {
 
         if (theme == null) {
             throw new IllegalArgumentException("테마는 필수 값입니다.");
+        }
+
+        if (status == null) {
+            throw new IllegalArgumentException("예약 상태는 필수 값입니다.");
         }
     }
 
