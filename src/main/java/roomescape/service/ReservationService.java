@@ -2,6 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
@@ -106,7 +108,11 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
 
         // TODO: member 안에 List<Reservation> vs 단방향 엔티티 관계
-        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(foundMember, LocalDate.now());
+        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
+                foundMember,
+                LocalDate.now(),
+                Sort.by(Order.asc("date"), Order.asc("time.startAt"))
+        );
 
         return reservations.stream()
                 .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))

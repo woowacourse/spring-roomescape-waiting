@@ -2,6 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -34,5 +36,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTheme(Theme theme);
 
-    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date);
+    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 }
