@@ -11,8 +11,6 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.web.controller.request.ReservationTimeWebRequest;
 
 class ReservationTimeController extends ControllerTest {
@@ -76,8 +74,9 @@ class ReservationTimeController extends ControllerTest {
     @DisplayName("예약 시간이 중복될 경우  -> 400")
     @Test
     void create_duplicate() {
-        ReservationTimeWebRequest request = new ReservationTimeWebRequest(VALID_RESERVATION_TIME.getStartAt().toString());
-        System.out.println(reservationTimeRepository.count());
+        ReservationTimeWebRequest request = new ReservationTimeWebRequest(
+            VALID_RESERVATION_TIME.getStartAt().toString());
+
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
