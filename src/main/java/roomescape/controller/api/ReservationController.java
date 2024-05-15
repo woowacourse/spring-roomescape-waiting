@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.PersonalReservationResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.security.Accessor;
 import roomescape.security.Auth;
@@ -44,9 +44,9 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<PersonalReservationResponse>> getMyReservations(@Auth Accessor accessor) {
-        List<PersonalReservationResponse> reservationResponses = reservationService
-                .getReservationsByMemberId(accessor.id());
+    public ResponseEntity<List<MyReservationResponse>> getMyReservationWithRanks(@Auth Accessor accessor) {
+        List<MyReservationResponse> reservationResponses = reservationService
+                .getMyReservationWithRanks(accessor.id());
 
         return ResponseEntity.ok(reservationResponses);
     }

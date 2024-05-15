@@ -11,11 +11,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithRankDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.response.PersonalReservationResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 @Service
@@ -102,11 +103,12 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<PersonalReservationResponse> getReservationsByMemberId(long id) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
+    public List<MyReservationResponse> getMyReservationWithRanks(long memberId) {
+        List<ReservationWithRankDto> reservations = reservationRepository
+                .findReservationWithRanksByMemberId(memberId);
 
         return reservations.stream()
-                .map(PersonalReservationResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
     }
 }

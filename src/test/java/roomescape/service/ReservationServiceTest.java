@@ -18,7 +18,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.dto.response.PersonalReservationResponse;
+import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 class ReservationServiceTest extends BaseServiceTest {
@@ -139,20 +139,16 @@ class ReservationServiceTest extends BaseServiceTest {
         );
         reservationRepository.save(reservation);
 
-        List<PersonalReservationResponse> responses = reservationService.getReservationsByMemberId(member.getId());
+        List<MyReservationResponse> responses = reservationService.getMyReservationWithRanks(member.getId());
+        MyReservationResponse myReservationResponse = responses.get(0);
 
-        SoftAssertions.assertSoftly(
-                softly -> {
-                    softly.assertThat(responses).hasSize(1);
-                    softly.assertThat(responses.get(0).date()).isEqualTo("2024-04-09");
-                    softly.assertThat(responses.get(0).theme().id()).isEqualTo(theme.getId());
-                    softly.assertThat(responses.get(0).theme().name()).isEqualTo("테마");
-                    softly.assertThat(responses.get(0).theme().description()).isEqualTo("테마 설명");
-                    softly.assertThat(responses.get(0).theme().thumbnail()).isEqualTo("https://example.com");
-                    softly.assertThat(responses.get(0).time().id()).isEqualTo(time.getId());
-                    softly.assertThat(responses.get(0).time().startAt()).isEqualTo("10:30");
-                    softly.assertThat(responses.get(0).status()).isEqualTo("예약 대기");
-                }
-        );
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(myReservationResponse.id()).isEqualTo(1L);
+            softly.assertThat(myReservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
+            softly.assertThat(myReservationResponse.time()).isEqualTo(LocalTime.of(10, 30));
+            softly.assertThat(myReservationResponse.theme()).isEqualTo("테마");
+            softly.assertThat(myReservationResponse.status()).isEqualTo("예약 대기");
+            softly.assertThat(myReservationResponse.rank()).isEqualTo(1L);
+        });
     }
 }

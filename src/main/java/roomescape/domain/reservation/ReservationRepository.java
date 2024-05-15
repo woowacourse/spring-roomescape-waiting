@@ -33,16 +33,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.member m
-            JOIN FETCH r.time t
-            JOIN FETCH r.theme th
-            WHERE m.id = :id
-            """)
-    List<Reservation> findAllByMemberId(long id);
-
-    @Query("""
             SELECT
                 new roomescape.domain.reservation.ReservationWithRankDto(
                     r,
@@ -57,6 +47,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                     ) AS Long)
                 )
             FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
             WHERE r.member.id = :memberId
             """)
     List<ReservationWithRankDto> findReservationWithRanksByMemberId(Long memberId);
