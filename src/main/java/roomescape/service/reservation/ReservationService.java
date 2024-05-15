@@ -11,6 +11,8 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.ScheduleRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -26,14 +28,16 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ScheduleRepository scheduleRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository, ScheduleRepository scheduleRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     public ReservationResponse create(AdminReservationRequest adminReservationRequest) {
@@ -47,15 +51,20 @@ public class ReservationService {
     }
 
     private ReservationResponse createReservation(long timeId, long themeId, long memberId, LocalDate date) {
+        ReservationDate reservationDate = ReservationDate.of(date);
         ReservationTime reservationTime = findTimeById(timeId);
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
+        validate(reservationDate, reservationTime, theme);
+        Schedule schedule = getScheduleOf(reservationDate, reservationTime);
+        Reservation reservation = reservationRepository.save(new Reservation(member, schedule, theme));
 
-        validate(date, reservationTime, theme);
+        return new ReservationResponse(reservation);
+    }
 
-        Reservation reservation = new Reservation(date, member, reservationTime, theme);
-
-        return new ReservationResponse(reservationRepository.save(reservation));
+    private Schedule getScheduleOf(ReservationDate reservationDate, ReservationTime reservationTime) {
+        return scheduleRepository.findByDateAndTime(reservationDate, reservationTime)
+                    .orElseGet(() -> scheduleRepository.save(new Schedule(reservationDate, reservationTime)));
     }
 
     private ReservationTime findTimeById(long timeId) {
@@ -70,8 +79,7 @@ public class ReservationService {
         return memberRepository.getById(memberId);
     }
 
-    private void validate(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        ReservationDate reservationDate = ReservationDate.of(date);
+    private void validate(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         validateIfBefore(reservationDate, reservationTime);
         validateDuplicated(reservationDate, reservationTime, theme);
     }

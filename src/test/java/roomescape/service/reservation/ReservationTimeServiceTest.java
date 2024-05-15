@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import groovyjarjarantlr4.v4.gui.Trees;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -19,9 +20,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.ScheduleRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -43,6 +47,8 @@ class ReservationTimeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     @DisplayName("새로운 예약 시간을 저장한다.")
     @Test
@@ -97,10 +103,13 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme));
+        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Reservation reservation = new Reservation(member, schedule, theme);
+        reservationRepository.save(reservation);
 
         //when&then
-        assertThatThrownBy(() -> reservationTimeService.deleteById(reservationTime.getId()))
+        long timeId = reservationTime.getId();
+        assertThatThrownBy(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
     }
@@ -109,14 +118,16 @@ class ReservationTimeServiceTest {
     @Test
     void findAvailableTimes() {
         //given
+        LocalDate date = LocalDate.MAX;
         LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(new ReservationTime(time.plusHours(5)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        LocalDate date = LocalDate.now().plusDays(1);
-        reservationRepository.save(new Reservation(date, member, bookedReservationTime, theme));
+        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(date), bookedReservationTime));
+        Reservation reservation = new Reservation(member, schedule, theme);
+        reservationRepository.save(reservation);
 
         //when
         List<AvailableReservationTimeResponse> result = reservationTimeService.findAvailableTimes(

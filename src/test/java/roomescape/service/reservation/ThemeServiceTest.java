@@ -3,6 +3,7 @@ package roomescape.service.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import groovyjarjarantlr4.v4.gui.Trees;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -17,9 +18,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.ScheduleRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -40,6 +44,8 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     @DisplayName("테마를 생성한다.")
     @Test
@@ -105,10 +111,13 @@ class ThemeServiceTest {
         Theme theme = createTheme("레벨2 탈출");
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme));
+        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Reservation reservation = new Reservation(member, schedule, theme);
+        reservationRepository.save(reservation);
 
         //when&then
-        assertThatThrownBy(() -> themeService.deleteById(theme.getId()))
+        long themeId = theme.getId();
+        assertThatThrownBy(() -> themeService.deleteById(themeId))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("해당 테마로 예약이 존재해서 삭제할 수 없습니다.");
     }
@@ -123,13 +132,13 @@ class ThemeServiceTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
+        Schedule schedule1 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime));
+        Schedule schedule2 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime));
+        Schedule schedule3 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime));
 
-        reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(1), member, reservationTime, theme1));
-        reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(7), member, reservationTime, theme2));
-        reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(8), member, reservationTime, theme3));
+        reservationRepository.save(new Reservation(member, schedule1, theme1));
+        reservationRepository.save(new Reservation(member, schedule2, theme2));
+        reservationRepository.save(new Reservation(member, schedule3, theme3));
 
         //when
         List<ThemeResponse> result = themeService.findPopularThemes();

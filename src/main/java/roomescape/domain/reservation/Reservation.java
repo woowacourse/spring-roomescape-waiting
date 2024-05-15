@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +20,7 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Schedule schedule;
 
     @ManyToOne
@@ -37,8 +36,8 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(LocalDate reservationDate, Member member, ReservationTime reservationTime, Theme theme) {
-        this(NO_ID, member, new Schedule(ReservationDate.of(reservationDate), reservationTime), theme);
+    public Reservation(Member member, Schedule schedule, Theme theme) {
+        this(NO_ID, member, schedule, theme);
     }
 
     public long getId() {
