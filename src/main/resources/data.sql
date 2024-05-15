@@ -68,7 +68,7 @@ VALUES ('23:30');
 
 /**
   reservation
- */
+*/
 INSERT INTO reservation(member_id, date, time_id, theme_id)
 VALUES (2, CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 1, 1);
 INSERT INTO reservation(member_id, date, time_id, theme_id)
