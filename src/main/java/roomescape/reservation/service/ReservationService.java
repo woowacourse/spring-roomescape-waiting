@@ -62,7 +62,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (memberReservationRepository.existsByReservation_DateAndReservationTimeAndReservationTheme(date,
+        if (memberReservationRepository.existsBy(date,
                 reservationTime, theme)) {
             throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
         }

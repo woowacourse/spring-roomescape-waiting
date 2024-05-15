@@ -9,11 +9,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
-    @Query(value = "SELECT 1 "
-            + " FROM member "
-            + " WHERE email = ? AND password = ? "
-            + " LIMIT 1;", nativeQuery = true)
-    int existsByEmailAndPassword(String email, String password);
+    @Query("""
+            SELECT count(*) > 0 FROM Member m 
+            WHERE m.email = :email AND m.password = :password
+            """)
+    boolean existsByEmailAndPassword(String email, String password);
 
     boolean existsByEmail(String email);
 }

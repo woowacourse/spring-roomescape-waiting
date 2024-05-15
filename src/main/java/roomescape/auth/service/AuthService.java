@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public void authenticate(LoginRequest loginRequest) {
-        if (memberRepository.existsByEmailAndPassword(loginRequest.email(), loginRequest.password()) <= 0) {
+        if (!memberRepository.existsByEmailAndPassword(loginRequest.email(), loginRequest.password())) {
             throw new BusinessException(ErrorType.MEMBER_NOT_FOUND);
         }
     }
