@@ -153,7 +153,7 @@ class MemberRestControllerTest {
                 .extract().cookie("token");
 
         RestAssured.given().log().all()
-                .cookie("token", "token" + "zxczdasd")
+                .cookie("token", token + "zxczdasd")
                 .when().get("/members/login/check")
                 .then().log().all()
                 .statusCode(401);
@@ -191,7 +191,7 @@ class MemberRestControllerTest {
     @DisplayName("멤버 목록을 조회하는데 성공하면 응답과 200 상태코드를 반환한다.")
     @Test
     void return_200_when_find_all_members() {
-        Member admin = new Member(2L, "t2@t2.com", "124", "재즈", "ADMIN");
+        Member admin = new Member("t2@t2.com", "124", "재즈", "ADMIN");
         String adminToken = jwtManager.generateToken(admin);
 
         RestAssured.given().log().all()
@@ -217,7 +217,7 @@ class MemberRestControllerTest {
     @DisplayName("어드민이 아닌 멤버가 멤버 목록을 조회할 시 로그인 페이지로 리다이렉트 시킨다.")
     @Test
     void return_302_when_not_admin_find_all_members() {
-        Member member = new Member(2L, "t2@t2.com", "124", "재즈", "MEMBER");
+        Member member = new Member("t2@t2.com", "124", "재즈", "MEMBER");
         String memberToken = jwtManager.generateToken(member);
 
         RestAssured.given().log().all()

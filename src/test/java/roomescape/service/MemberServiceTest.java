@@ -48,9 +48,8 @@ class MemberServiceTest {
     @Autowired
     private JpaMemberRepository memberRepository;
 
-    private final Member member1 = new Member(null, "t1@t1.com", "123", "러너덕", "MEMBER");
-    private final Member member2 = new Member(null, "t2@t2.com", "124", "재즈", "MEMBER");
-    private final Member member3 = new Member(null, "t3@t3.com", "125", "재즈덕", "MEMBER");
+    private final Member member1 = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
+    private final Member member3 = new Member("t3@t3.com", "125", "재즈덕", "MEMBER");
 
     @DisplayName("이메일이 중복인 회원을 생성하면 에러를 발생시킨다.")
     @Test

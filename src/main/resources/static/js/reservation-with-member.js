@@ -72,7 +72,7 @@ function populateSelect(selectId, options, textProperty) {
     const select = document.getElementById(selectId);
     options.forEach(optionData => {
         const option = document.createElement('option');
-        option.value = optionData.id;
+        option.value = optionData.email;
         option.textContent = optionData[textProperty];
         select.appendChild(option);
     });

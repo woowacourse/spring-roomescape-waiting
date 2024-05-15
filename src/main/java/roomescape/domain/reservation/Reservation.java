@@ -37,14 +37,14 @@ public class Reservation {
         this.time = time;
     }
 
-    public Reservation(Long memberId, String email, String password, String memberName, String role,
-                       Long themeId, String themeName, String description, String thumbnail, String date, Long timeId,
-                       String time) {
+    public Reservation(String email, String password, String memberName, String role,
+                       String themeName, String description, String thumbnail,
+                       String date, String time) {
         this(
-                new Member(memberId, email, password, memberName, role),
-                new Theme(themeId, themeName, description, thumbnail),
+                new Member(email, password, memberName, role),
+                new Theme(themeName, description, thumbnail),
                 LocalDate.parse(date),
-                new ReservationTime(timeId, time)
+                new ReservationTime(time)
         );
     }
 
@@ -75,19 +75,11 @@ public class Reservation {
         return time;
     }
 
-    public Long memberId() {
-        return member.getId();
-    }
-
-    public String themeName() {
-        return theme.getName();
+    public String memberEmail() {
+        return member.getEmail();
     }
 
     public Long themeId() {
         return theme.getId();
-    }
-
-    public Long timeId() {
-        return time.getId();
     }
 }

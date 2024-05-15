@@ -20,8 +20,8 @@ class AdminControllerTest {
     @Autowired
     private JwtManager jwtManager;
 
-    private final Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
-    private final Member admin = new Member(2L, "t2@t2.com", "124", "재즈", "ADMIN");
+    private final Member member = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
+    private final Member admin = new Member("t2@t2.com", "124", "재즈", "ADMIN");
 
     private String memberToken;
     private String adminToken;

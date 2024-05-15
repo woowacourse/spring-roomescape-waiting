@@ -8,32 +8,16 @@ import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.reservation.Reservation;
 
 public class ReservationSearchParams {
-    private final Long memberId;
+    private final String email;
     private final Long themeId;
     private final LocalDate dateFrom;
     private final LocalDate dateTo;
 
-    public ReservationSearchParams(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        this.memberId = memberId;
+    public ReservationSearchParams(String email, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
+        this.email = email;
         this.themeId = themeId;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
-    }
-
-    public Long memberId() {
-        return memberId;
-    }
-
-    public Long themeId() {
-        return themeId;
-    }
-
-    public LocalDate dateFrom() {
-        return dateFrom;
-    }
-
-    public LocalDate dateTo() {
-        return dateTo;
     }
 
     public Specification<Reservation> getSearchSpecification() {
@@ -43,8 +27,8 @@ public class ReservationSearchParams {
             root.fetch("theme");
             root.fetch("time");
 
-            if (memberId != null) {
-                predicates.add(builder.equal(root.get("member").get("id"), memberId));
+            if (email != null) {
+                predicates.add(builder.equal(root.get("member").get("email"), email));
             }
             if (themeId != null) {
                 predicates.add(builder.equal(root.get("theme").get("id"), themeId));

@@ -45,24 +45,23 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findReservationsByMemberId(long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
+    public List<ReservationResponse> findReservationsByMemberEmail(String email) {
+        return reservationRepository.findAllByMemberEmail(email)
                 .stream().map(ReservationResponse::new)
                 .toList();
     }
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
-        Reservation reservation = reservationInfo.toReservation();
-        Long timeId = reservation.timeId();
+        long timeId = reservationInfo.getTimeId();
+        LocalDate date = reservationInfo.getDate();
+        long themeId = reservationInfo.getThemeId();
+        String email = reservationInfo.getEmail();
 
         ReservationTime time = reservationTimeRepository.fetchById(timeId);
-        validatePreviousDate(reservation, time);
-
-        Long themeId = reservation.themeId();
-        LocalDate date = reservation.getDate();
+        validatePreviousDate(date, time);
         validateDuplicatedReservation(date, themeId, timeId);
 
-        Member member = jpaMemberRepository.fetchById(reservation.memberId());
+        Member member = jpaMemberRepository.fetchByEmail(email);
         Theme theme = jpaThemeRepository.fetchById(themeId);
         Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
         return new ReservationResponse(savedReservation);
@@ -75,8 +74,8 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private void validatePreviousDate(Reservation reservation, ReservationTime time) {
-        if (reservation.getDate().atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
+    private void validatePreviousDate(LocalDate date, ReservationTime time) {
+        if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new DateTimePassedException();
         }
     }

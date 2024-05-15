@@ -60,9 +60,9 @@ class ReservationServiceTest {
     @Autowired
     private JpaMemberRepository memberRepository;
 
-    private final Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
-    private final ReservationTime time = new ReservationTime(1L, "11:00");
-    private final Theme theme = new Theme(1L, "공포", "공포는 무서워", "hi.jpg");
+    private final Member member = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
+    private final ReservationTime time = new ReservationTime("11:00");
+    private final Theme theme = new Theme("공포", "공포는 무서워", "hi.jpg");
     private final LocalDate date = LocalDate.parse("2025-11-30");
 
     @DisplayName("저장되어있지 않은 예약 시간에 예약을 시도하면 에러를 발생시킨다.")
@@ -71,7 +71,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         themeRepository.save(theme);
 
-        ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
                 .isInstanceOf(TimeNotFoundException.class)
@@ -85,7 +85,7 @@ class ReservationServiceTest {
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
 
-        ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2024-05-07", 1L);
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2024-05-07", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
                 .isInstanceOf(DateTimePassedException.class)
@@ -101,7 +101,7 @@ class ReservationServiceTest {
         Reservation reservation1 = new Reservation(member, theme, date, time);
         reservationRepository.save(reservation1);
 
-        ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
                 .isInstanceOf(ReservationConflictException.class)
@@ -115,7 +115,7 @@ class ReservationServiceTest {
         themeRepository.save(theme);
         memberRepository.save(member);
 
-        ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
+        ReservationCreate reservationDto = new ReservationCreate("t1@t1.com", 1L, "2025-11-30", 1L);
 
         assertThatNoException()
                 .isThrownBy(() -> reservationService.createReservation(reservationDto));

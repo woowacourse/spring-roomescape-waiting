@@ -6,28 +6,28 @@ import roomescape.domain.reservation.Reservation;
 
 public class MemberResponse {
 
-    private final long id;
+    private final String email;
     private final String name;
 
-    public MemberResponse(long id, String name) {
-        this.id = id;
+    public MemberResponse(String email, String name) {
+        this.email = email;
         this.name = name;
     }
 
     public MemberResponse(Member member) {
-        this(member.getId(), member.getName());
+        this(member.getEmail(), member.getName());
     }
 
     public MemberResponse(LoginMember member) {
-        this(member.getId(), member.getName());
+        this(member.getEmail(), member.getName());
     }
 
     public MemberResponse(Reservation reservation) {
-        this(reservation.memberId(), reservation.memberName());
+        this(reservation.memberEmail(), reservation.memberName());
     }
 
-    public long getId() {
-        return id;
+    public String getEmail() {
+        return email;
     }
 
     public String getName() {

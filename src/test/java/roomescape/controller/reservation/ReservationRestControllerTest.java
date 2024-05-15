@@ -1,7 +1,10 @@
 package roomescape.controller.reservation;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,10 +27,6 @@ import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
 
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
         DependencyInjectionTestExecutionListener.class
@@ -41,8 +40,8 @@ class ReservationRestControllerTest {
     @Autowired
     private JwtManager jwtManager;
 
-    private final Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
-    private final Member admin = new Member(2L, "t2@t2.com", "124", "재즈", "ADMIN");
+    private final Member member = new Member("t1@t1.com", "t1", "러너덕", "MEMBER");
+    private final Member admin = new Member("tt@tt.com", "tt", "재즈", "ADMIN");
 
     private String memberToken;
     private String adminToken;
@@ -50,20 +49,29 @@ class ReservationRestControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        initializeMemberData();
         memberToken = jwtManager.generateToken(member);
         adminToken = jwtManager.generateToken(admin);
-        initializeMemberData();
+
         initializeTimesData();
         initializeThemeData();
     }
 
     private void initializeMemberData() {
-        MemberCreateRequest createRequest = new MemberCreateRequest("t1@t1.com", "123", "재즈");
+        MemberCreateRequest memberRequest = new MemberCreateRequest("t1@t1.com", "t1", "러너덕");
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .body(createRequest)
+                .body(memberRequest)
+                .when().post("/members/signup")
+                .then().log().all()
+                .statusCode(201);
+
+        MemberCreateRequest adminRequest = new MemberCreateRequest("tt@tt.com", "tt", "재즈");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminRequest)
                 .when().post("/members/signup")
                 .then().log().all()
                 .statusCode(201);
@@ -96,7 +104,7 @@ class ReservationRestControllerTest {
     @DisplayName("예약 목록을 조회하는데 성공하면 응답과 200 상태 코드를 반환한다.")
     @Test
     void return_200_when_find_all_reservations() {
-        AdminReservationRequest reservationCreate = new AdminReservationRequest(1L, 1L,
+        AdminReservationRequest reservationCreate = new AdminReservationRequest("tt@tt.com", 1L,
                 "2100-08-05", 1L);
 
         RestAssured.given().log().all()
@@ -117,7 +125,7 @@ class ReservationRestControllerTest {
                 .getList(".", ReservationResponse.class);
 
         ReservationResponse expectedResponse = new ReservationResponse(
-                actualResponse.get(0).getId(), new MemberResponse(1L, "재즈"),
+                actualResponse.get(0).getId(), new MemberResponse("tt@tt.com", "재즈"),
                 new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
                 "2100-08-05",
                 new ReservationTimeResponse(1L, "10:00")
@@ -146,7 +154,7 @@ class ReservationRestControllerTest {
     @DisplayName("어드민이 예약을 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
     @Test
     void return_201_when_create_reservation_admin() {
-        AdminReservationRequest reservationCreate = new AdminReservationRequest(1L, 1L,
+        AdminReservationRequest reservationCreate = new AdminReservationRequest("tt@tt.com", 1L,
                 "2100-08-05", 1L);
 
         RestAssured.given().log().all()

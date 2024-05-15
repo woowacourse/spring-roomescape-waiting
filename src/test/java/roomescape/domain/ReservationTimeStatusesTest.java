@@ -13,9 +13,9 @@ import roomescape.domain.reservation.ReservationTimeStatuses;
 
 class ReservationTimeStatusesTest {
 
-    private final ReservationTime reservationTime1 = new ReservationTime(1L, "10:30");
-    private final ReservationTime reservationTime2 = new ReservationTime(2L, "11:30");
-    private final ReservationTime reservationTime3 = new ReservationTime(3L, "12:30");
+    private final ReservationTime reservationTime1 = new ReservationTime("10:30");
+    private final ReservationTime reservationTime2 = new ReservationTime("11:30");
+    private final ReservationTime reservationTime3 = new ReservationTime("12:30");
 
     @DisplayName("모든 예약 시간과 이미 예약된 시간을 비교하여 가능한 예약 시간 상태를 생성한다")
     @Test

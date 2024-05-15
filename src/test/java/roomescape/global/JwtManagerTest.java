@@ -1,5 +1,10 @@
 package roomescape.global;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.restassured.RestAssured;
@@ -15,11 +20,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import roomescape.domain.member.Member;
 import roomescape.exception.member.UnauthorizedException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class JwtManagerTest {
 
@@ -29,7 +29,7 @@ class JwtManagerTest {
     @Autowired
     private JwtManager jwtManager;
 
-    private final Member member1 = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
+    private final Member member1 = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
 
     @BeforeEach
     void setUp() {
@@ -110,7 +110,7 @@ class JwtManagerTest {
         String role = claims.get("role", String.class);
 
         assertAll(
-                () -> assertThat(subject).isEqualTo(member1.getId().toString()),
+                () -> assertThat(subject).isEqualTo(member1.getEmail()),
                 () -> assertThat(name).isEqualTo(member1.getName()),
                 () -> assertThat(role).isEqualTo(member1.getRole().name())
         );

@@ -23,17 +23,15 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member(Long id, String email, MemberPassword password, String name, Role role) {
-        this.id = id;
+    public Member(String email, MemberPassword password, String name, Role role) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.role = role;
     }
 
-    public Member(Long id, String email, String password, String name, String role) {
+    public Member(String email, String password, String name, String role) {
         this(
-                id,
                 email,
                 new MemberPassword(password),
                 name,
@@ -41,9 +39,8 @@ public class Member {
         );
     }
 
-    public Member(Long id, String email, String password, String name) {
+    public Member(String email, String password, String name) {
         this(
-                id,
                 email,
                 new MemberPassword(password),
                 name,
@@ -64,10 +61,6 @@ public class Member {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getPassword() {
-        return password.getPassword();
     }
 
     public String getName() {

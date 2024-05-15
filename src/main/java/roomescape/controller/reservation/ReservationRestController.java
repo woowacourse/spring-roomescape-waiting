@@ -32,12 +32,12 @@ public class ReservationRestController {
 
     @GetMapping("/admin/reservations")
     public List<ReservationResponse> findReservations(
-            @RequestParam(name = "member", required = false) Long memberId,
+            @RequestParam(name = "member", required = false) String email,
             @RequestParam(name = "theme", required = false) Long themeId,
             @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
             @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
 
-        ReservationSearchParams request = new ReservationSearchParams(memberId, themeId, dateFrom, dateTo);
+        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
         return reservationService.findAllReservations(request);
     }
 
@@ -50,7 +50,7 @@ public class ReservationRestController {
 
     @GetMapping("/reservations")
     public List<ReservationResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
-        return reservationService.findReservationsByMemberId(loginMember.getId());
+        return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
     }
 
     @ResponseStatus(HttpStatus.CREATED)

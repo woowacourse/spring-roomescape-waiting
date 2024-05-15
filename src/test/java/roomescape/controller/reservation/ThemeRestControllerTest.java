@@ -47,17 +47,18 @@ class ThemeRestControllerTest {
     private final MemberCreateRequest memberCreate2 = new MemberCreateRequest("t2@t2.com", "124", "러너덕");
     private final MemberCreateRequest memberCreate3 = new MemberCreateRequest("t3@t3.com", "125", "재즈덕");
     private final MemberCreateRequest memberCreate4 = new MemberCreateRequest("t4@t4.com", "126", "덕");
+    private final MemberCreateRequest memberCreate5 = new MemberCreateRequest("tt@tt.com", "tt", "새양");
 
-    private final AdminReservationRequest reservationCreate1 = new AdminReservationRequest(1L, 1L,
+    private final AdminReservationRequest reservationCreate1 = new AdminReservationRequest("tt@tt.com", 1L,
             "2100-01-01", 1L);
-    private final AdminReservationRequest reservationCreate2 = new AdminReservationRequest(2L, 1L,
+    private final AdminReservationRequest reservationCreate2 = new AdminReservationRequest("tt@tt.com", 1L,
             "2025-08-05", 1L);
-    private final AdminReservationRequest reservationCreate3 = new AdminReservationRequest(2L, 2L,
+    private final AdminReservationRequest reservationCreate3 = new AdminReservationRequest("tt@tt.com", 2L,
             "2025-08-05", 2L);
-    private final AdminReservationRequest reservationCreate4 = new AdminReservationRequest(2L, 2L,
+    private final AdminReservationRequest reservationCreate4 = new AdminReservationRequest("tt@tt.com", 2L,
             "2025-08-06", 1L);
 
-    private final Member admin = new Member(2L, "t2@t2.com", "124", "재즈", "ADMIN");
+    private final Member admin = new Member("t2@t2.com", "124", "재즈", "ADMIN");
     private String adminToken;
 
     @BeforeEach
@@ -121,6 +122,7 @@ class ThemeRestControllerTest {
         create("/members/signup", memberCreate2);
         create("/members/signup", memberCreate3);
         create("/members/signup", memberCreate4);
+        create("/members/signup", memberCreate5);
         create("/admin/reservations", reservationCreate1);
         create("/admin/reservations", reservationCreate2);
         create("/admin/reservations", reservationCreate3);

@@ -35,7 +35,7 @@ class ReservationTimeRestControllerTest {
     @LocalServerPort
     private int port;
 
-    private final Member admin = new Member(2L, "t2@t2.com", "124", "재즈", "ADMIN");
+    private final Member admin = new Member("tt@tt.com", "tt", "재즈", "ADMIN");
     private String adminToken;
 
     @Autowired
@@ -52,9 +52,9 @@ class ReservationTimeRestControllerTest {
 
     private final ThemeRequest themeCreate1 = new ThemeRequest("공포", "공포는 무서워", "hi.jpg");
 
-    private final MemberCreateRequest memberCreate1 = new MemberCreateRequest("t1@t1.com", "123", "재즈");
+    private final MemberCreateRequest memberCreate1 = new MemberCreateRequest("tt@tt.com", "tt", "재즈");
 
-    private final AdminReservationRequest reservationCreate1 = new AdminReservationRequest(1L, 1L,
+    private final AdminReservationRequest reservationCreate1 = new AdminReservationRequest("tt@tt.com", 1L,
             "2100-01-01", 1L);
 
     private void create(String path, Object param) {

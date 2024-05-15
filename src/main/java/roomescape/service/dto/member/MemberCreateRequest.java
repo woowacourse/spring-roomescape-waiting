@@ -27,7 +27,7 @@ public class MemberCreateRequest {
     }
 
     public Member toMember() {
-        return new Member(null, email, password, name);
+        return new Member(email, password, name);
     }
 
     public String getEmail() {

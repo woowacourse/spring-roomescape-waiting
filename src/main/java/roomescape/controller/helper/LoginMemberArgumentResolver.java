@@ -33,9 +33,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = jwtManager.extractToken(request);
         Claims claims = jwtManager.verifyToken(token);
-        long memberId = Long.parseLong(claims.getSubject());
+        String email = claims.getSubject();
         String name = claims.get("name", String.class);
         String role = claims.get("role", String.class);
-        return new LoginMember(memberId, name, Role.getRole(role));
+        return new LoginMember(email, name, Role.getRole(role));
     }
 }

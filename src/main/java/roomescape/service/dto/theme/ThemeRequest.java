@@ -21,11 +21,7 @@ public class ThemeRequest {
     }
 
     public Theme toTheme() {
-        return new Theme(null, name, description, thumbnail);
-    }
-
-    public String getName() {
-        return name;
+        return new Theme(name, description, thumbnail);
     }
 
     public String getDescription() {
@@ -34,5 +30,9 @@ public class ThemeRequest {
 
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    public String getName() {
+        return name;
     }
 }

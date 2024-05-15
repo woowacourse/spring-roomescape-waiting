@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -16,13 +15,12 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    public ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
     }
 
-    public ReservationTime(Long id, String startAt) {
-        this(id, LocalTime.parse(startAt));
+    public ReservationTime(String startAt) {
+        this(LocalTime.parse(startAt));
     }
 
     protected ReservationTime() {

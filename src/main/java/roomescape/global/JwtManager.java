@@ -10,13 +10,12 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.exception.member.UnauthorizedException;
-
-import java.util.Date;
-import java.util.Optional;
 
 @Component
 public class JwtManager {
@@ -34,7 +33,7 @@ public class JwtManager {
 
     public String generateToken(Member member) {
         return Jwts.builder()
-                .subject(member.getId().toString())
+                .subject(member.getEmail())
                 .claim("name", member.getName())
                 .claim("role", member.getRole().name())
                 .signWith(Keys.hmacShaKeyFor(tokenSecretKey.getBytes()))

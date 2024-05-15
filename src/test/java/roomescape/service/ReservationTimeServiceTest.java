@@ -60,7 +60,7 @@ class ReservationTimeServiceTest {
     @DisplayName("중복된 예약 시간을 생성하면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_create_duplicated_reservation_time() {
-        reservationTimeRepository.save(new ReservationTime(1L, "10:00"));
+        reservationTimeRepository.save(new ReservationTime("10:00"));
 
         ReservationTimeRequest requestDto = new ReservationTimeRequest("10:00");
 
@@ -81,10 +81,10 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간 삭제 시 해당 시간에 예약이 존재하면 에러를 발생시킨다.")
     @Test
     void throw_exception_when_delete_reservation_time_with_existing_reservation() {
-        Member member = new Member(1L, "t1@t1.com", "123", "러너덕", "MEMBER");
-        Theme theme = new Theme(1L, "공포", "공포는 무서워", "hi.jpg");
+        Member member = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
+        Theme theme = new Theme("공포", "공포는 무서워", "hi.jpg");
         LocalDate date = LocalDate.parse("2025-11-30");
-        ReservationTime time = new ReservationTime(1L, "11:00");
+        ReservationTime time = new ReservationTime("11:00");
         Reservation reservation = new Reservation(member, theme, date, time);
 
         memberRepository.save(member);
@@ -100,7 +100,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간 삭제에 성공한다.")
     @Test
     void success_delete_reservation_time() {
-        ReservationTime time = new ReservationTime(1L, "11:00");
+        ReservationTime time = new ReservationTime("11:00");
         reservationTimeRepository.save(time);
 
         assertThatNoException()
