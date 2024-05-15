@@ -45,7 +45,7 @@ public class ThemeService {
         if (startDate.isAfter(endDate)) {
             throw new BusinessException(ErrorType.INVALID_REQUEST_ERROR);
         }
-        return themeRepository.findPopularThemes(startDate, endDate, limit).stream()
+        return themeRepository.findTopThemesByReservations(startDate, endDate, limit).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
