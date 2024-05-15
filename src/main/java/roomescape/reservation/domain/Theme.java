@@ -66,7 +66,7 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme)) {
             return false;
         }
         Theme theme = (Theme) o;

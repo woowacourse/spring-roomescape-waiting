@@ -24,6 +24,7 @@ import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -99,6 +100,7 @@ public class ReservationService {
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
+    @Transactional
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         Member member = getMember(authInfo.getId());

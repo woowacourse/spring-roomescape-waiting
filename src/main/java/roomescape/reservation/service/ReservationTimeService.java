@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
@@ -16,6 +17,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -26,6 +28,7 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
         LocalTime time = LocalTime.parse(reservationTimeRequest.startAt());
         if (reservationTimeRepository.existsByStartAt(time)) {
@@ -43,6 +46,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(long timeId) {
         if (reservationRepository.existsByTimeId(timeId)) {
             throw new BusinessException(ErrorType.RESERVATION_NOT_DELETED);

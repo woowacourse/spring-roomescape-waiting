@@ -49,7 +49,7 @@ public class ReservationTime {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReservationTime)) {
             return false;
         }
         ReservationTime reservationTime = (ReservationTime) o;

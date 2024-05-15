@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
@@ -11,6 +12,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
 
@@ -24,6 +26,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional
     public MemberResponse create(SignUpRequest signUpRequest) {
         Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
         return new MemberResponse(member.getId(), member.getName());

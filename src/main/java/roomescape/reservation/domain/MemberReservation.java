@@ -1,10 +1,7 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
@@ -14,9 +11,9 @@ public class MemberReservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Reservation reservation;
 
     public MemberReservation() {
@@ -29,8 +26,7 @@ public class MemberReservation {
     }
 
     public MemberReservation(Member member, Reservation reservation) {
-        this.member = member;
-        this.reservation = reservation;
+        this(null, member, reservation);
     }
 
     public boolean isMember(Member member) {
@@ -51,14 +47,10 @@ public class MemberReservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof MemberReservation)) return false;
         MemberReservation that = (MemberReservation) o;
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(id, that.id);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
@@ -38,6 +39,7 @@ public class AuthService {
         return AuthInfo.of(member);
     }
 
+    @Transactional
     public void signUp(SignUpRequest signUpRequest) {
         if (memberRepository.existsByEmail(signUpRequest.email())) {
             throw new BusinessException(ErrorType.DUPLICATED_EMAIL_ERROR);
