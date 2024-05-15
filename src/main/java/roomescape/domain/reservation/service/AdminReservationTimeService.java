@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class AdminReservationTimeService {
 
-    private ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
     public AdminReservationTimeService(ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
