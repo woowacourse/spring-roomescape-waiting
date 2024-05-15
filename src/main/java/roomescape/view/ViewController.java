@@ -20,4 +20,9 @@ public class ViewController {
     public String getReservationPage() {
         return "reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String getReservationMinePage() {
+        return "reservation-mine";
+    }
 }
