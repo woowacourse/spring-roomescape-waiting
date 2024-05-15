@@ -33,4 +33,12 @@ class MemberPageControllerTest {
                 .when().get("")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
+
+    @DisplayName("회원 예약 페이지 접근 성공 테스트")
+    @Test
+    void responseUserReservation() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+    }
 }

@@ -90,7 +90,7 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-        Map reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE);
+        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE);
 
         // then
         RestAssured.given().log().all()
@@ -100,6 +100,39 @@ class ReservationControllerTest {
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
+
+    @DisplayName("내 예약 조회 성공시 200을 응답한다.")
+    @Test
+    void findMy() {
+        // given
+        Member member = memberRepository.save(MEMBER_BROWN);
+
+        String accessToken = RestAssured
+                .given().log().all()
+                .body(new LoginRequest(member.getEmail(), member.getPassword()))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+
+        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE);
+
+        // 예약 추가
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().log().all();
+
+        // when & then
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .when().get("/reservations-mine")
+                .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
+    }
+
 
     @DisplayName("날짜 양식을 잘못 입력할 시 400을 응답한다.")
     @ParameterizedTest
@@ -116,7 +149,7 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-        Map reservationRequest = createReservationRequest(MEMBER_BROWN, value);
+        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, value);
 
         // when & then
         RestAssured.given().log().all()
@@ -141,7 +174,7 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-        Map reservationRequest = createReservationRequest(MEMBER_BROWN, "2023-12-12");
+        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, "2023-12-12");
         // when & then
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
@@ -165,7 +198,7 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-        Map reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE);
+        Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE);
 
         // 중복된 시간을 저장한다.
         RestAssured.given().log().all()
@@ -235,7 +268,7 @@ class ReservationControllerTest {
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
 
-    private Map createReservationRequest(Member member, String date) {
+    private Map<String, Object> createReservationRequest(Member member, String date) {
         Member savedMember = memberRepository.save(member);
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
