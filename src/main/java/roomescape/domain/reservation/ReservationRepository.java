@@ -29,4 +29,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                              @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
 
     List<Reservation> findByScheduleDateAndThemeId(ReservationDate date, long themeId);
+
+    List<Reservation> findByMemberId(long memberId);
 }
