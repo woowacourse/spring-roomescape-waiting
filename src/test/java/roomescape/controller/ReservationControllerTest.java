@@ -165,7 +165,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             () -> assertThat(userReservationResponse.theme()).isEqualTo("이름1"),
                             () -> assertThat(userReservationResponse.date()).isEqualTo(LocalDate.now()),
                             () -> assertThat(userReservationResponse.time()).isEqualTo(LocalTime.of(9, 0, 0)),
-                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.RESERVED.name())
+                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.RESERVED.getValue())
                     );
                 }),
                 dynamicTest("존재하지 않는 시간으로 예약을 추가할 수 없다.", () -> {
