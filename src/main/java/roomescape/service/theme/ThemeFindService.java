@@ -8,6 +8,7 @@ import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeFindService {
+
     private static final int START_DAYS_SUBTRACT = 7;
     private static final int END_DAYS_SUBTRACT = 1;
     private static final int RANK_COUNT = 7;

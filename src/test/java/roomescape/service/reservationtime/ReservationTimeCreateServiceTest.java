@@ -16,7 +16,6 @@ class ReservationTimeCreateServiceTest {
     @Autowired
     private ReservationTimeCreateService reservationTimeCreateService;
 
-
     @Test
     @DisplayName("존재하지 않는 예약 시간인 경우 성공한다")
     void checkDuplicateTime_Success() {
