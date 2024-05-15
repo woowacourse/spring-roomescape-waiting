@@ -14,6 +14,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
@@ -84,20 +85,6 @@ public class ReservationService {
                 .toList();
     }
 
-    private List<Time> extractReservationTimes(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(Reservation::getReservationTime)
-                .toList();
-    }
-
-    private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
-        return bookedTimes.contains(time);
-    }
-
-    public void removeReservations(long reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
-
     public List<ReservationResponse> findFilteredReservations(ReservationFilterRequest reservationFilterRequest) {
         FilterInfo filterInfo = reservationFilterRequest.toFilterInfo();
 
@@ -107,4 +94,25 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationWaitingResponse> findMemberReservations(long id) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
+
+        return reservations.stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+    }
+
+    public void removeReservations(long reservationId) {
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private List<Time> extractReservationTimes(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(Reservation::getReservationTime)
+                .toList();
+    }
+
+    private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
+        return bookedTimes.contains(time);
+    }
 }

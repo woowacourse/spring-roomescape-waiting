@@ -31,4 +31,6 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate);
 
     void deleteById(long reservationId);
+
+    List<Reservation> findAllByMemberId(long id);
 }
