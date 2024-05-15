@@ -8,13 +8,13 @@ import java.time.LocalTime;
 
 @Entity
 public class ReservationTime {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalTime startAt;
 
-    private ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(final Long id, final LocalTime startAt) {

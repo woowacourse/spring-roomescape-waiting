@@ -16,20 +16,24 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
     private MemberName memberName;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
     private Email email;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "member_role")
     private Role role;
 
-    private Member() {
+    protected Member() {
     }
 
     public Member(

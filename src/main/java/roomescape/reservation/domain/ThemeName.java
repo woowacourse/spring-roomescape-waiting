@@ -4,11 +4,11 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class ThemeName {
-
     private static final int MAX_THEME_NAME_LENGTH = 30;
+
     private String value;
 
-    private ThemeName() {
+    protected ThemeName() {
     }
 
     public ThemeName(final String value) {

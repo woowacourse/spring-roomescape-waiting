@@ -4,12 +4,11 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Password {
-
     private static final int MAX_PASSWORD_LENGTH = 20;
 
     private String value;
 
-    private Password() {
+    protected Password() {
     }
 
     public Password(final String value) {

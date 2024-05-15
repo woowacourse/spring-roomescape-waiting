@@ -14,7 +14,6 @@ import roomescape.member.domain.Member;
 
 @Entity
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +32,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(

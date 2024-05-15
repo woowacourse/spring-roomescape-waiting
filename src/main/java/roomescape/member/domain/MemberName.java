@@ -4,11 +4,11 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class MemberName {
-
     private static final int MAX_NAME_LENGTH = 10;
+
     private String value;
 
-    private MemberName() {
+    protected MemberName() {
     }
 
     public MemberName(final String name) {
