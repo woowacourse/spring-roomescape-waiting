@@ -16,6 +16,7 @@ import roomescape.service.ReservationService;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateMemberRequest;
 import roomescape.service.dto.request.ReservationCreateRequest;
+import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
@@ -29,6 +30,11 @@ public class ReservationController {
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllReservations() {
         return ResponseEntity.ok(reservationService.findAll());
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(AuthInfo authInfo) {
+        return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
     }
 
     @PostMapping("/reservations")

@@ -18,7 +18,9 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationSpecification;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.RoomThemeRepository;
+import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
+import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
@@ -43,6 +45,13 @@ public class ReservationService {
         return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
+        return reservationRepository.findByMemberId(authInfo.id())
+                .stream()
+                .map(reservation -> MyReservationResponse.from(reservation, "예약"))
                 .toList();
     }
 

@@ -14,4 +14,9 @@ public class MemberPageController {
     public String findLoginPage() {
         return "login";
     }
+
+    @GetMapping("/reservation-mine")
+    public String findMyReservationsPage() {
+        return "reservation-mine";
+    }
 }
