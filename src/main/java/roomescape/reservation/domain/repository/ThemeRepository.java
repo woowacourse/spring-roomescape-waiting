@@ -19,5 +19,4 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT ?;
             """, nativeQuery = true)
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
-    // TODO: 메서드명 수정
 }

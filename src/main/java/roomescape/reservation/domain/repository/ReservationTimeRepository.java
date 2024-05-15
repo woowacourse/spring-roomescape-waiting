@@ -11,13 +11,11 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     boolean existsByStartAt(LocalTime time);
 
-    @Query(value = """
-            SELECT reservation_time.id, reservation_time.start_at FROM reservation_time 
-            INNER JOIN reservation as re 
-            ON re.time_id = reservation_time.id 
-            INNER JOIN member_reservation as mr 
-            ON re.id = mr.reservation_id 
-            WHERE re.date = ? AND re.theme_id = ?;
-            """, nativeQuery = true)
+    @Query("""
+                SELECT rt FROM MemberReservation mr
+                JOIN mr.reservation r 
+                JOIN r.time rt 
+                WHERE r.date = :date AND r.theme.id = :themeId
+            """)
     Set<ReservationTime> findReservedTime(LocalDate date, long themeId);
 }
