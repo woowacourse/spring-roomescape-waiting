@@ -1,4 +1,4 @@
-package roomescape.member.controller;
+package roomescape.auth.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -6,11 +6,11 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.config.IntegrationTest;
-import roomescape.member.dto.MemberLoginRequest;
+import roomescape.auth.dto.LoginRequest;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.util.CookieUtils;
 
-class MemberLoginApiControllerTest extends IntegrationTest {
+class AuthApiControllerTest extends IntegrationTest {
 
     @DisplayName("회원 가입 후 로그인에 성공하면 200 응답을 받고 쿠키가 존재하는지 확인하고 로그인 체크 한다.")
     @Test
@@ -27,10 +27,10 @@ class MemberLoginApiControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(201);
 
-        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(email, password);
+        LoginRequest loginRequest = new LoginRequest(email, password);
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(memberLoginRequest)
+                .body(loginRequest)
                 .when().post("/login")
                 .thenReturn();
 

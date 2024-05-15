@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -9,10 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.auth.domain.Role;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.LoginMember;
+import roomescape.auth.dto.LoginMember;
 
 @Component
 public class JwtTokenProvider {

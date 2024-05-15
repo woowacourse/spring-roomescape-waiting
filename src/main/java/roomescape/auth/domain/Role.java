@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.auth.domain;
 
 import java.util.Arrays;
 import roomescape.exception.UnauthenticatedUserException;

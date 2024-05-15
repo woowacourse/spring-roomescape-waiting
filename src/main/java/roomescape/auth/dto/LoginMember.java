@@ -1,6 +1,6 @@
-package roomescape.member.dto;
+package roomescape.auth.dto;
 
-import roomescape.auth.Role;
+import roomescape.auth.domain.Role;
 
 public record LoginMember(Long id, Role role, String name, String email) {
 }

@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.auth.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.auth.domain.Role;
+import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
-import roomescape.member.dto.LoginMember;
+import roomescape.auth.dto.LoginMember;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class JwtTokenProviderTest {

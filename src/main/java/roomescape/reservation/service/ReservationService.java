@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.LoginMember;
+import roomescape.auth.dto.LoginMember;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;

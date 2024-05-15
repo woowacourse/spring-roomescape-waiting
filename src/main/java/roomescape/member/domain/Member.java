@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import roomescape.auth.Role;
+import roomescape.auth.domain.Role;
 
 @Entity
 @DynamicInsert

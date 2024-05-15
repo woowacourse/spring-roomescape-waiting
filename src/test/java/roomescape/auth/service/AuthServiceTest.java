@@ -1,4 +1,4 @@
-package roomescape.member.service;
+package roomescape.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,18 +12,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.auth.service.AuthService;
 import roomescape.config.DatabaseCleaner;
-import roomescape.member.dto.MemberLoginRequest;
+import roomescape.auth.dto.LoginRequest;
 import roomescape.member.dto.MemberSignUpRequest;
+import roomescape.member.service.MemberService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-class MemberLoginServiceTest {
+class AuthServiceTest {
 
     @Autowired
     private MemberService memberService;
 
     @Autowired
-    private MemberLoginService memberLoginService;
+    private AuthService authService;
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
@@ -39,8 +41,8 @@ class MemberLoginServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
         memberService.save(memberSignUpRequest);
 
-        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(KAKI_EMAIL, KAKI_PASSWORD);
-        String memberToken = memberLoginService.createMemberToken(memberLoginRequest);
+        LoginRequest loginRequest = new LoginRequest(KAKI_EMAIL, KAKI_PASSWORD);
+        String memberToken = authService.createMemberToken(loginRequest);
 
         assertThat(memberToken).isNotNull();
     }
@@ -51,9 +53,9 @@ class MemberLoginServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
         memberService.save(memberSignUpRequest);
 
-        MemberLoginRequest memberLoginRequest = new MemberLoginRequest(KAKI_EMAIL, "abcd");
+        LoginRequest loginRequest = new LoginRequest(KAKI_EMAIL, "abcd");
 
-        assertThatThrownBy(() -> memberLoginService.findByEmailAndPassword(memberLoginRequest))
+        assertThatThrownBy(() -> authService.findByEmailAndPassword(loginRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

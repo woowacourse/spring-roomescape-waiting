@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.auth.jwt;
 
 public enum JwtClaimKey {
     MEMBER_ID("memberId"),
