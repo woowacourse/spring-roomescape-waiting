@@ -1,14 +1,18 @@
 package roomescape.helper;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 @Component
+@Transactional
 public class DatabaseCleaner {
-    private final JdbcTemplate jdbcTemplate;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public DatabaseCleaner(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public DatabaseCleaner(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     public void execute() {
@@ -19,22 +23,22 @@ public class DatabaseCleaner {
     }
 
     private void clearMember() {
-        jdbcTemplate.update("DELETE FROM member");
-        jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART");
+        entityManager.createNativeQuery("DELETE FROM member").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE member ALTER COLUMN id RESTART").executeUpdate();
     }
 
     private void clearReservation() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART");
+        entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
     }
 
     private void clearTime() {
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART");
+        entityManager.createNativeQuery("DELETE FROM reservation_time").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE reservation_time ALTER COLUMN id RESTART").executeUpdate();
     }
 
     private void clearTheme() {
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART");
+        entityManager.createNativeQuery("DELETE FROM theme").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE theme ALTER COLUMN id RESTART").executeUpdate();
     }
 }
