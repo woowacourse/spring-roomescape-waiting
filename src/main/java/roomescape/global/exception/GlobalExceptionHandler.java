@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(value = BusinessException.class)
-    public ResponseEntity<ErrorResponse> handle(final BusinessException exception) {
+    @ExceptionHandler(value = AuthException.class)
+    public ResponseEntity<ErrorResponse> handle(final AuthException exception) {
         logger.error(exception.getMessage(), exception);
         return new ResponseEntity(exception.getErrorResponse(), exception.getErrorResponse().getStatusCode());
     }

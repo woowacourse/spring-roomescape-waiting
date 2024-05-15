@@ -6,12 +6,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.service.AuthService;
-import roomescape.global.exception.BusinessException;
-import roomescape.global.exception.ErrorType;
+import roomescape.global.exception.AuthException;
+import roomescape.global.exception.AuthException.AuthErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 public class AdminCheckInterceptor implements HandlerInterceptor {
+
     private final AuthService authService;
 
     public AdminCheckInterceptor(final AuthService authService) {
@@ -25,19 +26,19 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
         String token = extractTokenFromCookies(request.getCookies());
         Member member = authService.findMemberByToken(token);
         if (member == null || !member.getRole().equals(Role.ADMIN)) {
-            throw new BusinessException(ErrorType.ACCESS_FORBIDDEN);
+            throw new AuthException(AuthErrorType.ACCESS_FORBIDDEN);
         }
         return true;
     }
 
     private String extractTokenFromCookies(final Cookie[] cookies) {
         if (cookies == null || cookies.length == 0) {
-            throw new BusinessException(ErrorType.UNAUTHORIZED);
+            throw new AuthException(AuthErrorType.UNAUTHORIZED);
         }
         return Arrays.asList(cookies).stream()
                 .filter(cookie -> cookie.getName().equals("token"))
                 .findAny()
-                .orElseThrow(() -> new BusinessException(ErrorType.UNAUTHORIZED))
+                .orElseThrow(() -> new AuthException(AuthErrorType.UNAUTHORIZED))
                 .getValue();
     }
 }

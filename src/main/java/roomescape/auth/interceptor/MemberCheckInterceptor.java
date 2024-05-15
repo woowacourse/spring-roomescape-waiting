@@ -7,10 +7,11 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.service.AuthService;
-import roomescape.global.exception.BusinessException;
-import roomescape.global.exception.ErrorType;
+import roomescape.global.exception.AuthException;
+import roomescape.global.exception.AuthException.AuthErrorType;
 
 public class MemberCheckInterceptor implements HandlerInterceptor {
+
     private final AuthService authService;
 
     public MemberCheckInterceptor(final AuthService authService) {
@@ -24,19 +25,19 @@ public class MemberCheckInterceptor implements HandlerInterceptor {
         try {
             authService.findMemberByToken(token);
         } catch (final NoSuchElementException exception) {
-            throw new BusinessException(ErrorType.ACCESS_FORBIDDEN);
+            throw new AuthException(AuthErrorType.ACCESS_FORBIDDEN);
         }
         return true;
     }
 
     private String extractTokenFromCookies(final Cookie[] cookies) {
         if (cookies == null || cookies.length == 0) {
-            throw new BusinessException(ErrorType.UNAUTHORIZED);
+            throw new AuthException(AuthErrorType.UNAUTHORIZED);
         }
         return Arrays.asList(cookies).stream()
                 .filter(cookie -> cookie.getName().equals("token"))
                 .findAny()
-                .orElseThrow(() -> new BusinessException(ErrorType.UNAUTHORIZED))
+                .orElseThrow(() -> new AuthException(AuthErrorType.UNAUTHORIZED))
                 .getValue();
     }
 }
