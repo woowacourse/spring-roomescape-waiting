@@ -22,6 +22,7 @@ import roomescape.reservation.dto.ReservationCreateRequest;
 @Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
     private static final int COUNT_OF_RESERVATION = 4;
+    private static final int BRI_COUNT_OF_RESERVATION = 1;
 
     @LocalServerPort
     private int port;
@@ -43,6 +44,21 @@ class ReservationControllerTest {
                 .jsonPath().getInt("size()");
 
         assertThat(size).isEqualTo(COUNT_OF_RESERVATION);
+    }
+
+    @DisplayName("로그인한 사용자의 예약 목록을 읽을 수 있다.")
+    @Test
+    void findMyReservations() {
+        Cookies userCookies = makeUserCookie();
+
+        int size = RestAssured.given().log().all()
+                .cookies(userCookies)
+                .when().get("/reservations/accounts")
+                .then().log().all()
+                .statusCode(200).extract()
+                .jsonPath().getInt("size()");
+
+        assertThat(size).isEqualTo(BRI_COUNT_OF_RESERVATION);
     }
 
     @DisplayName("예약을 DB에 추가할 수 있다.")

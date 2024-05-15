@@ -23,4 +23,6 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                     AND date BETWEEN NVL(:startDate, date) AND NVL(:endDate, date) 
             """, nativeQuery = true)
     List<Reservation> findAll(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
+
+    List<Reservation> findByMember_id(Long memberId);
 }
