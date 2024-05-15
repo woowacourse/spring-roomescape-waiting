@@ -37,7 +37,7 @@ public class MemberRestController {
     @PostMapping("/members/login")
     public void login(@Valid @RequestBody MemberLoginRequest request, HttpServletResponse response) {
         String token = memberService.login(request);
-        CookieUtils.addCookie(response, TOKEN_NAME, token, 300);
+        CookieUtils.addCookie(response, TOKEN_NAME, token, 1800);
     }
 
     @GetMapping("/members/login/check")
