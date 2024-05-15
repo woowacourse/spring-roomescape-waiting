@@ -8,13 +8,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.test.RepositoryTest;
 import roomescape.theme.domain.Theme;
 
-@DataJpaTest
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ThemeRepositoryTest {
+class ThemeRepositoryTest extends RepositoryTest {
     private static final int COUNT_OF_THEME = 3;
     @Autowired
     private ThemeRepository themeRepository;

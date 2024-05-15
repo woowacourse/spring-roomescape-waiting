@@ -7,15 +7,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberPassword;
+import roomescape.test.RepositoryTest;
 
-@DataJpaTest
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class MemberRepositoryTest {
+class MemberRepositoryTest extends RepositoryTest {
     private static final int COUNT_OF_MEMBER = 4;
 
     @Autowired
@@ -47,12 +44,12 @@ class MemberRepositoryTest {
         assertThat(actual.get().getId()).isEqualTo(1L);
     }
 
-    @DisplayName("member를 삭제할 수 있다.")
+    @DisplayName("멤버를 삭제할 수 있다.")
     @Test
     void deleteTest() {
-        memberRepository.deleteById(4L);
-        
-        Optional<Member> member = memberRepository.findById(4L);
+        memberRepository.deleteById(1L);
+
+        Optional<Member> member = memberRepository.findById(1L);
         assertThat(member).isEmpty();
     }
 }

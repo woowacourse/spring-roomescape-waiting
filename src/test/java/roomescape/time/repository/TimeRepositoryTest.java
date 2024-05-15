@@ -9,13 +9,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.test.RepositoryTest;
 import roomescape.time.domain.ReservationTime;
 
-@DataJpaTest
-@Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class TimeRepositoryTest {
+class TimeRepositoryTest extends RepositoryTest {
     private static final int COUNT_OF_TIME = 3;
 
     @Autowired
@@ -57,7 +54,7 @@ class TimeRepositoryTest {
         Optional<ReservationTime> savedTime = timeRepository.findById(COUNT_OF_TIME + 1L);
         assertThat(savedTime).isNotEmpty();
     }
-    
+
     @DisplayName("예약 시간을 삭제할 수 있다.")
     @Test
     void deleteByIdTest() {
