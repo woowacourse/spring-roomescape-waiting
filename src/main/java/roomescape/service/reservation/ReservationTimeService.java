@@ -1,8 +1,11 @@
 package roomescape.service.reservation;
 
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
@@ -32,7 +35,7 @@ public class ReservationTimeService {
     }
 
     private void validateDuplicated(ReservationTimeCreateRequest reservationTimeCreateRequest) {
-        if (reservationTimeRepository.existsByTime(reservationTimeCreateRequest.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(LocalTime.parse(reservationTimeCreateRequest.startAt()))) {
             throw new InvalidReservationException("이미 같은 시간이 존재합니다.");
         }
     }
@@ -49,25 +52,24 @@ public class ReservationTimeService {
     }
 
     private void validateByReservation(long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByScheduleTimeId(id)) {
             throw new InvalidReservationException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
         }
     }
 
     public List<AvailableReservationTimeResponse> findAvailableTimes(
             ReservationTimeReadRequest reservationTimeReadRequest) {
-        List<ReservationTime> bookedReservationTimes = reservationTimeRepository.findBookedTimesByDateAndTheme(
-                reservationTimeReadRequest.date(),
-                reservationTimeReadRequest.themeId());
+        List<Reservation> reservations = reservationRepository.findByScheduleDateAndThemeId(
+                new ReservationDate(reservationTimeReadRequest.date()), reservationTimeReadRequest.themeId());
         return reservationTimeRepository.findAll().stream()
                 .map(time -> new AvailableReservationTimeResponse(time.getId(), time.getStartAt(),
-                        isBooked(bookedReservationTimes, time)))
+                        isBooked(reservations, time)))
                 .toList();
     }
 
-    private boolean isBooked(List<ReservationTime> bookedReservationTimes, ReservationTime time) {
-        return bookedReservationTimes.stream()
-                .map(ReservationTime::getStartAt)
-                .anyMatch(bookedTime -> bookedTime == time.getStartAt());
+    private boolean isBooked(List<Reservation> reservations, ReservationTime time) {
+        return reservations.stream()
+                .map(Reservation::getReservationTime)
+                .anyMatch(time::isSame);
     }
 }

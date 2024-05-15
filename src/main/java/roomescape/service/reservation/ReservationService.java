@@ -73,7 +73,7 @@ public class ReservationService {
     private void validate(String date, ReservationTime reservationTime, Theme theme) {
         ReservationDate reservationDate = new ReservationDate(date);
         validateIfBefore(reservationDate, reservationTime);
-        validateDuplicated(date, reservationTime, theme);
+        validateDuplicated(reservationDate, reservationTime, theme);
     }
 
     private void validateIfBefore(ReservationDate date, ReservationTime time) {
@@ -83,8 +83,8 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicated(String date, ReservationTime reservationTime, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId())) {
+    private void validateDuplicated(ReservationDate date, ReservationTime reservationTime, Theme theme) {
+        if (reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(), theme.getId())) {
             throw new InvalidReservationException("선택하신 테마와 일정은 이미 예약이 존재합니다.");
         }
     }

@@ -49,6 +49,10 @@ public class ReservationTime {
         }
     }
 
+    public boolean isSame(ReservationTime other){
+        return startAt.equals(other.startAt);
+    }
+
     public long getId() {
         return id;
     }
