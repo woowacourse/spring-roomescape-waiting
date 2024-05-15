@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.member.UnauthorizedException;
 
 import java.util.Date;
 import java.util.Optional;

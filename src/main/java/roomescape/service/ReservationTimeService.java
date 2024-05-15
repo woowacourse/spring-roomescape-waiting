@@ -1,18 +1,17 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeStatuses;
+import roomescape.exception.reservation.TimeDuplicatedException;
+import roomescape.exception.reservation.TimeUsingException;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.time.AvailableTimeRequest;
 import roomescape.service.dto.time.AvailableTimeResponses;
-import roomescape.service.exception.TimeDuplicatedException;
-import roomescape.service.exception.TimeUsingException;
-
-import java.util.List;
 
 @Service
 public class ReservationTimeService {
@@ -45,7 +44,7 @@ public class ReservationTimeService {
     public ReservationTimeResponse createReservationTime(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
-            throw new TimeDuplicatedException("중복된 시간을 입력할 수 없습니다.");
+            throw new TimeDuplicatedException();
         }
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
         return new ReservationTimeResponse(savedTime);
@@ -53,7 +52,7 @@ public class ReservationTimeService {
 
     public void deleteReservationTime(long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new TimeUsingException("해당 시간에 예약이 있어 삭제할 수 없습니다.");
+            throw new TimeUsingException();
         }
         reservationTimeRepository.deleteById(id);
     }
