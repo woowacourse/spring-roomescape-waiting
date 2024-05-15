@@ -56,7 +56,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email.value();
+        return email.email();
     }
 
     public MemberRole getRole() {
