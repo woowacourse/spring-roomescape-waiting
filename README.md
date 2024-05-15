@@ -1,7 +1,6 @@
-# 미션 2 기능 요구 사항
+# 방탈출 기능 요구 사항
 
 - [API 요청 폴더 바로가기](api-test)
-
 
 ### 📌 reservation (예약)
 - [예약 API 요청 파일 바로가기](api-test/reservation-api.http)
