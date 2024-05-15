@@ -66,6 +66,4 @@ class LoginTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(401);
     }
-
-
 }
