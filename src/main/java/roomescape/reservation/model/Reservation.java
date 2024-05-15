@@ -2,7 +2,6 @@ package roomescape.reservation.model;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,11 +18,11 @@ public class Reservation {
     private Long id;
     @Embedded
     private ReservationDate date;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private ReservationTime time;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Theme theme;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Member member;
 
     public static Reservation of(

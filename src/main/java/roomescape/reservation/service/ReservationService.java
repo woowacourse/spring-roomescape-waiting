@@ -10,6 +10,7 @@ import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.CustomReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -22,16 +23,19 @@ import java.util.NoSuchElementException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final CustomReservationRepository customReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
+            final CustomReservationRepository customReservationRepository,
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository
     ) {
+        this.customReservationRepository = customReservationRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -50,7 +54,7 @@ public class ReservationService {
                 request.to()
         );
 
-        return reservationRepository.searchReservations(searchReservationsParams);
+        return customReservationRepository.searchReservations(searchReservationsParams);
     }
 
     public Reservation saveReservation(final SaveReservationRequest request) {
@@ -69,15 +73,15 @@ public class ReservationService {
     }
 
     private static void validateReservationDateAndTime(final ReservationDate date, final ReservationTime time) {
-        final LocalDateTime reservationLocalDateTime = LocalDateTime.of(date.value(), time.getStartAt());
+        final LocalDateTime reservationLocalDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
         if (reservationLocalDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("현재 날짜보다 이전 날짜를 예약할 수 없습니다.");
         }
     }
 
     private void validateReservationDuplication(final Reservation reservation) {
-        if (reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getDate().value(),
+        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+                reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId())
         ) {
@@ -86,10 +90,6 @@ public class ReservationService {
     }
 
     public void deleteReservation(final Long reservationId) {
-        final int deletedDataCount = reservationRepository.deleteById(reservationId);
-
-        if (deletedDataCount <= 0) {
-            throw new NoSuchElementException("해당 id의 예약이 존재하지 않습니다.");
-        }
+        reservationRepository.deleteById(reservationId);
     }
 }

@@ -13,7 +13,6 @@ import roomescape.reservation.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class ThemeService {
@@ -40,25 +39,21 @@ public class ThemeService {
         return themeRepository.save(saveThemeRequest.toTheme());
     }
 
+    // TODO : 존재하지 않는 데이터 삭제에 대해서 예외를 던질것인가?
     public void deleteTheme(final Long themeId) {
         validateReservationOfIncludeThemeExist(themeId);
-
-        final int deletedDataCount = themeRepository.deleteById(themeId);
-
-        if (deletedDataCount <= 0) {
-            throw new NoSuchElementException("해당 id의 테마 정보가 존재하지 않습니다.");
-        }
+        themeRepository.deleteById(themeId);
     }
 
     private void validateReservationOfIncludeThemeExist(final Long themeId) {
-        if (reservationRepository.existByThemeId(themeId)) {
+        if (reservationRepository.existsByThemeId(themeId)) {
             throw new IllegalArgumentException("예약에 포함된 테마 정보는 삭제할 수 없습니다.");
         }
     }
 
     public ReservationTimeAvailabilities getAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
+        final List<Reservation> reservations = reservationRepository.findAllByDateAndTheme_Id(new ReservationDate(date), themeId);
 
         return ReservationTimeAvailabilities.of(reservationTimes, reservations);
     }
@@ -68,6 +63,6 @@ public class ThemeService {
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));
         final int maximumThemeCount = 10;
 
-        return themeRepository.findPopularThemes(startAt, endAt, maximumThemeCount);
+        return themeRepository.findPopularThemes(startAt.getDate(), endAt.getDate(), maximumThemeCount);
     }
 }

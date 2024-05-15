@@ -50,7 +50,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeExist(final Long reservationTimeId) {
-        if (reservationRepository.existByTimeId(reservationTimeId)) {
+        if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new IllegalArgumentException("예약에 포함된 시간 정보는 삭제할 수 없습니다.");
         }
     }

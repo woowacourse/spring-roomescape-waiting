@@ -5,6 +5,7 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.token.TokenProvider;
 import roomescape.member.encoder.PasswordEncoder;
 import roomescape.member.model.Member;
+import roomescape.member.model.MemberEmail;
 import roomescape.member.repository.MemberRepository;
 
 import java.util.NoSuchElementException;
@@ -27,7 +28,7 @@ public class AuthService {
     }
 
     public String login(final LoginRequest request) {
-        final Member member = memberRepository.findByEmail(request.email())
+        final Member member = memberRepository.findByEmail(new MemberEmail(request.email()))
                 .orElseThrow(() -> new NoSuchElementException("해당 이메일 정보와 일치하는 회원 정보가 없습니다."));
         checkCredential(member, request.password());
 
@@ -35,7 +36,7 @@ public class AuthService {
     }
 
     private void checkCredential(final Member member, final String password) {
-        if (!passwordEncoder.matches(password, member.getPassword().value())) {
+        if (!passwordEncoder.matches(password, member.getPassword().getPassword())) {
             throw new IllegalArgumentException("일치하지 않는 비밀번호입니다.");
         }
     }
