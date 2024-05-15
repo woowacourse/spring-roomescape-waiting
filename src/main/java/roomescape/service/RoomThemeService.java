@@ -25,10 +25,10 @@ public class RoomThemeService {
     }
 
     public List<RoomThemeResponse> findByRanking() {
-        LocalDate toDate = LocalDate.now();
-        LocalDate fromDate = toDate.minusDays(8);
+        LocalDate dateTo = LocalDate.now().minusDays(1);
+        LocalDate dateFrom = dateTo.minusDays(7);
 
-        return roomThemeRepository.findAllRanking(fromDate, toDate, Pageable.ofSize(10))
+        return roomThemeRepository.findAllRanking(dateFrom, dateTo, Pageable.ofSize(10))
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();

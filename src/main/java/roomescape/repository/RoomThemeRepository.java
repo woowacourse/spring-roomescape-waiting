@@ -13,8 +13,8 @@ public interface RoomThemeRepository extends JpaRepository<RoomTheme, Long>, Jpa
 
     @Query("SELECT t FROM RoomTheme as t "
             + "INNER JOIN Reservation as r ON t.id = r.theme.id "
-            + "WHERE :fromDate < r.date AND r.date < :toDate "
+            + "WHERE r.date BETWEEN :dateFrom AND :dateTo "
             + "GROUP BY t.id "
-            + "ORDER BY COUNT(t.id) DESC")
-    List<RoomTheme> findAllRanking(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
+            + "ORDER BY COUNT(t.id) DESC ")
+    List<RoomTheme> findAllRanking(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, Pageable pageable);
 }
