@@ -29,6 +29,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select r
             from Reservation r
+            join fetch r.theme
+            join fetch r.time
+            join fetch r.member
             where (:startDate is null or r.date >= :startDate)
                 and (:endDate is null or r.date <= :endDate)
                 and (:themeId is null or r.theme.id = :themeId)
