@@ -19,11 +19,11 @@ public class ReservationInserter {
     @Autowired
     MemberRepository memberRepository;
 
-    public void addNewReservation(final String date,final Theme theme, final Member member, final ReservationTime reservationTime) {
+    public Reservation addNewReservation(final String date,final Theme theme, final Member member, final ReservationTime reservationTime) {
         final var newTheme = themeRepository.save(theme);
         final var newMember = memberRepository.save(member);
         final var newTime = timeRepository.save(reservationTime);
-        reservationRepository.save(new Reservation(null, ReservationDate.from(date), newTime, newTheme, newMember));
+        return reservationRepository.save(new Reservation(null, ReservationDate.from(date), newTime, newTheme, newMember));
     }
 
     public void addExistReservation(final String date,final Theme theme, final Member member, final ReservationTime time) {
