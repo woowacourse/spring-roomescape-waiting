@@ -3,6 +3,7 @@ package roomescape.service.auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.auth.TokenProvider;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -33,14 +34,14 @@ public class AuthService {
     }
 
     private void validatePassword(LoginRequest request, Member member) {
-        if (!member.getPassword().equals(request.password())) {
+        if (!member.isPasswordMatches(request.password())) {
             throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
         }
     }
 
     public LoginCheckResponse check(String token) {
         String email = tokenProvider.extractMemberEmail(token);
-        Member member = memberRepository.getByEmail(email);
+        Member member = memberRepository.getByEmail(new Email(email));
         return new LoginCheckResponse(member);
     }
 
@@ -51,7 +52,7 @@ public class AuthService {
         return new MemberResponse(member);
     }
 
-    private void validateEmail(String email) {
+    private void validateEmail(Email email) {
         if (memberRepository.existsByEmail(email)) {
             throw new InvalidMemberException("이미 가입된 이메일입니다.");
         }

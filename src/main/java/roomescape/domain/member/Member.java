@@ -56,6 +56,14 @@ public class Member {
         this(id, new MemberName(name), new Email(email), new Password(password), Role.valueOf(role));
     }
 
+    public Member(MemberName name, Email email, Password password, Role role) {
+        this(NO_ID, name, email, password, role);
+    }
+
+    public boolean isPasswordMatches(Password other) {
+        return password.equals(other);
+    }
+
     public long getId() {
         return id;
     }
