@@ -51,6 +51,9 @@ class ReservationPersistenceAdapter implements ReservationRepository {
         String baseJpql = """
                 SELECT r
                 FROM Reservation AS r
+                JOIN FETCH r.member
+                JOIN FETCH r.time
+                JOIN FETCH r.theme
                 WHERE 1 = 1
                 """;
         StringBuilder dynamicJpql = new StringBuilder(baseJpql);
