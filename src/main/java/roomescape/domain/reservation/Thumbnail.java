@@ -1,9 +1,12 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embeddable;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
-public record Thumbnail(String value) {
+@Embeddable
+public record Thumbnail(String thumbnail) {
 
     private static final List<String> ALLOW_EXTENSIONS = List.of("jpg", "jpeg", "png", "heic");
     public static final String ALLOW_EXTENSIONS_FORMAT = String.join("|", ALLOW_EXTENSIONS);
@@ -11,7 +14,7 @@ public record Thumbnail(String value) {
             String.format("^\\S+.(?i)(%s)$", ALLOW_EXTENSIONS_FORMAT));
 
     public Thumbnail {
-        validate(value);
+        validate(thumbnail);
     }
 
     private void validate(final String url) {
@@ -32,6 +35,6 @@ public record Thumbnail(String value) {
     }
 
     public String asString() {
-        return value;
+        return thumbnail;
     }
 }

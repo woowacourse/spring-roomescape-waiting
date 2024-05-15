@@ -1,13 +1,24 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
 import java.util.Objects;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final Thumbnail thumbnail;
+    @Id @GeneratedValue
+    private Long id;
+    private String name;
+    private String description;
+    @Embedded
+    private Thumbnail thumbnail;
+
+    public Theme() {
+    }
 
     public Theme(final Long id, final String name, final String description, final Thumbnail thumbnail) {
         validate(name, description);
@@ -53,18 +64,13 @@ public class Theme {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        if (this == o) return true;
+        if (!(o instanceof final Theme theme)) return false;
+        return Objects.equals(name, theme.name) && Objects.equals(description, theme.description) && Objects.equals(thumbnail, theme.thumbnail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(name, description, thumbnail);
     }
 }
