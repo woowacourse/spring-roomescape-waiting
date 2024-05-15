@@ -27,12 +27,6 @@ class ThemeRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
-    @BeforeEach
-    void setUp() {
-        themeRepository.deleteAll();
-        entityManager.flush();
-    }
-
     @Test
     @DisplayName("테마 정보가 DB에 정상적으로 저장되는지 확인한다.")
     void saveTheme() {

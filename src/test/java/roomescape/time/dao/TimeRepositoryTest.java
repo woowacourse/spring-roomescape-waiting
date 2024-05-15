@@ -23,12 +23,6 @@ class TimeRepositoryTest {
     @Autowired
     private TimeRepository timeRepository;
 
-    @BeforeEach
-    void setUp() {
-        timeRepository.deleteAll();
-        entityManager.flush();
-    }
-
     @Test
     @DisplayName("시간 데이터들이 잘 저장되는지 확인.")
     void saveTime() {

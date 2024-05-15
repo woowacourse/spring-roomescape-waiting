@@ -25,11 +25,6 @@ class MemberRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @BeforeEach
-    void setUp() {
-        entityManager.clear();
-    }
-
     @Test
     @DisplayName("완전한 회원정보를 정상적으로 저장한다.")
     void save_ShouldRegisterSignUpData_WhenMemberRegisterInfoGiven() {
@@ -75,8 +70,7 @@ class MemberRepositoryTest {
         Member expected = entityManager.merge(new Member( "켬미", email, "test"));
 
         // When
-        Member registrationInfo = memberRepository.findByEmail(email)
-                .get();
+        Member registrationInfo = memberRepository.findByEmail(email).get();
 
         // Then
         assertThat(registrationInfo).isEqualTo(expected);
