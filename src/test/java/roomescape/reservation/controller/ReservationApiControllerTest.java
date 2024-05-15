@@ -47,7 +47,7 @@ class ReservationApiControllerTest extends IntegrationTest {
     @DisplayName("테마 아이디, 회원 아이디, 기간 조건 조회에 성공하면 200 응답을 받는다.")
     @Test
     void findAllBySearchCond() {
-        saveAdminMemberAsDuck();
+        saveAdminMember();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
         saveSuccessReservationAsDateNow();
@@ -93,7 +93,7 @@ class ReservationApiControllerTest extends IntegrationTest {
     @DisplayName("관리자가 예약을 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test
     void saveAdminReservation() throws JsonProcessingException {
-        saveAdminMemberAsDuck();
+        saveAdminMember();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
 

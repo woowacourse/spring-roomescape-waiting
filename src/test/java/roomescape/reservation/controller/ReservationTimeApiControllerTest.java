@@ -36,7 +36,7 @@ class ReservationTimeApiControllerTest extends IntegrationTest {
     @DisplayName("예약 가능한 시간 조회 성공 시 200응답을 받는다.")
     @Test
     void findAvailableTimes() {
-        saveAdminMemberAsDuck();
+        saveAdminMember();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
         saveSuccessReservationAsDateNow();

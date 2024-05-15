@@ -39,7 +39,7 @@ public class IntegrationTest {
     }
 
     protected String getAdminToken() {
-        Member member = new Member(1L, Role.ADMIN, new MemberName("러너덕"), "duck@email.com", "1234");
+        Member member = new Member(1L, Role.ADMIN, new MemberName("어드민"), "admin@email.com", "1234");
         return jwtTokenProvider.generateToken(member);
     }
 
@@ -54,8 +54,8 @@ public class IntegrationTest {
         jdbcTemplate.update(sql);
     }
 
-    protected void saveAdminMemberAsDuck() {
-        String sql = "insert into member (name, email, password, role) values ('러너덕', 'duck@email.com', '1234', 'ADMIN')";
+    protected void saveAdminMember() {
+        String sql = "insert into member (name, email, password, role) values ('어드민', 'admin@email.com', '1234', 'ADMIN')";
 
         jdbcTemplate.update(sql);
     }
