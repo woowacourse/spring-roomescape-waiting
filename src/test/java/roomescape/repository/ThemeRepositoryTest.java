@@ -18,7 +18,6 @@ import roomescape.domain.theme.ThemeRepository;
 @DataJpaTest
 class ThemeRepositoryTest {
 
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

@@ -85,6 +85,14 @@ public class Reservation {
         return reservationDateTime.isBefore(dateTime);
     }
 
+    public void updateToReserved() {
+        if (status != ReservationStatus.WAITING) {
+            throw new IllegalArgumentException("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
+        }
+
+        status = ReservationStatus.RESERVED;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

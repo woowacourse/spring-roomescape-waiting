@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWithRankDto;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -72,6 +74,21 @@ class ReservationRepositoryTest {
             softly.assertThat(reservation.getTheme().getName()).isEqualTo("테마1");
             softly.assertThat(reservation.getTheme().getDescription()).isEqualTo("테마1 설명");
             softly.assertThat(reservation.getTheme().getThumbnail()).isEqualTo("https://example1.com");
+        });
+    }
+
+    @Test
+    @DisplayName("회원 id로 대기 순서를 포함한 예약들을 조회한다.")
+    @Sql("/waitings.sql")
+    void findReservationWithRanksByMemberId() {
+        List<ReservationWithRankDto> reservationWithRanks = reservationRepository
+                .findReservationWithRanksByMemberId(4L);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservationWithRanks).hasSize(3);
+            softly.assertThat(reservationWithRanks.get(0).rank()).isEqualTo(3);
+            softly.assertThat(reservationWithRanks.get(1).rank()).isEqualTo(0);
+            softly.assertThat(reservationWithRanks.get(2).rank()).isEqualTo(1);
         });
     }
 

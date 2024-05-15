@@ -8,16 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.member m
-            JOIN FETCH r.time t
-            JOIN FETCH r.theme th
-            WHERE m.id = :id
-            """)
-    List<Reservation> findAllByMemberId(long id);
-
     boolean existsByTimeId(long id);
 
     boolean existsByThemeId(long id);
@@ -41,6 +31,35 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo
     );
+
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            JOIN FETCH r.time t
+            JOIN FETCH r.theme th
+            WHERE m.id = :id
+            """)
+    List<Reservation> findAllByMemberId(long id);
+
+    @Query("""
+            SELECT
+                new roomescape.domain.reservation.ReservationWithRankDto(
+                    r,
+                    CAST ((
+                        SELECT COUNT(r2)
+                        FROM Reservation r2
+                        WHERE r2.status = 'WAITING'
+                        AND r2.theme = r.theme
+                        AND r2.date = r.date
+                        AND r2.time = r.time
+                        AND r2.id <= r.id
+                    ) AS Long)
+                )
+            FROM Reservation r
+            WHERE r.member.id = :memberId
+            """)
+    List<ReservationWithRankDto> findReservationWithRanksByMemberId(Long memberId);
 
     default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
         return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);

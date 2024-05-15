@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -57,5 +59,25 @@ class ReservationTest {
         assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("테마는 필수 값입니다.");
+    }
+
+    @Test
+    @DisplayName("예약 대기에서 예약 상태로 바꾼다.")
+    void updateToReserved() {
+        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME);
+        reservation.updateToReserved();
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("예약 대기가 아니면 예약 상태로 바꿀 수 없다.")
+    void updateToReservedWhenNotWaiting() {
+        Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME);
+        reservation.updateToReserved();
+
+        assertThatThrownBy(reservation::updateToReserved)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
     }
 }
