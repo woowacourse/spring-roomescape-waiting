@@ -99,11 +99,10 @@ public class ReservationService {
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
-
-    // 관리자 삭제 불가 해결하기
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
-        if (!memberReservation.isMember(Member.of(authInfo))) {
+        Member member = getMember(authInfo.getId());
+        if (!member.isAdmin() && !memberReservation.isMember(member)) {
             throw new BusinessException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
         memberReservationRepository.deleteById(memberReservationId);
