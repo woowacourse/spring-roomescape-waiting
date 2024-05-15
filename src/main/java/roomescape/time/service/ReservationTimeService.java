@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     public List<AvailableTimeResponse> findAllWithBookStatus(LocalDate date, Long themeId) {
         List<Long> foundReservationTimeIds = reservationRepository
-                .findByDateDateAndTheme_Id(date, themeId)
+                .findByDateValueAndTheme_Id(date, themeId)
                 .stream()
                 .map(Reservation::getTimeId)
                 .toList();

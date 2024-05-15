@@ -75,7 +75,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date.getDate();
+        return date.getValue();
     }
 
     public ReservationTime getTime() {

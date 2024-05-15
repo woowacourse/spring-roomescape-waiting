@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByMember_IdAndTheme_IdAndDateDateBetween(Long memberId, Long themeId,
-                                                                   LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByMember_IdAndTheme_IdAndDateValueBetween(Long memberId, Long themeId,
+                                                                    LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findByDateDateAndTheme_Id(LocalDate date, Long themeId);
+    List<Reservation> findByDateValueAndTheme_Id(LocalDate date, Long themeId);
 
-    boolean existsByDateDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateValueAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 }

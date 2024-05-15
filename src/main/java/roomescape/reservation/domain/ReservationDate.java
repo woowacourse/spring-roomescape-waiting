@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -7,22 +8,22 @@ import java.util.Objects;
 @Embeddable
 public class ReservationDate {
 
-    //TODO: date 변수명 value로 변경
-    private LocalDate date;
+    @Column(name = "date")
+    private LocalDate value;
 
     public ReservationDate() {
     }
 
-    public ReservationDate(LocalDate date) {
-        this.date = date;
+    public ReservationDate(LocalDate value) {
+        this.value = value;
     }
 
     public boolean isBefore(LocalDate target) {
-        return date.isBefore(target);
+        return value.isBefore(target);
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getValue() {
+        return value;
     }
 
     @Override
@@ -34,11 +35,11 @@ public class ReservationDate {
             return false;
         }
         ReservationDate that = (ReservationDate) o;
-        return Objects.equals(date, that.date);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date);
+        return Objects.hash(value);
     }
 }
