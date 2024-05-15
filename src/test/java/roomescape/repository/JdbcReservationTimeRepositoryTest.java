@@ -102,7 +102,7 @@ class JdbcReservationTimeRepositoryTest {
 
         reservationTimeRepository.deleteById(1L);
 
-        assertThat(reservationTimeRepository.findAll()).isEmpty();
+        assertThat(reservationTimeRepository.existsById(1L)).isFalse();
     }
 
     @Test

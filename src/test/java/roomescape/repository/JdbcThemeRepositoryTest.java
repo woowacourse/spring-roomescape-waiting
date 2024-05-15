@@ -126,8 +126,7 @@ class JdbcThemeRepositoryTest {
 
         themeRepository.deleteById(1L);
 
-        List<Theme> themes = themeRepository.findAll();
-        assertThat(themes).isEmpty();
+        assertThat(themeRepository.existsById(1L)).isFalse();
     }
 
     @Test

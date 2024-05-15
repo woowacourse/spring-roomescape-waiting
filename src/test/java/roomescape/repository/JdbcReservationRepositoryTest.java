@@ -82,9 +82,7 @@ class JdbcReservationRepositoryTest {
 
         reservationRepository.deleteById(1L);
 
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        assertThat(reservations).isEmpty();
+        assertThat(reservationRepository.existsById(1L)).isFalse();
     }
 
     @Test
@@ -121,7 +119,7 @@ class JdbcReservationRepositoryTest {
         assertThat(reservationRepository.existsByReservation(date, 1L, 2L)).isFalse();
     }
 
-    private Reservation createReservation() {
+    private void createReservation() {
         Member member = createMember();
         ReservationTime reservationTime = createReservationTime();
         Theme theme = createTheme();
@@ -129,7 +127,7 @@ class JdbcReservationRepositoryTest {
         jdbcTemplate.update("INSERT INTO reservation (id, date, member_id, time_id, theme_id, status) "
                 + "VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED')");
 
-        return new Reservation(1L, LocalDate.of(2024, 5, 4), member, reservationTime, theme);
+        new Reservation(1L, LocalDate.of(2024, 5, 4), member, reservationTime, theme);
     }
 
     private Member createMember() {
