@@ -3,7 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Component;
 import roomescape.dao.MemberRepository;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
@@ -21,15 +21,15 @@ import static roomescape.exception.ExceptionDomainType.*;
 @Component
 public class ReservationCreateValidator {
     private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
 
-    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
+    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
         this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberDao;
         this.nowDateTimeFormatter = nowDateTimeFormatter;
@@ -51,7 +51,7 @@ public class ReservationCreateValidator {
     }
 
     private ReservationTime validateExistReservationTime(final long timeId) {
-        return reservationTimeDao.find(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotExistException(RESERVATION_TIME, timeId));
     }
 

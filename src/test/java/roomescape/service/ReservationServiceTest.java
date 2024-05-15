@@ -1,15 +1,12 @@
 package roomescape.service;
 
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.ReservationTimeRepository;
+import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
@@ -28,13 +25,13 @@ import static org.assertj.core.api.Assertions.*;
 class ReservationServiceTest {
 
     @Autowired
-    ReservationTimeDao reservationTimeDao;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     ReservationService reservationService;
 
     @Autowired
-    ThemeDao themeDao;
+    ThemeRepository themeRepository;
 
     @Autowired
     private MemberService memberService;
@@ -50,9 +47,9 @@ class ReservationServiceTest {
     @Test
     @DisplayName("유효한 값을 입력하면 예외를 발생하지 않는다")
     void create_reservation() {
-        final long timeId = reservationTimeDao.create(ReservationTime.from(null, "10:00"))
+        final long timeId = reservationTimeRepository.save(ReservationTime.from(null, "10:00"))
                 .getId();
-        final long themeId = themeDao.create(ThemeFixture.getDomain())
+        final long themeId = themeRepository.save(ThemeFixture.getDomain())
                 .getId();
         final long memberId = memberService.createMember(MemberFixture.getUserCreateInput())
                 .id();
@@ -72,9 +69,9 @@ class ReservationServiceTest {
     @Test
     @DisplayName("중복 예약 이면 예외를 발생한다.")
     void throw_exception_when_duplicate_reservationTime() {
-        final long timeId = reservationTimeDao.create(ReservationTime.from(null, "10:00"))
+        final long timeId = reservationTimeRepository.save(ReservationTime.from(null, "10:00"))
                 .getId();
-        final long themeId = themeDao.create(ThemeFixture.getDomain())
+        final long themeId = themeRepository.save(ThemeFixture.getDomain())
                 .getId();
         final long memberId = memberService.createMember(MemberFixture.getUserCreateInput())
                 .id();
@@ -89,9 +86,9 @@ class ReservationServiceTest {
     @Test
     @DisplayName("지나간 날짜와 시간으로 예약 생성 시 예외가 발생한다.")
     void throw_exception_when_create_past_time_reservation() {
-        final long timeId = reservationTimeDao.create(ReservationTime.from(null, "10:00"))
+        final long timeId = reservationTimeRepository.save(ReservationTime.from(null, "10:00"))
                 .getId();
-        final long themeId = themeDao.create(ThemeFixture.getDomain())
+        final long themeId = themeRepository.save(ThemeFixture.getDomain())
                 .getId();
         final var memberId = memberService.createMember(MemberFixture.getUserCreateInput())
                 .id();
@@ -105,15 +102,15 @@ class ReservationServiceTest {
     @Test
     @DisplayName("테마,멤버,날짜 범위에 맞는 예약을 검색한다.")
     void search_reservation_with_theme_member_and_date() {
-        final Long timeId = reservationTimeDao.create(ReservationTime.from(null, "10:00"))
+        final Long timeId = reservationTimeRepository.save(ReservationTime.from(null, "10:00"))
                 .getId();
-        final Long themeId = themeDao.create(ThemeFixture.getDomain())
+        final Long themeId = themeRepository.save(ThemeFixture.getDomain())
                 .getId();
         final var memberId = memberService.createMember(MemberFixture.getUserCreateInput())
                 .id();
         final var input1 = new ReservationInput("2024-05-10", timeId, themeId, memberId);
         final var input2 = new ReservationInput("2024-05-30", timeId, themeId, memberId);
-        final var input3 = new ReservationInput("2024-05-15", timeId, themeDao.create(ThemeFixture.getDomain())
+        final var input3 = new ReservationInput("2024-05-15", timeId, themeRepository.save(ThemeFixture.getDomain())
                 .getId(), memberId);
         reservationService.createReservation(input1);
         reservationService.createReservation(input2);
