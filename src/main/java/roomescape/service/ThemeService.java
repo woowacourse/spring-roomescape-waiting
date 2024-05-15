@@ -25,8 +25,7 @@ public class ThemeService {
         ThemeName name = new ThemeName(themeRequest.name());
         validateNameDuplicate(name);
         Theme theme = themeRequest.toEntity();
-
-
+        
         return themeRepository.save(theme).getId();
     }
 
