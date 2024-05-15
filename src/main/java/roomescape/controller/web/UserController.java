@@ -15,4 +15,9 @@ public class UserController {
     public String mainUserPage() {
         return "index";
     }
+
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "reservation-mine";
+    }
 }
