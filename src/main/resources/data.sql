@@ -48,4 +48,8 @@ values (1, '2024-4-26', 1, 2),
        (3, '2024-5-1', 1, 1),
        (4, '2024-5-1', 2, 1),
        (1, '2024-5-2', 3, 1),
-       (2, '2024-5-2', 4, 1);
+       (2, '2024-5-2', 4, 1),
+       (2, DATEADD(DAY, -1, CURRENT_DATE), 3, 2),
+       (2, DATEADD(DAY, -2, CURRENT_DATE), 3, 2),
+       (2, DATEADD(DAY, -3, CURRENT_DATE), 3, 3),
+       (2, DATEADD(DAY, -4, CURRENT_DATE), 3, 1);
