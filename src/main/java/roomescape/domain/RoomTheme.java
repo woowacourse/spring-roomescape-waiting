@@ -4,9 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.List;
 import roomescape.exception.BadRequestException;
 
 @Entity
@@ -19,8 +17,6 @@ public class RoomTheme {
     private String name;
     private String description;
     private String thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private List<Reservation> reservationList;
 
     public RoomTheme() {
 
@@ -56,10 +52,6 @@ public class RoomTheme {
         if (name == null || name.isBlank()) {
             throw new BadRequestException("이름에 빈값을 입력할 수 없습니다.");
         }
-    }
-
-    public RoomTheme withId(Long id) {
-        return new RoomTheme(id, name, description, thumbnail);
     }
 
     public Long getId() {

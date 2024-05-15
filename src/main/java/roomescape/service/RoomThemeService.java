@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.domain.RoomTheme;
 import roomescape.repository.RoomThemeRepository;
@@ -27,7 +28,7 @@ public class RoomThemeService {
         LocalDate toDate = LocalDate.now();
         LocalDate fromDate = toDate.minusDays(8);
 
-        return roomThemeRepository.findAllRanking(fromDate, toDate)
+        return roomThemeRepository.findAllRanking(fromDate, toDate, Pageable.ofSize(10))
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();
