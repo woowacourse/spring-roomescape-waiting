@@ -48,7 +48,7 @@ public class Member {
     }
 
     public static Member saveMemberFrom(long id) {
-        return new Member(id, DEFAULT_NAME, Email.saveEmailFrom(null), Password.savePasswordFrom(null),
+        return new Member(id, DEFAULT_NAME, Email.saveEmailFrom(), Password.savePasswordFrom(),
                 MemberRole.MEMBER);
     }
 

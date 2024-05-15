@@ -24,8 +24,8 @@ public class Password {
         return new Password(password);
     }
 
-    public static Password savePasswordFrom(String password) {
-        return new Password(password);
+    public static Password savePasswordFrom() {
+        return new Password(null);
     }
 
     public String getPassword() {

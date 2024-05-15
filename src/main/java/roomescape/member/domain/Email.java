@@ -17,8 +17,8 @@ public class Email {
         this.email = email;
     }
 
-    public static Email saveEmailFrom(String email) {
-        return new Email(email);
+    public static Email saveEmailFrom() {
+        return new Email(null);
     }
 
     public static Email emailFrom(String email) {
