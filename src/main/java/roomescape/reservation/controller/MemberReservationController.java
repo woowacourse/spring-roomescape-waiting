@@ -44,7 +44,7 @@ public class MemberReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAll() {
-        return ResponseEntity.ok(reservationService.getAll());
+        return ResponseEntity.ok(reservationService.getAllResponses());
     }
 
     @GetMapping("/times")
@@ -58,7 +58,7 @@ public class MemberReservationController {
     @GetMapping("/me")
     public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(
             @AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok(reservationService.findMemberReservations(member.getId()));
+        return ResponseEntity.ok(reservationService.findAllByMemberId(member.getId()));
     }
 
     @DeleteMapping("/{id}")

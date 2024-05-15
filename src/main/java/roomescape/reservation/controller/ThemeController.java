@@ -18,6 +18,7 @@ import roomescape.reservation.service.ThemeService;
 @Controller
 @RequestMapping("/themes")
 public class ThemeController {
+
     private final ThemeService themeService;
 
     public ThemeController(final ThemeService themeService) {
@@ -37,8 +38,8 @@ public class ThemeController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<ThemeResponse>> findThemeRanking() {
-        return ResponseEntity.ok(themeService.findThemeRanking());
+    public ResponseEntity<List<ThemeResponse>> findPopularThemes() {
+        return ResponseEntity.ok(themeService.findPopularThemes());
     }
 
     @DeleteMapping("/{id}")

@@ -39,10 +39,8 @@ public class ReservationService {
     public ReservationResponse save(final ReservationSaveRequest saveRequest, final Member member) {
         ReservationTime reservationTime = findReservationTimeById(saveRequest);
         Theme theme = findThemeById(saveRequest);
+        validateDuplicateReservation(saveRequest);
 
-        if (hasDuplicateReservation(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId())) {
-            throw new IllegalArgumentException("[ERROR] 중복된 예약이 존재합니다.");
-        }
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -57,7 +55,17 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
-    public List<ReservationResponse> getAll() {
+    private void validateDuplicateReservation(ReservationSaveRequest saveRequest) {
+        if (hasDuplicateReservation(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId())) {
+            throw new IllegalArgumentException("[ERROR] 중복된 예약이 존재합니다.");
+        }
+    }
+
+    private boolean hasDuplicateReservation(final LocalDate date, final long timeId, final long themeId) {
+        return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
+    }
+
+    public List<ReservationResponse> getAllResponses() {
         return getAllReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -87,26 +95,26 @@ public class ReservationService {
         return usedTimeIds.contains(reservationTime.getId());
     }
 
-    private boolean hasDuplicateReservation(final LocalDate date, final long timeId, final long themeId) {
-        return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
+    public List<Reservation> findByDateBetween(final LocalDate startDate, final LocalDate endDate) {
+        return reservationRepository.findByDateBetween(startDate, endDate);
     }
 
-    public List<MemberReservationResponse> findMemberReservations(final long memberId) {
+    public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }
 
-    public List<Reservation> findByDateBetween(final LocalDate startDate, final LocalDate endDate) {
-        return reservationRepository.findByDateBetween(startDate, endDate);
+    public ReservationDeleteResponse delete(final long id) {
+        validateNotExitsReservationById(id);
+        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
     }
 
-    public ReservationDeleteResponse delete(final long id) {
+    private void validateNotExitsReservationById(final long id) {
         if (reservationRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약이 존재하지 않습니다.");
         }
-        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
     }
 
     public void validateAlreadyHasReservationByTimeId(final long id) {

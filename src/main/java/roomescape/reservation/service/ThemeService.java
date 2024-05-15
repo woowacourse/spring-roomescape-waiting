@@ -38,7 +38,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<ThemeResponse> findThemeRanking() {
+    public List<ThemeResponse> findPopularThemes() {
         List<Reservation> reservations = reservationService.findByDateBetween(
                 LocalDate.now().minusWeeks(1),
                 LocalDate.now()
@@ -50,12 +50,12 @@ public class ThemeService {
                 .toList();
     }
 
-    private Map<Long, List<Reservation>> getReservationCountsPerThemeId(List<Reservation> reservations) {
+    private Map<Long, List<Reservation>> getReservationCountsPerThemeId(final List<Reservation> reservations) {
         return reservations.stream()
                 .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()));
     }
 
-    private List<Long> sortByReservationCountAndLimit(Map<Long, List<Reservation>> collect) {
+    private List<Long> sortByReservationCountAndLimit(final Map<Long, List<Reservation>> collect) {
         return collect.entrySet().stream()
                 .sorted(Comparator.comparingInt(entry -> entry.getValue().size()))
                 .map(Entry::getKey)
@@ -64,10 +64,14 @@ public class ThemeService {
     }
 
     public ThemeDeleteResponse delete(final long id) {
+        validateNotExitsThemeById(id);
+        reservationService.validateAlreadyHasReservationByThemeId(id);
+        return new ThemeDeleteResponse(themeRepository.deleteById(id));
+    }
+
+    private void validateNotExitsThemeById(final long id) {
         if (themeRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 테마가 존재하지 않습니다.");
         }
-        reservationService.validateAlreadyHasReservationByThemeId(id);
-        return new ThemeDeleteResponse(themeRepository.deleteById(id));
     }
 }
