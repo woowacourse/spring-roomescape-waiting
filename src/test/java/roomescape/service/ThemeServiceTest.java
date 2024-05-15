@@ -18,12 +18,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.exception.reservation.ThemeUsingException;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
-import roomescape.service.exception.ThemeUsingException;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

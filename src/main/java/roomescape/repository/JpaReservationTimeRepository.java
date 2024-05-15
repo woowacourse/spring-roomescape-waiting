@@ -1,13 +1,12 @@
 package roomescape.repository;
 
+import java.time.LocalTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.service.exception.TimeNotFoundException;
-
-import java.time.LocalTime;
-import java.util.List;
+import roomescape.exception.reservation.TimeNotFoundException;
 
 @Repository
 public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
@@ -15,7 +14,7 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
     boolean existsByStartAt(LocalTime startAt);
 
     default ReservationTime fetchById(long timeId) {
-        return findById(timeId).orElseThrow(() -> new TimeNotFoundException("예약 하려는 시간이 저장되어 있지 않습니다."));
+        return findById(timeId).orElseThrow(TimeNotFoundException::new);
     }
 
     @Query(value = """

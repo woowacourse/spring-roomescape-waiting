@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @ExceptionHandler
-    public ProblemDetail handleHttpStatusException(HttpStatusException ex) {
+    public ProblemDetail handleHttpStatusException(RoomeescapeException ex) {
         return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
     }
 

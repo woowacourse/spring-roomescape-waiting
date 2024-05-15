@@ -1,5 +1,9 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,17 +15,14 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import roomescape.domain.member.Member;
+import roomescape.exception.member.EmailDuplicatedException;
+import roomescape.exception.member.UnauthorizedEmailException;
+import roomescape.exception.member.UnauthorizedPasswordException;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.JpaMemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
-import roomescape.service.exception.UnauthorizedEmailException;
-import roomescape.service.exception.UnauthorizedPasswordException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -59,7 +60,7 @@ class MemberServiceTest {
         MemberCreateRequest requestDto = new MemberCreateRequest("t1@t1.com", "11", "워니");
 
         assertThatThrownBy(() -> memberService.signup(requestDto))
-                .isInstanceOf(UnauthorizedEmailException.class)
+                .isInstanceOf(EmailDuplicatedException.class)
                 .hasMessage("이미 가입되어 있는 이메일 주소입니다.");
     }
 
