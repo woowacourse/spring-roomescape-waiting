@@ -12,8 +12,8 @@ public record AuthenticatedMember(
     public static AuthenticatedMember from(final Member member) {
         return new AuthenticatedMember(
                 member.getId(),
-                member.getName().value(),
-                member.getEmail().value(),
+                member.getName().getName(),
+                member.getEmail().getEmail(),
                 member.getRole()
         );
     }

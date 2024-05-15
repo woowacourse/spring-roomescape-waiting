@@ -1,13 +1,29 @@
 package roomescape.member.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Member {
 
-    private final Long id;
-    private final MemberRole role;
-
-    private final MemberEmail email;
-    private final MemberName name;
-    private final MemberPassword password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private MemberRole role;
+    @Embedded
+    private MemberEmail email;
+    @Embedded
+    private MemberName name;
+    @Embedded
+    private MemberPassword password;
 
     public static Member createMemberWithoutId(
             final MemberRole role,
@@ -38,6 +54,9 @@ public class Member {
                 new MemberName(name),
                 new MemberEmail(email)
         );
+    }
+
+    public Member() {
     }
 
     private Member(

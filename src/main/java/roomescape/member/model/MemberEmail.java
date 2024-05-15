@@ -1,14 +1,25 @@
 package roomescape.member.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
 import java.util.regex.Pattern;
 
-public record MemberEmail(String value) {
+@Embeddable
+public class MemberEmail {
 
     private static final Pattern REGEX_PATTERN = Pattern.compile("^(.+)@(\\S+)$");
 
-    public MemberEmail {
-        checkNullOrEmpty(value);
-        validateEmailRegex(value);
+    @Column(length = 30, nullable = false)
+    private String email;
+
+    protected MemberEmail() {
+    }
+
+    public MemberEmail(final String email) {
+        checkNullOrEmpty(email);
+        validateEmailRegex(email);
+        this.email = email;
     }
 
     private void checkNullOrEmpty(final String value) {
@@ -21,5 +32,9 @@ public record MemberEmail(String value) {
         if (!REGEX_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("유효하지 않은 이메일 형식입니다.");
         }
+    }
+
+    public String getEmail() {
+        return email;
     }
 }
