@@ -6,11 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.config.TestConfig;
 import roomescape.dto.request.LoginRequest;
-import roomescape.security.TokenProvider;
 import roomescape.support.extension.DatabaseClearExtension;
 
 @ExtendWith(DatabaseClearExtension.class)
@@ -25,11 +23,9 @@ public abstract class BaseControllerTest {
     protected static final String ADMIN_PASSWORD = "abc123";
     protected static final String USER_EMAIL = "user@gmail.com";
     protected static final String USER_PASSWORD = "abc123";
-
+    protected String token;
     @LocalServerPort
     private int port;
-
-    protected String token;
 
     @BeforeEach
     void environmentSetUp() {
