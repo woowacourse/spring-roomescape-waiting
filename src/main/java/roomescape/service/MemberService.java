@@ -9,14 +9,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
-import roomescape.dto.LogInRequest;
-import roomescape.dto.MemberPreviewResponse;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.request.LogInRequest;
+import roomescape.dto.response.MemberPreviewResponse;
+import roomescape.dto.response.MemberReservationResponse;
 import roomescape.service.exception.ResourceNotFoundException;
 
 @Service
 public class MemberService {
 
+    // TODO: 토큰 관련 로직 분리
     @Value("${jwt.secret-key.prod}")
     private String secretKey;
 

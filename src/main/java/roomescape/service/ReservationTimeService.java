@@ -9,9 +9,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
-import roomescape.dto.AvailableReservationTimeResponse;
-import roomescape.dto.ReservationTimeRequest;
-import roomescape.dto.ReservationTimeResponse;
+import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.AvailableReservationTimeResponse;
+import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
 
@@ -65,6 +65,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    // TODO: 이거 삭제
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));

@@ -9,8 +9,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
-import roomescape.dto.ThemeRequest;
-import roomescape.dto.ThemeResponse;
+import roomescape.dto.request.ThemeRequest;
+import roomescape.dto.response.ThemeResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
 
@@ -63,6 +63,7 @@ public class ThemeService {
                 .toList();
     }
 
+    // 이거 삭제
     private Theme findValidatedTheme(Long id) { //todo: private 함수 위치 통일감있게 가져가기
         return themeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 테마를 찾을 수 없습니다."));

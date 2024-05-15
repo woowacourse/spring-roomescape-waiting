@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.dto.request;
 
 import static roomescape.dto.InputValidator.validateNotBlank;
 import static roomescape.dto.InputValidator.validateNotNull;

@@ -1,16 +1,17 @@
 package roomescape.acceptance.admin;
 
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.MemberPreviewResponse;
+import static roomescape.acceptance.Fixture.adminToken;
 
 import java.util.List;
 
-import static roomescape.acceptance.Fixture.adminToken;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+
+import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
+import roomescape.acceptance.BaseAcceptanceTest;
+import roomescape.dto.response.MemberPreviewResponse;
 
 class MemberAcceptanceTest extends BaseAcceptanceTest {
 

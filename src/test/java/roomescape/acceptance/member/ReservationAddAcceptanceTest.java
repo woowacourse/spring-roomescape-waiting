@@ -22,8 +22,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
-import roomescape.dto.MemberReservationRequest;
-import roomescape.dto.ReservationResponse;
+import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.response.ReservationResponse;
 
 @DisplayName("고객이 예약을 추가한다.")
 class ReservationAddAcceptanceTest extends BaseAcceptanceTest {

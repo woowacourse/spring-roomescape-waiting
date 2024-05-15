@@ -15,9 +15,9 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
-import roomescape.dto.AdminReservationRequest;
-import roomescape.dto.MemberReservationRequest;
-import roomescape.dto.ReservationResponse;
+import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
 
@@ -109,7 +109,8 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate dateFrom,
+                                                             LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo);
 
         return reservations.stream()

@@ -1,14 +1,15 @@
 package roomescape.acceptance.guest;
 
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import roomescape.acceptance.BaseAcceptanceTest;
-import roomescape.dto.ThemeResponse;
 
-import java.util.List;
+import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
+import roomescape.acceptance.BaseAcceptanceTest;
+import roomescape.dto.response.ThemeResponse;
 
 class ThemeAcceptanceTest extends BaseAcceptanceTest {
 

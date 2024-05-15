@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.domain.Member;
-import roomescape.dto.MemberPreviewResponse;
-import roomescape.dto.MemberReservationResponse;
+import roomescape.dto.response.MemberPreviewResponse;
+import roomescape.dto.response.MemberReservationResponse;
 import roomescape.service.MemberService;
 
 @RestController

@@ -1,6 +1,7 @@
-package roomescape.dto;
+package roomescape.dto.request;
 
 import roomescape.domain.Theme;
+import roomescape.dto.InputValidator;
 
 public record ThemeRequest(String name, String description, String thumbnail) {
 

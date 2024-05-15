@@ -2,10 +2,15 @@ package roomescape.controller.api;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import roomescape.domain.Member;
-import roomescape.dto.LogInRequest;
-import roomescape.dto.MemberPreviewResponse;
+import roomescape.dto.request.LogInRequest;
+import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.service.MemberService;
 
 @RestController
