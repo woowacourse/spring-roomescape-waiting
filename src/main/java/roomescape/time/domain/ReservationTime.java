@@ -4,8 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class ReservationTime {
@@ -13,6 +16,8 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
+    @OneToMany(mappedBy = "time")
+    private List<Reservation> reservations;
 
     public ReservationTime(LocalTime startAt) {
         this.id = null;

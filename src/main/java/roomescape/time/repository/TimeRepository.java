@@ -10,14 +10,11 @@ import roomescape.time.domain.ReservationTime;
 @Repository
 public interface TimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
-    @Query(value = """
-            SELECT id, start_at
-            FROM reservation_time
-            WHERE id IN (
-                SELECT time_id
-                FROM reservation
-                WHERE date = :date AND theme_id = :themeId
-            )
-            """, nativeQuery = true)
+    @Query("""
+            SELECT t FROM ReservationTime AS t
+            INNER JOIN t.reservations AS r
+            WHERE r.date = :date
+            AND r.theme.id = :themeId
+            """)
     List<ReservationTime> findTimesExistsReservationDateAndThemeId(LocalDate date, Long themeId);
 }

@@ -10,15 +10,13 @@ import roomescape.theme.domain.Theme;
 @Repository
 public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
-    @Query(value = """
-            SELECT theme.id, theme.name, theme.description, theme.thumbnail, COUNT(reservation.theme_id) AS reservation_count
-            FROM theme
-            JOIN reservation
-            ON reservation.theme_id = theme.id
-            WHERE reservation.date >= :startDate AND reservation.date <= :endDate
-            GROUP BY theme.id, theme.name, theme.description, theme.thumbnail
-            ORDER BY reservation_count DESC
+    @Query("""
+            SELECT t FROM Theme AS t
+            JOIN t.reservations AS r
+            WHERE r.date >= :startDate AND r.date <= :endDate
+            GROUP BY t.id
+            ORDER BY count(r.id) DESC
             LIMIT :count
-             """, nativeQuery = true)
+             """)
     List<Theme> findThemesSortedByCountOfReservation(LocalDate startDate, LocalDate endDate, int count);
 }
