@@ -20,7 +20,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @DataJpaTest
-class JdbcReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
