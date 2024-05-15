@@ -15,7 +15,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static roomescape.TestFixture.THEME_DETECTIVE;
 import static roomescape.TestFixture.THEME_HORROR;
@@ -119,7 +120,7 @@ class ThemeServiceTest {
     void findAllPopular() {
         // given
         final List<Theme> expectedThemes = List.of(THEME_HORROR(1L), THEME_DETECTIVE(2L));
-        given(themeRepository.findPopularThemesBy(any(), any(), anyInt())).willReturn(expectedThemes);
+        given(themeRepository.findPopularThemesBy(any())).willReturn(expectedThemes);
 
         // when
         final List<ThemeResponse> actual = themeService.findPopularThemes();

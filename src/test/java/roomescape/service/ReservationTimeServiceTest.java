@@ -102,8 +102,8 @@ class ReservationTimeServiceTest {
         final ReservationTime reservedTime = RESERVATION_TIME_SIX(1L);
         final AvailableReservationTimeSearch availableReservationTimeSearch
                 = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
-        given(reservationRepository.findTimeIds(
-                LocalDate.parse(DATE_MAY_EIGHTH), 1L)).willReturn(List.of(1L));
+        given(reservationRepository.findTimeIds(availableReservationTimeSearch))
+                .willReturn(List.of(1L));
         given(reservationTimeRepository.findAll())
                 .willReturn(List.of(reservedTime, RESERVATION_TIME_SEVEN(2L)));
 

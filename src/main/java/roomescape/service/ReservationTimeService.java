@@ -64,9 +64,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             final AvailableReservationTimeSearch condition
     ) {
-        final List<Long> reservations = reservationRepository.findTimeIds(
-                condition.date(), condition.themeId()
-        );
+        final List<Long> reservations = reservationRepository.findTimeIds(condition);
         final Set<Long> reservedTimeIds = new HashSet<>(reservations);
         final List<ReservationTime> times = reservationTimeRepository.findAll();
 

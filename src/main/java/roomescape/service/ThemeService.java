@@ -48,9 +48,7 @@ public class ThemeService {
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
         final ThemePopularFilter themePopularFilter = ThemePopularFilter.getThemePopularFilter(LocalDate.now());
-        final List<Theme> popularThemes = themeRepository.findPopularThemesBy(
-                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), themePopularFilter.getLimit()
-        );
+        final List<Theme> popularThemes = themeRepository.findPopularThemesBy(themePopularFilter);
         return popularThemes.stream()
                 .map(ThemeResponse::from)
                 .toList();

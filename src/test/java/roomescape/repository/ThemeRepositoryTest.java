@@ -85,9 +85,7 @@ class ThemeRepositoryTest extends RepositoryTest {
 
         // when
         final int limit = themePopularFilter.getLimit();
-        final List<Theme> actual = themeRepository.findPopularThemesBy(
-                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), limit
-        );
+        final List<Theme> actual = themeRepository.findPopularThemesBy(themePopularFilter);
 
         // then
         assertThat(actual).hasSize(limit);
