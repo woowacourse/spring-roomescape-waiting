@@ -41,11 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 .toList();
     }
 
-
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId, LocalDate from, LocalDate until);
 
     default List<Reservation> searchReservations(ReservationSearchCondition condition) {
-        //TODO 동적 쿼리 고려
         return findAllByThemeIdAndMemberIdAndDateBetween(condition.themeId(), condition.memberId(),
                 condition.dateFrom(), condition.dateTo());
     }
