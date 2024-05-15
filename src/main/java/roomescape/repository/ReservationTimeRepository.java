@@ -9,7 +9,7 @@ import roomescape.domain.time.ReservationTime;
 @Repository
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-   List<ReservationTime> findByIdNotIn(List<Long> ids);
+    List<ReservationTime> findByIdNotIn(List<Long> ids);
 
     boolean existsByStartAt(LocalTime time);
 }
