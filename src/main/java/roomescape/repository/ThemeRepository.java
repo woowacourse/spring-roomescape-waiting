@@ -7,14 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
-    @Query(nativeQuery = true, value = """
-            SELECT t.id, t.name, t.description, t.thumbnail, COUNT(*) as reservation_count
-            FROM reservation as r
-            INNER JOIN theme as t on r.theme_id = t.id
-            WHERE r.date BETWEEN ? AND ?
-            GROUP BY t.id
-            ORDER BY reservation_count desc
-            LIMIT(?)
+    @Query("""
+            SELECT r.theme
+            FROM Reservation r
+            WHERE r.date BETWEEN :start AND :end
+            GROUP BY r.theme
+            ORDER BY COUNT(r) DESC
+            LIMIT :limit
             """)
     List<Theme> findTopReservedThemesByDateRangeAndLimit(LocalDate start, LocalDate end, int limit);
 
