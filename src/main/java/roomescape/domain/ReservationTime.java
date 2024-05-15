@@ -15,8 +15,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    public ReservationTime() {
-
+    protected ReservationTime() {
     }
 
     public ReservationTime(LocalTime startAt) {
@@ -33,10 +32,6 @@ public class ReservationTime {
         if (time == null) {
             throw new BadRequestException("시간에 빈값을 입력할 수 없습니다.");
         }
-    }
-
-    public ReservationTime withId(Long id) {
-        return new ReservationTime(id, startAt);
     }
 
     public Long getId() {

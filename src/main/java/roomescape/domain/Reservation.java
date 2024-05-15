@@ -22,8 +22,7 @@ public class Reservation {
     @ManyToOne
     private RoomTheme theme;
 
-    public Reservation() {
-
+    protected Reservation() {
     }
 
     public Reservation(Member member, LocalDate date, ReservationTime time, RoomTheme theme) {

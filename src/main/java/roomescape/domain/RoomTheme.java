@@ -18,8 +18,7 @@ public class RoomTheme {
     private String description;
     private String thumbnail;
 
-    public RoomTheme() {
-
+    protected RoomTheme() {
     }
 
     public RoomTheme(String name, String description, String thumbnail) {
