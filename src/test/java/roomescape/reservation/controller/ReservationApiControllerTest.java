@@ -39,32 +39,14 @@ class ReservationApiControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    @DisplayName("예약을 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
-//    void createReservationRequestTest() throws Exception {
-//        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(1L, LocalDate.now(), 1L,
-//                1L);
-//        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.ADMIN, "hogi", "hogi@naver.com");
-//        ThemeResponse themeResponse = new ThemeResponse(1L, "공포", "무서운 테마", "https://i.pinimg.com/236x.jpg");
-//        TimeResponse timeResponse = new TimeResponse(1L, LocalTime.now());
-//        MemberResponse memberResponse = new MemberResponse(1L, "hogi");
-//        ReservationResponse reservationResponse = new ReservationResponse(1L, memberResponse,
-//                reservationCreateRequest.date(),
-//                themeResponse, timeResponse);
-//
-//        doReturn(1L).when(reservationService)
-//                .save(reservationCreateRequest, loginMemberInToken);
-//
-//        doReturn(reservationResponse).when(reservationService)
-//                .findById(1L);
-//
-//        mockMvc.perform(post("/reservations")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(reservationCreateRequest)))
-//                .andExpect(status().isCreated())
-//                .andExpect(header().string("Location", "/reservations/1"))
-//                .andExpect(jsonPath("$.id").value(reservationResponse.id()));
-//    }
+    @Test
+    @DisplayName("나의 예약 내역을 조회 성공하면 200을 반환한다.")
+    void myReservationsTest() throws Exception {
+        mockMvc.perform(get("/reservations/me")
+                        .cookie(new Cookie("token", "cookieValue"))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
     @Test
     @DisplayName("예약을 성공적으로 제거하면 204 응답을 받는다.")

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -50,7 +51,7 @@ public class ReservationApiController {
     ) {
         Long id = reservationService.save(reservationCreateRequest, loginMemberInToken);
         ReservationResponse reservationResponse = reservationService.findById(id);
-
+        
         return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
     }
 
@@ -60,5 +61,13 @@ public class ReservationApiController {
         reservationService.delete(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/reservations/me")
+    public ResponseEntity<List<MyReservationResponse>> myReservations(@Login LoginMemberInToken loginMemberInToken) {
+        List<MyReservationResponse> myReservationResponses = reservationService.findAllByMemberId(
+                loginMemberInToken.id());
+
+        return ResponseEntity.ok(myReservationResponses);
     }
 }
