@@ -2,11 +2,19 @@ package roomescape.infrastructure.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.Reservation;
 
 interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, Long> {
+
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAll();
+
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    Optional<Reservation> findById(Long id);
 
     @Query("""
               SELECT r.theme.id
