@@ -4,11 +4,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
-import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 
@@ -18,10 +18,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -32,68 +31,6 @@ class ReservationRepositoryTest {
     void findAllTest() {
         // When
         final List<Reservation> reservations = reservationRepository.findAll();
-
-        // Then
-        assertThat(reservations).hasSize(16);
-    }
-
-    @DisplayName("회원 id, 테마 id, 시작일, 종료일을 기준으로 예약 정보를 조회한다.")
-    @Test
-    void searchReservationsWithAllConditionTest() {
-        // Given
-        final long memberId = 1L;
-        final long themeId = 11L;
-        final LocalDate from = LocalDate.now().minusDays(7);
-        final LocalDate to = LocalDate.now().plusDays(1);
-        final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(memberId, themeId, from, to);
-
-        // When
-        final List<Reservation> reservations = reservationRepository.searchReservations(searchReservationsParams);
-
-        // Then
-        assertThat(reservations).hasSize(1);
-    }
-
-    @DisplayName("테마 id, 시작일, 종료일을 기준으로 예약 정보를 조회한다.")
-    @Test
-    void searchReservationsWithThemeIdAndFromAndToConditionTest() {
-        // Given
-        final long themeId = 1L;
-        final LocalDate from = LocalDate.now().minusDays(7);
-        final LocalDate to = LocalDate.now().plusDays(1);
-        final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(null, themeId, from, to);
-
-        // When
-        final List<Reservation> reservations = reservationRepository.searchReservations(searchReservationsParams);
-
-        // Then
-        assertThat(reservations).hasSize(4);
-    }
-
-    @DisplayName("시작일, 종료일을 기준으로 예약 정보를 조회한다.")
-    @Test
-    void searchReservationsWithFromAndToConditionTest() {
-        // Given
-        final LocalDate from = LocalDate.now().minusDays(7);
-        final LocalDate to = LocalDate.now().plusDays(1);
-        final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(null, null, from, to);
-
-        // When
-        final List<Reservation> reservations = reservationRepository.searchReservations(searchReservationsParams);
-
-        // Then
-        assertThat(reservations).hasSize(12);
-    }
-
-    @DisplayName("시작일 이후의 예약 정보를 조회한다.")
-    @Test
-    void searchReservationsAfterFromConditionTest() {
-        // Given
-        final LocalDate from = LocalDate.now().minusDays(7);
-        final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(null, null, from, null);
-
-        // When
-        final List<Reservation> reservations = reservationRepository.searchReservations(searchReservationsParams);
 
         // Then
         assertThat(reservations).hasSize(16);
@@ -128,22 +65,24 @@ class ReservationRepositoryTest {
     @Test
     void deleteByIdTest() {
         // When
-        final int deletedDataCount = reservationRepository.deleteById(1L);
+        reservationRepository.deleteById(1L);
 
         // Then
-        assertThat(deletedDataCount).isEqualTo(1);
+        final long count = reservationRepository.count();
+        assertThat(count).isEqualTo(15);
     }
 
     @DisplayName("특정 날짜와 시간 아이디를 가진 예약이 존재하는지 조회한다.")
     @Test
     void existByDateAndTimeIdTest() {
         // Given
-        final LocalDate reservationDate = LocalDate.now().plusDays(2);
+        final ReservationDate reservationDate = new ReservationDate(LocalDate.now().plusDays(2));
         final Long timeId = 4L;
         final Long themeId = 9L;
 
         // When
-        final boolean isExist = reservationRepository.existByDateAndTimeIdAndThemeId(reservationDate, timeId, themeId);
+        final boolean isExist = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+                reservationDate, timeId, themeId);
 
         // Then
         assertThat(isExist).isTrue();
@@ -151,12 +90,12 @@ class ReservationRepositoryTest {
 
     @DisplayName("특정 시간 아이디를 가진 예약이 존재하는지 조회한다.")
     @Test
-    void existByTimeIdTest() {
+    void existsByTimeIdTest() {
         // Given
         final Long timeId = 1L;
 
         // When
-        final boolean isExist = reservationRepository.existByTimeId(timeId);
+        final boolean isExist = reservationRepository.existsByTimeId(timeId);
 
         // Then
         assertThat(isExist).isTrue();
@@ -166,11 +105,11 @@ class ReservationRepositoryTest {
     @Test
     void findAllByDateAndThemeIdTest() {
         // Given
-        final LocalDate reservationDate = LocalDate.now().minusDays(3);
+        final ReservationDate reservationDate = new ReservationDate(LocalDate.now().minusDays(3));
         final Long themeId = 1L;
 
         // When
-        final List<Reservation> allByDateAndThemeId = reservationRepository.findAllByDateAndThemeId(reservationDate, themeId);
+        final List<Reservation> allByDateAndThemeId = reservationRepository.findAllByDateAndTheme_Id(reservationDate, themeId);
 
         // Then
         assertThat(allByDateAndThemeId).hasSize(2);

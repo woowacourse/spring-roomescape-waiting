@@ -6,10 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ssl.SslAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.dto.SaveMemberRequest;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
@@ -19,17 +17,13 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
 class MemberServiceTest {
     
     @Autowired
     private MemberService memberService;
-    @Autowired
-    private SslAutoConfiguration sslAutoConfiguration;
 
     @DisplayName("모든 회원 정보를 조회한다.")
     @Test
@@ -57,10 +51,10 @@ class MemberServiceTest {
         // Then
         assertAll(
                 () -> assertThat(savedMember.getId()).isEqualTo(6L),
-                () -> assertThat(savedMember.getEmail().value()).isEqualTo(email),
-                () -> assertThat(savedMember.getEmail().value()).isEqualTo(email),
+                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
+                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
                 () -> assertThat(savedMember.getRole()).isEqualTo(role),
-                () -> assertThat(savedMember.getName().value()).isEqualTo(name)
+                () -> assertThat(savedMember.getName().getName()).isEqualTo(name)
         );
     }
 

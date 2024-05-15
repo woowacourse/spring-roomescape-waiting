@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.dto.SaveThemeRequest;
 import roomescape.reservation.model.Theme;
 
@@ -14,11 +13,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
 class ThemeServiceTest {
 
     @Autowired
@@ -51,9 +48,9 @@ class ThemeServiceTest {
         Assertions.assertAll(
                 () -> assertThat(themes).hasSize(16),
                 () -> assertThat(theme.getId()).isEqualTo(16L),
-                () -> assertThat(theme.getName().value()).isEqualTo(name),
-                () -> assertThat(theme.getDescription().value()).isEqualTo(description),
-                () -> assertThat(theme.getThumbnail().value()).isEqualTo(thumbnail)
+                () -> assertThat(theme.getName().getName()).isEqualTo(name),
+                () -> assertThat(theme.getDescription().getDescription()).isEqualTo(description),
+                () -> assertThat(theme.getThumbnail().getThumbnail()).isEqualTo(thumbnail)
         );
     }
 

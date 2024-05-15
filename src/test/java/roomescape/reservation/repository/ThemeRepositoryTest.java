@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.Theme;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)   // TODO : 더 좋은 데이터 초기화 방식 고민
 class ThemeRepositoryTest {
 
     @Autowired
@@ -61,8 +62,8 @@ class ThemeRepositoryTest {
         assertAll(
                 () -> assertThat(themes).hasSize(16),
                 () -> assertThat(savedTheme.getId()).isEqualTo(16L),
-                () -> assertThat(savedTheme.getName().value()).isEqualTo(theme.getName().value()),
-                () -> assertThat(savedTheme.getDescription().value()).isEqualTo(theme.getDescription().value()),
+                () -> assertThat(savedTheme.getName().getName()).isEqualTo(theme.getName().getName()),
+                () -> assertThat(savedTheme.getDescription().getDescription()).isEqualTo(theme.getDescription().getDescription()),
                 () -> assertThat(savedTheme.getThumbnail()).isEqualTo(theme.getThumbnail())
         );
     }
@@ -71,10 +72,11 @@ class ThemeRepositoryTest {
     @Test
     void deleteByIdTest() {
         // When
-        final int deletedDataCount = themeRepository.deleteById(3L);
+        themeRepository.deleteById(3L);
 
         // Then
-        assertThat(deletedDataCount).isEqualTo(1);
+        final long count = themeRepository.count();
+        assertThat(count).isEqualTo(14);
     }
 
     @DisplayName("특정 기간 중 가장 예약 개수가 많은 상위 10개의 테마 정보를 인기순으로 조회한다.")
@@ -85,7 +87,7 @@ class ThemeRepositoryTest {
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));
         final int maximumThemeCount = 10;
 
-        final List<Theme> popularThemes = themeRepository.findPopularThemes(startAt, endAt, maximumThemeCount);
+        final List<Theme> popularThemes = themeRepository.findPopularThemes(startAt.getDate(), endAt.getDate(), maximumThemeCount);
 
         // Then
         assertAll(

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.model.ReservationTime;
 
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeRepositoryTest {
 
     @Autowired
@@ -66,10 +67,11 @@ class ReservationTimeRepositoryTest {
     @Test
     void deleteByIdTest() {
         // When
-        final int deletedDataCount = reservationTimeRepository.deleteById(2L);
+        reservationTimeRepository.deleteById(2L);
 
         // Then
-        assertThat(deletedDataCount).isEqualTo(1);
+        final long count = reservationTimeRepository.count();
+        assertThat(count).isEqualTo(7);
     }
 
     @DisplayName("특정 시간값의 예약 시간이 존재하는지 조회한다.")
@@ -77,7 +79,7 @@ class ReservationTimeRepositoryTest {
     void existByStartAtTest() {
         // When
         final LocalTime startAt = LocalTime.of(13, 30);
-        final boolean isExist = reservationTimeRepository.existByStartAt(startAt);
+        final boolean isExist = reservationTimeRepository.existsByStartAt(startAt);
 
         // Then
         assertThat(isExist).isTrue();

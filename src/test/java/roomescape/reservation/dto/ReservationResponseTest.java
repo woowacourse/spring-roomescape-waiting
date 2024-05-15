@@ -33,8 +33,8 @@ class ReservationResponseTest {
         assertAll(
                 () -> assertThat(reservationResponse).isNotNull(),
                 () -> assertThat(reservationResponse.id()).isEqualTo(reservation.getId()),
-                () -> assertThat(reservationResponse.member().name()).isEqualTo(reservation.getMember().getName().value()),
-                () -> assertThat(reservationResponse.date()).isEqualTo(reservation.getDate().value()),
+                () -> assertThat(reservationResponse.member().name()).isEqualTo(reservation.getMember().getName().getName()),
+                () -> assertThat(reservationResponse.date()).isEqualTo(reservation.getDate().getDate()),
                 () -> assertThat(reservationResponse.time().startAt()).isEqualTo(reservation.getTime().getStartAt())
         );
     }
