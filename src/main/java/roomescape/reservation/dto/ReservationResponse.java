@@ -21,7 +21,7 @@ public record ReservationResponse(
                         reservation.getMember().getName().getName(),
                         reservation.getMember().getEmail().getEmail()
                 ),
-                reservation.getDate().getDate(),
+                reservation.getDate().getValue(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );

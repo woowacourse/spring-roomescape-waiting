@@ -15,8 +15,8 @@ public record MyReservationResponse(
     public static MyReservationResponse from(final Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName().getName(),
-                reservation.getDate().getDate(),
+                reservation.getTheme().getName().getValue(),
+                reservation.getDate().getValue(),
                 reservation.getTime().getStartAt(),
                 reservation.getStatus().getDescription()
         );
