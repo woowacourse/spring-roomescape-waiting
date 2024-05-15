@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.dto.SaveMemberRequest;
 import roomescape.member.encoder.PasswordEncoder;
 import roomescape.member.model.Member;
+import roomescape.member.model.MemberEmail;
 import roomescape.member.repository.MemberRepository;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class MemberService {
     }
 
     private void validateEmailDuplicate(final String email) {
-        if (memberRepository.existByEmail(email)) {
+        if (memberRepository.existsByEmail(new MemberEmail(email))) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
     }
