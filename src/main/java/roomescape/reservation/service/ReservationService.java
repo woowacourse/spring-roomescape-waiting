@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
@@ -49,7 +50,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findMyReservations(Member member) {
+    public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
+        Member member = getMember(authInfo.getId());
         return memberReservationRepository.findAllByMember(member)
                 .stream()
                 .map(MyReservationResponse::from)
@@ -57,10 +59,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse createMemberReservation(Member member, ReservationRequest reservationRequest) {
+    public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
+        Member member = getMember(authInfo.getId());
 
         if (memberReservationRepository.existsBy(date,
                 reservationTime, theme)) {
@@ -87,9 +90,9 @@ public class ReservationService {
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
-    public void deleteMemberReservation(Member member, long memberReservationId) {
+    public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
-        if (!memberReservation.isMember(member)) {
+        if (!memberReservation.isMember(Member.of(authInfo))) {
             throw new BusinessException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
         memberReservationRepository.deleteById(memberReservationId);

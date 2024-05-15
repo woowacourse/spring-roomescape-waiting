@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.TokenProvider;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
@@ -90,7 +91,7 @@ class ReservationControllerTest extends ControllerTest {
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
-                getMemberChoco(),
+                AuthInfo.of(getMemberChoco()),
                 new ReservationRequest(
                         LocalDate.now().toString(),
                         reservationTimeResponse.id(),

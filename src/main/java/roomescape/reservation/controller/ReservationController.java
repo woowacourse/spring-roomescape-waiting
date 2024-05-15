@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
 import roomescape.member.domain.Member;
+import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
@@ -46,16 +48,16 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(@LoginUser Member member,
+    public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.createMemberReservation(member, reservationRequest);
+        ReservationResponse response = reservationService.createMemberReservation(authInfo, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
     }
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@LoginUser Member member,
+    public ResponseEntity<Void> delete(@LoginUser AuthInfo authInfo,
                                        @PathVariable("id") @Min(1) long reservationMemberId) {
-        reservationService.deleteMemberReservation(member, reservationMemberId);
+        reservationService.deleteMemberReservation(authInfo, reservationMemberId);
         return ResponseEntity.noContent().build();
     }
 
@@ -71,7 +73,7 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/my")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser Member member) {
-        return ResponseEntity.ok(reservationService.findMyReservations(member));
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser AuthInfo authInfo) {
+        return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
     }
 }

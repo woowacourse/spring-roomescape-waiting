@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import roomescape.auth.domain.AuthInfo;
 
 @Entity
 public class Member {
@@ -45,6 +46,10 @@ public class Member {
 
     public Member(Long id, String name) {
         this(id, name, null, null, Role.USER);
+    }
+
+    public static Member of(AuthInfo authInfo) {
+        return new Member(authInfo.getId(), authInfo.getName(), authInfo.getEmail(), authInfo.getRole());
     }
 
     public Long getId() {

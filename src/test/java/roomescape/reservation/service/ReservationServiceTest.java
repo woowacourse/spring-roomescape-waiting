@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
@@ -60,7 +61,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme.getId());
 
         //when
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(member,
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(AuthInfo.of(member),
                 reservationRequest);
 
         //then
@@ -184,7 +185,7 @@ class ReservationServiceTest extends ServiceTest {
                 new MemberReservation(member, reservation));
 
         //when
-        reservationService.deleteMemberReservation(member, memberReservation.getId());
+        reservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
 
         //then
         assertThat(
@@ -206,7 +207,7 @@ class ReservationServiceTest extends ServiceTest {
                 theme.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(member, reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(member), reservationRequest)).isInstanceOf(
                 BusinessException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
     }
 
@@ -244,7 +245,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(member, reservation2));
 
         //when
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(member);
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(AuthInfo.of(member));
 
         //then
         assertAll(

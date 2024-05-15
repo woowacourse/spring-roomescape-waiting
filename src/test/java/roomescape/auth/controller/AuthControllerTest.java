@@ -97,7 +97,7 @@ class AuthControllerTest extends ControllerTest {
                             .when().get("/login/check")
                             .then().log().all()
                             .statusCode(HttpStatus.OK.value()).extract().as(AuthInfo.class);
-
+                    System.out.println(authInfo);
                     authInfos.add(authInfo);
                 }),
                 dynamicTest("토큰으로 얻은 회원 정보를 검증한다.", () -> {
