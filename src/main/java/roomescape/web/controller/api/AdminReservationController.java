@@ -1,10 +1,8 @@
 package roomescape.web.controller.api;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,10 +48,10 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<MemberReservationWebResponse>> getSearchedReservations(
-        @RequestParam @NotNull @Positive Long memberId,
-        @RequestParam @NotNull @Positive Long themeId,
-        @RequestParam @NotBlank(message = "From 날짜는 필수입니다.") String dateFrom,
-        @RequestParam @NotBlank(message = "To 날짜는 필수입니다.") String dateTo) {
+        @RequestParam(required = false) Long memberId,
+        @RequestParam(required = false) Long themeId,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo) {
 
         AdminSearchedReservationAppRequest appRequest = new AdminSearchedReservationAppRequest(
             memberId, themeId, dateFrom, dateTo);
