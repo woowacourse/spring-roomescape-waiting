@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)

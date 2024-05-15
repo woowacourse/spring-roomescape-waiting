@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.auth.Role;
+import roomescape.member.domain.Role;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.reservation.domain.Reservation;

@@ -1,6 +1,6 @@
 package roomescape.member.dto;
 
-import roomescape.auth.Role;
+import roomescape.member.domain.Role;
 
 public record LoginMemberInToken(
         Long id,

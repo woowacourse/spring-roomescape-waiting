@@ -15,7 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import roomescape.auth.Role;
+import roomescape.member.domain.Role;
 import roomescape.auth.TokenProvider;
 import roomescape.config.ControllerConfig;
 import roomescape.config.RoleCheckInterceptor;

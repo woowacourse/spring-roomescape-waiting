@@ -1,7 +1,5 @@
 package roomescape.member.domain;
 
-import roomescape.auth.Role;
-
 public class Member {
     private Long id;
     private Role role;
