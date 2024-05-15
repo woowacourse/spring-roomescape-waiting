@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AuthException.class)
     public ResponseEntity<ErrorResponse> handle(final AuthException exception) {
         logger.error(exception.getMessage(), exception);
-        return new ResponseEntity(exception.getErrorResponse(), exception.getErrorResponse().getStatusCode());
+        return new ResponseEntity<>(exception.getErrorResponse(), exception.getErrorResponse().getStatusCode());
     }
 
     @ExceptionHandler(value = NoSuchElementException.class)
@@ -31,22 +31,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(BAD_REQUEST, "[ERROR] 요청된 자원이 존재하지 않습니다."));
     }
 
-    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handle(final HttpRequestMethodNotSupportedException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse(BAD_REQUEST, "[ERROR] 올바른 형식의 필드를 입력해주세요."));
-    }
-
-    @ExceptionHandler(value = HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handle(final HttpMessageNotReadableException exception) {
-        logger.error(exception.getMessage(), exception);
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse(BAD_REQUEST, "[ERROR] 올바른 형식의 필드를 입력해주세요."));
-    }
-
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handle(final MethodArgumentNotValidException exception) {
+    @ExceptionHandler({
+            HttpRequestMethodNotSupportedException.class,
+            HttpMessageNotReadableException.class,
+            MethodArgumentNotValidException.class
+    })
+    public ResponseEntity<ErrorResponse> handle(final RuntimeException exception) {
         logger.error(exception.getMessage(), exception);
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(BAD_REQUEST, "[ERROR] 올바른 형식의 필드를 입력해주세요."));
