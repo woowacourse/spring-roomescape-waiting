@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.member.repository.MemberRepository;
@@ -39,7 +38,7 @@ class MemberServiceTest {
         String name = "hogi";
         String email = "hogi@naver.com";
         String password = "asd";
-        Member member = new Member(new MemberName(name), email, password);
+        Member member = new Member(name, email, password);
         memberRepository.save(member);
 
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(name, email, password);

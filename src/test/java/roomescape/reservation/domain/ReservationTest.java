@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 
 class ReservationTest {
 
@@ -18,7 +17,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(LocalTime.now());
 
         assertThatThrownBy(() -> new Reservation(
-                new Member(new MemberName("호기"), "hogi@email.com", "1234"),
+                new Member("호기", "hogi@email.com", "1234"),
                 LocalDate.now().minusDays(1),
                 theme,
                 reservationTime)

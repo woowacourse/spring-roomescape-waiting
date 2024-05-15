@@ -27,7 +27,7 @@ public class ReservationTimeService {
     public Long save(TimeCreateRequest timeCreateRequest) {
         ReservationTime reservationTime = timeCreateRequest.toReservationTime();
 
-        return reservationTimeRepository.save(reservationTime);
+        return reservationTimeRepository.save(reservationTime).getId();
     }
 
     public TimeResponse findById(Long id) {
@@ -38,7 +38,7 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
-        List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
+        List<Long> bookedTimeIds = reservationRepository.findIdByReservationsDateAndThemeId(date, themeId);
 
         return reservationTimeRepository.findAll().stream()
                 .map(reservationTime -> AvailableReservationTimeResponse.toResponse(
@@ -55,10 +55,10 @@ public class ReservationTimeService {
     }
 
     public void delete(Long id) {
-        reservationTimeRepository.findReservationInSameId(id)
+        reservationTimeRepository.findByReservationsId(id)
                 .ifPresent(empty -> {
                     throw new IllegalArgumentException("해당 시간으로 예약된 내역이 있습니다.");
                 });
-        reservationTimeRepository.delete(id);
+        reservationTimeRepository.deleteById(id);
     }
 }

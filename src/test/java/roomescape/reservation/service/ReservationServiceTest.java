@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.member.domain.Role;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
@@ -49,7 +48,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
     void notExistReservationTimeIdExceptionTest() {
         Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme);
+        Long themeId = themeRepository.save(theme).getId();
 
         LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(loginMemberInToken.id(),
@@ -63,13 +62,13 @@ class ReservationServiceTest {
     @DisplayName("중복된 예약이 있다면 예외가 발생한다.")
     void duplicateReservationExceptionTest() {
         Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme);
+        Long themeId = themeRepository.save(theme).getId();
 
         LocalTime localTime = LocalTime.parse("10:00");
         ReservationTime reservationTime = new ReservationTime(localTime);
-        Long timeId = reservationTimeRepository.save(reservationTime);
+        Long timeId = reservationTimeRepository.save(reservationTime).getId();
 
-        Member member = new Member(1L, Role.MEMBER, new MemberName("호기"), "hogi@email.com", "1234");
+        Member member = new Member(1L, Role.MEMBER, "호기", "hogi@email.com", "1234");
         memberRepository.save(member);
 
         LocalDate localDate = LocalDate.now();

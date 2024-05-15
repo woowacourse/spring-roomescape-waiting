@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 
@@ -22,7 +21,7 @@ class TokenProviderTest {
 
     @BeforeEach
     void init() {
-        member = new Member(1L, Role.MEMBER, new MemberName("호기"), "hogi@naver.com", "asd");
+        member = new Member(1L, Role.MEMBER, "호기", "hogi@naver.com", "asd");
     }
 
     @Test

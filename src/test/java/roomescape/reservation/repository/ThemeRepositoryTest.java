@@ -9,17 +9,15 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
-@JdbcTest
-@Import({ThemeRepository.class, ReservationTimeRepository.class, ReservationRepository.class, MemberRepository.class})
+@DataJpaTest
 class ThemeRepositoryTest {
 
     @Autowired
@@ -38,7 +36,7 @@ class ThemeRepositoryTest {
     @DisplayName("id로 엔티티를 찾는다.")
     void findByIdTest() {
         Theme theme = new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg");
-        Long themeId = themeRepository.save(theme);
+        Long themeId = themeRepository.save(theme).getId();
         Theme findTheme = themeRepository.findById(themeId).get();
 
         assertThat(findTheme.getId()).isEqualTo(themeId);
@@ -48,8 +46,8 @@ class ThemeRepositoryTest {
     @DisplayName("이름으로 엔티티를 찾는다.")
     void findByIdNameTest() {
         Theme theme = new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg");
-        Long themeId = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findByName(theme.getName()).get();
+        Long themeId = themeRepository.save(theme).getId();
+        Theme findTheme = themeRepository.findByThemeName(theme.getName()).get();
 
         assertThat(findTheme.getId()).isEqualTo(themeId);
     }
@@ -69,42 +67,32 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("최근 1주일을 기준하여 예약이 많은 순으로 10개의 테마를 조회한다.")
     void findTopTenThemesDescendingOfLastWeekTest() {
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
-        Long theme1Id = themeRepository.save(
+        Theme theme1 = themeRepository.save(
                 new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg")
         );
-        Theme theme1 = themeRepository.findById(theme1Id).get();
-
-        Long theme2Id = themeRepository.save(
+        Theme theme2 = themeRepository.save(
                 new Theme("액션", "액션 테마", "https://i.pinimg.com/236x.jpg")
         );
-        Theme theme2 = themeRepository.findById(theme2Id).get();
-
-        Long theme3Id = themeRepository.save(
+        Theme theme3 = themeRepository.save(
                 new Theme("SF", "미래 테마", "https://i.pinimg.com/236x.jpg")
         );
-        Theme theme3 = themeRepository.findById(theme3Id).get();
 
-        Long member1Id = memberRepository.save(new Member(new MemberName("호기"), "hogi@email.com", "ㅁㄴㅇ"));
-        Member member1 = memberRepository.findById(member1Id).get();
-
-        Long member2Id = memberRepository.save(new Member(new MemberName("카키"), "kaki@email.com", "ㅁㄴㅇ"));
-        Member member2 = memberRepository.findById(member2Id).get();
-
-        Long member3Id = memberRepository.save(new Member(new MemberName("솔라"), "solar@email.com", "ㅁㄴㅇ"));
-        Member member3 = memberRepository.findById(member3Id).get();
-
-        Long member4Id = memberRepository.save(new Member(new MemberName("네오"), "neo@email.com", "ㅁㄴㅇ"));
-        Member member4 = memberRepository.findById(member4Id).get();
+        Member member1 = memberRepository.save(new Member("호기", "hogi@email.com", "ㅁㄴㅇ"));
+        Member member2 = memberRepository.save(new Member("카키", "kaki@email.com", "ㅁㄴㅇ"));
+        Member member3 = memberRepository.save(new Member("솔라", "solar@email.com", "ㅁㄴㅇ"));
+        Member member4 = memberRepository.save(new Member("네오", "neo@email.com", "ㅁㄴㅇ"));
 
         reservationRepository.save(new Reservation(member1, LocalDate.now(), theme1, reservationTime));
         reservationRepository.save(new Reservation(member2, LocalDate.now(), theme2, reservationTime));
         reservationRepository.save(new Reservation(member3, LocalDate.now(), theme2, reservationTime));
         reservationRepository.save(new Reservation(member4, LocalDate.now(), theme3, reservationTime));
 
-        List<Theme> themes = themeRepository.findPopularThemesLimitTen();
+        LocalDate today = LocalDate.now();
+        LocalDate sevenDaysBefore = today.minusDays(7);
+        List<Theme> themes = themeRepository.findPopularThemesLimitTen(sevenDaysBefore, today, PageRequest.of(0,
+                10));
 
         assertAll(
                 () -> assertThat(themes.get(0).getName()).isEqualTo("액션"),
@@ -116,8 +104,8 @@ class ThemeRepositoryTest {
     @DisplayName("id를 받아 삭제한다.")
     void deleteTest() {
         Theme theme = new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg");
-        Long themeId = themeRepository.save(theme);
-        themeRepository.delete(themeId);
+        Long themeId = themeRepository.save(theme).getId();
+        themeRepository.deleteById(themeId);
         List<Theme> themes = themeRepository.findAll();
 
         assertThat(themes.size()).isEqualTo(0);

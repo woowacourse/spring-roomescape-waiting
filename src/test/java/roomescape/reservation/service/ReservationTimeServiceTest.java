@@ -12,10 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.member.domain.Role;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -61,19 +60,19 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 가능한 시간을 조회한다.")
     void findAvailableTimesTest() {
-        Long time1Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        Long time1Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00"))).getId();
         ReservationTime reservationTime1 = reservationTimeRepository.findById(time1Id).get();
 
-        Long time2Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("11:00")));
+        Long time2Id = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("11:00"))).getId();
         ReservationTime reservationTime2 = reservationTimeRepository.findById(time2Id).get();
 
         Long themeId = themeRepository.save(
                 new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg")
-        );
+        ).getId();
         Theme theme = themeRepository.findById(themeId).get();
 
         Long memberId = memberRepository.save(
-                new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234"));
+                new Member(1L, Role.MEMBER, "카키", "kaki@email.com", "1234")).getId();
         Member member = memberRepository.findById(memberId).get();
 
         Reservation reservation = new Reservation(
@@ -97,14 +96,14 @@ class ReservationTimeServiceTest {
     @DisplayName("이미 해당 시간으로 예약 되있을 경우 삭제 시 예외가 발생한다.")
     void deleteExceptionTest() {
         Long themeId = themeRepository.save(
-                new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
+                new Theme("공포", "호러 방탈출", "http://asdf.jpg")).getId();
         Theme theme = themeRepository.findById(themeId).get();
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now())).getId();
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
 
         Long memberId = memberRepository.save(
-                new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234"));
+                new Member(1L, Role.MEMBER, "카키", "kaki@email.com", "1234")).getId();
         Member member = memberRepository.findById(memberId).get();
 
         Reservation reservation = new Reservation(

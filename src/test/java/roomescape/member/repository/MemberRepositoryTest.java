@@ -8,13 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 
-@JdbcTest
-@Import(MemberRepository.class)
+@DataJpaTest
 class MemberRepositoryTest {
 
     @Autowired
@@ -23,13 +20,13 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void init() {
-        member = new Member(new MemberName("호기"), "hogi@naver.com", "asd");
+        member = new Member("호기", "hogi@naver.com", "asd");
     }
 
     @Test
     @DisplayName("id로 회원을 찾는다.")
     void findById() {
-        Long memberId = memberRepository.save(member);
+        Long memberId = memberRepository.save(member).getId();
         Member findMember = memberRepository.findById(memberId).get();
 
         assertThat(findMember.getId()).isEqualTo(memberId);
@@ -40,8 +37,8 @@ class MemberRepositoryTest {
     @CsvSource({"'hogigigigigigi@naver.com', false", "'hogi@naver.com', true"})
     void existNameOrEmail(String email, boolean exist) {
         memberRepository.save(member);
-        Member hogi = new Member(new MemberName("hogi"), email, "1234");
-        boolean existEmail = memberRepository.existEmail(hogi);
+        Member hogi = new Member("hogi", email, "1234");
+        boolean existEmail = memberRepository.existsByEmail(hogi.getEmail());
 
         assertThat(existEmail).isEqualTo(exist);
     }
@@ -50,7 +47,7 @@ class MemberRepositoryTest {
     @Test
     @DisplayName("이메일과 비밀번호가 일치하는 회원을 찾는다.")
     void findByEmailAndPassword() {
-        Long memberId = memberRepository.save(member);
+        Long memberId = memberRepository.save(member).getId();
         Member findMember = memberRepository.findByEmailAndPassword(member.getEmail(), member.getPassword()).get();
 
         assertThat(findMember.getId()).isEqualTo(memberId);

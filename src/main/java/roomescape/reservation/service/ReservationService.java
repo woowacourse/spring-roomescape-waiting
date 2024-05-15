@@ -39,7 +39,7 @@ public class ReservationService {
         Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken);
         validateDuplicateReservation(reservation);
 
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(reservation).getId();
     }
 
     private Reservation getValidatedReservation(ReservationCreateRequest reservationCreateRequest,
@@ -62,7 +62,8 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existReservation(reservation)) {
+        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(), reservation.getTime()
+                .getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
         }
     }
@@ -81,13 +82,15 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllBySearch(ReservationSearchRequest reservationSearchRequest) {
-        return reservationRepository.findAllByThemeIdAndMemberIdBetweenStartAndEnd(
-                        reservationSearchRequest).stream()
+        Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
+        Member member = memberRepository.findById(reservationSearchRequest.memberId()).get();
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme,
+                        reservationSearchRequest.dateTo(), reservationSearchRequest.dateFrom()).stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
 
     public void delete(Long id) {
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
     }
 }
