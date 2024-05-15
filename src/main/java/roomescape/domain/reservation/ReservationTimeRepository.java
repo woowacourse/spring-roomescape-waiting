@@ -1,25 +1,14 @@
 package roomescape.domain.reservation;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalTime;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.exception.InvalidReservationException;
 
-public interface ReservationTimeRepository {
-
-    ReservationTime save(ReservationTime reservationTime);
-
-    List<ReservationTime> findAll();
-
-    void deleteById(long id);
-
-    Optional<ReservationTime> findById(long id);
-
-    default ReservationTime getById(Long id) {
+public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
+    default ReservationTime getById(long id) {
         return findById(id)
                 .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 시간입니다."));
     }
 
-    boolean existsByTime(String startAt);
-
-    List<ReservationTime> findBookedTimesByDateAndTheme(String date, long themeId);
+    boolean existsByStartAt(LocalTime startAt);
 }
