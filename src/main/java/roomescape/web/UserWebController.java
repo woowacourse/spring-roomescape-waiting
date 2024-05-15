@@ -25,4 +25,9 @@ public class UserWebController {
     public String getUserReservationPage() {
         return "/reservation";
     }
+
+    @GetMapping("/reservation-mine")
+    public String getUserMyReservationPage() {
+        return "/reservation-mine";
+    }
 }

@@ -68,39 +68,39 @@ VALUES ('23:30');
 
 /**
   reservation
-*/
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (2, CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 1, 1);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (3, CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 1, 2);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (4, CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 4, 1);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (5, CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 3, 1);
+ */
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (2, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 1, 1);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (3, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 1, 2);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (4, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 4, 1);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (5, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 3, 1);
 
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (1, CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 5, 1);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (2, CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 7, 2);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (3, CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 6, 13);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (4, CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 8, 14);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (1, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 5, 1);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (2, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 7, 2);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (3, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 6, 13);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (4, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 8, 14);
 
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (5, CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 1, 2);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (3, CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 1, 12);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (2, CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 4, 10);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (1, CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 3, 11);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (5, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -3, NOW()) AS DATE), 1, 2);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (3, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -4, NOW()) AS DATE), 1, 12);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (2, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -2, NOW()) AS DATE), 4, 10);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (1, 'RESERVATION', CAST(TIMESTAMPADD(DAY, -6, NOW()) AS DATE), 3, 11);
 
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (2, CAST(TIMESTAMPADD(DAY, 3, NOW()) AS DATE), 1, 10);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (4, CAST(TIMESTAMPADD(DAY, 4, NOW()) AS DATE), 1, 15);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (1, CAST(TIMESTAMPADD(DAY, 2, NOW()) AS DATE), 4, 9);
-INSERT INTO reservation(member_id, date, time_id, theme_id)
-VALUES (5, CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (2, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 3, NOW()) AS DATE), 1, 10);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (4, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 4, NOW()) AS DATE), 1, 15);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (1, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 2, NOW()) AS DATE), 4, 9);
+INSERT INTO reservation(member_id, status, date, time_id, theme_id)
+VALUES (5, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8);

@@ -92,4 +92,8 @@ public class ReservationService {
     public void deleteReservation(final Long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
+
+    public List<Reservation> getMyReservations(final Long memberId) {
+        return reservationRepository.findAllByMember_Id(memberId);
+    }
 }

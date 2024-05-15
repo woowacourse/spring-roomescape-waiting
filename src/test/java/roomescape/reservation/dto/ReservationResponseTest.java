@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 
@@ -20,11 +21,12 @@ class ReservationResponseTest {
     @Test
     void convertDtoTest() {
         // Given
+        final ReservationStatus reservationStatus = ReservationStatus.RESERVATION;
         final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(2, 22));
         final Theme theme = Theme.of(1L, "테바의 비밀친구", "테바의 은밀한 비밀친구", "대충 테바 사진 링크");
         final Member member = Member.createMemberWithId(1L, MemberRole.USER, "password1111", "kelly", "kelly6bf@mail.com");
         final LocalDate reservationDate = LocalDate.now().plusDays(1);
-        final Reservation reservation = Reservation.of(1L, reservationDate, reservationTime, theme, member);
+        final Reservation reservation = Reservation.of(1L, reservationStatus, reservationDate, reservationTime, theme, member);
 
         // When
         final ReservationResponse reservationResponse = ReservationResponse.from(reservation);

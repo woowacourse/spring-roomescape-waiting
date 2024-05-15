@@ -2,6 +2,7 @@ package roomescape.reservation.dto;
 
 import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 
@@ -19,6 +20,7 @@ public record SaveReservationRequest(LocalDate date, Long memberId, Long timeId,
             final Member member
     ) {
         return Reservation.of(
+                ReservationStatus.RESERVATION,
                 date,
                 reservationTime,
                 theme,

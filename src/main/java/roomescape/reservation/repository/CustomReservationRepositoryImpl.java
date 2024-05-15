@@ -7,6 +7,7 @@ import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
 import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.param.QueryGenerator;
@@ -28,7 +29,7 @@ public class CustomReservationRepositoryImpl implements CustomReservationReposit
                 searchReservationsParams,
                 """
                     SELECT
-                        r.id AS reservation_id, r.date AS reservation_date,
+                        r.id AS reservation_id, r.date AS reservation_date, r.status AS reservation_status,
                         rt.id AS time_id, rt.start_at AS reservation_time,
                         th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail AS theme_thumbnail,
                         m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role
@@ -45,6 +46,7 @@ public class CustomReservationRepositoryImpl implements CustomReservationReposit
     private RowMapper<Reservation> itemRowMapper() {
         return ((rs, rowNum) -> Reservation.of(
                 rs.getLong("reservation_id"),
+                ReservationStatus.of(rs.getString("reservation_status")),
                 rs.getDate("reservation_date").toLocalDate(),
                 new ReservationTime(rs.getLong("time_id"), rs.getTime("reservation_time").toLocalTime()),
                 Theme.of(
