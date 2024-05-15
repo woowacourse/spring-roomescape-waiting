@@ -1,18 +1,16 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.Fixture.COOKIE_NAME;
-import static roomescape.Fixture.VALID_USER_EMAIL;
-import static roomescape.Fixture.VALID_USER_NAME;
-import static roomescape.Fixture.VALID_USER_PASSWORD;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.Fixture.*;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import roomescape.domain.MemberRole;
 import roomescape.web.controller.request.MemberReservationWebRequest;
+
+import java.util.stream.Stream;
 
 class ReservationControllerTest extends ControllerTest {
 
@@ -133,5 +131,45 @@ class ReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @DisplayName("필터링된 예약을 조회한다. -> 200")
+    @TestFactory
+    Stream<DynamicTest> getFilteredReservations() {
+        jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)",
+                VALID_ADMIN_NAME.getName(), VALID_ADMIN_EMAIL.getEmail(),
+                VALID_ADMIN_PASSWORD.getPassword(), MemberRole.ADMIN.name());
+        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
+                "2026-02-01", 1L, 1L, 2L, "RESERVATION");
+
+        return Stream.of(dynamicTest("테마 아이디로 예약 필터링", () ->
+                        RestAssured.given().log().all()
+                                .cookie(COOKIE_NAME, getAdminToken())
+                                .when().get("/admin/reservations/search?themeId=1")
+                                .then().log().all()
+                                .statusCode(200)
+                                .body("size()", is(2))),
+                dynamicTest("멤버 아이디로 예약 필터링", () ->
+                        RestAssured.given().log().all()
+                                .cookie(COOKIE_NAME, getAdminToken())
+                                .when().get("/admin/reservations/search?memberId=1")
+                                .then().log().all()
+                                .statusCode(200)
+                                .body("size()", is(1))),
+                dynamicTest("날짜로 예약 필터링", () ->
+                        RestAssured.given().log().all()
+                                .cookie(COOKIE_NAME, getAdminToken())
+                                .when().get("/admin/reservations/search?from=2026-02-01")
+                                .then().log().all()
+                                .statusCode(200)
+                                .body("size()", is(2))),
+                dynamicTest("전체 조건으로 예약 필터링", () ->
+                        RestAssured.given().log().all()
+                                .cookie(COOKIE_NAME, getAdminToken())
+                                .when().get("/admin/reservations/search?memberId=1&themeId=1&from=2026-02-01&to=2026-03-01")
+                                .then().log().all()
+                                .statusCode(200)
+                                .body("size()", is(1)))
+        );
     }
 }

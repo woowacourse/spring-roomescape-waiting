@@ -1,4 +1,6 @@
 package roomescape.service.request;
 
-public record AdminSearchedReservationAppRequest(Long memberId, Long themeId, String dateFrom, String dateTo) {
+import java.time.LocalDate;
+
+public record AdminSearchedReservationAppRequest(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
 }

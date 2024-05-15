@@ -11,7 +11,6 @@ import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -86,8 +85,8 @@ public class ReservationService {
     }
 
     public List<ReservationAppResponse> findAllSearched(AdminSearchedReservationAppRequest request) {
-        List<Reservation> searchedReservations = reservationRepository.findAllByMemberIdAndThemeIdInPeriod(
-                request.memberId(), request.themeId(), LocalDate.parse(request.dateFrom()), LocalDate.parse(request.dateTo()));
+        List<Reservation> searchedReservations = reservationRepository.findAllWithSearchConditions(
+                request.memberId(), request.themeId(), request.dateFrom(), request.dateTo());
 
         return searchedReservations.stream()
                 .map(ReservationAppResponse::from)
