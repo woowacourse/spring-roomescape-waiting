@@ -8,5 +8,4 @@ import java.util.List;
 public interface CustomReservationRepository {
 
     List<Reservation> searchReservations(SearchReservationsParams searchReservationsParams);
-
 }
