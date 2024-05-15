@@ -153,7 +153,7 @@ public class ReservationService {
             final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
         Member member = memberService.findMemberById(memberId);
         Theme theme = themeService.findThemeById(themeId);
-        // TODO: [STEP6 필터링 로직] 동적 쿼리로 변경
+
         List<ReservationResponse> response = reservationRepository.findByThemeIdAndMemberIdBetweenDate(theme, member, dateFrom, dateTo).stream()
                 .map(ReservationResponse::from)
                 .toList();
