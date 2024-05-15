@@ -39,14 +39,9 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
-
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION_TIME));
-
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
+        Member member = getMember(memberId);
+        ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
+        Theme theme = getTheme(reservationRequest.themeId());
 
         if (reservationRepository.existsByTimeAndDate(reservationTime, reservationRequest.date())) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
@@ -72,15 +67,9 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
-    }
-
     public List<ReservationResponse> findAllReservationsByCondition(ReservationConditionRequest condition) {
-        Theme findTheme = themeRepository.findById(condition.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-        Member findMember = memberRepository.findById(condition.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        Theme findTheme = getTheme(condition.themeId());
+        Member findMember = getMember(condition.memberId());
         List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(
                 findTheme, findMember, condition.dateFrom(), condition.dateTo());
 
@@ -89,12 +78,32 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findAllByMember(Long id) {
+    public List<MyReservationResponse> findAllByMemberId(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
+
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
+    }
+
+    private Theme getTheme(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
+    }
+
+    private ReservationTime getReservationTime(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION_TIME));
+    }
+
+    private Member getMember(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
     }
 }
