@@ -46,16 +46,6 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
     ReservationTimeService reservationTimeService;
 
-//    @BeforeEach
-//    void setUp() {
-//        memberRepository = new FakeMemberDao();
-//        reservationRepository = new FakeReservationDao();
-//        reservationTimeRepository = new FakeReservationTimeDao(reservationRepository);
-//        memberReservationRepository = new FakeMemberReservationDao();
-//        themeRepository = new FakeThemeDao(memberReservationRepository);
-//        reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository);
-//    }
-
     @DisplayName("예약 시간 생성에 성공한다.")
     @Test
     void create() {
@@ -134,9 +124,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         reservationTimeRepository.save(get2PM());
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         memberReservationRepository.save(new MemberReservation(member, reservation));
 
         //when

@@ -20,6 +20,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.service.TokenProvider;
+import roomescape.member.controller.dto.MemberResponse;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -53,8 +56,6 @@ class ReservationControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-//        memberService.create(
-//                new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), "1234"));
         token = tokenProvider.createAccessToken(getMemberChoco().getEmail());
     }
 

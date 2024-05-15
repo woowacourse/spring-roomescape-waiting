@@ -38,14 +38,6 @@ class ThemeServiceTest extends ServiceTest {
     @Autowired
     ThemeService themeService;
 
-//    @BeforeEach
-//    void setUp() {
-//        reservationRepository = new FakeReservationDao();
-//        memberReservationRepository = new FakeMemberReservationDao();
-//        themeRepository = new FakeThemeDao(memberReservationRepository);
-//        themeService = new ThemeService(themeRepository, reservationRepository);
-//    }
-
     @DisplayName("테마 조회에 성공한다.")
     @Test
     void findAll() {

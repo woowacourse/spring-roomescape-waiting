@@ -3,29 +3,20 @@ package roomescape.member.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.fixture.MemberFixture.getMemberClover;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.util.ServiceTest;
 
-class MemberServiceTest  extends ServiceTest {
+class MemberServiceTest extends ServiceTest {
     @Autowired
     MemberRepository memberRepository;
-
     @Autowired
     MemberService memberService;
-
-//    @BeforeEach
-//    void setUp() {
-//        memberRepository = new FakeMemberDao();
-//        memberService = new MemberService(memberRepository);
-//    }
 
     @DisplayName("사용자 생성에 성공한다.")
     @Test
@@ -46,7 +37,6 @@ class MemberServiceTest  extends ServiceTest {
     @Test
     void findById() {
         //given
-        String password = "1234";
         Member memberClover = getMemberClover();
         Member member = memberRepository.save(memberClover);
 

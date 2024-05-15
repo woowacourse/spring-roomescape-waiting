@@ -52,9 +52,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void create() {
         //given
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         String date = "2100-04-18";
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
@@ -80,14 +78,10 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        Member memberChoco = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member memberChoco = memberRepository.save(getMemberChoco());
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation1));
 
-        Member memberClover = memberRepository.save(
-                new Member(getMemberClover().getName(), getMemberClover().getEmail(), "1234",
-                        getMemberClover().getRole()));
+        Member memberClover = memberRepository.save(getMemberClover());
         memberReservationRepository.save(new MemberReservation(memberClover, reservation2));
 
         //when
@@ -110,14 +104,10 @@ class ReservationServiceTest extends ServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
 
-        Member memberChoco = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member memberChoco = memberRepository.save(getMemberChoco());
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation));
 
-        Member memberClover = memberRepository.save(
-                new Member(getMemberClover().getName(), getMemberClover().getEmail(), "1234",
-                        getMemberClover().getRole()));
+        Member memberClover = memberRepository.save(getMemberClover());
         memberReservationRepository.save(new MemberReservation(memberClover, reservation));
 
         //when
@@ -141,9 +131,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        Member memberChoco = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member memberChoco = memberRepository.save(getMemberChoco());
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation1));
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2));
 
@@ -168,9 +156,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        Member memberChoco = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member memberChoco = memberRepository.save(getMemberChoco());
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation1));
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2));
 
@@ -193,9 +179,7 @@ class ReservationServiceTest extends ServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = getNextDayReservation(time, theme);
         reservationRepository.save(reservation);
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         MemberReservation memberReservation = memberReservationRepository.save(
                 new MemberReservation(member, reservation));
 
@@ -212,9 +196,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void duplicatedReservation() {
         //given
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
@@ -232,9 +214,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void deleteMemberReservation() {
         //given
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234",
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
@@ -253,9 +233,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void myReservations() {
         //given
-        Member member = memberRepository.save(
-                new Member(getMemberClover().getName(), getMemberClover().getEmail(), "1234",
-                        getMemberClover().getRole()));
+        Member member = memberRepository.save(getMemberClover());
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme1 = themeRepository.save(getTheme1());
         Theme theme2 = themeRepository.save(getTheme2());
@@ -271,7 +249,7 @@ class ReservationServiceTest extends ServiceTest {
         //then
         assertAll(
                 () -> assertThat(myReservations).hasSize(2),
-                ()-> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
+                () -> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
         );
     }
 }

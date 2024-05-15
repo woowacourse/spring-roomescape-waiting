@@ -41,7 +41,7 @@ class PayloadTest {
                 .hasMessage(ErrorType.SECURITY_EXCEPTION.getMessage());
     }
 
-    private boolean isSameName(String name1, String name2){
+    private boolean isSameName(String name1, String name2) {
         return name1.equals(name2);
     }
 }

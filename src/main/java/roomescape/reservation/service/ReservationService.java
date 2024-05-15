@@ -62,12 +62,14 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (memberReservationRepository.existsByReservation_DateAndReservationTimeAndReservationTheme(date, reservationTime, theme)) {
+        if (memberReservationRepository.existsByReservation_DateAndReservationTimeAndReservationTheme(date,
+                reservationTime, theme)) {
             throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
         }
 
         Reservation reservation = reservationRepository.save(Reservation.create(date, reservationTime, theme));
-        MemberReservation memberReservation = memberReservationRepository.save(new MemberReservation(member, reservation));
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(member, reservation));
 
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
@@ -78,13 +80,10 @@ public class ReservationService {
         Theme theme = getTheme(memberReservationRequest.themeId());
         LocalDate date = LocalDate.parse(memberReservationRequest.date());
 
-//        if (reservationRepository.existsBy(date, reservationTime, theme) <= 0) {
-//            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
-//        }
-
         Member member = memberRepository.findById(memberReservationRequest.memberId()).orElseThrow();
         Reservation reservation = reservationRepository.save(new Reservation(date, reservationTime, theme));
-        MemberReservation memberReservation = memberReservationRepository.save(new MemberReservation(member, reservation));
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(member, reservation));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 

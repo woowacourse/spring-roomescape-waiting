@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
@@ -18,7 +17,6 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.util.ServiceTest;
 
@@ -26,28 +24,17 @@ import roomescape.util.ServiceTest;
 class AuthServiceTest extends ServiceTest {
     @Autowired
     MemberRepository memberRepository;
-
     @Autowired
     TokenProvider tokenProvider;
-
     @Autowired
     AuthService authService;
-
-//    @BeforeEach
-//    void setUp() {
-//        memberRepository = new FakeMemberDao();
-//        tokenProvider = new FakeTokenProvider();
-//        authService = new AuthService(memberRepository, tokenProvider);
-//    }
 
     @DisplayName("토큰 생성에 성공한다.")
     @Test
     void createToken() {
         //given
         String password = "1234";
-        Member member = memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), password,
-                        getMemberChoco().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         LoginRequest loginRequest = new LoginRequest(member.getEmail(), password);
 
         //when
@@ -62,10 +49,7 @@ class AuthServiceTest extends ServiceTest {
     @Test
     void fetchByToken() {
         //given
-        String password = "1234";
-        Member member = memberRepository.save(
-                new Member(getMemberClover().getName(), getMemberClover().getEmail(), password,
-                        getMemberClover().getRole()));
+        Member member = memberRepository.save(getMemberChoco());
         String accessToken = tokenProvider.createAccessToken(member.getEmail());
 
         //when
@@ -112,8 +96,7 @@ class AuthServiceTest extends ServiceTest {
     void createDuplicatedEmail() {
         //given
         String password = "1234";
-        memberRepository.save(
-                new Member(getMemberChoco().getName(), getMemberChoco().getEmail(), password, Role.USER));
+        memberRepository.save(getMemberChoco());
         SignUpRequest signUpRequest =
                 new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), password);
 
