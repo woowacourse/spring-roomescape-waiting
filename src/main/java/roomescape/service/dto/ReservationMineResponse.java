@@ -25,7 +25,7 @@ public class ReservationMineResponse {
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"    //TODO : enum으로 추출하기
+                reservation.getStatus().getDescription()
         );
     }
 

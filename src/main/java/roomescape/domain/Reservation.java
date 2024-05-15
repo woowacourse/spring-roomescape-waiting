@@ -1,13 +1,7 @@
 package roomescape.domain;
 
-import jakarta.persistence.ConstraintMode;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -25,20 +19,23 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Theme theme;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     public Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme) {
+    public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.date = date;
         this.member = member;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
-    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme) {
-        this(null, date, member, time, theme);
+    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, date, member, time, theme, status);
     }
 
     public Long getId() {
@@ -59,5 +56,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

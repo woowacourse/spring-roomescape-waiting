@@ -3,10 +3,7 @@ package roomescape.service.dto;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import roomescape.controller.dto.AdminReservationRequest;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 
 public class ReservationRequest {
     private final LocalDate date;
@@ -37,8 +34,8 @@ public class ReservationRequest {
         }
     }
 
-    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Reservation(date, member, reservationTime, theme);
+    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme, ReservationStatus status) {
+        return new Reservation(date, member, reservationTime, theme, status);
     }
 
     public LocalDate getDate() {
