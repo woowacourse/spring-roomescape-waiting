@@ -142,4 +142,14 @@ class ReservationServiceTest {
         assertThatNoException()
                 .isThrownBy(() -> reservationService.deleteReservation(reservation.getId()));
     }
+
+    @Test
+    @DisplayName("이메일로 예약 목록을 조회한다.")
+    void methodName() {
+        // given
+
+        // when
+
+        // then
+    }
 }

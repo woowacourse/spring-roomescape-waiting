@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -188,5 +189,31 @@ class ReservationRestControllerTest {
                 .when().delete("/admin/reservations/" + id)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("멤버가 예약을 조회하면 응답과 200 상태 코드를 반환한다.")
+    void return_200_when_find_reservations_member() {
+        MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
+                "2100-08-05", 1L);
+
+        Integer id = RestAssured.given().log().all()
+                .cookie("token", memberToken)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .body()
+                .path("id");
+
+        RestAssured.given().log().all()
+                .cookie("token", memberToken)
+                .contentType(ContentType.JSON)
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", Matchers.is(1));
     }
 }
