@@ -1,7 +1,11 @@
 package roomescape.service;
 
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import io.restassured.RestAssured;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,11 +25,6 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -95,7 +94,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        Reservation reservation1 = new Reservation(1L, member, theme, date, time);
+        Reservation reservation1 = new Reservation(member, theme, date, time);
         reservationRepository.save(reservation1);
 
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
@@ -130,7 +129,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 정상적으로 삭제한다.")
     @Test
     void success_delete_reservation() {
-        Reservation reservation = new Reservation(1L, member, theme, date, time);
+        Reservation reservation = new Reservation(member, theme, date, time);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);

@@ -30,18 +30,17 @@ public class Reservation {
     @JoinColumn(name = "time_id")
     private ReservationTime time;
 
-    public Reservation(Long id, Member member, Theme theme, LocalDate date, ReservationTime time) {
+    public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
     }
 
-    public Reservation(Long id, Long memberId, String email, String password, String memberName, String role,
+    public Reservation(Long memberId, String email, String password, String memberName, String role,
                        Long themeId, String themeName, String description, String thumbnail, String date, Long timeId,
                        String time) {
         this(
-                id,
                 new Member(memberId, email, password, memberName, role),
                 new Theme(themeId, themeName, description, thumbnail),
                 LocalDate.parse(date),

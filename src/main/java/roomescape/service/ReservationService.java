@@ -46,22 +46,26 @@ public class ReservationService {
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
         Reservation reservation = reservationInfo.toReservation();
-        ReservationTime time = reservationTimeRepository.findById(reservation.timeId())
-                .orElseThrow(() -> new IllegalArgumentException("예약 하려는 시간이 저장되어 있지 않습니다."));
+        Long timeId = reservation.timeId();
 
+        ReservationTime time = reservationTimeRepository.fetchById(timeId);
         validatePreviousDate(reservation, time);
 
-        if (reservationRepository.existsByDateAndThemeIdAndTimeId(reservation.getDate(), reservation.themeId(),
-                reservation.timeId())) {
-            throw new IllegalArgumentException("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
-        }
+        Long themeId = reservation.themeId();
+        LocalDate date = reservation.getDate();
+        validateDuplicatedReservation(date, themeId, timeId);
 
         Member member = jpaMemberRepository.fetchById(reservation.memberId());
-        Theme theme = jpaThemeRepository.fetchById(reservation.themeId());
-        LocalDate date = reservation.getDate();
-        Reservation reservation1 = new Reservation(null, member, theme, date, time);
-        Reservation savedReservation = reservationRepository.save(reservation1);
+        Theme theme = jpaThemeRepository.fetchById(themeId);
+        Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
         return new ReservationResponse(savedReservation);
+    }
+
+    public void deleteReservation(long id) {
+        if (!reservationRepository.existsById(id)) {
+            throw new IllegalArgumentException("존재하지 않는 아이디입니다.");
+        }
+        reservationRepository.deleteById(id);
     }
 
     private void validatePreviousDate(Reservation reservation, ReservationTime time) {
@@ -70,10 +74,9 @@ public class ReservationService {
         }
     }
 
-    public void deleteReservation(long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new IllegalArgumentException("존재하지 않는 아이디입니다.");
+    private void validateDuplicatedReservation(LocalDate date, Long themeId, Long timeId) {
+        if (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
+            throw new IllegalArgumentException("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
         }
-        reservationRepository.deleteById(id);
     }
 }
