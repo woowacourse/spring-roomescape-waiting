@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class RoomescapeExceptionHandler extends AbstractExceptionHandler {
-
     @ExceptionHandler
     public ResponseEntity<?> roomescapeExceptionHandler(RoomescapeException exception) {
         logError(exception);

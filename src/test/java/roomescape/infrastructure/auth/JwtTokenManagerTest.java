@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
-public class JwtTokenManagerTest {
-
+class JwtTokenManagerTest {
     @DisplayName("쿠키에서 토큰을 추출한다")
     @Test
     void extractTokenTest() {

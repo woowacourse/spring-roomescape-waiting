@@ -31,7 +31,8 @@ public class ThemeName {
 
     private void validateLength(String name) {
         if (name != null && name.length() > NAME_MAX_LENGTH) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, String.format("테마명은 %d자 이하여야 합니다.", NAME_MAX_LENGTH));
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST,
+                    String.format("테마명은 %d자 이하여야 합니다.", NAME_MAX_LENGTH));
         }
     }
 }

@@ -8,15 +8,10 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.data.domain.Page;
 import roomescape.application.ServiceTest;
-import roomescape.config.TestConfig;
 
 @ServiceTest
-public class PopularThemeFinderTest {
-
+class PopularThemeFinderTest {
     @Autowired
     private PopularThemeFinder popularThemeFinder;
 

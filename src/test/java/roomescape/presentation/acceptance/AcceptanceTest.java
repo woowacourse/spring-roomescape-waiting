@@ -18,7 +18,6 @@ import roomescape.config.TestConfig;
         webEnvironment = WebEnvironment.RANDOM_PORT
 )
 class AcceptanceTest {
-
     @LocalServerPort
     private int port;
 

@@ -13,18 +13,11 @@ import roomescape.exception.RoomescapeException;
 
 @ServiceTest
 class ReservationFactoryTest {
-
     @Autowired
     private ReservationFactory reservationFactory;
 
     @Autowired
     private ReservationQueryRepository reservationQueryRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private MemberCommandRepository memberCommandRepository;
 
     @DisplayName("존재하지 않는 예약 시간으로 예약을 생성시 예외를 반환한다.")
     @Test

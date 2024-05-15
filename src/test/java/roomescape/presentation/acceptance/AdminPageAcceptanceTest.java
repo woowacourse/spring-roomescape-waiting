@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class AdminPageAcceptanceTest extends AcceptanceTest {
-
     @DisplayName("요청자가 운영자라면 200 OK 응답을 받는다.")
     @Nested
     class Admin {

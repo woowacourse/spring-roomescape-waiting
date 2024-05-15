@@ -19,7 +19,8 @@ public class AuthService {
     private final TokenManager tokenManager;
     private final MemberQueryRepository memberQueryRepository;
 
-    public AuthService(TokenProvider tokenProvider, TokenManager tokenManager, MemberQueryRepository memberQueryRepository) {
+    public AuthService(TokenProvider tokenProvider, TokenManager tokenManager,
+                       MemberQueryRepository memberQueryRepository) {
         this.tokenProvider = tokenProvider;
         this.tokenManager = tokenManager;
         this.memberQueryRepository = memberQueryRepository;

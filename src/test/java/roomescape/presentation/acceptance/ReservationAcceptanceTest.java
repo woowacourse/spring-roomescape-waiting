@@ -11,29 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
-import roomescape.domain.MemberCommandRepository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationCommandRepository;
 import roomescape.domain.ReservationQueryRepository;
-import roomescape.domain.ReservationTimeRepository;
-import roomescape.domain.ThemeRepository;
 
-public class ReservationAcceptanceTest extends AcceptanceTest {
-
-    @Autowired
-    private ReservationCommandRepository reservationCommandRepository;
-
+class ReservationAcceptanceTest extends AcceptanceTest {
     @Autowired
     private ReservationQueryRepository reservationQueryRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private MemberCommandRepository memberCommandRepository;
 
     private static String accessToken;
 

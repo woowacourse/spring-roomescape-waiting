@@ -5,42 +5,16 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ThemeRequest;
 import roomescape.application.dto.ThemeResponse;
-import roomescape.domain.Email;
-import roomescape.domain.Member;
-import roomescape.domain.MemberCommandRepository;
-import roomescape.domain.Password;
-import roomescape.domain.PlayerName;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationCommandRepository;
-import roomescape.domain.ReservationQueryRepository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 
-public class ThemeAcceptanceTest extends AcceptanceTest {
-
+class ThemeAcceptanceTest extends AcceptanceTest {
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationQueryRepository reservationQueryRepository;
-
-    @Autowired
-    private ReservationCommandRepository reservationCommandRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private MemberCommandRepository memberCommandRepository;
 
     @DisplayName("테마를 추가한다.")
     @Test
@@ -64,12 +38,6 @@ public class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("인기 테마를 조회한다.")
     @Test
     void findPopularThemes() {
-        Theme theme = themeRepository.save(ThemeFixture.defaultValue());
-        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.defaultValue());
-        Member member = memberCommandRepository.save(new Member(new PlayerName("test"), new Email("test@email.com"), new Password("wootecoCrew6!"), Role.BASIC));
-        Reservation reservation = reservationCommandRepository.save(
-                new Reservation(member, LocalDate.now(), reservationTime, theme));
-
         RestAssured.given().log().all()
                 .when()
                 .then().log().all()

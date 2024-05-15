@@ -26,7 +26,8 @@ public class Email {
         int emailLength = email.length();
         if (emailLength < MIN_LENGTH || MAX_LENGTH < emailLength) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST,
-                    String.format("이메일의 길이는 최소 %d자 이상 %d자 이하만 가능합니다. 현재 이메일 길이:%d", MIN_LENGTH, MAX_LENGTH, emailLength));
+                    String.format("이메일의 길이는 최소 %d자 이상 %d자 이하만 가능합니다. 현재 이메일 길이:%d", MIN_LENGTH, MAX_LENGTH,
+                            emailLength));
         }
         this.email = email;
     }

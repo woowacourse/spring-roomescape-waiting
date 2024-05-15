@@ -8,8 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
-public class PasswordTest {
-
+class PasswordTest {
     @DisplayName("비밀번호가 8~20자 범위가 아니거나, 대소문자, 숫자, 특수문자가 포함되지 않거나 공백이 포함되면 예외가 발생한다.")
     @ParameterizedTest
     @ValueSource(strings = {"1234567", "1234567890abcdefghijk", "wootecoCrew!", "wootecoCrew6 ", "wootecoCrew6! "})
