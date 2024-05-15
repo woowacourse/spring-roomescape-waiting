@@ -3,8 +3,8 @@ POST {{base-url}}/login
 Content-Type: application/json
 
 {
-  "email": "user@email.com",
-  "password": "password"
+  "email": "user@gmail.com",
+  "password": "1234"
 }
 
 ### 로그아웃 API

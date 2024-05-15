@@ -11,7 +11,7 @@ public class CookieProvider {
     public Cookies createCookies() {
         return RestAssured.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(new LoginRequest("admin@email.com", "password"))
+                .body(new LoginRequest("admin@gmail.com", "1234"))
                 .when().post("/login")
                 .then().log().all()
                 .extract().detailedCookies();

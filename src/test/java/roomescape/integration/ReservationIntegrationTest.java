@@ -183,7 +183,7 @@ class ReservationIntegrationTest extends IntegrationTest {
             jdbcTemplate.update("UPDATE MEMBER SET role = 'USER'");
             String userCookie = RestAssured.given().log().all()
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .body(new LoginRequest("admin@email.com", "password"))
+                    .body(new LoginRequest("admin@gmail.com", "1234"))
                     .when().post("/login")
                     .then().log().all()
                     .extract().header("Set-Cookie").split(";")[0];

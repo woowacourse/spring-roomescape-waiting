@@ -27,7 +27,7 @@ public class DatabaseInitializer {
     }
 
     private Member createMember() {
-        Member member = new Member("어드민", "admin@email.com", "password", MemberRole.ADMIN);
+        Member member = new Member("어드민", "admin@gmail.com", "1234", MemberRole.ADMIN);
         entityManager.persist(member);
         return member;
     }
