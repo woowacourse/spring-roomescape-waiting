@@ -15,7 +15,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 
 @DataJpaTest
-class JdbcMemberRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

@@ -16,7 +16,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 
 @DataJpaTest
-class JdbcThemeRepositoryTest {
+class ThemeRepositoryTest {
 
 
     @Autowired

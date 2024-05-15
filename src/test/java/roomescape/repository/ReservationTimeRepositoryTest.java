@@ -16,7 +16,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 
 @DataJpaTest
-class JdbcReservationTimeRepositoryTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
