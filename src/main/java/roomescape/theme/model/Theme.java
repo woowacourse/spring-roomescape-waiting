@@ -16,6 +16,10 @@ public class Theme {
     private String description;
     private String thumbnail;
 
+    public Theme(final String name, final String description, final String thumbnail) {
+        this(null, name, description, thumbnail);
+    }
+
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateThemeNameIsBlank(name);
         validateThemeDescriptionIsBlank(description);

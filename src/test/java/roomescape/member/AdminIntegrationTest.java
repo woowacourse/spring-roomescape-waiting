@@ -45,7 +45,7 @@ class AdminIntegrationTest {
     }
 
     private String getTokenByLogin() {
-        memberRepository.save(new Member(null, "비밥", Role.ADMIN, "admin@naver.com", "hihi"));
+        memberRepository.save(new Member("비밥", Role.ADMIN, "admin@naver.com", "hihi"));
         return RestAssured
                 .given().log().all()
                 .body(new LoginRequest("admin@naver.com", "hihi"))
@@ -58,9 +58,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약을 생성한다.")
     void createReservationByAdmin() {
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -249,9 +249,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenThemeNotExist() {
-        // themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        // themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -273,9 +273,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenTimeNotExist() {
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
-        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        // reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -297,9 +297,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenMemberNotExist() {
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
-        // memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
+        // memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");

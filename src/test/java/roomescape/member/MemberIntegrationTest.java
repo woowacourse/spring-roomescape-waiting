@@ -57,8 +57,8 @@ class MemberIntegrationTest {
     @Test
     @DisplayName("회원 목록을 조회한다.")
     void getReservationTimes() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
-        memberRepository.save(new Member(null, "로키", Role.USER, "qwer@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("로키", Role.USER, "qwer@naver.com", "hihi"));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -73,8 +73,8 @@ class MemberIntegrationTest {
     @Test
     @DisplayName("회원의 예약 목록을 조회한다.")
     void getMembersWithReservations() {
-        Member member1 = memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
-        Member member2 = memberRepository.save(new Member(null, "로키", Role.USER, "qwer@naver.com", "hihi"));
+        Member member1 = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        Member member2 = memberRepository.save(new Member("로키", Role.USER, "qwer@naver.com", "hihi"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
         List<Theme> themes = ThemeFixture.get(3).stream().map(themeRepository::save).toList();
         reservationRepository.save(ReservationFixture.getOneWithMemberTimeTheme(member1, reservationTime, themes.get(0)));

@@ -45,14 +45,14 @@ class ReservationTimeTest {
         @DisplayName("주어진 시간과 시간 객체의 시작 시간이 동일할 경우 참을 반환한다.")
         void isSameStartAt() {
             LocalTime sameTime = LocalTime.parse("10:00");
-            ReservationTime reservationTime = new ReservationTime(null, sameTime);
+            ReservationTime reservationTime = new ReservationTime(sameTime);
             assertTrue(reservationTime.isSameStartAt(sameTime));
         }
 
         @Test
         @DisplayName("주어진 시간과 시간 객체의 시작 시간이 동일하지 않는 경우 거짓을 반환한다.")
         void isSameStartAt_WhenNotSame() {
-            ReservationTime reservationTime = new ReservationTime(null, LocalTime.parse("10:00"));
+            ReservationTime reservationTime = new ReservationTime(LocalTime.parse("10:00"));
             assertFalse(reservationTime.isSameStartAt(LocalTime.parse("10:01")));
         }
     }
@@ -62,21 +62,21 @@ class ReservationTimeTest {
         @Test
         @DisplayName("주어진 시간보다 예약 시간이 이전인 경우 참을 반환한다.")
         void isBefore() {
-            ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(1, 2));
+            ReservationTime reservationTime = new ReservationTime(LocalTime.of(1, 2));
             assertTrue(reservationTime.isNotAfter(LocalTime.of(1, 3)));
         }
 
         @Test
         @DisplayName("주어진 시간보다 예약 시간이 이후인 경우 거짓을 반환한다.")
         void isBefore_WhenReservationTimeIsAfter() {
-            ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(1, 2));
+            ReservationTime reservationTime = new ReservationTime(LocalTime.of(1, 2));
             assertTrue(reservationTime.isNotAfter(LocalTime.of(1, 2)));
         }
 
         @Test
         @DisplayName("주어진 시간보다 예약 시간이 같은 시간인 경우 거짓을 반환한다.")
         void isBefore_WhenReservationTimeIsSame() {
-            ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(1, 2));
+            ReservationTime reservationTime = new ReservationTime(LocalTime.of(1, 2));
             assertFalse(reservationTime.isNotAfter(LocalTime.of(1, 1)));
         }
     }

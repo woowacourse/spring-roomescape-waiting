@@ -47,11 +47,11 @@ class ThemeRepositoryTest {
                 .toList();
 
         Theme topTheme = savedThemes.get(3);
-        reservationRepository.save(new Reservation(null, member, LocalDate.parse("2025-12-12"), reservationTime, topTheme));
-        reservationRepository.save(new Reservation(null, member, LocalDate.parse("2025-02-12"), reservationTime, topTheme));
+        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-12-12"), reservationTime, topTheme));
+        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-02-12"), reservationTime, topTheme));
 
         Theme secondTheme = savedThemes.get(0);
-        reservationRepository.save(new Reservation(null, member, LocalDate.parse("2025-12-12"), reservationTime, secondTheme));
+        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-12-12"), reservationTime, secondTheme));
 
         // when
         List<Theme> orderByReservations = themeRepository.findAllOrderByReservationCount(Pageable.ofSize(10));

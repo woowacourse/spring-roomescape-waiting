@@ -85,7 +85,7 @@ class ReservationTest {
                     () -> Reservation.create(
                             MemberFixture.getOne(),
                             now.toLocalDate(),
-                            new ReservationTime(null, now.toLocalTime().minusHours(1)),
+                            new ReservationTime(now.toLocalTime().minusHours(1)),
                             ThemeFixture.getOne()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(now.minusHours(1) + "는 현재보다 동일하거나 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");

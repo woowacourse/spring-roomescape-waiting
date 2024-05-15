@@ -8,7 +8,7 @@ import roomescape.reservationtime.model.ReservationTime;
 public class ReservationTimeFixture {
 
     public static ReservationTime getOne() {
-        return new ReservationTime(null, LocalTime.parse("10:00"));
+        return new ReservationTime(LocalTime.parse("10:00"));
     }
 
     public static List<ReservationTime> get(int count) {

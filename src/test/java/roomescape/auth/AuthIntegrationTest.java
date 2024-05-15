@@ -34,7 +34,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인 성공 시, Set-Cookie 헤더에 쿠키 값을 전달한다.")
     void login() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -53,7 +53,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 존재하지 않을 경우, 예외를 반환한다.")
     void login_WhenMemberNotExist() {
-        // memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        // memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -71,7 +71,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenEmailIsNull() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", null);
@@ -89,7 +89,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 형식에 맞지 않는 경우, 예외를 반환한다.")
     void login_WhenEmailIsInvalidType() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "nulasdfl");
@@ -107,7 +107,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenPasswordNotCorrect() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -125,7 +125,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenPasswordIsNull() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -144,7 +144,7 @@ class AuthIntegrationTest {
     @DisplayName("로그인한 회원의 정보 조회 시, 토큰으로부터 회원 정보를 확인 후 결과를 반환한다.")
     void loginCheck() {
         // give
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");

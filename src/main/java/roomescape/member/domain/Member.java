@@ -24,6 +24,10 @@ public class Member {
 
     private String password;
 
+    public Member(final String name, final Role role, final String email, final String password) {
+        this(null, name, role, email, password);
+    }
+
     public Member(final Long id, final String name, final Role role, final String email, final String password) {
         validateNameIsNull(name);
         validateRoleIsNull(role);

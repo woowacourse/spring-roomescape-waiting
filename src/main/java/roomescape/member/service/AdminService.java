@@ -36,7 +36,7 @@ public class AdminService {
         ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
 
         Reservation reservation = reservationRepository.save(
-                new Reservation(null, member, createReservationRequest.date(), reservationTime, theme));
+                new Reservation(member, createReservationRequest.date(), reservationTime, theme));
         return CreateReservationResponse.from(reservation);
     }
 

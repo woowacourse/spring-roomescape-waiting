@@ -51,7 +51,7 @@ class ReservationIntegrationTest {
     }
 
     private String getTokenByLogin() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
         return RestAssured
                 .given().log().all()
                 .body(new LoginRequest("login@naver.com", "hihi"))
@@ -61,16 +61,16 @@ class ReservationIntegrationTest {
     }
 
     private void saveTimeThemeMemberForReservation() {
-        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
     }
 
     @Test
     @DisplayName("방탈출 예약 생성 성공 시, 생성된 시간대의 정보를 반환한다.")
     void createReservationTime() {
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -230,8 +230,8 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
     void createReservation_WhenThemeNotExist() {
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
-        // themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        // themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -252,8 +252,8 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservation_WhenTimeNotExist() {
-        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
-        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        // reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -274,12 +274,12 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 이미 같은 테마, 같은 날짜, 같은 시간에 예약이 있는 경우 예외를 반환한다.")
     void createReservation_WhenTimeAndDateAndThemeExist() {
-        Member member = memberRepository.save(new Member(null, "롸키", Role.USER, "loki@naver.com", "loki"));
+        Member member = memberRepository.save(new Member("롸키", Role.USER, "loki@naver.com", "loki"));
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(null, LocalTime.parse("20:00")));
-        Theme theme = themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+                new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
         Reservation reservation = reservationRepository.save(
-                new Reservation(null, member, LocalDate.parse("2025-12-23"), reservationTime, theme));
+                new Reservation(member, LocalDate.parse("2025-12-23"), reservationTime, theme));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", reservation.getDate());
@@ -301,8 +301,8 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 목록을 조회한다.")
     void getReservationTimes() {
         saveTimeThemeMemberForReservation();
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -318,8 +318,8 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 하나를 조회한다.")
     void getReservationTime() {
         saveTimeThemeMemberForReservation();
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -335,7 +335,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        // reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        // reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/1")
@@ -349,9 +349,9 @@ class ReservationIntegrationTest {
     @DisplayName("해당 날짜와 테마를 통해 예약 가능한 시간 조회한다.")
     void getAvailableTimes() {
         saveTimeThemeMemberForReservation();
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("10:00")));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -371,10 +371,10 @@ class ReservationIntegrationTest {
     @DisplayName("해당 날짜와 테마, 기간에 해당하는 예약을 검색한다.")
     void searchBy() {
         saveTimeThemeMemberForReservation();
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("10:00")));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2025-01-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2025-01-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -393,7 +393,7 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 하나를 삭제한다.")
     void deleteReservationTime() {
         saveTimeThemeMemberForReservation();
-        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -406,7 +406,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeNotExist() {
-        // reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        // reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")

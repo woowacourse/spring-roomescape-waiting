@@ -30,6 +30,11 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    public Reservation(final Member member, final LocalDate date, final ReservationTime reservationTime,
+                       final Theme theme) {
+        this(null, member, date, reservationTime, theme);
+    }
+
     public Reservation(final Long id,
                        final Member member,
                        final LocalDate date,

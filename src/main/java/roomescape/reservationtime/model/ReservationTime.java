@@ -14,6 +14,10 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
+    public ReservationTime(final LocalTime startAt) {
+        this(null, startAt);
+    }
+
     public ReservationTime(final Long id, final LocalTime startAt) {
         validateReservationTimeIsNull(startAt);
 
