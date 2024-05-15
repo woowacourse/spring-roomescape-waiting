@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.exception.InvalidMemberException;
 import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.member.dto.MemberResponse;
 
@@ -25,7 +26,8 @@ public class MemberService {
     }
 
     public Member findById(long id) {
-        return memberRepository.getById(id);
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 회원입니다."));
     }
 
     public List<MemberReservationResponse> findReservations(long memberId) {

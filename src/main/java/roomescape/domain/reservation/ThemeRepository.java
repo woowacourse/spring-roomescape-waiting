@@ -5,15 +5,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.exception.InvalidReservationException;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     boolean existsByName(ThemeName name);
-
-    default Theme getById(long id) {
-        return findById(id)
-                .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 테마입니다."));
-    }
 
     @Query(value = """
             SELECT id, name, description, thumbnail, reservation_count

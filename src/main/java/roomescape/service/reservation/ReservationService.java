@@ -15,6 +15,7 @@ import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.ScheduleRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.reservation.dto.AdminReservationRequest;
@@ -68,15 +69,18 @@ public class ReservationService {
     }
 
     private ReservationTime findTimeById(long timeId) {
-        return reservationTimeRepository.getById(timeId);
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 시간입니다."));
     }
 
     private Theme findThemeById(long themeId) {
-        return themeRepository.getById(themeId);
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 테마입니다."));
     }
 
     private Member findMemberById(long memberId) {
-        return memberRepository.getById(memberId);
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 회원입니다."));
     }
 
     private void validate(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
@@ -107,15 +111,13 @@ public class ReservationService {
     }
 
     public void deleteById(long reservationId, long memberId) {
-        validateAuthority(reservationId, memberId);
+        reservationRepository.findById(reservationId)
+                .ifPresent(reservation -> validateAuthority(reservation, memberId));
         reservationRepository.deleteById(reservationId);
     }
 
-    private void validateAuthority(long reservationId, long memberId) {
-        if (!reservationRepository.existsById(reservationId)) {
-            return;
-        }
-        if (reservationRepository.getById(reservationId).getMember().getId() != memberId) {
+    private void validateAuthority(Reservation reservation, long memberId) {
+        if (!reservation.isReservationOf(memberId)) {
             throw new UnauthorizedException("예약을 삭제할 권한이 없습니다.");
         }
     }

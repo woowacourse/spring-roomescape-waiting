@@ -27,7 +27,7 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        Member member = memberRepository.getByEmail(Email.of(loginRequest.email()));
+        Member member = getMemberByEmail(loginRequest.email());
         validatePassword(loginRequest, member);
         String token = tokenProvider.create(member);
         return new LoginResponse(token);
@@ -41,7 +41,7 @@ public class AuthService {
 
     public LoginCheckResponse check(String token) {
         String email = tokenProvider.extractMemberEmail(token);
-        Member member = memberRepository.getByEmail(Email.of(email));
+        Member member = getMemberByEmail(email);
         return new LoginCheckResponse(member);
     }
 
@@ -56,5 +56,10 @@ public class AuthService {
         if (memberRepository.existsByEmail(email)) {
             throw new InvalidMemberException("이미 가입된 이메일입니다.");
         }
+    }
+
+    private Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(Email.of(email))
+                .orElseThrow(() -> new InvalidMemberException("이메일 또는 비밀번호가 잘못되었습니다."));
     }
 }

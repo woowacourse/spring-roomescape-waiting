@@ -40,6 +40,10 @@ public class Reservation {
         this(NO_ID, member, schedule, theme);
     }
 
+    public boolean isReservationOf(long memberId) {
+        return member.getId() == memberId;
+    }
+
     public long getId() {
         return id;
     }
