@@ -35,20 +35,20 @@ VALUES ('poke@test.com', 'hashedpassword', 'salt', 'poke', 'USER');
 INSERT INTO member(email, password, salt, name, role)
 VALUES ('wedge@test.com', 'yAD5RFQKSwFkOImAX+hDr1RSlsR7MBBSFr/xni5sGOE=', 'SZj5iqlnmc4cLvpOAS0a1g==', 'wedge', 'ADMIN');
 -- reservation
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-05-01', 3, 2, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-05-01', 2, 2, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-04-30', 2, 2, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-04-30', 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-04-02', 3, 3, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2024-03-02', 3, 3, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2099-04-30', 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2999-04-30', 1, 1, 2);
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-05-01', 3, 2, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-05-01', 2, 2, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-04-30', 2, 2, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-04-30', 1, 1, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-04-02', 3, 3, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2024-03-02', 3, 3, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2099-04-30', 1, 1, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2999-04-30', 1, 1, 2, 'RESERVED');
 
