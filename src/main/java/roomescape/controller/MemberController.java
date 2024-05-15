@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Auth;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 import roomescape.service.MemberService;
 import roomescape.service.TokenService;
 
@@ -28,10 +28,10 @@ public class MemberController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) {
-        long userId = memberService.login(loginRequest);
+        long memberId = memberService.login(loginRequest);
         LocalDateTime now = LocalDateTime.now();
         Duration tokenLifeTime = Duration.between(now, now.plusHours(1));
-        String token = tokenService.createToken(userId, now, tokenLifeTime);
+        String token = tokenService.createToken(memberId, now, tokenLifeTime);
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .maxAge(tokenLifeTime)
@@ -42,13 +42,13 @@ public class MemberController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<UserInfo> myInfo(@Auth long userId) {
-        UserInfo userInfo = memberService.findByUserId(userId);
-        return ResponseEntity.ok(userInfo);
+    public ResponseEntity<MemberInfo> myInfo(@Auth long memberId) {
+        MemberInfo memberInfo = memberService.findByMemberId(memberId);
+        return ResponseEntity.ok(memberInfo);
     }
 
     @GetMapping("/members")
-    public List<UserInfo> allMembers() {
+    public List<MemberInfo> allMembers() {
         return memberService.findAll();
     }
 }

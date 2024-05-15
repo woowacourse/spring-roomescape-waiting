@@ -15,8 +15,7 @@ class TokenServiceTest {
         LocalDateTime dateTime = LocalDateTime.of(2025, 12, 31, 23, 59, 59);
 
         String token = tokenService.createToken(1L, dateTime, Duration.between(dateTime, dateTime.plusHours(1)));
-
-        String expected = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NjcxOTY3OTksInVzZXJfaWQiOjF9.JAI7t6t9Ju_KS7cRPvIc841QE7MBSTVLvciRWomE6hw";
+        String expected = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NjcxOTY3OTksIm1lbWJlcl9pZCI6MX0.sIqOH_FW8ugFJ0TYD1Cjpq-sBEs_BafloUY1g13wAL4";
         Assertions.assertThat(token)
                 .isEqualTo(expected);
     }

@@ -15,7 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 import roomescape.fixture.MemberFixture;
 import roomescape.service.MemberService;
 import roomescape.service.TokenService;
@@ -58,7 +58,7 @@ class MemberControllerTest {
     @Test
     @DisplayName("자기 정보 조회 정상 동작 시 API 명세대로 응답이 생성되는지 확인")
     void myInfo() {
-        Mockito.when(memberService.findByUserId(MemberFixture.DEFAULT_MEMBER.getId()))
+        Mockito.when(memberService.findByMemberId(MemberFixture.DEFAULT_MEMBER.getId()))
                 .thenReturn(MemberFixture.DEFAULT_MEMBER_INFO);
         
         ResponseEntity<UserInfo> response = memberController.myInfo(MemberFixture.DEFAULT_MEMBER.getId());

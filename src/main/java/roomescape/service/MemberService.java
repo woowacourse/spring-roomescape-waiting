@@ -2,17 +2,17 @@ package roomescape.service;
 
 import static roomescape.exception.ExceptionType.INVALID_TOKEN;
 import static roomescape.exception.ExceptionType.LOGIN_FAIL;
-import static roomescape.service.mapper.UserInfoMapper.toResponse;
+import static roomescape.service.mapper.MemberInfoMapper.toResponse;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
-import roomescape.service.mapper.UserInfoMapper;
+import roomescape.service.mapper.MemberInfoMapper;
 
 @Service
 public class MemberService {
@@ -33,16 +33,16 @@ public class MemberService {
         return loginSuccessMember.getId();
     }
 
-    public UserInfo findByUserId(long userId) {
-        Member member = memberRepository.findById(userId)
+    public MemberInfo findByMemberId(long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(INVALID_TOKEN));
         return toResponse(member);
     }
 
-    public List<UserInfo> findAll() {
+    public List<MemberInfo> findAll() {
         return memberRepository.findAll()
                 .stream()
-                .map(UserInfoMapper::toResponse)
+                .map(MemberInfoMapper::toResponse)
                 .toList();
     }
 }

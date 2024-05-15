@@ -6,7 +6,7 @@ import static roomescape.domain.Role.MEMBER;
 import roomescape.domain.Member;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 
 public class MemberFixture {
     private static final Sha256Encryptor ENCRYPTOR = new Sha256Encryptor();

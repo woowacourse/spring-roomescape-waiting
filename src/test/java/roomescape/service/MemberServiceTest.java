@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
 import roomescape.fixture.MemberFixture;
 import roomescape.repository.CollectionMemberRepository;
@@ -36,8 +36,8 @@ class MemberServiceTest {
         MemberService memberService = new MemberService(memberRepository, SHA_256_ENCRYPTOR);
 
         Long memberId = DEFAULT_MEMBER.getId();
-        UserInfo userInfo = memberService.findByUserId(memberId);
-        Assertions.assertThat(userInfo)
+        MemberInfo memberInfo = memberService.findByMemberId(memberId);
+        Assertions.assertThat(memberInfo)
                 .isEqualTo(MemberFixture.DEFAULT_MEMBER_INFO);
     }
 }
