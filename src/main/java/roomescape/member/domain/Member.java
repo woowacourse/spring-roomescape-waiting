@@ -10,13 +10,10 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Embedded
     private Name name;
-
     private String email;
-
     private String password;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 

@@ -15,10 +15,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
