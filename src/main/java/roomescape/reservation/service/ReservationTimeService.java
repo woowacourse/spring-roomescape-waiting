@@ -34,14 +34,15 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeDuplication(final SaveReservationTimeRequest request) {
-        if (reservationTimeRepository.existByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new IllegalArgumentException("이미 존재하는 예약시간이 있습니다.");
         }
     }
 
     public void deleteReservationTime(final Long reservationTimeId) {
         validateReservationTimeExist(reservationTimeId);
-        final int deletedDataCount = reservationTimeRepository.deleteById(reservationTimeId);
+        reservationTimeRepository.deleteById(reservationTimeId);
+        final int deletedDataCount =1;
 
         if (deletedDataCount <= 0) {
             throw new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다.");
