@@ -54,15 +54,15 @@ public class Theme {
         return id;
     }
 
-    public String getName() {
-        return name.getValue();
+    public ThemeName getName() {
+        return name;
     }
 
-    public String getDescription() {
-        return description.getValue();
+    public Description getDescription() {
+        return description;
     }
 
-    public String getThumbnail() {
-        return thumbnail.getValue();
+    public Thumbnail getThumbnail() {
+        return thumbnail;
     }
 }

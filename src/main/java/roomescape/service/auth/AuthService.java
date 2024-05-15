@@ -6,7 +6,7 @@ import roomescape.auth.TokenProvider;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.Password;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.auth.dto.LoginCheckResponse;
@@ -27,29 +27,29 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        Member member = memberRepository.getByEmail(loginRequest.email());
+        Member member = memberRepository.getByEmail(Email.of(loginRequest.email()));
         validatePassword(loginRequest, member);
         String token = tokenProvider.create(member);
         return new LoginResponse(token);
     }
 
     private void validatePassword(LoginRequest request, Member member) {
-        if (!member.isPasswordMatches(request.password())) {
+        if (!member.isPasswordMatches(Password.of(request.password()))) {
             throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
         }
     }
 
     public LoginCheckResponse check(String token) {
         String email = tokenProvider.extractMemberEmail(token);
-        Member member = memberRepository.getByEmail(new Email(email));
+        Member member = memberRepository.getByEmail(Email.of(email));
         return new LoginCheckResponse(member);
     }
 
     public MemberResponse create(SignUpRequest signUpRequest) {
-        validateEmail(signUpRequest.email());
-        Member member = memberRepository.save(
-                new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.GUEST));
-        return new MemberResponse(member);
+        Member member = signUpRequest.toMember();
+        validateEmail(member.getEmail());
+        Member newMember = memberRepository.save(member);
+        return new MemberResponse(newMember);
     }
 
     private void validateEmail(Email email) {

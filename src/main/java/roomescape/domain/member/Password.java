@@ -14,9 +14,13 @@ public class Password {
     public Password() {
     }
 
-    public Password(String value) {
+    private Password(String value) {
         validate(value);
         this.value = value;
+    }
+
+    public static Password of(String password) {
+        return new Password(password);
     }
 
     private void validate(String value) {

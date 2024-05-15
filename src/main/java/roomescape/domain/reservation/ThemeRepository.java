@@ -25,5 +25,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             ) ON theme_id = id
             ORDER BY reservation_count DESC
             LIMIT :limit""", nativeQuery = true)
-    List<Theme> findByReservationTermAndLimit(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("limit") long limit);
+    List<Theme> findByReservationTermAndLimit(@Param("startDate") LocalDate startDate,
+                                              @Param("endDate") LocalDate endDate, @Param("limit") long limit);
 }

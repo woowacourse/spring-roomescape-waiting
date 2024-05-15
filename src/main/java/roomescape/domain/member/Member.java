@@ -45,7 +45,7 @@ public class Member {
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(NO_ID, new MemberName(name), new Email(email), new Password(password), role);
+        this(NO_ID, new MemberName(name), Email.of(email), Password.of(password), role);
     }
 
     public Member(long id, Member member) {
@@ -53,7 +53,7 @@ public class Member {
     }
 
     public Member(long id, String name, String email, String password, String role) {
-        this(id, new MemberName(name), new Email(email), new Password(password), Role.valueOf(role));
+        this(id, new MemberName(name), Email.of(email), Password.of(password), Role.valueOf(role));
     }
 
     public Member(MemberName name, Email email, Password password, Role role) {
@@ -68,19 +68,19 @@ public class Member {
         return id;
     }
 
-    public String getMemberName() {
-        return memberName.getValue();
+    public MemberName getMemberName() {
+        return memberName;
     }
 
-    public String getEmail() {
-        return email.getValue();
+    public Email getEmail() {
+        return email;
     }
 
-    public String getPassword() {
-        return password.getValue();
+    public Password getPassword() {
+        return password;
     }
 
-    public String getRole() {
-        return role.name();
+    public Role getRole() {
+        return role;
     }
 }

@@ -2,9 +2,7 @@ package roomescape.domain.reservation;
 
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
-import roomescape.exception.InvalidReservationException;
 
 @Embeddable
 public class ReservationDate {
@@ -13,17 +11,12 @@ public class ReservationDate {
     public ReservationDate() {
     }
 
-    public ReservationDate(String value) {
-        validate(value);
-        this.value = LocalDate.parse(value);
+    private ReservationDate(LocalDate value) {
+        this.value = value;
     }
 
-    private void validate(String value) {
-        try {
-            LocalDate.parse(value);
-        } catch (DateTimeParseException e) {
-            throw new InvalidReservationException("올바르지 않은 날짜입니다.");
-        }
+    public static ReservationDate of(LocalDate date) {
+        return new ReservationDate(date);
     }
 
     @Override

@@ -14,7 +14,7 @@ class PasswordTest {
     @ParameterizedTest
     @ValueSource(strings = {"linin", "linirinilinir"})
     void invalidPassword(String password) {
-        assertThatThrownBy(() -> new Password(password))
+        assertThatThrownBy(() -> Password.of(password))
                 .isInstanceOf(InvalidMemberException.class)
                 .hasMessage("비밀번호는 6자 이상 12자 이하여야 합니다.");
     }

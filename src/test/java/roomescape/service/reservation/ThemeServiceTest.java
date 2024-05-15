@@ -62,7 +62,7 @@ class ThemeServiceTest {
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         themeRepository.save(theme);
 
-        ThemeRequest themeRequest = new ThemeRequest(theme.getName(), "우테코 레벨2를 탈출하는 내용입니다.",
+        ThemeRequest themeRequest = new ThemeRequest(theme.getName().getValue(), "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
 
         //when&then

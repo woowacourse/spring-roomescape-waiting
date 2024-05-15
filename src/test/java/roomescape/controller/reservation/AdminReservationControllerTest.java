@@ -26,7 +26,7 @@ class AdminReservationControllerTest {
     @LocalServerPort
     private int port;
 
-    private String date;
+    private LocalDate date;
     private long timeId;
     private long themeId;
     private String adminToken;
@@ -37,7 +37,7 @@ class AdminReservationControllerTest {
     void init() {
         RestAssured.port = port;
 
-        date = "2222-05-01";
+        date = LocalDate.now().plusDays(1);
         timeId = (int) RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(new ReservationTimeCreateRequest("17:46"))

@@ -1,11 +1,12 @@
 package roomescape.service.reservation.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 public record AdminReservationRequest(
-        @NotBlank(message = "날짜를 입력해주세요.") String date,
-        @NotNull(message = "회원 ID를 입력해주세요.") long memberId,
-        @NotNull(message = "시간 ID를 입력해주세요.") long timeId,
-        @NotNull(message = "테마 ID를 입력해주세요.") long themeId) {
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+        @NotNull(message = "회원 ID를 입력해주세요.") Long memberId,
+        @NotNull(message = "시간 ID를 입력해주세요.") Long timeId,
+        @NotNull(message = "테마 ID를 입력해주세요.") Long themeId) {
 }

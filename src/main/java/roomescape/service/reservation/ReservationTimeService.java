@@ -1,6 +1,5 @@
 package roomescape.service.reservation;
 
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,13 +28,12 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest reservationTimeCreateRequest) {
         validateDuplicated(reservationTimeCreateRequest);
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(reservationTimeCreateRequest.startAt()));
+        ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeCreateRequest.toReservationTime());
         return new ReservationTimeResponse(reservationTime);
     }
 
     private void validateDuplicated(ReservationTimeCreateRequest reservationTimeCreateRequest) {
-        if (reservationTimeRepository.existsByStartAt(LocalTime.parse(reservationTimeCreateRequest.startAt()))) {
+        if (reservationTimeRepository.existsByStartAt(reservationTimeCreateRequest.startAt())) {
             throw new InvalidReservationException("이미 같은 시간이 존재합니다.");
         }
     }
@@ -60,7 +58,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableTimes(
             ReservationTimeReadRequest reservationTimeReadRequest) {
         List<Reservation> reservations = reservationRepository.findByScheduleDateAndThemeId(
-                new ReservationDate(reservationTimeReadRequest.date()), reservationTimeReadRequest.themeId());
+                ReservationDate.of(reservationTimeReadRequest.date()), reservationTimeReadRequest.themeId());
         return reservationTimeRepository.findAll().stream()
                 .map(time -> new AvailableReservationTimeResponse(time.getId(), time.getStartAt(),
                         isBooked(reservations, time)))

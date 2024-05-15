@@ -1,7 +1,12 @@
 package roomescape.service.reservation.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import roomescape.domain.reservation.ReservationTime;
 
 public record ReservationTimeCreateRequest(
-        @NotBlank(message = "시간을 입력해주세요.") String startAt) {
+        @DateTimeFormat(pattern = "HH:mm") LocalTime startAt) {
+    public ReservationTime toReservationTime() {
+        return new ReservationTime(startAt);
+    }
 }

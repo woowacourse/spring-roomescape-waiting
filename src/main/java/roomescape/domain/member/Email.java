@@ -14,9 +14,13 @@ public class Email {
     public Email() {
     }
 
-    public Email(String value) {
+    private Email(String value) {
         validate(value);
         this.value = value;
+    }
+
+    public static Email of(String email) {
+        return new Email(email);
     }
 
     private void validate(String value) {

@@ -1,5 +1,6 @@
 package roomescape.service.reservation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,7 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
                               MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -46,7 +46,7 @@ public class ReservationService {
                 reservationRequest.date());
     }
 
-    private ReservationResponse createReservation(long timeId, long themeId, long memberId, String date) {
+    private ReservationResponse createReservation(long timeId, long themeId, long memberId, LocalDate date) {
         ReservationTime reservationTime = findTimeById(timeId);
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
@@ -70,8 +70,8 @@ public class ReservationService {
         return memberRepository.getById(memberId);
     }
 
-    private void validate(String date, ReservationTime reservationTime, Theme theme) {
-        ReservationDate reservationDate = new ReservationDate(date);
+    private void validate(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        ReservationDate reservationDate = ReservationDate.of(date);
         validateIfBefore(reservationDate, reservationTime);
         validateDuplicated(reservationDate, reservationTime, theme);
     }
@@ -84,15 +84,14 @@ public class ReservationService {
     }
 
     private void validateDuplicated(ReservationDate date, ReservationTime reservationTime, Theme theme) {
-        if (reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(), theme.getId())) {
+        if (reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(),
+                theme.getId())) {
             throw new InvalidReservationException("선택하신 테마와 일정은 이미 예약이 존재합니다.");
         }
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::new)
-                .toList();
+        return reservationRepository.findAll().stream().map(ReservationResponse::new).toList();
     }
 
     public void deleteById(long id) {
@@ -114,9 +113,9 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByCondition(ReservationFindRequest reservationFindRequest) {
+        ReservationDate dateFrom = ReservationDate.of(reservationFindRequest.dateFrom());
+        ReservationDate dateTo = ReservationDate.of(reservationFindRequest.dateTo());
         return reservationRepository.findBy(reservationFindRequest.memberId(), reservationFindRequest.themeId(),
-                        reservationFindRequest.dateFrom(), reservationFindRequest.dateTo()).stream()
-                .map(ReservationResponse::new)
-                .toList();
+                dateFrom, dateTo).stream().map(ReservationResponse::new).toList();
     }
 }

@@ -25,7 +25,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             AND (:themeId is null or r.theme.id = :themeId)
             AND (:dateFrom is null or r.schedule.date >= :dateFrom)
             AND (:dateTo is null or r.schedule.date < :dateTo)""")
-    List<Reservation> findBy(@Param("memberId") Long memberId, @Param("themeId") Long themeId, @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
+    List<Reservation> findBy(@Param("memberId") Long memberId, @Param("themeId") Long themeId,
+                             @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
 
     List<Reservation> findByScheduleDateAndThemeId(ReservationDate date, long themeId);
 }

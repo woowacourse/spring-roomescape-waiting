@@ -23,8 +23,8 @@ public class TokenProvider {
 
         return Jwts.builder()
                 .claim("id", member.getId())
-                .claim("role", member.getRole())
-                .claim("email", member.getEmail())
+                .claim("role", member.getRole().name())
+                .claim("email", member.getEmail().getValue())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())

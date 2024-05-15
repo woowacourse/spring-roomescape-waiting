@@ -5,8 +5,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
-import roomescape.exception.InvalidReservationException;
 
 @Entity
 public class ReservationTime {
@@ -30,26 +28,15 @@ public class ReservationTime {
     }
 
     public ReservationTime(long id, String time) {
-        validate(time);
         this.id = id;
         this.startAt = LocalTime.parse(time);
     }
 
-    public ReservationTime(String time) {
-        validate(time);
-        this.id = NO_ID;
-        this.startAt = LocalTime.parse(time);
+    public ReservationTime(LocalTime time) {
+        this(NO_ID, time);
     }
 
-    private void validate(String time) {
-        try {
-            LocalTime.parse(time);
-        } catch (DateTimeParseException e) {
-            throw new InvalidReservationException("올바르지 않은 시간입니다.");
-        }
-    }
-
-    public boolean isSame(ReservationTime other){
+    public boolean isSame(ReservationTime other) {
         return startAt.equals(other.startAt);
     }
 

@@ -37,17 +37,8 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(long id, Reservation reservation) {
-        this(id, reservation.member, reservation.schedule, reservation.theme);
-    }
-
-    public Reservation(long id, String date, Member member, ReservationTime reservationTime,
-                       final Theme theme) {
-        this(id, member, new Schedule(new ReservationDate(date), reservationTime), theme);
-    }
-
-    public Reservation(String reservationDate, Member member, ReservationTime reservationTime, Theme theme) {
-        this(NO_ID, member, new Schedule(new ReservationDate(reservationDate), reservationTime), theme);
+    public Reservation(LocalDate reservationDate, Member member, ReservationTime reservationTime, Theme theme) {
+        this(NO_ID, member, new Schedule(ReservationDate.of(reservationDate), reservationTime), theme);
     }
 
     public long getId() {

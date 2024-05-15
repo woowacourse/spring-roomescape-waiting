@@ -14,7 +14,7 @@ class EmailTest {
     @ParameterizedTest
     @ValueSource(strings = {"lini@", "lini.com"})
     void invalidEmailFormat(String email) {
-        assertThatThrownBy(() -> new Email(email))
+        assertThatThrownBy(() -> Email.of(email))
                 .isInstanceOf(InvalidMemberException.class)
                 .hasMessage("유효하지 않은 이메일입니다.");
     }
