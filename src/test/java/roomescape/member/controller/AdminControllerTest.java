@@ -1,36 +1,29 @@
 package roomescape.member.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberAdmin;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.service.TokenProvider;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.controller.dto.ReservationTimeRequest;
-import roomescape.reservation.controller.dto.ReservationTimeResponse;
-import roomescape.reservation.controller.dto.ThemeRequest;
-import roomescape.reservation.controller.dto.ThemeResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
 import roomescape.util.ControllerTest;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.MemberFixture.getMemberAdmin;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
 
 @DisplayName("관리자 페이지 테스트")
 class AdminControllerTest extends ControllerTest {

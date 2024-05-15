@@ -1,7 +1,8 @@
 package roomescape.reservation.controller.dto;
 
-import java.time.LocalTime;
 import roomescape.reservation.domain.AvailableTime;
+
+import java.time.LocalTime;
 
 public record AvailableTimeResponse(long timeId, LocalTime startAt, boolean alreadyBooked) {
     public static AvailableTimeResponse from(AvailableTime availableTime) {

@@ -11,7 +11,6 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.service.AuthService;
 import roomescape.global.annotation.LoginUser;
-import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 
 @Component

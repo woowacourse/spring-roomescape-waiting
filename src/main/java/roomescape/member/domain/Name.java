@@ -1,10 +1,11 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
-import java.util.regex.Pattern;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
+
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 @Embeddable
 public class Name {

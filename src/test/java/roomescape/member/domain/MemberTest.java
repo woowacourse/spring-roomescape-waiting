@@ -1,14 +1,14 @@
 package roomescape.member.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("사용자 도메인 테스트")
 class MemberTest {
@@ -19,10 +19,14 @@ class MemberTest {
         long id1 = 1;
         String name1 = "name1";
         String name2 = "name2";
+        String email1 = "email1@email.com";
+        String email2 = "email2@email.com";
+        String password1 = "password1";
+        String password2 = "password2";
 
         //when
-        Member member1 = new Member(id1, name1);
-        Member member2 = new Member(id1, name2);
+        Member member1 = new Member(id1, name1, email1, password1, Role.USER);
+        Member member2 = new Member(id1, name2, email2, password2, Role.USER);
 
         //then
         assertThat(member1).isEqualTo(member2);
@@ -33,10 +37,11 @@ class MemberTest {
     @ValueSource(strings = {"", "   ", "$#@%!"})
     void invalidName(String invalidName) {
         //given
-        long id = 1;
+        String email1 = "email1@email.com";
+        String password1 = "password1";
 
         //when & then
-        assertThatThrownBy(() -> new Member(1L, invalidName))
+        assertThatThrownBy(() -> new Member(1L, invalidName, email1, password1, Role.USER))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorType.NAME_FORMAT_ERROR.getMessage());
     }

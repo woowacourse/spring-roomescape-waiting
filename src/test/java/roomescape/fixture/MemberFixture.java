@@ -9,10 +9,10 @@ public class MemberFixture {
     }
 
     public static Member getMemberClover() {
-        return new Member(null, "클로버", "dev.clover@gmail.com", "qwer",Role.USER);
+        return new Member(null, "클로버", "dev.clover@gmail.com", "qwer", Role.USER);
     }
 
     public static Member getMemberAdmin() {
-        return new Member(null, "관리자", "admin@roomescape.com", "admin",Role.ADMIN);
+        return new Member(null, "관리자", "admin@roomescape.com", "admin", Role.ADMIN);
     }
 }

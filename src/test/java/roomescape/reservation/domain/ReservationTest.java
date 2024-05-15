@@ -1,12 +1,13 @@
 package roomescape.reservation.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.fixture.ThemeFixture.getTheme1;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.ThemeFixture.getTheme1;
 
 @DisplayName("예약 도메인 테스트")
 class ReservationTest {

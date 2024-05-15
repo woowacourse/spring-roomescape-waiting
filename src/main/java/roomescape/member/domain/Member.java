@@ -1,10 +1,7 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.*;
-import roomescape.reservation.domain.MemberReservation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -34,16 +31,8 @@ public class Member {
         this.role = role;
     }
 
-    public Member(Long id, String name, String email, Role role) {
-        this(id, name, email, null, role);
-    }
-
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
-    }
-
-    public Member(Long id, String name) {
-        this(id, name, null, null, Role.USER);
     }
 
     public boolean isAdmin() {

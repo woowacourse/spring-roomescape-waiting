@@ -1,9 +1,9 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
+import roomescape.member.domain.Member;
 
 import java.util.Objects;
-import roomescape.member.domain.Member;
 
 @Entity
 public class MemberReservation {

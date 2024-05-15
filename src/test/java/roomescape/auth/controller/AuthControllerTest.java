@@ -1,17 +1,7 @@
 package roomescape.auth.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -26,6 +16,17 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.AuthService;
 import roomescape.member.domain.Role;
 import roomescape.util.ControllerTest;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
 
 @DisplayName("회원 API 통합 테스트")
 class AuthControllerTest extends ControllerTest {

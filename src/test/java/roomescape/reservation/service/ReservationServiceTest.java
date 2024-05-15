@@ -1,17 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.MemberFixture.getMemberClover;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
-import static roomescape.fixture.ReservationTimeFixture.getNoon;
-import static roomescape.fixture.ThemeFixture.getTheme1;
-import static roomescape.fixture.ThemeFixture.getTheme2;
-
-import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +21,19 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
+import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationTimeFixture.getNoon;
+import static roomescape.fixture.ThemeFixture.getTheme1;
+import static roomescape.fixture.ThemeFixture.getTheme2;
 
 @DisplayName("예약 로직 테스트")
 class ReservationServiceTest extends ServiceTest {

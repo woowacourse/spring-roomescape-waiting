@@ -1,16 +1,16 @@
 package roomescape.member.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.controller.dto.SignUpRequest;
-import roomescape.auth.service.PasswordEncoder;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

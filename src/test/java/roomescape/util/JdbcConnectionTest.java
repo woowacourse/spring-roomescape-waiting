@@ -1,10 +1,5 @@
 package roomescape.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.SQLException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.controller.ReservationController;
+
+import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("JDBC 테스트")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

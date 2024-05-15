@@ -2,21 +2,17 @@ package roomescape.member.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+
+import java.net.URI;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
