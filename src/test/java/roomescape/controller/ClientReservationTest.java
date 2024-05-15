@@ -11,8 +11,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.TimeSlotResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -20,12 +22,24 @@ import roomescape.dto.response.TimeSlotResponse;
 @TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
 class ClientReservationTest {
 
+    private static final String EMAIL = "testDB@email.com";
+    private static final String PASSWORD = "1234";
+
     @LocalServerPort
     private int port;
+    private String accessToken;
+
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        accessToken = RestAssured
+                .given().log().all()
+                .body(new TokenRequest(EMAIL, PASSWORD))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().cookies().extract().cookie("token");
     }
 
     private int getTotalTimeSlotsCount() {
@@ -55,5 +69,20 @@ class ClientReservationTest {
                 .when().get("/books/%s/%s".formatted(invalidDate, invalidThemeId))
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    /* 예약 현황
+        testdb@email.com 3개
+        testdb2@email.com 4개
+   */
+    @DisplayName("로그인 된 유저의 예약 내역을 조회하면 200을 응답한다.")
+    @Test
+    void given_when_find_my_reservations_then_statusCodeIsOk() {
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3));
     }
 }

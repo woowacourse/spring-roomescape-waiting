@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
@@ -52,6 +53,12 @@ public class ReservationController {
             @RequestParam(required = false, name = "dateFrom") String dateFrom,
             @RequestParam(required = false, name = "dateTo") String dateTo) {
         return ResponseEntity.ok(reservationService.findDistinctReservations(memberId, themeId, dateFrom, dateTo));
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<ReservationMineResponse>> findMyReservations(LoginMember loginMember) {
+        List<ReservationMineResponse> myReservations = reservationService.findMyReservations(loginMember);
+        return ResponseEntity.ok(myReservations);
     }
 
     @DeleteMapping("/{id}")

@@ -7,7 +7,9 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -59,6 +61,14 @@ public class ReservationService {
         Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
+    }
+
+    public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
+        Member member = findMemberById(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        return reservations.stream()
+                .map(ReservationMineResponse::from)
+                .toList();
     }
 
     public void delete(Long id) {

@@ -3,6 +3,7 @@ package roomescape.dto.request;
 import java.time.LocalDate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
@@ -13,7 +14,7 @@ public record ReservationRequest(Long memberId, LocalDate date, Long timeId, Lon
     }
 
     public Reservation toEntity(Member member, TimeSlot time, Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.BOOKING);
     }
 
     private void isValid(Long memberId, LocalDate date, Long timeId, Long themeId) {

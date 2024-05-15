@@ -23,4 +23,4 @@
   - reservation-mine.html
   - reservation-mine.js
 - [x] 내 예약 조회 페이지 응답 추가
-- [ ] 내 예약 조회 API 추가
+- [x] 내 예약 조회 API 추가
