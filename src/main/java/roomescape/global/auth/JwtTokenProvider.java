@@ -4,12 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
@@ -21,7 +22,6 @@ public class JwtTokenProvider {
 
     public String generateToken(String payload) {
         Claims claims = Jwts.claims().setSubject(payload);
-        claims.put("userId", 2);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime validity = now.plusSeconds(validityInSeconds);
         return Jwts.builder()
