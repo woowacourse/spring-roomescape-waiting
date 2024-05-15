@@ -1,5 +1,8 @@
 package roomescape.domain.user;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public record Name(String name) {
 
     public Name {

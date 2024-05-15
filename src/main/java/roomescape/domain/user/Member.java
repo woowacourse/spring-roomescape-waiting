@@ -1,13 +1,24 @@
 package roomescape.domain.user;
 
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
+@Entity
 public class Member {
-    private final Long id;
-    private final Name name;
-    private final Email email;
-    private final Password password;
-    private final Role role;
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private Name name;
+    @Embedded
+    private Email email;
+    @Embedded
+    private Password password;
+    private Role role;
+
+    public Member() {
+    }
 
     public Member(final Long id, final Name name, final Email email, final Password password, final Role role) {
         this.id = id;
@@ -38,13 +49,13 @@ public class Member {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof final Member user)) return false;
-        return Objects.equals(email, user.email) && Objects.equals(password, user.password);
+        if (!(o instanceof final Member member)) return false;
+        return Objects.equals(email, member.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password);
+        return Objects.hashCode(email);
     }
 
     public String getName() {
@@ -52,11 +63,11 @@ public class Member {
     }
 
     public String getEmail() {
-        return email.value();
+        return email.email();
     }
 
     public String getPassword() {
-        return password.value();
+        return password.password();
     }
 
     public Long getId() {

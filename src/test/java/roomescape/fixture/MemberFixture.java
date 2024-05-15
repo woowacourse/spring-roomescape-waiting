@@ -1,10 +1,7 @@
 package roomescape.fixture;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import roomescape.domain.user.Member;
 import roomescape.domain.user.Role;
-import roomescape.service.MemberService;
 import roomescape.service.dto.input.MemberCreateInput;
 
 public class MemberFixture {
@@ -30,4 +27,14 @@ public class MemberFixture {
                 "password1234"
         );
     }
+
+    public static Member getDomain(final String email) {
+        return Member.fromMember(
+                null,
+                "조이썬",
+                email,
+                "password1234"
+        );
+    }
+
 }
