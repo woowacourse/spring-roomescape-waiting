@@ -38,32 +38,24 @@ public class ReservationService {
     }
 
     public ReservationResponse save(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
-        Reservation reservation = getValidatedReservation(reservationSaveRequest, loginMember);
+        Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember);
         validateDuplicateReservation(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation getValidatedReservation(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+    private Reservation createValidatedReservation(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
         Theme theme = themeRepository.findById(reservationSaveRequest.getThemeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = getValidatedMemberByRole(reservationSaveRequest, loginMember);
+        Member member = memberRepository.findById(loginMember.id())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return reservationSaveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
-    }
-
-    private Member getValidatedMemberByRole(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
-        if (loginMember.role().isAdmin()) {
-            return memberRepository.findById(reservationSaveRequest.getMemberId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        }
-        return memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
