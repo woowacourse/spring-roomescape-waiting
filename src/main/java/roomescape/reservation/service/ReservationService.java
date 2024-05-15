@@ -16,7 +16,7 @@ import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.theme.dao.ThemeDao;
+import roomescape.theme.dao.ThemeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.dao.TimeRepository;
 import roomescape.time.domain.Time;

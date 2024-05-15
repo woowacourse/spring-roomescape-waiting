@@ -1,5 +1,10 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -7,14 +12,23 @@ import roomescape.exception.BadRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
+@Entity
 public class Reservation {
 
     private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
-    private final String memberName;
-    private final LocalDate date;
-    private Theme theme;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private String memberName;
+    private LocalDate date;
+    @ManyToOne
     private Time time;
+    @ManyToOne
+    private Theme theme;
+
+    public Reservation() {
+    }
 
     public Reservation(String memberName, LocalDate date, Time time, Theme theme) {
         this(0, memberName, date, time, theme);
