@@ -7,6 +7,7 @@ values ('도도', 'dodo@gmail.com', '123', 'MEMBER');
 insert into member(name, email, password, role)
 values ('폭포', 'pokpo@gmail.com', '123', 'MEMBER');
 
+
 insert into theme(name, description, thumbnail)
 values ('테마1', '테마1입니당 ^0^', 'https://file.miricanvas.com/template_thumb/2021/07/02/13/20/k4t92g5ntu46etia/thumb.jpg');
 
