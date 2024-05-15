@@ -9,4 +9,4 @@
 
 - [x] `GET /reservation-mine` 호출 시 내 예약 목록 페이지 응답
 - 내 예약 목록을 조회하는 API 구현
-    - [ ] `GET /reservations-mine` 호출 시 내 예약 목록 응답  
+    - [ ] `GET /reservations/me` 호출 시 내 예약 목록 응답  

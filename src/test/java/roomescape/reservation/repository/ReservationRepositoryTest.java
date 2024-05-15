@@ -146,6 +146,21 @@ public class ReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("한 맴버가 예약한 목록을 반환한다.")
+    void findAllByMemberIdTest() {
+        Member member = memberRepository.save(new Member("hogi", "hoho@naver.com", "1234"));
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time
+                ));
+
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
+
+        assertThat(reservations.size()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("DB 삭제 테스트")
     void deleteTest() {
         Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now())).getId();
