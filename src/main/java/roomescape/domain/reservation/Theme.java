@@ -73,4 +73,14 @@ public class Theme {
     public int hashCode() {
         return Objects.hash(name, description, thumbnail);
     }
+
+    @Override
+    public String toString() {
+        return "Theme{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", thumbnail=" + thumbnail +
+                '}';
+    }
 }
