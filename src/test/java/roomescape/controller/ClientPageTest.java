@@ -54,6 +54,13 @@ class ClientPageTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @DisplayName("내 예약 목록 조회 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_when_GetReservationMinePage_then_statusCodeIsOkay() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
-
-
