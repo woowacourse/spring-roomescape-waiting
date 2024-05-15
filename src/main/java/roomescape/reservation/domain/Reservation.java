@@ -1,10 +1,13 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,16 +16,18 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
+@Table(name = "reservation", uniqueConstraints = @UniqueConstraint(columnNames = {"date", "timeId", "themeId"}))
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
+    @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
