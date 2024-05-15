@@ -16,3 +16,11 @@
   - [x] Theme
   - [x] TimeSlot
 - [x] Reservation 클래스 엔티티 설정
+
+## 2단계 - 내 예약 목록 조회 기능
+
+- [ ] 2단계 클라이언트 코드 추가
+  - reservation-mine.html
+  - reservation-mine.js
+- [ ] 내 예약 조회 페이지 응답 추가
+- [ ] 내 예약 조회 API 추가
