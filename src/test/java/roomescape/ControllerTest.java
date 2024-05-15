@@ -28,17 +28,15 @@ public class ControllerTest {
 
     public String getAdminCookie() {
         LoginRequest loginRequest = new LoginRequest(ADMIN_EMAIL, ADMIN_PASSWORD);
-        return RestAssured.given().log().all()
-                .body(loginRequest)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract().header("Set-Cookie").split(";")[0];
+        return getCookie(loginRequest);
     }
 
     public String getMemberCookie() {
         LoginRequest loginRequest = new LoginRequest(MEMBER_EMAIL, MEMBER_PASSWORD);
+        return getCookie(loginRequest);
+    }
+
+    private String getCookie(LoginRequest loginRequest) {
         return RestAssured.given().log().all()
                 .body(loginRequest)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
