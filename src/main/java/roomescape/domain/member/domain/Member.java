@@ -1,7 +1,12 @@
 package roomescape.domain.member.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
@@ -54,10 +59,15 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && role == member.role;
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email)
+                && Objects.equals(password, member.password) && role == member.role;
     }
 
     @Override

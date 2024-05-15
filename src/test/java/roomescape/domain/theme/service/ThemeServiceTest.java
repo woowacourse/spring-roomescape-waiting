@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.reservation.repository.ReservationRepository;
+import roomescape.domain.reservation.repository.reservation.ReservationRepository;
 import roomescape.domain.reservation.service.FakeReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
@@ -26,22 +26,7 @@ class ThemeServiceTest {
     ThemeService themeService;
 
     @Mock
-    ReservationRepository reservationRepository;
-
-    @DisplayName("인기 테마를 알 수 있습니다.")
-    @Test
-    void should_get_theme_ranking() {
-        Theme theme = new Theme(1L, "테마1", "테마1설명", "url");
-        when(reservationRepository.findThemeOrderByReservationCount())
-                .thenReturn(List.of(theme));
-
-        List<Theme> themeRanking = themeService.getThemeRanking();
-
-        assertAll(
-                () -> assertThat(themeRanking).hasSize(1),
-                () -> assertThat(themeRanking.get(0)).isEqualTo(theme)
-        );
-    }
+    ThemeRepository themeRepository;
 
     @DisplayName("모든 테마를 불러올 수 있습니다.")
     @Test
@@ -78,5 +63,19 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.removeTheme(1L))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");
+    }
+
+    @DisplayName("인기 테마를 알 수 있습니다.")
+    @Test
+    void should_get_theme_ranking() {
+        Theme theme = new Theme(1L, "테마1", "테마1설명", "url");
+        when(themeRepository.findThemeOrderByReservationCount()).thenReturn(List.of(theme));
+
+        List<Theme> themeRanking = themeService.getThemeRanking();
+
+        assertAll(
+                () -> assertThat(themeRanking).hasSize(1),
+                () -> assertThat(themeRanking.get(0)).isEqualTo(theme)
+        );
     }
 }

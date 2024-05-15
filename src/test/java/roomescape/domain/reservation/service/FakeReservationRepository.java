@@ -1,10 +1,6 @@
 package roomescape.domain.reservation.service;
 
-import roomescape.domain.member.domain.Member;
-import roomescape.domain.reservation.domain.reservation.Reservation;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.repository.ReservationRepository;
-import roomescape.domain.theme.domain.Theme;
+import static roomescape.domain.member.domain.Role.MEMBER;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -12,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static roomescape.domain.member.domain.Role.MEMBER;
+import roomescape.domain.member.domain.Member;
+import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.repository.reservation.ReservationRepository;
+import roomescape.domain.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -40,7 +39,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         return reservations.values()
                 .stream()
                 .filter(reservation ->
@@ -83,7 +82,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId) {
+    public boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservations.values().stream()
                 .anyMatch(reservation -> reservation.getTimeId().equals(timeId) && reservation.getDate().equals(date)
                         && reservation.getThemeId().equals(themeId));
@@ -95,19 +94,19 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTime> findByDateAndTheme_Id(LocalDate date, Long themeId) {
+    public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
         return reservations.values()
                 .stream()
                 .filter(reservation ->
                         reservation.getDate().isEqual(date) && reservation.getThemeId().equals(themeId))
-                .map(reservation -> {
-                    return new ReservationTime(reservation.getTimeId(), reservation.getTime().getStartAt());
-                })
                 .toList();
     }
 
     @Override
-    public List<Theme> findThemeOrderByReservationCount() {
-        return null;
+    public List<Reservation> findByMemberId(Long memberId) {
+        return reservations.values()
+                .stream()
+                .filter(reservation -> reservation.getMemberId().equals(memberId))
+                .toList();
     }
 }

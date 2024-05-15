@@ -1,9 +1,8 @@
 package roomescape.domain.member.domain;
 
 import jakarta.persistence.Embeddable;
-import roomescape.global.exception.EscapeApplicationException;
-
 import java.util.Objects;
+import roomescape.global.exception.EscapeApplicationException;
 
 @Embeddable
 public class Name {

@@ -1,13 +1,12 @@
 package roomescape.domain.theme.service;
 
-import roomescape.domain.theme.domain.Theme;
-import roomescape.domain.theme.repository.ThemeRepository;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import roomescape.domain.theme.domain.Theme;
+import roomescape.domain.theme.repository.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
     Map<Long, Theme> themes = new HashMap<>();
@@ -38,5 +37,10 @@ public class FakeThemeRepository implements ThemeRepository {
             return Optional.of(themes.get(id));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<Theme> findThemeOrderByReservationCount() {
+        return null;
     }
 }

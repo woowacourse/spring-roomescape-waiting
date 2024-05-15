@@ -1,11 +1,10 @@
-package roomescape.domain.reservation.repository;
+package roomescape.domain.reservation.repository.reservationTime;
 
+import java.time.LocalTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 
-import java.time.LocalTime;
-
-public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
+public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
     boolean existsByStartAt(LocalTime startAt);
 }

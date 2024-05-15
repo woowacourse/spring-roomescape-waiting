@@ -2,7 +2,9 @@ package roomescape.domain.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.MemberFixture.ADMIN_EMAIL;
 import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
+import static roomescape.fixture.MemberFixture.ADMIN_PASSWORD;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +54,7 @@ class MemberServiceTest {
     void should_find_member_by_email_and_password() {
         Member expectedMember = ADMIN_MEMBER;
 
-        Member actualMember = memberService.findMemberByEmailAndPassword("admin@gmail.com", "123456");
+        Member actualMember = memberService.findMemberByEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
 
         assertThat(actualMember).isEqualTo(expectedMember);
     }

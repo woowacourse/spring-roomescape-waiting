@@ -1,5 +1,14 @@
 package roomescape.domain.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.member.domain.Role.ADMIN;
+import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
+import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
+import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
+
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,16 +22,6 @@ import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.service.FakeThemeRepository;
 import roomescape.global.exception.EscapeApplicationException;
-
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.domain.member.domain.Role.ADMIN;
-import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
-import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
-import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
 
 class ReservationServiceTest {
 
