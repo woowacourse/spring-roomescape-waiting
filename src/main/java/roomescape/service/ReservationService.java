@@ -33,6 +33,12 @@ public class ReservationService {
         return ReservationOutput.toOutputs(reservations);
     }
 
+    public List<ReservationOutput> getAllMyReservations(final long memberId) {
+        final List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+
+        return ReservationOutput.toOutputs(reservations);
+    }
+
     public List<ReservationOutput> searchReservation(final ReservationSearchInput input) {
         final List<Reservation> themeReservations = reservationRepository.getReservationByThemeIdAndMemberIdAndDateBetween(
                 input.themeId(), input.memberId(), new ReservationDate(input.fromDate()), new ReservationDate(input.toDate()));
