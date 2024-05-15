@@ -10,6 +10,11 @@ public class MemberPageController {
         return "reservation";
     }
 
+    @GetMapping("/member/reservation")
+    public String findMyReservationPage() {
+        return "reservation-mine";
+    }
+
     @GetMapping("/login")
     public String findLoginPage() {
         return "login";

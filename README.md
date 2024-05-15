@@ -69,7 +69,7 @@
 
 ### 내 예약 페이지 접근
 - http method: GET
-- uri: /reservation-mine
+- uri: /member/reservation
 - file path: templates/reservation-mine.html
 
 
@@ -646,7 +646,7 @@
 - uri: /reservations-mine
 - request
 ```
-GET /reservations-mine HTTP/1.1
+GET /members/reservations HTTP/1.1
 cookie: token={token}
 host: localhost:8080
 ```
