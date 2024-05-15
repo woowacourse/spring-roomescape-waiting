@@ -43,10 +43,18 @@ public class ReservationTimeService {
 
     public List<ReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = findTimeIdForDateAndTheme(date, themeId);
-        List<ReservationTime> availableTimes = reservationTimeRepository.findByIdNotIn(bookedTimeIds);
-        return availableTimes.stream()
+        List<ReservationTime> times = findAvailableTimes(bookedTimeIds);
+        return times.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
+    }
+
+    private List<ReservationTime> findAvailableTimes(List<Long> bookedTimeIds) {
+        if (bookedTimeIds.isEmpty()) {
+            return reservationTimeRepository.findAll();
+        }
+
+        return reservationTimeRepository.findByIdNotIn(bookedTimeIds);
     }
 
     public void deleteReservationTime(Long id) {

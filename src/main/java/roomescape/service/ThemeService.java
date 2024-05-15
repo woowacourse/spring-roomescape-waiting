@@ -25,7 +25,7 @@ public class ThemeService {
         ThemeName name = new ThemeName(themeRequest.name());
         validateNameDuplicate(name);
         Theme theme = themeRequest.toEntity();
-        
+
         return themeRepository.save(theme).getId();
     }
 
@@ -44,9 +44,9 @@ public class ThemeService {
     public List<ThemeResponse> getPopularThemes() {
         List<Long> popularThemeIds = reservationRepository.findThemeReservationCountsForDate(
                 DateUtil.A_WEEK_AGO, DateUtil.YESTERDAY);
-        return popularThemeIds.stream()
-                .map(this::findThemeById)
-                .map(ThemeResponse::from)
+
+        return themeRepository.findAllById(popularThemeIds)
+                .stream().map(ThemeResponse::from)
                 .toList();
     }
 

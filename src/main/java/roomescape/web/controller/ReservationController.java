@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.login.LoginMember;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -54,15 +55,23 @@ public class ReservationController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<MemberReservationResponse>> getReservationsMine(LoginMember loginMember) {
+        List<MemberReservationResponse> memberReservationResponses = reservationService.getReservationByMemberId(
+                loginMember.id());
+
+        return ResponseEntity.ok(memberReservationResponses);
     }
 
     @GetMapping("/reservations/{id}")
     public ResponseEntity<ReservationResponse> getReservation(@PathVariable Long id) {
         ReservationResponse reservationResponse = reservationService.getReservation(id);
         return ResponseEntity.ok(reservationResponse);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

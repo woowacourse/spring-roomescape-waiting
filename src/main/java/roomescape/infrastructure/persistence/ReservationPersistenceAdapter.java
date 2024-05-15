@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.repository.ReservationRepository;
 
@@ -83,6 +84,11 @@ class ReservationPersistenceAdapter implements ReservationRepository {
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
         return repository.findByDateAndThemeId(date, themeId);
+    }
+
+    @Override
+    public List<Reservation> findByMember(Member member) {
+        return repository.findByMember(member);
     }
 
     @Override

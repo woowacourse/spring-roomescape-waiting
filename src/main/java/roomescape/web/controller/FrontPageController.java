@@ -11,6 +11,11 @@ public class FrontPageController {
         return "/reservation";
     }
 
+    @GetMapping("/reservation-mine")
+    public String reservationMine() {
+        return "/reservation-mine";
+    }
+
     @GetMapping("/login")
     public String login() {
         return "/login";

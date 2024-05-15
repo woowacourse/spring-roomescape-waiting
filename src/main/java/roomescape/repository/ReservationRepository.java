@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
 public interface ReservationRepository {
@@ -20,6 +21,8 @@ public interface ReservationRepository {
     List<Reservation> findByMemberAndThemeAndDateRange(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+
+    List<Reservation> findByMember(Member member);
 
     boolean existsByTimeId(Long id);
 

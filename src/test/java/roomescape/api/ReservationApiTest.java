@@ -59,7 +59,7 @@ class ReservationApiTest {
     @Test
     void 관리자_예약_추가() {
         Cookie cookieByAdminLogin = getCookieByLogin(port, "admin@email.com", "123456");
-        ReservationRequest reservationRequest = createReservationRequest();
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
 
         RestAssured.given().log().all()
                 .port(port)
@@ -79,7 +79,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_단일_조회() {
-        ReservationRequest reservationRequest = createReservationRequest();
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -96,12 +96,30 @@ class ReservationApiTest {
 
     @Test
     void 예약_전체_조회() {
-        ReservationRequest reservationRequest = createReservationRequest();
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
                 .port(port)
                 .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
+    @Test
+    void 사용자_예약_전체_조회() {
+        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L);
+        addReservation(otherUserReservationRequest);
+        addReservation(userReservationRequest);
+
+        Cookie cookieByUserLogin = getCookieByLogin(port, "atom@email.com", "123456");
+
+        RestAssured.given().log().all()
+                .port(port)
+                .cookie(cookieByUserLogin)
+                .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
@@ -121,7 +139,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_삭제() {
-        ReservationRequest reservationRequest = createReservationRequest();
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -135,11 +153,11 @@ class ReservationApiTest {
         return new UserReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
     }
 
-    private ReservationRequest createReservationRequest() {
-        return new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 2L);
+    private ReservationRequest createReservationRequest(Long memberId, Long timeId) {
+        return new ReservationRequest(LocalDate.now().plusDays(1), timeId, 1L, memberId);
     }
 
-    private void addReservation(final ReservationRequest reservationRequest) {
+    private void addReservation(ReservationRequest reservationRequest) {
         Cookie cookieByAdminLogin = getCookieByLogin(port, "admin@email.com", "123456");
         RestAssured.given().log().all()
                 .port(port)

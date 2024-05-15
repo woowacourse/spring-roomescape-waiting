@@ -8,6 +8,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -53,6 +54,13 @@ public class ReservationService {
     public ReservationResponse getReservation(Long id) {
         Reservation reservation = findReservationById(id);
         return ReservationResponse.from(reservation);
+    }
+
+    public List<MemberReservationResponse> getReservationByMemberId(Long memberId) {
+        Member member = findMember(memberId);
+        List<Reservation> reservations = reservationRepository.findByMember(member);
+        return reservations.stream().map(MemberReservationResponse::from)
+                .toList();
     }
 
     public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {
