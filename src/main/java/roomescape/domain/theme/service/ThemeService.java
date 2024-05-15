@@ -1,7 +1,6 @@
 package roomescape.domain.theme.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -13,11 +12,9 @@ import java.util.List;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public List<Theme> findAllTheme() {
