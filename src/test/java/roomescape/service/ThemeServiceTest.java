@@ -119,7 +119,7 @@ class ThemeServiceTest {
     void findAllPopular() {
         // given
         final List<Theme> expectedThemes = List.of(THEME_HORROR(1L), THEME_DETECTIVE(2L));
-        given(themeRepository.findPopularThemesBy(any(), any(), anyInt())).willReturn(expectedThemes);
+        given(themeRepository.findPopularThemesBy(any())).willReturn(expectedThemes);
 
         // when
         final List<ThemeResponse> actual = themeService.findPopularThemes();

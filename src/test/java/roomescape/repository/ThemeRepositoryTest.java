@@ -80,14 +80,12 @@ class ThemeRepositoryTest extends RepositoryTest {
     @DisplayName("인기 테마 목록을 조회한다.")
     void findPopularThemes() {
         // given
-        final ThemePopularFilter themePopularFilter
+        final ThemePopularFilter filter
                 = ThemePopularFilter.getThemePopularFilter(LocalDate.parse("2034-05-12"));
 
         // when
-        final int limit = themePopularFilter.getLimit();
-        final List<Theme> actual = themeRepository.findPopularThemesBy(
-                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), limit
-        );
+        final int limit = filter.getLimit();
+        final List<Theme> actual = themeRepository.findPopularThemesBy(filter);
 
         // then
         assertThat(actual).hasSize(limit);

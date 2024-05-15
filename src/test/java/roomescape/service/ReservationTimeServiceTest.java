@@ -100,16 +100,15 @@ class ReservationTimeServiceTest {
     void findAvailableReservationTimes() {
         // given
         final ReservationTime reservedTime = RESERVATION_TIME_SIX(1L);
-        final AvailableReservationTimeSearch availableReservationTimeSearch
-                = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
-        given(reservationRepository.findTimeIds(
-                LocalDate.parse(DATE_MAY_EIGHTH), 1L)).willReturn(List.of(1L));
+        final AvailableReservationTimeSearch condition = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
+
+        given(reservationRepository.findTimeIds(condition))
+                .willReturn(List.of(1L));
         given(reservationTimeRepository.findAll())
                 .willReturn(List.of(reservedTime, RESERVATION_TIME_SEVEN(2L)));
 
         // when
-        final List<AvailableReservationTimeResponse> availableReservationTimes
-                = reservationTimeService.findAvailableReservationTimes(availableReservationTimeSearch);
+        final List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(condition);
 
         // then
         assertAll(() -> {

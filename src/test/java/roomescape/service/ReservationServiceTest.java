@@ -96,12 +96,12 @@ class ReservationServiceTest {
         // given
         final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
         final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        final ReservationFilterParam reservationFilterParam
-                = new ReservationFilterParam(1L, 1L,
-                LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"));
-        given(reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(1L, 1L,
-                LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")))
-                .willReturn(List.of(reservation1, reservation2));
+        final ReservationFilterParam reservationFilterParam = new ReservationFilterParam(
+                1L, 1L, LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")
+        );
+        given(reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+                1L, 1L, LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"))
+        ).willReturn(List.of(reservation1, reservation2));
 
         // when
         final List<ReservationResponse> reservations
