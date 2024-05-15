@@ -23,4 +23,8 @@ public class ReservationFindService {
                                                 LocalDate dateFrom, LocalDate dateTo) {
         return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
     }
+
+    public List<Reservation> findUserReservations(long memberId) {
+        return reservationRepository.findByMemberId(memberId);
+    }
 }

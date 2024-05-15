@@ -54,6 +54,17 @@ public class ReservationApiControllerTest {
     }
 
     @Test
+    @DisplayName("유저 예약 목록 조회를 정상적으로 수행한다.")
+    void selectUserReservationListRequest_Success() {
+        RestAssured.given().log().all()
+                .cookie("token", TokenGenerator.makeUserToken())
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
+    @Test
     @DisplayName("예약 추가, 조회를 정상적으로 수행한다.")
     void ReservationTime_CREATE_READ_Success() {
         Map<String, Object> reservation = Map.of("name", "브라운",
