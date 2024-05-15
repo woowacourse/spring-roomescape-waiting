@@ -13,10 +13,10 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """
                 SELECT
-                th.id,
-                th.name,
-                th.description,
-                th.thumbnail
+                    th.id,
+                    th.name,
+                    th.description,
+                    th.thumbnail
                 FROM Theme AS th
                 JOIN Reservation AS r
                 ON th.id = r.theme_id

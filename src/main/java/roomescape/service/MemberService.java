@@ -48,7 +48,7 @@ public class MemberService {
     }
 
     public MemberResponse getById(Long id) {
-        Member member = memberRepository.getById(id);
+        Member member = memberRepository.getByIdentifier(id);
 
         return MemberResponse.from(member);
     }

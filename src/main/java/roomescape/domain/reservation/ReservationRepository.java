@@ -8,6 +8,14 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            JOIN FETCH r.time t
+            JOIN FETCH r.theme th
+            WHERE m.id = :id
+            """)
     List<Reservation> findAllByMemberId(long id);
 
     boolean existsByTimeId(long id);
