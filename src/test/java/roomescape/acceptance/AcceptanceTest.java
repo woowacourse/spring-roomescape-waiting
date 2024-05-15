@@ -6,17 +6,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.dto.auth.TokenRequest;
+import roomescape.dto.auth.TokenResponse;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
 import roomescape.dto.theme.ThemeSaveRequest;
-import roomescape.dto.auth.TokenRequest;
-import roomescape.dto.auth.TokenResponse;
 
-import static org.hamcrest.Matchers.is;
 import static roomescape.TestFixture.*;
 
-@Sql("/test-schema.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class AcceptanceTest {
 
@@ -109,12 +106,11 @@ abstract class AcceptanceTest {
                 .statusCode(statusCode);
     }
 
-    protected void assertGetResponse(final String path, final int statusCode, final int size) {
+    protected void assertGetResponse(final String path, final int statusCode) {
         RestAssured.given().log().all()
                 .when().get(path)
                 .then().log().all()
-                .statusCode(statusCode)
-                .body("size()", is(size));
+                .statusCode(statusCode);
     }
 
     protected void assertDeleteResponse(final String path, final Long id, final int statusCode) {

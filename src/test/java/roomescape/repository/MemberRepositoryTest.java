@@ -1,7 +1,4 @@
-package roomescape.dao;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+package roomescape.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,16 +11,19 @@ import roomescape.domain.member.Role;
 import java.util.List;
 import java.util.Optional;
 
-class MemberDaoTest extends DaoTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.MEMBER_BROWN;
+
+class MemberRepositoryTest extends RepositoryTest {
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     private Member member;
 
     @BeforeEach
     void setUp() {
-        member = memberDao.save(MEMBER_BROWN());
+        member = memberRepository.save(MEMBER_BROWN());
     }
 
     @Test
@@ -33,7 +33,7 @@ class MemberDaoTest extends DaoTest {
         final Member member = new Member(new Name("미르"), "mir@email.com", "1234", Role.MEMBER);
 
         // when
-        final Member savedMember = memberDao.save(member);
+        final Member savedMember = memberRepository.save(member);
 
         // then
         assertThat(savedMember.getId()).isNotNull();
@@ -43,7 +43,7 @@ class MemberDaoTest extends DaoTest {
     @DisplayName("Id에 해당하는 사용자를 조회한다.")
     void findMemberById() {
         // when
-        final Optional<Member> actual = memberDao.findById(member.getId());
+        final Optional<Member> actual = memberRepository.findById(member.getId());
 
         // then
         assertThat(actual).hasValue(member);
@@ -53,10 +53,10 @@ class MemberDaoTest extends DaoTest {
     @DisplayName("Id에 해당하는 사용자가 없으면 빈 옵셔널을 조회한다.")
     void returnEmptyOptionalWhenFindMemberByNotExistingId() {
         // given
-        final Long notExistingId = 4L;
+        final Long notExistingId = 0L;
 
         // when
-        final Optional<Member> actual = memberDao.findById(notExistingId);
+        final Optional<Member> actual = memberRepository.findById(notExistingId);
 
         // then
         assertThat(actual).isEmpty();
@@ -66,7 +66,7 @@ class MemberDaoTest extends DaoTest {
     @DisplayName("email에 해당하는 사용자를 조회한다.")
     void findMemberByEmail() {
         // when
-        final Optional<Member> actual = memberDao.findByEmail(member.getEmail());
+        final Optional<Member> actual = memberRepository.findByEmail(member.getEmail());
 
         // then
         assertThat(actual).hasValue(member);
@@ -79,7 +79,7 @@ class MemberDaoTest extends DaoTest {
         final String notExistingEmail = "odd@email.com";
 
         // when
-        final Optional<Member> actual = memberDao.findByEmail(notExistingEmail);
+        final Optional<Member> actual = memberRepository.findByEmail(notExistingEmail);
 
         // then
         assertThat(actual).isEmpty();
@@ -89,7 +89,7 @@ class MemberDaoTest extends DaoTest {
     @DisplayName("사용자 전체 목록을 조회한다.")
     void findAllMembers() {
         // when
-        final List<Member> actual = memberDao.findAll();
+        final List<Member> actual = memberRepository.findAll();
 
         // then
         assertThat(actual).hasSize(3);

@@ -1,31 +1,29 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.repository.ThemeRepository;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static roomescape.TestFixture.THEME_DETECTIVE;
+import static roomescape.TestFixture.THEME_HORROR;
+
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
     @Mock
-    private ThemeDao themeDao;
+    private ThemeRepository themeRepository;
 
     @InjectMocks
     private ThemeService themeService;
@@ -36,7 +34,7 @@ class ThemeServiceTest {
         // given
         final Theme expectedTheme = THEME_HORROR(1L);
 
-        given(themeDao.save(any())).willReturn(expectedTheme);
+        given(themeRepository.save(any())).willReturn(expectedTheme);
 
         // when
         final ThemeResponse actual = themeService.create(expectedTheme);
@@ -51,7 +49,7 @@ class ThemeServiceTest {
         // given
         final List<Theme> expectedThemes = List.of(THEME_HORROR(1L));
 
-        given(themeDao.findAll()).willReturn(expectedThemes);
+        given(themeRepository.findAll()).willReturn(expectedThemes);
 
         // when
         final List<ThemeResponse> actual = themeService.findAll();
@@ -68,7 +66,7 @@ class ThemeServiceTest {
         // given
         final Theme expectedTheme = THEME_HORROR(1L);
 
-        given(themeDao.findById(anyLong())).willReturn(Optional.of(expectedTheme));
+        given(themeRepository.findById(anyLong())).willReturn(Optional.of(expectedTheme));
 
         // when
         final ThemeResponse actual = themeService.findById(1L);
@@ -84,7 +82,7 @@ class ThemeServiceTest {
     @DisplayName("조회하려는 테마가 존재하지 않는 경우 예외가 발생한다.")
     void throwExceptionWhenNotExistTheme() {
         // given
-        given(themeDao.findById(anyLong())).willReturn(Optional.empty());
+        given(themeRepository.findById(anyLong())).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> themeService.findById(1L))
@@ -97,7 +95,7 @@ class ThemeServiceTest {
         // given
         final Theme theme = THEME_HORROR(1L);
 
-        given(themeDao.findById(anyLong())).willReturn(Optional.of(theme));
+        given(themeRepository.findById(anyLong())).willReturn(Optional.of(theme));
 
         // when & then
         assertThatCode(() -> themeService.deleteById(1L))
@@ -108,7 +106,7 @@ class ThemeServiceTest {
     @DisplayName("삭제하려는 테마가 존재하지 않는 경우 예외가 발생한다.")
     void throwExceptionWhenDeleteNotExistingTheme() {
         // given
-        given(themeDao.findById(anyLong()))
+        given(themeRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -121,7 +119,7 @@ class ThemeServiceTest {
     void findAllPopular() {
         // given
         final List<Theme> expectedThemes = List.of(THEME_HORROR(1L), THEME_DETECTIVE(2L));
-        given(themeDao.findPopularThemesBy(any())).willReturn(expectedThemes);
+        given(themeRepository.findPopularThemesBy(any(), any(), anyInt())).willReturn(expectedThemes);
 
         // when
         final List<ThemeResponse> actual = themeService.findPopularThemes();

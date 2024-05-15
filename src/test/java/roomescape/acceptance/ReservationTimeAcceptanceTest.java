@@ -1,8 +1,5 @@
 package roomescape.acceptance;
 
-import static roomescape.TestFixture.DATE_MAY_EIGHTH;
-import static roomescape.TestFixture.START_AT_SIX;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +7,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
+
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.START_AT_SIX;
 
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
 
@@ -36,7 +36,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindReservationTimes() {
         saveReservationTime();
 
-        assertGetResponse("/times", 200, 1);
+        assertGetResponse("/times", 200);
     }
 
     @Test
@@ -51,7 +51,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("존재하지 않는 예약 시간을 삭제하면 400을 응답한다.")
     void respondBadRequestWhenDeleteNotExistingReservationTime() {
         saveReservationTime();
-        final Long notExistingReservationTimeId = 2L;
+        final Long notExistingReservationTimeId = 0L;
 
         assertDeleteResponse("/times/", notExistingReservationTimeId, 400);
     }

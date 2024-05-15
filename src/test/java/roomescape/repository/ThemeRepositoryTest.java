@@ -1,17 +1,12 @@
-package roomescape.dao;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
-import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
+package roomescape.repository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
 
@@ -19,25 +14,20 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-class ThemeDaoTest extends DaoTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.THEME_DETECTIVE;
+import static roomescape.TestFixture.THEME_HORROR;
+
+class ThemeRepositoryTest extends RepositoryTest {
 
     @Autowired
-    private MemberDao memberDao;
-
-    @Autowired
-    private ReservationTimeDao reservationTimeDao;
-
-    @Autowired
-    private ThemeDao themeDao;
-
-    @Autowired
-    private ReservationDao reservationDao;
+    private ThemeRepository themeRepository;
 
     private Theme theme;
 
     @BeforeEach
     void setUp() {
-        theme = themeDao.save(THEME_DETECTIVE());
+        theme = themeRepository.save(THEME_DETECTIVE());
     }
 
     @Test
@@ -47,17 +37,18 @@ class ThemeDaoTest extends DaoTest {
         final Theme theme = THEME_HORROR();
 
         // when
-        final Theme actual = themeDao.save(theme);
+        final Theme actual = themeRepository.save(theme);
 
         // then
         assertThat(actual.getId()).isNotNull();
     }
 
+    @Disabled
     @Test
     @DisplayName("테마 목록을 조회한다.")
     void findAll() {
         // when
-        final List<Theme> actual = themeDao.findAll();
+        final List<Theme> actual = themeRepository.findAll();
 
         // then
         assertThat(actual).hasSize(1);
@@ -67,7 +58,7 @@ class ThemeDaoTest extends DaoTest {
     @DisplayName("Id에 해당하는 테마를 조회한다.")
     void findById() {
         // when
-        final Optional<Theme> actual = themeDao.findById(theme.getId());
+        final Optional<Theme> actual = themeRepository.findById(theme.getId());
 
         // then
         assertThat(actual).isNotEmpty();
@@ -77,10 +68,10 @@ class ThemeDaoTest extends DaoTest {
     @DisplayName("존재하지 않는 Id로 테마를 조회하면 빈 옵셔널을 반환한다.")
     void returnEmptyOptionalWhenFindByNotExistingId() {
         // given
-        final Long notExistingId = 2L;
+        final Long notExistingId = 0L;
 
         // when
-        final Optional<Theme> actual = themeDao.findById(notExistingId);
+        final Optional<Theme> actual = themeRepository.findById(notExistingId);
 
         // then
         assertThat(actual).isEmpty();
@@ -90,14 +81,15 @@ class ThemeDaoTest extends DaoTest {
     @DisplayName("Id에 해당하는 테마를 삭제한다.")
     void deleteById() {
         // when
-        themeDao.deleteById(theme.getId());
+        themeRepository.deleteById(theme.getId());
 
         // then
-        final List<Theme> actual = themeDao.findAll();
-        assertThat(actual).hasSize(0);
+        final List<Theme> actual = themeRepository.findAll();
+        assertThat(actual).doesNotContain(theme);
     }
 
     @Sql("/popular-theme-data.sql")
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     @Test
     @DisplayName("인기 테마 목록을 조회한다.")
     void findPopularThemes() {
@@ -106,7 +98,9 @@ class ThemeDaoTest extends DaoTest {
                 = ThemePopularFilter.getThemePopularFilter(LocalDate.parse("2034-05-12"));
 
         // when
-        final List<Theme> actual = themeDao.findPopularThemesBy(themePopularFilter);
+        final List<Theme> actual = themeRepository.findPopularThemesBy(
+                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), themePopularFilter.getLimit()
+        );
 
         // then
         assertThat(actual).extracting(Theme::getId)

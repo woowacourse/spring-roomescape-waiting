@@ -2,12 +2,12 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationDao;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.dto.reservation.AvailableReservationTimeResponse;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
 import roomescape.dto.reservation.ReservationTimeResponse;
-import roomescape.dao.ReservationTimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,23 +18,23 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReservationTimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
-    private final ReservationDao reservationDao;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeDao reservationTimeDao,
-                                  final ReservationDao reservationDao) {
-        this.reservationTimeDao = reservationTimeDao;
-        this.reservationDao = reservationDao;
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationTimeResponse create(final ReservationTime reservationTime) {
-        final ReservationTime savedReservationTime = reservationTimeDao.save(reservationTime);
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
     @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAll() {
-        final List<ReservationTime> reservationTimes = reservationTimeDao.findAll();
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
@@ -42,31 +42,33 @@ public class ReservationTimeService {
 
     @Transactional(readOnly = true)
     public ReservationTimeResponse findById(final Long id) {
-        final ReservationTime reservationTime = reservationTimeDao.findById(id)
+        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 예약 시간이 없습니다."));
         return ReservationTimeResponse.from(reservationTime);
     }
 
     public void delete(final Long id) {
-        final ReservationTime reservationTime = reservationTimeDao.findById(id)
+        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 예약 시간이 없습니다."));
         validateHasReservation(reservationTime);
-        reservationTimeDao.deleteById(reservationTime.getId());
+        reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
     private void validateHasReservation(final ReservationTime reservationTime) {
-        final int reservationCount = reservationDao.countByTimeId(reservationTime.getId());
+        final int reservationCount = reservationRepository.countByTime_Id(reservationTime.getId());
         if (reservationCount > 0) {
             throw new IllegalArgumentException("해당 예약 시간의 예약 건이 존재합니다.");
         }
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
-            final AvailableReservationTimeSearch availableReservationTimeSearch
+            final AvailableReservationTimeSearch condition
     ) {
-        final List<Long> reservations = reservationDao.findTimeIds(availableReservationTimeSearch);
+        final List<Long> reservations = reservationRepository.findTimeIds(
+                condition.date(), condition.themeId()
+        );
         final Set<Long> reservedTimeIds = new HashSet<>(reservations);
-        final List<ReservationTime> times = reservationTimeDao.findAll();
+        final List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream()
                 .map(reservationTime -> {

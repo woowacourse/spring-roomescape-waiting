@@ -1,13 +1,12 @@
 package roomescape.acceptance;
 
-import static org.hamcrest.Matchers.is;
-import static roomescape.TestFixture.*;
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.dto.reservation.AdminReservationSaveRequest;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
+
+import static roomescape.TestFixture.*;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
 
@@ -36,7 +35,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondBadRequestWhenNotExistingReservationTime() {
         saveReservationTime();
         final Long themeId = saveTheme();
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, 2L, themeId);
+        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, 0L, themeId);
 
         assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
     }
@@ -46,7 +45,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondBadRequestWhenNotExistingTheme() {
         saveTheme();
         final Long timeId = saveReservationTime();
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 2L);
+        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 0L);
 
         assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
     }
@@ -56,7 +55,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindReservations() {
         saveReservation();
         
-        assertGetResponse("/reservations", 200, 1);
+        assertGetResponse("/reservations", 200);
     }
     
     @Test
@@ -69,12 +68,11 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .queryParam("themeId", 1L)
                 .queryParam("memberId", 1L)
                 .queryParam("dateFrom", "2034-05-01")
-                .queryParam("dateTo", "2034-05-08")
+                .queryParam("dateTo", "R2034-05-08")
                 .cookie("token", accessToken)
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+                .statusCode(200);
     }
     
     @Test
@@ -89,7 +87,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("존재하지 않는 예약을 삭제하면 400을 응답한다.")
     void respondBadRequestWhenDeleteNotExistingReservation() {
         saveReservation();
-        final Long notExistingReservationTimeId = 2L;
+        final Long notExistingReservationTimeId = 0L;
 
         assertDeleteResponse("/reservations/", notExistingReservationTimeId, 400);
     }

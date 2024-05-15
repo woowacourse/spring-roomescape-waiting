@@ -1,29 +1,29 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.ADMIN;
-import static roomescape.TestFixture.MEMBER_MIA;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.dao.MemberDao;
 import roomescape.domain.member.Member;
 import roomescape.dto.MemberResponse;
+import roomescape.repository.MemberRepository;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static roomescape.TestFixture.ADMIN;
+import static roomescape.TestFixture.MEMBER_MIA;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
     @Mock
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private MemberService memberService;
@@ -33,7 +33,7 @@ class MemberServiceTest {
     void findById() {
         // given
         final Member expectedMember = MEMBER_MIA(1L);
-        given(memberDao.findById(anyLong()))
+        given(memberRepository.findById(anyLong()))
                 .willReturn(Optional.of(expectedMember));
 
         // when
@@ -50,7 +50,7 @@ class MemberServiceTest {
         final Member member1 = MEMBER_MIA(1L);
         final Member member2 = ADMIN(2L);
         final List<Member> initial_members = List.of(member1, member2);
-        given(memberDao.findAll()).willReturn(initial_members);
+        given(memberRepository.findAll()).willReturn(initial_members);
 
         // when
         final List<MemberResponse> members = memberService.findAll();

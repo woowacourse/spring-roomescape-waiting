@@ -2,10 +2,10 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
 import roomescape.dto.theme.ThemeResponse;
+import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,19 +14,19 @@ import java.util.List;
 @Service
 public class ThemeService {
 
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
 
-    public ThemeService(final ThemeDao themeDao) {
-        this.themeDao = themeDao;
+    public ThemeService(final ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
     }
 
     public ThemeResponse create(final Theme theme) {
-        return ThemeResponse.from(themeDao.save(theme));
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
-        final List<Theme> themes = themeDao.findAll();
+        final List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -34,21 +34,23 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public ThemeResponse findById(final Long id) {
-        final Theme theme = themeDao.findById(id)
+        final Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + "에 해당하는 테마가 없습니다."));
         return ThemeResponse.from(theme);
     }
 
     public void deleteById(final Long id) {
-        final Theme theme = themeDao.findById(id)
+        final Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + "에 해당하는 테마가 없습니다."));
-        themeDao.deleteById(theme.getId());
+        themeRepository.deleteById(theme.getId());
     }
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
         final ThemePopularFilter themePopularFilter = ThemePopularFilter.getThemePopularFilter(LocalDate.now());
-        final List<Theme> popularThemes = themeDao.findPopularThemesBy(themePopularFilter);
+        final List<Theme> popularThemes = themeRepository.findPopularThemesBy(
+                themePopularFilter.getStartDate(), themePopularFilter.getEndDate(), themePopularFilter.getLimit()
+        );
         return popularThemes.stream()
                 .map(ThemeResponse::from)
                 .toList();

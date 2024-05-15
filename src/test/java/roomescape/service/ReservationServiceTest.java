@@ -1,13 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.*;
-import static roomescape.TestFixture.RESERVATION_TIME_SIX;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,24 +7,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
-import roomescape.dao.ReservationDao;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservation.ReservationExistenceCheck;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ReservedThemeResponse;
+import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.BDDMockito.given;
+import static roomescape.TestFixture.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     @Mock
-    private ReservationDao reservationDao;
+    private ReservationRepository reservationRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -42,7 +37,7 @@ class ReservationServiceTest {
     void create() {
         // given
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        given(reservationDao.save(reservation))
+        given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme()));
 
@@ -59,11 +54,8 @@ class ReservationServiceTest {
         // given
         final Theme theme = THEME_HORROR(1L);
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
-        final ReservationExistenceCheck reservationExistenceCheck
-                = new ReservationExistenceCheck(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId());
-        given(reservationDao.findAllBy(reservationExistenceCheck))
-                .willReturn(List.of(new Reservation(1L, reservation.getMember(), reservation.getDate(),
-                        reservation.getTime(), reservation.getTheme())));
+        given(reservationRepository.countByDateAndTime_IdAndTheme_Id(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
+                .willReturn(1);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(reservation))
@@ -76,7 +68,7 @@ class ReservationServiceTest {
         // given
         final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
         final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), THEME_DETECTIVE());
-        given(reservationDao.findAll())
+        given(reservationRepository.findAll())
                 .willReturn(List.of(reservation1, reservation2));
 
         // when
@@ -107,7 +99,8 @@ class ReservationServiceTest {
         final ReservationFilterParam reservationFilterParam
                 = new ReservationFilterParam(1L, 1L,
                 LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"));
-        given(reservationDao.findAllBy(reservationFilterParam))
+        given(reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(1L, 1L,
+                LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")))
                 .willReturn(List.of(reservation1, reservation2));
 
         // when
@@ -133,7 +126,7 @@ class ReservationServiceTest {
     void delete() {
         // given
         final Long existingId = 1L;
-        given(reservationDao.existById(existingId)).willReturn(true);
+        given(reservationRepository.existsById(existingId)).willReturn(true);
 
         // when & then
         assertThatCode(() -> reservationService.delete(existingId))
@@ -145,7 +138,7 @@ class ReservationServiceTest {
     void throwExceptionWhenDeleteNotExistingReservation() {
         // given
         final Long notExistingId = 1L;
-        given(reservationDao.existById(notExistingId)).willReturn(false);
+        given(reservationRepository.existsById(notExistingId)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationService.delete(notExistingId))

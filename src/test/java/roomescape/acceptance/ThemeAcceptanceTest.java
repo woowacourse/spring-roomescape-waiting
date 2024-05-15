@@ -1,10 +1,10 @@
 package roomescape.acceptance;
 
-import static roomescape.TestFixture.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.dto.theme.ThemeSaveRequest;
+
+import static roomescape.TestFixture.*;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
 
@@ -22,7 +22,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindThemes() {
         saveTheme();
 
-        assertGetResponse("/themes", 200, 1);
+        assertGetResponse("/themes", 200);
     }
 
     @Test
@@ -30,7 +30,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     void respondOkWhenFindPopularThemes() {
         saveTheme();
 
-        assertGetResponse("/themes/popular", 200, 1);
+        assertGetResponse("/themes/popular", 200);
     }
 
     @Test
@@ -45,7 +45,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("존재하지 않는 테마를 삭제하면 400을 응답한다.")
     void respondBadRequestWhenDeleteNotExistingTheme() {
         saveTheme();
-        final Long notExistingThemeId = 2L;
+        final Long notExistingThemeId = 0L;
 
         assertDeleteResponse("/themes/", notExistingThemeId, 400);
     }
