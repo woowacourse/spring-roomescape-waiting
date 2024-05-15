@@ -6,12 +6,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.Nullable;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-
-    @Override
-    @EntityGraph(attributePaths = {"member", "time", "theme"})
-    List<Reservation> findAll();
 
     @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
@@ -31,11 +28,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select r
             from Reservation r
-            where r.date between :startDate and :endDate
-                and r.theme = :theme
-                and r.member = :member""")
-    List<Reservation> findByDateBetweenAndThemeAndMember(LocalDate startDate, LocalDate endDate, Theme theme,
-                                                             Member member);
+            where (:startDate is null or r.date >= :startDate)
+                and (:endDate is null or r.date <= :endDate)
+                and (:themeId is null or r.theme.id = :themeId)
+                and (:memberId is null or r.member.id = :memberId)""")
+    List<Reservation> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Long themeId,
+                                       @Nullable Long memberId);
 
     boolean existsByTime(ReservationTime time);
 

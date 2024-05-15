@@ -41,25 +41,29 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
-        ReservationTime time = reservationTimeRepository.findById(reservationSaveRequest.timeId())
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
+        Reservation reservation = createReservation(reservationSaveRequest);
 
-        Theme theme = themeRepository.findById(reservationSaveRequest.themeId())
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
-
-        Member member = memberRepository.findById(reservationSaveRequest.memberId())
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 회원입니다."));
-
-        Reservation reservation = new Reservation(member, reservationSaveRequest.date(), time, theme);
         validateUnique(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
+    private Reservation createReservation(ReservationSaveRequest reservationSaveRequest) {
+        return new Reservation(
+                findMemberById(reservationSaveRequest.memberId()),
+                reservationSaveRequest.date(),
+                findTimeById(reservationSaveRequest.timeId()),
+                findThemeById(reservationSaveRequest.themeId())
+        );
+    }
+
     private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(reservation.getDate(),
-                reservation.getTime(), reservation.getTheme());
+        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
 
         if (isReservationExist) {
             throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
@@ -73,24 +77,12 @@ public class ReservationService {
         reservationRepository.delete(foundReservation);
     }
 
-    public List<ReservationResponse> findReservationsByCondition(
-            ReservationConditionRequest reservationConditionRequest) {
-        if (reservationConditionRequest.hasNoneCondition()) {
-            List<Reservation> reservations = reservationRepository.findAll();
-            return toReservationResponse(reservations);
-        }
-
-        Theme foundTheme = themeRepository.findById(reservationConditionRequest.themeId())
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
-
-        Member foundMember = memberRepository.findById(reservationConditionRequest.memberId())
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 회원입니다."));
-
-        List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeAndMember(
+    public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
+        List<Reservation> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),
-                foundTheme,
-                foundMember
+                reservationConditionRequest.themeId(),
+                reservationConditionRequest.memberId()
         );
 
         return toReservationResponse(reservations);
@@ -103,13 +95,9 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> findAllUserReservation(Long memberId) {
-        // TODO: 중복 메소드 분리
-        Member foundMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
-
         // TODO: member 안에 List<Reservation> vs 단방향 엔티티 관계
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
-                foundMember,
+                findMemberById(memberId),
                 LocalDate.now(),
                 Sort.by(Order.asc("date"), Order.asc("time.startAt"))
         );
@@ -117,6 +105,21 @@ public class ReservationService {
         return reservations.stream()
                 .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
                 .toList();
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
+    }
+
+    private Theme findThemeById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
+    }
+
+    private ReservationTime findTimeById(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
 }
 
