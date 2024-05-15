@@ -6,11 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import roomescape.reservation.model.Reservation;
 
 @Entity
 public class Member {
@@ -18,15 +14,15 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
     @Enumerated(EnumType.STRING)
     private Role role;
-    private String email;
-    private String password;
 
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations = new HashSet<>();
+    private String email;
+
+    private String password;
 
     public Member(final Long id, final String name, final Role role, final String email, final String password) {
         validateNameIsNull(name);
@@ -98,10 +94,6 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    public Set<Reservation> getReservations() {
-        return reservations;
     }
 
     @Override

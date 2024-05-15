@@ -3,18 +3,21 @@ package roomescape.member.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.member.domain.Member;
 import roomescape.member.dto.response.FindReservationResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.FindMembersResponse;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
 
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
-    public MemberService(final MemberRepository memberRepository) {
+    public MemberService(final MemberRepository memberRepository, final ReservationRepository reservationRepository) {
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<FindMembersResponse> getMembers() {
@@ -24,11 +27,9 @@ public class MemberService {
     }
 
     public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
-        Long memberId = authInfo.getMemberId();
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("식별자 " + memberId + "에 해당하는 회원이 존재하지 않아 회원의 예약을 조회할 수 없습니다."));
-        return member.getReservations().stream()
-                        .map(FindReservationResponse::from)
-                        .toList();
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
+        return reservations.stream()
+                .map(FindReservationResponse::from)
+                .toList();
     }
 }
