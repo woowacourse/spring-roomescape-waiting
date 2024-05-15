@@ -9,7 +9,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -26,39 +25,14 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this.id = id;
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
-    }
-
     protected Reservation() {
-    }
-
-    public boolean isTime(ReservationTime time) {
-        return this.time.equals(time);
-    }
-
-    public LocalDateTime getDateTime() {
-        return LocalDateTime.of(date, time.getStartAt());
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
     }
 
     public Long getId() {

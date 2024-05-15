@@ -24,8 +24,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Member(Long id, String name, String email, String password, Role role) {
-        this.id = id;
+    public Member(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -36,7 +35,7 @@ public class Member {
     }
 
     public static Member createUser(String name, String email, String password) {
-        return new Member(null, name, email, password, Role.USER);
+        return new Member(name, email, password, Role.USER);
     }
 
     public Long getId() {
