@@ -1,11 +1,11 @@
 package roomescape.service.reservation.dto;
 
-import java.time.LocalDate;
+import roomescape.domain.reservation.ReservationDate;
 
 public record ReservationFindRequest(
         Long memberId,
         Long themeId,
-        LocalDate dateFrom,
-        LocalDate dateTo
+        ReservationDate dateFrom,
+        ReservationDate dateTo
 ) {
 }
