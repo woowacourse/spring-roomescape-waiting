@@ -10,22 +10,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.controller.interceptor.CheckRoleInterceptor;
 import roomescape.controller.resolver.LoginUserArgumentResolver;
 import roomescape.service.AuthService;
-import roomescape.service.UserService;
+import roomescape.service.MemberService;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final AuthService authService;
-    private final UserService userService;
+    private final MemberService memberService;
 
-    public WebMvcConfiguration(AuthService authService, UserService userService) {
+    public WebMvcConfiguration(AuthService authService, MemberService memberService) {
         this.authService = authService;
-        this.userService = userService;
+        this.memberService = memberService;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginUserArgumentResolver(authService, userService));
+        resolvers.add(new LoginUserArgumentResolver(authService, memberService));
     }
 
     @Override

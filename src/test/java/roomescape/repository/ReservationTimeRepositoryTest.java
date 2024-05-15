@@ -21,7 +21,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.model.Role;
 import roomescape.model.Theme;
 
 @DataJpaTest

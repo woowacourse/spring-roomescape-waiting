@@ -10,16 +10,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.service.AuthService;
-import roomescape.service.UserService;
+import roomescape.service.MemberService;
 
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
-    private final UserService userService;
+    private final MemberService memberService;
 
-    public LoginUserArgumentResolver(AuthService authService, UserService userService) {
+    public LoginUserArgumentResolver(AuthService authService, MemberService memberService) {
         this.authService = authService;
-        this.userService = userService;
+        this.memberService = memberService;
     }
 
     @Override
@@ -32,6 +32,6 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         Long userId = authService.findUserIdByCookie(request.getCookies());
-        return userService.findUserById(userId);
+        return memberService.findUserById(userId);
     }
 }
