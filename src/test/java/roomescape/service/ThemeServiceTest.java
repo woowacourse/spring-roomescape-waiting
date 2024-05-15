@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.dao.MemberRepository;
-import roomescape.dao.ReservationInserter;
 import roomescape.dao.ReservationRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -20,6 +19,7 @@ import roomescape.service.dto.input.ThemeInput;
 import roomescape.service.dto.output.ReservationTimeOutput;
 import roomescape.service.dto.output.ThemeOutput;
 import roomescape.util.DatabaseCleaner;
+import roomescape.util.ReservationInserter;
 
 import java.time.LocalDate;
 import java.util.List;

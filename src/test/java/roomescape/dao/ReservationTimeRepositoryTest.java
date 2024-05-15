@@ -9,6 +9,7 @@ import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.util.DatabaseCleaner;
+import roomescape.util.ReservationInserter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
