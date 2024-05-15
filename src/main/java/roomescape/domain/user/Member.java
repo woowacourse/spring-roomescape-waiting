@@ -15,6 +15,7 @@ public class Member {
     private Email email;
     @Embedded
     private Password password;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public Member() {
