@@ -1,25 +1,11 @@
 package roomescape.domain.view;
 
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ControllerTest;
 
 public class AdminViewControllerTest extends ControllerTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setUpAll() {
-        jdbcTemplate.update(
-                "insert into member (name, email, password, role) values ('어드민', 'admin@gmail.com', '123456', 'ADMIN')");
-        jdbcTemplate.update(
-                "insert into member (name, email, password, role) values ('멤버', 'dodo@gmail.com', '123123', 'MEMBER')");
-    }
 
     @DisplayName("/admin 으로 시작하는 요청 시 admin권한이 없으면 접근할 수 없다(403 Forbidden)")
     @Test

@@ -1,20 +1,21 @@
 package roomescape.domain.reservation.domain;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.global.exception.EscapeApplicationException;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTimeTest {
 
     @DisplayName("time이 정상적인 값일 경우 예외가 발생하지 않습니다.")
     @Test
     void should_not_throw_exception_when_reservation_time_is_right() {
-        assertThatCode(() -> new ReservationTime(null, TEN_HOUR))
+        assertThatCode(() -> new ReservationTime(null, LocalTime.of(10, 0)))
                 .doesNotThrowAnyException();
     }
 
