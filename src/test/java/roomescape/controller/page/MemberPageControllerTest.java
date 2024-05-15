@@ -51,4 +51,11 @@ class MemberPageControllerTest {
                 .when().get("/signup")
                 .then().statusCode(200);
     }
+    @Test
+    @DisplayName("/reservation-mine 요청시 내 예약 페이지를 응답한다.")
+    void response_my_reservation_page() {
+        RestAssured.given().contentType(ContentType.JSON)
+                .when().get("/reservation-mine")
+                .then().statusCode(200);
+    }
 }
