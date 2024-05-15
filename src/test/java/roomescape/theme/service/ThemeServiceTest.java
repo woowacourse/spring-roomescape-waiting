@@ -36,7 +36,7 @@ class ThemeServiceTest {
     void should_return_all_themes_as_responses() {
         when(themeRepository.findAll()).thenReturn(List.of(THEME_1));
 
-        List<Theme> themes = themeService.findAllTheme();
+        List<ThemeResponse> themes = themeService.findAllTheme();
 
         assertThat(themes).hasSize(1);
     }

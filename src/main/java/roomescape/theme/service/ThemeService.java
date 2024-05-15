@@ -22,8 +22,10 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    public List<Theme> findAllTheme() {
-        return themeRepository.findAll();
+    public List<ThemeResponse> findAllTheme() {
+        return themeRepository.findAll().stream()
+                .map(ThemeResponse::new)
+                .toList();
     }
 
     public List<ThemeResponse> findPopularTheme() {

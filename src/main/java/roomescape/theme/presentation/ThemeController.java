@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeAddRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
@@ -25,7 +24,7 @@ public class ThemeController {
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<Theme>> getThemeList() {
+    public ResponseEntity<List<ThemeResponse>> getThemeList() {
         return ResponseEntity.ok(themeService.findAllTheme());
     }
 
