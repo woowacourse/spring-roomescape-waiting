@@ -3,6 +3,7 @@ package roomescape.service.dto.theme;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
 import roomescape.controller.helper.validator.DateFormatConstraint;
 
 public class PopularThemeRequest {
@@ -24,12 +25,12 @@ public class PopularThemeRequest {
         this.count = count;
     }
 
-    public String getStartDate() {
-        return startDate;
+    public LocalDate getStartDate() {
+        return LocalDate.parse(startDate);
     }
 
-    public String getEndDate() {
-        return endDate;
+    public LocalDate getEndDate() {
+        return LocalDate.parse(endDate);
     }
 
     public Integer getCount() {

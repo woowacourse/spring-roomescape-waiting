@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
+import roomescape.service.dto.theme.PopularThemeRequest;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
 
@@ -26,14 +27,15 @@ public class ThemeService {
                 .toList();
     }
 
-//    public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
-//        List<Theme> topBookedThemes = themeRepository.findTopThemeBetween(
-//                request.getStartDate(), request.getEndDate());
-//
-//        return topBookedThemes.stream()
-//                .map(ThemeResponse::new)
-//                .toList();
-//    }
+
+    public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
+        List<Theme> topBookedThemes = themeRepository.findPopularThemes(request.getStartDate(), request.getEndDate());
+
+        return topBookedThemes.stream()
+                .limit(request.getCount())
+                .map(ThemeResponse::new)
+                .toList();
+    }
 
     public ThemeResponse createTheme(ThemeRequest request) {
         Theme theme = themeRepository.save(request.toTheme());
