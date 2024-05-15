@@ -75,7 +75,7 @@ public class ThemeService {
     }
 
     private void validateDeletable(Theme theme) {
-        if (reservationRepository.existThemeId(theme.getId())) {
+        if (reservationRepository.existsByThemeId(theme.getId())) {
             throw new IllegalArgumentException(
                     "[ERROR] 예약되어있는 테마는 삭제할 수 없습니다.",
                     new Throwable("theme_id : " + theme.getId())

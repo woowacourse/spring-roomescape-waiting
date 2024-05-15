@@ -40,7 +40,7 @@ public class ReservationService {
     public Long addReservation(ReservationRequest request) {
         Reservation reservation = convertReservation(request);
         validateAddable(reservation);
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(reservation).getId();
     }
 
     public List<ReservationResponse> getAllReservations() {
@@ -69,7 +69,7 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         Reservation reservation = findReservationById(id);
-        reservationRepository.delete(reservation.getId());
+        reservationRepository.deleteById(reservation.getId());
     }
 
     private Reservation convertReservation(ReservationRequest request) {
@@ -117,7 +117,7 @@ public class ReservationService {
     }
 
     private void validateReservationNotDuplicate(Reservation reservation) {
-        if (reservationRepository.existDateTimeAndTheme(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTimeId(),
                 reservation.getThemeId())

@@ -52,7 +52,7 @@ public class ReservationTimeService {
     public void deleteReservationTime(Long id) {
         ReservationTime reservationTime = findTimeById(id);
         validateDeletable(reservationTime);
-        reservationRepository.delete(reservationTime.getId());
+        reservationRepository.deleteById(reservationTime.getId());
     }
 
     private ReservationTime findTimeById(Long timeId) {
@@ -64,7 +64,7 @@ public class ReservationTimeService {
     }
 
     private List<Long> findTimeIdForDateAndTheme(LocalDate date, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, themeId);
+        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         return reservations.stream()
                 .map(Reservation::getTimeId)
                 .toList();
@@ -80,7 +80,7 @@ public class ReservationTimeService {
     }
 
     private void validateDeletable(ReservationTime reservationTime) {
-        if (reservationRepository.existTimeId(reservationTime.getId())) {
+        if (reservationRepository.existsByTimeId(reservationTime.getId())) {
             throw new IllegalArgumentException(
                     "[ERROR] 해당 시간에 예약이 존재해서 삭제할 수 없습니다.",
                     new Throwable("예약 시간 : " + reservationTime.getStartAt())
