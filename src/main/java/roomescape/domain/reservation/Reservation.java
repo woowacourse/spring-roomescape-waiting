@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.*;
 import roomescape.domain.user.Member;
 
 import java.time.LocalDate;
@@ -7,13 +8,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
+@Entity
 public class Reservation {
 
-    private final Long id;
-    private final ReservationDate date;
-    private final ReservationTime time;
-    private final Theme theme;
-    private final Member member;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    private ReservationDate date;
+
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
+    @ManyToOne
+    private Member member;
+
+    public Reservation() {
+    }
 
     public Reservation(final Long id, final ReservationDate date, final ReservationTime time, final Theme theme, final Member member) {
         this.id = id;
@@ -54,10 +67,12 @@ public class Reservation {
     public boolean isBefore(final LocalDate localDate, final LocalTime localTime) {
         return parseLocalDateTime().isBefore(LocalDateTime.of(localDate, localTime));
     }
-    public boolean isEqualMember(final long memberId){
+
+    public boolean isEqualMember(final long memberId) {
         return this.member.isEqualId(memberId);
     }
-    public boolean isEqualTheme(final long themeId){
+
+    public boolean isEqualTheme(final long themeId) {
         return this.theme.isEqualId(themeId);
     }
 

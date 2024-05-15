@@ -1,8 +1,11 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embeddable;
+
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
+@Embeddable
 public record ReservationDate(LocalDate date) {
 
     public static ReservationDate from(final String date) {
