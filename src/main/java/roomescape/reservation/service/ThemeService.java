@@ -39,7 +39,6 @@ public class ThemeService {
         return themeRepository.save(saveThemeRequest.toTheme());
     }
 
-    // TODO : 존재하지 않는 데이터 삭제에 대해서 예외를 던질것인가?
     public void deleteTheme(final Long themeId) {
         validateReservationOfIncludeThemeExist(themeId);
         themeRepository.deleteById(themeId);
@@ -63,6 +62,6 @@ public class ThemeService {
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));
         final int maximumThemeCount = 10;
 
-        return themeRepository.findPopularThemes(startAt.getDate(), endAt.getDate(), maximumThemeCount);
+        return themeRepository.findPopularThemes(startAt.getValue(), endAt.getValue(), maximumThemeCount);
     }
 }
