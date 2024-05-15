@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
@@ -34,8 +35,13 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
-        return reservationRepository.findTopThemesDurationOrderByCount(popularThemeRequest.startDate(), popularThemeRequest.endDate(), popularThemeRequest.limit())
-                .stream()
+        List<Theme> popularThemes = reservationRepository.findTopThemesDurationOrderByCount(
+                popularThemeRequest.startDate(),
+                popularThemeRequest.endDate(),
+                Limit.of(popularThemeRequest.limit())
+        );
+
+        return popularThemes.stream()
                 .map(ThemeResponse::new)
                 .toList();
     }

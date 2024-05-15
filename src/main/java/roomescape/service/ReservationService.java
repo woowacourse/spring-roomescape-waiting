@@ -95,7 +95,6 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> findAllUserReservation(Long memberId) {
-        // TODO: member 안에 List<Reservation> vs 단방향 엔티티 관계
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
                 findMemberById(memberId),
                 LocalDate.now(),

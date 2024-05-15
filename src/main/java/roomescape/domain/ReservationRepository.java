@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,8 +23,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             where r.date between :startDate and :endDate
             group by r.theme
             order by count(r) desc
-            limit :limit""")
-    List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Integer limit);
+            """)
+    List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Limit limit);
 
     @Query("""
             select r
