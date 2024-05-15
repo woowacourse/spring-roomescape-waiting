@@ -67,6 +67,12 @@
 - uri: /login
 - file path: templates/login.html
 
+### 내 예약 페이지 접근
+- http method: GET
+- uri: /reservation-mine
+- file path: templates/reservation-mine.html
+
+
 ### 모든 예약 조회
 - http method: GET
 - uri: /reservations
@@ -634,3 +640,43 @@
       "message": "권한이 없는 접근입니다."
       }
     ```
+
+### 사용자 예약 조회
+- http method: GET
+- uri: /reservations-mine
+- request
+```
+GET /reservations-mine HTTP/1.1
+cookie: token={token}
+host: localhost:8080
+```
+
+- response
+```
+HTTP/1.1 200
+Content-Type: application/json
+
+[
+  {
+    "reservationId": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "예약"
+  },
+  {
+    "reservationId": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "예약"
+  },
+  {
+    "reservationId": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "예약"
+  }
+]
+```
