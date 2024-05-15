@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
@@ -9,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminReservationServiceTest {
+
     @Autowired
     private AdminReservationService adminReservationService;
 
@@ -24,7 +27,7 @@ class AdminReservationServiceTest {
         LocalDate dateTo = LocalDate.parse("2024-12-24");
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(null, null, dateFrom, dateTo);
+        List<ReservationResponse> results = adminReservationService.getByFilter(null, null, dateFrom, dateTo);
 
         // then
         assertEquals(2, results.size());
@@ -40,7 +43,7 @@ class AdminReservationServiceTest {
         Long themeId = 1L;
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(memberId, themeId, null, null);
+        List<ReservationResponse> results = adminReservationService.getByFilter(memberId, themeId, null, null);
 
         // then
         assertEquals(1, results.size());
@@ -54,7 +57,7 @@ class AdminReservationServiceTest {
         Long memberId = 1L;
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(memberId, null, null, null);
+        List<ReservationResponse> results = adminReservationService.getByFilter(memberId, null, null, null);
 
         // then
         assertEquals(2, results.size());
@@ -69,7 +72,7 @@ class AdminReservationServiceTest {
         Long themeId = 1L;
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(null, themeId, null, null);
+        List<ReservationResponse> results = adminReservationService.getByFilter(null, themeId, null, null);
 
         // then
         assertEquals(1, results.size());
@@ -83,7 +86,7 @@ class AdminReservationServiceTest {
         LocalDate dateFrom = LocalDate.parse("2024-12-24");
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(null, null, dateFrom, null);
+        List<ReservationResponse> results = adminReservationService.getByFilter(null, null, dateFrom, null);
 
         // then
         assertEquals(1, results.size());
@@ -97,7 +100,7 @@ class AdminReservationServiceTest {
         LocalDate dateTo = LocalDate.parse("2024-12-24");
 
         // when
-        List<AdminReservationResponse> results = adminReservationService.getByFilter(null, null, null, dateTo);
+        List<ReservationResponse> results = adminReservationService.getByFilter(null, null, null, dateTo);
 
         // then
         assertEquals(2, results.size());

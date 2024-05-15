@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
+import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.service.AdminReservationService;
 
 @RestController
@@ -25,16 +26,16 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<AdminReservationResponse> save(
-            @RequestBody @Valid final ReservationSaveRequest reservationSaveRequest
+    public ResponseEntity<ReservationResponse> save(
+            @RequestBody @Valid final AdminReservationSaveRequest reservationSaveRequest
     ) {
-        AdminReservationResponse reservationResponse = adminReservationService.save(reservationSaveRequest);
+        ReservationResponse reservationResponse = adminReservationService.save(reservationSaveRequest);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<AdminReservationResponse>> getByFilter(
+    public ResponseEntity<List<ReservationResponse>> getByFilter(
             @RequestParam(required = false) final Long memberId,
             @RequestParam(required = false) final Long themeId,
             @RequestParam(required = false) final LocalDate dateFrom,

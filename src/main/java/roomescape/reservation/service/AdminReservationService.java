@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
-import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -26,14 +25,9 @@ public class AdminReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationResponse save(final AdminReservationSaveRequest reservationSaveRequest) {
-        Member member = findMemberById(reservationSaveRequest.memberId());
-
-        return reservationService.save(new ReservationSaveRequest(
-                reservationSaveRequest.themeId(),
-                reservationSaveRequest.date(),
-                reservationSaveRequest.timeId()
-        ), member);
+    public ReservationResponse save(final AdminReservationSaveRequest adminReservationSaveRequest) {
+        Member member = findMemberById(adminReservationSaveRequest.memberId());
+        return reservationService.save(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 
     private Member findMemberById(final long memberId) {

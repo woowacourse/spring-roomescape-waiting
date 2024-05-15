@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.annotation.AuthenticationPrincipal;
 import roomescape.member.domain.Member;
+import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.MemberReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
