@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    boolean existByStartAt(LocalTime startAt);
+    boolean existsByStartAt(LocalTime startAt);
 }

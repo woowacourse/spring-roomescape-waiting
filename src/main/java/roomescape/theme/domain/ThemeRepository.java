@@ -10,10 +10,10 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
 
     @Query("""
-            SELECT t FROM Theme AS t
-            JOIN Reservation AS r
+            SELECT th FROM Theme AS th
+            JOIN Reservation AS r ON th.id = r.theme.id
             WHERE r.date.date BETWEEN :start AND :end
-            GROUP BY t.id
+            GROUP BY th.id
             ORDER BY count (r.id) DESC
             """)
     List<Theme> findTopByDurationAndCount(LocalDate start, LocalDate end, Pageable pageable);

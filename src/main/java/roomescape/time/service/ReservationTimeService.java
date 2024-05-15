@@ -9,9 +9,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.ReservationTimeAddRequest;
 import roomescape.time.dto.ReservationTimeResponse;
-import roomescape.time.dto.AvailableTimeResponse;
 
 @Service
 public class ReservationTimeService {
@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     public List<AvailableTimeResponse> findAllWithBookStatus(LocalDate date, Long themeId) {
         List<Long> foundReservationTimeIds = reservationRepository
-                .findByDateDateAndThemeId(date, themeId)
+                .findByDateDateAndTheme_Id(date, themeId)
                 .stream()
                 .map(Reservation::getTimeId)
                 .toList();
@@ -43,15 +43,15 @@ public class ReservationTimeService {
         List<AvailableTimeResponse> availableTimeResponses = new ArrayList<>();
         for (ReservationTime reservationTime : reservationTimes) {
             availableTimeResponses.add(new AvailableTimeResponse(
-                            reservationTime,
-                            foundReservationTimeIds.contains(reservationTime.getId())
+                    reservationTime,
+                    foundReservationTimeIds.contains(reservationTime.getId())
             ));
         }
         return availableTimeResponses;
     }
 
     public ReservationTimeResponse saveReservationTime(ReservationTimeAddRequest reservationTimeAddRequest) {
-        if (reservationTimeRepository.existByStartAt(reservationTimeAddRequest.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(reservationTimeAddRequest.startAt())) {
             throw new DuplicateSaveException("이미 존재하는 예약시간은 추가할 수 없습니다.");
         }
         ReservationTime saved = reservationTimeRepository.save(reservationTimeAddRequest.toReservationTime());

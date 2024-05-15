@@ -28,11 +28,11 @@ public class MemberService {
     }
 
     public MemberResponse joinMember(JoinRequest joinRequest) {
-        if (memberRepository.existByEmail(joinRequest.email())) {
+        if (memberRepository.existsByEmail(joinRequest.email())) {
             throw new DuplicateSaveException("중복되는 이메일의 회원이 존재합니다");
         }
 
-        if (memberRepository.existByName(joinRequest.name())) {
+        if (memberRepository.existsByName(joinRequest.name())) {
             throw new DuplicateSaveException("중복되는 이름의 회원이 존재합니다");
         }
 

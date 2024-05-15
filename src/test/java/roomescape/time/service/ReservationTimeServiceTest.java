@@ -41,7 +41,7 @@ class ReservationTimeServiceTest {
     @Test
     void should_save_reservation_time_when_requested() {
         when(reservationTimeRepository.save(any(ReservationTime.class))).thenReturn(RESERVATION_TIME_10_00_ID_1);
-        when(reservationTimeRepository.existByStartAt(TIME_10_00)).thenReturn(false);
+        when(reservationTimeRepository.existsByStartAt(TIME_10_00)).thenReturn(false);
 
         ReservationTimeResponse saved = reservationTimeService.saveReservationTime(TIME_ADD_REQUEST_10_00);
 
@@ -51,7 +51,7 @@ class ReservationTimeServiceTest {
     @DisplayName("이미 존재하는 예약 시간에 대한 추가 요청 시 예외가 발생한다")
     @Test
     void should_throw_exception_when_reservation_time_already_exists() {
-        when(reservationTimeRepository.existByStartAt(TIME_ADD_REQUEST_10_00.startAt())).thenReturn(true);
+        when(reservationTimeRepository.existsByStartAt(TIME_ADD_REQUEST_10_00.startAt())).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.saveReservationTime(TIME_ADD_REQUEST_10_00))
                 .isInstanceOf(DuplicateSaveException.class);
