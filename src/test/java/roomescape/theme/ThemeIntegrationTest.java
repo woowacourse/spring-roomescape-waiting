@@ -6,22 +6,42 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.testutil.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.model.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.util.IntegrationTest;
+import roomescape.theme.model.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @IntegrationTest
 class ThemeIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @LocalServerPort
     private int port;
@@ -163,7 +183,7 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 목록을 조회한다.")
     void getThemes() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/themes")
@@ -180,11 +200,14 @@ class ThemeIntegrationTest {
     @DisplayName("인기 방탈출 테마 목록을 조회한다.")
     void getPopularThemes() {
         IntStream.rangeClosed(1, 20)
-                        .forEach(index -> jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('" + index + "이름', '설명', '썸네일')"));
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
-        IntStream.rangeClosed(10, 20)
-                .forEach(index -> jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, " + index + ");"));
+                .forEach(index -> themeRepository.save(new Theme(null, index + "이름", "설명", "썸네일")));
+        Member member = memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(null, LocalTime.parse("20:00")));
+        LongStream.rangeClosed(10, 20)
+                .forEach(index -> reservationRepository.save(
+                        new Reservation(null, member, LocalDate.parse("2024-04-23"), reservationTime,
+                                themeRepository.getById(index))));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -193,13 +216,13 @@ class ThemeIntegrationTest {
 
                 .statusCode(200)
                 .body("size()", is(10))
-                .body("name",hasItems("20이름"));
+                .body("name", hasItems("20이름"));
     }
 
     @Test
     @DisplayName("방탈출 테마를 삭제한다.")
     void deleteTheme() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/themes/1")
@@ -211,7 +234,7 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 삭제 시, 해당 테마가 존재하지 않는다면 예외를 반환한다.")
     void deleteTheme_WhenAlreadyNotExist() {
-        // jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
+        // themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -225,10 +248,13 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 삭제 시, 해당 테마가 사용 중이라면 예외를 반환한다.")
     void deleteTheme_WhenThemeInUsage() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, 1 )");
+
+        Theme theme = themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(null, LocalTime.of(20, 0)));
+        Member member = memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationRepository.save(
+                new Reservation(null, member, LocalDate.parse("2024-04-23"), reservationTime, theme));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

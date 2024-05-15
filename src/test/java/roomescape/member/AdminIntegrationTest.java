@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,15 +14,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.auth.dto.request.LoginRequest;
-import roomescape.testutil.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservationtime.model.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.util.IntegrationTest;
+import roomescape.theme.model.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @IntegrationTest
 class AdminIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @LocalServerPort
     private int port;
@@ -32,9 +45,7 @@ class AdminIntegrationTest {
     }
 
     private String getTokenByLogin() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '비밥', 1, 'admin@naver.com', 'hihi')");
-
+        memberRepository.save(new Member(null, "비밥", Role.ADMIN, "admin@naver.com", "hihi"));
         return RestAssured
                 .given().log().all()
                 .body(new LoginRequest("admin@naver.com", "hihi"))
@@ -47,10 +58,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약을 생성한다.")
     void createReservationByAdmin() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -239,10 +249,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenThemeNotExist() {
-        // jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
+        // themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -264,10 +273,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenTimeNotExist() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        // jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update(
-                "insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -289,9 +297,9 @@ class AdminIntegrationTest {
     @Test
     @DisplayName("관리자 권한으로 예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservationByAdmin_WhenMemberNotExist() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        // jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 0, 'login@naver.com', 'hihi')");
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+        // memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");

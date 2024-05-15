@@ -1,4 +1,4 @@
-package roomescape.testutil;
+package roomescape.util;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,6 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 @Target(ElementType.TYPE)
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public @interface IntegrationTest {
 }

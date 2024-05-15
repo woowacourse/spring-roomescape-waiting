@@ -11,21 +11,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ActiveProfiles;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.util.IntegrationTest;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@IntegrationTest
 class AuthIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
 
     @LocalServerPort
     private int port;
@@ -38,8 +34,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인 성공 시, Set-Cookie 헤더에 쿠키 값을 전달한다.")
     void login() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -58,7 +53,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 존재하지 않을 경우, 예외를 반환한다.")
     void login_WhenMemberNotExist() {
-        // jdbcTemplate.update("INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        // memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -76,7 +71,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenEmailIsNull() {
-         jdbcTemplate.update("INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", null);
@@ -94,10 +89,10 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 형식에 맞지 않는 경우, 예외를 반환한다.")
     void login_WhenEmailIsInvalidType() {
-         jdbcTemplate.update("INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
-        params.put("email", "null");
+        params.put("email", "nulasdfl");
         params.put("password", "hihi");
 
         RestAssured.given().log().all()
@@ -112,8 +107,7 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenPasswordNotCorrect() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
@@ -131,10 +125,10 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 비밀번호가 올바르지 않을 경우, 예외를 반환한다.")
     void login_WhenPasswordIsNull() {
-        jdbcTemplate.update("INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
-        params.put("email", "login@namil.cm");
+        params.put("email", "login@naver.com");
         params.put("password", null);
 
         RestAssured.given().log().all()
@@ -150,8 +144,7 @@ class AuthIntegrationTest {
     @DisplayName("로그인한 회원의 정보 조회 시, 토큰으로부터 회원 정보를 확인 후 결과를 반환한다.")
     void loginCheck() {
         // give
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");

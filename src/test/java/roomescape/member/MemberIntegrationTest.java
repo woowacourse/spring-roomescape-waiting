@@ -10,14 +10,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.testutil.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.util.IntegrationTest;
 
 @IntegrationTest
 class MemberIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
 
     @LocalServerPort
     private int port;
@@ -30,11 +32,8 @@ class MemberIntegrationTest {
     @Test
     @DisplayName("회원 목록을 조회한다.")
     void getReservationTimes() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'admin@naver.com', 'hihi')");
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'user@naver.com', 'hihi')");
-
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        memberRepository.save(new Member(null, "로키", Role.USER, "qwer@naver.com", "hihi"));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

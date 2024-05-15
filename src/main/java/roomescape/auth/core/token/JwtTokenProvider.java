@@ -11,7 +11,7 @@ import java.util.Date;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRole;
+import roomescape.member.domain.Role;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -42,7 +42,7 @@ public class JwtTokenProvider implements TokenProvider {
         return new AuthInfo(
                 Long.parseLong(claims.getSubject()),
                 claims.get(MEMBER_ID_CLAIM, String.class),
-                MemberRole.valueOf(claims.get(MEMBER_ROLE_CLAIM, String.class)));
+                Role.valueOf(claims.get(MEMBER_ROLE_CLAIM, String.class)));
     }
 
     private Claims getClaims(final String token) {

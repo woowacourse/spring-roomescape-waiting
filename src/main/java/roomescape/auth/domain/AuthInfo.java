@@ -1,21 +1,21 @@
 package roomescape.auth.domain;
 
 import java.util.Objects;
-import roomescape.member.domain.MemberRole;
+import roomescape.member.domain.Role;
 
 public class AuthInfo {
     private final Long memberId;
     private final String name;
-    private final MemberRole memberRole;
+    private final Role role;
 
-    public AuthInfo(final Long memberId, final String name, final MemberRole memberRole) {
+    public AuthInfo(final Long memberId, final String name, final Role role) {
         this.memberId = memberId;
         this.name = name;
-        this.memberRole = memberRole;
+        this.role = role;
     }
 
     public boolean isNotAdmin() {
-        return this.memberRole.isNotAdmin();
+        return this.role.isNotAdmin();
     }
 
     public Long getMemberId() {
@@ -36,11 +36,11 @@ public class AuthInfo {
         }
         AuthInfo authInfo = (AuthInfo) o;
         return Objects.equals(memberId, authInfo.memberId) && Objects.equals(name, authInfo.name)
-                && memberRole == authInfo.memberRole;
+                && role == authInfo.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(memberId, name, memberRole);
+        return Objects.hash(memberId, name, role);
     }
 }

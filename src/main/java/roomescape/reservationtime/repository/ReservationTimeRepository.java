@@ -14,6 +14,8 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     Optional<ReservationTime> findById(Long timeId);
 
+    ReservationTime getById(Long timeId);
+
     boolean existsById(Long id);
 
     boolean existsByStartAt(LocalTime time);

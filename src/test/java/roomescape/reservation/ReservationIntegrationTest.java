@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItems;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,18 +16,34 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.auth.dto.request.LoginRequest;
-import roomescape.testutil.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.model.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.util.IntegrationTest;
+import roomescape.theme.model.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @IntegrationTest
 class ReservationIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @LocalServerPort
     private int port;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void init() {
@@ -33,9 +51,7 @@ class ReservationIntegrationTest {
     }
 
     private String getTokenByLogin() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
-
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
         return RestAssured
                 .given().log().all()
                 .body(new LoginRequest("login@naver.com", "hihi"))
@@ -45,16 +61,16 @@ class ReservationIntegrationTest {
     }
 
     private void saveTimeThemeMemberForReservation() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
+        memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
     }
 
     @Test
     @DisplayName("방탈출 예약 생성 성공 시, 생성된 시간대의 정보를 반환한다.")
     void createReservationTime() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -214,8 +230,8 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
     void createReservation_WhenThemeNotExist() {
-        // jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
+        // themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -236,8 +252,8 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservation_WhenTimeNotExist() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        // jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("20:00")));
+        themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -258,16 +274,17 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 이미 같은 테마, 같은 날짜, 같은 시간에 예약이 있는 경우 예외를 반환한다.")
     void createReservation_WhenTimeAndDateAndThemeExist() {
-        jdbcTemplate.update(
-                "INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'asd@naver.com', 'hihi')");
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('홀리몰리', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-12-23', 1, 1 )");
+        Member member = memberRepository.save(new Member(null, "롸키", Role.USER, "loki@naver.com", "loki"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(null, LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(null, member, LocalDate.parse("2025-12-23"), reservationTime, theme));
 
         Map<String, Object> params = new HashMap<>();
-        params.put("date", "2024-12-23");
-        params.put("timeId", 1);
-        params.put("themeId", 1);
+        params.put("date", reservation.getDate());
+        params.put("timeId", reservation.getReservationTime().getId());
+        params.put("themeId", reservation.getTheme().getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -277,15 +294,15 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(400)
-                .body("detail", equalTo("이미 2024-12-23의 홀리몰리 테마에는 20:00 시의 예약이 존재하여 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("이미 2025-12-23의 테마이름 테마에는 20:00 시의 예약이 존재하여 예약을 생성할 수 없습니다."));
     }
 
     @Test
     @DisplayName("방탈출 예약 목록을 조회한다.")
     void getReservationTimes() {
         saveTimeThemeMemberForReservation();
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-12-23', 1, 1 )");
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -301,7 +318,8 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 하나를 조회한다.")
     void getReservationTime() {
         saveTimeThemeMemberForReservation();
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -317,7 +335,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        // jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
+        // reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/1")
@@ -331,9 +349,9 @@ class ReservationIntegrationTest {
     @DisplayName("해당 날짜와 테마를 통해 예약 가능한 시간 조회한다.")
     void getAvailableTimes() {
         saveTimeThemeMemberForReservation();
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-12-23', 1, 1 )");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("10:00")));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -353,14 +371,14 @@ class ReservationIntegrationTest {
     @DisplayName("해당 날짜와 테마, 기간에 해당하는 예약을 검색한다.")
     void searchBy() {
         saveTimeThemeMemberForReservation();
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-12-23', 1, 1 )");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2025-1-23', 1, 1 )");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.parse("10:00")));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2025-01-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/search?themeId=1&dateFrom=2024-12-23")
+                .when().get("/reservations/search?memberId=1&themeId=1&dateFrom=2024-12-23&dateTo=2025-01-23")
                 .then().log().all()
 
                 .statusCode(200)
@@ -375,7 +393,7 @@ class ReservationIntegrationTest {
     @DisplayName("방탈출 예약 하나를 삭제한다.")
     void deleteReservationTime() {
         saveTimeThemeMemberForReservation();
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
+        reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -388,7 +406,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeNotExist() {
-        // jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-11-23', 1, 1 )");
+        // reservationRepository.save(new Reservation(null, memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")

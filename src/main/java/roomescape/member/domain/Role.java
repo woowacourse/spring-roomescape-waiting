@@ -3,12 +3,12 @@ package roomescape.member.domain;
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum MemberRole {
+public enum Role {
     ADMIN,
     USER,
     ;
 
-    public static MemberRole getMemberRole(final String role) {
+    public static Role getMemberRole(final String role) {
         return Arrays.stream(values())
                 .filter(memberRole -> Objects.equals(memberRole.name(), role))
                 .findFirst()

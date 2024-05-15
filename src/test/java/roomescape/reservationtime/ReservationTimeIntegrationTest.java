@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItems;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,17 +14,35 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.testutil.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.model.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.util.IntegrationTest;
+import roomescape.theme.model.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @IntegrationTest
 class ReservationTimeIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @LocalServerPort
     private int port;
+
 
     @BeforeEach
     void init() {
@@ -82,8 +102,8 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 목록을 조회한다.")
     void getReservationTimes() {
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -98,7 +118,8 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 하나를 조회한다.")
     void getReservationTime() {
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/times/1")
@@ -112,7 +133,8 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        // jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/times/1")
@@ -125,7 +147,8 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 하나를 삭제한다.")
     void deleteReservationTime() {
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/1")
@@ -137,7 +160,8 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeNotExist() {
-        // jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
+        // reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(20, 0)));
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/1")
@@ -150,10 +174,12 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeInUsage() {
-        jdbcTemplate.update("insert into theme (name, description, thumbnail) values ('테마이름', '설명', '썸네일')");
-        jdbcTemplate.update("insert into reservation_time (start_at) values ('20:00')");
-        jdbcTemplate.update("insert into member (name, role, email, password) values ( '몰리', 'USER', 'login@naver.com', 'hihi')");
-        jdbcTemplate.update("insert into reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, 1 )");
+        Theme theme = themeRepository.save(new Theme(null, "테마이름", "설명", "썸네일"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(null, LocalTime.of(20, 0)));
+        Member member = memberRepository.save(new Member(null, "몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationRepository.save(
+                new Reservation(null, member, LocalDate.parse("2024-04-23"), reservationTime, theme));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.theme.model.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
@@ -15,6 +14,8 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     List<Theme> findAll();
 
     Optional<Theme> findById(Long id);
+
+    Theme getById(Long id);
 
     @Query(value = """
             select t
