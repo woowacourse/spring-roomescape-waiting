@@ -1,13 +1,25 @@
 package roomescape.reservation.model;
 
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.util.Objects;
 
+@Entity
 public class Theme {
 
-    private final Long id;
-    private final ThemeName name;
-    private final ThemeDescription description;
-    private final ThemeThumbnail thumbnail;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Embedded
+    private ThemeName name;
+    @Embedded
+    private ThemeDescription description;
+    @Embedded
+    private ThemeThumbnail thumbnail;
 
     public static Theme of(final String name, final String description, final String thumbnail) {
         return new Theme(null, new ThemeName(name), new ThemeDescription(description), new ThemeThumbnail(thumbnail));
@@ -15,6 +27,9 @@ public class Theme {
 
     public static Theme of(final Long id, final String name, final String description, final String thumbnail) {
         return new Theme(id, new ThemeName(name), new ThemeDescription(description), new ThemeThumbnail(thumbnail));
+    }
+
+    protected Theme() {
     }
 
     private Theme(final Long id, final ThemeName name, final ThemeDescription description, final ThemeThumbnail thumbnail) {
