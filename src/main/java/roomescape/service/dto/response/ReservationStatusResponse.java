@@ -1,8 +1,7 @@
 package roomescape.service.dto.response;
 
-import roomescape.domain.ReservationTime;
-
 import java.time.LocalTime;
+import roomescape.domain.ReservationTime;
 
 public record ReservationStatusResponse(LocalTime startAt, Long timeId, boolean alreadyBooked) {
 

@@ -3,13 +3,12 @@ package roomescape.service.auth;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
+import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.exception.AuthenticationException;
-
-import java.security.Key;
-import java.util.Arrays;
 
 @Component
 public class TokenProvider {

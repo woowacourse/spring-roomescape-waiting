@@ -1,25 +1,20 @@
 package roomescape.service.reservationtime;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
-
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationTimeCreateServiceTest {
 
     @Autowired
     private ReservationTimeCreateService reservationTimeCreateService;
-
 
 
     @Test
