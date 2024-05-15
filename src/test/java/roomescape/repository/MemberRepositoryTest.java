@@ -7,10 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.service.exception.MemberNotFoundException;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
@@ -38,5 +40,21 @@ class MemberRepositoryTest {
 
         final Member expected = new Member(4L, null, null, null, null);
         assertThat(saved).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
+    void fetchByIdNotPresent() {
+        final long id = 100L;
+
+        assertThatThrownBy(() -> memberRepository.fetchById(id)).isInstanceOf(MemberNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
+    void fetchByEmailNotPresent() {
+        final String email = "notfound@email.com";
+
+        assertThatThrownBy(() -> memberRepository.fetchByEmail(email)).isInstanceOf(MemberNotFoundException.class);
     }
 }

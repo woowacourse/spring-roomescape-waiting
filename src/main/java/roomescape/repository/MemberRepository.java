@@ -11,7 +11,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     default Member fetchByEmail(String email) {
-        return findByEmail(email).orElseThrow();
+        return findByEmail(email).orElseThrow(() -> new MemberNotFoundException("존재하지 않는 멤버입니다."));
     }
 
     default Member fetchById(long id) {
