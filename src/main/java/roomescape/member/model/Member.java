@@ -56,7 +56,7 @@ public class Member {
         );
     }
 
-    public Member() {
+    protected Member() {
     }
 
     private Member(

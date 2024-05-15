@@ -63,9 +63,9 @@ class InMemoryMemberRepositoryTest {
         Assertions.assertAll(
                 () -> assertThat(savedMember.getId()).isEqualTo(memberId),
                 () -> assertThat(savedMember.getRole()).isEqualTo(role),
-                () -> assertThat(savedMember.getPassword().getPassword()).isEqualTo(password),
-                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
-                () -> assertThat(savedMember.getName().getName()).isEqualTo(name)
+                () -> assertThat(savedMember.getPassword().getValue()).isEqualTo(password),
+                () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
+                () -> assertThat(savedMember.getName().getValue()).isEqualTo(name)
         );
     }
 

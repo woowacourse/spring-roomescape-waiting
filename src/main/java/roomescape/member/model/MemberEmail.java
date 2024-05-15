@@ -34,7 +34,7 @@ public class MemberEmail {
         }
     }
 
-    public String getEmail() {
+    public String getValue() {
         return email;
     }
 }

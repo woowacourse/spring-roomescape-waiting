@@ -23,7 +23,7 @@ public class MemberPassword {
         }
     }
 
-    public String getPassword() {
+    public String getValue() {
         return password;
     }
 }

@@ -29,7 +29,7 @@ public class MemberName {
         }
     }
 
-    public String getName() {
+    public String getValue() {
         return name;
     }
 }

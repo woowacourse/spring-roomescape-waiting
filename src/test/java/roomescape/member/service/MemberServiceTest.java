@@ -51,10 +51,10 @@ class MemberServiceTest {
         // Then
         assertAll(
                 () -> assertThat(savedMember.getId()).isEqualTo(6L),
-                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
-                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
+                () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
+                () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
                 () -> assertThat(savedMember.getRole()).isEqualTo(role),
-                () -> assertThat(savedMember.getName().getName()).isEqualTo(name)
+                () -> assertThat(savedMember.getName().getValue()).isEqualTo(name)
         );
     }
 

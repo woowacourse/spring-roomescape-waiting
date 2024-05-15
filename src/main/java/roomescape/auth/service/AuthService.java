@@ -36,7 +36,7 @@ public class AuthService {
     }
 
     private void checkCredential(final Member member, final String password) {
-        if (!passwordEncoder.matches(password, member.getPassword().getPassword())) {
+        if (!passwordEncoder.matches(password, member.getPassword().getValue())) {
             throw new IllegalArgumentException("일치하지 않는 비밀번호입니다.");
         }
     }

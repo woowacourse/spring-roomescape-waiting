@@ -18,8 +18,8 @@ public record ReservationResponse(
                 reservation.getId(),
                 new MemberResponse(
                         reservation.getMember().getId(),
-                        reservation.getMember().getName().getName(),
-                        reservation.getMember().getEmail().getEmail()
+                        reservation.getMember().getName().getValue(),
+                        reservation.getMember().getEmail().getValue()
                 ),
                 reservation.getDate().getValue(),
                 ReservationTimeResponse.from(reservation.getTime()),
