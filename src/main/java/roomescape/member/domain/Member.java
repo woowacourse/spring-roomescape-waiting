@@ -32,7 +32,6 @@ public class Member {
     private MemberRole role;
 
     public Member() {
-
     }
 
     private Member(long id, String name, Email email, Password password, MemberRole role) {
