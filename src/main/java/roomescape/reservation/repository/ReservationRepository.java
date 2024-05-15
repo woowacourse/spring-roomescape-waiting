@@ -1,25 +1,17 @@
 package roomescape.reservation.repository;
 
-import roomescape.reservation.dto.SearchReservationsParams;
+import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.reservation.model.Reservation;
 
-import java.time.LocalDate;
-import java.util.List;
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-public interface ReservationRepository {
-    List<Reservation> findAll();
+//    List<Reservation> searchReservations(SearchReservationsParams searchReservationsParams);
 
-    List<Reservation> searchReservations(SearchReservationsParams searchReservationsParams);
+//    boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    Reservation save(Reservation reservation);
+    boolean existsByTimeId(Long reservationTimeId);
 
-    int deleteById(Long reservationId);
+    boolean existsByThemeId(Long themeId);
 
-    boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-
-    boolean existByTimeId(Long reservationTimeId);
-
-    boolean existByThemeId(Long themeId);
-
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+//    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 }

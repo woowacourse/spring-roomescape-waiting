@@ -17,10 +17,10 @@ public record ReservationResponse(
                 reservation.getId(),
                 new MemberResponse(
                         reservation.getMember().getId(),
-                        reservation.getMember().getName().value(),
-                        reservation.getMember().getEmail().value()
+                        reservation.getMember().getName().getName(),
+                        reservation.getMember().getEmail().getEmail()
                 ),
-                reservation.getDate().value(),
+                reservation.getDate().getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
