@@ -1,5 +1,6 @@
 package roomescape.common;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import io.jsonwebtoken.JwtException;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -36,11 +37,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ProblemDetail> catcHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        String exceptionMessage = "입력값의 형식이 올바르지 않습니다. 다시 시도해주세요.";
-        System.out.println(exceptionMessage);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exceptionMessage));
+    public ResponseEntity<ProblemDetail> catchHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof JsonMappingException jsonMappingException) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                            jsonMappingException.getPath().get(0).getFieldName() + " 필드의 형식이 잘못되었습니다."));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "잘못된 JSON 형식입니다."));
     }
 
     @ExceptionHandler
