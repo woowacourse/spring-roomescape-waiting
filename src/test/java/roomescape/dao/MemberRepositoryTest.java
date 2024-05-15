@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.domain.user.Email;
 import roomescape.fixture.MemberFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,5 +44,18 @@ class MemberRepositoryTest {
 
         final var result = sut.findAll();
         assertThat(result).hasSize(2);
+    }
+    @Test
+    void findByEmail(){
+        sut.save(MemberFixture.getDomain("alphaka@gmail.com"));
+
+        final var result = sut.findByEmail(new Email("alphaka@gmail.com"));
+        assertThat(result).contains(MemberFixture.getDomain("alphaka@gmail.com"));
+    }
+    @Test
+    void existsByEmail(){
+        sut.save(MemberFixture.getDomain("alphaka@gmail.com"));
+        final var result = sut.existsByEmail(new Email("alphaka@gmail.com"));
+        assertThat(result).isTrue();
     }
 }
