@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.web.controller.request.ReservationTimeWebRequest;
 
-class ReservationTimeController extends ControllerTest {
+class ReservationTimeControllerTest extends ControllerTest {
 
 
     @BeforeEach
