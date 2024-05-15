@@ -128,7 +128,7 @@ class ReservationServiceTest {
 
     @DisplayName("사용자별 모든 예약 조회 테스트")
     @Test
-    void findAllByMember() {
+    void findAllByMemberId() {
         ReservationTimeResponse reservationTime1 = reservationTimeService.createReservationTime(new ReservationTimeRequest(LocalTime.of(10, 0)));
         ReservationTimeResponse reservationTime2= reservationTimeService.createReservationTime(new ReservationTimeRequest(LocalTime.of(12, 0)));
 
@@ -142,7 +142,7 @@ class ReservationServiceTest {
                 member2.id());
         reservationService.createReservation(reservationRequest2, reservationRequest2.memberId());
 
-        List<MyReservationResponse> reservations = reservationService.findAllByMember(member1.id());
+        List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.id());
 
         assertThat(reservations).hasSize(1);
     }

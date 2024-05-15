@@ -22,7 +22,7 @@ public class UserPageController {
     }
 
     @GetMapping("/reservation-mine")
-    public String reservationMinePage() {
+    public String myReservationPage() {
         return "reservation-mine";
     }
 }

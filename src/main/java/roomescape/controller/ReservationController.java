@@ -61,8 +61,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMineReservation(@MemberId Long id) {
-        return ResponseEntity.ok(reservationService.findAllByMember(id));
+    public ResponseEntity<List<MyReservationResponse>> getMyReservation(@MemberId Long id) {
+        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
     }
 
     @DeleteMapping("/{id}")
