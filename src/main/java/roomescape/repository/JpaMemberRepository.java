@@ -3,7 +3,9 @@ package roomescape.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
+import roomescape.domain.Password;
 import roomescape.repository.jpa.JpaMemberDao;
 
 @Repository
@@ -16,7 +18,7 @@ public class JpaMemberRepository implements MemberRepository {
 
     @Override
     public Optional<Member> findByEmailAndEncryptedPassword(String email, String encryptedPassword) {
-        return jpaMemberDao.findByEmailAndEncryptedPassword(email, encryptedPassword);
+        return jpaMemberDao.findByEmailAndEncryptedPassword(new Email(email), new Password(encryptedPassword));
     }
 
     @Override
