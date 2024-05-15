@@ -60,8 +60,8 @@ class ThemeRepositoryTest {
         assertAll(
                 () -> assertThat(themes).hasSize(16),
                 () -> assertThat(savedTheme.getId()).isEqualTo(16L),
-                () -> assertThat(savedTheme.getName().getName()).isEqualTo(theme.getName().getName()),
-                () -> assertThat(savedTheme.getDescription().getDescription()).isEqualTo(theme.getDescription().getDescription()),
+                () -> assertThat(savedTheme.getName().getValue()).isEqualTo(theme.getName().getValue()),
+                () -> assertThat(savedTheme.getDescription().getValue()).isEqualTo(theme.getDescription().getValue()),
                 () -> assertThat(savedTheme.getThumbnail()).isEqualTo(theme.getThumbnail())
         );
     }
@@ -85,7 +85,7 @@ class ThemeRepositoryTest {
         final ReservationDate endAt = new ReservationDate(LocalDate.now().minusDays(1));
         final int maximumThemeCount = 10;
 
-        final List<Theme> popularThemes = themeRepository.findPopularThemes(startAt.getDate(), endAt.getDate(), maximumThemeCount);
+        final List<Theme> popularThemes = themeRepository.findPopularThemes(startAt.getValue(), endAt.getValue(), maximumThemeCount);
 
         // Then
         assertAll(

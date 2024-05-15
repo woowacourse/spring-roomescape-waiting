@@ -49,7 +49,7 @@ class ReservationServiceTest {
                 () -> assertThat(reservations).hasSize(17),
                 () -> assertThat(reservation.getId()).isEqualTo(17L),
                 () -> assertThat(reservation.getMember().getId()).isEqualTo(3L),
-                () -> assertThat(reservation.getDate().getDate()).isEqualTo(date),
+                () -> assertThat(reservation.getDate().getValue()).isEqualTo(date),
                 () -> assertThat(reservation.getTime().getStartAt()).isEqualTo(LocalTime.of(9, 30))
         );
     }
