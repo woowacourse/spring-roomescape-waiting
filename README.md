@@ -19,7 +19,7 @@
 
 ## 2단계 - 내 예약 목록 조회 기능
 
-- [ ] 2단계 클라이언트 코드 추가
+- [x] 2단계 클라이언트 코드 추가
   - reservation-mine.html
   - reservation-mine.js
 - [ ] 내 예약 조회 페이지 응답 추가
