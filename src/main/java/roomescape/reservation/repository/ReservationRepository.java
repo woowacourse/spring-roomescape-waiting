@@ -26,9 +26,10 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             "FROM Reservation r " +
             "WHERE r.date.date between :startDate AND :endDate " +
             "GROUP BY r.theme.id " +
-            "ORDER BY COUNT(r.theme.id) DESC "
+            "ORDER BY COUNT(r.theme.id) DESC " +
+            "LIMIT :limitCount "
     )
-    List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate);
+    List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate, int limitCount);
 
     void deleteById(long reservationId);
 
