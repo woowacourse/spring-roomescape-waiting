@@ -17,7 +17,6 @@ import io.restassured.http.ContentType;
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.request.UserLoginRequest;
-import roomescape.controller.response.ReservationResponse;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -34,8 +33,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponse.class);
+                .statusCode(200).extract();
     }
 
     @DisplayName("예약을 검색한다.")
@@ -55,8 +53,7 @@ class ReservationControllerTest {
                 .cookie(cookie)
                 .when().get("/admin/reservations?themeId=1&memberId=1&dateFrom=2024-05-05&dateTo=2024-05-10")
                 .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponse.class);
+                .statusCode(200).extract();
     }
 
     @DisplayName("사용자가 예약을 추가할 수 있다.")

@@ -16,22 +16,22 @@ import roomescape.controller.request.UserLoginRequest;
 import roomescape.controller.response.UserNameResponse;
 import roomescape.model.Member;
 import roomescape.service.AuthService;
-import roomescape.service.UserService;
+import roomescape.service.MemberService;
 
 @RestController
 public class UserController {
 
-    private final UserService userService;
+    private final MemberService memberService;
     private final AuthService authService;
 
-    public UserController(UserService userService, AuthService authService) {
-        this.userService = userService;
+    public UserController(MemberService memberService, AuthService authService) {
+        this.memberService = memberService;
         this.authService = authService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody UserLoginRequest request, HttpServletResponse response) {
-        Member member = userService.findUserByEmailAndPassword(request);
+        Member member = memberService.findUserByEmailAndPassword(request);
         Cookie cookie = authService.createCookieByUser(member);
         response.addCookie(cookie);
         return ResponseEntity.ok().build();
@@ -44,7 +44,7 @@ public class UserController {
 
     @GetMapping("/members")
     public ResponseEntity<List<Member>> getAllUsers() {
-        List<Member> members = userService.findAllUsers();
+        List<Member> members = memberService.findAllUsers();
         return ResponseEntity.ok(members);
     }
 }

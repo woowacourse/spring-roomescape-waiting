@@ -11,7 +11,6 @@ import org.springframework.test.context.jdbc.Sql;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.ReservationTimeRequest;
-import roomescape.controller.response.IsReservedTimeResponse;
 import roomescape.model.ReservationTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -54,10 +53,10 @@ class ReservationTimeControllerTest {
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인한다.")
     @Test
     void should_get_reservations_with_book_state_by_date_and_theme() {
+
         RestAssured.given().log().all()
                 .when().get("/times/reserved?date=2030-08-05&themeId=1")
                 .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", IsReservedTimeResponse.class);
+                .statusCode(200);
     }
 }

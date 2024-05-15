@@ -13,6 +13,9 @@ public class ReservationTimeResponse {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime startAt;
 
+    public ReservationTimeResponse() {
+    }
+
     public ReservationTimeResponse(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
