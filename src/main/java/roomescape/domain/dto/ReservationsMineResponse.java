@@ -12,7 +12,7 @@ public record ReservationsMineResponse(Long reservationId, String theme, LocalDa
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"
+                reservation.getStatus().getMessage()
         );
     }
 }

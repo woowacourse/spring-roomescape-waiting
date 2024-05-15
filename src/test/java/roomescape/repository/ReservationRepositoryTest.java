@@ -28,7 +28,7 @@ class ReservationRepositoryTest {
     @Test
     void given_when_findAll_then_returnReservations() {
         //given, when, then
-        assertThat(reservationRepository.findAll()).hasSize(7);
+        assertThat(reservationRepository.findAll()).hasSize(8);
     }
 
     @DisplayName("Db에 예약 정보를 저장한다.")
