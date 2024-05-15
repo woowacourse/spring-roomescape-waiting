@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Role;
-import roomescape.dto.UserInfo;
+import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
 import roomescape.service.MemberService;
 import roomescape.service.TokenService;
@@ -26,18 +26,18 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
             throws IOException {
         try {
             String token = TokenExtractor.extractFrom(request.getCookies());
-            long userIdFromToken = tokenService.findUserIdFromToken(token);
-            UserInfo userInfo = memberService.findByUserId(userIdFromToken);
-            sendRedirectIfNotAdmin(response, userInfo);
-            return userInfo.role().equals(Role.ADMIN.name());
+            long memberIdFromToken = tokenService.findMemberIdFromToken(token);
+            MemberInfo memberInfo = memberService.findByMemberId(memberIdFromToken);
+            sendRedirectIfNotAdmin(response, memberInfo);
+            return memberInfo.role().equals(Role.ADMIN.name());
         } catch (RoomescapeException e) {
             response.sendRedirect("/");
             return false;
         }
     }
 
-    private void sendRedirectIfNotAdmin(HttpServletResponse response, UserInfo userInfo) throws IOException {
-        if (!userInfo.role().equals(Role.ADMIN.name())) {
+    private void sendRedirectIfNotAdmin(HttpServletResponse response, MemberInfo memberInfo) throws IOException {
+        if (!memberInfo.role().equals(Role.ADMIN.name())) {
             response.sendRedirect("/");
         }
     }

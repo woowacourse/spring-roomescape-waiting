@@ -28,6 +28,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest nativeRequest = (HttpServletRequest) webRequest.getNativeRequest();
         String token = TokenExtractor.extractFrom(nativeRequest.getCookies());
-        return tokenService.findUserIdFromToken(token);
+        return tokenService.findMemberIdFromToken(token);
     }
 }

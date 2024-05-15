@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TokenService {
-    private static final String USER_ID = "user_id";
+    private static final String MEMBER_ID = "member_id";
     private static final String secretKey = "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=";
 
     public String createToken(long id, LocalDateTime createdAt, Duration tokenLifeTime) {
@@ -21,7 +21,7 @@ public class TokenService {
         Date expiredTime = localDateTimeToDate(rawExpiredTime);
         return Jwts.builder()
                 .expiration(expiredTime)
-                .claim(USER_ID, id)
+                .claim(MEMBER_ID, id)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
@@ -31,13 +31,13 @@ public class TokenService {
         return Date.from(instant);
     }
 
-    public long findUserIdFromToken(String token) {
+    public long findMemberIdFromToken(String token) {
         Jws<Claims> claimsJws = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .build()
                 .parseSignedClaims(token);
 
         Claims payload = claimsJws.getPayload();
-        return payload.get(USER_ID, Long.class);
+        return payload.get(MEMBER_ID, Long.class);
     }
 }

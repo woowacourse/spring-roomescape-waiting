@@ -24,8 +24,8 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             throws IOException {
         try {
             String token = TokenExtractor.extractFrom(request.getCookies());
-            long userIdFromToken = tokenService.findUserIdFromToken(token);
-            memberService.findByUserId(userIdFromToken);
+            long memberIdFromToken = tokenService.findMemberIdFromToken(token);
+            memberService.findByMemberId(memberIdFromToken);
         } catch (RoomescapeException e) {
             response.sendRedirect("/login");
             return false;
