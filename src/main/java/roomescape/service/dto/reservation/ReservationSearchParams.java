@@ -1,12 +1,11 @@
 package roomescape.service.dto.reservation;
 
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.jpa.domain.Specification;
-import roomescape.domain.reservation.Reservation;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import roomescape.domain.reservation.Reservation;
 
 public class ReservationSearchParams {
     private final Long memberId;
@@ -40,6 +39,10 @@ public class ReservationSearchParams {
     public Specification<Reservation> getSearchSpecification() {
         return ((root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            root.fetch("member");
+            root.fetch("theme");
+            root.fetch("time");
+
             if (memberId != null) {
                 predicates.add(builder.equal(root.get("member").get("id"), memberId));
             }

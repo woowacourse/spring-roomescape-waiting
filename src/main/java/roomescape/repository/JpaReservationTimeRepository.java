@@ -13,10 +13,6 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
 
     boolean existsByStartAt(LocalTime startAt);
 
-    default ReservationTime fetchById(long timeId) {
-        return findById(timeId).orElseThrow(TimeNotFoundException::new);
-    }
-
     @Query(value = """
             SELECT
             t.id AS time_id,
@@ -28,4 +24,8 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
             AND r.theme_id = :themeId
             """, nativeQuery = true)
     List<ReservationTime> findReservedTimeByThemeAndDate(String date, long themeId);
+
+    default ReservationTime fetchById(long timeId) {
+        return findById(timeId).orElseThrow(TimeNotFoundException::new);
+    }
 }
