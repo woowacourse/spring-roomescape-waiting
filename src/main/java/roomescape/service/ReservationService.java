@@ -1,17 +1,25 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
+
+import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.MemberReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -89,7 +97,7 @@ public class ReservationService {
     }
 
     private void validateNotDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new OperationNotAllowedException("예약이 이미 존재합니다.");
         }
     }

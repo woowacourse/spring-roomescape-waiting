@@ -1,6 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
@@ -8,8 +13,6 @@ import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
-
-import java.util.List;
 
 @Service
 public class ThemeService {
@@ -38,7 +41,7 @@ public class ThemeService {
 
     public void deleteThemeById(Long id) {
         findValidatedTheme(id);
-        boolean exist = reservationRepository.existByThemeId(id);
+        boolean exist = reservationRepository.existsByThemeId(id);
         if (exist) {
             throw new OperationNotAllowedException("해당 테마에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
@@ -47,9 +50,15 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getMostReservedThemes() {
-        List<Theme> themes = themeRepository.findMostReservedThemesWithinDays(7, 10);
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minusDays(7);        // todo: 상수화
+        int limit = 10;
 
-        return themes.stream()
+        List<Reservation> mostReserved = reservationRepository.findMostReserved(from, to);
+
+        return mostReserved.stream()
+                .limit(limit)
+                .map(Reservation::getTheme)
                 .map(ThemeResponse::from)
                 .toList();
     }

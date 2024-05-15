@@ -1,17 +1,17 @@
 package roomescape.service;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.LogInRequest;
 import roomescape.dto.MemberPreviewResponse;
-import roomescape.infrastructure.JdbcMemberRepository;
 import roomescape.service.exception.ResourceNotFoundException;
-
-import java.util.List;
 
 @Service
 public class MemberService {
@@ -21,8 +21,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public MemberService(JdbcMemberRepository jdbcMemberRepository) {
-        this.memberRepository = jdbcMemberRepository;
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public String logIn(LogInRequest logInRequest) {

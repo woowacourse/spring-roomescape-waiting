@@ -1,6 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
@@ -9,9 +14,6 @@ import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class ReservationTimeService {
@@ -41,7 +43,7 @@ public class ReservationTimeService {
 
     public void deleteReservationTimeById(Long id) {
         findValidatedReservationTime(id);
-        boolean exist = reservationRepository.existByReservationTimeId(id);
+        boolean exist = reservationRepository.existsByReservationTimeId(id);
         if (exist) {
             throw new OperationNotAllowedException("해당 시간에 예약이 존재하기 때문에 삭제할 수 없습니다.");
         }
@@ -50,13 +52,15 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimeBookedStatus(LocalDate date, Long themeId) {
-        List<ReservationTime> bookedTimes = reservationTimeRepository.findByReservationDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> reservedTimes = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()
+                .map(Reservation::getReservationTime)
+                .toList();
 
         return reservationTimes.stream()
                 .map(reservationTime -> AvailableReservationTimeResponse.from(
                         reservationTime,
-                        bookedTimes.contains(reservationTime)
+                        reservedTimes.contains(reservationTime)
                 ))
                 .toList();
     }

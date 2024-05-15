@@ -25,7 +25,7 @@ VALUES ('산초', 'sancho@sancho.com', 'sancho', 'ADMIN'),
        ('알파카', 'alpaca@sancho.com', 'alpaca', 'CUSTOMER'),
        ('위브', 'wiib@sancho.com', 'wiib', 'CUSTOMER');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id)
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id)
 VALUES (2, '2024-05-10', 1, 1),
        (3, '2024-05-11', 3, 2),
        (3, '2024-05-12', 4, 3),
