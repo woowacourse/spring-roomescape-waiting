@@ -78,18 +78,15 @@ public class AdminReservationService {
         return reservations.stream()
                 .filter(reservation ->
                         (memberId == null || reservation.getMember().getId().equals(memberId))
-                )
-                .filter(reservation ->
+                ).filter(reservation ->
                         (themeId == null || reservation.getTheme().getId().equals(themeId))
                 ).filter(reservation ->
                         (dateFrom == null ||
                                 (reservation.getDate().isEqual(dateFrom) || reservation.getDate().isAfter(dateFrom)))
-                )
-                .filter(reservation ->
+                ).filter(reservation ->
                         (dateTo == null ||
                                 (reservation.getDate().isEqual(dateTo) || reservation.getDate().isBefore(dateTo)))
-                )
-                .distinct()
+                ).distinct()
                 .toList();
     }
 }
