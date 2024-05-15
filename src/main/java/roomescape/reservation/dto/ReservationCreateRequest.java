@@ -8,12 +8,11 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
 public record ReservationCreateRequest(
-        @NotNull Long memberId,
         @NotNull LocalDate date,
         @NotNull Long themeId,
         @NotNull Long timeId
 ) {
-    
+
     public Reservation toReservation(Member member, Theme theme, ReservationTime reservationTime) {
         return new Reservation(member, date, theme, reservationTime);
     }

@@ -51,7 +51,7 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(theme).getId();
 
         LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
-        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(loginMemberInToken.id(),
+        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(
                 LocalDate.now(), 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.save(reservationCreateRequest, loginMemberInToken))
@@ -72,13 +72,13 @@ class ReservationServiceTest {
         memberRepository.save(member);
 
         LocalDate localDate = LocalDate.now();
-        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(1L, localDate,
+        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(localDate,
                 themeId, timeId);
         LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, member.getRole(), member.getName(),
                 member.getEmail());
         reservationService.save(reservationCreateRequest, loginMemberInToken);
 
-        ReservationCreateRequest duplicateRequest = new ReservationCreateRequest(1L, localDate, themeId, timeId);
+        ReservationCreateRequest duplicateRequest = new ReservationCreateRequest(localDate, themeId, timeId);
         assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMemberInToken))
                 .isInstanceOf(IllegalArgumentException.class);
     }

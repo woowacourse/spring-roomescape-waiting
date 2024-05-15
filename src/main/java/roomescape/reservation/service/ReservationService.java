@@ -8,6 +8,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -87,6 +88,12 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme,
                         reservationSearchRequest.dateTo(), reservationSearchRequest.dateFrom()).stream()
                 .map(ReservationResponse::toResponse)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findAllByMemberId(Long memberId) {
+        return reservationRepository.findAllByMemberId(memberId).stream()
+                .map(MyReservationResponse::toResponse)
                 .toList();
     }
 
