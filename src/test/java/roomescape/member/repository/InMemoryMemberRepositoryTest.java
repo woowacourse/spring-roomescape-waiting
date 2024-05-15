@@ -5,18 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.member.model.Member;
+import roomescape.member.model.MemberEmail;
 import roomescape.member.model.MemberRole;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@Sql(value = {"/schema.sql", "/data.sql"}, executionPhase = BEFORE_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)   // TODO : 더 좋은 데이터 초기화 방식 고민
 class InMemoryMemberRepositoryTest {
 
     @Autowired
@@ -63,9 +63,9 @@ class InMemoryMemberRepositoryTest {
         Assertions.assertAll(
                 () -> assertThat(savedMember.getId()).isEqualTo(memberId),
                 () -> assertThat(savedMember.getRole()).isEqualTo(role),
-                () -> assertThat(savedMember.getPassword().value()).isEqualTo(password),
-                () -> assertThat(savedMember.getEmail().value()).isEqualTo(email),
-                () -> assertThat(savedMember.getName().value()).isEqualTo(name)
+                () -> assertThat(savedMember.getPassword().getPassword()).isEqualTo(password),
+                () -> assertThat(savedMember.getEmail().getEmail()).isEqualTo(email),
+                () -> assertThat(savedMember.getName().getName()).isEqualTo(name)
         );
     }
 
@@ -73,7 +73,7 @@ class InMemoryMemberRepositoryTest {
     @Test
     void findByEmailTest() {
         // Given
-        final String memberEmail = "user@mail.com";
+        final MemberEmail memberEmail = new MemberEmail("user@mail.com");
 
         // When
         final Optional<Member> member = memberRepository.findByEmail(memberEmail);
@@ -84,12 +84,12 @@ class InMemoryMemberRepositoryTest {
 
     @DisplayName("이미 존재하는 이메일은이 여부를 반환한다.")
     @Test
-    void existByEmailTest() {
+    void existsByEmailTest() {
         // Given
-        final String email = "user@mail.com";
+        final MemberEmail memberEmail = new MemberEmail("user@mail.com");
 
         // When
-        final boolean isExist = memberRepository.existByEmail(email);
+        final boolean isExist = memberRepository.existsByEmail(memberEmail);
 
         // Then
         assertThat(isExist).isTrue();
