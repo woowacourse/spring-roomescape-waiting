@@ -1,11 +1,9 @@
 package roomescape.web.dto.response.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
+import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.domain.Reservation;
 
 public record UserReservationResponse(

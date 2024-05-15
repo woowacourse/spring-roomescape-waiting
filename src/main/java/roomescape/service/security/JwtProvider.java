@@ -1,10 +1,9 @@
 package roomescape.service.security;
 
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.exception.member.AuthenticationFailureException;
@@ -14,7 +13,7 @@ public class JwtProvider {
     private static final String SECRET_KEY = "hellowootecoworldhihowareyouiamfinethankyouandyou";
     private static final String ROLE_CLAIM_KEY = "role";
     private static final String NAME_CLAIM_KEY = "name";
-    
+
     public String encode(Member user) {
         return Jwts.builder()
                 .subject(user.getId().toString())

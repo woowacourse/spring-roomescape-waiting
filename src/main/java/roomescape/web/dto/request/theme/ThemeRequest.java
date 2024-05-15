@@ -1,7 +1,6 @@
 package roomescape.web.dto.request.theme;
 
 import jakarta.validation.constraints.NotBlank;
-
 import roomescape.domain.Theme;
 
 public record ThemeRequest(

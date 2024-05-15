@@ -1,7 +1,6 @@
 package roomescape.exception.member;
 
 import org.springframework.http.HttpStatus;
-
 import roomescape.exception.CustomException;
 
 public class AuthenticationFailureException extends CustomException {

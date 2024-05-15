@@ -1,12 +1,9 @@
 package roomescape.web.dto.request.time;
 
-import java.time.LocalTime;
-
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
 public record ReservationTimeRequest(

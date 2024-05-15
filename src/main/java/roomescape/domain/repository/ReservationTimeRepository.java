@@ -3,9 +3,7 @@ package roomescape.domain.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.repository.CrudRepository;
-
 import roomescape.domain.ReservationTime;
 
 public interface ReservationTimeRepository extends CrudRepository<ReservationTime, LocalTime> {

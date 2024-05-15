@@ -1,9 +1,8 @@
 package roomescape.exception;
 
 
-import org.springframework.http.HttpStatus;
-
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public abstract class CustomException extends RuntimeException {

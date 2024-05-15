@@ -1,10 +1,8 @@
 package roomescape.service;
 
 import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.member.AuthenticationFailureException;

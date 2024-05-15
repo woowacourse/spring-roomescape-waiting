@@ -2,9 +2,7 @@ package roomescape.domain.repository;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.repository.CrudRepository;
-
 import roomescape.domain.Member;
 
 public interface MemberRepository extends CrudRepository<Member, Long> {
@@ -19,6 +17,6 @@ public interface MemberRepository extends CrudRepository<Member, Long> {
     boolean existsByEmail(String email);
 
     void delete(Member member);
-    
+
     void deleteAll();
 }

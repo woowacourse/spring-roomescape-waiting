@@ -1,14 +1,11 @@
 package roomescape.config;
 
-import java.util.Arrays;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.springframework.web.servlet.HandlerInterceptor;
-
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Role;
 import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.member.AuthorizationFailureException;
@@ -16,10 +13,12 @@ import roomescape.service.security.JwtProvider;
 
 @RequiredArgsConstructor
 public class AdminHandlerInterceptor implements HandlerInterceptor {
+
     private final JwtProvider jwtProvider;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+                             Object handler)
             throws Exception {
         Cookie tokenCookie = extractCookie(request, "token");
         String token = tokenCookie.getValue();
