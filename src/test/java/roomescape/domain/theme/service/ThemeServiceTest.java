@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
+import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,19 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.removeTheme(1L))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");
+    }
+
+    @DisplayName("테마를 삭제할 수 있습니다")
+    @Test
+    void should_remove_theme() {
+        FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
+        FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
+        fakeThemeRepository.save(DUMMY_THEME);
+        themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
+
+        themeService.removeTheme(1L);
+
+        assertThat(fakeThemeRepository.themes).hasSize(0);
     }
 
     @DisplayName("인기 테마를 알 수 있습니다.")
