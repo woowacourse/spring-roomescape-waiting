@@ -13,13 +13,10 @@ import roomescape.reservation.domain.Theme;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long>, MemberReservationRepositoryCustom {
 
-    Optional<MemberReservation> findById(long id);
-
     List<MemberReservation> findAllByMember(Member member);
-
-    void deleteById(long memberReservationId);
 
     void deleteByReservation_Id(long reservationId);
 
+    //TODO: Query 고려
     boolean existsByReservation_DateAndReservationTimeAndReservationTheme(LocalDate date, ReservationTime time, Theme theme);
 }
