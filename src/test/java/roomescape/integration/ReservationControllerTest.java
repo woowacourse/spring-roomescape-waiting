@@ -65,7 +65,7 @@ public class ReservationControllerTest {
                 Map.of(
                         "id", defaultMember.getId(),
                         "name", defaultMember.getName(),
-                        "role", defaultMember.getRole().name()
+                        "role", defaultMember.getRole().getTokenValue()
                 )
         );
 

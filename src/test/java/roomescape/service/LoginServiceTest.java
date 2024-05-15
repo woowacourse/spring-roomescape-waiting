@@ -88,7 +88,7 @@ class LoginServiceTest {
             String token = JWT_GENERATOR.generateWith(Map.of(
                     "id", defaultUser.getId(),
                     "name", defaultUser.getName(),
-                    "role", defaultUser.getRole().name()
+                    "role", defaultUser.getRole().getTokenValue()
             ));
 
             //when
