@@ -5,15 +5,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.infra.AdminCheckInterceptor;
 import roomescape.infra.AuthArgumentResolver;
-import roomescape.infra.AuthInterceptor;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     private final AuthArgumentResolver authArgumentResolver;
-    private final AuthInterceptor interceptor;
+    private final AdminCheckInterceptor interceptor;
 
-    public WebConfig(AuthArgumentResolver authArgumentResolver, AuthInterceptor interceptor) {
+    public WebConfig(AuthArgumentResolver authArgumentResolver, AdminCheckInterceptor interceptor) {
         this.authArgumentResolver = authArgumentResolver;
         this.interceptor = interceptor;
     }

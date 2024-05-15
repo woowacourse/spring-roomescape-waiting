@@ -13,11 +13,11 @@ import roomescape.service.MemberService;
 import roomescape.service.TokenService;
 
 @Component
-public class AuthInterceptor implements HandlerInterceptor {
+public class AdminCheckInterceptor implements HandlerInterceptor {
     private final TokenService tokenService;
     private final MemberService memberService;
 
-    public AuthInterceptor(TokenService tokenService, MemberService memberService) {
+    public AdminCheckInterceptor(TokenService tokenService, MemberService memberService) {
         this.tokenService = tokenService;
         this.memberService = memberService;
     }
