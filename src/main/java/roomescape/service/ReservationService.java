@@ -1,7 +1,15 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDate;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.infrastructure.MemberRepository;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
@@ -10,10 +18,6 @@ import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class ReservationService {
@@ -24,9 +28,9 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, MemberRepository memberRepository) {
+        ReservationRepository reservationRepository,
+        ReservationTimeRepository reservationTimeRepository,
+        ThemeRepository themeRepository, MemberRepository memberRepository) {
 
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -50,17 +54,17 @@ public class ReservationService {
 
     private ReservationTime findTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("예약에 대한 예약시간이 존재하지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("예약에 대한 예약시간이 존재하지 않습니다."));
     }
 
     private Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("예약에 대한 테마가 존재하지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("예약에 대한 테마가 존재하지 않습니다."));
     }
 
     private Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException(memberId + "|예약에 대한 사용자가 존재하지 않습니다."));
+            .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
     }
 
     private void validatePastReservation(Reservation reservation) {
@@ -71,7 +75,7 @@ public class ReservationService {
 
     private void validateDuplication(ReservationDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new IllegalArgumentException("이미 존재하는 예약 정보 입니다.");
+            throw new IllegalStateException("이미 존재하는 예약 정보 입니다.");
         }
     }
 
@@ -81,24 +85,25 @@ public class ReservationService {
 
     public List<ReservationAppResponse> findAll() {
         return reservationRepository.findAll().stream()
-                .map(ReservationAppResponse::from)
-                .toList();
+            .map(ReservationAppResponse::from)
+            .toList();
     }
 
     public List<ReservationAppResponse> findAllSearched(AdminSearchedReservationAppRequest request) {
         List<Reservation> searchedReservations = reservationRepository.findAllByMemberIdAndThemeIdInPeriod(
-                request.memberId(), request.themeId(), LocalDate.parse(request.dateFrom()), LocalDate.parse(request.dateTo()));
+            request.memberId(), request.themeId(), LocalDate.parse(request.dateFrom()),
+            LocalDate.parse(request.dateTo()));
 
         return searchedReservations.stream()
-                .map(ReservationAppResponse::from)
-                .toList();
+            .map(ReservationAppResponse::from)
+            .toList();
     }
 
     public List<ReservationAppResponse> findByMemberId(Long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-                .map(ReservationAppResponse::from)
-                .toList();
+            .map(ReservationAppResponse::from)
+            .toList();
     }
 }

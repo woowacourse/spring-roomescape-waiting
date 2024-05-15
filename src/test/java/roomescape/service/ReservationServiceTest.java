@@ -114,7 +114,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
             () -> reservationService.save(new ReservationAppRequest(rawDate, timeId, themeId, memberId)))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @DisplayName("실패: 어제 날짜에 대한 예약을 생성하면 예외가 발생한다.")
