@@ -9,6 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"member", "time", "theme"})
+    List<Reservation> findAll();
+
+    @EntityGraph(attributePaths = {"time", "theme"})
+    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
+
     @Query("select r.time from Reservation r where r.date = :date and r.theme = :theme")
     List<ReservationTime> findTimeByDateAndTheme(LocalDate date, Theme theme);
 
@@ -35,6 +42,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByTheme(Theme theme);
-
-    List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 }
