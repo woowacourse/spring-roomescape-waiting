@@ -23,9 +23,9 @@ INSERT INTO theme (name, description, thumbnail) VALUES ('오락', '재밌어', 
 INSERT INTO theme (name, description, thumbnail) VALUES ('판타지', '말이 안돼', 'https://i.postimg.cc/8k2PQ4yv/theme.jpg');
 INSERT INTO theme (name, description, thumbnail) VALUES ('감성', '감동적', 'https://sherlock-holmes.co.kr/attach/theme/16788523411.jpg');
 
--- INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hihi@naver.com', 'hihi');
--- INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
--- INSERT INTO member (name, role, email, password) values ( '포비', 'ADMIN', 'test@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hihi@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '포비', 'ADMIN', 'test@naver.com', 'hihi');
 --
 -- -- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 1, '2024-04-23', 1, 1);
 -- -- INSERT INTO reservation (member_id, date, time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
