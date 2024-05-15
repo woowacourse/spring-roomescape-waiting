@@ -20,6 +20,66 @@ HTTP/1.1 200
 
 </details>
 
+## 회원
+
+<details>
+<summary> 내 예약 조회 API </summary>
+
+### 메인 페이지 조회
+
+#### Request
+
+```http request
+GET /members HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "name": "바보로키"
+    }
+]
+```
+
+</details>
+<br>
+<details>
+<summary> 내 예약 조회 API </summary>
+
+### 메인 페이지 조회
+
+#### Request
+
+```http request
+GET /members/reservations HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+```
+
+#### Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "reservationId": 1,
+        "theme": "테마1",
+        "date": "2024-03-01",
+        "time": "10:00",
+        "status": "예약"
+    }
+]
+```
+
+</details>
+
 ## 예약
 
 <details>
