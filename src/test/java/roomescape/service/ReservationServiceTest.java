@@ -9,7 +9,6 @@ import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
-import roomescape.exception.NotExistException;
 import roomescape.exception.PastTimeReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
@@ -57,13 +56,6 @@ class ReservationServiceTest {
 
         assertThatCode(() -> reservationService.createReservation(input))
                 .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약 ID 를 삭제하려 하면 에외를 발생한다.")
-    void throw_exception_when_not_exist_id() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(-1))
-                .isInstanceOf(NotExistException.class);
     }
 
     @Test

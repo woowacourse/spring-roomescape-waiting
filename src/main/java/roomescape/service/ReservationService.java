@@ -1,50 +1,45 @@
 package roomescape.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.exception.*;
+import roomescape.domain.reservation.ReservationDate;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.output.ReservationOutput;
 
-import static roomescape.exception.ExceptionDomainType.*;
+import java.util.List;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
     private final ReservationCreateValidator reservationCreateValidator;
 
-    public ReservationService(final ReservationDao reservationDao,
+    public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationCreateValidator reservationCreateValidator) {
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
         this.reservationCreateValidator = reservationCreateValidator;
     }
 
     public ReservationOutput createReservation(final ReservationInput input) {
         final Reservation reservation = reservationCreateValidator.validateReservationInput(input);
-        final Reservation savedReservation = reservationDao.create(reservation);
+        final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationOutput.toOutput(savedReservation);
     }
 
     public List<ReservationOutput> getAllReservations() {
-        final List<Reservation> reservations = reservationDao.getAll();
+        final List<Reservation> reservations = reservationRepository.findAll();
         return ReservationOutput.toOutputs(reservations);
     }
 
     public List<ReservationOutput> searchReservation(final ReservationSearchInput input) {
-        final List<Reservation> themeReservations = reservationDao.getThemeAndMemberReservationWithPeriod(
-                input.themeId(), input.memberId(), input.fromDate(), input.toDate());
+        final List<Reservation> themeReservations = reservationRepository.getReservationByThemeIdAndMemberIdAndDateBetween(
+                input.themeId(), input.memberId(), new ReservationDate(input.fromDate()), new ReservationDate(input.toDate()));
         return ReservationOutput.toOutputs(themeReservations);
     }
 
     public void deleteReservation(final long id) {
-        if (reservationDao.delete(id)) {
-            return;
-        }
-        throw new NotExistException(RESERVATION, id);
+        reservationRepository.deleteById(id);
     }
 }

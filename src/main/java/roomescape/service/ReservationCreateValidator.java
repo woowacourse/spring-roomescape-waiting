@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Component;
 import roomescape.dao.MemberRepository;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Reservation;
@@ -20,15 +20,15 @@ import static roomescape.exception.ExceptionDomainType.*;
 
 @Component
 public class ReservationCreateValidator {
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
 
-    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
-        this.reservationDao = reservationDao;
+    public ReservationCreateValidator(final ReservationRepository reservationRepository, final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberDao;
@@ -41,7 +41,7 @@ public class ReservationCreateValidator {
         final Member member = validateExistMember(input.memberId());
 
         final Reservation reservation = input.toReservation(reservationTime, theme,member);
-        if (reservationDao.isExistByReservationAndTime(ReservationDate.from(input.date()), input.timeId())) {
+        if (reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
             throw new AlreadyExistsException(RESERVATION, reservation.getLocalDateTimeFormat());
         }
         if (reservation.isBefore(nowDateTimeFormatter.getDate(), nowDateTimeFormatter.getTime())) {

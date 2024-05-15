@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.VisitDate;
@@ -18,11 +18,11 @@ import static roomescape.exception.ExceptionDomainType.THEME;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationDao reservationDao) {
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ThemeOutput createTheme(final ThemeInput input) {
@@ -42,7 +42,7 @@ public class ThemeService {
     }
 
     public void deleteTheme(final long id) {
-        if (reservationDao.isExistByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new ExistReservationException(THEME, id);
         }
         themeRepository.deleteById(id);

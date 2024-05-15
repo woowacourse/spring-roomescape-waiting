@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
@@ -34,7 +34,7 @@ class ReservationTimeServiceTest {
     @Autowired
     ReservationTimeService reservationTimeService;
     @Autowired
-    ReservationDao reservationDao;
+    ReservationRepository reservationRepository;
 
     @Autowired
     ReservationService reservationService;
@@ -77,7 +77,7 @@ class ReservationTimeServiceTest {
         final ThemeOutput themeOutput = themeService.createTheme(ThemeFixture.getInput());
         final MemberCreateOutput memberOutput = memberService.createMember(MemberFixture.getUserCreateInput());
 
-        reservationDao.create(Reservation.from(
+        reservationRepository.save(Reservation.from(
                 null,
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
@@ -31,7 +31,7 @@ class ThemeServiceTest {
     @Autowired
     ReservationTimeService reservationTimeService;
     @Autowired
-    ReservationDao reservationDao;
+    ReservationRepository reservationRepository;
 
     @Autowired
     DatabaseCleaner databaseCleaner;
@@ -88,7 +88,7 @@ class ThemeServiceTest {
         final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
                 new ReservationTimeInput("10:00"));
 
-        reservationDao.create(Reservation.from(
+        reservationRepository.save(Reservation.from(
                 null,
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
@@ -113,21 +113,21 @@ class ThemeServiceTest {
         final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
                 new ReservationTimeInput("10:00"));
 
-        reservationDao.create(Reservation.from(
+        reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-01",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
                 MemberFixture.getDomain()
         ));
-        reservationDao.create(Reservation.from(
+        reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-02",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
                 MemberFixture.getDomain()
         ));
-        reservationDao.create(Reservation.from(
+        reservationRepository.save(Reservation.from(
                 null,
                 "2024-06-03",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),

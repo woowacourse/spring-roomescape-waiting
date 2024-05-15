@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
 import roomescape.dao.dto.AvailableReservationTimeResultInterface;
 import roomescape.domain.reservation.ReservationTime;
@@ -21,11 +21,11 @@ import static roomescape.exception.ExceptionDomainType.RESERVATION_TIME;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationDao reservationDao) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationDao = reservationDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationTimeOutput createReservationTime(final ReservationTimeInput input) {
@@ -51,7 +51,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTime(final long id) {
-        if (reservationDao.isExistByTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new ExistReservationException(RESERVATION_TIME, id);
         }
         reservationTimeRepository.deleteById(id);
