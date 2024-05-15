@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
@@ -20,6 +22,8 @@ public class Theme {
     private String name;
     private String description;
     private String thumbnail;
+    @OneToMany(mappedBy = "theme")
+    private List<Reservation> reservations;
 
     protected Theme() {
     }

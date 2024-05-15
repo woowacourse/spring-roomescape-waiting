@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
 import roomescape.repository.jpa.JpaThemeDao;
@@ -22,7 +23,7 @@ public class JpaThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findAndOrderByPopularity(LocalDate start, LocalDate end, int count) {
-        return jpaThemeDao.findAndOrderByPopularity(start, end, count);
+        return jpaThemeDao.findAndOrderByPopularityFirstTheme(start, end, PageRequest.of(0, count));
     }
 
     @Override
