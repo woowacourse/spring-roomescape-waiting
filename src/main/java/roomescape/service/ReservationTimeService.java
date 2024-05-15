@@ -13,46 +13,48 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ReservationTimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    private final ReservationDao reservationDao;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ReservationDao reservationDao) {
-        this.reservationTimeDao = reservationTimeDao;
-        this.reservationDao = reservationDao;
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationRepository reservationRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
+
     public List<ReservationTime> findAllReservationTimes() {
-        return reservationTimeDao.findAllReservationTimes();
+        return reservationTimeRepository.findAll();
     }
 
     public ReservationTime addReservationTime(ReservationTimeRequest request) {
         LocalTime startAt = request.startAt();
         validateExistTime(startAt);
         ReservationTime reservationTime = new ReservationTime(startAt);
-        return reservationTimeDao.addReservationTime(reservationTime);
+        return reservationTimeRepository.save(reservationTime);
     }
 
     private void validateExistTime(LocalTime startAt) {
-        long countReservationTimeByStartAt = reservationTimeDao.countReservationTimeByStartAt(startAt);
+        long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
         if (countReservationTimeByStartAt > 0) {
             throw new DuplicatedException("이미 존재하는 시간입니다.");
         }
     }
 
     public ReservationTime findReservationTime(long id) {
-        return reservationTimeDao.findReservationById(id);
+        return reservationTimeRepository.findById(id);
     }
 
     public List<IsReservedTimeResponse> getIsReservedTime(LocalDate date, long themeId) {
-        List<ReservationTime> allTimes = reservationTimeDao.findAllReservationTimes();
-        List<ReservationTime> bookedTimes = reservationTimeDao.findAllReservedTimes(date, themeId);
+        List<ReservationTime> allTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> bookedTimes = reservationTimeRepository.findAllReservedTimes(date, themeId);
         List<ReservationTime> notBookedTimes = filterNotBookedTimes(allTimes, bookedTimes);
         List<IsReservedTimeResponse> bookedResponse = mapToResponse(bookedTimes, true);
         List<IsReservedTimeResponse> notBookedResponse = mapToResponse(notBookedTimes, false);
@@ -62,18 +64,19 @@ public class ReservationTimeService {
     public void deleteReservationTime(long id) {
         validateNotExistReservationTime(id);
         validateReservedTime(id);
-        reservationTimeDao.deleteReservationTime(id);
+        reservationTimeRepository.deleteById(id);
     }
 
     private void validateReservedTime(long id) {
-        long countedReservationByTime = reservationDao.countReservationByTimeId(id);
+        ReservationTime time = reservationTimeRepository.findById(id);
+        long countedReservationByTime = reservationRepository.countByTime(time);
         if (countedReservationByTime > 0) {
             throw new BadRequestException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 
     private void validateNotExistReservationTime(long id) {
-        long countedReservationTime = reservationTimeDao.countReservationTimeById(id);
+        long countedReservationTime = reservationTimeRepository.countById(id);
         if (countedReservationTime <= 0) {
             throw new NotFoundException("id(%s)에 해당하는 예약 시간이 존재하지 않습니다.".formatted(id));
         }

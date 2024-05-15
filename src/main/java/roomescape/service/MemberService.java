@@ -8,34 +8,35 @@ import roomescape.controller.request.UserLoginRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Member;
-import roomescape.repository.UserDao;
+import roomescape.repository.MemberRepository;
 
 @Service
-public class UserService {
+public class MemberService {
 
-    private final UserDao userDao;
+    private final MemberRepository memberRepository;
 
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public Member findUserByEmailAndPassword(UserLoginRequest request) {
-        return userDao.findUserByEmailAndPassword(request.email(), request.password())
+        return memberRepository.findByEmailAndPassword(request.email(), request.password())
                 .orElseThrow(() -> new AuthenticationException(
                         "사용자(email: %s, password: %s)가 존재하지 않습니다.".formatted(request.email(), request.password())));
     }
 
     public String findUserNameById(Long id) {
-        return userDao.findUserNameByUserId(id)
-                .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다."));
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다.".formatted(id)));
+        return member.getName();
     }
 
     public Member findUserById(Long id) {
-        return userDao.findUserById(id)
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다."));
     }
 
     public List<Member> findAllUsers() {
-        return userDao.findAllUsers();
+        return memberRepository.findAll();
     }
 }

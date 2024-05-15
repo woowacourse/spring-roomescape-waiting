@@ -13,9 +13,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import roomescape.controller.request.ReservationTimeRequest;
 import roomescape.controller.response.IsReservedTimeResponse;
@@ -26,27 +28,43 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.service.fake.FakeReservationDao;
-import roomescape.service.fake.FakeReservationTimeDao;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
-    private final FakeReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-    private final FakeReservationDao reservationDao = new FakeReservationDao();
-    private final ReservationTimeService reservationTimeService =
-            new ReservationTimeService(reservationTimeDao, reservationDao);
+    @Autowired
+    private final ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private final ReservationRepository reservationRepository;
+    @Autowired
+    private final ThemeRepository themeRepository;
+    @Autowired
+    private final MemberRepository memberRepository;
+    @Autowired
+    private final ReservationTimeService reservationTimeService;
 
-    @BeforeEach
-    void setUp() {
-        reservationTimeDao.clear();
-        reservationDao.clear();
+    @Autowired
+    public ReservationTimeServiceTest(ReservationTimeRepository reservationTimeRepository,
+                                      ReservationRepository reservationRepository, ThemeRepository themeRepository,
+                                      MemberRepository memberRepository,
+                                      ReservationTimeService reservationTimeService) {
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+        this.reservationTimeService = reservationTimeService;
     }
 
     @DisplayName("모든 예약 시간을 반환한다")
     @Test
     void should_return_all_reservation_times() {
-        reservationTimeDao.add(new ReservationTime(1L, LocalTime.of(11, 0)));
-        reservationTimeDao.add(new ReservationTime(2L, LocalTime.of(12, 0)));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(11, 0)));
+        reservationTimeRepository.save(new ReservationTime(2L, LocalTime.of(12, 0)));
 
         List<ReservationTime> reservationTimes = reservationTimeService.findAllReservationTimes();
 
@@ -56,8 +74,8 @@ class ReservationTimeServiceTest {
     @DisplayName("아이디에 해당하는 예약 시간을 반환한다.")
     @Test
     void should_get_reservation_time() {
-        reservationTimeDao.add(new ReservationTime(1L, LocalTime.of(11, 0)));
-        reservationTimeDao.add(new ReservationTime(2L, LocalTime.of(12, 0)));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(11, 0)));
+        reservationTimeRepository.save(new ReservationTime(2L, LocalTime.of(12, 0)));
 
         ReservationTime reservationTime = reservationTimeService.findReservationTime(2);
 
@@ -69,7 +87,7 @@ class ReservationTimeServiceTest {
     void should_add_reservation_times() {
         reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.of(13, 0)));
 
-        List<ReservationTime> allReservationTimes = reservationTimeDao.findAllReservationTimes();
+        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
 
         assertThat(allReservationTimes).hasSize(1);
     }
@@ -77,12 +95,12 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간을 삭제한다")
     @Test
     void should_remove_reservation_times() {
-        reservationTimeDao.addReservationTime(new ReservationTime(1L, LocalTime.of(12, 0)));
-        reservationTimeDao.addReservationTime(new ReservationTime(2L, LocalTime.of(13, 0)));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(12, 0)));
+        reservationTimeRepository.save(new ReservationTime(2L, LocalTime.of(13, 0)));
 
         reservationTimeService.deleteReservationTime(1);
 
-        List<ReservationTime> allReservationTimes = reservationTimeDao.findAllReservationTimes();
+        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
         assertThat(allReservationTimes).hasSize(1);
     }
 
@@ -97,22 +115,24 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하는 시간이면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_exist_id() {
-        reservationTimeDao.addReservationTime(new ReservationTime(1L, LocalTime.of(12, 0)));
+        reservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(12, 0)));
 
         assertThatCode(() -> reservationTimeService.deleteReservationTime(1))
                 .doesNotThrowAnyException();
     }
 
-    @DisplayName("특정 시간에 대핸 예약이 존재하는데, 그 시간을 삭제하려 할 때 예외가 발생한다.")
+    @DisplayName("특정 시간에 대해 예약이 존재하는데, 그 시간을 삭제하려 할 때 예외가 발생한다.")
     @Test
     void should_throw_exception_when_exist_reservation_using_time() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
-        reservationTimeDao.addReservationTime(reservationTime);
-        reservationDao.addReservation(
-                new Reservation(now().plusDays(2),
-                        reservationTime,
-                        new Theme("name", "공포", "미스터리"),
-                        new Member(1L, "배키", MEMBER, "dmsgml@email.com", "1234")));
+        Theme theme = new Theme("name", "공포", "미스터리");
+        Member member = new Member(1L, "배키", MEMBER, "dmsgml@email.com", "1234");
+        reservationTimeRepository.save(reservationTime);
+        themeRepository.save(theme);
+        memberRepository.save(member);
+
+        reservationRepository.save(
+                new Reservation(now().plusDays(2), reservationTime, theme, member));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1))
                 .isInstanceOf(BadRequestException.class)
@@ -123,7 +143,7 @@ class ReservationTimeServiceTest {
     @Test
     void should_throw_exception_when_add_exist_time() {
         LocalTime reservedTime = LocalTime.of(10, 0);
-        reservationTimeDao.add(new ReservationTime(1L, reservedTime));
+        reservationTimeRepository.save(new ReservationTime(1L, reservedTime));
 
         ReservationTimeRequest request = new ReservationTimeRequest(reservedTime);
 
@@ -137,11 +157,19 @@ class ReservationTimeServiceTest {
     void should_return_times_with_book_state() {
         ReservationTime reservedTime = new ReservationTime(1L, LocalTime.of(12, 0));
         ReservationTime notReservedTime = new ReservationTime(2L, LocalTime.of(13, 0));
-        reservationTimeDao.add(reservedTime);
-        reservationTimeDao.add(notReservedTime);
+        reservationTimeRepository.save(reservedTime);
+        reservationTimeRepository.save(notReservedTime);
+
         Theme theme = new Theme(1L, "배키", "드라마", "hello.jpg");
+        themeRepository.save(theme);
+
+        Member member = new Member(1L, "배키", MEMBER, "email@email.com", "1234");
+        memberRepository.save(member);
+
         LocalDate reservedDate = now().plusDays(2);
-//        reservationDao.addReservation(new Reservation(1L, "리사", reservedDate, reservedTime, theme));
+        reservationRepository.save(new Reservation(reservedDate, reservedTime, theme, member));
+
+        System.out.println("reservationRepository = " + reservationRepository.findAll().size());
 
         List<IsReservedTimeResponse> times = reservationTimeService.getIsReservedTime(reservedDate, 1L);
 

@@ -7,34 +7,48 @@ import static roomescape.model.Role.MEMBER;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 
 import roomescape.controller.request.UserLoginRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Member;
-import roomescape.service.fake.FakeUserDao;
+import roomescape.repository.MemberRepository;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = "/test_data.sql")
 class MemberServiceTest {
 
-    private final FakeUserDao userDao = new FakeUserDao();
-    private final UserService userService = new UserService(userDao);
+    @Autowired
+    private final MemberRepository memberRepository;
+    @Autowired
+    private final MemberService memberService;
 
-    @BeforeEach
-    void setUp() {
-        userDao.clear();
+    @Autowired
+    MemberServiceTest(MemberRepository memberRepository, MemberService memberService) {
+        this.memberRepository = memberRepository;
+        this.memberService = memberService;
     }
+//
+//    @BeforeEach
+//    void setUp() {
+//        userDao.clear();
+//    }
 
     @DisplayName("아이디와 비밀번호가 같은 유저가 존재하면 해당 유저를 반환한다.")
     @Test
     void should_find_user_when_user_exist() {
-        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(member);
+        Member member = new Member("배키", MEMBER, "hello@email.com", "1234");
+        memberRepository.save(member);
         UserLoginRequest request = new UserLoginRequest("1234", "hello@email.com");
 
-        Member finduser = userService.findUserByEmailAndPassword(request);
+        Member finduser = memberService.findUserByEmailAndPassword(request);
 
         assertThat(finduser).isEqualTo(member);
     }
@@ -43,10 +57,10 @@ class MemberServiceTest {
     @Test
     void should_throw_exception_when_user_not_exist() {
         Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(member);
+        memberRepository.save(member);
         UserLoginRequest request = new UserLoginRequest("1111", "sun@email.com");
 
-        assertThatThrownBy(() -> userService.findUserByEmailAndPassword(request))
+        assertThatThrownBy(() -> memberService.findUserByEmailAndPassword(request))
                 .isInstanceOf(AuthenticationException.class);
     }
 
@@ -54,9 +68,9 @@ class MemberServiceTest {
     @Test
     void should_find_username_when_give_id() {
         Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(member);
+        memberRepository.save(member);
 
-        String userNameById = userService.findUserNameById(1L);
+        String userNameById = memberService.findUserNameById(1L);
 
         assertThat(userNameById).isEqualTo("배키");
     }
@@ -64,7 +78,7 @@ class MemberServiceTest {
     @DisplayName("주어진 아이디에 해당하는 사용자가 없으면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_user_id_not_exist() {
-        assertThatThrownBy(() -> userService.findUserNameById(1L))
+        assertThatThrownBy(() -> memberService.findUserNameById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -72,9 +86,9 @@ class MemberServiceTest {
     @Test
     void should_find_user_when_give_id() {
         Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        userDao.addUser(member);
+        memberRepository.save(member);
 
-        Member memberById = userService.findUserById(1L);
+        Member memberById = memberService.findUserById(1L);
 
         assertThat(memberById).isEqualTo(member);
     }
@@ -82,17 +96,17 @@ class MemberServiceTest {
     @DisplayName("주어진 아이디에 해당하는 사용자가 없으면 예외가 발생한다.")
     @Test
     void should_not_find_user_and_throw_exception_when_user_id_not_exist() {
-        assertThatThrownBy(() -> userService.findUserById(1L))
+        assertThatThrownBy(() -> memberService.findUserById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @DisplayName("모든 사용자를 조회한다.")
     @Test
     void should_find_all_users() {
-        userDao.addUser(new Member(1L, "썬", MEMBER, "sun@email.com", "1111"));
-        userDao.addUser(new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        memberRepository.save(new Member(1L, "썬", MEMBER, "sun@email.com", "1111"));
+        memberRepository.save(new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222"));
 
-        List<Member> members = userService.findAllUsers();
+        List<Member> members = memberService.findAllUsers();
 
         assertThat(members).hasSize(2);
     }
