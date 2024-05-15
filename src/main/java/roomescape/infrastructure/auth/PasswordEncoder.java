@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.infrastructure.auth;
 
 import java.util.IllegalFormatFlagsException;
 

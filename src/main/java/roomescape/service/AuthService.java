@@ -9,8 +9,8 @@ import roomescape.dto.login.LoginMember;
 import roomescape.dto.login.LoginRequest;
 import roomescape.dto.member.MemberPayload;
 import roomescape.dto.token.TokenDto;
-import roomescape.infrastructure.JwtProvider;
-import roomescape.infrastructure.PasswordEncoder;
+import roomescape.infrastructure.auth.JwtProvider;
+import roomescape.infrastructure.auth.PasswordEncoder;
 import roomescape.repository.MemberRepository;
 
 @Service

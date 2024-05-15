@@ -7,7 +7,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
 import roomescape.dto.login.LoginMember;
 import roomescape.dto.token.TokenDto;
-import roomescape.infrastructure.AuthorizationExtractor;
+import roomescape.infrastructure.auth.AuthorizationExtractor;
 import roomescape.service.AuthService;
 
 @Component

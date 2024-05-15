@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.login.LoginCheckResponse;
 import roomescape.dto.login.LoginRequest;
-import roomescape.infrastructure.JwtProvider;
+import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/member-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

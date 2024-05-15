@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infrastructure.persistence;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.repository.ReservationRepository;
 
 @Repository
 class ReservationPersistenceAdapter implements ReservationRepository {

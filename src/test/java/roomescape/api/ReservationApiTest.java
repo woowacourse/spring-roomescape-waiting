@@ -19,7 +19,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.UserReservationRequest;
-import roomescape.infrastructure.JwtProvider;
+import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/reservation-api-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
