@@ -23,6 +23,7 @@ import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
+import roomescape.service.exception.ThemeUsingException;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -69,7 +70,7 @@ class ThemeServiceTest {
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ThemeUsingException.class)
                 .hasMessage("해당 테마에 예약이 있어 삭제할 수 없습니다.");
     }
 

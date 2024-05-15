@@ -10,7 +10,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import roomescape.service.exception.UnauthorizedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,18 +17,13 @@ public class GlobalExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @ExceptionHandler
-    public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public ProblemDetail handleHttpStatusException(HttpStatusException ex) {
+        return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler
-    public ProblemDetail handleIllegalStateException(IllegalStateException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler
-    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMostSpecificCause().getMessage());
+    public ProblemDetail handleJwtException(JwtException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler
@@ -43,19 +37,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ProblemDetail handleMemberNotFoundException(UnauthorizedException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-    }
-
-    @ExceptionHandler
-    public ProblemDetail handleJwtException(JwtException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-    }
-
-    @ExceptionHandler
-    public ProblemDetail handleException(Exception ex) {
+    public ProblemDetail handleInternalServerErrorException(Exception ex) {
         log.error("", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "죄송합니다. 서버에서 문제가 발생하여 요청을 처리할 수 없습니다.");
+    }
+
+    @ExceptionHandler
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMostSpecificCause().getMessage());
     }
 }

@@ -1,11 +1,7 @@
 package roomescape.service;
 
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +21,15 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
+import roomescape.service.exception.DateTimePassedException;
+import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationNotFoundException;
+import roomescape.service.exception.TimeNotFoundException;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -70,7 +75,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(TimeNotFoundException.class)
                 .hasMessage("예약 하려는 시간이 저장되어 있지 않습니다.");
     }
 
@@ -84,7 +89,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2024-05-07", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DateTimePassedException.class)
                 .hasMessage("지나간 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
@@ -100,7 +105,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate(1L, 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
     }
 
@@ -122,7 +127,7 @@ class ReservationServiceTest {
     @Test
     void throw_exception_when_not_saved_reservation_id() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessage("존재하지 않는 아이디입니다.");
     }
 

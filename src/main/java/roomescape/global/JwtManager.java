@@ -10,12 +10,13 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
-import roomescape.service.exception.UnauthorizedException;
+import roomescape.exception.UnauthorizedException;
+
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class JwtManager {
@@ -54,11 +55,11 @@ public class JwtManager {
         try {
             return parseClaims(token);
         } catch (ExpiredJwtException e) {
-            throw new JwtException("기한이 만료된 JWT 토큰입니다.");
+            throw new JwtException("기한이 만료된 JWT 토큰입니다.", e);
         } catch (UnsupportedJwtException | MalformedJwtException e) {
-            throw new JwtException("JWT 토큰 구성이 올바르지 않습니다.");
+            throw new JwtException("JWT 토큰 구성이 올바르지 않습니다.", e);
         } catch (SignatureException e) {
-            throw new JwtException("JWT 토큰 검증에 실패하였습니다.");
+            throw new JwtException("JWT 토큰 검증에 실패하였습니다.", e);
         }
     }
 

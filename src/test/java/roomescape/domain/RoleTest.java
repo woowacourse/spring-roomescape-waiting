@@ -1,11 +1,12 @@
 package roomescape.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Role;
+import roomescape.exception.NotFoundException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RoleTest {
 
@@ -29,7 +30,7 @@ class RoleTest {
     @Test
     void throw_exception_when_invalid_role() {
         assertThatThrownBy(() -> Role.getRole("USER"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessage("회원의 권한이 존재하지 않습니다.");
     }
 

@@ -59,7 +59,7 @@ class MemberServiceTest {
         MemberCreateRequest requestDto = new MemberCreateRequest("t1@t1.com", "11", "워니");
 
         assertThatThrownBy(() -> memberService.signup(requestDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(UnauthorizedEmailException.class)
                 .hasMessage("이미 가입되어 있는 이메일 주소입니다.");
     }
 

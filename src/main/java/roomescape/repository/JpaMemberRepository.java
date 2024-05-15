@@ -1,10 +1,12 @@
 package roomescape.repository;
 
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.service.exception.UnauthorizedEmailException;
+import roomescape.service.exception.MemberNotFoundException;
+
+import java.util.Optional;
 
 @Repository
 public interface JpaMemberRepository extends JpaRepository<Member, Long> {

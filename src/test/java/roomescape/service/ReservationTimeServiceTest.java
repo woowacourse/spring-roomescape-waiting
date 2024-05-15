@@ -1,10 +1,6 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import io.restassured.RestAssured;
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +20,13 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
+import roomescape.service.exception.TimeDuplicatedException;
+import roomescape.service.exception.TimeUsingException;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -63,7 +66,7 @@ class ReservationTimeServiceTest {
         ReservationTimeRequest requestDto = new ReservationTimeRequest("10:00");
 
         assertThatThrownBy(() -> reservationTimeService.createReservationTime(requestDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(TimeDuplicatedException.class)
                 .hasMessage("중복된 시간을 입력할 수 없습니다.");
     }
 
@@ -91,7 +94,7 @@ class ReservationTimeServiceTest {
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(TimeUsingException.class)
                 .hasMessage("해당 시간에 예약이 있어 삭제할 수 없습니다.");
     }
 

@@ -1,5 +1,7 @@
 package roomescape.domain.member;
 
+import roomescape.exception.NotFoundException;
+
 public enum Role {
     ADMIN,
     MEMBER;
@@ -11,6 +13,6 @@ public enum Role {
         if (MEMBER.name().equals(role)) {
             return MEMBER;
         }
-        throw new IllegalArgumentException("회원의 권한이 존재하지 않습니다.");
+        throw new NotFoundException("회원의 권한이 존재하지 않습니다.");
     }
 }
