@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
@@ -53,9 +54,20 @@ public class ReservationService {
         Theme theme = getTheme(reservationAddRequest.themeId());
         Member member = getMember(reservationAddRequest.memberId());
 
+        validateReservationDateTime(reservationAddRequest, reservationTime);
+
         Reservation reservation = reservationAddRequest.toEntity(reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
+
+    private void validateReservationDateTime(ReservationAddRequest reservationAddRequest,
+                                             ReservationTime reservationTime) {
+        LocalDateTime reservationDateTime = reservationAddRequest.date().atTime(reservationTime.getStartAt());
+        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+            throw new EscapeApplicationException(reservationDateTime + ": 예약은 현재 보다 이전일 수 없습니다");
+        }
+    }
+
 
     private Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
