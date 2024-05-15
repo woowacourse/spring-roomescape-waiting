@@ -20,7 +20,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                 FROM Theme AS th
                 JOIN Reservation AS r
                 ON th.id = r.theme_id
-                WHERE r.date BETWEEN :startDate AND :endDate
+                WHERE :startDate <= r.date AND r.date <= :endDate
                 GROUP BY th.id
                 ORDER BY COUNT(th.id) DESC
                 LIMIT :limit
