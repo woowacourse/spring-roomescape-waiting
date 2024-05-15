@@ -28,6 +28,7 @@ public enum ExceptionType {
     WRONG_PASSWORD(BAD_REQUEST, "잘못된 비밀번호입니다."),
     REQUIRED_LOGIN(UNAUTHORIZED, "로그인이 필요합니다."),
     PERMISSION_DENIED(FORBIDDEN, "접근 권한이 없습니다."),
+    NO_QUERY_PARAMETER(BAD_REQUEST, "필수 검색 조건이 누락되었습니다. 요청을 다시 확인해 주세요"),
     ;
 
     private final HttpStatus status;

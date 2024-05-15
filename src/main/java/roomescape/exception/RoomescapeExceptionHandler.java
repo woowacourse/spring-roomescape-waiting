@@ -1,9 +1,11 @@
 package roomescape.exception;
 
+import static roomescape.exception.ExceptionType.*;
 import static roomescape.exception.ExceptionType.INVALID_DATE_TIME_FORMAT;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import roomescape.dto.ErrorResponse;
@@ -24,6 +26,13 @@ public class RoomescapeExceptionHandler {
         return ResponseEntity
                 .status(e.getHttpStatus())
                 .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handle(MissingServletRequestParameterException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(NO_QUERY_PARAMETER.getStatus())
+                .body(new ErrorResponse(NO_QUERY_PARAMETER.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

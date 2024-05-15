@@ -3,6 +3,7 @@ package roomescape.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.NO_QUERY_PARAMETER;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import io.restassured.RestAssured;
@@ -262,6 +263,28 @@ public class ReservationControllerTest {
             assertThat(reservationResponses).containsExactlyInAnyOrder(
                     ReservationResponse.from(reservation6)
             );
+        }
+
+        @DisplayName("예약자 아이디를 사용하지 않으면 예외가 발생한다.")
+        @Test
+        void searchWithoutMemberTest() {
+            RestAssured.given()
+                    .param("themeId", 1).log().all()
+                    .get("/reservations/search")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
+        }
+
+        @DisplayName("테마 아이디를 사용하지 않으면 예외가 발생한다.")
+        @Test
+        void searchWithoutThemeTest() {
+            RestAssured.given()
+                    .param("memberId", 1).log().all()
+                    .get("/reservations/search")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
         }
 
         @DisplayName("날짜와 테마를 이용해서 검색할 수 있다.")

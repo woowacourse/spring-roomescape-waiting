@@ -53,16 +53,12 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/search")
-    public List<ReservationResponse> searchReservation(@RequestParam(required = false) Long themeId,
-                                                       @RequestParam(required = false) Long memberId,
-                                                       @RequestParam(required = false) LocalDate dateFrom,
-                                                       @RequestParam(required = false) LocalDate dateTo) {
-        if (dateFrom == null) {
-            dateFrom = LocalDate.now();
-        }
-        if (dateTo == null) {
-            dateTo = LocalDate.now();
-        }
+    public List<ReservationResponse> searchReservation(@RequestParam Long themeId,
+                                                       @RequestParam Long memberId,
+                                                       @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
+                                                           LocalDate dateFrom,
+                                                       @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
+                                                           LocalDate dateTo) {
         return reservationService.searchReservation(themeId, memberId, dateFrom, dateTo);
     }
 
