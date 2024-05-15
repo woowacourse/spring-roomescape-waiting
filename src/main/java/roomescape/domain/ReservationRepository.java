@@ -15,7 +15,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 
     @Query("select r.time from Reservation r where r.date = :date and r.theme = :theme")
-    List<ReservationTime> findTimeByDateAndTheme(LocalDate date, Theme theme);
+    List<ReservationTime> findTimesByDateAndTheme(LocalDate date, Theme theme);
 
     @Query("""
             select r.theme
@@ -34,10 +34,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             join fetch r.member
             where (:startDate is null or r.date >= :startDate)
                 and (:endDate is null or r.date <= :endDate)
-                and (:themeId is null or r.theme.id = :themeId)
-                and (:memberId is null or r.member.id = :memberId)""")
-    List<Reservation> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Long themeId,
-                                       @Nullable Long memberId);
+                and (:theme is null or r.theme = :theme)
+                and (:member is null or r.member = :member)""")
+    List<Reservation> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Theme theme,
+                                       @Nullable Member member);
 
     boolean existsByTime(ReservationTime time);
 
