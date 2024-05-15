@@ -45,6 +45,12 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> findReservationsByMemberId(long memberId) {
+        return reservationRepository.findAllByMemberId(memberId)
+                .stream().map(ReservationResponse::new)
+                .toList();
+    }
+
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
         Reservation reservation = reservationInfo.toReservation();
         Long timeId = reservation.timeId();

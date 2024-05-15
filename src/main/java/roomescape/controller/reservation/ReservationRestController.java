@@ -1,6 +1,8 @@
 package roomescape.controller.reservation;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +20,6 @@ import roomescape.service.ReservationService;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 public class ReservationRestController {
@@ -47,6 +46,11 @@ public class ReservationRestController {
     public ReservationResponse createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
                                                        @Valid @RequestBody MemberReservationRequest request) {
         return reservationService.createReservation(new ReservationCreate(loginMember, request));
+    }
+
+    @GetMapping("/reservations")
+    public List<ReservationResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
+        return reservationService.findReservationsByMemberId(loginMember.getId());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
