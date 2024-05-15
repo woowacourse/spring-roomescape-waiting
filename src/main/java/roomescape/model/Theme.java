@@ -1,14 +1,11 @@
 package roomescape.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 
 import roomescape.exception.BadRequestException;
 
@@ -21,8 +18,6 @@ public class Theme {
     private String name;
     private String description;
     private String thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private List<Reservation> reservations = new ArrayList<>();
 
     protected Theme() {
     }
@@ -63,10 +58,6 @@ public class Theme {
         return thumbnail;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -79,13 +70,12 @@ public class Theme {
         return id.equals(theme.id)
                 && Objects.equals(name, theme.name)
                 && Objects.equals(description, theme.description)
-                && Objects.equals(thumbnail, theme.thumbnail)
-                && Objects.equals(reservations, theme.reservations);
+                && Objects.equals(thumbnail, theme.thumbnail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnail, reservations);
+        return Objects.hash(id, name, description, thumbnail);
     }
 
     @Override

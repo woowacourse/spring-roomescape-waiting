@@ -1,7 +1,5 @@
 package roomescape.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
@@ -10,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 
 import roomescape.exception.BadRequestException;
 
@@ -25,8 +22,6 @@ public class Member {
     private Role role;
     private String email;
     private String password;
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations = new ArrayList<>();
 
     protected Member() {
     }
@@ -38,6 +33,10 @@ public class Member {
         this.role = role;
         this.email = email;
         this.password = password;
+    }
+
+    public Member(String name, Role role, String email, String password) {
+        this(null, name, role, email, password);
     }
 
     public Member(Long id, String name, Role role) {
@@ -70,10 +69,6 @@ public class Member {
         return role;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -85,18 +80,17 @@ public class Member {
         Member member = (Member) object;
         return Objects.equals(getId(), member.getId()) && Objects.equals(getName(), member.getName())
                 && getRole() == member.getRole() && Objects.equals(getEmail(), member.getEmail())
-                && Objects.equals(getPassword(), member.getPassword())
-                && Objects.equals(reservations, member.reservations);
+                && Objects.equals(getPassword(), member.getPassword());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getRole(), getEmail(), getPassword(), reservations);
+        return Objects.hash(getId(), getName(), getRole(), getEmail(), getPassword());
     }
 
     @Override
     public String toString() {
-        return "User{" +
+        return "Member{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", role=" + role +

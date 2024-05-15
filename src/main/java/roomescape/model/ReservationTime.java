@@ -1,15 +1,12 @@
 package roomescape.model;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 
 @Entity
 public class ReservationTime {
@@ -18,9 +15,6 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
-
-    @OneToMany(mappedBy = "time")
-    private List<Reservation> reservations = new ArrayList<>();
 
     protected ReservationTime() {
     }
@@ -42,10 +36,6 @@ public class ReservationTime {
         return startAt;
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -55,12 +45,12 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) o;
-        return id.equals(that.id) && Objects.equals(startAt, that.startAt) && Objects.equals(reservations, that.reservations);
+        return id.equals(that.id) && Objects.equals(startAt, that.startAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt, reservations);
+        return Objects.hash(id, startAt);
     }
 
     @Override
