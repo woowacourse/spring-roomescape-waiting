@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.user.Email;
 import roomescape.fixture.MemberFixture;
+import roomescape.util.DatabaseCleaner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,9 +14,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberRepositoryTest {
     @Autowired
     MemberRepository sut;
+    @Autowired
+    DatabaseCleaner databaseCleaner;
     @BeforeEach
     void setup(){
-        sut.deleteAll();
+        databaseCleaner.initialize();
     }
 
     @Test
