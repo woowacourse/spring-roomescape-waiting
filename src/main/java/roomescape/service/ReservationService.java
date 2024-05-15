@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.exception.UnauthorizedException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -180,5 +181,18 @@ public class ReservationService {
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteReservationWaitingById(Long reservationId, Long memberId) {
+        Reservation reservation = reservationRepository
+                .findByIdAndStatus(reservationId, ReservationStatus.WAITING)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 대기가 존재하지 않습니다."));
+
+        if (!reservation.getMember().getId().equals(memberId)) {
+            throw new UnauthorizedException("자신의 예약 대기만 취소할 수 있습니다.");
+        }
+
+        reservationRepository.deleteById(reservationId);
     }
 }

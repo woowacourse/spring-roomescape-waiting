@@ -92,10 +92,11 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}/waiting")
-    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable Long id) {
-        if (true) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
+    public ResponseEntity<Void> deleteReservationWaiting(
+            @PathVariable Long id,
+            @Auth Accessor accessor
+    ) {
+        reservationService.deleteReservationWaitingById(id, accessor.id());
 
         return ResponseEntity.noContent().build();
     }
