@@ -39,19 +39,19 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<MemberReservationsResponse> searchReservation(
+    public ResponseEntity<ReservationsResponse> searchReservation(
             @RequestParam final long themeId,
             @RequestParam final long memberId,
             @RequestParam final LocalDate fromDate,
             @RequestParam final LocalDate toDate) {
         final List<ReservationOutput> outputs = reservationService.searchReservation(new ReservationSearchInput(themeId, memberId, fromDate, toDate));
-        return ResponseEntity.ok(MemberReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
     }
 
     @GetMapping("/reservations/mine")
-    public ResponseEntity<ReservationsResponse> getMyReservations(final LoginMemberRequest loginMemberRequest) {
+    public ResponseEntity<MemberReservationsResponse> getMyReservations(final LoginMemberRequest loginMemberRequest) {
         final List<ReservationOutput> outputs = reservationService.getAllMyReservations(loginMemberRequest.id());
-        return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
+        return ResponseEntity.ok(MemberReservationsResponse.toResponse(outputs));
     }
 
     @DeleteMapping("/reservations/{id}")
