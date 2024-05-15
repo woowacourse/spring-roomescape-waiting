@@ -14,6 +14,7 @@ public record JoinRequest(
         @NotBlank(message = "이름은 필수 입니다")
         String name
 ) {
+
     public Member toMember() {
         return new Member(name, email, password, Role.MEMBER);
     }

@@ -23,7 +23,7 @@ class ThemeRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-    
+
     @DisplayName("가장 예약이 많은 인기테마를 조회할 수 있다")
     @Test
     void should_return_top_themes_when_requested() {

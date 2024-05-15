@@ -8,5 +8,4 @@ public record AvailableTimeResponse(Long timeId, LocalTime startAt, boolean alre
     public AvailableTimeResponse(ReservationTime reservationTime, boolean alreadyBooked) {
         this(reservationTime.getId(), reservationTime.getStartAt(), alreadyBooked);
     }
-
 }

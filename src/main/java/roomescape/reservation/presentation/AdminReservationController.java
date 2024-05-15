@@ -16,11 +16,9 @@ import roomescape.reservation.service.ReservationService;
 @RestController
 public class AdminReservationController {
 
-    private final MemberService memberService;
     private final ReservationService reservationService;
 
-    public AdminReservationController(MemberService memberService, ReservationService reservationService) {
-        this.memberService = memberService;
+    public AdminReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 

@@ -6,7 +6,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.time.dto.ReservationTimeResponse;
 
-public record ReservationResponse(Long id, MemberResponse member, LocalDate date, ReservationTimeResponse time,
+public record ReservationResponse(Long id,
+                                  MemberResponse member,
+                                  LocalDate date,
+                                  ReservationTimeResponse time,
                                   ThemeResponse theme) {
 
     public ReservationResponse(Reservation reservation) {

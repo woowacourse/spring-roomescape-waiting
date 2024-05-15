@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.ReservationTimeAddRequest;
 import roomescape.time.dto.ReservationTimeResponse;
-import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.service.ReservationTimeService;
 
 @RestController

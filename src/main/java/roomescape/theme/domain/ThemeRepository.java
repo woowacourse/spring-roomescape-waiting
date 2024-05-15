@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-
     @Query("""
             SELECT th FROM Theme AS th
             JOIN Reservation AS r ON th.id = r.theme.id

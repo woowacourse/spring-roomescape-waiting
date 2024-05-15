@@ -17,7 +17,6 @@ import roomescape.time.dto.ReservationTimeResponse;
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
-
     private final ReservationTimeRepository reservationTimeRepository;
 
     public ReservationTimeService(ReservationRepository reservationRepository,
