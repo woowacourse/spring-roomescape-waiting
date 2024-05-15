@@ -6,7 +6,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.Theme;
+import roomescape.domain.ThemeRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
@@ -37,7 +44,8 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservation(
             Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+                memberId, themeId, dateFrom, dateTo);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
