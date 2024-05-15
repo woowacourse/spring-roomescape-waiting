@@ -46,8 +46,8 @@ public class Theme {
         this(id, theme.name, theme.description, theme.thumbnail);
     }
 
-    public Theme(long id, String name, String description, String thumbnail) {
-        this(id, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
+    public Theme(ThemeName name, Description description, Thumbnail thumbnail) {
+        this(NO_ID, name, description, thumbnail);
     }
 
     public long getId() {
