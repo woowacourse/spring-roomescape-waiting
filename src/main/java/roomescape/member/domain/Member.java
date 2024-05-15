@@ -26,7 +26,7 @@ public class Member {
     private String password;
 
     @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservation = new HashSet<>();
+    private Set<Reservation> reservations = new HashSet<>();
 
     public Member(final Long id, final String name, final Role role, final String email, final String password) {
         validateNameIsNull(name);
@@ -94,6 +94,14 @@ public class Member {
 
     public String getPassword() {
         return password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public Set<Reservation> getReservations() {
+        return reservations;
     }
 
     @Override
