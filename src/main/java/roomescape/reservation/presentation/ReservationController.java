@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Authenticated;
 import roomescape.auth.dto.Accessor;
 import roomescape.reservation.dto.MemberReservationAddRequest;
+import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -41,6 +42,12 @@ public class ReservationController {
         return ResponseEntity.ok(
                 reservationService.findAllByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo)
         );
+    }
+
+    @GetMapping("/reservations/my")
+    public ResponseEntity<List<MemberReservationStatusResponse>> findMemberReservationStatus(
+            @Authenticated Accessor accessor) {
+        return ResponseEntity.ok(reservationService.findAllByMemberWithStatus(accessor.id()));
     }
 
     @PostMapping("/reservations")

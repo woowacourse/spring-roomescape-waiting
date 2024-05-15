@@ -11,6 +11,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.MemberReservationAddRequest;
+import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
@@ -46,6 +47,13 @@ public class ReservationService {
         return reservationRepository.findByMember_IdAndTheme_IdAndDateValueBetween(memberId, themeId,
                         dateFrom, dateTo).stream()
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
+        return reservationRepository.findAllByMember_Id(memberId)
+                .stream()
+                .map(MemberReservationStatusResponse::new)
                 .toList();
     }
 

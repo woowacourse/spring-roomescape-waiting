@@ -7,6 +7,7 @@
 | GET    | `/admin/time`                                    | 어드민 시간 관리 페이지 요청          |
 | GET    | `/admin/theme`                                   | 어드민 테마 관리 페이지 요청          |
 | GET    | `/reservation`                                   | 예약 관리 페이지 요청              |
+| GET    | `/reservation-mine`                              | 나의 예약 페이지 요청              |
 | GET    | ` `                                              | 메인 페이지 요청                 |
 | GET    | `/login`                                         | 로그인 페이지 요청                |
 | GET    | `/signup`                                        | 회원가입 페이지 요청               |
@@ -15,6 +16,7 @@
 | GET    | `/reservations`                                  | 전체 예약 정보 요청               |
 | POST   | `/reservations`                                  | 예약 추가 요청                  |
 | DELETE | `/reservations/{id}`                             | 예약 삭제 요청                  |
+| GET    | `/reservations/my`                                | 로그인 유저의 예약 목록 요청          |
 | GET    | `/times`                                         | 전체 시간 요청                  |
 | POST   | `/times`                                         | 시간 추가 요청                  |
 | DELETE | `/times/{id}`                                    | 시간 삭제 요청                  |
@@ -23,6 +25,16 @@
 | POST   | `/themes`                                        | 테마 추가 요청                  |
 | DELETE | `/themes/{id}`                                   | 테마 삭제 요청                  |
 | DELETE | `/themes/popular`                                | 인기 있는 테마 요청               |
+
+# 테스트 계정
+
+| 이름  | 이메일              | 비밀번호 | 권한   |
+|-----|------------------|------|------|
+| 안돌  | andole@test.com  | 123  | MEMBER |
+| 파랑  | parang@test.com  | 123  | MEMBER |
+| 리비  | libienz@test.com | 123  | MEMBER |
+| 메이슨 | mason@test.com   | 123  | MEMBER |
+| 어드민 | admin@test.com   | 123  | ADMIN |
 
 # 도메인 명세
 
@@ -50,11 +62,3 @@
 
 - [x] 예약 신청 날짜는 오늘보다 이전일 수 없다.
 - [x] 예약 날짜는 null일 수 없다.
-
-## 1단계 해야될 일
-
-- [x] jpa 의존성 추가
-- [x] yml파일 설정 (ddl auto 등)
-- [x] 기존 레포 제거
-- [x] 엔티티 매핑
-- [x] 연관관계 매핑

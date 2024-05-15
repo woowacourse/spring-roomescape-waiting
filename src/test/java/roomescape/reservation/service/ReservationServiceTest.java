@@ -26,6 +26,7 @@ import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTimeRepository;
@@ -53,6 +54,15 @@ class ReservationServiceTest {
 
         assertThat(reservationService.findAllReservation())
                 .contains(new ReservationResponse(SAVED_RESERVATION_1), new ReservationResponse(SAVED_RESERVATION_2));
+    }
+
+    @DisplayName("특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
+    @Test
+    void should_return_response_when_my_reservations_requested_all() {
+        when(reservationRepository.findAllByMember_Id(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
+
+        assertThat(reservationService.findAllByMemberWithStatus(1L))
+                .containsExactly(new MemberReservationStatusResponse(SAVED_RESERVATION_1));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")
