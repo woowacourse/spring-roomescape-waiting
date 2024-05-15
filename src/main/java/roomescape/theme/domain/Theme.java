@@ -5,10 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
 import java.util.Objects;
-import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class Theme {
@@ -21,8 +18,6 @@ public class Theme {
     private ThemeDescription description;
     @Embedded
     private ThemeThumbnail thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private List<Reservation> reservations;
 
     public Theme(Long id, String name, String description, String thumbnail) {
         this(Objects.requireNonNull(id),

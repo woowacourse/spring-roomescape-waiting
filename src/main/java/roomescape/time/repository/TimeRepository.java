@@ -11,8 +11,8 @@ import roomescape.time.domain.ReservationTime;
 public interface TimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
     @Query("""
-            SELECT t FROM ReservationTime AS t
-            INNER JOIN t.reservations AS r
+            SELECT t FROM Reservation AS r
+            INNER JOIN r.time AS t
             WHERE r.date = :date
             AND r.theme.id = :themeId
             """)
