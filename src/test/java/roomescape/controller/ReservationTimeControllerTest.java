@@ -28,6 +28,7 @@ import roomescape.service.dto.request.ReservationTimeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReservationTimeControllerTest {
+
     @LocalServerPort
     private int port;
 

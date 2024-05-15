@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.TIME;
@@ -101,29 +100,5 @@ class ReservationTimeRepositoryTest {
         reservationTimeRepository.deleteById(reservationTime.getId());
         // then
         assertThat(reservationTimeRepository.findAll()).isEmpty();
-    }
-
-    @DisplayName("삭제 대상이 존재하면 true를 반환한다.")
-    @Test
-    void returnTrueWhenDeleted() {
-        // given
-        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        // when
-//        boolean deleted = reservationTimeRepository.deleteById(reservationTime.getId());
-//        // then
-//        assertThat(deleted).isTrue();
-        assertThatCode(() -> reservationTimeRepository.deleteById(reservationTime.getId()))
-                .doesNotThrowAnyException();
-    }
-
-    @DisplayName("삭제 대상이 존재하지 않으면 false를 반환한다.")
-    @Test
-    void returnFalseWhenNotDeleted() {
-//        // given & when
-//        boolean deleted = reservationTimeRepository.deleteById(1L);
-//        // then
-//        assertThat(deleted).isFalse();
-        assertThatCode(() -> reservationTimeRepository.deleteById(1L))
-                .doesNotThrowAnyException();
     }
 }

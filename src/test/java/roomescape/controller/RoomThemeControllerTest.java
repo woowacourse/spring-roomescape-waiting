@@ -16,6 +16,7 @@ import roomescape.service.dto.request.RoomThemeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RoomThemeControllerTest {
+
     @LocalServerPort
     private int port;
 

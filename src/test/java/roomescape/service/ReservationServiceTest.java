@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DATE_AFTER_1DAY;
 import static roomescape.TestFixture.DATE_AFTER_2DAY;
 import static roomescape.TestFixture.MEMBER_BROWN;
+import static roomescape.TestFixture.MEMBER_NAME;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 import static roomescape.TestFixture.VALID_STRING_DATE;
@@ -82,12 +83,14 @@ class ReservationServiceTest {
         List<MyReservationResponse> myReservations = reservationService.findMyReservations(authInfo);
 
         // then
+        MyReservationResponse myReservationResponse = myReservations.get(0);
+
         assertAll(
-                () -> assertThat(myReservations.get(0).reservationId()).isEqualTo(reservationResponse.id()),
-                () -> assertThat(myReservations.get(0).theme()).isEqualTo(ROOM_THEME1.getName()),
-                () -> assertThat(myReservations.get(0).date()).isEqualTo(VALID_STRING_DATE),
-                () -> assertThat(myReservations.get(0).time()).isEqualTo(VALID_STRING_TIME),
-                () -> assertThat(myReservations.get(0).status()).isEqualTo("예약")
+                () -> assertThat(myReservationResponse.reservationId()).isEqualTo(reservationResponse.id()),
+                () -> assertThat(myReservationResponse.theme()).isEqualTo(ROOM_THEME1.getName()),
+                () -> assertThat(myReservationResponse.date()).isEqualTo(VALID_STRING_DATE),
+                () -> assertThat(myReservationResponse.time()).isEqualTo(VALID_STRING_TIME),
+                () -> assertThat(myReservationResponse.status()).isEqualTo("예약")
         );
     }
 
@@ -110,13 +113,15 @@ class ReservationServiceTest {
     @Test
     void save() {
         // given
-        ReservationCreateRequest reservationCreateRequest = createReservationRequest(VALID_STRING_DATE);
+        ReservationCreateRequest reservationCreateRequest = createReservationRequest(MEMBER_BROWN,
+                RESERVATION_TIME_10AM, ROOM_THEME1, VALID_STRING_DATE);
         // when
         ReservationResponse response = reservationService.save(reservationCreateRequest);
         // then
         assertAll(
                 () -> assertThat(reservationService.findAll()).hasSize(1),
-                () -> assertThat(response.member().name()).isEqualTo("브라운"),
+                () -> assertThat(response.member().name()).isEqualTo(MEMBER_NAME),
+                () -> assertThat(response.theme().name()).isEqualTo(ROOM_THEME1.getName()),
                 () -> assertThat(response.date()).isEqualTo(VALID_STRING_DATE),
                 () -> assertThat(response.time().startAt()).isEqualTo(VALID_STRING_TIME)
         );
@@ -126,7 +131,8 @@ class ReservationServiceTest {
     @Test
     void pastReservationSaveThrowsException() {
         // given
-        ReservationCreateRequest reservationCreateRequest = createReservationRequest("2000-11-09");
+        ReservationCreateRequest reservationCreateRequest = createReservationRequest(MEMBER_BROWN,
+                RESERVATION_TIME_10AM, ROOM_THEME1, "2000-11-09");
         // when & then
         assertThatThrownBy(() -> reservationService.save(reservationCreateRequest))
                 .isInstanceOf(BadRequestException.class)
@@ -137,19 +143,19 @@ class ReservationServiceTest {
     @Test
     void deleteById() {
         // given
-        createReservationRequest(VALID_STRING_DATE);
+        createReservationRequest(MEMBER_BROWN, RESERVATION_TIME_10AM, ROOM_THEME1, VALID_STRING_DATE);
         // when
         reservationService.deleteById(1L);
         // then
         assertThat(reservationService.findAll()).isEmpty();
     }
 
-    private ReservationCreateRequest createReservationRequest(String date) {
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(
-                RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        return new ReservationCreateRequest(member.getId(), LocalDate.parse(date),
+    private ReservationCreateRequest createReservationRequest(Member member, ReservationTime reservationTime,
+                                                              RoomTheme roomTheme, String date) {
+        Member savedMember = memberRepository.save(member);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        RoomTheme savedRoomTheme = roomThemeRepository.save(roomTheme);
+        return new ReservationCreateRequest(savedMember.getId(), LocalDate.parse(date),
                 savedReservationTime.getId(), savedRoomTheme.getId());
     }
 }

@@ -1,7 +1,10 @@
 package roomescape.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
+import static roomescape.TestFixture.ADMIN_NAME;
+
 import io.restassured.RestAssured;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.response.MemberResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -28,7 +30,7 @@ class MemberControllerTest {
     void tokenLogin() {
         String accessToken = RestAssured
                 .given().log().all()
-                .body(new LoginRequest("zeze@gmail.com", "zeze"))
+                .body(ADMIN_LOGIN_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
@@ -42,6 +44,6 @@ class MemberControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
 
-        Assertions.assertThat(member.name()).isEqualTo("제제");
+        assertThat(member.name()).isEqualTo(ADMIN_NAME);
     }
 }

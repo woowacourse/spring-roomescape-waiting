@@ -1,14 +1,11 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.ADMIN_ZEZE;
 import static roomescape.TestFixture.DATE_AFTER_1DAY;
 import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
-import static roomescape.TestFixture.ROOM_THEME2;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

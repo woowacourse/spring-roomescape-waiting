@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MemberPageControllerTest {
+
     @LocalServerPort
     private int port;
 
