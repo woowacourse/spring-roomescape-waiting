@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -37,21 +38,28 @@ public class ThemeService {
                 .toList();
     }
 
-    // TODO: 개선하기
     public List<ThemeResponse> findThemeRanking() {
-        Map<Long, List<Reservation>> collect1 = reservationService.getAllReservations().stream()
-                .filter(reservation -> reservation.getDate().isBefore(LocalDate.now()) && reservation.getDate()
-                        .isAfter(LocalDate.now().minusWeeks(1)))
-                .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()));
+        List<Reservation> reservations = reservationService.findByDateBetween(
+                LocalDate.now().minusWeeks(1),
+                LocalDate.now()
+        );
+        List<Long> popularThemes = sortByReservationCountAndLimit(getReservationCountsPerThemeId(reservations));
 
-        List<Long> list = collect1.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getValue().size()))
-                .map(entry -> entry.getKey())
-                .limit(10)
-                .toList();
-
-        return list.stream()
+        return popularThemes.stream()
                 .map(id -> ThemeResponse.from(themeRepository.findById(id).get()))
+                .toList();
+    }
+
+    private Map<Long, List<Reservation>> getReservationCountsPerThemeId(List<Reservation> reservations) {
+        return reservations.stream()
+                .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()));
+    }
+
+    private List<Long> sortByReservationCountAndLimit(Map<Long, List<Reservation>> collect) {
+        return collect.entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> entry.getValue().size()))
+                .map(Entry::getKey)
+                .limit(10)
                 .toList();
     }
 

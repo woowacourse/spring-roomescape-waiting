@@ -98,6 +98,10 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<Reservation> findByDateBetween(final LocalDate startDate, final LocalDate endDate) {
+        return reservationRepository.findByDateBetween(startDate, endDate);
+    }
+
     public ReservationDeleteResponse delete(final long id) {
         if (reservationRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약이 존재하지 않습니다.");
