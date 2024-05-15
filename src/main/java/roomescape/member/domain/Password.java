@@ -9,12 +9,12 @@ public class Password {
 
     private String value;
 
+    private Password() {
+    }
+
     public Password(final String value) {
         validatePassword(value);
         this.value = value;
-    }
-
-    public Password() {
     }
 
     private void validatePassword(final String value) {

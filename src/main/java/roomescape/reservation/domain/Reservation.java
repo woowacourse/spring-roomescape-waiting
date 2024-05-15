@@ -33,6 +33,9 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private Reservation() {
+    }
+
     public Reservation(
             final Long id,
             final Member member,
@@ -49,9 +52,6 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    public Reservation() {
     }
 
     private void validateDate(final LocalDate date) {

@@ -23,6 +23,9 @@ public class Theme {
 
     private String thumbnail;
 
+    private Theme() {
+    }
+
     public Theme(final Long id, final ThemeName themeName, final String description, final String thumbnail) {
         validateDescription(description);
         validateThumbnail(thumbnail);
@@ -30,9 +33,6 @@ public class Theme {
         this.themeName = themeName;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public Theme() {
     }
 
     private void validateDescription(final String description) {

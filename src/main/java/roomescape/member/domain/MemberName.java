@@ -8,12 +8,12 @@ public class MemberName {
     private static final int MAX_NAME_LENGTH = 10;
     private String value;
 
+    private MemberName() {
+    }
+
     public MemberName(final String name) {
         validateName(name);
         this.value = name;
-    }
-
-    public MemberName() {
     }
 
     private void validateName(final String name) {

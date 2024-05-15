@@ -13,13 +13,13 @@ public class Email {
 
     private String value;
 
+    private Email() {
+
+    }
+
     public Email(final String value) {
         validateEmail(value);
         this.value = value;
-    }
-
-    public Email() {
-
     }
 
     private void validateEmail(final String value) {

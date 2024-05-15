@@ -8,12 +8,12 @@ public class ThemeName {
     private static final int MAX_THEME_NAME_LENGTH = 30;
     private String value;
 
+    private ThemeName() {
+    }
+
     public ThemeName(final String value) {
         validateName(value);
         this.value = value;
-    }
-
-    public ThemeName() {
     }
 
     private void validateName(final String value) {

@@ -29,6 +29,9 @@ public class Member {
     @Column(name = "member_role")
     private Role role;
 
+    private Member() {
+    }
+
     public Member(
             final Long id, final MemberName memberName, final Email email,
             final Password password, final Role role
@@ -38,9 +41,6 @@ public class Member {
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    public Member() {
     }
 
     public static Member of(final String name, final String email, final String password, final String role) {

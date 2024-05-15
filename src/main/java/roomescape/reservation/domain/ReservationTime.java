@@ -14,13 +14,13 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
+    private ReservationTime() {
+    }
+
     public ReservationTime(final Long id, final LocalTime startAt) {
         validateStartAt(startAt);
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public ReservationTime() {
     }
 
     private void validateStartAt(final LocalTime startAt) {
