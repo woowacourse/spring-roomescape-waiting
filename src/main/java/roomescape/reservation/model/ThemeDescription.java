@@ -30,7 +30,7 @@ public class ThemeDescription {
         }
     }
 
-    public String getDescription() {
+    public String getValue() {
         return description;
     }
 }

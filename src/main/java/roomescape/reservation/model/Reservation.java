@@ -30,13 +30,13 @@ public class Reservation {
     private Member member;
 
     public static Reservation of(
-            ReservationStatus status,
+            final ReservationStatus status,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
             final Member member
     ) {
-        checkNull(status, time, theme, member);
+        checkRequiredData(status, time, theme, member);
 
         final ReservationDate reservationDate = new ReservationDate(date);
         return new Reservation(
@@ -49,14 +49,14 @@ public class Reservation {
         );
     }
 
-    private static void checkNull(
+    private static void checkRequiredData(
             final ReservationStatus status,
             final ReservationTime reservationTime,
             final Theme theme,
             final Member member
     ) {
         if (status == null || reservationTime == null || theme == null || member == null) {
-            throw new IllegalArgumentException("시간, 테마, 회원 정보는 Null을 입력할 수 없습니다.");
+            throw new IllegalArgumentException("예약 상태, 시간, 테마, 회원 정보는 Null을 입력할 수 없습니다.");
         }
     }
 
@@ -68,7 +68,7 @@ public class Reservation {
             final Theme theme,
             final Member member
     ) {
-        checkNull(status, time, theme, member);
+        checkRequiredData(status, time, theme, member);
 
         return new Reservation(
                 id,
@@ -97,10 +97,6 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.member = member;
-    }
-
-    public Reservation initializeIndex(final Long reservationId) {
-        return new Reservation(reservationId, status, date, time, theme, member);
     }
 
     public Long getId() {

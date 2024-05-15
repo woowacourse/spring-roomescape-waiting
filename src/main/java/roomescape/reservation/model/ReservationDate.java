@@ -25,7 +25,7 @@ public class ReservationDate {
         }
     }
 
-    public LocalDate getDate() {
+    public LocalDate getValue() {
         return date;
     }
 }

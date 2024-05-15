@@ -30,7 +30,7 @@ public class ThemeThumbnail {
         }
     }
 
-    public String getThumbnail() {
+    public String getValue() {
         return thumbnail;
     }
 }
