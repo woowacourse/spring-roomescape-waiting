@@ -6,17 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.dto.SaveReservationTimeRequest;
 import roomescape.reservation.model.ReservationTime;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -39,7 +36,7 @@ class ReservationTimeServiceTest {
     @Test
     void saveReservationTimeTest() {
         // Given
-        final LocalTime startAt = LocalTime.now().plusHours(3);
+        final LocalTime startAt = LocalTime.now().plusHours(1);
         final SaveReservationTimeRequest saveReservationTimeRequest = new SaveReservationTimeRequest(startAt);
 
         // When
@@ -64,15 +61,6 @@ class ReservationTimeServiceTest {
         final List<ReservationTime> reservationTimes = reservationTimeService.getReservationTimes();
         assertThat(reservationTimes).hasSize(7);
     }
-
-//    @DisplayName("존재하지 않는 예약 시간 정보를 삭제하려고 하면 예외가 발생한다.")
-//    @Test
-//    void throwExceptionWhenDeleteNotExistReservationTimeTest() {
-//        // When & Then
-//        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(17L))
-//                .isInstanceOf(NoSuchElementException.class)
-//                .hasMessage("해당 id의 예약 시간이 존재하지 않습니다.");
-//    }
 
     @DisplayName("이미 존재하는 예약시간이 입력되면 예외를 발생한다.")
     @Test

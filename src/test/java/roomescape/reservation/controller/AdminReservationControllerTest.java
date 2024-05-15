@@ -110,17 +110,6 @@ class AdminReservationControllerTest {
                 .body("message", is("유효하지 않은 권한 요청입니다."));
     }
 
-//    @DisplayName("존재하지 않는 예약 정보를 삭제하려고 하면 400코드가 응답된다.")
-//    @Test
-//    void deleteNoExistReservationTest() {
-//        RestAssured.given().log().all()
-//                .cookie("token", createAdminAccessToken())
-//                .when().delete("/admin/reservations/20")
-//                .then().log().all()
-//                .statusCode(400)
-//                .body("message", is("해당 id의 예약이 존재하지 않습니다."));
-//    }
-
     @DisplayName("예약 시간 정보를 저장한다.")
     @Test
     void saveReservationTimeTest() {
@@ -182,17 +171,6 @@ class AdminReservationControllerTest {
                 .statusCode(403)
                 .body("message", is("유효하지 않은 권한 요청입니다."));
     }
-
-//    @DisplayName("존재하지 않는 예약 시간 정보를 삭제하려고 하면 400코드가 응답된다.")
-//    @Test
-//    void deleteNoExistReservationTimeTest() {
-//        RestAssured.given().log().all()
-//                .cookie("token", createAdminAccessToken())
-//                .when().delete("/admin/times/20")
-//                .then().log().all()
-//                .statusCode(400)
-//                .body("message", is("해당 id의 예약 시간이 존재하지 않습니다."));
-//    }
 
     @DisplayName("테마 정보를 저장한다.")
     @Test
