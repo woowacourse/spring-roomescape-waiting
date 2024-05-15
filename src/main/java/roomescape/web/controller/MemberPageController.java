@@ -26,7 +26,7 @@ public class MemberPageController {
         return "index";
     }
 
-    @GetMapping("/reservations/mine")
+    @GetMapping("/reservation-mine")
     public String getMyReservationPage() {
         return "reservation-mine";
     }
