@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -38,19 +39,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        if (request.hasAnyNull()) {
-            return reservationRepository.findAll().stream()
-                    .map(ReservationResponse::new)
-                    .toList();
-        }
+        Specification<Reservation> specification = request.getSearchSpecification();
 
-        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(
-                        request.memberId(),
-                        request.themeId(),
-                        request.dateFrom(),
-                        request.dateTo())
-                .stream()
-                .map(ReservationResponse::new)
+        return reservationRepository.findAll(specification)
+                .stream().map(ReservationResponse::new)
                 .toList();
     }
 
