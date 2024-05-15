@@ -22,6 +22,7 @@ public class PopularThemeFinder {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDate = today.minusDays(START_DAY_TO_SUBTRACT);
         LocalDate endDate = today.minusDays(END_DATE_TO_SUBTRACT);
-        return reservationQueryRepository.findPopularThemesDateBetween(startDate, endDate);
+        return reservationQueryRepository.findPopularThemesDateBetween(startDate, endDate).stream()
+                .limit(COUNT_OF_LIMIT).toList();
     }
 }
