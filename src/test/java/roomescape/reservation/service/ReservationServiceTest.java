@@ -18,7 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ConflictException;
 import roomescape.exception.IllegalReservationDateTimeRequestException;
-import roomescape.member.dao.MemberDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dao.ReservationJdbcDao;
 import roomescape.reservation.domain.Reservation;
@@ -45,7 +45,7 @@ class ReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
     @Mock
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
     @Mock
     private TimeRepository timeRepository;
 

@@ -3,8 +3,10 @@ package roomescape.member.service;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BadRequestException;
-import roomescape.member.dao.MemberJdbcDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 
@@ -23,7 +25,7 @@ class MemberServiceTest {
     private static final String USER_EXAMPLE_COM = "user@example.com";
     private static final String USER_EXAMPLE_PASSWORD = "password";
     @Mock
-    private MemberJdbcDao memberJdbcDao;
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private MemberService memberService;
@@ -36,7 +38,8 @@ class MemberServiceTest {
         Member registeredMember = new Member(USERNAME, USER_EXAMPLE_COM, USER_EXAMPLE_PASSWORD);
 
         // When
-        when(memberJdbcDao.findByEmail(USER_EXAMPLE_COM)).thenReturn(registeredMember);
+        when(memberRepository.findByEmail(USER_EXAMPLE_COM))
+                .thenReturn(Optional.of(registeredMember));
 
         // Then
         Member actualInfo = memberService.findMember(request);
@@ -54,7 +57,7 @@ class MemberServiceTest {
         MemberLoginRequest request = new MemberLoginRequest(email, USER_EXAMPLE_PASSWORD);
 
         // When
-        when(memberJdbcDao.findByEmail(email)).thenReturn(null);
+        when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
         // Then
         assertThrows(BadRequestException.class, () -> {

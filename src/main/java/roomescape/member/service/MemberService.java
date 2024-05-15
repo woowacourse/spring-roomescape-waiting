@@ -3,7 +3,7 @@ package roomescape.member.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
-import roomescape.member.dao.MemberJdbcDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
@@ -11,33 +11,27 @@ import roomescape.member.dto.MemberProfileInfo;
 @Service
 public class MemberService {
 
-    private final MemberJdbcDao memberJdbcDao;
+    private final MemberRepository memberRepository;
 
-    public MemberService(MemberJdbcDao memberJdbcDao) {
-        this.memberJdbcDao = memberJdbcDao;
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
     }
 
     public List<MemberProfileInfo> findAllMembers() {
-        return memberJdbcDao.findAll()
+        return memberRepository.findAll()
                 .stream()
                 .map(member -> new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))
                 .toList();
     }
 
     public Member findMember(MemberLoginRequest memberLoginRequest) {
-        Member member = memberJdbcDao.findByEmail(memberLoginRequest.email());
-        validateLoginRequest(member);
-        return member;
-    }
-
-    private void validateLoginRequest(Member member) {
-        if (member == null || member.getEmail() == null || member.getPassword() == null) {
-            throw new BadRequestException("등록되지 않은 회원입니다.");
-        }
+        return memberRepository.findByEmail(memberLoginRequest.email())
+                .orElseThrow(() -> new BadRequestException("등록되지 않은 이메일입니다."));
     }
 
     public Member findMemberById(Long id) {
-        return memberJdbcDao.findById(id);
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new BadRequestException("등록되지 않은 회원 ID 입니다."));
     }
 
 }

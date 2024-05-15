@@ -81,7 +81,7 @@ class ReservationControllerTest {
                 .thenReturn(true);
         Mockito.when(memberAuthService.extractPayload(any()))
                 .thenReturn(new MemberProfileInfo(1L, "어드민", "admin@email.com"));
-        Member member = new Member(1, "valid", "testUser@email.com", "pass");
+        Member member = new Member(1L, "valid", "testUser@email.com", "pass");
         token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
                 .writeValueAsString(new ReservationRequest(reservation.getDate(), "polla", 1L, 1L));

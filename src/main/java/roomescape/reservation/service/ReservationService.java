@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.IllegalReservationDateTimeRequestException;
 import roomescape.exception.SaveDuplicateContentException;
-import roomescape.member.dao.MemberDao;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dao.ReservationDao;
@@ -27,14 +27,14 @@ public class ReservationService {
     private final ReservationDao reservationDao;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
 
     public ReservationService(ReservationDao reservationDao, TimeRepository timeRepository, ThemeRepository themeRepository,
-            MemberDao memberDao) {
+            MemberRepository memberRepository) {
         this.reservationDao = reservationDao;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
-        this.memberDao = memberDao;
+        this.memberRepository = memberRepository;
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest,
@@ -55,7 +55,7 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalReservationDateTimeRequestException("해당 예약 시간이 존재하지 않습니다."));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new BadRequestException("선택한 테마가 존재하지 않습니다."));
-        Member member = memberDao.findById(reservationRequest.memberId());
+        Member member = memberRepository.findById(reservationRequest.memberId()).orElseThrow();
         Reservation reservation = new Reservation(member.getName(), reservationRequest.date(), time, theme);
         Reservation savedReservation = reservationDao.save(reservation);
         reservationDao.saveMemberReservation(savedReservation.getId(), member.getId());

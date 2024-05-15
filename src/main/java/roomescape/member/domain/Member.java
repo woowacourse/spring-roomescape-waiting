@@ -1,16 +1,34 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
+@Entity
 public class Member {
 
-    private final long id;
-    private final String name;
-    private final String email;
-    private final String password;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
     private MemberRole role;
 
-    public Member(long id, String name, String email, String password, String role) {
+    public Member() {
+    }
+
+    public Member(Long id, String name, String email, String password) {
+        this(id, name, email, password, "USER");
+    }
+
+    public Member(String name, String email, String password) {
+        this(null, name, email, password, "USER");
+    }
+
+    public Member(Long id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -18,19 +36,11 @@ public class Member {
         this.role = MemberRole.valueOf(role);
     }
 
-    public Member(long id, String name, String email, String password) {
-        this(id, name, email, password, "USER");
-    }
-
-    public Member(String name, String email, String password) {
-        this(0, email, password, name, "GUEST");
-    }
-
     public String getEmail() {
         return email;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -58,7 +68,7 @@ public class Member {
         if (!(o instanceof Member member)) {
             return false;
         }
-        return id == member.id && Objects.equals(email, member.email) && Objects.equals(password, member.password)
+        return Objects.equals(id, member.id) && Objects.equals(email, member.email) && Objects.equals(password, member.password)
                 && Objects.equals(name, member.name);
     }
 
