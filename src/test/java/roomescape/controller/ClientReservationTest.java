@@ -2,27 +2,37 @@ package roomescape.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
-
-import java.util.HashMap;
-import java.util.Map;
+import roomescape.auth.AuthorizationExtractor;
+import roomescape.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ClientReservationTest {
+    private static final String COMMON_USER = "poke@test.com";
+
     @LocalServerPort
     int port;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    private String generateToken(String email) {
+        return jwtTokenProvider.createToken(email);
     }
 
     @DisplayName("날짜와 테마를 선택하면 예약 가능한 시간을 확인할 수 있다.")
@@ -37,7 +47,8 @@ class ClientReservationTest {
     @DisplayName("사용자 예약 시 부적절한 입력값이 들어 올 경우 400오류를 반환한다.")
     @ParameterizedTest
     @CsvSource({"2099-01-11,test", "1111-22-33,1", "1111-22-33,test", ","})
-    void given_when_booksWithInvalidDateAndThemeId_then_statusCodeIsBadRequest(String invalidDate, String invalidThemeId) {
+    void given_when_booksWithInvalidDateAndThemeId_then_statusCodeIsBadRequest(String invalidDate,
+                                                                               String invalidThemeId) {
         RestAssured.given().log().all()
                 .when().get("/books/%s/%s".formatted(invalidDate, invalidThemeId))
                 .then().log().all()
@@ -70,5 +81,15 @@ class ClientReservationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @DisplayName("로그인한 사용자의 예약을 조회한다.")
+    @Test
+    void given_memberToken_when_readByMember_then_statusCodeIsOk() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(COMMON_USER))
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200);
     }
 }

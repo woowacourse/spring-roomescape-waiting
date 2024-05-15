@@ -1,19 +1,21 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.Member;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
+import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -33,7 +35,7 @@ class ReservationServiceTest {
     @DisplayName("예약 목록을 반환한다.")
     void given_when_findEntireReservationList_then_returnReservationResponses() {
         //when, then
-        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(7);
+        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(8);
     }
 
     @Test
@@ -78,9 +80,11 @@ class ReservationServiceTest {
     void given_reservationRequestWithInitialSize_when_createWithNotExistThemeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
-        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 99L, 1L);
+        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 99L,
+                1L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(InvalidClientFieldWithValueException.class);
+        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+                InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
@@ -89,9 +93,11 @@ class ReservationServiceTest {
     void given_reservationRequestWithInitialSize_when_createWithNotExistTimeId_then_throwException() {
         //given
         long initialSize = getReservationSize();
-        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 99L, 1L, 1L);
+        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 99L, 1L,
+                1L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(InvalidClientFieldWithValueException.class);
+        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+                InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
     }
 
@@ -100,9 +106,22 @@ class ReservationServiceTest {
     void given_reservationRequestWithInitialSize_when_createWithNotExistMemberId_then_throwException() {
         //given
         long initialSize = getReservationSize();
-        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 1L, 99L);
+        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-01-01"), 1L, 1L,
+                99L);
         //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(InvalidClientFieldWithValueException.class);
+        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(
+                InvalidClientFieldWithValueException.class);
         assertThat(getReservationSize()).isEqualTo(initialSize);
+    }
+
+    @Test
+    @DisplayName("로그인한 회원의 예약 목록을 반환한다.")
+    void given_member_when_findReservationByMember_then_returnReservationMineResponses() {
+        //given
+        Member member = new Member(1L, "poke@test.com", "hashedpassword", "salt", "poke", "USER");
+        //when
+        final List<ReservationsMineResponse> reservationsByMember = service.findReservationsByMember(member);
+        //then
+        assertThat(reservationsByMember).hasSize(7);
     }
 }

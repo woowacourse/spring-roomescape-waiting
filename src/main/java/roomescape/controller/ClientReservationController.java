@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ import roomescape.domain.Member;
 import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
+import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.service.BookService;
 import roomescape.service.ReservationService;
 
@@ -38,5 +40,12 @@ public class ClientReservationController {
                 reservationService.create(reservationRequest.with(member.getId()));
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
+    }
+
+    @GetMapping("/reservations-mine")
+    public ResponseEntity<List<ReservationsMineResponse>> readByMember(Member member) {
+        final List<ReservationsMineResponse> reservationsMineResponses =
+                reservationService.findReservationsByMember(member);
+        return ResponseEntity.ok(reservationsMineResponses);
     }
 }

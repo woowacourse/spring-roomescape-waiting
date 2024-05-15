@@ -11,6 +11,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
+import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
 import roomescape.repository.MemberRepository;
@@ -90,5 +91,12 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
         return new ReservationResponses(reservationResponses);
+    }
+
+    public List<ReservationsMineResponse> findReservationsByMember(final Member member) {
+        return reservationRepository.findByMember(member)
+                .stream()
+                .map(ReservationsMineResponse::from)
+                .toList();
     }
 }

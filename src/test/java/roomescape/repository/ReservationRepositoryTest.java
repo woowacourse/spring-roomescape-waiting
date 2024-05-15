@@ -80,8 +80,8 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.existsByTimeId(2L)).isTrue();
     }
 
-    @Test
     @DisplayName("memberId, themeId, 기간을 이용하여 예약을 조회할 수 있다.")
+    @Test
     void given_memberIdThemeIdAndPeriod_when_find_then_Reservations() {
         //given
         Long themeId = 2L;
@@ -92,5 +92,14 @@ class ReservationRepositoryTest {
         final List<Reservation> reservations = reservationRepository
                 .findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
         assertThat(reservations.size()).isEqualTo(3);
+    }
+
+    @DisplayName("특정 member의 예약을 조회할 수 있다.")
+    @Test
+    void given_member_when_findByMember_then_Reservations() {
+        //given
+        Member member = new Member(1L, "poke@test.com", "hashedpassword", "salt", "poke", "USER");
+        //when, then
+        assertThat(reservationRepository.findByMember(member)).hasSize(7);
     }
 }

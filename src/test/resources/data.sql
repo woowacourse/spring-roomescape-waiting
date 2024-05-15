@@ -49,4 +49,6 @@ INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2024-03-02', 3, 3, 1);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2099-04-30', 1, 1, 1);
+INSERT INTO reservation(date, time_id, theme_id, member_id)
+VALUES ('2999-04-30', 1, 1, 2);
 
