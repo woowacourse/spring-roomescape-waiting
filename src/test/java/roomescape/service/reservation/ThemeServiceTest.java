@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -102,9 +103,9 @@ class ThemeServiceTest {
     void cannotDeleteByReservation() {
         //given
         Theme theme = createTheme("레벨2 탈출");
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime("21:25"));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        reservationRepository.save(new Reservation("2024-10-04", member, reservationTime, theme));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme));
 
         //when&then
         assertThatThrownBy(() -> themeService.deleteById(theme.getId()))
@@ -120,18 +121,15 @@ class ThemeServiceTest {
         Theme theme2 = createTheme("레벨2 탈출");
         Theme theme3 = createTheme("레벨3 탈출");
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime("21:25"));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
 
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE), member,
-                        reservationTime, theme1));
+                new Reservation(LocalDate.now().minusDays(1), member, reservationTime, theme1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(7).format(DateTimeFormatter.ISO_DATE), member,
-                        reservationTime, theme2));
+                new Reservation(LocalDate.now().minusDays(7), member, reservationTime, theme2));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(8).format(DateTimeFormatter.ISO_DATE), member,
-                        reservationTime, theme3));
+                new Reservation(LocalDate.now().minusDays(8), member, reservationTime, theme3));
 
         //when
         List<ThemeResponse> result = themeService.findPopularThemes();

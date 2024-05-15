@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class AdminReservationControllerTest {
         date = LocalDate.now().plusDays(1);
         timeId = (int) RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest("17:46"))
+                .body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
                 .then().extract().response().jsonPath().get("id");
 

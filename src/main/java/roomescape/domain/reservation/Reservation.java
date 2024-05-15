@@ -18,13 +18,13 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Member member;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Schedule schedule;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Theme theme;
 
     public Reservation() {

@@ -23,15 +23,6 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(long id, ReservationTime reservationTime) {
-        this(id, reservationTime.startAt);
-    }
-
-    public ReservationTime(long id, String time) {
-        this.id = id;
-        this.startAt = LocalTime.parse(time);
-    }
-
     public ReservationTime(LocalTime time) {
         this(NO_ID, time);
     }

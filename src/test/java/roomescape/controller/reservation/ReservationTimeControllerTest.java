@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,7 @@ class ReservationTimeControllerTest {
     void createReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest("10:00"))
+                .body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
     }
@@ -42,39 +43,25 @@ class ReservationTimeControllerTest {
     @Test
     void createDuplicateTime() {
         //given
+        LocalTime time = LocalTime.now();
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest("10:00"))
+                .body(new ReservationTimeCreateRequest(time))
                 .when().post("/times");
 
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest("10:00"))
+                .body(new ReservationTimeCreateRequest(time))
                 .when().post("/times")
                 .then().log().all().statusCode(400).body("message", is("이미 같은 시간이 존재합니다."));
-    }
-
-    @DisplayName("시간 추가 실패 테스트 - 시간 오류")
-    @Test
-    void createInvalidReservationTime() {
-        //given
-        String invalidTime = "25:00";
-
-        //when&then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(invalidTime))
-                .when().post("/times")
-                .then().log().all()
-                .assertThat().statusCode(400).body("message", is("올바르지 않은 시간입니다."));
     }
 
     @DisplayName("등록된 시간 내역을 조회한다.")
     @Test
     void findAllReservationTime() {
         //given
-        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest("10:00"))
+        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times");
 
         //when&then
@@ -87,7 +74,7 @@ class ReservationTimeControllerTest {
     @Test
     void deleteReservationTimeById() {
         //given
-        var id = RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest("10:00"))
+        var id = RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
                 .then().log().all().extract().response().jsonPath().get("id");
 

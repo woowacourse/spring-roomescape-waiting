@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +48,7 @@ class ReservationTimeServiceTest {
     @Test
     void create() {
         //given
-        String startAt = "10:00";
+        LocalTime startAt = LocalTime.now();
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(startAt);
 
         //when
@@ -61,7 +65,7 @@ class ReservationTimeServiceTest {
     @Test
     void findAll() {
         //given
-        reservationTimeRepository.save(new ReservationTime("10:00"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
         //when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
@@ -74,7 +78,7 @@ class ReservationTimeServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        String time = "10:00";
+        LocalTime time = LocalTime.now();
         reservationTimeRepository.save(new ReservationTime(time));
 
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(time);
@@ -89,11 +93,11 @@ class ReservationTimeServiceTest {
     @Test
     void cannotDeleteTime() {
         //given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime("10:00"));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        reservationRepository.save(new Reservation("2222-10-04", member, reservationTime, theme));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme));
 
         //when&then
         assertThatThrownBy(() -> reservationTimeService.deleteById(reservationTime.getId()))
@@ -105,12 +109,13 @@ class ReservationTimeServiceTest {
     @Test
     void findAvailableTimes() {
         //given
-        ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime("10:00"));
-        ReservationTime notBookedReservationTime = reservationTimeRepository.save(new ReservationTime("11:00"));
+        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
+        ReservationTime notBookedReservationTime = reservationTimeRepository.save(new ReservationTime(time.plusHours(5)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        String date = "2222-10-04";
+        LocalDate date = LocalDate.now().plusDays(1);
         reservationRepository.save(new Reservation(date, member, bookedReservationTime, theme));
 
         //when
@@ -118,9 +123,9 @@ class ReservationTimeServiceTest {
                 new ReservationTimeReadRequest(date, theme.getId()));
 
         //then
-        boolean isBookedOfBookedTime = result.stream().filter(time -> time.id() == bookedReservationTime.getId())
+        boolean isBookedOfBookedTime = result.stream().filter(bookedTime -> bookedTime.id() == bookedReservationTime.getId())
                 .findFirst().get().alreadyBooked();
-        boolean isBookedOfUnBookedTime = result.stream().filter(time -> time.id() == notBookedReservationTime.getId())
+        boolean isBookedOfUnBookedTime = result.stream().filter(unbookedTime -> unbookedTime.id() == notBookedReservationTime.getId())
                 .findFirst().get().alreadyBooked();
         assertAll(
                 () -> assertThat(result).hasSize(2),

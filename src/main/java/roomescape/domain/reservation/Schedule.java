@@ -1,7 +1,6 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -24,7 +23,7 @@ public class Schedule {
     @AttributeOverride(name = "value", column = @Column(name = "DATE"))
     private ReservationDate date;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private ReservationTime time;
 
     public Schedule() {

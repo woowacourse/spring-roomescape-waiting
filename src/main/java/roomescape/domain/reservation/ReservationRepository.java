@@ -8,8 +8,7 @@ import roomescape.exception.UnauthorizedException;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByScheduleDateAndScheduleTimeIdAndThemeId(ReservationDate scheduleDate, long scheduleTimeId,
-                                                            long themeId);
+    boolean existsByScheduleDateAndScheduleTimeIdAndThemeId(ReservationDate scheduleDate, long scheduleTimeId, long themeId);
 
     boolean existsByScheduleTimeId(long timeId);
 

@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,7 @@ class ReservationControllerTest {
     @LocalServerPort
     private int port;
 
-    private String date;
+    private LocalDate date;
     private long timeId;
     private long themeId;
     private String token;
@@ -31,10 +33,10 @@ class ReservationControllerTest {
     void init() {
         RestAssured.port = port;
 
-        date = "2222-05-01";
+        date = LocalDate.now().plusDays(1);
         timeId = (int) RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest("17:46"))
+                .body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
                 .then().extract().response().jsonPath().get("id");
 
@@ -88,7 +90,7 @@ class ReservationControllerTest {
     @Test
     void createInvalidScheduleReservation() {
         //given
-        String invalidDate = "2023-10-04";
+        LocalDate invalidDate = LocalDate.now().minusDays(5);
 
         //when&then
         RestAssured.given().log().all()
@@ -98,22 +100,6 @@ class ReservationControllerTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .assertThat().statusCode(400).body("message", is("현재보다 이전으로 일정을 설정할 수 없습니다."));
-    }
-
-    @DisplayName("예약 추가 실패 테스트 - 일정 날짜 오류")
-    @Test
-    void createInvalidScheduleDateReservation() {
-        //given
-        String invalidDate = "03-04";
-
-        //when&then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .body(new ReservationRequest(invalidDate, timeId, themeId))
-                .when().post("/reservations")
-                .then().log().all()
-                .assertThat().statusCode(400).body("message", is("올바르지 않은 날짜입니다."));
     }
 
     @DisplayName("모든 예약 내역 조회 테스트")
