@@ -3,12 +3,16 @@ package roomescape.controller;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.UserLoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql("/controller-test-data.sql")
 class StaticAdminPageControllerTest {
 
     @DisplayName("관리자 권한이 아니면 403을 반환한다.")
