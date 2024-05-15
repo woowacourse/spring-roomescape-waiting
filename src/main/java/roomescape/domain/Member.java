@@ -31,7 +31,7 @@ public class Member {
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(nullable = false)
     private MemberRole role;
 
     @OneToMany(mappedBy = "member")
