@@ -8,6 +8,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.util.DatabaseCleaner;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,10 +21,12 @@ class ReservationTimeRepositoryTest {
     ReservationTimeRepository sut;
     @Autowired
     ReservationInserter reservationInserter;
+    @Autowired
+    DatabaseCleaner databaseCleaner;
 
     @BeforeEach
     void setup() {
-        sut.deleteAll();
+        databaseCleaner.initialize();
     }
 
     @Test
@@ -76,7 +79,8 @@ class ReservationTimeRepositoryTest {
                         .getId());
 
         result.stream()
-                .filter(avail -> avail.getStartAt().equals("13:00"))
+                .filter(avail -> avail.getStartAt()
+                        .equals("13:00"))
                 .forEach(avail -> assertThat(avail.getIsBooked()).isFalse());
     }
 }

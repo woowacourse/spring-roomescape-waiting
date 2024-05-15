@@ -2,7 +2,7 @@ package roomescape.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.dao.dto.AvailableReservationTimeResultInterface;
+import roomescape.dao.dto.AvailableReservationTimeResult;
 import roomescape.domain.reservation.ReservationTime;
 
 import java.time.LocalDate;
@@ -21,5 +21,5 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
                     LEFT OUTER JOIN Reservation AS r
                     ON rt.id = r.time_id AND r.date = ? AND r.theme_id = ?
             """, nativeQuery = true)
-    List<AvailableReservationTimeResultInterface> getAvailableReservationTimeByThemeIdAndDate(LocalDate date, Long themeId);
+    List<AvailableReservationTimeResult> getAvailableReservationTimeByThemeIdAndDate(LocalDate date, Long themeId);
 }

@@ -3,7 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationRepository;
 import roomescape.dao.ReservationTimeRepository;
-import roomescape.dao.dto.AvailableReservationTimeResultInterface;
+import roomescape.dao.dto.AvailableReservationTimeResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
@@ -45,7 +45,7 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeOutput> getAvailableTimes(final AvailableReservationTimeInput input) {
-        final List<AvailableReservationTimeResultInterface> availableReservationTimeResults =
+        final List<AvailableReservationTimeResult> availableReservationTimeResults =
                 reservationTimeRepository.getAvailableReservationTimeByThemeIdAndDate(input.date(), input.themeId());
         return AvailableReservationTimeOutput.toOutputs(availableReservationTimeResults);
     }
