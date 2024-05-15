@@ -6,6 +6,9 @@ import roomescape.domain.Reservation;
 
 public class ReservationSpecification {
 
+    private ReservationSpecification() {
+    }
+
     public static Specification<Reservation> hasThemeId(Long themeId) {
         if (themeId == null) {
             return null;
