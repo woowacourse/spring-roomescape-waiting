@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class AuthorizationResponseHandler {
+class AuthorizationResponseHandler {
 
-    static boolean redirectLogin(HttpServletResponse response) throws IOException {
+    public static boolean redirectLogin(HttpServletResponse response) throws IOException {
         response.sendRedirect("/login");
         return false;
     }
 
-    static boolean responseUnauthorized(HttpServletResponse response) throws IOException {
+    public static boolean responseUnauthorized(HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter writer = response.getWriter();

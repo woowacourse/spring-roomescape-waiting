@@ -33,13 +33,13 @@ class ReservationPersistenceAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate) {
-        return repository.findThemeReservationCountsForDate(startDate, endDate);
+    public Optional<Reservation> findById(Long id) {
+        return repository.findById(id);
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        return repository.findById(id);
+    public List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate) {
+        return repository.findThemeReservationCountsForDate(startDate, endDate);
     }
 
     @Override

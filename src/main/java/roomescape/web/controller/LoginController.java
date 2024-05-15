@@ -16,7 +16,7 @@ import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
 @RestController
-public class LoginController {
+class LoginController {
 
     private final AuthService authService;
     private final MemberService memberService;

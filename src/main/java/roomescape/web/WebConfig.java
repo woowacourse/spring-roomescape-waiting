@@ -11,7 +11,7 @@ import roomescape.web.interceptor.AdminAuthorizationInterceptor;
 import roomescape.web.interceptor.UserAuthorizationInterceptor;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+class WebConfig implements WebMvcConfigurer {
 
     private final AdminAuthorizationInterceptor adminAuthorizationInterceptor;
     private final UserAuthorizationInterceptor userAuthorizationInterceptor;

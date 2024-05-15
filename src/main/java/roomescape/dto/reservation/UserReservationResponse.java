@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.reservation.Reservation;
 
-public record MemberReservationResponse(
+public record UserReservationResponse(
         Long reservationId,
         String theme,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
@@ -13,8 +13,8 @@ public record MemberReservationResponse(
         String status
 ) {
 
-    public static MemberReservationResponse from(Reservation reservation) {
-        return new MemberReservationResponse(
+    public static UserReservationResponse from(Reservation reservation) {
+        return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),

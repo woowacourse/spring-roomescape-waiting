@@ -8,7 +8,7 @@ import roomescape.dto.member.MemberResponse;
 import roomescape.service.MemberService;
 
 @RestController
-public class MemberController {
+class MemberController {
 
     private final MemberService memberService;
 

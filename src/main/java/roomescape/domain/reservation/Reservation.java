@@ -17,6 +17,7 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,10 +50,6 @@ public class Reservation {
 
     public Long getThemeId() {
         return theme.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
     }
 
     public Long getId() {

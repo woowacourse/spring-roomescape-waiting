@@ -12,9 +12,6 @@ import roomescape.domain.reservation.Reservation;
 interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, Long> {
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
-    List<Reservation> findAll();
-
-    @EntityGraph(attributePaths = {"member", "theme", "time"})
     Optional<Reservation> findById(Long id);
 
     @Query("""
@@ -27,6 +24,9 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
             """
     )
     List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate);
+
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAll();
 
     @Query("SELECT r from Reservation r WHERE r.date = :date AND r.theme.id = :themeId")
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
