@@ -25,6 +25,6 @@
 ## 2단계 요구사항
 
 - [ ] 자신의 예약 목록 조회
-- [ ] 자신의 예약 목록 화면 응답
-    - [ ] "/reservation-mine" URL 요청 시 `reservation-mine.html` 가 응답된다.
+- [x] 자신의 예약 목록 화면 응답
+    - [x] "/reservation-mine" URL 요청 시 `reservation-mine.html` 가 응답된다.
     - [x] js, html 파일 추가

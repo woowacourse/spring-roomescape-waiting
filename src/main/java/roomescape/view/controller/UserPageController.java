@@ -14,4 +14,9 @@ public class UserPageController {
     public String loadLoginPage() {
         return "/login";
     }
+
+    @GetMapping("/reservation-mine")
+    public String loadMyReservationPage() {
+        return "/reservation-mine";
+    }
 }

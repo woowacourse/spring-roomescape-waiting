@@ -43,4 +43,13 @@ class UserPageControllerTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @DisplayName("나의 예약 페이지를 열 수 있다.")
+    @Test
+    void loadMyReservationPage() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
