@@ -24,9 +24,9 @@ import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.util.IntegrationTest;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.util.IntegrationTest;
 
 @IntegrationTest
 class ThemeIntegrationTest {

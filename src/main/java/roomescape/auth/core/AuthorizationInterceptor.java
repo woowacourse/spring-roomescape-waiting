@@ -3,8 +3,8 @@ package roomescape.auth.core;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.core.token.TokenProvider;
+import roomescape.auth.domain.AuthInfo;
 
 public class AuthorizationInterceptor implements HandlerInterceptor {
 

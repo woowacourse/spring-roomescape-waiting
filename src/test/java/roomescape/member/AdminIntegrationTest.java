@@ -20,9 +20,9 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.util.IntegrationTest;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.util.IntegrationTest;
 
 @IntegrationTest
 class AdminIntegrationTest {
