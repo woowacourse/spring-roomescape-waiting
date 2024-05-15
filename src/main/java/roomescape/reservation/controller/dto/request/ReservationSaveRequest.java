@@ -10,13 +10,13 @@ import roomescape.reservation.domain.Theme;
 
 public record ReservationSaveRequest(
         @NotNull
+        long themeId,
+
+        @NotNull
         LocalDate date,
 
         @NotNull
-        long timeId,
-
-        @NotNull
-        long themeId
+        long timeId
 ) {
 
     public Reservation toEntity(final Member member, final ReservationTime reservationTime, final Theme theme,

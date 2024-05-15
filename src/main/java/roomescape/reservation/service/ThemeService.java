@@ -37,6 +37,7 @@ public class ThemeService {
                 .toList();
     }
 
+    // TODO: 개선하기
     public List<ThemeResponse> findThemeRanking() {
         Map<Long, List<Reservation>> collect1 = reservationService.getAllReservations().stream()
                 .filter(reservation -> reservation.getDate().isBefore(LocalDate.now()) && reservation.getDate()
