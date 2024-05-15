@@ -18,7 +18,7 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = NAME_MAX_LENGTH)
+    @Column(nullable = false, unique = true, length = NAME_MAX_LENGTH)
     private String name;
 
     @Column(nullable = false)
