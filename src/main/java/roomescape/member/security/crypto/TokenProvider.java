@@ -11,4 +11,5 @@ public interface TokenProvider {
     Map<String, String> getPayload(String token);
 
     boolean validateToken(String token);
+
 }

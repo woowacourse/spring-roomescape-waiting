@@ -7,80 +7,89 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import roomescape.exception.BadRequestException;
+import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @Entity
 public class Reservation {
 
-    private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
+    // private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private String memberName;
+    private Long id;
+
+    @ManyToOne
+    private Member member;
+
     private LocalDate date;
+
     @ManyToOne
     private Time time;
+
     @ManyToOne
     private Theme theme;
 
     public Reservation() {
     }
 
-    public Reservation(String memberName, LocalDate date, Time time, Theme theme) {
-        this(0, memberName, date, time, theme);
+    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    public Reservation(long id, String memberName, LocalDate date, Time time, Theme theme) {
-        validate(memberName, date, time, theme);
+    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
+        validate(member, date, time, theme);
         this.id = id;
-        this.memberName = memberName;
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    private void validate(String name, LocalDate date, Time time, Theme theme) {
-        if (name == null || date == null || time == null || theme == null) {
+    private void validate(Member member, LocalDate date, Time time, Theme theme) {
+        if (member == null || date == null || time == null || theme == null) {
             throw new BadRequestException("예약 정보가 부족합니다.");
         }
-        validateName(name);
+        //validateName(name);
     }
 
-    private void validateName(String name) {
-        if (name.isBlank()) {
-            throw new BadRequestException("공백으로 이루어진 이름으로 예약할 수 없습니다.");
-        }
-        if (ILLEGAL_NAME_REGEX.matcher(name)
-                .matches()) {
-            throw new BadRequestException("특수문자가 포함된 이름으로 예약을 시도하였습니다.");
-        }
-    }
+    /**
+     * private void validateName(String name) { if (name.isBlank()) { throw new BadRequestException("공백으로 이루어진 이름으로 예약할
+     * 수 없습니다."); } if (ILLEGAL_NAME_REGEX.matcher(name) .matches()) { throw new BadRequestException("특수문자가 포함된 이름으로 예약을
+     * 시도하였습니다."); } }
+     **/
 
-    public boolean hasSameId(long id) {
-        return this.id == id;
-    }
-
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
     public String getMemberName() {
-        return memberName;
+        return member.getName();
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public Time getReservationTime() {
+    public Time getTime() {
         return time;
     }
 
-    public long getReservationTimeId() {
+    public void setTime(Time time) {
+        this.time = time;
+    }
+
+    public Long getTimeId() {
         return time.getId();
     }
 
@@ -88,24 +97,16 @@ public class Reservation {
         return theme;
     }
 
-    public long getThemeId() {
-        return theme.getId();
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setTime(Time time) {
-        this.time = time;
-    }
-
     public void setTheme(Theme theme) {
         this.theme = theme;
     }
 
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
     public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
-        return  date.isAfter(start) && date.isBefore(end);
+        return date.isAfter(start) && date.isBefore(end);
     }
 
     @Override
@@ -116,24 +117,25 @@ public class Reservation {
         if (!(o instanceof Reservation that)) {
             return false;
         }
-        return id == that.id && Objects.equals(memberName, that.memberName) && Objects.equals(date, that.date) && Objects.equals(
-                theme, that.theme) && Objects.equals(time, that.time);
+        if (id == null || that.id == null) {
+            return Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme,
+                    that.theme);
+        }
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(memberName, date, theme, id, time);
+        if (id == null) {
+            return Objects.hash(date, time, theme);
+        }
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return "Reservation{" +
-                "date=" + date +
-                ", memberName='" + memberName + '\'' +
-                ", theme=" + theme +
-                ", id=" + id +
-                ", time=" + time +
-                '}';
+        return "Reservation{" + "date=" + date + ", id=" + id + ", member=" + member + ", time=" + time + ", theme="
+                + theme + '}';
     }
 
 }

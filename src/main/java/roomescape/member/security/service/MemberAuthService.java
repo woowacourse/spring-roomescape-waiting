@@ -46,6 +46,14 @@ public class MemberAuthService {
                 payload.get("email"));
     }
 
+    private String extractTokenFromCookie(Cookie[] cookies) {
+        return Arrays.stream(cookies)
+                .filter(cookie -> "token".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new IllegalAuthorizationException("잘못된 쿠키 값입니다."));
+    }
+
     public String extractNameFromPayload(Cookie[] cookies) {
         String token = extractTokenFromCookie(cookies);
         Map<String, String> tokenPayload = tokenProvider.getPayload(token);
@@ -57,15 +65,8 @@ public class MemberAuthService {
         return tokenProvider.validateToken(token);
     }
 
-    private String extractTokenFromCookie(Cookie[] cookies) {
-        return Arrays.stream(cookies)
-                .filter(cookie -> "token".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalAuthorizationException("잘못된 쿠키 값입니다."));
-    }
-
     public boolean isAdmin(Member member) {
         return member.getRole() == MemberRole.ADMIN;
     }
+
 }

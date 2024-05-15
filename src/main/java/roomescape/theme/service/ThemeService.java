@@ -40,7 +40,8 @@ public class ThemeService {
                 .minusDays(NUMBER_OF_ONE_DAY);
         LocalDate beforeOneWeek = yesterday.minusDays(NUMBER_OF_ONE_WEEK);
 
-        List<Theme> rankedThemes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(beforeOneWeek, yesterday);
+        List<Theme> rankedThemes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(beforeOneWeek,
+                yesterday);
         return rankedThemes.stream()
                 .limit(TOP_THEMES_LIMIT)
                 .map(ThemeRankResponse::fromTheme)

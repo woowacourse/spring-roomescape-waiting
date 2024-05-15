@@ -16,16 +16,20 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.exception.AuthorizationException;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationRequest;
 
 public class ReservationArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final MemberAuthService memberAuthService;
+    private final MemberService memberService;
 
-    public ReservationArgumentResolver(MemberAuthService memberAuthService) {
+    public ReservationArgumentResolver(MemberAuthService memberAuthService, MemberService memberService) {
         this.memberAuthService = memberAuthService;
+        this.memberService = memberService;
     }
 
     @Override
@@ -43,10 +47,11 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
                 .getCookies();
         if (memberAuthService.isLoginMember(cookies)) {
             MemberProfileInfo payload = memberAuthService.extractPayload(cookies);
+            Member member = memberService.findMemberById(payload.id());
             ReservationRequest reservationRequest = convertToRequestBody(request);
             return new ReservationRequest(
                     LocalDate.from(reservationRequest.date()),
-                    payload.name(),
+                    member,
                     reservationRequest.timeId(),
                     reservationRequest.themeId()
             );

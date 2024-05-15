@@ -10,7 +10,6 @@ import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
 import roomescape.member.service.MemberService;
 
-
 public class CheckRoleInterceptor implements HandlerInterceptor {
 
     private final MemberAuthService memberAuthService;

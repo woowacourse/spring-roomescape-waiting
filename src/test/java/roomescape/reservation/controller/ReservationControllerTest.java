@@ -48,8 +48,12 @@ class ReservationControllerTest {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    private final Reservation reservation = new Reservation(1L, "polla", LocalDate.MAX,
-            new Time(1L, LocalTime.of(12, 0)), new Theme(1L, "polla", "폴라 방탈출", "이미지~"));
+    private final Member member = new Member("tester", "test@email.com","pass");
+    private final Reservation reservation = new Reservation(
+            member,
+            LocalDate.MAX,
+            new Time(1L, LocalTime.of(12, 0)),
+            new Theme(1L, "도비", "도비 방탈출", "이미지~"));
 
     @Autowired
     private MockMvc mockMvc;
@@ -84,7 +88,7 @@ class ReservationControllerTest {
         Member member = new Member(1L, "valid", "testUser@email.com", "pass");
         token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(new ReservationRequest(reservation.getDate(), "polla", 1L, 1L));
+                .writeValueAsString(new ReservationRequest(reservation.getDate(), member, 1L, 1L));
 
         mockMvc.perform(post("/reservations").cookie(new Cookie("token", token))
                         .content(content)
@@ -110,7 +114,7 @@ class ReservationControllerTest {
     void findAvailableTimeList() throws Exception {
         Mockito.when(reservationService.findTimeAvailability(1, LocalDate.now()))
                 .thenReturn(
-                        List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getReservationTime(), true)));
+                        List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getTime(), true)));
 
         mockMvc.perform(get("/reservations/times/1?date=" + LocalDate.now()))
                 .andDo(print())

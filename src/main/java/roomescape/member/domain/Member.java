@@ -20,10 +20,6 @@ public class Member {
     public Member() {
     }
 
-    public Member(Long id, String name, String email, String password) {
-        this(id, name, email, password, "USER");
-    }
-
     public Member(String name, String email, String password) {
         this(null, name, email, password, "USER");
     }
@@ -34,6 +30,10 @@ public class Member {
         this.email = email;
         this.password = password;
         this.role = MemberRole.valueOf(role);
+    }
+
+    public Member(Long id, String name, String email, String password) {
+        this(id, name, email, password, "USER");
     }
 
     public String getEmail() {
@@ -68,7 +68,8 @@ public class Member {
         if (!(o instanceof Member member)) {
             return false;
         }
-        return Objects.equals(id, member.id) && Objects.equals(email, member.email) && Objects.equals(password, member.password)
+        return Objects.equals(id, member.id) && Objects.equals(email, member.email) && Objects.equals(password,
+                member.password)
                 && Objects.equals(name, member.name);
     }
 
