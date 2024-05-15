@@ -11,6 +11,7 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.LogInRequest;
 import roomescape.dto.MemberPreviewResponse;
+import roomescape.dto.MemberReservationResponse;
 import roomescape.service.exception.ResourceNotFoundException;
 
 @Service
@@ -56,6 +57,13 @@ public class MemberService {
     public List<MemberPreviewResponse> getAllMemberPreview() {
         return memberRepository.findAll().stream()
                 .map(MemberPreviewResponse::from)
+                .toList();
+    }
+
+    public List<MemberReservationResponse> getReservations(Member member) {
+        return member.getReservations()
+                .stream()
+                .map(MemberReservationResponse::from)
                 .toList();
     }
 }

@@ -24,7 +24,7 @@ public class Member {
     private Role role;
 
     @OneToMany(mappedBy = "member")
-    private List<Reservation> reservation;
+    private List<Reservation> reservations;
 
     public Member() {
     }
@@ -55,5 +55,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 }

@@ -1,13 +1,16 @@
 package roomescape.controller.api;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.MemberPreviewResponse;
-import roomescape.service.MemberService;
 
-import java.util.List;
+import roomescape.domain.Member;
+import roomescape.dto.MemberPreviewResponse;
+import roomescape.dto.MemberReservationResponse;
+import roomescape.service.MemberService;
 
 @RestController
 @RequestMapping("/members")
@@ -22,6 +25,14 @@ public class MemberController {
     @GetMapping
     public ResponseEntity<List<MemberPreviewResponse>> getMembers() {
         List<MemberPreviewResponse> response = memberService.getAllMemberPreview();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // TODO: 메서드명 재고
+    @GetMapping("/reservations")
+    public ResponseEntity<List<MemberReservationResponse>> getReservations(Member member) {
+        List<MemberReservationResponse> response = memberService.getReservations(member);
 
         return ResponseEntity.ok(response);
     }

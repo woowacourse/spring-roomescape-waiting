@@ -1,9 +1,13 @@
 package roomescape.acceptance;
 
-import roomescape.domain.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 public class PreInsertedData {
 
@@ -66,7 +70,6 @@ public class PreInsertedData {
             "customer2",
             Role.CUSTOMER
     );
-
 
     public static final Reservation PRE_INSERTED_RESERVATION_1 = new Reservation(
             1L,
