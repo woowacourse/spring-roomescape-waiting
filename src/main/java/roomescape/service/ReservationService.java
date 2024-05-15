@@ -38,6 +38,12 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
+        if (request.hasAnyNull()) {
+            return reservationRepository.findAll().stream()
+                    .map(ReservationResponse::new)
+                    .toList();
+        }
+
         return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(
                         request.memberId(),
                         request.themeId(),

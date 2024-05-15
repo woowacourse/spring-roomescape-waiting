@@ -30,4 +30,8 @@ public class ReservationSearchParams {
     public LocalDate dateTo() {
         return dateTo;
     }
+
+    public boolean hasAnyNull() {
+        return memberId == null || themeId == null || dateFrom == null || dateTo == null;
+    }
 }
