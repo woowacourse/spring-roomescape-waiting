@@ -1,5 +1,5 @@
 INSERT INTO member(name, email, password, role)
-VALUES ('Stitch', 'admin@gmail.com', 'asd', 'ADMIN'),
+VALUES ('Arthur', 'admin@gmail.com', 'asd', 'ADMIN'),
        ('Wiib', 'user@gmail.com', 'asd', 'USER');
 
 INSERT INTO theme(name, description, thumbnail)
