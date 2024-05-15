@@ -2,6 +2,8 @@ package roomescape.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
@@ -28,7 +30,8 @@ public class ThemeService {
         LocalDate periodEnd = LocalDate.now();
         LocalDate periodStart = periodEnd.minusDays(POPULAR_THEMES_LOOK_BACK_DAYS);
 
-        return themeRepository.findByPeriodOrderByReservationCount(periodStart, periodEnd, POPULAR_THEMES_LIMIT_COUNT)
+        Pageable pageRequest = PageRequest.of(0, POPULAR_THEMES_LIMIT_COUNT);
+        return themeRepository.findTopByDurationAndCount(periodStart, periodEnd, pageRequest)
                 .stream()
                 .map(ThemeResponse::new)
                 .toList();

@@ -7,6 +7,7 @@ import java.util.Objects;
 @Embeddable
 public class ReservationDate {
 
+    //TODO: date 변수명 value로 변경
     private LocalDate date;
 
     public ReservationDate() {

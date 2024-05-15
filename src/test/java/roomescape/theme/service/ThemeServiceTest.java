@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.dto.ThemeResponse;
@@ -42,7 +44,8 @@ class ThemeServiceTest {
     @DisplayName("인기 있는 테마를 조회하고 응답 형태로 반환할 수 있다")
     @Test
     void should_return_popular_themes_as_responses() {
-        when(themeRepository.findByPeriodOrderByReservationCount(SEVEN_DAYS_AGO, TODAY, 10))
+        Pageable pageRequest = PageRequest.of(0, 10);
+        when(themeRepository.findTopByDurationAndCount(SEVEN_DAYS_AGO, TODAY, pageRequest))
                 .thenReturn(List.of(THEME_1, THEME_2));
 
         List<ThemeResponse> popularThemes = themeService.findPopularTheme();
