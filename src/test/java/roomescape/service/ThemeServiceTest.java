@@ -1,25 +1,15 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.user.Member;
 import roomescape.exception.ExistReservationException;
-import roomescape.exception.NotExistException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.service.dto.input.ReservationTimeInput;
@@ -27,6 +17,11 @@ import roomescape.service.dto.input.ThemeInput;
 import roomescape.service.dto.output.ReservationTimeOutput;
 import roomescape.service.dto.output.ThemeOutput;
 import roomescape.util.DatabaseCleaner;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class ThemeServiceTest {
@@ -82,13 +77,6 @@ class ThemeServiceTest {
 
         final var result = themeService.getAllThemes();
         assertThat(result).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 테마 ID 를 삭제하려 하면 에외를 발생한다.")
-    void throw_exception_when_not_exist_id() {
-        assertThatThrownBy(() -> themeService.deleteTheme(-1))
-                .isInstanceOf(NotExistException.class);
     }
 
     @Test

@@ -64,7 +64,6 @@ class ThemeRepositoryTest {
         final Theme theme2 = Theme.of(null,"감동","실화","b.jpg");
         final Theme theme3 = Theme.of(null,"충격","충충실화","c.jpg");
 
-        //final String date,final Theme theme, final Member member, final ReservationTime reservationTime
         reservationInserter.addNewReservation("2024-10-03",theme1, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
         reservationInserter.addNewReservation("2024-10-02",theme1, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
         reservationInserter.addNewReservation("2024-10-02",theme2, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());

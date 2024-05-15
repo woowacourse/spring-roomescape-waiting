@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import roomescape.dao.MemberRepository;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
@@ -22,15 +22,15 @@ import static roomescape.exception.ExceptionDomainType.*;
 public class ReservationCreateValidator {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
-    private final ThemeDao themeDao;
+    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
 
-    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao, final ThemeDao themeDao, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
+    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
-        this.themeDao = themeDao;
+        this.themeRepository = themeRepository;
         this.memberRepository = memberDao;
         this.nowDateTimeFormatter = nowDateTimeFormatter;
     }
@@ -56,7 +56,7 @@ public class ReservationCreateValidator {
     }
 
     private Theme validateExistTheme(final long themeId) {
-        return themeDao.find(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotExistException(THEME, themeId));
     }
 
