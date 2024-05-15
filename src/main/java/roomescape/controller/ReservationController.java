@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ReservationRequest;
+import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.model.Reservation;
@@ -18,7 +19,6 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
-//@Validated
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
@@ -70,6 +70,15 @@ public class ReservationController {
         List<Reservation> responses = reservationService.findReservationsByConditions(memberId, themeId, from, to);
         List<ReservationResponse> response = responses.stream()
                 .map(ReservationResponse::from)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MemberReservationResponse>> getReservationsOfMember(LoginMember member) {
+        List<Reservation> reservations = reservationService.findReservationsByMember(member);
+        List<MemberReservationResponse> response = reservations.stream()
+                .map((MemberReservationResponse::new))
                 .toList();
         return ResponseEntity.ok(response);
     }

@@ -6,6 +6,7 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.member.LoginMember;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationDto;
@@ -63,6 +64,10 @@ public class ReservationService {
 
     public List<Reservation> findReservationsByConditions(long memberId, long themeId, LocalDate from, LocalDate to) {
         return reservationRepository.findByMemberIdAndThemeIdAndDate(memberId, themeId, from, to);
+    }
+
+    public List<Reservation> findReservationsByMember(LoginMember member) {
+        return reservationRepository.findByMemberId(member.getId());
     }
 
     private void validateIsFuture(LocalDate date, LocalTime time) {
