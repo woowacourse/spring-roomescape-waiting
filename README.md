@@ -19,7 +19,7 @@
 
 ### Request
 
-> GET /reservations-mine HTTP/1.1 <br>
+> GET member/reservations HTTP/1.1 <br>
 > cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBR
 > E1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM <br>
 > host: localhost:8080
