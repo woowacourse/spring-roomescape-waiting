@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
@@ -14,6 +15,7 @@ import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 
 @Service
+@Transactional
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -24,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAllReservationTime() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
@@ -31,6 +34,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAllAvailableReservationTime(LocalDate date, long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

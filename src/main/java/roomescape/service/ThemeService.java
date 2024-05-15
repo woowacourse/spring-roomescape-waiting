@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
@@ -13,6 +14,7 @@ import roomescape.service.dto.ThemeRequest;
 import roomescape.service.dto.ThemeResponse;
 
 @Service
+@Transactional
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -24,6 +26,7 @@ public class ThemeService {
         this.clock = clock;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllTheme() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -31,6 +34,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllPopularTheme() {
         LocalDate startDate = LocalDate.now(clock).minusDays(7L);
         LocalDate endDate = LocalDate.now(clock);
