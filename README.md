@@ -27,4 +27,4 @@
 - [ ] 자신의 예약 목록 조회
 - [ ] 자신의 예약 목록 화면 응답
     - [ ] "/reservation-mine" URL 요청 시 `reservation-mine.html` 가 응답된다.
-    - [ ] js, html 파일 추가
+    - [x] js, html 파일 추가
