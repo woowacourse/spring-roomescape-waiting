@@ -9,8 +9,7 @@ public record RoomThemeCreateRequest(
         @NotBlank
         String description,
         @NotBlank
-        String thumbnail)
-{
+        String thumbnail) {
     public RoomTheme toRoomTheme() {
         return new RoomTheme(name, description, thumbnail);
     }

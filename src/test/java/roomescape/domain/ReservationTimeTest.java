@@ -12,7 +12,7 @@ class ReservationTimeTest {
     @ParameterizedTest
     @NullSource
     void nullEmptyTime(LocalTime value) {
-        Assertions.assertThatThrownBy(() ->new ReservationTime(value))
+        Assertions.assertThatThrownBy(() -> new ReservationTime(value))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("시간에 빈값을 입력할 수 없습니다.");
     }

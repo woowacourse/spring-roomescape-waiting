@@ -17,7 +17,8 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         if (request.getCookies() == null) {
             throw new AuthenticationException("인증되지 않은 사용자입니다.");
         }

@@ -93,11 +93,13 @@ class ReservationRepositoryTest {
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
         boolean existsFalse
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(), savedRoomTheme.getId());
+                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
+                savedRoomTheme.getId());
         reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
         // when
         boolean existsTrue
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(), savedRoomTheme.getId());
+                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
+                savedRoomTheme.getId());
         // then
         assertAll(
                 () -> assertThat(existsFalse).isFalse(),

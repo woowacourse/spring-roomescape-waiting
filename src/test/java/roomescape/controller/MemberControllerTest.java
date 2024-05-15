@@ -42,7 +42,6 @@ class MemberControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
 
-
         Assertions.assertThat(member.name()).isEqualTo("제제");
     }
 }

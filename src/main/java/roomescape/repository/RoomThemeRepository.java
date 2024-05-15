@@ -16,5 +16,6 @@ public interface RoomThemeRepository extends JpaRepository<RoomTheme, Long>, Jpa
             + "WHERE r.date BETWEEN :dateFrom AND :dateTo "
             + "GROUP BY t.id "
             + "ORDER BY COUNT(t.id) DESC ")
-    List<RoomTheme> findAllRanking(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo, Pageable pageable);
+    List<RoomTheme> findAllRanking(@Param("dateFrom") LocalDate dateFrom, @Param("dateTo") LocalDate dateTo,
+                                   Pageable pageable);
 }

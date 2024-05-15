@@ -11,7 +11,8 @@ class RoomThemeTest {
     @ParameterizedTest
     @NullAndEmptySource
     void nullEmptyName(String value) {
-        Assertions.assertThatThrownBy(() ->new RoomTheme(value, "레벨 1 탈출", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"))
+        Assertions.assertThatThrownBy(() -> new RoomTheme(value, "레벨 1 탈출",
+                        "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("이름에 빈값을 입력할 수 없습니다.");
     }
@@ -20,7 +21,8 @@ class RoomThemeTest {
     @ParameterizedTest
     @NullAndEmptySource
     void nullEmptyDescription(String value) {
-        Assertions.assertThatThrownBy(() ->new RoomTheme("레벨 1", value, "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"))
+        Assertions.assertThatThrownBy(() -> new RoomTheme("레벨 1", value,
+                        "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("설명에 빈값을 입력할 수 없습니다.");
     }
@@ -29,7 +31,7 @@ class RoomThemeTest {
     @ParameterizedTest
     @NullAndEmptySource
     void nullEmptyThumbnail(String value) {
-        Assertions.assertThatThrownBy(() ->new RoomTheme("레벨 1", "레벨 1 탈출", value))
+        Assertions.assertThatThrownBy(() -> new RoomTheme("레벨 1", "레벨 1 탈출", value))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("썸네일에 빈값을 입력할 수 없습니다.");
     }

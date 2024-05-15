@@ -11,5 +11,5 @@ public record ReservationCreateMemberRequest(
         @NotNull
         Long timeId,
         @NotNull
-        Long themeId){
+        Long themeId) {
 }

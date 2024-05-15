@@ -53,8 +53,7 @@ public class ReservationTimeService {
     }
 
     public List<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
-            ReservationAvailabilityTimeRequest timeRequest)
-    {
+            ReservationAvailabilityTimeRequest timeRequest) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Reservation> reservations = reservationRepository.findByThemeId(timeRequest.themeId());
 
@@ -69,8 +68,7 @@ public class ReservationTimeService {
     private boolean isReservationBooked(
             List<Reservation> reservations,
             LocalDate date,
-            ReservationTime reservationTime)
-    {
+            ReservationTime reservationTime) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.hasDateTime(date, reservationTime));
     }

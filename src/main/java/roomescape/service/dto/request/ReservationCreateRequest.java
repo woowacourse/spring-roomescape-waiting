@@ -17,10 +17,10 @@ public record ReservationCreateRequest(
         @NotNull
         Long timeId,
         @NotNull
-        Long themeId)
-{
+        Long themeId) {
     public static ReservationCreateRequest from(ReservationCreateMemberRequest adminRequest, Long memberId) {
-        return new ReservationCreateRequest(memberId, adminRequest.date(), adminRequest.timeId(), adminRequest.themeId());
+        return new ReservationCreateRequest(memberId, adminRequest.date(), adminRequest.timeId(),
+                adminRequest.themeId());
     }
 
     public Reservation toReservation(Member member, ReservationTime reservationTime, RoomTheme roomTheme) {

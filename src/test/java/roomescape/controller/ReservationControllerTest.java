@@ -141,7 +141,6 @@ class ReservationControllerTest {
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
 
-
         Map reservationRequest = createReservationRequest(MEMBER_BROWN, "2023-12-12");
         // when & then
         RestAssured.given().log().all()

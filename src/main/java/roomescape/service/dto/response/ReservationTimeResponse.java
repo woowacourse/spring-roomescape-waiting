@@ -10,8 +10,7 @@ public record ReservationTimeResponse(
         Long id,
         @NotNull
         @JsonFormat(pattern = "HH:mm")
-        LocalTime startAt)
-{
+        LocalTime startAt) {
     public static ReservationTimeResponse from(ReservationTime reservationTime) {
         return new ReservationTimeResponse(
                 reservationTime.getId(),

@@ -8,8 +8,7 @@ import roomescape.domain.ReservationTime;
 public record ReservationTimeRequest(
         @NotNull
         @JsonFormat(pattern = "HH:mm")
-        LocalTime startAt)
-{
+        LocalTime startAt) {
     public ReservationTime toReservationTime() {
         return new ReservationTime(startAt);
     }

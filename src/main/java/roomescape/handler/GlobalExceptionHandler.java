@@ -56,7 +56,8 @@ public class GlobalExceptionHandler {
         exception.printStackTrace();
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, exception.getFieldErrors().get(0).getDefaultMessage());
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus,
+                exception.getFieldErrors().get(0).getDefaultMessage());
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
