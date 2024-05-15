@@ -1,11 +1,11 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationRepository;
-import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.VisitDate;
 import roomescape.exception.ExistReservationException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.ThemeInput;
 import roomescape.service.dto.output.ThemeOutput;
 

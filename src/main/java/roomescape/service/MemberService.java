@@ -1,11 +1,11 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.MemberRepository;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.input.MemberCreateInput;
 import roomescape.service.dto.input.MemberLoginInput;
 import roomescape.service.dto.output.MemberCreateOutput;

@@ -1,4 +1,4 @@
-package roomescape.dao.dto;
+package roomescape.repository.dto;
 
 public interface AvailableReservationTimeResult {
     boolean getIsBooked();

@@ -1,6 +1,6 @@
 package roomescape.service.dto.output;
 
-import roomescape.dao.dto.AvailableReservationTimeResult;
+import roomescape.repository.dto.AvailableReservationTimeResult;
 
 import java.util.List;
 

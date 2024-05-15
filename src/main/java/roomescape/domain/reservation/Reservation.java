@@ -78,15 +78,7 @@ public class Reservation {
     public boolean isBefore(final LocalDate localDate, final LocalTime localTime) {
         return parseLocalDateTime().isBefore(LocalDateTime.of(localDate, localTime));
     }
-
-    public boolean isEqualMember(final long memberId) {
-        return this.member.isEqualId(memberId);
-    }
-
-    public boolean isEqualTheme(final long themeId) {
-        return this.theme.isEqualId(themeId);
-    }
-
+    
     public LocalDateTime parseLocalDateTime() {
         return LocalDateTime.of(date.date(), this.time.getStartAt());
     }

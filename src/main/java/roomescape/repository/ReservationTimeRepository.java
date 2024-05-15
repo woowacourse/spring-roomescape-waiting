@@ -1,9 +1,9 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.dao.dto.AvailableReservationTimeResult;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.repository.dto.AvailableReservationTimeResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

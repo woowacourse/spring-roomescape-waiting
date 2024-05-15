@@ -1,10 +1,6 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Component;
-import roomescape.dao.MemberRepository;
-import roomescape.dao.ReservationRepository;
-import roomescape.dao.ReservationTimeRepository;
-import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
@@ -13,6 +9,10 @@ import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
 import roomescape.exception.PastTimeReservationException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.util.DateTimeFormatter;
 

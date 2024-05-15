@@ -1,4 +1,4 @@
-package roomescape.dao;
+package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.user.Email;

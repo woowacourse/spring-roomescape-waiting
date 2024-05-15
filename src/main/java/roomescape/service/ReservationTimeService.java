@@ -1,12 +1,12 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.dao.ReservationRepository;
-import roomescape.dao.ReservationTimeRepository;
-import roomescape.dao.dto.AvailableReservationTimeResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.dto.AvailableReservationTimeResult;
 import roomescape.service.dto.input.AvailableReservationTimeInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.service.dto.output.AvailableReservationTimeOutput;

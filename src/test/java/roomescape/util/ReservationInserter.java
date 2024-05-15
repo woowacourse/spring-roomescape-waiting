@@ -2,12 +2,12 @@ package roomescape.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import roomescape.dao.MemberRepository;
-import roomescape.dao.ReservationRepository;
-import roomescape.dao.ReservationTimeRepository;
-import roomescape.dao.ThemeRepository;
 import roomescape.domain.reservation.*;
 import roomescape.domain.user.Member;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @Component
 public class ReservationInserter {
