@@ -32,9 +32,9 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllPopularTheme() {
-        String startDate = LocalDate.now(clock).minusDays(7L).toString();
-        String endDate = LocalDate.now(clock).toString();
-        List<Theme> themes = reservationRepository.findThemeWithMostPopularReservation(startDate, endDate);
+        LocalDate startDate = LocalDate.now(clock).minusDays(7L);
+        LocalDate endDate = LocalDate.now(clock);
+        List<Theme> themes = reservationRepository.findThemeByMostPopularReservation(startDate, endDate);
         return themes.stream()
                 .map(ThemeResponse::new)
                 .toList();
