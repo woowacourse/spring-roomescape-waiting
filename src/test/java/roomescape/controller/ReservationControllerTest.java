@@ -1,23 +1,23 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static roomescape.Fixture.COOKIE_NAME;
 import static roomescape.Fixture.VALID_MEMBER;
 import static roomescape.Fixture.VALID_RESERVATION;
 import static roomescape.Fixture.VALID_RESERVATION_TIME;
 import static roomescape.Fixture.VALID_THEME;
-import static roomescape.Fixture.VALID_USER_EMAIL;
 import static roomescape.Fixture.VALID_USER_NAME;
-import static roomescape.Fixture.VALID_USER_PASSWORD;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.MemberRole;
 import roomescape.web.controller.request.MemberReservationWebRequest;
+import roomescape.web.controller.response.ReservationMineWebResponse;
 
 class ReservationControllerTest extends ControllerTest {
 
@@ -122,5 +122,20 @@ class ReservationControllerTest extends ControllerTest {
             .when().post("/reservations")
             .then().log().all()
             .statusCode(400);
+    }
+
+    @DisplayName("로그인 중인 회원의 예약 정보를 조회한다. -> 200")
+    @Test
+    void getReservationMine() {
+        List<ReservationMineWebResponse> responses = RestAssured.given().log().all()
+            .cookie(COOKIE_NAME, getUserToken())
+            .when().get("reservations/mine")
+            .then().log().all()
+            .statusCode(200).extract().jsonPath().getList(".", ReservationMineWebResponse.class);
+
+        assertAll(
+            () -> assertEquals(1, responses.size()),
+            () -> assertEquals(1L, responses.get(0).reservationId())
+        );
     }
 }
