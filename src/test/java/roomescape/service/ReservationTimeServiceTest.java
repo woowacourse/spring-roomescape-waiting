@@ -77,7 +77,7 @@ class ReservationTimeServiceTest {
         final ThemeOutput themeOutput = themeService.createTheme(ThemeFixture.getInput());
         final MemberCreateOutput memberOutput = memberService.createMember(MemberFixture.getUserCreateInput());
 
-        reservationRepository.save(Reservation.from(
+        reservationRepository.save(Reservation.fromComplete(
                 null,
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
