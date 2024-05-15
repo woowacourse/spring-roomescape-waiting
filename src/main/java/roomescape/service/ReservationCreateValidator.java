@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Component;
-import roomescape.dao.MemberDao;
+import roomescape.dao.MemberRepository;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -23,15 +23,15 @@ public class ReservationCreateValidator {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
-    private final MemberDao memberDao;
+    private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
 
-    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao, final ThemeDao themeDao, final MemberDao memberDao, final DateTimeFormatter nowDateTimeFormatter) {
+    public ReservationCreateValidator(final ReservationDao reservationDao, final ReservationTimeDao reservationTimeDao, final ThemeDao themeDao, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
-        this.memberDao = memberDao;
+        this.memberRepository = memberDao;
         this.nowDateTimeFormatter = nowDateTimeFormatter;
     }
 
@@ -61,7 +61,7 @@ public class ReservationCreateValidator {
     }
 
     private Member validateExistMember(final long memberId) {
-        return memberDao.findById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotExistException(MEMBER, memberId));
     }
 }
