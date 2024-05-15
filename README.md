@@ -5,7 +5,6 @@
     - 일반 유저 계정 - id : bri@abc.com / pw : 1234 / name : 브리
     - 일반 유저 계정 - id : brown@abc.com / pw : 1234 / name : 브라운
     - 일반 유저 계정 - id : duck@abc.com / pw : 1234 / name : 오리
-- 추후 패스워드 확인 기능 추가 예정
 
 ## 1단계 요구사항
 
@@ -22,3 +21,10 @@
     - [x] Reservation
 - 추가적인 리팩터링
     - [x] 멤버에 패스워드 추가
+
+## 2단계 요구사항
+
+- [ ] 자신의 예약 목록 조회
+- [ ] 자신의 예약 목록 화면 응답
+    - [ ] "/reservation-mine" URL 요청 시 `reservation-mine.html` 가 응답된다.
+    - [ ] js, html 파일 추가
