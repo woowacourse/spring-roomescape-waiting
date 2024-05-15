@@ -14,11 +14,11 @@ function render(data) {
 
     data.forEach(item => {
         const row = tableBody.insertRow();
-        
-        const theme = data.themeName;
-        const date = data.date;
-        const time = data.startAt;
-        const status = data.status;
+
+        const theme = item.themeName;
+        const date = item.date;
+        const time = item.startAt;
+        const status = item.status;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
