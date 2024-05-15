@@ -4,9 +4,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -33,8 +32,7 @@ public class ReservationService {
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             RoomThemeRepository roomThemeRepository,
-            MemberRepository memberRepository)
-    {
+            MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.roomThemeRepository = roomThemeRepository;
@@ -49,24 +47,14 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
-        Map<String, Object> searchKeys = new HashMap<>();
         validateDateCondition(dateFrom, dateTo);
+        Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
+                .and(ReservationSpecification.hasMemberId(memberId))
+                .and(ReservationSpecification.fromDate(dateFrom))
+                .and(ReservationSpecification.toDate(dateTo));
 
-        if (themeId != null) {
-            searchKeys.put("themeId", themeId);
-        }
-
-        if (memberId != null) {
-            searchKeys.put("memberId", memberId);
-        }
-
-        if (dateFrom != null && dateTo != null) {
-            searchKeys.put("dateFrom", dateFrom);
-            searchKeys.put("dateTo", dateTo);
-        }
-
-        return reservationRepository.findAll(ReservationSpecification.searchReservation(searchKeys))
-                .stream().map(ReservationResponse::from)
+        return reservationRepository.findAll(spec).stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 

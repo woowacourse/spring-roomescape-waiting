@@ -1,22 +1,36 @@
 package roomescape.repository;
 
-import jakarta.persistence.criteria.Predicate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.Reservation;
 
 public class ReservationSpecification {
 
-    public static Specification<Reservation> searchReservation(Map<String, Object> searchKey) {
-        return ((root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            for(String key : searchKey.keySet()){
-                predicates.add(criteriaBuilder.equal(root.get(key), searchKey.get(key)));
-            }
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        });
+    public static Specification<Reservation> hasThemeId(Long themeId) {
+        if (themeId == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("theme").get("id"), themeId);
+    }
+
+    public static Specification<Reservation> hasMemberId(Long memberId) {
+        if (memberId == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("member").get("id"), memberId);
+    }
+
+    public static Specification<Reservation> fromDate(LocalDate dateFrom) {
+        if (dateFrom == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("date"), dateFrom);
+    }
+
+    public static Specification<Reservation> toDate(LocalDate toDate) {
+        if (toDate == null) {
+            return null;
+        }
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), toDate);
     }
 }
