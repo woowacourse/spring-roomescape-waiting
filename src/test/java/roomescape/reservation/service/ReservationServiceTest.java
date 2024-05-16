@@ -64,8 +64,8 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void create() {
         //given
-        String date = "2100-04-18";
-        reservationRepository.save(new Reservation(LocalDate.parse(date), time, theme1));
+        LocalDate date = LocalDate.now().plusMonths(1);
+        reservationRepository.save(new Reservation(date, time, theme1));
         ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme1.getId());
 
         //when
@@ -193,7 +193,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation));
 
-        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate().toString(), time.getId(),
+        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(), time.getId(),
                 theme1.getId());
 
         //when & then

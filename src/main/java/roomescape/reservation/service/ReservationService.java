@@ -63,23 +63,21 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
-        LocalDate date = LocalDate.parse(reservationRequest.date());
         return createMemberReservation(
                 authInfo.getId(),
                 reservationRequest.timeId(),
                 reservationRequest.themeId(),
-                date
+                reservationRequest.date()
         );
     }
 
     @Transactional
     public ReservationResponse createMemberReservation(MemberReservationRequest memberReservationRequest) {
-        LocalDate date = LocalDate.parse(memberReservationRequest.date());
         return createMemberReservation(
                 memberReservationRequest.memberId(),
                 memberReservationRequest.timeId(),
                 memberReservationRequest.themeId(),
-                date
+                memberReservationRequest.date()
         );
     }
 

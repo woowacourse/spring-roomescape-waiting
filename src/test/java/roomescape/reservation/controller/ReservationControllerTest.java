@@ -7,6 +7,7 @@ import static roomescape.fixture.MemberFixture.getMemberClover;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -74,7 +75,7 @@ class ReservationControllerTest extends ControllerTest {
     void create() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest(LocalTime.NOON));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> params = new HashMap<>();
@@ -96,7 +97,7 @@ class ReservationControllerTest extends ControllerTest {
     @TestFactory
     Stream<DynamicTest> delete() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest(LocalTime.NOON));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
         MemberResponse memberResponseOf = memberService.findAll()
                 .stream()
@@ -107,7 +108,7 @@ class ReservationControllerTest extends ControllerTest {
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 AuthInfo.from(member),
                 new ReservationRequest(
-                        LocalDate.now().plusDays(10).toString(),
+                        LocalDate.now().plusDays(10),
                         reservationTimeResponse.id(),
                         themeResponse.id())
         );
@@ -150,36 +151,12 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200);
     }
 
-    @DisplayName("예약 생성 시, 잘못된 날짜 형식에 대해 400을 반환한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"", "20-12-31", "2020-1-30", "2020-11-0", "-1"})
-    void createBadRequest(String date) {
-        //given
-        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
-        ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", date);
-        reservation.put("timeId", reservationTimeResponse.id());
-        reservation.put("themeId", themeResponse.id());
-
-        //when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
-    }
-
     @DisplayName("지나간 날짜와 시간에 대한 예약 생성 시, 400을 반환한다.")
     @Test
     void createReservationAfterNow() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest(LocalTime.NOON));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();

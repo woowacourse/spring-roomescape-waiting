@@ -50,14 +50,13 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void create() {
         //given
-        String localTime = "12:00";
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(localTime);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.NOON);
 
         //when
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeRequest);
 
         //then
-        assertThat(reservationTimeResponse.startAt()).isEqualTo(localTime);
+        assertThat(reservationTimeResponse.startAt()).isEqualTo(LocalTime.NOON.toString());
         assertThat(reservationTimeRepository.findAll()).hasSize(1);
     }
 
@@ -105,9 +104,8 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        String localTime = "12:00";
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(localTime);
-        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(localTime)));
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.NOON);
+        reservationTimeRepository.save(new ReservationTime(LocalTime.NOON));
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.create(reservationTimeRequest))

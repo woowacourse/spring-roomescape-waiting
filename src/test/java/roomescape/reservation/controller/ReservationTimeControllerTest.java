@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +43,7 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void findAll() {
         //given
-        reservationTimeService.create(new ReservationTimeRequest("12:00"));
+        reservationTimeService.create(new ReservationTimeRequest(LocalTime.NOON));
 
         //when & then
         RestAssured.given().log().all()
@@ -55,29 +57,12 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        ReservationTimeResponse timeResponse = reservationTimeService.create(new ReservationTimeRequest("12:00"));
+        ReservationTimeResponse timeResponse = reservationTimeService.create(new ReservationTimeRequest(LocalTime.NOON));
 
         //when & then
         RestAssured.given().log().all()
                 .when().delete("/times/" + timeResponse.id())
                 .then().log().all()
                 .statusCode(200);
-    }
-
-    @DisplayName("시간 생성 시, 잘못된 시간 형식에 대해 400을 반환한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"", "26:57", "23:89", "-1"})
-    void createBadRequest(String startAt) {
-        //given
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        //when & then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(400);
     }
 }

@@ -7,6 +7,9 @@ import static roomescape.fixture.MemberFixture.getMemberChoco;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -105,7 +108,7 @@ class AdminControllerTest extends ControllerTest {
                 dynamicTest("관리자 예약 생성 시, 201을 반환한다.", () -> {
                     //given
                     ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                            new ReservationTimeRequest("12:00"));
+                            new ReservationTimeRequest(LocalTime.NOON));
                     ThemeResponse themeResponse = themeService.create(
                             new ThemeRequest("name", "description", "thumbnail"));
                     MemberResponse memberResponse = authService.signUp(

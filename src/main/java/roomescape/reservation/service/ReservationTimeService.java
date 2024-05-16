@@ -30,7 +30,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
-        LocalTime time = LocalTime.parse(reservationTimeRequest.startAt());
+        LocalTime time = reservationTimeRequest.startAt();
         if (reservationTimeRepository.existsByStartAt(time)) {
             throw new BadRequestException(ErrorType.DUPLICATED_RESERVATION_TIME_ERROR);
         }
