@@ -32,25 +32,25 @@ public class ReservationCreateService {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation createReservation(ReservationAdminSaveRequest request) {
+    public Reservation create(ReservationAdminSaveRequest request) {
         Reservation reservation = request.toEntity(
                 request,
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 getMember(request.memberId()));
-        return createReservation(reservation);
+        return create(reservation);
     }
 
-    public Reservation createReservation(ReservationSaveRequest request, Member member) {
+    public Reservation create(ReservationSaveRequest request, Member member) {
         Reservation reservation = request.toEntity(
                 request,
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 member);
-        return createReservation(reservation);
+        return create(reservation);
     }
 
-    private Reservation createReservation(Reservation request) {
+    private Reservation create(Reservation request) {
         validateDateIsFuture(request.getDate(), request.getReservationTime());
         validateAlreadyBooked(request.getDate(), request.getReservationTime().getId(), request.getTheme().getId());
         return reservationRepository.save(request);

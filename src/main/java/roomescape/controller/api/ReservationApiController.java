@@ -47,7 +47,7 @@ public class ReservationApiController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid ReservationSaveRequest request,
                                                               @AuthenticatedMember Member member) {
-        Reservation newReservation = reservationCreateService.createReservation(request, member);
+        Reservation newReservation = reservationCreateService.create(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
