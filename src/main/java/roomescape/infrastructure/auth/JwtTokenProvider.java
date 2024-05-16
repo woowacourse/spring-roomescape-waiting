@@ -22,8 +22,6 @@ public class JwtTokenProvider implements TokenProvider {
     public String createToken(String payload) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtTokenProperties.getExpireMilliseconds());
-        System.out.println("validity = " + validity);
-        System.out.println("now = " + now);
 
         String secretKey = jwtTokenProperties.getSecretKey();
         SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
