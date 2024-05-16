@@ -28,6 +28,10 @@ public class Member {
     protected Member() {
     }
 
+    public Member(final String email, final Password password, final String name, final String role) {
+        this(null, email, password, name, role);
+    }
+
     public Member(final Long id, final String email, final Password password, final String name, final String role) {
         validEmail(email);
         validEmpty("name", name);
@@ -37,10 +41,6 @@ public class Member {
         this.password = password;
         this.name = name;
         this.role = role;
-    }
-
-    public Member(final String email, final Password password, final String name, final String role) {
-        this(null, email, password, name, role);
     }
 
     private void validEmail(String email) {

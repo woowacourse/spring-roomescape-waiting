@@ -7,12 +7,12 @@ public class Password {
     private String password;
     private String salt;
 
+    protected Password() {
+    }
+
     public Password(final String password, final String salt) {
         this.password = password;
         this.salt = salt;
-    }
-
-    protected Password() {
     }
 
     public String getPassword() {

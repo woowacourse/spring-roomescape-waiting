@@ -24,7 +24,11 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
+    }
+
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        this(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
@@ -35,10 +39,6 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 
     public Member getMember() {

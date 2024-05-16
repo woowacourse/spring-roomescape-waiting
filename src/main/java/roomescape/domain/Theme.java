@@ -15,10 +15,13 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
-    //TODO: 주 생성자 컨밴션 일관성 유지
+    public Theme(final String name, final String description, final String thumbnail) {
+        this(null, name, description, thumbnail);
+    }
+
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateEmpty("name", name);
         validateEmpty("description", description);
@@ -28,10 +31,6 @@ public class Theme {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
     }
 
     private void validateEmpty(final String fieldName, final String value) {
