@@ -26,11 +26,14 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new CheckAdminInterceptor(memberService, tokenProvider, tokenContextRequest))
-                .addPathPatterns("/admin/**");
         registry.addInterceptor(new CheckLoginInterceptor(memberService, tokenProvider, tokenContextRequest))
                 .addPathPatterns("/login/check")
-                .addPathPatterns("/reservations/**");
+                .addPathPatterns("/reservations/**")
+                .addPathPatterns("/admin/**")
+                .order(1);
+        registry.addInterceptor(new CheckAdminInterceptor(tokenContextRequest))
+                .addPathPatterns("/admin/**")
+                .order(2);
     }
 
     @Override

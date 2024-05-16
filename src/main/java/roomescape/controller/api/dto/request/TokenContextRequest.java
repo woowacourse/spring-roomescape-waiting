@@ -3,6 +3,7 @@ package roomescape.controller.api.dto.request;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+import roomescape.exception.UnauthorizedException;
 import roomescape.service.dto.output.TokenLoginOutput;
 
 import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUEST;
@@ -13,6 +14,9 @@ public class TokenContextRequest {
     private TokenLoginOutput tokenLoginOutput;
 
     public TokenLoginOutput getTokenLoginOutput() {
+        if(tokenLoginOutput == null) {
+            throw new UnauthorizedException();
+        }
         return tokenLoginOutput;
     }
 

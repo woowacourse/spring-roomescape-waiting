@@ -14,9 +14,7 @@ import roomescape.controller.api.dto.request.TokenContextRequest;
 import roomescape.domain.user.Role;
 import roomescape.exception.ForbiddenException;
 import roomescape.exception.UnauthorizedException;
-import roomescape.service.MemberService;
 import roomescape.service.dto.output.TokenLoginOutput;
-import roomescape.util.TokenProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -24,9 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 class CheckAdminInterceptorTest {
     @MockBean
-    MemberService memberService;
-    @MockBean
-    TokenProvider tokenProvider;
+    TokenContextRequest tokenContextRequest;
 
     CheckAdminInterceptor sut;
     MockHttpServletRequest request;
@@ -34,7 +30,7 @@ class CheckAdminInterceptorTest {
 
     @BeforeEach
     void setUp() {
-        sut = new CheckAdminInterceptor(memberService, tokenProvider, new TokenContextRequest());
+        sut = new CheckAdminInterceptor(tokenContextRequest);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
     }
@@ -43,10 +39,7 @@ class CheckAdminInterceptorTest {
     @DisplayName("토큰의 정보가 관리자이면 참을 반환한다.")
     void return_true_when_token_info_is_admin() {
         final var output = new TokenLoginOutput(1, "운영자", "admin@email.com", "password1234", Role.ADMIN.getValue());
-        Mockito.when(tokenProvider.parseToken(request))
-                .thenReturn("admin_token");
-        Mockito.when(memberService.loginToken("admin_token"))
-                .thenReturn(output);
+        Mockito.when(tokenContextRequest.getTokenLoginOutput()).thenReturn(output);
         request.setCookies(new Cookie("token", "admin_token"));
 
         final var result = sut.preHandle(request, response, null);
@@ -58,10 +51,7 @@ class CheckAdminInterceptorTest {
     @DisplayName("토큰의 정보가 관리자가 아니면 예외를 발생한다.")
     void throw_exception_when_token_info_is_not_admin() {
         final var output = new TokenLoginOutput(1, "조이썬", "joyson5582@email.com", "password1234", Role.USER.getValue());
-        Mockito.when(tokenProvider.parseToken(request))
-                .thenReturn("not_admin_token");
-        Mockito.when(memberService.loginToken("not_admin_token"))
-                .thenReturn(output);
+        Mockito.when(tokenContextRequest.getTokenLoginOutput()).thenReturn(output);
         request.setCookies(new Cookie("token", "not_admin_token"));
 
         assertThatThrownBy(() -> sut.preHandle(request, response, null))
@@ -71,9 +61,7 @@ class CheckAdminInterceptorTest {
     @Test
     @DisplayName("토큰이 없으면 예외를 발생한다.")
     void return_false_when_not_exist_token() {
-        Mockito.when(tokenProvider.parseToken(request))
-                        .thenThrow(new UnauthorizedException());
-
+        Mockito.when(tokenContextRequest.getTokenLoginOutput()).thenThrow(UnauthorizedException.class);
         assertThatThrownBy(() -> sut.preHandle(request, response, null))
                 .isInstanceOf(UnauthorizedException.class);
     }
