@@ -88,10 +88,6 @@ public class Reservation {
         return reservationTime.getStartAt();
     }
 
-    public boolean isReserved() {
-        return reservationStatus == ReservationStatus.RESERVED;
-    }
-
     public Theme getTheme() {
         return theme;
     }
