@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.MemberService;
-import roomescape.web.dto.request.member.SignupRequest;
-import roomescape.web.dto.response.member.MemberResponse;
+import roomescape.service.dto.request.member.SignupRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 
 @RestController
 @RequestMapping("/members")

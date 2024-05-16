@@ -23,12 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Member;
 import roomescape.service.ReservationService;
 import roomescape.service.security.JwtProvider;
-import roomescape.web.dto.request.reservation.ReservationRequest;
-import roomescape.web.dto.request.reservation.UserReservationRequest;
-import roomescape.web.dto.response.member.MemberResponse;
-import roomescape.web.dto.response.reservation.ReservationResponse;
-import roomescape.web.dto.response.theme.ThemeResponse;
-import roomescape.web.dto.response.time.ReservationTimeResponse;
+import roomescape.service.dto.request.reservation.ReservationRequest;
+import roomescape.service.dto.request.reservation.UserReservationRequest;
+import roomescape.service.dto.response.member.MemberResponse;
+import roomescape.service.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.response.time.ReservationTimeResponse;
 
 @WebMvcTest(controllers = ReservationController.class)
 class ReservationControllerTest {

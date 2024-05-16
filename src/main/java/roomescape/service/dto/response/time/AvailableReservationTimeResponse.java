@@ -1,4 +1,4 @@
-package roomescape.web.dto.response.time;
+package roomescape.service.dto.response.time;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
