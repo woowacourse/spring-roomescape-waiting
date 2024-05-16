@@ -25,7 +25,7 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {

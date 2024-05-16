@@ -14,21 +14,12 @@ public class TimeSlot {
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot() {
-
+    protected TimeSlot() {
     }
 
     public TimeSlot(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public TimeSlot(Long id, String startAt) {
-        this(id, LocalTime.parse(startAt));
-    }
-
-    public TimeSlot(String startAt) {
-        this(null, startAt);
     }
 
     public boolean isTimeBeforeNow() {
