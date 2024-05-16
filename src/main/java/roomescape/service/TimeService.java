@@ -40,19 +40,19 @@ public class TimeService {
 
     private void validateDuplicatedTime(TimeSlotRequest timeSlotRequest) {
         if (timeSlotRepository.existsByStartAt(timeSlotRequest.startAt())) {
-            throw new IllegalArgumentException("[ERROR] 이미 등록된 시간입니다");
+            throw new IllegalArgumentException("이미 등록된 시간입니다");
         }
     }
 
     private void validateExistReservation(Long id) {
         TimeSlot timeSlot = getTimeSlotById(id);
         if (reservationRepository.existsByTime(timeSlot)) {
-            throw new IllegalArgumentException("[ERROR] 예약이 등록된 시간은 제거할 수 없습니다");
+            throw new IllegalArgumentException("예약이 등록된 시간은 제거할 수 없습니다");
         }
     }
 
     private TimeSlot getTimeSlotById(long id) {
         return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 시간입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다"));
     }
 }

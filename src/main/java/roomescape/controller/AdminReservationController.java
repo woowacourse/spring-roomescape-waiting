@@ -1,6 +1,9 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +17,8 @@ import roomescape.service.ReservationService;
 @RequestMapping("/admin")
 public class AdminReservationController {
 
+    private static final ZoneId KST_ZONE = ZoneId.of("Asia/Seoul");
+
     private final ReservationService reservationService;
 
     public AdminReservationController(ReservationService reservationService) {
@@ -21,8 +26,9 @@ public class AdminReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createAdminReservation(@RequestBody ReservationRequest request) {
-        ReservationResponse reservationResponse = reservationService.create(request);
+    public ResponseEntity<ReservationResponse> createAdminReservation(@Valid @RequestBody ReservationRequest request) {
+        LocalDateTime now = LocalDateTime.now(KST_ZONE);
+        ReservationResponse reservationResponse = reservationService.create(request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

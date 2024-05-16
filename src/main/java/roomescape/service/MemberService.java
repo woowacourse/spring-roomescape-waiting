@@ -30,14 +30,14 @@ public class MemberService {
 
     public MemberResponse loginCheck(LoginMember loginMember) {
         Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
         return MemberResponse.from(member);
     }
 
     public LoginMember findLoginMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
         return LoginMember.from(member);
     }
 

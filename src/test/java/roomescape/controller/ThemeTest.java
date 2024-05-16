@@ -75,7 +75,7 @@ class ThemeTest {
                 .when().delete("/themes/1")
                 .then().log().all()
                 .statusCode(400)
-                .body(containsString("[ERROR] 예약이 등록된 테마는 제거할 수 없습니다"));
+                .body(containsString("예약이 등록된 테마는 제거할 수 없습니다"));
     }
 
     @DisplayName("테마 등록 시 빈 값이 한 개 이상 포함되어 있을 경우 400 오류를 반환한다.")
@@ -94,7 +94,7 @@ class ThemeTest {
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body(containsString("[ERROR] 테마 등록 시 빈 값은 허용하지 않습니다"));
+                .body(containsString("테마 등록 시 빈 값은 허용하지 않습니다"));
     }
 
     @DisplayName("테마 등록 시 썸네일 주소가 올바르지 않을 경우 400 오류를 반환한다.")
@@ -113,6 +113,6 @@ class ThemeTest {
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body(containsString("[ERROR] 썸네일 URL 형식이 올바르지 않습니다"));
+                .body(containsString("썸네일 URL 형식이 올바르지 않습니다"));
     }
 }

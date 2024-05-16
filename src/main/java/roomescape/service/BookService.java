@@ -43,6 +43,6 @@ public class BookService {
 
     private Theme getThemeById(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
     }
 }

@@ -23,7 +23,7 @@ public record ThemeRequest(String name, String description, String thumbnail) {
 
     private void validEmpty(String input) {
         if (input == null || input.trim().isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 테마 등록 시 빈 값은 허용하지 않습니다");
+            throw new IllegalArgumentException("테마 등록 시 빈 값은 허용하지 않습니다");
         }
     }
 
@@ -32,7 +32,7 @@ public record ThemeRequest(String name, String description, String thumbnail) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(thumbnail);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("[ERROR] 썸네일 URL 형식이 올바르지 않습니다");
+            throw new IllegalArgumentException("썸네일 URL 형식이 올바르지 않습니다");
         }
     }
 }

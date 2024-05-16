@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -22,8 +23,9 @@ public class TimeSlot {
         this.startAt = startAt;
     }
 
-    public boolean isTimeBeforeNow() {
-        return startAt.isBefore(LocalTime.now());
+    public boolean isTimeBefore(LocalDateTime dateTime) {
+        LocalTime currentTime = LocalTime.of(dateTime.getHour(), dateTime.getMinute());
+        return startAt.isBefore(currentTime);
     }
 
     public Long getId() {

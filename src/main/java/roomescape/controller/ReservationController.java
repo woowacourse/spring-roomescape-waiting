@@ -2,6 +2,8 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +25,8 @@ import roomescape.service.ReservationService;
 @RequestMapping("/reservations")
 public class ReservationController {
 
+    private static final ZoneId KST_ZONE = ZoneId.of("Asia/Seoul");
+
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
@@ -33,9 +37,10 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservationByClient(
             @Valid @RequestBody MemberReservationRequest memberRequest,
             LoginMember member) {
+        LocalDateTime now = LocalDateTime.now(KST_ZONE);
         ReservationRequest reservationRequest = new ReservationRequest(member.id(), memberRequest.date(),
                 memberRequest.timeId(), memberRequest.themeId());
-        ReservationResponse reservationResponse = reservationService.create(reservationRequest);
+        ReservationResponse reservationResponse = reservationService.create(reservationRequest, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

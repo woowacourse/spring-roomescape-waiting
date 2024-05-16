@@ -40,12 +40,12 @@ public class ThemeService {
     private void validateExistReservation(Long id) {
         Theme theme = getThemeById(id);
         if (reservationRepository.existsByTheme(theme)) {
-            throw new IllegalArgumentException("[ERROR] 예약이 등록된 테마는 제거할 수 없습니다");
+            throw new IllegalArgumentException("예약이 등록된 테마는 제거할 수 없습니다");
         }
     }
 
     private Theme getThemeById(long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 테마 입니다"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
     }
 }
