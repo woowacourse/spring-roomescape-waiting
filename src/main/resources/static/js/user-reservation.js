@@ -106,7 +106,7 @@ function renderAvailableTimes(times) {
         timeSlots.innerHTML = '<div class="no-times">선택할 수 있는 시간이 없습니다.</div>';
         return;
     }
-    times.forEach(time => {
+    times.reservationStatuses.forEach(time => {
         const startAt = time.startAt;
         const timeId = time.timeId;
         const alreadyBooked = time.alreadyBooked;
