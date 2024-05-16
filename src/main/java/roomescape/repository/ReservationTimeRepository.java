@@ -19,7 +19,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             SELECT rt 
             FROM ReservationTime rt 
             INNER JOIN Reservation r 
-            ON rt.id = r.time.id 
+            ON rt.id = r.reservationTime.id 
             WHERE r.date = :date 
             AND r.theme.id = :themeId
             """)

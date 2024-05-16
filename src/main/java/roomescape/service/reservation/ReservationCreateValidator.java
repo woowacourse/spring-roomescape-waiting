@@ -41,7 +41,7 @@ public class ReservationCreateValidator {
     }
 
     public void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalArgumentException("해당 시간에 이미 예약된 테마입니다.");
         }
     }

@@ -21,7 +21,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne
-    private ReservationTime time;
+    private ReservationTime reservationTime;
 
     @ManyToOne
     private Theme theme;
@@ -29,11 +29,11 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
-        this.time = time;
+        this.reservationTime = reservationTime;
         this.theme = theme;
     }
 
@@ -54,7 +54,7 @@ public class Reservation {
     }
 
     public ReservationTime getReservationTime() {
-        return time;
+        return reservationTime;
     }
 
     public Theme getTheme() {
@@ -71,11 +71,11 @@ public class Reservation {
         }
         Reservation that = (Reservation) object;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
+               && Objects.equals(reservationTime, that.reservationTime) && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return Objects.hash(id, member, date, reservationTime, theme);
     }
 }
