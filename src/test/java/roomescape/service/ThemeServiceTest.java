@@ -6,11 +6,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -24,6 +24,7 @@ import roomescape.service.dto.request.theme.ThemeRequest;
 import roomescape.service.dto.response.theme.ThemeResponse;
 
 @SpringBootTest
+@Transactional
 class ThemeServiceTest {
     @Autowired
     private ThemeService themeService;
@@ -35,13 +36,6 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        themeRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("테마를 저장한다")

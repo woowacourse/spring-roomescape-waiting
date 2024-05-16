@@ -2,22 +2,23 @@ package roomescape.service;
 
 import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.member.DuplicatedEmailException;
-import roomescape.service.security.JwtProvider;
 import roomescape.service.dto.request.member.LoginRequest;
 import roomescape.service.dto.request.member.SignupRequest;
 import roomescape.service.dto.response.member.MemberResponse;
+import roomescape.service.security.JwtProvider;
 
 @SpringBootTest
+@Transactional
 class MemberServiceTest {
     @Autowired
     private MemberService memberService;
@@ -30,11 +31,6 @@ class MemberServiceTest {
     @BeforeEach
     void setUp() {
         dummyMember = new Member("name", "email", "password");
-    }
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAll();
     }
 
     @Test
