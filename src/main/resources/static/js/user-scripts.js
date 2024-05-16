@@ -22,6 +22,9 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
         });
 });
 
+const registerBtn = document.getElementById('register-btn');
+if (registerBtn !== null) registerBtn.addEventListener('click', register);
+
 function updateUIBasedOnLogin() {
     fetch('/login/check') // 로그인 상태 확인 API 호출
         .then(response => {
@@ -94,6 +97,7 @@ function signup() {
 }
 
 function register(event) {
+    event.preventDefault();
     // 폼 데이터 수집
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
