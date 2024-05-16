@@ -11,10 +11,11 @@ import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import roomescape.config.TokenProperties;
+import roomescape.domain.TokenProvider;
 
 @Component
 @EnableConfigurationProperties(TokenProperties.class)
-public class JwtTokenProvider {
+public class JwtTokenProvider implements TokenProvider {
 
     private final TokenProperties tokenProperties;
 
@@ -22,6 +23,7 @@ public class JwtTokenProvider {
         this.tokenProperties = tokenProperties;
     }
 
+    @Override
     public String createToken(Map<String, Object> payload) {
         Claims claims = Jwts.claims(new HashMap<>(payload));
         Date now = new Date();
@@ -35,6 +37,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    @Override
     public Map<String, Object> getPayload(String token) {
         return Jwts.parser()
                 .setSigningKey(tokenProperties.secretKey())
@@ -42,6 +45,7 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
+    @Override
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(tokenProperties.secretKey()).parseClaimsJws(token);

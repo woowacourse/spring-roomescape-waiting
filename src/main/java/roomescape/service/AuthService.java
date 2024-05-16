@@ -2,8 +2,8 @@ package roomescape.service;
 
 import java.util.Map;
 import org.springframework.stereotype.Service;
-import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.domain.Role;
+import roomescape.domain.TokenProvider;
 import roomescape.exception.AuthenticationException;
 import roomescape.service.dto.LoginMember;
 import roomescape.service.dto.MemberResponse;
@@ -16,10 +16,10 @@ public class AuthService {
     private static final String CLAIM_NAME = "name";
     private static final String CLAIM_ROLE = "role";
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider tokenProvider;
 
-    public AuthService(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
+    public AuthService(TokenProvider tokenProvider) {
+        this.tokenProvider = tokenProvider;
     }
 
     public String createToken(MemberResponse memberResponse) {
@@ -29,7 +29,7 @@ public class AuthService {
                 CLAIM_ROLE, memberResponse.role()
         );
 
-        return jwtTokenProvider.createToken(payload);
+        return tokenProvider.createToken(payload);
     }
 
     public String getTokenName() {
@@ -38,7 +38,7 @@ public class AuthService {
 
     public LoginMember findMemberByToken(String token) {
         validateToken(token);
-        Map<String, Object> payload = jwtTokenProvider.getPayload(token);
+        Map<String, Object> payload = tokenProvider.getPayload(token);
 
         return new LoginMember(
                 Long.parseLong((String) payload.get(CLAIM_SUB)),
@@ -48,7 +48,7 @@ public class AuthService {
     }
 
     private void validateToken(String token) {
-        if (!jwtTokenProvider.validateToken(token)) {
+        if (!tokenProvider.validateToken(token)) {
             throw new AuthenticationException();
         }
     }
