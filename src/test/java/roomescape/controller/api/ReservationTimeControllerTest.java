@@ -98,7 +98,7 @@ class ReservationTimeControllerTest extends BaseControllerTest {
 
     @Test
     @DisplayName("이용가능한 시간들을 조회한다.")
-    @Sql("/available-reservation-times.sql")
+    @Sql("/reservation.sql")
     void getAvailableReservationTimes() {
         ExtractableResponse<Response> extractResponse = RestAssured.given().log().all()
                 .param("date", "2024-04-09")

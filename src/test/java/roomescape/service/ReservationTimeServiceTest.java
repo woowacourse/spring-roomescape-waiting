@@ -60,7 +60,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
 
     @Test
     @DisplayName("날짜와 테마 id로 예약 가능한 시간들을 조회한다.")
-    @Sql("/available-reservation-times.sql")
+    @Sql("/reservation.sql")
     void getAvailableReservationTimes() {
         LocalDate date = LocalDate.of(2024, 4, 9);
         Long themeId = 1L;
