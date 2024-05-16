@@ -12,10 +12,10 @@ import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationConflictException;
 import roomescape.exception.reservation.ReservationNotFoundException;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -23,18 +23,18 @@ import roomescape.service.dto.reservation.ReservationSearchParams;
 @Service
 public class ReservationService {
 
-    private final JpaReservationRepository reservationRepository;
-    private final JpaReservationTimeRepository reservationTimeRepository;
-    private final JpaMemberRepository jpaMemberRepository;
-    private final JpaThemeRepository jpaThemeRepository;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(JpaReservationRepository reservationRepository,
-                              JpaReservationTimeRepository reservationTimeRepository,
-                              JpaMemberRepository jpaMemberRepository, JpaThemeRepository jpaThemeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              MemberRepository memberRepository, ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.jpaMemberRepository = jpaMemberRepository;
-        this.jpaThemeRepository = jpaThemeRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
@@ -61,8 +61,8 @@ public class ReservationService {
         validatePreviousDate(date, time);
         validateDuplicatedReservation(date, themeId, timeId);
 
-        Member member = jpaMemberRepository.fetchByEmail(email);
-        Theme theme = jpaThemeRepository.fetchById(themeId);
+        Member member = memberRepository.fetchByEmail(email);
+        Theme theme = themeRepository.fetchById(themeId);
         Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
         return new ReservationResponse(savedReservation);
     }

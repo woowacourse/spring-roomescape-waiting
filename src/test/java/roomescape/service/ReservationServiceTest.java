@@ -24,10 +24,10 @@ import roomescape.exception.reservation.ReservationConflictException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.reservation.ReservationCreate;
 
 @TestExecutionListeners(value = {
@@ -49,16 +49,16 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private JpaReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JpaThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private JpaReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private JpaMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     private final Member member = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
     private final ReservationTime time = new ReservationTime("11:00");

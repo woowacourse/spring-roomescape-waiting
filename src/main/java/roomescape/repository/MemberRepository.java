@@ -7,7 +7,7 @@ import roomescape.domain.member.Member;
 import roomescape.exception.member.UnauthorizedEmailException;
 
 @Repository
-public interface JpaMemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmail(String email);
 

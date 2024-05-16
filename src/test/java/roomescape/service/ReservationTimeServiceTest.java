@@ -21,10 +21,10 @@ import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.TimeDuplicatedException;
 import roomescape.exception.reservation.TimeUsingException;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
 
 @TestExecutionListeners(value = {
@@ -46,16 +46,16 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private JpaReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JpaThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private JpaReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private JpaMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @DisplayName("중복된 예약 시간을 생성하면 에러를 발생시킨다.")
     @Test

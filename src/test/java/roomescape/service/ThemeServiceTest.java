@@ -20,10 +20,10 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.ThemeUsingException;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -44,16 +44,16 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Autowired
-    private JpaReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JpaThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    private JpaReservationRepository reservationRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private JpaMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @DisplayName("테마 삭제 시 해당 테마에 예약이 존재하면 에러를 발생시킨다.")
     @Test

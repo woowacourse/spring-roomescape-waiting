@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.ThemeUsingException;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.theme.PopularThemeRequest;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
@@ -13,10 +13,10 @@ import roomescape.service.dto.theme.ThemeResponse;
 @Service
 public class ThemeService {
 
-    private final JpaThemeRepository themeRepository;
-    private final JpaReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(JpaThemeRepository themeRepository, JpaReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
