@@ -14,7 +14,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 
-@Entity
+@Entity(name = "reservation")
 public class Reservation {
 
     @Id

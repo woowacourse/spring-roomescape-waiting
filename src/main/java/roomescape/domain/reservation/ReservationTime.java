@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 
-@Entity
+@Entity(name = "reservation_time")
 public class ReservationTime {
 
     @Id
