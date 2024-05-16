@@ -51,15 +51,15 @@ public class Reservation {
                 Member.saveMemberFrom(memberId));
     }
 
-    public static Reservation reservationOf(long id, LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(long id, LocalDate date, Time time, Theme theme, Member member) {
         return new Reservation(id, Date.dateFrom(date), time, theme, member);
     }
 
-    public static Reservation saveReservationOf(LocalDate date, long timeId, long themeId, long memberId) {
+    public static Reservation of(LocalDate date, long timeId, long themeId, long memberId) {
         return new Reservation(date, timeId, themeId, memberId);
     }
 
-    public static Reservation saveReservationOf(LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
         return new Reservation(0, Date.dateFrom(date), time, theme, member);
     }

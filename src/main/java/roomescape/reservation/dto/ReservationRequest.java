@@ -9,6 +9,6 @@ public record ReservationRequest(
         long themeId
 ) {
     public Reservation fromRequest(long memberId) {
-        return Reservation.saveReservationOf(date, timeId, themeId, memberId);
+        return Reservation.of(date, timeId, themeId, memberId);
     }
 }

@@ -47,7 +47,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(reservation.getTheme().getId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
 
-        Reservation saveReservation = Reservation.saveReservationOf(reservation.getDate(), time,
+        Reservation saveReservation = Reservation.of(reservation.getDate(), time,
                 theme, reservation.getMember());
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
@@ -62,7 +62,7 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
-        Reservation saveReservation = Reservation.saveReservationOf(reservation.getDate(), time, theme, member);
+        Reservation saveReservation = Reservation.of(reservation.getDate(), time, theme, member);
         ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
 

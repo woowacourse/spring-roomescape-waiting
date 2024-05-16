@@ -30,7 +30,7 @@ public class ThemeServiceTest {
     @DisplayName("예약이 존재하는 테마는 삭제하지 못한다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.saveReservationOf(LocalDate.now(), 1, 1, 1));
+        reservations.add(Reservation.of(LocalDate.now(), 1, 1, 1));
 
         when(reservationRepository.findByThemeId(1L))
                 .thenReturn(reservations);
