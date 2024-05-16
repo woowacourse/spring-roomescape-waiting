@@ -73,10 +73,6 @@ public class Member {
         this.email = email;
     }
 
-    public Member initializeIndex(final Long memberId) {
-        return new Member(memberId, role, password, name, email);
-    }
-
     public MemberEmail getEmail() {
         return email;
     }

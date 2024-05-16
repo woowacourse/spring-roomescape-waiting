@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.time.LocalTime;
-import java.util.Objects;
 
 @Entity
 public class ReservationTime {
@@ -43,18 +42,5 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final ReservationTime that)) return false;
-        return Objects.equals(id, that.id)
-                && Objects.equals(startAt, that.startAt);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, startAt);
     }
 }

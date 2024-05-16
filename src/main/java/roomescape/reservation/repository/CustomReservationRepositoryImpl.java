@@ -46,7 +46,7 @@ public class CustomReservationRepositoryImpl implements CustomReservationReposit
     private RowMapper<Reservation> itemRowMapper() {
         return ((rs, rowNum) -> Reservation.of(
                 rs.getLong("reservation_id"),
-                ReservationStatus.of(rs.getString("reservation_status")),
+                ReservationStatus.valueOf(rs.getString("reservation_status")),
                 rs.getDate("reservation_date").toLocalDate(),
                 new ReservationTime(rs.getLong("time_id"), rs.getTime("reservation_time").toLocalTime()),
                 Theme.of(
@@ -56,7 +56,7 @@ public class CustomReservationRepositoryImpl implements CustomReservationReposit
                         rs.getString("theme_thumbnail")),
                 Member.createMemberWithId(
                         rs.getLong("member_id"),
-                        MemberRole.of(rs.getString("member_role")),
+                        MemberRole.valueOf(rs.getString("member_role")),
                         rs.getString("member_password"),
                         rs.getString("member_name"),
                         rs.getString("member_email")

@@ -40,6 +40,6 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
                 .get("role")
                 .toString();
 
-        return MemberRole.of(role);
+        return MemberRole.valueOf(role);
     }
 }
