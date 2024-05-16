@@ -1,5 +1,19 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static roomescape.InitialDataFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialDataFixture.NOT_RESERVATED_TIME;
+import static roomescape.InitialDataFixture.NOT_RESERVED_THEME;
+import static roomescape.InitialDataFixture.NO_RESERVATION_DATE;
+import static roomescape.InitialDataFixture.RESERVATION_1;
+import static roomescape.InitialDataFixture.RESERVATION_2;
+import static roomescape.InitialDataFixture.THEME3_MEMBER1_RESERVATION_COUNT;
+import static roomescape.InitialDataFixture.THEME_2;
+import static roomescape.InitialDataFixture.THEME_3;
+import static roomescape.InitialMemberFixture.MEMBER_1;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Reservation;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static roomescape.InitialDataFixture.*;
-import static roomescape.InitialMemberFixture.MEMBER_1;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})

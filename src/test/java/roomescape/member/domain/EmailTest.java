@@ -1,14 +1,14 @@
 package roomescape.member.domain;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exceptions.ValidationException;
-
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.member.domain.Email.INVALID_EMAIL_FORMAT;
 import static roomescape.member.domain.Email.INVALID_EMAIL_LENGTH;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.exceptions.ValidationException;
 
 class EmailTest {
 

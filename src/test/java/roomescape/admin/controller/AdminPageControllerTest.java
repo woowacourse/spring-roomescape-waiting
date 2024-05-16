@@ -1,18 +1,19 @@
 package roomescape.admin.controller;
 
+import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
+import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialMemberFixture.MEMBER_4;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static roomescape.InitialMemberFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

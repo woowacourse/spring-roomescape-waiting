@@ -1,15 +1,14 @@
 package roomescape;
 
+import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialMemberFixture.MEMBER_2;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_2;
 
 public class InitialDataFixture {
 

@@ -3,8 +3,12 @@ package roomescape.member.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.naming.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.NotFoundException;
@@ -12,27 +16,20 @@ import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberJpaRepository;
-
-import javax.naming.AuthenticationException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 
 @Service
 public class MemberService {
 
+    private final MemberJpaRepository memberJpaRepository;
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
-
-    private final MemberJpaRepository memberJpaRepository;
 
     public MemberService(MemberJpaRepository MemberJpaRepository) {
         this.memberJpaRepository = MemberJpaRepository;
@@ -115,6 +112,7 @@ public class MemberService {
     }
 
     public Member getById(Long memberId) {
-        return memberJpaRepository.findById(memberId).orElseThrow(() -> new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
+        return memberJpaRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
     }
 }

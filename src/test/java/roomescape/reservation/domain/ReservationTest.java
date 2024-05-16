@@ -1,15 +1,14 @@
 package roomescape.reservation.domain;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.InitialDataFixture.RESERVATION_1;
 import static roomescape.InitialDataFixture.RESERVATION_2;
 import static roomescape.InitialMemberFixture.MEMBER_1;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class ReservationTest {
 

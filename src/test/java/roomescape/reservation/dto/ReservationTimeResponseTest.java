@@ -1,12 +1,11 @@
 package roomescape.reservation.dto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.domain.ReservationTime;
-
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ReservationTimeResponseTest {
 

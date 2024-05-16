@@ -1,5 +1,14 @@
 package roomescape.theme.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static roomescape.InitialDataFixture.INITIAL_THEME_COUNT;
+import static roomescape.InitialDataFixture.NOT_RESERVED_THEME;
+import static roomescape.InitialDataFixture.THEME_1;
+import static roomescape.InitialDataFixture.THEME_2;
+import static roomescape.InitialDataFixture.THEME_3;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +18,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static roomescape.InitialDataFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})

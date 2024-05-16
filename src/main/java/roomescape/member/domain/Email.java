@@ -1,9 +1,8 @@
 package roomescape.member.domain;
 
-import roomescape.exceptions.ValidationException;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import roomescape.exceptions.ValidationException;
 
 public record Email(String email) {
 

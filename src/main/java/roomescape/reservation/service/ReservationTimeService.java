@@ -1,5 +1,8 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
@@ -10,10 +13,6 @@ import roomescape.reservation.repository.ReservationJpaRepository;
 import roomescape.reservation.repository.ReservationTimeJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeJpaRepository;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ReservationTimeService {
@@ -56,7 +55,8 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findTimesWithAlreadyBooked(LocalDate date, Long themeId) {
-        Theme theme = themeJpaRepository.findById(themeId).orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));
+        Theme theme = themeJpaRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));
         List<Long> alreadyBookedTimeIds = reservationJpaRepository.findByDateAndTheme(date, theme)
                 .stream()
                 .map(reservation -> reservation.getReservationTime().getId())

@@ -1,10 +1,9 @@
 package roomescape.util;
 
 import jakarta.servlet.http.Cookie;
-
-import javax.naming.AuthenticationException;
 import java.util.Arrays;
 import java.util.Objects;
+import javax.naming.AuthenticationException;
 
 public class TokenExtractor {
 

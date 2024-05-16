@@ -1,9 +1,8 @@
 package roomescape.reservation.dto;
 
-import roomescape.reservation.domain.ReservationTime;
-
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import roomescape.reservation.domain.ReservationTime;
 
 public record ReservationTimeResponse(Long id, String startAt, Boolean alreadyBooked) {
 

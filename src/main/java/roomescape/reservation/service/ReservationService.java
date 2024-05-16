@@ -1,5 +1,8 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
@@ -16,10 +19,6 @@ import roomescape.reservation.repository.ReservationJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -84,7 +83,8 @@ public class ReservationService {
     }
 
     private void validateIsDuplicated(Reservation reservation) {
-        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())) {
+        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(reservation.getDate(),
+                reservation.getReservationTime(), reservation.getTheme())) {
             throw new DuplicationException("이미 예약이 존재합니다.");
         }
     }

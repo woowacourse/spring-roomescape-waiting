@@ -1,10 +1,11 @@
 package roomescape.theme.domain;
 
-import jakarta.persistence.*;
-import roomescape.reservation.domain.Reservation;
-
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Theme {

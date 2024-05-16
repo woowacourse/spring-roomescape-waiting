@@ -1,8 +1,7 @@
 package roomescape.theme.domain;
 
-import roomescape.exceptions.MissingRequiredFieldException;
-
 import java.util.Objects;
+import roomescape.exceptions.MissingRequiredFieldException;
 
 public record Name(String name) {
 
