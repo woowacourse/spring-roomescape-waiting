@@ -30,7 +30,8 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> postReservationTime(@RequestBody @Valid ReservationTimeRequest reservationTimeRequest) {
+    public ResponseEntity<ReservationTimeResponse> postReservationTime(
+            @RequestBody @Valid ReservationTimeRequest reservationTimeRequest) {
         ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(reservationTimeRequest);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/times/{id}")

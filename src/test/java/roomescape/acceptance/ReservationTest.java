@@ -1,6 +1,7 @@
 package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -8,38 +9,24 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.junit.jupiter.api.TestFactory;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.request.ThemeRequest;
-import roomescape.service.dto.request.TokenRequest;
-import roomescape.service.dto.request.UserReservationRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationTest extends AcceptanceTest {
-
-    private String accessToken;
 
     @BeforeEach
     void insert() {
-        TokenRequest tokenRequest = new TokenRequest("password", "admin@email.com");
-        accessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(tokenRequest)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract().cookie("token");
-
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies("token", adminToken)
                 .body(reservationTimeRequest)
                 .post("/times")
                 .then().log().all()
@@ -48,67 +35,136 @@ class ReservationTest extends AcceptanceTest {
         ThemeRequest themeRequest = new ThemeRequest("hi", "happy", "abcd.html");
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies("token", adminToken)
                 .body(themeRequest)
                 .post("/themes");
-
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12), 1L, 1L, 1L);
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .body(reservationRequest)
-                .post("/reservations");
     }
 
-    @DisplayName("예약 추가 API 테스트")
-    @Test
-    void createReservation() {
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2099, 12, 12), 1L, 1L, 1L);
+    @DisplayName("ADMIN 예약 CRUD 테스트")
+    @TestFactory
+    Stream<DynamicTest> reservationByAdmin() {
+        return Stream.of(
+                dynamicTest("예약을 추가한다.", () -> {
+                    ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2099, 12, 12), 1L, 1L,
+                            1L);
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("id", is(2));
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(reservationRequest)
+                            .when().post("/admin/reservations")
+                            .then().log().all()
+                            .statusCode(201)
+                            .body("id", is(1));
+                }),
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2));
+                dynamicTest("예약을 조회한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookies("token", adminToken)
+                            .when().get("/reservations")
+                            .then().log().all()
+                            .statusCode(200)
+                            .body("size()", is(1));
+                }),
+
+                dynamicTest("예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookies("token", adminToken)
+                            .when().delete("/reservations/1")
+                            .then().log().all()
+                            .statusCode(204);
+                })
+        );
     }
 
-    @DisplayName("예약 조회 API 테스트")
-    @Test
-    void getReservations() {
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+    @DisplayName("USER 예약 조회 CRUD 테스트")
+    @TestFactory
+    Stream<DynamicTest> reservationByUser() {
+        return Stream.of(
+                dynamicTest("예약 시간을 추가한다.", () -> {
+                    ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(12, 0));
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(reservationTimeRequest)
+                            .post("/times")
+                            .then().log().all()
+                            .extract();
+                }),
+
+                dynamicTest("asd 사용자 예약을 추가한다.", () -> {
+                    ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2099, 12, 12), 1L, 1L,
+                            2L);
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(reservationRequest)
+                            .when().post("/admin/reservations")
+                            .then().log().all()
+                            .statusCode(201)
+                            .body("id", is(1));
+                }),
+
+                dynamicTest("qwe 사용자 예약을 추가한다.", () -> {
+                    ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2099, 12, 12), 2L, 1L,
+                            3L);
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(reservationRequest)
+                            .when().post("/admin/reservations")
+                            .then().log().all()
+                            .statusCode(201)
+                            .body("id", is(2));
+                }),
+
+                dynamicTest("asd 사용자의 예약을 조회한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .get("/reservations/mine")
+                            .then().log().all()
+                            .statusCode(200)
+                            .body("size()", is(1));
+                })
+        );
     }
 
-    @DisplayName("예약 취소 API 테스트")
-    @Test
-    void deleteReservation() {
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
+    @DisplayName("동일한 날짜와 시간에 중복 예약시 예외 처리")
+    @TestFactory
+    Stream<DynamicTest> duplicateReservation() {
+        Map<String, String> reservationRequest = new HashMap<>();
+        reservationRequest.put("name", "1234567890");
+        reservationRequest.put("date", "2030-12-12");
+        reservationRequest.put("timeId", "1");
+        reservationRequest.put("themeId", "1");
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+        return Stream.of(
+                dynamicTest("예약을 추가한다.", () -> {
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .body(reservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
+                dynamicTest("중복된 예약을 추가한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .body(reservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(400);
+                })
+        );
     }
+
 
     @DisplayName("올바르지 않은 날짜 형식으로 입력시 예외처리")
     @Test
@@ -121,7 +177,7 @@ class ReservationTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies("token", userToken)
                 .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
@@ -139,7 +195,7 @@ class ReservationTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies("token", userToken)
                 .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
@@ -157,66 +213,10 @@ class ReservationTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
+                .cookies("token", userToken)
                 .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
     }
-
-    @DisplayName("동일한 날짜와 시간에 중복 예약시 예외 처리")
-    @Test
-    void duplicateReservation() {
-        Map<String, String> reservationRequest = new HashMap<>();
-        reservationRequest.put("name", "1234567890");
-        reservationRequest.put("date", "2030-12-12");
-        reservationRequest.put("timeId", "1");
-        reservationRequest.put("themeId", "1");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @DisplayName("사용자별 예약을 조회할 수 있다.")
-    @Test
-    void methodName() {
-        TokenRequest tokenRequest = new TokenRequest("password", "asd@email.com");
-        String userAccessToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(tokenRequest)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract().cookie("token");
-
-        ReservationTimeRequest reservationTimeRequest2 = new ReservationTimeRequest(LocalTime.of(12, 0));
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .body(reservationTimeRequest2)
-                .post("/times")
-                .then().log().all()
-                .extract();
-
-        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.of(2030, 12, 12), 2L, 1L);
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", userAccessToken)
-                .body(userReservationRequest)
-                .post("/reservations");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", userAccessToken)
-                .get("/reservations/mine")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
-    }
-
 }
