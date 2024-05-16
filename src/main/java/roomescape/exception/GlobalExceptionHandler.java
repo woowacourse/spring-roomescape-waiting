@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ProblemDetail handleInternalServerErrorException(Exception ex) {
-        log.error("", ex);
+        log.error(ex.getMessage(), ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "죄송합니다. 서버에서 문제가 발생하여 요청을 처리할 수 없습니다.");
     }
