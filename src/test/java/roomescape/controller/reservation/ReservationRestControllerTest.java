@@ -197,16 +197,13 @@ class ReservationRestControllerTest {
         MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
                 "2100-08-05", 1L);
 
-        Integer id = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
                 .body(reservationCreate)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .extract()
-                .body()
-                .path("id");
+                .statusCode(201);
 
         RestAssured.given().log().all()
                 .cookie("token", memberToken)
