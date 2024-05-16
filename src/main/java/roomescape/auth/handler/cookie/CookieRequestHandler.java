@@ -4,6 +4,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import roomescape.auth.handler.RequestHandler;
+import roomescape.exception.BusinessException;
+
+import static roomescape.exception.ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE;
 
 @Component
 public class CookieRequestHandler implements RequestHandler {
@@ -17,6 +20,6 @@ public class CookieRequestHandler implements RequestHandler {
                 return cookie.getValue();
             }
         }
-        return "";
+        throw new BusinessException(TOKEN_PAYLOAD_EXTRACTION_FAILURE);
     }
 }
