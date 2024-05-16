@@ -3,7 +3,7 @@ package roomescape.member.domain;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 @Embeddable
@@ -23,7 +23,7 @@ public class Email {
 
     public void validate(String email) {
         if (email == null || !pattern.matcher(email).matches()) {
-            throw new BusinessException(ErrorType.EMAIL_FORMAT_ERROR);
+            throw new BadRequestException(ErrorType.EMAIL_FORMAT_ERROR);
         }
     }
 

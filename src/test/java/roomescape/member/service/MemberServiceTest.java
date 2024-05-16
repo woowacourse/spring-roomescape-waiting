@@ -12,6 +12,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.util.ServiceTest;
 
+@DisplayName("사용자 로직 테스트")
 class MemberServiceTest extends ServiceTest {
     @Autowired
     MemberRepository memberRepository;

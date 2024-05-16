@@ -1,7 +1,7 @@
 package roomescape.auth.domain;
 
 import java.util.function.Supplier;
-import roomescape.exception.BusinessException;
+import roomescape.exception.AuthenticationException;
 import roomescape.exception.ErrorType;
 
 public class Payload<T> {
@@ -15,7 +15,7 @@ public class Payload<T> {
 
     public T getValue() {
         if (!validator.get()) {
-            throw new BusinessException(ErrorType.SECURITY_EXCEPTION);
+            throw new AuthenticationException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE);
         }
         return body;
     }

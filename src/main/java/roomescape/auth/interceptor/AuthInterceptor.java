@@ -6,7 +6,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.service.AuthService;
-import roomescape.exception.BusinessException;
+import roomescape.exception.AuthenticationException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 public abstract class AuthInterceptor implements HandlerInterceptor {
@@ -23,10 +24,10 @@ public abstract class AuthInterceptor implements HandlerInterceptor {
         try {
             AuthInfo authInfo = authService.fetchByToken(requestHandler.extract(request));
             if (!isAuthorized(authInfo)) {
-                throw new BusinessException(getUnauthorizedErrorType());
+                throw new AuthenticationException(getUnauthorizedErrorType());
             }
-        } catch (BusinessException | NullPointerException e) {
-            throw new BusinessException(getSecurityErrorType());
+        } catch (BadRequestException | NullPointerException e) {
+            throw new AuthenticationException(getSecurityErrorType());
         }
         return true;
     }

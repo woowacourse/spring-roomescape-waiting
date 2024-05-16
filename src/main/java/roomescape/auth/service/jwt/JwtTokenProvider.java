@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.Payload;
 import roomescape.auth.service.TokenProvider;
-import roomescape.exception.BusinessException;
+import roomescape.exception.AuthenticationException;
 import roomescape.exception.ErrorType;
 
 @Component
@@ -46,8 +46,8 @@ public class JwtTokenProvider implements TokenProvider {
                     () -> isToken(token)
             );
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn(ErrorType.INVALID_TOKEN.getMessage());
-            throw new BusinessException(ErrorType.SECURITY_EXCEPTION);
+            log.warn(e.getMessage());
+            throw new AuthenticationException(ErrorType.SECURITY_EXCEPTION);
         }
 
     }
@@ -58,7 +58,7 @@ public class JwtTokenProvider implements TokenProvider {
             Jws<Claims> claims = Jwts.parser().setSigningKey(jwtProperties.getSecretKey()).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn(ErrorType.INVALID_TOKEN.getMessage());
+            log.warn(e.getMessage());
             return false;
         }
     }

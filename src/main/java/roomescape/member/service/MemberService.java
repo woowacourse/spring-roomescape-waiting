@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.controller.dto.SignUpRequest;
-import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
+import roomescape.exception.NotFoundException;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
@@ -35,6 +35,6 @@ public class MemberService {
 
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_NOT_FOUND));
     }
 }

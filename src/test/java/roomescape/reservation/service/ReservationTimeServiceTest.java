@@ -14,7 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
@@ -97,7 +97,7 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.delete(reservation.getId()))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.RESERVATION_NOT_DELETED.getMessage());
     }
 
@@ -111,7 +111,7 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.create(reservationTimeRequest))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.DUPLICATED_RESERVATION_TIME_ERROR.getMessage());
     }
 

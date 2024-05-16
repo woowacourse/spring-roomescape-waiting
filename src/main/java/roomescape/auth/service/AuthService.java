@@ -6,7 +6,8 @@ import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BusinessException;
+import roomescape.exception.AuthenticationException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
@@ -28,10 +29,10 @@ public class AuthService {
 
     public void authenticate(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new AuthenticationException(ErrorType.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
-            throw new BusinessException(ErrorType.LOGIN_FAILED);
+            throw new AuthenticationException(ErrorType.SECURITY_EXCEPTION);
         }
     }
 
@@ -41,14 +42,14 @@ public class AuthService {
 
     public AuthInfo fetchByToken(String token) {
         Member member = memberRepository.findByEmail(tokenProvider.getPayload(token).getValue())
-                .orElseThrow(() -> new BusinessException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE));
+                .orElseThrow(() -> new AuthenticationException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE));
         return AuthInfo.of(member);
     }
 
     @Transactional
     public void signUp(SignUpRequest signUpRequest) {
         if (memberRepository.existsByEmail(signUpRequest.email())) {
-            throw new BusinessException(ErrorType.DUPLICATED_EMAIL_ERROR);
+            throw new BadRequestException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
         memberRepository.save(new Member(
                 signUpRequest.name(),

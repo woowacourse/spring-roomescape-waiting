@@ -12,7 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
@@ -96,7 +96,7 @@ class ThemeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.RESERVATION_NOT_DELETED.getMessage());
     }
 
@@ -111,7 +111,7 @@ class ThemeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> themeService.findPopularThemes(startDate, endDate, limit))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.INVALID_REQUEST_ERROR.getMessage());
     }
 }

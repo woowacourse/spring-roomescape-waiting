@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
@@ -39,7 +39,7 @@ public class ThemeService {
     @Transactional
     public void delete(long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new BusinessException(ErrorType.RESERVATION_NOT_DELETED);
+            throw new BadRequestException(ErrorType.RESERVATION_NOT_DELETED);
         }
 
         themeRepository.deleteById(themeId);
@@ -47,7 +47,7 @@ public class ThemeService {
 
     public List<ThemeResponse> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
         if (startDate.isAfter(endDate)) {
-            throw new BusinessException(ErrorType.INVALID_REQUEST_ERROR);
+            throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
         }
         return themeRepository.findTopThemesByReservations(startDate, endDate, limit).stream()
                 .map(ThemeResponse::from)

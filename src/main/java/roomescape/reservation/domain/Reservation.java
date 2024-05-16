@@ -9,7 +9,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 @Entity
@@ -46,7 +46,7 @@ public class Reservation {
 
     private void validate(LocalDate date, ReservationTime time) {
         if (date == null || time == null) {
-            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+            throw new BadRequestException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
         }
     }
 

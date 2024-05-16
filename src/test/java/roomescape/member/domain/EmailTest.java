@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exception.BusinessException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 @DisplayName("이메일 도메인 테스트")
@@ -16,7 +16,7 @@ class EmailTest {
     void email(String invalidEmail) {
         //given & when & then
         assertThatThrownBy(() -> new Email(invalidEmail))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.EMAIL_FORMAT_ERROR.getMessage());
     }
 }

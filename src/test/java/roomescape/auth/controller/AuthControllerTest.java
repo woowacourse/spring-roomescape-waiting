@@ -234,7 +234,7 @@ class AuthControllerTest extends ControllerTest {
                             .body(params)
                             .when().post("/signup")
                             .then().log().all()
-                            .statusCode(HttpStatus.CONFLICT.value());
+                            .statusCode(HttpStatus.BAD_REQUEST.value());
                 })
         );
     }

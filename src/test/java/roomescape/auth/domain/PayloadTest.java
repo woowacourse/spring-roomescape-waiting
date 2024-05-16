@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
+import roomescape.exception.AuthenticationException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 @DisplayName("페이로드 테스트")
@@ -37,8 +38,8 @@ class PayloadTest {
         //then
         assertThat(payload1.getValue()).isEqualTo(name1);
         assertThatThrownBy(payload2::getValue)
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.SECURITY_EXCEPTION.getMessage());
+                .isInstanceOf(AuthenticationException.class)
+                .hasMessage(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE.getMessage());
     }
 
     private boolean isSameName(String name1, String name2) {
