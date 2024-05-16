@@ -14,7 +14,7 @@ public record MemberRequest(Long id, String name, String email, String role, Str
         );
     }
 
-    public Member toLoginMember() {
+    public Member toMember() {
         return new Member(id, name, email, role, password);
     }
 }

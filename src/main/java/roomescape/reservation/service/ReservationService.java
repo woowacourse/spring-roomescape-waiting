@@ -51,7 +51,7 @@ public class ReservationService {
                 reservationRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
-                memberRequest.toLoginMember()
+                memberRequest.toMember()
         );
         validateIsBeforeNow(reservation);
         validateIsDuplicated(reservation);
@@ -60,7 +60,7 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(AdminReservationRequest adminReservationRequest) {
-        Member member = memberService.getLoginMemberById(adminReservationRequest.memberId());
+        Member member = memberService.getMemberById(adminReservationRequest.memberId());
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(adminReservationRequest.timeId());
         ThemeResponse themeResponse = themeService.getTheme(adminReservationRequest.themeId());
 
@@ -104,7 +104,7 @@ public class ReservationService {
             LocalDate dateTo
     ) {
         Theme theme = themeService.getById(themeId);
-        Member member = memberService.getById(memberId);
+        Member member = memberService.getMemberById(memberId);
         return reservationJpaRepository.findByThemeAndMember(theme, member)
                 .stream()
                 .filter(reservation -> reservation.isBetweenInclusive(dateFrom, dateTo))

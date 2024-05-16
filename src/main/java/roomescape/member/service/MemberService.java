@@ -21,7 +21,6 @@ import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberJpaRepository;
 
-
 @Service
 public class MemberService {
 
@@ -35,7 +34,7 @@ public class MemberService {
         this.memberJpaRepository = MemberJpaRepository;
     }
 
-    public Member getLoginMemberById(Long memberId) {
+    public Member getMemberById(Long memberId) {
         return memberJpaRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원 id입니다. memberId = " + memberId));
     }
@@ -75,17 +74,17 @@ public class MemberService {
     }
 
     public MemberNameResponse getMemberNameResponseByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToLoginMember(token);
+        Member member = parseTokenToMember(token);
         return new MemberNameResponse(member);
     }
 
     public boolean isAdminToken(String token) throws AuthenticationException {
-        Member member = parseTokenToLoginMember(token);
+        Member member = parseTokenToMember(token);
 
         return member.isAdmin();
     }
 
-    private Member parseTokenToLoginMember(String token) throws AuthenticationException {
+    private Member parseTokenToMember(String token) throws AuthenticationException {
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
@@ -105,14 +104,9 @@ public class MemberService {
         }
     }
 
-    public MemberRequest getLoginMemberRequestByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToLoginMember(token);
+    public MemberRequest getMemberRequestByToken(String token) throws AuthenticationException {
+        Member member = parseTokenToMember(token);
 
         return new MemberRequest(member);
-    }
-
-    public Member getById(Long memberId) {
-        return memberJpaRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
     }
 }

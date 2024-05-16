@@ -45,7 +45,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
-        return reservationService.findReservationsByMember(memberRequest.toLoginMember());
+        return reservationService.findReservationsByMember(memberRequest.toMember());
     }
 
     @DeleteMapping("/{id}")

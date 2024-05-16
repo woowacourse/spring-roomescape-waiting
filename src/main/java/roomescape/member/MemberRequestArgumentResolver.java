@@ -33,6 +33,6 @@ public class MemberRequestArgumentResolver implements HandlerMethodArgumentResol
         HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
         String token = TokenExtractor.extractTokenFromCookie(servletRequest.getCookies());
 
-        return memberService.getLoginMemberRequestByToken(token);
+        return memberService.getMemberRequestByToken(token);
     }
 }
