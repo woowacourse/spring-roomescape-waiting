@@ -27,11 +27,6 @@ class ReservationControllerTest extends ControllerTest {
         themeRepository.save(VALID_THEME);
         memberRepository.save(VALID_MEMBER);
         reservationRepository.save(VALID_RESERVATION);
-        /*entityManager.persist(VALID_RESERVATION_TIME);
-        entityManager.persist(VALID_THEME);
-        entityManager.persist(VALID_MEMBER);
-        entityManager.persist(VALID_RESERVATION);
-        entityManager.flush();*/
     }
 
     @DisplayName("예약을 저장한다. -> 201")
