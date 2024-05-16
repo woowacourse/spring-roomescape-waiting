@@ -8,14 +8,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.dto.SaveReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeDto;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.ReservationTimeAvailabilities;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
@@ -82,5 +86,23 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservationTimeId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약에 포함된 시간 정보는 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("예약 가능한 시간들을 조회한다.")
+    @Test
+    void getAvailableReservationTimesTest() {
+        // Given
+        final LocalDate date = LocalDate.now().plusDays(3);
+        final Long themeId = 10L;
+
+        // When
+        final ReservationTimeAvailabilities availableReservationTimes = reservationTimeService.getAvailableReservationTimes(date, themeId);
+
+        // Then
+        final Map<ReservationTime, Boolean> values = availableReservationTimes.values();
+        Assertions.assertAll(
+                () -> assertThat(values).hasSize(8),
+                () -> assertThat(values.values().contains(false)).isTrue()
+        );
     }
 }

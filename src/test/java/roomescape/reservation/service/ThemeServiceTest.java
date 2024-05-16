@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeServiceTest {
 
@@ -74,5 +74,18 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.deleteTheme(themeId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약에 포함된 테마 정보는 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("인기 테마 정보를 조회한다.")
+    @Test
+    void getPopularThemesTest() {
+        // When
+        final List<ThemeDto> popularThemes = themeService.getPopularThemes();
+
+        // Then
+        Assertions.assertAll(
+                () -> assertThat(popularThemes).hasSize(7),
+                () -> assertThat(popularThemes.get(0).id()).isEqualTo(1L)
+        );
     }
 }
