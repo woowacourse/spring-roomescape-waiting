@@ -2,11 +2,14 @@ package roomescape.reservation.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,9 +18,15 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              MemberRepository memberRepository,
+                              ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
     }
 
     @Transactional
@@ -46,7 +55,12 @@ public class ReservationService {
         return reservationRepository.findAllWithDetails();
     }
 
-    public List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate fromDate, LocalDate toDate) {
+    public List<Reservation> findReservationsByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId,
+                                                                                LocalDate fromDate, LocalDate toDate) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("해당 Id의 사용자가 없습니다."));
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException("해당 Id의 테마가 없습니다."));
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 

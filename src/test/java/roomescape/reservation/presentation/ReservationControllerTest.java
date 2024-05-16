@@ -23,7 +23,6 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -88,7 +87,7 @@ class ReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
 
-        BDDMockito.given(reservationService.findAllByMemberAndThemeAndDateBetween(any(), any(), any(), any()))
+        BDDMockito.given(reservationService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
                 .willReturn(List.of(expectedReservation));
 
         // when & then
