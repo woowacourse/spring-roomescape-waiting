@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -10,6 +11,7 @@ public class Email {
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^\\w+@\\w+\\.\\w+$");
     private static final int ADDRESS_MAX_LENGTH = 50;
 
+    @Column(name = "email", nullable = false)
     private String address;
 
     Email() {

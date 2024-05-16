@@ -6,7 +6,6 @@ import roomescape.domain.member.Member;
 
 @Entity
 public class MemberRole {
-
     @Id
     private long memberId;
     private String name;

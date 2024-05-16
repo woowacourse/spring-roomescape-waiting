@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
@@ -7,6 +8,7 @@ import java.util.Objects;
 public class ThemeName {
     private static final int NAME_MAX_LENGTH = 20;
 
+    @Column(nullable = false)
     private String name;
 
     ThemeName() {
