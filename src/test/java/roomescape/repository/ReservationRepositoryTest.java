@@ -21,6 +21,7 @@ import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
@@ -111,7 +112,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
     @MethodSource("provideFilterCondition")
     void findByConditions(ReservationConditionRequest condition, int resultSize) {
         // given // when
-        List<Reservation> reservations = reservationRepository.findByConditions(condition.dateFrom(),
+        List<ReservationReadOnly> reservations = reservationRepository.findByConditions(condition.dateFrom(),
                 condition.dateTo(), condition.themeId(), condition.memberId());
 
         // then

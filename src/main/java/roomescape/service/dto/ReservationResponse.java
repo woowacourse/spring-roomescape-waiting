@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationReadOnly;
 
 public record ReservationResponse(
         Long id,
@@ -13,6 +14,16 @@ public record ReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
+
+    public static ReservationResponse from(ReservationReadOnly reservation) {
+        return new ReservationResponse(
+                reservation.id(),
+                MemberResponse.from(reservation.member()),
+                reservation.date(),
+                new ReservationTimeResponse(reservation.time()),
+                new ThemeResponse(reservation.theme())
+        );
+    }
 
     public ReservationResponse(Reservation reservation) {
         this(

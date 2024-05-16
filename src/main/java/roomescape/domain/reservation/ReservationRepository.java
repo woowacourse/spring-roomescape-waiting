@@ -28,17 +28,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Limit limit);
 
     @Query("""
-            select r
+            select new roomescape.domain.reservation.ReservationReadOnly(
+                r.id,
+                r.member,
+                r.date,
+                r.time,
+                r.theme
+            )
             from Reservation r
-            join fetch r.theme
-            join fetch r.time
-            join fetch r.member
             where (:startDate is null or r.date >= :startDate)
                 and (:endDate is null or r.date <= :endDate)
                 and (:themeId is null or r.theme.id = :themeId)
                 and (:memberId is null or r.member.id = :memberId)""")
-    List<Reservation> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Long themeId,
-                                       @Nullable Long memberId);
+    List<ReservationReadOnly> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Long themeId,
+                                               @Nullable Long memberId);
 
     boolean existsByTime(ReservationTime time);
 

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
@@ -82,14 +83,17 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
-        List<Reservation> reservations = reservationRepository.findByConditions(
+        List<ReservationReadOnly> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),
                 reservationConditionRequest.themeId(),
                 reservationConditionRequest.memberId()
         );
 
-        return toReservationResponse(reservations);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+//        return toReservationResponse(reservations);
     }
 
     private List<ReservationResponse> toReservationResponse(List<Reservation> reservations) {
