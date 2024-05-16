@@ -17,9 +17,10 @@ public class CheckUserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Long memberId = jwtManager.parseToken(request);
-        if (memberId == -1L) {
-            throw new AuthorizationException("로그인 후 이용하세요.");
+        try {
+            jwtManager.parseToken(request);
+        } catch (AuthorizationException e) {
+            return false;
         }
         return true;
     }

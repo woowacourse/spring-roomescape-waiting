@@ -34,22 +34,14 @@ public class JwtManager {
     }
 
     public Long parseToken(HttpServletRequest request) {
-        Long defaultId = -1L;
-
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return defaultId;
+            throw new AuthorizationException("쿠키가 비어 있습니다.");
         }
-
-        String token = extractTokenFromCookies(cookies);
-        if (token == null) {
-            return defaultId;
-        }
-
-        return parse(token);
+        return parse(extractToken(cookies));
     }
 
-    private String extractTokenFromCookies(Cookie[] cookies) {
+    private String extractToken(Cookie[] cookies) {
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("token")) {
                 return cookie.getValue();
@@ -68,7 +60,7 @@ public class JwtManager {
             return Long.valueOf(claims.getSubject());
         } catch (ExpiredJwtException e) {
             throw new AuthorizationException("토큰이 만료되었습니다.");
-        } catch (UnsupportedJwtException | MalformedJwtException e) {
+        } catch (UnsupportedJwtException | MalformedJwtException | NumberFormatException e) {
             throw new AuthorizationException("잘못된 형식의 토큰입니다.");
         } catch (IllegalArgumentException e) {
             throw new AuthorizationException("빈 토큰을 입력할 수 없습니다.");
