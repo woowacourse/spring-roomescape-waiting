@@ -1,5 +1,6 @@
 package roomescape.reservationtime.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,8 @@ public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
     public ReservationTime(final LocalTime startAt) {
@@ -28,26 +31,14 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public static ReservationTime of(final Long id, final ReservationTime reservationTime) {
-        return new ReservationTime(id, reservationTime.getStartAt());
-    }
-
     private void validateReservationTimeIsNull(final LocalTime time) {
         if (time == null) {
             throw new IllegalArgumentException("예약 시간 생성 시 시작 시간은 필수입니다.");
         }
     }
 
-    public boolean isNotAfter(final LocalTime time) {
-        return this.startAt.isBefore(time) || isSameStartAt(time);
-    }
-
     public boolean isSameTo(final Long timeId) {
         return Objects.equals(this.id, timeId);
-    }
-
-    public boolean isSameStartAt(final LocalTime time) {
-        return Objects.equals(this.startAt, time);
     }
 
     public Long getId() {
