@@ -40,6 +40,18 @@ class AdminReservationControllerTest {
         RestAssured.port = randomServerPort;
     }
 
+    @DisplayName("전체 예약 정보를 조회한다.")
+    @Test
+    void getReservationsTest() {
+        RestAssured.given().log().all()
+                .cookie("token", createAdminAccessToken())
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(16));
+    }
+
+
     @DisplayName("(관리자) - 사용자 아이디를 포함하여 예약 정보를 저장한다.")
     @Test
     void saveReservationForAdminTest() {
@@ -91,7 +103,7 @@ class AdminReservationControllerTest {
 
         final List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .cookie("token", createAdminAccessToken())
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ReservationResponse.class);

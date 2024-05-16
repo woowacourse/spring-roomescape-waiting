@@ -25,11 +25,11 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping("/reservations")
-    public List<ReservationResponse> getReservations() {
-        return reservationService.getReservations()
+    @GetMapping("/reservations-mine")
+    public List<MyReservationResponse> getMyReservations(@Authenticated final AuthenticatedMember authenticatedMember) {
+        return reservationService.getMyReservations(authenticatedMember.id())
                 .stream()
-                .map(ReservationResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
@@ -43,13 +43,5 @@ public class ReservationController {
 
         return ResponseEntity.created(URI.create("/reservations/" + savedReservation.id()))
                 .body(ReservationResponse.from(savedReservation));
-    }
-
-    @GetMapping("/reservations-mine")
-    public List<MyReservationResponse> getMyReservations(@Authenticated final AuthenticatedMember authenticatedMember) {
-        return reservationService.getMyReservations(authenticatedMember.id())
-                .stream()
-                .map(MyReservationResponse::from)
-                .toList();
     }
 }

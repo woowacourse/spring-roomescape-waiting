@@ -32,17 +32,6 @@ class ReservationControllerTest {
         RestAssured.port = randomServerPort;
     }
 
-    @DisplayName("전체 예약 정보를 조회한다.")
-    @Test
-    void getReservationsTest() {
-        RestAssured.given().log().all()
-                .cookie("token", createUserAccessToken())
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(16));
-    }
-
     @DisplayName("예약 정보를 저장한다.")
     @Test
     void saveReservationTest() {

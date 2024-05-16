@@ -48,7 +48,6 @@ public class AdminReservationController {
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
-
     }
 
     @PostMapping("/admin/reservations")
