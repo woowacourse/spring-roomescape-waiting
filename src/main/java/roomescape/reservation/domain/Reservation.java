@@ -29,15 +29,15 @@ public class Reservation {
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id")
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime reservationTime;
 
     protected Reservation() {
