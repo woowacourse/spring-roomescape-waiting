@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(`/admin${RESERVATION_API_ENDPOINT}`)
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
