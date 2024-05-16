@@ -94,10 +94,10 @@ public class ReservationApiController {
                 .body(new ReservationResponse(newReservation));
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable
-                                                  @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
-        reservationDeleteService.deleteReservation(id);
+                                                  @Positive(message = "1 이상의 값만 입력해주세요.") long reservationId) {
+        reservationDeleteService.deleteReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

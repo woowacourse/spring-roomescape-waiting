@@ -62,10 +62,10 @@ public class ThemeApiController {
                 .body(new ThemeResponse(theme));
     }
 
-    @DeleteMapping("/themes/{id}")
+    @DeleteMapping("/themes/{themeId}")
     public ResponseEntity<Void> deleteTheme(@PathVariable
-                                            @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
-        themeDeleteService.deleteTheme(id);
+                                            @Positive(message = "1 이상의 값만 입력해주세요.") long themeId) {
+        themeDeleteService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();
     }
 }

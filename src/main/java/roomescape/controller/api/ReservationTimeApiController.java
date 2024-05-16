@@ -72,10 +72,10 @@ public class ReservationTimeApiController {
                 .body(new ReservationTimeResponse(reservationTime));
     }
 
-    @DeleteMapping("/times/{id}")
+    @DeleteMapping("/times/{timeId}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable
-                                                      @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
-        reservationTimeDeleteService.deleteReservationTime(id);
+                                                      @Positive(message = "1 이상의 값만 입력해주세요.") long timeId) {
+        reservationTimeDeleteService.deleteReservationTime(timeId);
         return ResponseEntity.noContent().build();
     }
 }
