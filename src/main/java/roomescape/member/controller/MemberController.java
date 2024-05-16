@@ -19,6 +19,6 @@ public class MemberController {
 
     @GetMapping
     public List<MemberIdNameResponse> findMembers() {
-        return memberService.findMembers();
+        return memberService.findMembersIdAndName();
     }
 }

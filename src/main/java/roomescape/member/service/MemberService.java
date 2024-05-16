@@ -39,7 +39,7 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원 id입니다. memberId = " + memberId));
     }
 
-    public List<MemberIdNameResponse> findMembers() {
+    public List<MemberIdNameResponse> findMembersIdAndName() {
         List<MemberIdNameResponse> memberIdNameResponses = new ArrayList<>();
         for (Member member : memberJpaRepository.findAll()) {
             memberIdNameResponses.add(new MemberIdNameResponse(member));
