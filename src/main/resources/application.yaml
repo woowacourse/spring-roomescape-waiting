@@ -17,8 +17,6 @@ spring:
     username: sa
     password:
 
-
-
 security:
   jwt:
     token:

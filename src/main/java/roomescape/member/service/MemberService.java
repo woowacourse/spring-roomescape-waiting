@@ -1,6 +1,7 @@
 package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.auth.dto.SignUpRequest;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.member.domain.Member;
@@ -16,6 +17,10 @@ public class MemberService {
 
     public MemberService(final MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
+    }
+
+    public Member addMember(final SignUpRequest request) {
+        return memberRepository.save(request.toMemberEntity());
     }
 
     public MembersResponse findAllMembers() {

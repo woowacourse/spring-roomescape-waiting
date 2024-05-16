@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.dto.SignUpRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.annotation.MemberId;
@@ -24,6 +25,16 @@ public class AuthController {
     public AuthController(final AuthService authService) {
         this.authService = authService;
     }
+
+    @PostMapping("/signup")
+    public ApiResponse<Void> signup(@Valid @RequestBody final SignUpRequest signupRequest, final HttpServletResponse response) {
+        TokenDto tokenDto = authService.signUp(signupRequest);
+        addTokensToCookie(tokenDto, response);
+        
+        return ApiResponse.success();
+    }
+
+    //TODO: 로그아웃
 
     @PostMapping("/login")
     public ApiResponse<Void> login(@Valid @RequestBody final LoginRequest loginRequest, final HttpServletResponse response) {
@@ -51,7 +62,6 @@ public class AuthController {
         return ApiResponse.success();
     }
 
-    // TODO: 로그아웃, 회원가입 구현
     private TokenDto getTokenFromCookie(final HttpServletRequest request) {
         String accessToken = "";
         String refreshToken = "";

@@ -3,6 +3,7 @@ package roomescape.auth.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.dto.SignUpRequest;
 import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.error.ErrorType;
@@ -18,6 +19,12 @@ public class AuthService {
     public AuthService(final MemberService memberService, final JwtHandler jwtHandler) {
         this.memberService = memberService;
         this.jwtHandler = jwtHandler;
+    }
+
+    public TokenDto signUp(final SignUpRequest signupRequest) {
+        Member member = memberService.addMember(signupRequest);
+
+        return jwtHandler.createToken(member.getId());
     }
 
     public TokenDto login(final LoginRequest request) {

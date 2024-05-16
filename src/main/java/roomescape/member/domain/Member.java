@@ -29,6 +29,10 @@ public class Member {
     public Member() {
     }
 
+    public Member(final String name, final String email, final String password) {
+        this(null, name, email, password, Role.MEMBER);
+    }
+
     public Member(final String name, final String email, final String password, final Role role) {
         this(null, name, email, password, role);
     }
