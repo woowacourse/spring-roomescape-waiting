@@ -20,8 +20,8 @@ import roomescape.domain.Reservation;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
-import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.reservation.ReservationResponses;
+import roomescape.service.dto.response.reservation.UserReservationResponses;
 import roomescape.service.reservation.AdminReservationCreateService;
 import roomescape.service.reservation.ReservationCreateService;
 import roomescape.service.reservation.ReservationDeleteService;
@@ -63,13 +63,9 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<UserReservationResponse>> getUserReservations(@AuthenticatedMember Member member) {
+    public ResponseEntity<UserReservationResponses> getUserReservations(@AuthenticatedMember Member member) {
         List<Reservation> userReservations = reservationFindService.findUserReservations(member.getId());
-        return ResponseEntity.ok(
-                userReservations.stream()
-                        .map(UserReservationResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(UserReservationResponses.from(userReservations));
     }
 
     @PostMapping("/reservations")

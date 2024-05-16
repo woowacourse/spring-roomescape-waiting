@@ -66,7 +66,7 @@ public class ReservationApiControllerTest extends BaseControllerTest {
                 .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("reservations.size()", is(1));
     }
 
     @Test
