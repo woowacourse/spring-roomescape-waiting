@@ -32,14 +32,14 @@ class MemberControllerTest {
     @Test
     void getMembersTest() {
         RestAssured.given().log().all()
-                .cookie("token", createUserAccessToken())
-                .when().get("/members")
+                .cookie("token", createAdminAccessToken())
+                .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5));
     }
 
-    private String createUserAccessToken() {
-        return tokenProvider.createToken(3L, MemberRole.USER);
+    private String createAdminAccessToken() {
+        return tokenProvider.createToken(1L, MemberRole.ADMIN);
     }
 }
