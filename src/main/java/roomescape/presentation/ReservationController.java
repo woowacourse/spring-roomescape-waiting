@@ -51,7 +51,7 @@ public class ReservationController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(
             @AuthenticationPrincipal LoginMember loginMember) {
         List<MyReservationResponse> responses = reservationService.findMyReservations(loginMember.id());
