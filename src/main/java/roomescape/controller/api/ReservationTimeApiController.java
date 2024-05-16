@@ -18,7 +18,8 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 import roomescape.service.dto.response.ReservationStatusResponse;
-import roomescape.service.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.response.reservationTime.ReservationTimeResponse;
+import roomescape.service.dto.response.reservationTime.ReservationTimeResponses;
 import roomescape.service.reservationtime.ReservationTimeCreateService;
 import roomescape.service.reservationtime.ReservationTimeDeleteService;
 import roomescape.service.reservationtime.ReservationTimeFindService;
@@ -40,13 +41,9 @@ public class ReservationTimeApiController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
+    public ResponseEntity<ReservationTimeResponses> getReservationTimes() {
         List<ReservationTime> reservationTimes = reservationTimeFindService.findReservationTimes();
-        return ResponseEntity.ok(
-                reservationTimes.stream()
-                        .map(ReservationTimeResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(ReservationTimeResponses.from(reservationTimes));
     }
 
     @GetMapping("/times/available")

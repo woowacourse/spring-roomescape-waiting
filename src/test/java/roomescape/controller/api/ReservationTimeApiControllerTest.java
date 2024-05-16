@@ -8,8 +8,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.controller.BaseControllerTest;
 
 public class ReservationTimeApiControllerTest extends BaseControllerTest {
@@ -38,7 +36,7 @@ public class ReservationTimeApiControllerTest extends BaseControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("reservationTimes.size()", is(3));
 
         RestAssured.given().log().all()
                 .when().delete("/times/3")
