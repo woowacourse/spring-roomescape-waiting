@@ -18,16 +18,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ProblemDetail handleHttpStatusException(RoomeescapeException ex) {
+        log.error(ex.getMessage(), ex);
         return ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
     }
 
     @ExceptionHandler
     public ProblemDetail handleJwtException(JwtException ex) {
+        log.error(ex.getMessage(), ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler
     public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        log.error(ex.getMessage(), ex);
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .findFirst()
@@ -38,13 +41,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ProblemDetail handleInternalServerErrorException(Exception ex) {
-        log.error("", ex);
+        log.error(ex.getMessage(), ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "죄송합니다. 서버에서 문제가 발생하여 요청을 처리할 수 없습니다.");
     }
 
     @ExceptionHandler
     public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.error(ex.getMessage(), ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMostSpecificCause().getMessage());
     }
 }
