@@ -1,8 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.dto.BookResponse;
+import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.domain.dto.ReservationTimeResponses;
@@ -51,5 +54,17 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(id)) {
             throw new DeleteNotAllowException("예약이 등록된 시간은 제거할 수 없습니다.");
         }
+    }
+
+    public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
+        List<ReservationTime> reservationReservationTimes = reservationTimeRepository.findByDateAndThemeId(date,
+                themeId);
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        final List<BookResponse> bookResponses = reservationTimes.stream().map(timeSlot -> {
+            Boolean alreadyBooked = reservationReservationTimes.stream()
+                    .anyMatch(reservationTimeSlot -> reservationTimeSlot.getId().equals(timeSlot.getId()));
+            return new BookResponse(timeSlot.getStartAt(), timeSlot.getId(), alreadyBooked);
+        }).toList();
+        return new BookResponses(bookResponses);
     }
 }

@@ -14,23 +14,24 @@ import roomescape.domain.dto.BookResponses;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
-import roomescape.service.BookService;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationTimeService;
 
 @RestController
 public class ClientReservationController {
-    private final BookService bookService;
+    private final ReservationTimeService reservationTimeService;
     private final ReservationService reservationService;
 
-    public ClientReservationController(final BookService bookService, final ReservationService reservationService) {
-        this.bookService = bookService;
+    public ClientReservationController(final ReservationTimeService reservationTimeService,
+                                       final ReservationService reservationService) {
+        this.reservationTimeService = reservationTimeService;
         this.reservationService = reservationService;
     }
 
     @GetMapping("/books/{date}/{theme_id}")
     public ResponseEntity<BookResponses> read(@PathVariable(value = "date") LocalDate date,
                                               @PathVariable(value = "theme_id") Long themeId) {
-        return ResponseEntity.ok(bookService.findAvailableBookList(date, themeId));
+        return ResponseEntity.ok(reservationTimeService.findAvailableBookList(date, themeId));
     }
 
     @PostMapping("/reservations")
