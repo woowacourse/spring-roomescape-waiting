@@ -88,7 +88,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
             );
         }
 
-        @DisplayName("예외 발생 - 예약이 있는 테마를 삭제한다.") // todo: 어드민으로 변경
+        @DisplayName("예외 발생 - 예약이 있는 테마를 삭제한다.")
         @Test
         void deleteTheme_whenReservationExist_fail() {
             long themeIdWhereReservationExist = PRE_INSERTED_THEME_2.getId();

@@ -13,6 +13,11 @@ import roomescape.dto.response.ThemeResponse;
 
 class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
+    /*
+    @Mock
+    MemberService memberService;
+    * */
+
     @DisplayName("테마 목록을 조회한다.")
     @Test
     void getThemes_success() {

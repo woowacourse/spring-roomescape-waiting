@@ -1,42 +1,49 @@
 package roomescape.config;
 
-import jakarta.servlet.http.Cookie;
+import java.util.Optional;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import roomescape.domain.Member;
-import roomescape.domain.Role;
 import roomescape.service.MemberService;
+import roomescape.util.CookieUtil;
+import roomescape.util.JwtProvider;
 
+@Component
 public class CheckRoleInterceptor implements HandlerInterceptor {
 
+    private final JwtProvider jwtProvider;
     private final MemberService memberService;
 
-    CheckRoleInterceptor(MemberService memberService) {
+    CheckRoleInterceptor(JwtProvider jwtProvider, MemberService memberService) {
+        this.jwtProvider = jwtProvider;
         this.memberService = memberService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies == null) {
-            throw new ForbiddenAccessException("관리자만 접근 가능합니다.");
-        }
+        Optional<String> token = CookieUtil.extractToken(request.getCookies());
 
-        // TODO: 쿠키 추출 로직 분리
-        boolean isAdmin = false;
-        for (Cookie cookie : cookies) {
-            if ("token".equals(cookie.getName())) {
-                Member member = memberService.getUserByToken(cookie.getValue());
-                isAdmin = member.getRole().equals(Role.ADMIN);
-            }
-        }
+        token.ifPresentOrElse(
+                this::validateAdmin,
+                () -> {
+                    throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
+                }
+        );
 
-        if (!isAdmin) {
-            throw new ForbiddenAccessException("관리자만 접근 가능합니다.");
-        }
         return true;
+    }
+
+    private void validateAdmin(String token) {
+        String subject = jwtProvider.getSubject(token);
+        long memberId = Long.parseLong(subject);
+        Member member = memberService.findValidatedSiteUserById(memberId);
+        if (!member.getRole().isAdmin()) {
+            throw new ForbiddenAccessException();
+        }
     }
 }

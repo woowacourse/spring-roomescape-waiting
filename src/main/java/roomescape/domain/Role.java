@@ -16,4 +16,8 @@ public enum Role {
     public static Role findByName(String name) {
         return CACHE.get(name);
     }
+
+    public boolean isAdmin() {
+        return this == ADMIN;
+    }
 }
