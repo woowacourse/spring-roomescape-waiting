@@ -13,6 +13,8 @@ public class MemberFixture {
 
     public static final Member DEFAULT_MEMBER = asMember(1L, "member", "email@email.com", "qwer");
 
+    public static final Member DEFAULT_ADMIN = asAdmin(2L, "admin", "email2@email.com", "qwer");
+
     public static final LoginRequest DEFAULT_MEMBER_LOGIN_REQUEST = new LoginRequest(
             DEFAULT_MEMBER.getEmail(),
             DEFAULT_MEMBER.getEncryptedPassword()
@@ -24,7 +26,6 @@ public class MemberFixture {
             DEFAULT_MEMBER.getRole().name()
     );
 
-    public static final Member DEFAULT_ADMIN = asAdmin(2L, "admin", "email2@email.com", "qwer");
 
     private static Member asAdmin(long id, String name, String email, String password) {
         return new Member(id, name, email, ENCRYPTOR.encrypt(password), ADMIN);
