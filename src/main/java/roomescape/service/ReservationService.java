@@ -54,7 +54,7 @@ public class ReservationService {
         Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
                 requestedTheme);
 
-        Reservations reservations = new Reservations(reservationRepository.findAll());
+        Reservations reservations = reservationRepository.findAll();
         if (reservations.hasSameReservation(beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
@@ -76,7 +76,7 @@ public class ReservationService {
         Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
                 requestedMember);
 
-        Reservations reservations = new Reservations(reservationRepository.findAll());
+        Reservations reservations = reservationRepository.findAll();
         if (reservations.hasSameReservation(beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
@@ -90,7 +90,7 @@ public class ReservationService {
 
 
     public List<ReservationResponse> findAll() {
-        Reservations reservations = new Reservations(reservationRepository.findAll());
+        Reservations reservations = reservationRepository.findAll();
         return reservations.getReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -98,7 +98,7 @@ public class ReservationService {
 
     public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
                                                        LocalDate dateTo) {
-        Reservations reservations = new Reservations(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
+        Reservations reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
         return reservations.getReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -109,7 +109,7 @@ public class ReservationService {
     }
 
     public List<ReservationDetailResponse> findAllByMemberId(long userId) {
-        return reservationRepository.findAllByMemberId(userId).stream()
+        return reservationRepository.findAllByMemberId(userId).getReservations().stream()
                 .map(ReservationDetailResponse::from)
                 .toList();
     }

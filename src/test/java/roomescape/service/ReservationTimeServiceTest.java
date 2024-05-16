@@ -136,7 +136,7 @@ class ReservationTimeServiceTest {
             reservationTimeService.delete(1L);
 
             //then
-            assertThat(new ReservationTimes(reservationTimeRepository.findAll()).getReservationTimes())
+            assertThat(reservationTimeRepository.findAll().getReservationTimes())
                     .isEmpty();
         }
 

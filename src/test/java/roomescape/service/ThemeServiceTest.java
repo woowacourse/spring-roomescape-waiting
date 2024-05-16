@@ -148,7 +148,7 @@ class ThemeServiceTest {
         void notDuplicatedThemeNameSaveTest() {
             themeService.save(new ThemeRequest("otherName", "description", "thumbnail"));
 
-            assertThat(new Themes(themeRepository.findAll()).getThemes())
+            assertThat(themeRepository.findAll().getThemes())
                     .hasSize(2);
         }
 

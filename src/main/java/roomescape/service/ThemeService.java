@@ -30,7 +30,7 @@ public class ThemeService {
     }
 
     public ThemeResponse save(ThemeRequest themeRequest) {
-        Themes themes = new Themes(themeRepository.findAll());
+        Themes themes = themeRepository.findAll();
         if (themes.hasNameOf(themeRequest.name())) {
             throw new RoomescapeException(DUPLICATE_THEME);
         }
@@ -40,14 +40,14 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAll() {
-        return new Themes(themeRepository.findAll()).getThemes().stream()
+        return themeRepository.findAll().getThemes().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> findAndOrderByPopularity(int count) {
         Duration lastWeek = Duration.ofLastWeek();
-        return reservationRepository.findAndOrderByPopularity(lastWeek.getStartDate(), lastWeek.getEndDate(), count).stream()
+        return reservationRepository.findAndOrderByPopularity(lastWeek, count).getThemes().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

@@ -21,7 +21,7 @@ public class MemberService {
 
 
     public List<MemberResponse> findAll() {
-        return new Members(memberRepository.findAll()).getMembers().stream()
+        return memberRepository.findAll().getMembers().stream()
                 .map(MemberResponse::from)
                 .toList();
     }
