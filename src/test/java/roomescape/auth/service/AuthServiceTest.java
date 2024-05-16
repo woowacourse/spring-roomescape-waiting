@@ -18,6 +18,7 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.global.exception.auth.WrongPasswordException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.fixture.MemberFixture;
@@ -38,7 +39,7 @@ class AuthServiceTest {
     @DisplayName("로그인 요청에 성공하면 토큰을 반환한다")
     @Test
     void should_return_token_when_valid_login_request_arrived() {
-        when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
+        when(memberRepository.findByEmail(any(Email.class))).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
         when(jwtTokenProvider.createToken(any(Member.class))).thenReturn(DUMMY_TOKEN);
 
         LoginRequest request = new LoginRequest("andole@test.com", "123");
@@ -48,7 +49,7 @@ class AuthServiceTest {
     @DisplayName("로그인 요청 시 이메일에 해당하는 유저를 찾을 수 없을 경우 예외가 발생한다")
     @Test
     void should_throw_exception_when_email_not_exist() {
-        when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
+        when(memberRepository.findByEmail(any(Email.class))).thenReturn(Optional.empty());
         LoginRequest request = new LoginRequest("noSignedUp@gmail.com", "123");
 
         assertThatThrownBy(() -> authService.login(request))
@@ -58,7 +59,7 @@ class AuthServiceTest {
     @DisplayName("로그인 요청 시 비밀번호가 틀리다면 예외가 발생한다")
     @Test
     void should_throw_exception_when_password_is_incorrect() {
-        when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
+        when(memberRepository.findByEmail(any(Email.class))).thenReturn(Optional.of(MemberFixture.MEMBER_ID_1));
         LoginRequest request = new LoginRequest("aa@gmail.com", "1234");
 
         assertThatThrownBy(() -> authService.login(request))

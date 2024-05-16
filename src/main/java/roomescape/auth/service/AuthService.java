@@ -8,6 +8,7 @@ import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.infrastructure.Token;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.global.exception.auth.WrongPasswordException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
@@ -23,7 +24,8 @@ public class AuthService {
     }
 
     public Token login(LoginRequest loginRequest) {
-        Member findMember = memberRepository.findByEmail(loginRequest.email())
+        Email loginEmail = new Email(loginRequest.email());
+        Member findMember = memberRepository.findByEmail(loginEmail)
                 .orElseThrow(() -> new NoSuchRecordException("이메일: " + loginRequest.email() + " 해당하는 멤버를 찾을 수 없습니다"));
 
         if (!findMember.getPassword().equals(loginRequest.password())) {

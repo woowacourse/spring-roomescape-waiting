@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import java.util.Objects;
 import roomescape.global.exception.member.InvalidMemberNameException;
 
@@ -8,11 +9,15 @@ public class Name {
     private static final int MIN_LENGTH = 1;
     private static final int MAX_LENGTH = 5;
 
-    private final String value;
+    @Column(name = "name", nullable = false)
+    private String value;
 
     public Name(String value) {
         validate(value);
         this.value = value;
+    }
+
+    public Name() {
     }
 
     private void validate(String value) {

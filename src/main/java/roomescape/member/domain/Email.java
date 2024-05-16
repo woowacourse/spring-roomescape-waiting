@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import java.util.Objects;
 import roomescape.global.exception.member.InvalidMemberEmailException;
 
@@ -7,11 +8,15 @@ public class Email {
 
     private static final String EMAIL_FORMAT = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
-    private final String value;
+    @Column(name = "email", nullable = false)
+    private String value;
 
     public Email(String value) {
         validate(value);
         this.value = value;
+    }
+
+    public Email() {
     }
 
     private void validate(String value) {

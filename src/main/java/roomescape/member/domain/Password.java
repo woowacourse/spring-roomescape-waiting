@@ -1,15 +1,20 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import java.util.Objects;
 import roomescape.global.exception.member.InvalidMemberPasswordException;
 
 public class Password {
 
-    private final String value;
+    @Column(name = "password", nullable = false)
+    private String value;
 
     public Password(String value) {
         validate(value);
         this.value = value;
+    }
+
+    public Password() {
     }
 
     private void validate(String value) {
