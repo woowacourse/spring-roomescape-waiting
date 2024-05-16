@@ -31,21 +31,11 @@ public class Member {
     }
 
     public Member(String email, String password, String name, String role) {
-        this(
-                email,
-                new MemberPassword(password),
-                name,
-                Role.getRole(role)
-        );
+        this(email, new MemberPassword(password), name, Role.getRole(role));
     }
 
     public Member(String email, String password, String name) {
-        this(
-                email,
-                new MemberPassword(password),
-                name,
-                Role.MEMBER
-        );
+        this(email, new MemberPassword(password), name, Role.MEMBER);
     }
 
     protected Member() {
