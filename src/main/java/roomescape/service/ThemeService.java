@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.ReservationRepository;
@@ -55,7 +56,8 @@ public class ThemeService {
     public List<ThemeAppResponse> findPopular() {
         LocalDate from = LocalDate.now().minusDays(BASED_ON_PERIOD_POPULAR_THEME);
         LocalDate to = LocalDate.now().minusDays(1);
-        return themeRepository.findMostReservedThemesInPeriod(from, to, MAX_POPULAR_THEME_COUNT).stream()
+        return themeRepository.findMostReservedThemesInPeriod(from, to,
+                        PageRequest.of(0, MAX_POPULAR_THEME_COUNT)).stream()
                 .map(ThemeAppResponse::from)
                 .toList();
     }

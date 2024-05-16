@@ -1,6 +1,7 @@
 package roomescape.infrastructure;
 
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,19 +17,15 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """
                     SELECT
-                        th.id AS id, 
-                        th.name AS name, 
-                        th.description AS description,
-                        th.thumbnail AS thumbnail, 
-                        COUNT(r.theme_id) AS count
-                    FROM theme AS th
-                    LEFT JOIN reservation AS r ON th.id = r.theme_id AND r.date BETWEEN :from AND :to
+                        th,
+                        COUNT(r.theme.id) AS count
+                    FROM Theme AS th
+                    LEFT JOIN Reservation AS r ON th.id = r.theme.id AND r.date.date BETWEEN :from AND :to
                     GROUP BY th.id
-                    ORDER BY count DESC 
-                    LIMIT :themeCount
-            """, nativeQuery = true)
+                    ORDER BY count DESC
+            """)
     List<Theme> findMostReservedThemesInPeriod(
             @Param("from") LocalDate from,
             @Param("to") LocalDate to,
-            @Param("themeCount") int themeCount);
+            Pageable pageable);
 }
