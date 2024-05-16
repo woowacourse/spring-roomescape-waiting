@@ -31,10 +31,6 @@ class ThemeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        themeRepository.saveAll(List.of(
-                new Theme("n1", "d1", "t1"),
-                new Theme("n2", "d2", "t2")));
-
         reservationTimeRepository.saveAll(List.of(
                 new ReservationTime(LocalTime.of(1, 0)),
                 new ReservationTime(LocalTime.of(2, 0))));

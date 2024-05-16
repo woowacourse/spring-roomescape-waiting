@@ -15,7 +15,6 @@ import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
@@ -35,19 +34,12 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
     @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
-        themeRepository.saveAll(List.of(
-                new Theme("n1", "d1", "t1"),
-                new Theme("n2", "d2", "t2"),
-                new Theme("n3", "d3", "t3")));
-
         reservationTimeRepository.saveAll(List.of(
                 new ReservationTime(LocalTime.of(1, 0)),
                 new ReservationTime(LocalTime.of(2, 0)),

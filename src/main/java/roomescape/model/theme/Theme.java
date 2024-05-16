@@ -26,22 +26,22 @@ public class Theme {
     @OneToMany(mappedBy = "theme")
     private Set<Reservation> reservations;
 
-    public Theme(long id, String name, String description, String thumbnail) {
+    private Theme(long id, Name name, Description description, Thumbnail thumbnail) {
         this.id = id;
-        this.name = new Name(name);
-        this.description = new Description(description);
-        this.thumbnail = new Thumbnail(thumbnail);
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
     }
 
-    public Theme(String name, String description, String thumbnail) {
-        this(0, name, description, thumbnail);
+    public Theme(long id, String name, String description, String thumbnail) {
+        this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
     public Theme() {
     }
 
     public static Theme from(ThemeDto themeDto) {
-        return new Theme(themeDto.getName().getName(), themeDto.getDescription(), themeDto.getThumbnail());
+        return new Theme(0, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
     }
 
     public long getId() {
