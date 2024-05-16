@@ -24,8 +24,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ApiResponse<Void> login(@Valid @RequestBody final LoginRequest loginRequest, final HttpServletResponse response) {
-        TokenDto tokenDto = authService.login(loginRequest);
+    public ApiResponse<Void> login(
+            @Valid @RequestBody final LoginRequest loginRequest,
+            final HttpServletResponse response
+    ) {
+        final TokenDto tokenDto = authService.login(loginRequest);
         addTokensToCookie(tokenDto, response);
 
         return ApiResponse.success();
@@ -33,15 +36,18 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public ApiResponse<LoginCheckResponse> checkLogin(@MemberId final Long memberId) {
-        LoginCheckResponse response = authService.checkLogin(memberId);
+        final LoginCheckResponse response = authService.checkLogin(memberId);
         return ApiResponse.success(response);
     }
 
     @GetMapping("/token-reissue")
-    public ApiResponse<Void> reissueToken(final HttpServletRequest request, final HttpServletResponse response) {
-        TokenDto requestToken = getTokenFromCookie(request);
+    public ApiResponse<Void> reissueToken(
+            final HttpServletRequest request,
+            final HttpServletResponse response
+    ) {
+        final TokenDto requestToken = getTokenFromCookie(request);
 
-        TokenDto tokenInfo = authService.reissueToken(requestToken.accessToken(), requestToken.refreshToken());
+        final TokenDto tokenInfo = authService.reissueToken(requestToken.accessToken(), requestToken.refreshToken());
         addTokensToCookie(tokenInfo, response);
 
         return ApiResponse.success();
@@ -51,7 +57,7 @@ public class AuthController {
     private TokenDto getTokenFromCookie(final HttpServletRequest request) {
         String accessToken = "";
         String refreshToken = "";
-        for (Cookie cookie : request.getCookies()) {
+        for (final Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals("accessToken")) {
                 accessToken = cookie.getValue();
                 cookie.setMaxAge(0);
@@ -65,13 +71,13 @@ public class AuthController {
         return new TokenDto(accessToken, refreshToken);
     }
 
-    private void addTokensToCookie(TokenDto tokenInfo, HttpServletResponse response) {
+    private void addTokensToCookie(final TokenDto tokenInfo, final HttpServletResponse response) {
         addTokenToCookie("accessToken", tokenInfo.accessToken(), response);
         addTokenToCookie("refreshToken", tokenInfo.refreshToken(), response);
     }
 
-    private void addTokenToCookie(String cookieName, String token, HttpServletResponse response) {
-        Cookie cookie = new Cookie(cookieName, token);
+    private void addTokenToCookie(final String cookieName, final String token, final HttpServletResponse response) {
+        final Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true);
 
         response.addCookie(cookie);

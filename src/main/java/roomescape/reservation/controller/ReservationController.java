@@ -2,8 +2,8 @@ package roomescape.reservation.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +23,6 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
 import roomescape.reservation.service.ReservationService;
-
-import java.time.LocalDate;
 
 @RestController
 public class ReservationController {
@@ -49,7 +47,7 @@ public class ReservationController {
     @GetMapping("/reservations/themes/{themeId}/times")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationTimeInfosResponse> getReservationTimeInfos(
-            @NotBlank(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long themeId,
+            @NotNull(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long themeId,
             @NotNull(message = "날짜는 null일 수 없습니다.") @RequestParam final LocalDate date) {
         return ApiResponse.success(reservationService.findReservationsByDateAndThemeId(date, themeId));
     }
@@ -74,7 +72,7 @@ public class ReservationController {
             @MemberId final Long memberId,
             final HttpServletResponse response
     ) {
-        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest, memberId);
+        final ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest, memberId);
 
         response.setHeader(HttpHeaders.LOCATION, "/reservations/" + reservationResponse.id());
         return ApiResponse.success(reservationResponse);
@@ -84,7 +82,7 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeReservation(
             @MemberId final Long memberId,
-            @NotBlank(message = "reservationId는 null 또는 공백일 수 없습니다.") @PathVariable("id") final Long reservationId
+            @NotNull(message = "reservationId는 null 또는 공백일 수 없습니다.") @PathVariable("id") final Long reservationId
     ) {
         reservationService.removeReservationById(reservationId, memberId);
 

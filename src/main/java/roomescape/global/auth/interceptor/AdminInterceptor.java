@@ -28,24 +28,25 @@ public class AdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
+            throws Exception {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
-        HandlerMethod handlerMethod = (HandlerMethod) handler;
-        Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
+        final HandlerMethod handlerMethod = (HandlerMethod) handler;
+        final Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
         if (adminAnnotation == null) {
             return true;
         }
 
-        String cookieHeader = request.getHeader("Cookie");
+        final String cookieHeader = request.getHeader("Cookie");
         if (cookieHeader != null) {
-            for (Cookie cookie : request.getCookies()) {
+            for (final Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals(ACCESS_TOKEN_COOKIE_NAME)) {
-                    String accessToken = cookie.getValue();
-                    Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
+                    final String accessToken = cookie.getValue();
+                    final Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
 
-                    Member member = memberService.findMemberById(memberId);
+                    final Member member = memberService.findMemberById(memberId);
                     return checkRole(member);
                 }
             }

@@ -2,8 +2,8 @@ package roomescape.theme.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,8 +19,6 @@ import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.dto.ThemesResponse;
 import roomescape.theme.service.ThemeService;
-
-import java.time.LocalDate;
 
 @RestController
 public class ThemeController {
@@ -51,7 +49,7 @@ public class ThemeController {
             @Valid @RequestBody final ThemeRequest request,
             final HttpServletResponse response
     ) {
-        ThemeResponse themeResponse = themeService.addTheme(request);
+        final ThemeResponse themeResponse = themeService.addTheme(request);
         response.setHeader(HttpHeaders.LOCATION, "/themes/" + themeResponse.id());
 
         return ApiResponse.success(themeResponse);
@@ -61,7 +59,7 @@ public class ThemeController {
     @DeleteMapping("/themes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeTheme(
-            @NotBlank(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long id
+            @NotNull(message = "themeId는 null일 수 없습니다.") @PathVariable final Long id
     ) {
         themeService.removeThemeById(id);
 

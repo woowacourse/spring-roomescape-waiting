@@ -2,12 +2,11 @@ package roomescape.reservation.dto.request;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.reservation.domain.ReservationTime;
-
-import java.time.LocalTime;
 
 public record ReservationTimeRequest(
         @NotNull(message = "예약 시간은 null일 수 없습니다.")
