@@ -1,12 +1,13 @@
 package roomescape.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ReservationStatusTest {
 
@@ -23,8 +24,8 @@ class ReservationStatusTest {
         ReservationStatus reservationStatus = ReservationStatus.of(reservedTimes, reservationTimes);
 
         assertAll(
-                () -> assertThat(reservationStatus.findReservationStatusBy(reservationTime1)).isTrue(),
-                () -> assertThat(reservationStatus.findReservationStatusBy(reservationTime2)).isFalse()
+                () -> assertThat(reservationStatus.getReservationStatus().get(reservationTime1)).isTrue(),
+                () -> assertThat(reservationStatus.getReservationStatus().get(reservationTime2)).isFalse()
         );
     }
 }

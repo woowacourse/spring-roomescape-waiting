@@ -2,9 +2,6 @@ package roomescape.controller.api;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +19,10 @@ import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.reservationtime.ReservationTimeCreateService;
 import roomescape.service.reservationtime.ReservationTimeDeleteService;
 import roomescape.service.reservationtime.ReservationTimeFindService;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 @Validated
 @RestController
@@ -56,12 +57,14 @@ public class ReservationTimeApiController {
         ReservationStatus reservationStatus = reservationTimeFindService.findIsBooked(date, themeId);
         return ResponseEntity.ok(
                 reservationStatus.getReservationStatus()
-                        .keySet()
+                        .entrySet()
                         .stream()
-                        .map(reservationTime -> new ReservationStatusResponse(
-                                reservationTime,
-                                reservationStatus.findReservationStatusBy(reservationTime))
-                        ).toList());
+                        .map(status -> new ReservationStatusResponse(
+                                        status.getKey(),
+                                        status.getValue()
+                                )
+                        ).toList()
+        );
     }
 
     @PostMapping("/times")

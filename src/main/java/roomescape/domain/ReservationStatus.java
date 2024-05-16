@@ -26,10 +26,6 @@ public class ReservationStatus {
                 .anyMatch(reservedTime -> reservedTime.equals(reservationTime));
     }
 
-    public Boolean findReservationStatusBy(ReservationTime reservationTime) {
-        return reservationStatus.get(reservationTime);
-    }
-
     public Map<ReservationTime, Boolean> getReservationStatus() {
         return reservationStatus;
     }
