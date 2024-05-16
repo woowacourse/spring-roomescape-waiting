@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출
-    */
-
     const currentDate = new Date();
     const endDate = currentDate.toISOString().split('T')[0];
     currentDate.setDate(currentDate.getDate() - 7);
@@ -19,10 +15,6 @@ function render(response) {
     const data = response.data;
     const container = document.getElementById('theme-ranking');
 
-    /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출 후 렌더링
-          response 명세에 맞춰 name, thumbnail, description 값 설정
-    */
     data.forEach(theme => {
         const name = theme.name;
         const thumbnail = theme.thumbnail;
