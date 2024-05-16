@@ -21,4 +21,9 @@ public class UserViewController {
         return "/login";
     }
 
+    @GetMapping("/reservation-mine")
+    public String reservationMinePage() {
+        return "/reservation-mine";
+    }
+
 }
