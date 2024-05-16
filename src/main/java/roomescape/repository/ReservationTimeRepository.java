@@ -15,12 +15,14 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     Optional<ReservationTime> findByStartAt(LocalTime startAt);
 
-    @Query("SELECT rt "
-            + "FROM ReservationTime rt "
-            + "INNER JOIN Reservation r "
-            + "ON rt.id = r.time.id "
-            + "WHERE r.date = :date "
-            + "AND r.theme.id = :themeId")
+    @Query("""
+            SELECT rt 
+            FROM ReservationTime rt 
+            INNER JOIN Reservation r 
+            ON rt.id = r.time.id 
+            WHERE r.date = :date 
+            AND r.theme.id = :themeId
+            """)
     List<ReservationTime> findReservationByThemeIdAndDate(@Param("date") LocalDate date,
                                                           @Param("themeId") long themeId);
 }
