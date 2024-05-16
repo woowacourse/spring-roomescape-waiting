@@ -44,9 +44,6 @@ public class ControllerAdvice {
             builder.append(fieldError.getField());
             builder.append("](은)는 ");
             builder.append(fieldError.getDefaultMessage());
-            builder.append(" 입력된 값: [");
-            builder.append(fieldError.getRejectedValue());
-            builder.append("]");
         }
 
         ErrorMessageResponse response = new ErrorMessageResponse(builder.toString());
