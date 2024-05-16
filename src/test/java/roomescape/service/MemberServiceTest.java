@@ -65,7 +65,7 @@ class MemberServiceTest {
         //given
         when(passwordEncoder.encode(any(String.class), any(String.class))).thenReturn(
                 new Password("hashedpassword", "salt"));
-        SignupRequest signupRequest = new SignupRequest("poke@test.com", "123456", "ash");
+        SignupRequest signupRequest = new SignupRequest("user@test.com", "123456", "ash");
         //when, then
         assertThatThrownBy(() -> service.createUser(signupRequest)).isInstanceOf(SignupFailException.class);
         assertThat(getMemberSize()).isEqualTo(2);
@@ -77,7 +77,7 @@ class MemberServiceTest {
         //given
         when(passwordEncoder.encode(any(String.class), any(String.class))).thenReturn(
                 new Password("hashedpassword", "salt"));
-        LoginRequest loginRequest = new LoginRequest("poke@test.com", "password");
+        LoginRequest loginRequest = new LoginRequest("user@test.com", "password");
         //when, then
         assertThatCode(() -> service.login(loginRequest)).doesNotThrowAnyException();
     }

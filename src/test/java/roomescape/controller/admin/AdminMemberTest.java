@@ -9,33 +9,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
-import roomescape.auth.JwtTokenProvider;
+import roomescape.controller.TestAccessToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AdminMemberTest {
-    private static final String ADMIN_USER = "wedge@test.com";
-
     @LocalServerPort
-    int port;
-
+    private int port;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TestAccessToken testAccessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
     }
 
-    private String generateToken(String email) {
-        return jwtTokenProvider.createToken(email);
-    }
-
     @DisplayName("회원 정보들을 반환한다.")
     @Test
     void given_when_getMembers_then_statusCodeIsOk() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(200);

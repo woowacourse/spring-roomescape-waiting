@@ -14,25 +14,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
-import roomescape.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ClientReservationTest {
-    private static final String COMMON_USER = "poke@test.com";
-
     @LocalServerPort
-    int port;
+    private int port;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TestAccessToken testAccessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-    }
-
-    private String generateToken(String email) {
-        return jwtTokenProvider.createToken(email);
     }
 
     @DisplayName("날짜와 테마를 선택하면 예약 가능한 시간을 확인할 수 있다.")
@@ -59,25 +52,15 @@ class ClientReservationTest {
     @Test
     void given_reservationRequest_when_create_statusCodeIsOk() {
         //given
-        Map<String, Object> login = new HashMap<>();
-        login.put("email", "wedge@test.com");
-        login.put("password", "test1234");
-        var cookies = RestAssured
-                .given().log().all()
-                .contentType(ContentType.JSON)
-                .body(login)
-                .when().post("/login")
-                .then().log().all()
-                .extract().response().getDetailedCookies();
         Map<String, String> params = new HashMap<>();
         params.put("date", "2099-01-01");
         params.put("themeId", "1");
         params.put("timeId", "2");
         //when, then
         RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
                 .contentType(ContentType.JSON)
                 .body(params)
-                .cookies(cookies)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -87,7 +70,7 @@ class ClientReservationTest {
     @Test
     void given_memberToken_when_readByMember_then_statusCodeIsOk() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(COMMON_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
                 .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200);

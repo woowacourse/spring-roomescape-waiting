@@ -1,7 +1,11 @@
 package roomescape.controller.admin;
 
+import static org.hamcrest.Matchers.containsString;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,38 +17,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
-import roomescape.auth.JwtTokenProvider;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.containsString;
+import roomescape.controller.TestAccessToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AdminReservationTest {
-    private static final String ADMIN_USER = "wedge@test.com";
-    private static final String COMMON_USER = "poke@test.com";
-
     @LocalServerPort
-    int port;
+    private int port;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TestAccessToken testAccessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
     }
 
-    private String generateToken(String email) {
-        return jwtTokenProvider.createToken(email);
-    }
-
     @DisplayName("예약 목록을 불러오는데 성공하면 200을 응답한다.")
     @Test
     void given_when_GetReservations_then_statusCodeIsOk() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200);
@@ -60,7 +52,7 @@ class AdminReservationTest {
         reservation.put("memberId", 1);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -72,7 +64,7 @@ class AdminReservationTest {
     @Test
     void given_when_deleteSuccessful_then_statusCodeIsNoContents() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -88,7 +80,7 @@ class AdminReservationTest {
         reservation.put("memberId", 1);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -108,7 +100,7 @@ class AdminReservationTest {
         reservation.put("memberId", 1);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -127,9 +119,8 @@ class AdminReservationTest {
         reservation.put("themeId", 1);
         reservation.put("memberId", 1);
 
-
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -147,9 +138,8 @@ class AdminReservationTest {
         reservation.put("themeId", 1);
         reservation.put("memberId", 1);
 
-
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -167,9 +157,8 @@ class AdminReservationTest {
         reservation.put("themeId", 1);
         reservation.put("memberId", 1);
 
-
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -190,7 +179,7 @@ class AdminReservationTest {
         reservation.put("memberId", 1);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -209,7 +198,7 @@ class AdminReservationTest {
         reservation.put("themeId", 99);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -227,7 +216,7 @@ class AdminReservationTest {
         reservation.put("memberId", 99);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -245,7 +234,7 @@ class AdminReservationTest {
         reservation.put("memberId", 1);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/admin/reservations")
@@ -255,9 +244,9 @@ class AdminReservationTest {
 
     @DisplayName("일반 유저가 예약을 삭제하려 할때 401오류를 반환한다.")
     @Test
-    void given_commonUserCookie_when_deleteFail_then_statusCodeIsNoContents() {
+    void given_userCookie_when_deleteFail_then_statusCodeIsNoContents() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(COMMON_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
                 .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(401);

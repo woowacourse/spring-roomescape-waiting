@@ -1,7 +1,11 @@
 package roomescape.controller.admin;
 
+import static org.hamcrest.Matchers.containsString;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,33 +17,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
-import roomescape.auth.JwtTokenProvider;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.containsString;
+import roomescape.controller.TestAccessToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AdminTimeTest {
-    private static final String ADMIN_USER = "wedge@test.com";
-
     @LocalServerPort
-    int port;
-
+    private int port;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TestAccessToken testAccessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
     }
-
-    private String generateToken(String email) {
-        return jwtTokenProvider.createToken(email);
-    }
-
 
     @DisplayName("시간 등록 성공 시 201을 응답한다.")
     @Test
@@ -48,7 +39,7 @@ public class AdminTimeTest {
         params.put("startAt", "10:10");
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/times")
@@ -60,7 +51,7 @@ public class AdminTimeTest {
     @Test
     void given_when_deleteTimes_then_statusCodeNoContents() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().delete("/admin/times/4")
                 .then().log().all()
                 .statusCode(204);
@@ -73,7 +64,7 @@ public class AdminTimeTest {
         time.put("startAt", "10:00");
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(time)
                 .when().post("/admin/times")
@@ -91,7 +82,7 @@ public class AdminTimeTest {
         time.put("startAt", invalidTime);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(time)
                 .when().post("/admin/times")
@@ -109,7 +100,7 @@ public class AdminTimeTest {
         time.put("startAt", invalidTime);
 
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(time)
                 .when().post("/admin/times")
@@ -122,7 +113,7 @@ public class AdminTimeTest {
     @Test
     void given_when_deleteTimeIdRegisteredReservation_then_statusCodeIsBadRequest() {
         RestAssured.given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .when().delete("/admin/times/1")
                 .then().log().all()

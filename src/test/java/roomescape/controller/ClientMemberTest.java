@@ -15,26 +15,18 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
-import roomescape.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ClientMemberTest {
-    private static final String ADMIN_USER = "wedge@test.com";
-
     @LocalServerPort
-    int port;
-
+    private int port;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TestAccessToken testAccessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-    }
-
-    private String generateToken(String email) {
-        return jwtTokenProvider.createToken(email);
     }
 
     @DisplayName("회원 가입 요청 성공 시 200을 응답한다.")
@@ -58,7 +50,7 @@ class ClientMemberTest {
     void given_when_signupFail_then_statusCodeIsBadRequest() {
         Map<String, Object> params = new HashMap<>();
         // 이미 있는 계정
-        params.put("email", "poke@test.com");
+        params.put("email", "user@test.com");
         params.put("password", "1q2w3e4r!");
         params.put("name", "poke");
 
@@ -90,7 +82,7 @@ class ClientMemberTest {
     @Test
     void given_when_loginSuccess_then_statusCodeOk() {
         Map<String, Object> params = new HashMap<>();
-        params.put("email", "wedge@test.com");
+        params.put("email", "admin@test.com");
         params.put("password", "test1234");
         var response = RestAssured
                 .given().log().all()
@@ -106,7 +98,7 @@ class ClientMemberTest {
     @Test
     void given_when_loginCheckSuccess_then_statusCodeOk() {
         Map<String, Object> params = new HashMap<>();
-        params.put("email", "wedge@test.com");
+        params.put("email", "admin@test.com");
         params.put("password", "test1234");
         var cookies = RestAssured
                 .given().log().all()
@@ -127,7 +119,7 @@ class ClientMemberTest {
     void given_when_logoutSuccess_then_statusCodeOk() {
         var response = RestAssured
                 .given().log().all()
-                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .when().post("/logout")
                 .then().log().all().extract();
