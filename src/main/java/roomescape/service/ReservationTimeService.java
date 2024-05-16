@@ -6,8 +6,8 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeStatuses;
 import roomescape.exception.reservation.TimeDuplicatedException;
 import roomescape.exception.reservation.TimeUsingException;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.time.AvailableTimeRequest;
@@ -16,11 +16,11 @@ import roomescape.service.dto.time.AvailableTimeResponses;
 @Service
 public class ReservationTimeService {
 
-    private final JpaReservationTimeRepository reservationTimeRepository;
-    private final JpaReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(JpaReservationTimeRepository reservationTimeRepository,
-                                  JpaReservationRepository reservationRepository) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }

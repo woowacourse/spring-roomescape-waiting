@@ -7,7 +7,7 @@ import roomescape.domain.member.MemberPassword;
 import roomescape.exception.member.EmailDuplicatedException;
 import roomescape.exception.member.UnauthorizedPasswordException;
 import roomescape.global.JwtManager;
-import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.dto.member.MemberResponse;
@@ -15,10 +15,10 @@ import roomescape.service.dto.member.MemberResponse;
 @Service
 public class MemberService {
 
-    private final JpaMemberRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final JwtManager jwtManager;
 
-    public MemberService(JpaMemberRepository memberRepository, JwtManager jwtManager) {
+    public MemberService(MemberRepository memberRepository, JwtManager jwtManager) {
         this.memberRepository = memberRepository;
         this.jwtManager = jwtManager;
     }

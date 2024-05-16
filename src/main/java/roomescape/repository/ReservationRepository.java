@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 
 @Repository
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long>,
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {
 
     boolean existsByTimeId(long timeId);

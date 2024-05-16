@@ -9,7 +9,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.repository.exception.ThemeNotFoundException;
 
 @Repository
-public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
             SELECT th 

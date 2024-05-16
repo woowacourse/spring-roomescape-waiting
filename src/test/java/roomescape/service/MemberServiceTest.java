@@ -20,7 +20,7 @@ import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.member.UnauthorizedPasswordException;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 
@@ -46,7 +46,7 @@ class MemberServiceTest {
     private JwtManager jwtManager;
 
     @Autowired
-    private JpaMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     private final Member member1 = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
     private final Member member3 = new Member("t3@t3.com", "125", "재즈덕", "MEMBER");
