@@ -1,6 +1,4 @@
-package roomescape.reservation.controller.response;
-
-import roomescape.reservation.dto.ThemeDto;
+package roomescape.reservation.dto;
 
 public record ThemeResponse(
         Long id,

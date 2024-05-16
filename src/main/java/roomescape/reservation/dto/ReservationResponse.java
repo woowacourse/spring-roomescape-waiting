@@ -1,7 +1,6 @@
-package roomescape.reservation.controller.response;
+package roomescape.reservation.dto;
 
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.dto.ReservationDto;
 
 import java.time.LocalDate;
 

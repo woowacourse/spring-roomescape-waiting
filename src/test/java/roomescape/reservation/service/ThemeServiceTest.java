@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservation.controller.request.SaveThemeRequest;
+import roomescape.reservation.dto.SaveThemeRequest;
 import roomescape.reservation.dto.ThemeDto;
 
 import java.util.List;

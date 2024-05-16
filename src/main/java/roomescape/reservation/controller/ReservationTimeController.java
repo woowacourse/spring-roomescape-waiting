@@ -2,7 +2,7 @@ package roomescape.reservation.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.controller.response.ReservationTimeResponse;
+import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 import java.util.List;

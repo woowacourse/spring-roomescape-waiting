@@ -37,6 +37,10 @@ public class TokenProvider {
     }
 
     private Date createExpirationDate() {
+        return generateTokenExpiration();
+    }
+
+    private Date generateTokenExpiration() {
         return new Date(new Date().getTime() + tokenExpirationPeriod);
     }
 

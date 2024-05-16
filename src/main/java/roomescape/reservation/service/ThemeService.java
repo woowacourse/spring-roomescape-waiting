@@ -8,7 +8,7 @@ import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.ReservationTimeAvailabilities;
 import roomescape.reservation.model.Theme;
-import roomescape.reservation.controller.request.SaveThemeRequest;
+import roomescape.reservation.dto.SaveThemeRequest;
 import roomescape.reservation.repository.CustomThemeRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;

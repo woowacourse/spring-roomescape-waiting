@@ -5,9 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.ReservationDto;
-import roomescape.reservation.controller.request.SaveReservationRequest;
+import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsParams;
-import roomescape.reservation.controller.request.SearchReservationsRequest;
+import roomescape.reservation.dto.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
@@ -106,7 +106,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> getMyReservations(final Long memberId) {
-        return reservationRepository.findAllByMember_Id(memberId);
+    public List<ReservationDto> getMyReservations(final Long memberId) {
+        return reservationRepository.findAllByMember_Id(memberId)
+                .stream()
+                .map(ReservationDto::from)
+                .toList();
     }
 }
