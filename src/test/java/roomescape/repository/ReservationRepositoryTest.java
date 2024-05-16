@@ -72,7 +72,14 @@ class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
         assertThat(reservations.get(0).getId()).isEqualTo(1L);
     }
-}
+
+    @DisplayName("특정 멤버의 예약을 조회한다.")
+    @Test
+    void should_find_by_memberId() {
+        List<Reservation> reservations = reservationRepository.findByMemberId(2L);
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.get(0).getId()).isEqualTo(2L);
+    }
 
     @DisplayName("특정 시간 아이디의 예약이 존재하면 참을 반환한다.")
     @Test
