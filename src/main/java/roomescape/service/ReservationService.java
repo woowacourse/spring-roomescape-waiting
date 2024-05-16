@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
 import roomescape.infrastructure.MemberRepository;
@@ -7,6 +8,7 @@ import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.PastReservationException;
+import roomescape.service.exception.ReservationSpecification;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
@@ -85,8 +87,8 @@ public class ReservationService {
     }
 
     public List<ReservationAppResponse> findAllSearched(AdminSearchedReservationAppRequest request) {
-        List<Reservation> searchedReservations = reservationRepository.findAllWithSearchConditions(
-                request.memberId(), request.themeId(), request.dateFrom(), request.dateTo());
+        Specification<Reservation> reservationSpecification = new ReservationSpecification().generate(request);
+        List<Reservation> searchedReservations = reservationRepository.findAll(reservationSpecification);
 
         return searchedReservations.stream()
                 .map(ReservationAppResponse::from)
