@@ -368,7 +368,7 @@ class ReservationIntegrationTest {
                 .when().get("/reservations/times?date=2024-11-23&themeId=1")
                 .then().log().all()
                 .extract().jsonPath()
-                .getList(".", FindAvailableTimesResponse.class);;
+                .getList(".", FindAvailableTimesResponse.class);
 
         assertAll(
                 () -> assertThat(findAvailableTimesResponses).hasSize(2),

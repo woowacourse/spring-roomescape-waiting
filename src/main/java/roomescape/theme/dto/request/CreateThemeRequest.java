@@ -17,6 +17,6 @@ public record CreateThemeRequest(
         @Size(message = "테마 썸네일은 최대 255자까지 입력이 가능합니다.", max = 255)
         String thumbnail) {
     public Theme toTheme() {
-        return new Theme( name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 }

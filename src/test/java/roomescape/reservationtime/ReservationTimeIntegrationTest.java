@@ -174,7 +174,7 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeInUsage() {
-        Theme theme = themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.of(20, 0)));
         Member member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));

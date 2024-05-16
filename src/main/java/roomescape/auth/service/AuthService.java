@@ -36,7 +36,7 @@ public class AuthService {
     }
 
     public GetAuthInfoResponse getMemberAuthInfo(final AuthInfo authInfo) {
-        Member member =  memberRepository.findById(authInfo.getMemberId())
+        Member member = memberRepository.findById(authInfo.getMemberId())
                 .orElseThrow(() -> new SecurityException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
         return GetAuthInfoResponse.from(member);
     }

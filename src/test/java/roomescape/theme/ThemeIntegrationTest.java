@@ -183,7 +183,7 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 목록을 조회한다.")
     void getThemes() {
-        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/themes")
@@ -200,7 +200,7 @@ class ThemeIntegrationTest {
     @DisplayName("인기 방탈출 테마 목록을 조회한다.")
     void getPopularThemes() {
         IntStream.rangeClosed(1, 20)
-                .forEach(index -> themeRepository.save(new Theme( index + "이름", "설명", "썸네일")));
+                .forEach(index -> themeRepository.save(new Theme(index + "이름", "설명", "썸네일")));
         Member member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.parse("20:00")));
@@ -222,7 +222,7 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마를 삭제한다.")
     void deleteTheme() {
-        themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/themes/1")
@@ -249,7 +249,7 @@ class ThemeIntegrationTest {
     @DisplayName("방탈출 테마 삭제 시, 해당 테마가 사용 중이라면 예외를 반환한다.")
     void deleteTheme_WhenThemeInUsage() {
 
-        Theme theme = themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.of(20, 0)));
         Member member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
