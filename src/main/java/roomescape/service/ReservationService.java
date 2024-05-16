@@ -9,6 +9,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationConflictException;
 import roomescape.exception.reservation.ReservationNotFoundException;
@@ -61,7 +62,8 @@ public class ReservationService {
         validatePreviousDate(date, time);
         validateDuplicatedReservation(date, themeId, timeId);
 
-        Member member = memberRepository.fetchByEmail(email);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.fetchById(themeId);
         Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
         return new ReservationResponse(savedReservation);

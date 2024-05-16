@@ -126,8 +126,7 @@ class ReservationServiceTest {
     @Test
     void throw_exception_when_not_saved_reservation_id() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(ReservationNotFoundException.class)
-                .hasMessage("존재하지 않는 아이디입니다.");
+                .isInstanceOf(ReservationNotFoundException.class);
     }
 
     @DisplayName("예약을 정상적으로 삭제한다.")

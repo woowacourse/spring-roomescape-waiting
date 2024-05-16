@@ -23,6 +23,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate);
 
     default Theme fetchById(long themeId) {
-        return findById(themeId).orElseThrow(() -> new ThemeNotFoundException("테마가 존재하지 않습니다."));
+        return findById(themeId).orElseThrow(ThemeNotFoundException::new);
     }
 }
