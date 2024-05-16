@@ -37,7 +37,7 @@ class LoginControllerTest {
 
     @DisplayName("실패: 잘못된 이메일 혹은 잘못된 비밀번호")
     @ParameterizedTest
-    @CsvSource(value = {"a@a.com,123a", "b@a.com,123a", "b@a.com,123a"})
+    @CsvSource(value = {"a@a.com,123c!", "b@a.com,123b!", "b@a.com,123a!"})
     void login_WrongEmail_Or_WrongPassword(String email, String password) {
         LoginRequest request = new LoginRequest(email, password);
         RestAssured.given().log().all()
