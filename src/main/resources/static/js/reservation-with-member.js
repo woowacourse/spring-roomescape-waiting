@@ -49,7 +49,7 @@ function fetchTimes() {
 function fetchThemes() {
     requestRead(THEME_API_ENDPOINT)
         .then(data => {
-            themesOptions.push(...data);
+            themesOptions.push(...data.themes);
             populateSelect('theme', themesOptions, 'name');
         })
         .catch(error => console.error('Error fetching theme:', error));

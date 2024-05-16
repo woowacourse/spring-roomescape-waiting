@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Theme;
 import roomescape.service.dto.request.ThemeSaveRequest;
-import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.response.theme.ThemeResponses;
 import roomescape.service.theme.ThemeCreateService;
 import roomescape.service.theme.ThemeDeleteService;
 import roomescape.service.theme.ThemeFindService;
@@ -36,23 +37,15 @@ public class ThemeApiController {
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<ThemeResponse>> getThemes() {
+    public ResponseEntity<ThemeResponses> getThemes() {
         List<Theme> themes = themeFindService.findThemes();
-        return ResponseEntity.ok(
-                themes.stream()
-                        .map(ThemeResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(ThemeResponses.from(themes));
     }
 
     @GetMapping("/themes/ranks")
-    public ResponseEntity<List<ThemeResponse>> getThemeRanks() {
+    public ResponseEntity<ThemeResponses> getThemeRanks() {
         List<Theme> themes = themeFindService.findThemeRanks();
-        return ResponseEntity.ok(
-                themes.stream()
-                        .map(ThemeResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(ThemeResponses.from(themes));
     }
 
     @PostMapping("/themes")

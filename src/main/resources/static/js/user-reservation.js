@@ -67,7 +67,7 @@ function checkDate() {
         timeSlots.innerHTML = '';
 
         requestRead(THEME_API_ENDPOINT)
-            .then(renderTheme)
+            .then(data => renderTheme(data.themes))
             .catch(error => console.error('Error fetching times:', error));
     }
 }

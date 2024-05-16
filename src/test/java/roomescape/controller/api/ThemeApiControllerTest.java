@@ -27,7 +27,7 @@ public class ThemeApiControllerTest extends BaseControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("themes.size()", is(2));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ThemeApiControllerTest extends BaseControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("themes.size()", is(3));
     }
 
     @Test
@@ -65,6 +65,6 @@ public class ThemeApiControllerTest extends BaseControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("themes.size()", is(1));
     }
 }

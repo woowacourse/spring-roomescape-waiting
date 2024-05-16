@@ -22,7 +22,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data.forEach(item => {
+    data.themes.forEach(item => {
         const row = tableBody.insertRow();
 
         cellFields.forEach((field, index) => {
