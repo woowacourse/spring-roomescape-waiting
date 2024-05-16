@@ -3,15 +3,12 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.restassured.RestAssured;
 import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import roomescape.domain.member.Member;
@@ -31,16 +28,9 @@ import roomescape.service.dto.reservation.ReservationTimeRequest;
         DatabaseCleanupListener.class,
         DependencyInjectionTestExecutionListener.class
 })
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@Import(ReservationTimeService.class)
+@DataJpaTest
 class ReservationTimeServiceTest {
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @Autowired
     private ReservationTimeService reservationTimeService;

@@ -7,34 +7,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-import io.restassured.RestAssured;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.mock.web.MockHttpServletRequest;
 import roomescape.domain.member.Member;
 import roomescape.exception.member.UnauthorizedException;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {JwtManager.class})
 class JwtManagerTest {
-
-    @LocalServerPort
-    private int port;
 
     @Autowired
     private JwtManager jwtManager;
 
     private final Member member1 = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @DisplayName("회원 정보로 JWT 토큰을 생성한다")
     @Test
