@@ -1,12 +1,11 @@
 package roomescape.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.service.MemberService;
-
-import java.util.List;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -25,13 +24,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new CheckLoginInterceptor(memberService))
-                .addPathPatterns("/reservation", "/logout", "/reservation-mine", "/admin/**");
+                .addPathPatterns("/reservation", "/logout", "/reservation-mine");
         registry.addInterceptor(new CheckMemberInterceptor(memberService))
                 .addPathPatterns("/**")
                 .excludePathPatterns("/", "/error", "/login", "/signup",
                         "/members", "/themes/popular",
                         "/css/**", "/*.ico", "/js/**", "/image/**",
-                        "/reservation", "/logout", "/reservation-mine", "/admin/**");
+                        "/reservation", "/logout", "/reservation-mine");
         registry.addInterceptor(new CheckAdminInterceptor())
                 .addPathPatterns("/admin/**");
     }

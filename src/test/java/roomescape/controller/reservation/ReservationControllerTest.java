@@ -1,7 +1,14 @@
 package roomescape.controller.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,21 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.controller.member.dto.MemberLoginRequest;
 import roomescape.controller.reservation.dto.MemberResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.theme.dto.ReservationThemeResponse;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationControllerTest {
 
     @Autowired
@@ -83,7 +84,8 @@ class ReservationControllerTest {
     @MethodSource("invalidRequestParameterProvider")
     @DisplayName("유효하지 않은 요청인 경우 400을 반환한다.")
     void invalidRequest(final String date, final String timeId, final String themeId) {
-        final Map<String, String> params = Map.of("date", date, "timeId", timeId, "themeId", themeId);
+        final Map<String, String> params = Map.of("date", date, "timeId", timeId, "themeId",
+                themeId);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)

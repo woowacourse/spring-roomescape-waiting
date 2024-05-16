@@ -1,17 +1,15 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationNotFoundException;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -27,22 +25,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByThemeId(long themeId);
 
-    List<Reservation> findAllByDateBetween(LocalDate from, LocalDate until);
+    @Query("""
+            SELECT r.theme
+            FROM Reservation r
+            WHERE r.date BETWEEN :dateFrom AND :dateTo
+            GROUP BY r.theme
+            ORDER BY COUNT(r) DESC
+            LIMIT :limit""")
+    List<Theme> findPopularThemes(
+            @Param("dateFrom") LocalDate from,
+            @Param("dateTo") LocalDate until,
+            @Param("limit") int limit);
 
-    default List<Theme> findPopularThemes(LocalDate from, LocalDate until, int limit) {
-
-        final List<Reservation> allBetween = findAllByDateBetween(from, until);
-        return allBetween.stream()
-                .collect(Collectors.groupingBy(Reservation::getTheme))
-                .entrySet()
-                .stream()
-                .sorted(Comparator.comparingInt(a -> -a.getValue().size()))
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
-    }
-
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId, LocalDate from, LocalDate until);
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId,
+                                                                LocalDate from, LocalDate until);
 
     default List<Reservation> searchReservations(ReservationSearchCondition condition) {
         return findAllByThemeIdAndMemberIdAndDateBetween(condition.themeId(), condition.memberId(),

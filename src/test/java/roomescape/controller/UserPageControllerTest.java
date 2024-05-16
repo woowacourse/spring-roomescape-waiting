@@ -1,6 +1,9 @@
 package roomescape.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,12 +13,11 @@ import org.springframework.http.MediaType;
 import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserPageControllerTest {
 
-    static final MemberLoginRequest request = new MemberLoginRequest("jinwuo0925@gmail.com", "1111");
+    static final MemberLoginRequest request = new MemberLoginRequest("jinwuo0925@gmail.com",
+            "1111");
 
     @LocalServerPort
     int port;
@@ -37,7 +39,7 @@ class UserPageControllerTest {
     }
 
     @Test
-    @DisplayName("어드민 정보 확인")
+    @DisplayName("사용자 정보 확인")
     void checkAdmin() {
         final String accessToken = RestAssured.given().log().all()
                 .body(request)
@@ -48,7 +50,7 @@ class UserPageControllerTest {
 
         final CookieMemberResponse memberResponse = RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .accept(ContentType.JSON)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200).extract().as(CookieMemberResponse.class);

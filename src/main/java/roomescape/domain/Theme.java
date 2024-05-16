@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
 import java.util.Objects;
 
 @Entity
@@ -23,7 +22,8 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(final Long id, final String name,
+                 final String description, final String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;

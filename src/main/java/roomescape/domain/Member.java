@@ -6,9 +6,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -22,13 +19,12 @@ public class Member {
     private String password;
     @Enumerated(value = EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations;
 
     protected Member() {
     }
 
-    public Member(final Long id, final String name, final String email, final String password, final Role role) {
+    public Member(final Long id, final String name, final String email,
+                  final String password, final Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
