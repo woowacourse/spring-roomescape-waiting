@@ -9,7 +9,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
-import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
 
 import java.time.LocalDate;
@@ -18,7 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Sql("/truncate.sql")
+@Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationRepositoryTest {
 
@@ -28,8 +27,6 @@ class ReservationRepositoryTest {
     private ThemeRepository themeRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -40,10 +37,6 @@ class ReservationRepositoryTest {
         reservationTimeRepository.saveAll(List.of(
                 new ReservationTime(LocalTime.of(1, 0)),
                 new ReservationTime(LocalTime.of(2, 0))));
-
-        memberRepository.saveAll(List.of(
-                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
-                new Member("우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN)));
 
         reservationRepository.saveAll(List.of(
                 new Reservation(

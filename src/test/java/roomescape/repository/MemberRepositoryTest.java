@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,20 +12,13 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Sql("/truncate.sql")
+@Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
 
-    @BeforeEach
-    void setUp() {
-        memberRepository.save(new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER));
-        memberRepository.save(new Member("우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN));
-    }
-
-    @Sql("/truncate.sql")
     @DisplayName("특정 이메일을 가진 사용자를 조회한다.")
     @Test
     void should_find_member_by_email() {

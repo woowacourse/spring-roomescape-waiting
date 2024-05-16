@@ -12,9 +12,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
-import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
-import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -27,7 +25,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@Sql("/truncate.sql")
+@Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationServiceTest {
 
@@ -38,8 +36,6 @@ class ReservationServiceTest {
     private ReservationService reservationService;
     @Autowired
     private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -56,10 +52,6 @@ class ReservationServiceTest {
                 new ReservationTime(LocalTime.of(1, 0)),
                 new ReservationTime(LocalTime.of(2, 0)),
                 new ReservationTime(LocalTime.now())));
-
-        memberRepository.saveAll(List.of(
-                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
-                new Member("우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN)));
 
         reservationRepository.saveAll(List.of(
                 new Reservation(LocalDate.of(2000, 1, 1),

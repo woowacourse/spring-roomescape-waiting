@@ -12,9 +12,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
-import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
-import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -27,7 +25,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Sql("/truncate.sql")
+@Sql("/init.sql")
 @SpringBootTest
 class ThemeServiceTest {
 
@@ -41,8 +39,6 @@ class ThemeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -55,10 +51,6 @@ class ThemeServiceTest {
                 new ReservationTime(LocalTime.of(1, 0)),
                 new ReservationTime(LocalTime.of(2, 0)),
                 new ReservationTime(LocalTime.of(3, 0))));
-
-        memberRepository.saveAll(List.of(
-                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
-                new Member("우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN)));
 
         reservationRepository.saveAll(List.of(
                 new Reservation(LocalDate.now().minusDays(1),

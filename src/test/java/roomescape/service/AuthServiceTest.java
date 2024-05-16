@@ -1,22 +1,16 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.model.member.Member;
-import roomescape.model.member.Role;
-import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Sql("/truncate.sql")
+@Sql("/init.sql")
 @SpringBootTest
 class AuthServiceTest {
 
@@ -24,15 +18,6 @@ class AuthServiceTest {
 
     @Autowired
     private AuthService authService;
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository.saveAll(List.of(
-                new Member("에버", "treeboss@gmail.com", "treeboss123!", Role.USER),
-                new Member("우테코", "wtc@gmail.com", "wtc123!!", Role.ADMIN)));
-    }
 
     @DisplayName("사용자 정보를 통해 JWT 토큰을 생성한다.")
     @Test
