@@ -15,7 +15,6 @@ import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 @Entity
 public class Member {
-    private static final String ADMIN_ROLE = "ADMIN";
     private static Pattern EMAIL_REGEX = Pattern.compile("^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$");
 
     @Id
