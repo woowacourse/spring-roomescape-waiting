@@ -1,16 +1,22 @@
 package roomescape.domain;
 
-public class Password {
-    private final String hashValue;
-    private final String salt;
+import jakarta.persistence.Embeddable;
 
-    public Password(final String hashValue, final String salt) {
-        this.hashValue = hashValue;
+@Embeddable
+public class Password {
+    private String password;
+    private String salt;
+
+    public Password(final String password, final String salt) {
+        this.password = password;
         this.salt = salt;
     }
 
-    public String getHashValue() {
-        return hashValue;
+    protected Password() {
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getSalt() {
@@ -18,6 +24,6 @@ public class Password {
     }
 
     public boolean check(final Password other) {
-        return hashValue.equals(other.hashValue) && salt.equals(other.salt);
+        return password.equals(other.password) && salt.equals(other.salt);
     }
 }

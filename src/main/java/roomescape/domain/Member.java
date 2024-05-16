@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,29 +20,27 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String email;
-    private String password;
-    private String salt;
+    @Embedded
+    private Password password;
     private String name;
     private String role;
 
-    public Member() {
+    protected Member() {
     }
 
-    public Member(final Long id, final String email, final String password, final String salt, final String name,
-                  String role) {
+    public Member(final Long id, final String email, final Password password, final String name, final String role) {
         validEmail(email);
         validEmpty("name", name);
         validEmpty("role", role);
         this.id = id;
         this.email = email;
         this.password = password;
-        this.salt = salt;
         this.name = name;
         this.role = role;
     }
 
     public Member(final String email, final Password password, final String name, final String role) {
-        this(null, email, password.getHashValue(), password.getSalt(), name, role);
+        this(null, email, password, name, role);
     }
 
     private void validEmail(String email) {
@@ -75,6 +74,6 @@ public class Member {
     }
 
     public Password getPassword() {
-        return new Password(this.password, this.salt);
+        return password;
     }
 }

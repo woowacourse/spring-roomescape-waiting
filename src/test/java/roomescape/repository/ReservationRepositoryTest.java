@@ -98,7 +98,8 @@ class ReservationRepositoryTest {
     @Test
     void given_member_when_findByMember_then_Reservations() {
         //given
-        Member member = new Member(1L, "poke@test.com", "hashedpassword", "salt", "poke", "USER");
+        Password password = new Password("hashedpassword", "salt");
+        Member member = new Member(1L, "poke@test.com", password, "poke", "USER");
         //when, then
         assertThat(reservationRepository.findByMember(member)).hasSize(7);
     }
