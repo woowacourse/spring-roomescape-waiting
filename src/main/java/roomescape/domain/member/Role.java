@@ -6,4 +6,8 @@ public enum Role {
     public boolean isAdmin() {
         return this == ADMIN;
     }
+
+    public boolean isGuest() {
+        return this == GUEST;
+    }
 }

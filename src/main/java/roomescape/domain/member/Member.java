@@ -50,6 +50,14 @@ public class Member {
         return password.equals(other);
     }
 
+    public boolean isGuest() {
+        return role.isGuest();
+    }
+
+    public boolean isAdmin() {
+        return role.isAdmin();
+    }
+
     public Long getId() {
         return id;
     }

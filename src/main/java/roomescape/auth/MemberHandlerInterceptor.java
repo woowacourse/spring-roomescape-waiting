@@ -11,13 +11,13 @@ import roomescape.service.member.MemberService;
 import roomescape.util.CookieUtils;
 
 @Component
-public class AdminRoleHandlerInterceptor implements HandlerInterceptor {
+public class MemberHandlerInterceptor implements HandlerInterceptor {
 
     private final TokenProvider tokenProvider;
     private final MemberService memberService;
 
     @Autowired
-    public AdminRoleHandlerInterceptor(TokenProvider tokenProvider, MemberService memberService) {
+    public MemberHandlerInterceptor(TokenProvider tokenProvider, MemberService memberService) {
         this.tokenProvider = tokenProvider;
         this.memberService = memberService;
     }
@@ -27,7 +27,7 @@ public class AdminRoleHandlerInterceptor implements HandlerInterceptor {
         String token = CookieUtils.extractTokenFromCookie(request.getCookies());
         long memberId = tokenProvider.extractMemberId(token);
         Member member = memberService.findById(memberId);
-        if (member.isAdmin()) {
+        if (member.isGuest() || member.isAdmin()) {
             return true;
         }
         throw new ForbiddenException();
