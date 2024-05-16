@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [4단계] 예약 대기 관리 기능
           예약 대기 목록 조회 endpoint 설정
      */
-    fetch('') // 내 예약 목록 조회 API 호출
+    fetch('/admin/reservations/waiting')
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -23,11 +23,11 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = '';
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const id = item.id;
+        const name = item.name;
+        const theme = item.theme;
+        const date = item.date;
+        const startAt = item.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
@@ -41,8 +41,8 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 승인/거절 버튼이 필요한 경우 활성화하여 사용
          */
-        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-        // actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
+        actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
+        actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
 
@@ -54,9 +54,9 @@ function approve(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = `/admin/reservations/waiting/${id}/approve`
     return fetch(endpoint, {
-        method: ''
+        method: 'POST'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
@@ -71,9 +71,9 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = `/admin/reservations/waiting/${id}/deny`
     return fetch(endpoint, {
-        method: ''
+        method: 'POST'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
