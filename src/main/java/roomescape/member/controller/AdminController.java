@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
     private final ReservationService reservationService;
@@ -27,26 +28,6 @@ public class AdminController {
     public AdminController(ReservationService reservationService, MemberService memberService) {
         this.reservationService = reservationService;
         this.memberService = memberService;
-    }
-
-    @GetMapping
-    public String admin() {
-        return "admin/index";
-    }
-
-    @GetMapping("/reservation")
-    public String reservation() {
-        return "admin/reservation-new";
-    }
-
-    @GetMapping("/time")
-    public String time() {
-        return "admin/time";
-    }
-
-    @GetMapping("/theme")
-    public String theme() {
-        return "admin/theme";
     }
 
     @PostMapping("/reservations")

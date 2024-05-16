@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
 import roomescape.reservation.controller.dto.MyReservationResponse;
@@ -21,7 +23,8 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
-@Controller
+@RestController
+@RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
 
@@ -30,11 +33,6 @@ public class ReservationController {
     }
 
     @GetMapping
-    public String getPopularPage() {
-        return "index";
-    }
-
-    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> reservations(
             @RequestParam(value = "themeId", required = false) Long themeId,
             @RequestParam(value = "memberId", required = false) Long memberId,
@@ -45,32 +43,21 @@ public class ReservationController {
                 new ReservationQueryRequest(themeId, memberId, startDate, endDate)));
     }
 
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
         ReservationResponse response = reservationService.createMemberReservation(authInfo, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@LoginUser AuthInfo authInfo,
                                        @PathVariable("id") @Min(1) long reservationMemberId) {
         reservationService.deleteMemberReservation(authInfo, reservationMemberId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/reservation")
-    public String getReservationPage() {
-        return "reservation";
-    }
-
-
-    @GetMapping("/reservation-mine")
-    public String getMyPage() {
-        return "reservation-mine";
-    }
-
-    @GetMapping("/reservations/my")
+    @GetMapping("/my")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser AuthInfo authInfo) {
         return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
     }

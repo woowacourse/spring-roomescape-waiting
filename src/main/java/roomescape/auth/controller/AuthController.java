@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
@@ -16,7 +17,7 @@ import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.handler.ResponseHandler;
 import roomescape.auth.service.AuthService;
 
-@Controller
+@RestController
 public class AuthController {
 
     private final AuthService authService;
@@ -27,11 +28,6 @@ public class AuthController {
         this.authService = authService;
         this.requestHandler = requestHandler;
         this.responseHandler = responseHandler;
-    }
-
-    @GetMapping("/login")
-    public String getLoginPage() {
-        return "login";
     }
 
     @PostMapping("/login")
@@ -51,11 +47,6 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         responseHandler.expire(response);
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/signup")
-    public String getSignUpPage() {
-        return "signup";
     }
 
     @PostMapping("/signup")
