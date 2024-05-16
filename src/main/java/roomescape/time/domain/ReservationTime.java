@@ -11,7 +11,7 @@ import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.time.exception.TimeExceptionCode;
 
 @Entity
-public class Time {
+public class ReservationTime {
 
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
@@ -23,20 +23,20 @@ public class Time {
     @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
 
-    public Time() {
+    public ReservationTime() {
     }
 
-    public Time(LocalTime startAt) {
+    public ReservationTime(LocalTime startAt) {
         this(0, startAt);
         validation();
     }
 
-    public Time(long id, LocalTime startAt) {
+    public ReservationTime(long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
-    public Time(long id) {
+    public ReservationTime(long id) {
         this(id, null);
     }
 
@@ -73,7 +73,7 @@ public class Time {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Time time = (Time) o;
+        ReservationTime time = (ReservationTime) o;
         return id == time.id;
     }
 

@@ -4,17 +4,17 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 
-public interface TimeRepository extends Repository<Time, Long> {
+public interface TimeRepository extends Repository<ReservationTime, Long> {
 
-    Time save(Time time);
+    ReservationTime save(ReservationTime time);
 
-    List<Time> findAllByOrderByStartAt();
+    List<ReservationTime> findAllByOrderByStartAt();
 
-    Optional<Time> findByStartAt(LocalTime startAt);
+    Optional<ReservationTime> findByStartAt(LocalTime startAt);
 
-    Optional<Time> findById(Long id);
+    Optional<ReservationTime> findById(Long id);
 
     void deleteById(Long timeId);
 }

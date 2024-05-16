@@ -14,7 +14,7 @@ import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 
 @Entity
 public class Reservation {
@@ -27,7 +27,7 @@ public class Reservation {
     private Date date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Time time;
+    private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
@@ -38,7 +38,7 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(long id, Date date, Time time, Theme theme, Member member) {
+    public Reservation(long id, Date date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -47,11 +47,11 @@ public class Reservation {
     }
 
     private Reservation(LocalDate date, long timeId, long themeId, long memberId) {
-        this(0, Date.saveDateFrom(date), new Time(timeId), Theme.saveThemeFrom(themeId),
+        this(0, Date.saveDateFrom(date), new ReservationTime(timeId), Theme.saveThemeFrom(themeId),
                 Member.saveMemberFrom(memberId));
     }
 
-    public static Reservation of(long id, LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         return new Reservation(id, Date.dateFrom(date), time, theme, member);
     }
 
@@ -59,7 +59,7 @@ public class Reservation {
         return new Reservation(date, timeId, themeId, memberId);
     }
 
-    public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(LocalDate date, ReservationTime time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
         return new Reservation(0, Date.dateFrom(date), time, theme, member);
     }
@@ -72,7 +72,7 @@ public class Reservation {
         return date.getDate();
     }
 
-    public Time getReservationTime() {
+    public ReservationTime getReservationTime() {
         return time;
     }
 
@@ -88,13 +88,13 @@ public class Reservation {
         this.id = id;
     }
 
-    private static void validateAtSaveDateAndTime(LocalDate date, Time time) {
+    private static void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {
         if (date.equals(LocalDate.now())) {
             validateTime(time);
         }
     }
 
-    private static void validateTime(Time time) {
+    private static void validateTime(ReservationTime time) {
         if (time.isBeforeTime(LocalTime.now())) {
             throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
         }

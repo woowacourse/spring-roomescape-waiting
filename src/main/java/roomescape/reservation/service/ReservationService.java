@@ -19,7 +19,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeExceptionCode;
 import roomescape.time.repository.TimeRepository;
 
@@ -42,7 +42,7 @@ public class ReservationService {
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
         Reservation reservation = reservationRequest.fromRequest(memberId);
 
-        Time time = timeRepository.findById(reservation.getReservationTime().getId())
+        ReservationTime time = timeRepository.findById(reservation.getReservationTime().getId())
                 .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
         Theme theme = themeRepository.findById(reservation.getTheme().getId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
@@ -55,7 +55,7 @@ public class ReservationService {
     public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
         Reservation reservation = adminReservationRequest.fromRequest();
 
-        Time time = timeRepository.findById(reservation.getReservationTime().getId())
+        ReservationTime time = timeRepository.findById(reservation.getReservationTime().getId())
                 .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
         Theme theme = themeRepository.findById(reservation.getTheme().getId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
@@ -76,9 +76,9 @@ public class ReservationService {
     }
 
     public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
-        List<Time> allTimes = timeRepository.findAllByOrderByStartAt();
+        List<ReservationTime> allTimes = timeRepository.findAllByOrderByStartAt();
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate_Date(themeId, date);
-        List<Time> bookedTimes = extractReservationTimes(reservations);
+        List<ReservationTime> bookedTimes = extractReservationTimes(reservations);
 
         return allTimes.stream()
                 .map(time -> ReservationTimeAvailabilityResponse.fromTime(time, isTimeBooked(time, bookedTimes)))
@@ -106,13 +106,13 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    private List<Time> extractReservationTimes(List<Reservation> reservations) {
+    private List<ReservationTime> extractReservationTimes(List<Reservation> reservations) {
         return reservations.stream()
                 .map(Reservation::getReservationTime)
                 .toList();
     }
 
-    private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
+    private boolean isTimeBooked(ReservationTime time, List<ReservationTime> bookedTimes) {
         return bookedTimes.contains(time);
     }
 }

@@ -22,7 +22,7 @@ public class AdminViewController {
     }
 
     @GetMapping({"/time"})
-    public String timePage() {
+    public String reservationTimePage() {
         return "admin/time";
     }
 

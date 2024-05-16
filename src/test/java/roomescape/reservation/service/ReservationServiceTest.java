@@ -24,14 +24,14 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     private final Reservation reservation = Reservation.of(1L, LocalDate.now().plusDays(1),
-            new Time(1L, LocalTime.now()), Theme.themeOf(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
+            new ReservationTime(1L, LocalTime.now()), Theme.themeOf(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
             Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
 
     @InjectMocks
@@ -55,7 +55,7 @@ class ReservationServiceTest {
                 .thenReturn(reservation);
 
         when(timeRepository.findById(1L))
-                .thenReturn(Optional.of(new Time(1)));
+                .thenReturn(Optional.of(new ReservationTime(1)));
 
         when(themeRepository.findById(1L))
                 .thenReturn(Optional.of(new Theme()));

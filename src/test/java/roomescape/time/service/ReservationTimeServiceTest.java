@@ -23,18 +23,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.exception.TimeExceptionCode;
 import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
-class TimeServiceTest {
+class ReservationTimeServiceTest {
 
     private static final LocalTime CURRENT_TIME = LocalTime.now();
 
-    private final Time time = new Time(1L, LocalTime.of(17, 3));
+    private final ReservationTime time = new ReservationTime(1L, LocalTime.of(17, 3));
 
     @InjectMocks
     private TimeService timeService;

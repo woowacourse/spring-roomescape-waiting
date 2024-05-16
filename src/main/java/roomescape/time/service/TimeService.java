@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.exception.TimeExceptionCode;
@@ -26,14 +26,14 @@ public class TimeService {
 
     public TimeResponse addReservationTime(TimeRequest timeRequest) {
         validateDuplicateTime(timeRequest.startAt());
-        Time reservationTime = new Time(timeRequest.startAt());
-        Time savedReservationTime = timeRepository.save(reservationTime);
+        ReservationTime reservationTime = new ReservationTime(timeRequest.startAt());
+        ReservationTime savedReservationTime = timeRepository.save(reservationTime);
 
         return toResponse(savedReservationTime);
     }
 
     public List<TimeResponse> findReservationTimes() {
-        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAt();
+        List<ReservationTime> reservationTimes = timeRepository.findAllByOrderByStartAt();
 
         return reservationTimes.stream()
                 .map(this::toResponse)
@@ -45,12 +45,12 @@ public class TimeService {
         timeRepository.deleteById(reservationTimeId);
     }
 
-    public TimeResponse toResponse(Time time) {
+    public TimeResponse toResponse(ReservationTime time) {
         return new TimeResponse(time.getId(), time.getStartAt());
     }
 
     public void validateDuplicateTime(LocalTime startAt) {
-        Optional<Time> time = timeRepository.findByStartAt(startAt);
+        Optional<ReservationTime> time = timeRepository.findByStartAt(startAt);
 
         if (time.isPresent()) {
             throw new RoomEscapeException(TimeExceptionCode.DUPLICATE_TIME_EXCEPTION);

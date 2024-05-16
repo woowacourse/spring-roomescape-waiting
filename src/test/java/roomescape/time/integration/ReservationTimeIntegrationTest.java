@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.model.IntegrationTest;
 import roomescape.time.dto.TimeRequest;
 
-public class TimeIntegrationTest extends IntegrationTest {
+public class ReservationTimeIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("시간을 잘 등록하고 삭제하고 확인이 가능하다.")

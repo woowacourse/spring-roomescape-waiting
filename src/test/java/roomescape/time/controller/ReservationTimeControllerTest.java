@@ -21,14 +21,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.model.ControllerTest;
-import roomescape.time.domain.Time;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.service.TimeService;
 
 @WebMvcTest(TimeController.class)
-class TimeControllerTest extends ControllerTest {
-    private final Time time = new Time(4L, LocalTime.of(10, 0, 0));
+class ReservationTimeControllerTest extends ControllerTest {
+    private final ReservationTime time = new ReservationTime(4L, LocalTime.of(10, 0, 0));
     private final String expectedTime = "10:00:00";
 
     @Autowired
@@ -79,7 +79,7 @@ class TimeControllerTest extends ControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    public TimeResponse toResponse(Time time) {
+    public TimeResponse toResponse(ReservationTime time) {
         return new TimeResponse(time.getId(), time.getStartAt());
     }
 }
