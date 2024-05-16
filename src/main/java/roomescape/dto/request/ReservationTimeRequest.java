@@ -1,10 +1,10 @@
 package roomescape.dto.request;
 
-import static roomescape.dto.InputValidator.validateNotNull;
+import roomescape.domain.ReservationTime;
 
 import java.time.LocalTime;
 
-import roomescape.domain.ReservationTime;
+import static roomescape.dto.InputValidator.validateNotNull;
 
 public record ReservationTimeRequest(LocalTime startAt) {
 

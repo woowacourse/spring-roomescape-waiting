@@ -1,23 +1,19 @@
 package roomescape.acceptance.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static roomescape.acceptance.Fixture.customerToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
-
-import java.util.List;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.MemberReservationResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.acceptance.Fixture.customerToken;
+import static roomescape.acceptance.PreInsertedData.*;
 
 public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
 

@@ -1,9 +1,9 @@
 package roomescape.util;
 
+import jakarta.servlet.http.Cookie;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import jakarta.servlet.http.Cookie;
 
 public class CookieUtil {
 

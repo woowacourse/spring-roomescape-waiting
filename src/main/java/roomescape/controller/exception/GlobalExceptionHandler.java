@@ -1,11 +1,10 @@
 package roomescape.controller.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import io.jsonwebtoken.ExpiredJwtException;
 import roomescape.config.ForbiddenAccessException;
 import roomescape.config.TokenValidationFailureException;
 import roomescape.dto.exception.InputNotAllowedException;

@@ -1,8 +1,8 @@
 package roomescape.dto.request;
 
-import java.time.LocalDate;
-
 import roomescape.dto.InputValidator;
+
+import java.time.LocalDate;
 
 public record MemberReservationRequest(LocalDate date, Long timeId, Long themeId) {
 

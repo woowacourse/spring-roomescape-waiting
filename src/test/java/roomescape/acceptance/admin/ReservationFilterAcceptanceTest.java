@@ -1,23 +1,18 @@
 package roomescape.acceptance.admin;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_3;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_4;
-
-import java.util.List;
-
+import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.ReservationResponse;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.acceptance.Fixture.adminToken;
+import static roomescape.acceptance.PreInsertedData.*;
 
 @DisplayName("관리자가 예약을 필터링해서 조회한다.")
 class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {

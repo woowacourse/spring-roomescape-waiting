@@ -1,9 +1,6 @@
 package roomescape.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LogInRequest;
@@ -11,6 +8,8 @@ import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.dto.response.MemberReservationResponse;
 import roomescape.service.exception.ResourceNotFoundException;
 import roomescape.util.JwtProvider;
+
+import java.util.List;
 
 @Service
 public class MemberService {

@@ -1,28 +1,26 @@
 package roomescape.acceptance.admin;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
-import static roomescape.acceptance.Fixture.secretKey;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_ADMIN;
-
-import java.util.stream.Stream;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.request.LogInRequest;
 import roomescape.dto.response.MemberPreviewResponse;
+
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.acceptance.Fixture.secretKey;
+import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_ADMIN;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
 

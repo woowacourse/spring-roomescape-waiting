@@ -1,18 +1,16 @@
 package roomescape.config;
 
-import java.util.Optional;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import roomescape.domain.Member;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;
+
+import java.util.Optional;
 
 @Component
 public class CheckRoleInterceptor implements HandlerInterceptor {

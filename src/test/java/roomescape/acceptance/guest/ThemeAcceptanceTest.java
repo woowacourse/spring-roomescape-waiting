@@ -1,22 +1,16 @@
 package roomescape.acceptance.guest;
 
-import java.util.List;
-
+import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.ThemeResponse;
 
-class ThemeAcceptanceTest extends BaseAcceptanceTest {
+import java.util.List;
 
-    /*
-    @Mock
-    MemberService memberService;
-    * */
+class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
     @DisplayName("테마 목록을 조회한다.")
     @Test

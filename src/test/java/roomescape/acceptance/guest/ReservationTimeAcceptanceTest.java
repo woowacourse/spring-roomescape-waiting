@@ -1,22 +1,18 @@
 package roomescape.acceptance.guest;
 
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_3;
-
-import java.time.LocalDate;
-import java.util.List;
-
+import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
-import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static roomescape.acceptance.PreInsertedData.*;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 

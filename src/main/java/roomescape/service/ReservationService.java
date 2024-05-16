@@ -1,25 +1,17 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-
 import org.springframework.stereotype.Service;
-
-import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
-import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
+import roomescape.domain.*;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class ReservationService {
@@ -75,6 +67,7 @@ public class ReservationService {
         findValidatedReservation(id);
         reservationRepository.deleteById(id);
     }
+
     // todo: 이거 삭제
     private Reservation findValidatedReservation(Long id) {
         return reservationRepository.findById(id)
