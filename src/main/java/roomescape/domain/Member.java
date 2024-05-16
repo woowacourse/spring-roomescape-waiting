@@ -2,8 +2,6 @@ package roomescape.domain;
 
 import jakarta.persistence.*;
 
-import java.util.Set;
-
 @Entity
 public class Member {
 
@@ -22,9 +20,6 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private MemberRole role;
-
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
 
     public Member() {
     }
