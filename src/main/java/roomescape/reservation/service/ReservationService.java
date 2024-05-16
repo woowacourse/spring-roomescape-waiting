@@ -8,6 +8,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -108,6 +109,13 @@ public class ReservationService {
                 .stream()
                 .filter(reservation -> reservation.isBetweenInclusive(dateFrom, dateTo))
                 .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<MyReservationResponse> findReservationsByMember(Member member) {
+        return reservationJpaRepository.findByMember(member)
+                .stream()
+                .map(MyReservationResponse::new)
                 .toList();
     }
 

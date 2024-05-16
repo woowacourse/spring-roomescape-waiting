@@ -19,6 +19,8 @@ public interface ReservationJpaRepository extends CrudRepository<Reservation, Lo
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
+    List<Reservation> findByMember(Member member);
+
     @Query(value = """
             SELECT r.theme
             FROM Reservation r
