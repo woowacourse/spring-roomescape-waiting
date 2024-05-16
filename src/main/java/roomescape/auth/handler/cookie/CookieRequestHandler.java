@@ -17,6 +17,6 @@ public class CookieRequestHandler implements RequestHandler {
                 return cookie.getValue();
             }
         }
-        return "";
+        return null;
     }
 }
