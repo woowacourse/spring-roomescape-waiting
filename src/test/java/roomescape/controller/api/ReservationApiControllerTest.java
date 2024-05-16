@@ -1,25 +1,18 @@
 package roomescape.controller.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.controller.BaseControllerTest;
 import roomescape.util.TokenGenerator;
 
 public class ReservationApiControllerTest extends BaseControllerTest {
-
-    @Autowired
-    private ReservationApiController reservationApiController;
 
     @Override
     @BeforeEach
@@ -77,21 +70,5 @@ public class ReservationApiControllerTest extends BaseControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.size()", is(0));
-    }
-
-    // TODO: 불필요한 테스트 삭제
-    @Test
-    @DisplayName("데이터베이스 관련 로직을 컨트롤러에서 분리하였다.")
-    void layerRefactoring() {
-        boolean isJdbcTemplateInjected = false;
-
-        for (Field field : reservationApiController.getClass().getDeclaredFields()) {
-            if (field.getType().equals(JdbcTemplate.class)) {
-                isJdbcTemplateInjected = true;
-                break;
-            }
-        }
-
-        assertThat(isJdbcTemplateInjected).isFalse();
     }
 }
