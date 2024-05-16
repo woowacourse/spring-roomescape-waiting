@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@RequestMapping("/reservations")
 public class ReservationApiController {
 
     private final ReservationService reservationService;
@@ -24,7 +25,7 @@ public class ReservationApiController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationRequest reservationRequest,
                                                                  final LoginMemberRequest loginMemberRequest) {
         final ReservationOutput output = reservationService.createReservation(reservationRequest.toInput(loginMemberRequest.id()));
@@ -32,13 +33,13 @@ public class ReservationApiController {
                 .body(ReservationResponse.toResponse(output));
     }
 
-    @GetMapping("/reservations")
+    @GetMapping
     public ResponseEntity<ReservationsResponse> getAllReservations() {
         final List<ReservationOutput> outputs = reservationService.getAllReservations();
         return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
     }
 
-    @GetMapping("/reservations/search")
+    @GetMapping("/search")
     public ResponseEntity<ReservationsResponse> searchReservation(
             @RequestParam final long themeId,
             @RequestParam final long memberId,
@@ -48,13 +49,13 @@ public class ReservationApiController {
         return ResponseEntity.ok(ReservationsResponse.toResponse(outputs));
     }
 
-    @GetMapping("/reservations/mine")
+    @GetMapping("/mine")
     public ResponseEntity<MemberReservationsResponse> getMyReservations(final LoginMemberRequest loginMemberRequest) {
         final List<ReservationOutput> outputs = reservationService.getAllMyReservations(loginMemberRequest.id());
         return ResponseEntity.ok(MemberReservationsResponse.toResponse(outputs));
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent()
