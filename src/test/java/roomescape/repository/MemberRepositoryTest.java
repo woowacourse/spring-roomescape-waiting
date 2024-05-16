@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.model.member.Email;
 import roomescape.model.member.Member;
+import roomescape.model.member.Password;
 import roomescape.model.member.Role;
 
 import java.util.Optional;
@@ -24,7 +26,9 @@ class MemberRepositoryTest {
     void should_find_member_by_email_and_password() {
         Member expected = new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER);
 
-        Optional<Member> actual = memberRepository.findByEmailAndPassword(expected.getEmail(), expected.getPassword());
+        Email email = new Email(expected.getEmail());
+        Password password = new Password(expected.getPassword());
+        Optional<Member> actual = memberRepository.findByEmailAndPassword(email, password);
 
         assertThat(actual).isNotEmpty();
         assertThat(actual).hasValue(expected);

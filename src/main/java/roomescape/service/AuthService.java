@@ -28,8 +28,8 @@ public class AuthService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당하는 계정이 없습니다."));
         return Jwts.builder()
                 .subject(String.valueOf(member.getId()))
-                .claim("name", member.getName().getName())
-                .claim("email", member.getEmail().getEmail())
+                .claim("name", member.getName())
+                .claim("email", member.getEmail())
                 .claim("role", member.getRole())
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .compact();
