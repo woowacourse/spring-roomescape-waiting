@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthorizationExtractor;
 import roomescape.auth.CookieAuthorizationExtractor;
 import roomescape.domain.Member;
-import roomescape.domain.dto.*;
+import roomescape.domain.dto.LoginRequest;
+import roomescape.domain.dto.LoginResponse;
+import roomescape.domain.dto.SignupRequest;
+import roomescape.domain.dto.SignupResponse;
+import roomescape.domain.dto.TokenResponse;
 import roomescape.service.MemberService;
 
 @RestController
@@ -41,6 +45,13 @@ public class ClientMemberController {
     ResponseEntity<LoginResponse> loginCheck(Member member) {
         final LoginResponse loginResponse = LoginResponse.from(member);
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/logout")
+    ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie(authorizationExtractor.TOKEN_NAME, "");
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 
     private void setCookie(final HttpServletResponse response, final String accessToken) {

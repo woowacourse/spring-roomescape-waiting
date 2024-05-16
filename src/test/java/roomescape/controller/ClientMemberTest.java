@@ -1,29 +1,40 @@
 package roomescape.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import roomescape.auth.AuthorizationExtractor;
+import roomescape.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ClientMemberTest {
+    private static final String ADMIN_USER = "wedge@test.com";
+
     @LocalServerPort
     int port;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    private String generateToken(String email) {
+        return jwtTokenProvider.createToken(email);
     }
 
     @DisplayName("회원 가입 요청 성공 시 200을 응답한다.")
@@ -41,7 +52,6 @@ class ClientMemberTest {
                 .then().log().all()
                 .statusCode(200);
     }
-
 
     @DisplayName("회원 가입 요청 실패 시 400을 응답한다.")
     @Test
@@ -89,7 +99,7 @@ class ClientMemberTest {
                 .when().post("/login")
                 .then().log().all().extract();
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.header("Set-Cookie").split(";")[0]).isNotEmpty();
+        assertThat(response.cookie(AuthorizationExtractor.TOKEN_NAME)).isNotEmpty();
     }
 
     @DisplayName("토큰과 함께 로그인 확인 요청 시 200를 응답한다.")
@@ -110,5 +120,18 @@ class ClientMemberTest {
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @DisplayName("로그아웃 성공 시 200 응답하고 토큰 cookie에 빈 값을 설정한다.")
+    @Test
+    void given_when_logoutSuccess_then_statusCodeOk() {
+        var response = RestAssured
+                .given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, generateToken(ADMIN_USER))
+                .contentType(ContentType.JSON)
+                .when().post("/logout")
+                .then().log().all().extract();
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.cookie(AuthorizationExtractor.TOKEN_NAME)).isBlank();
     }
 }
