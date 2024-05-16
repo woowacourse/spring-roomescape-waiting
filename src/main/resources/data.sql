@@ -1,16 +1,16 @@
 -- 회원
 INSERT INTO member (name, email, password, role)
 VALUES
-('카키', 'kaki@email.com', '1234', default),
+('카키', 'kaki@email.com', '1234', 'MEMBER'),
 ('파랑', 'blue@email.com', '1234', 'ADMIN'),
-('솔라', 'solar@email.com', '1234', default),
-('브라운', 'brown@email.com', '1234', default),
-('네오', 'neo@email.com', '1234', default),
-('브리', 'bre@email.com', '1234', default),
-('포비', 'pobi@email.com', '1234', default),
-('구구', 'googoo@email.com', '1234', default),
-('토미', 'tomi@email.com', '1234', default),
-('리사', 'risa@email.com', '1234', default);
+('솔라', 'solar@email.com', '1234', 'MEMBER'),
+('브라운', 'brown@email.com', '1234', 'MEMBER'),
+('네오', 'neo@email.com', '1234', 'MEMBER'),
+('브리', 'bre@email.com', '1234', 'MEMBER'),
+('포비', 'pobi@email.com', '1234', 'MEMBER'),
+('구구', 'googoo@email.com', '1234', 'MEMBER'),
+('토미', 'tomi@email.com', '1234', 'MEMBER'),
+('리사', 'risa@email.com', '1234', 'MEMBER');
 ALTER TABLE member ALTER COLUMN id RESTART WITH 11;
 
 -- 에약 시간
