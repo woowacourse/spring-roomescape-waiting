@@ -12,7 +12,7 @@ public class Email {
 
     private String address;
 
-    public Email() {
+    Email() {
     }
 
     public Email(String address) {

@@ -10,13 +10,13 @@ public class Password {
 
     private String password;
 
+    Password() {
+    }
+
     public Password(String password) {
         validateNonBlank(password);
         validateLength(password);
         this.password = password;
-    }
-
-    public Password() {
     }
 
     private static void validateNonBlank(String rawPassword) {

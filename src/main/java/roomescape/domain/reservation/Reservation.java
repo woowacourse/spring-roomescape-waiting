@@ -26,7 +26,7 @@ public class Reservation {
     private Theme theme;
     private LocalDateTime createdAt;
 
-    public Reservation() {
+    Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,

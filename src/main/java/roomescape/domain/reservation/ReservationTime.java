@@ -15,7 +15,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    public ReservationTime() {
+    ReservationTime() {
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
