@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.global.auth.jwt.constant.JwtKey;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.UnauthorizedException;
 
@@ -38,7 +39,7 @@ class JwtHandlerTest {
         Date expiredAt = new Date(date.getTime() - 1);
 
         String accessToken = Jwts.builder()
-                .claim("memberId", 1L)
+                .claim(JwtKey.MEMBER_ID.getValue(), 1L)
                 .setIssuedAt(date)
                 .setExpiration(expiredAt)
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
@@ -58,7 +59,7 @@ class JwtHandlerTest {
         Date expiredAt = new Date(date.getTime() + 100000);
 
         String accessToken = Jwts.builder()
-                .claim("memberId", 1L)
+                .claim(JwtKey.MEMBER_ID.getValue(), 1L)
                 .setIssuedAt(date)
                 .setExpiration(expiredAt)
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
@@ -83,7 +84,7 @@ class JwtHandlerTest {
         String invalidSecretKey = secretKey.substring(1);
 
         String accessToken = Jwts.builder()
-                .claim("memberId", 1L)
+                .claim(JwtKey.MEMBER_ID.getValue(), 1L)
                 .setIssuedAt(date)
                 .setExpiration(expiredAt)
                 .signWith(SignatureAlgorithm.HS256, invalidSecretKey.getBytes()) // 기존은 HS256 알고리즘

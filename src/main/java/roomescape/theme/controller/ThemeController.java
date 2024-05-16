@@ -2,7 +2,6 @@ package roomescape.theme.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -61,7 +60,7 @@ public class ThemeController {
     @DeleteMapping("/themes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeTheme(
-            @NotBlank(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long id
+            @NotNull(message = "themeId는 null 일 수 없습니다.") @PathVariable final Long id
     ) {
         themeService.removeThemeById(id);
 

@@ -2,7 +2,6 @@ package roomescape.reservation.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.Admin;
+import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.dto.response.ApiResponse;
 import roomescape.reservation.dto.request.ReservationRequest;
@@ -41,6 +41,7 @@ public class ReservationController {
         return ApiResponse.success(reservationService.findAllReservations());
     }
 
+    @Auth
     @GetMapping("/reservations-mine")
     public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
         return ApiResponse.success(reservationService.findReservationByMemberId(memberId));
@@ -49,7 +50,7 @@ public class ReservationController {
     @GetMapping("/reservations/themes/{themeId}/times")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationTimeInfosResponse> getReservationTimeInfos(
-            @NotBlank(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long themeId,
+            @NotNull(message = "themeId는 null 일 수 없습니다.") @PathVariable final Long themeId,
             @NotNull(message = "날짜는 null일 수 없습니다.") @RequestParam final LocalDate date) {
         return ApiResponse.success(reservationService.findReservationsByDateAndThemeId(date, themeId));
     }
@@ -67,6 +68,7 @@ public class ReservationController {
                 reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
     }
 
+    @Auth
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ReservationResponse> saveReservation(
@@ -80,11 +82,12 @@ public class ReservationController {
         return ApiResponse.success(reservationResponse);
     }
 
+    @Auth
     @DeleteMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeReservation(
             @MemberId final Long memberId,
-            @NotBlank(message = "reservationId는 null 또는 공백일 수 없습니다.") @PathVariable("id") final Long reservationId
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("id") final Long reservationId
     ) {
         reservationService.removeReservationById(reservationId, memberId);
 

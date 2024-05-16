@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.global.auth.jwt.constant.JwtKey;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.UnauthorizedException;
@@ -16,6 +17,9 @@ import java.util.Date;
 
 @Component
 public class JwtHandler {
+    public static final String ACCESS_TOKEN_HEADER_KEY = "accessToken";
+    public static final String REFRESH_TOKEN_HEADER_KEY = "refreshToken";
+
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
     @Value("${security.jwt.token.access.expire-length}")
@@ -29,7 +33,7 @@ public class JwtHandler {
         Date refreshTokenExpiredAt = new Date(date.getTime() + accessTokenExpireTime);
 
         String accessToken = Jwts.builder()
-                .claim("memberId", memberId)
+                .claim(JwtKey.MEMBER_ID.getValue(), memberId)
                 .setIssuedAt(date)
                 .setExpiration(accessTokenExpiredAt)
                 .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
@@ -49,13 +53,13 @@ public class JwtHandler {
 
         return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token)
                 .getBody()
-                .get("memberId", Long.class);
+                .get(JwtKey.MEMBER_ID.getValue(), Long.class);
     }
 
     public Long getMemberIdFromTokenWithNotValidate(String token) {
         return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token)
                 .getBody()
-                .get("memberId", Long.class);
+                .get(JwtKey.MEMBER_ID.getValue(), Long.class);
     }
 
     public void validateToken(String token) {

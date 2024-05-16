@@ -6,22 +6,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.global.auth.annotation.Admin;
+import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.constant.JwtKey;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 
 @Component
-public class AdminInterceptor implements HandlerInterceptor {
+public class AuthInterceptor implements HandlerInterceptor {
     private final MemberService memberService;
     private final JwtHandler jwtHandler;
 
-    public AdminInterceptor(final MemberService memberService, final JwtHandler jwtHandler) {
+    public AuthInterceptor(final MemberService memberService, final JwtHandler jwtHandler) {
         this.memberService = memberService;
         this.jwtHandler = jwtHandler;
     }
@@ -33,8 +32,8 @@ public class AdminInterceptor implements HandlerInterceptor {
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
-        Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
-        if (adminAnnotation == null) {
+        Auth authAnnotation = handlerMethod.getMethodAnnotation(Auth.class);
+        if (authAnnotation == null) {
             return true;
         }
 
@@ -60,7 +59,7 @@ public class AdminInterceptor implements HandlerInterceptor {
     }
 
     private boolean checkRole(final Member member) {
-        if (member.isRole(Role.ADMIN)) {
+        if (member.hasRole()) {
             return true;
         }
         throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,

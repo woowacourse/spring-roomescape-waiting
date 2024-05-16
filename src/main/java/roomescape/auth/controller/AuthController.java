@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
+import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.annotation.MemberId;
+import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.dto.response.ApiResponse;
 
@@ -31,12 +33,14 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    @Auth
     @GetMapping("/login/check")
     public ApiResponse<LoginCheckResponse> checkLogin(@MemberId final Long memberId) {
         LoginCheckResponse response = authService.checkLogin(memberId);
         return ApiResponse.success(response);
     }
 
+    // TODO: 토큰 재발급 자동화 로직 구현
     @GetMapping("/token-reissue")
     public ApiResponse<Void> reissueToken(final HttpServletRequest request, final HttpServletResponse response) {
         TokenDto requestToken = getTokenFromCookie(request);
@@ -52,11 +56,11 @@ public class AuthController {
         String accessToken = "";
         String refreshToken = "";
         for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("accessToken")) {
+            if (cookie.getName().equals(JwtHandler.ACCESS_TOKEN_HEADER_KEY)) {
                 accessToken = cookie.getValue();
                 cookie.setMaxAge(0);
             }
-            if (cookie.getName().equals("refreshToken")) {
+            if (cookie.getName().equals(JwtHandler.REFRESH_TOKEN_HEADER_KEY)) {
                 refreshToken = cookie.getValue();
                 cookie.setMaxAge(0);
             }
@@ -66,8 +70,8 @@ public class AuthController {
     }
 
     private void addTokensToCookie(TokenDto tokenInfo, HttpServletResponse response) {
-        addTokenToCookie("accessToken", tokenInfo.accessToken(), response);
-        addTokenToCookie("refreshToken", tokenInfo.refreshToken(), response);
+        addTokenToCookie(JwtHandler.ACCESS_TOKEN_HEADER_KEY, tokenInfo.accessToken(), response);
+        addTokenToCookie(JwtHandler.REFRESH_TOKEN_HEADER_KEY, tokenInfo.refreshToken(), response);
     }
 
     private void addTokenToCookie(String cookieName, String token, HttpServletResponse response) {

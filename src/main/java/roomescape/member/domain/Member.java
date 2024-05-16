@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 
+//TODO: VO 사용 고려
 @Entity
 public class Member {
     @Id
@@ -55,6 +56,10 @@ public class Member {
 
     public boolean isRole(final Role role) {
         return this.role == role;
+    }
+
+    public boolean hasRole() {
+        return role != null;
     }
 
     public Long getId() {

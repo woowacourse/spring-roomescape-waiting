@@ -1,6 +1,5 @@
 package roomescape.global.auth.resolver;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -10,8 +9,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.auth.jwt.JwtHandler;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.UnauthorizedException;
+import roomescape.global.auth.jwt.constant.JwtKey;
 
 @Component
 public class MemberIdResolver implements HandlerMethodArgumentResolver {
@@ -30,15 +28,11 @@ public class MemberIdResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer, final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) throws Exception {
-        String cookieHeader = webRequest.getHeader("Cookie");
-        if (cookieHeader != null) {
-            for (Cookie cookie : webRequest.getNativeRequest(HttpServletRequest.class).getCookies()) {
-                if (cookie.getName().equals(ACCESS_TOKEN_COOKIE_NAME)) {
-                    String accessToken = cookie.getValue();
-                    return jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
-                }
-            }
-        }
-        throw new UnauthorizedException(ErrorType.INVALID_TOKEN, "JWT 토큰이 존재하지 않거나 유효하지 않습니다.");
+        HttpServletRequest httpServletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+        Long memberId = (Long) httpServletRequest.getAttribute(JwtKey.MEMBER_ID.getValue());
+        System.out.println("=====");
+        System.out.println(memberId);
+
+        return memberId;
     }
 }

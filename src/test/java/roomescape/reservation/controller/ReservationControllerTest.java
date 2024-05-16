@@ -191,9 +191,12 @@ public class ReservationControllerTest {
     @MethodSource("requestValidateSource")
     @DisplayName("예약 생성 시, 요청 값에 공백 또는 null이 포함되어 있으면 400 에러를 발생한다.")
     void validateBlankRequest(Map<String, String> invalidRequestBody) {
+        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
+                .header("Cookie", accessTokenCookie)
                 .body(invalidRequestBody)
                 .when().post("/reservations")
                 .then().log().all()
@@ -228,6 +231,8 @@ public class ReservationControllerTest {
     @Test
     @DisplayName("예약 생성 시, 정수 요청 데이터에 문자가 입력되어오면 400 에러를 발생한다.")
     void validateRequestDataFormat() {
+        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+
         Map<String, String> invalidTypeRequestBody = Map.of(
                 "date", LocalDate.now().plusDays(1L).toString(),
                 "timeId", "1",
@@ -237,6 +242,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
+                .header("Cookie", accessTokenCookie)
                 .body(invalidTypeRequestBody)
                 .when().post("/reservations")
                 .then().log().all()
