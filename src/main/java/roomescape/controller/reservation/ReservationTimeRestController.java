@@ -14,7 +14,7 @@ import roomescape.service.ReservationTimeService;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.time.AvailableTimeRequest;
-import roomescape.service.dto.time.AvailableTimeResponses;
+import roomescape.service.dto.time.AvailableTimeResponse;
 
 @RestController
 public class ReservationTimeRestController {
@@ -31,7 +31,7 @@ public class ReservationTimeRestController {
     }
 
     @GetMapping("/times/available")
-    public AvailableTimeResponses findAvailableReservationTimes(@Valid AvailableTimeRequest request) {
+    public List<AvailableTimeResponse> findAvailableReservationTimes(@Valid AvailableTimeRequest request) {
         return reservationTimeService.findAvailableReservationTimes(request);
     }
 

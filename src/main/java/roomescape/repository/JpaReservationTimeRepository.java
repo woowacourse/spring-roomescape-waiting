@@ -2,6 +2,8 @@ package roomescape.repository;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,7 +25,7 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
             WHERE r.date = :date
             AND r.theme_id = :themeId
             """, nativeQuery = true)
-    List<ReservationTime> findReservedTimeByThemeAndDate(String date, long themeId);
+    Set<ReservationTime> findReservedTimeByThemeAndDate(String date, long themeId);
 
     default ReservationTime fetchById(long timeId) {
         return findById(timeId).orElseThrow(TimeNotFoundException::new);

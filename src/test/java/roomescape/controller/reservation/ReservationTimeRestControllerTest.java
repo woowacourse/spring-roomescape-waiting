@@ -23,7 +23,6 @@ import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.time.AvailableTimeResponse;
-import roomescape.service.dto.time.AvailableTimeResponses;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -121,21 +120,18 @@ class ReservationTimeRestControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        AvailableTimeResponses actualResponse = RestAssured.given().log().all()
+        List<AvailableTimeResponse> actualResponse = RestAssured.given().log().all()
                 .when().get("/times/available?date=2100-01-01&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
                 .jsonPath()
-                .getObject(".", AvailableTimeResponses.class);
+                .getList(".", AvailableTimeResponse.class);
 
-        AvailableTimeResponse availableTimeResponse1 = new AvailableTimeResponse(
-                new ReservationTimeResponse(1L, "10:00"), true);
-        AvailableTimeResponse availableTimeResponse2 = new AvailableTimeResponse(
-                new ReservationTimeResponse(2L, "12:00"), false);
-        AvailableTimeResponses expectedResponse = new AvailableTimeResponses(List.of(
-                availableTimeResponse1, availableTimeResponse2
-        ));
+        List<AvailableTimeResponse> expectedResponse = List.of(
+                new AvailableTimeResponse(new ReservationTimeResponse(1L, "10:00"), true),
+                new AvailableTimeResponse(new ReservationTimeResponse(2L, "12:00"), false)
+        );
 
         assertThat(actualResponse)
                 .usingRecursiveComparison()
