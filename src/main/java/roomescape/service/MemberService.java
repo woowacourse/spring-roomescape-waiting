@@ -56,11 +56,15 @@ public class MemberService {
     }
 
     public Member findMemberByToken(final String token) {
+        validateToken(token);
+        String payload = jwtTokenProvider.getPayload(token);
+        return findMember(payload);
+    }
+
+    public void validateToken(final String token) {
         if (!jwtTokenProvider.validateToken(token)) {
             throw new InvalidTokenException("유효하지 않은 토큰입니다.");
         }
-        final String payload = jwtTokenProvider.getPayload(token);
-        return findMember(payload);
     }
 
     public List<Member> findAll() {
