@@ -93,13 +93,6 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
-//        return toReservationResponse(reservations);
-    }
-
-    private List<ReservationResponse> toReservationResponse(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(ReservationResponse::new)
-                .toList();
     }
 
     @Transactional(readOnly = true)
