@@ -69,7 +69,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme1.getId());
 
         //when
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(AuthInfo.of(memberChoco),
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(AuthInfo.from(memberChoco),
                 reservationRequest);
 
         //then
@@ -178,7 +178,7 @@ class ReservationServiceTest extends ServiceTest {
                 new MemberReservation(memberChoco, reservation));
 
         //when
-        reservationService.deleteMemberReservation(AuthInfo.of(memberChoco), memberReservation.getId());
+        reservationService.deleteMemberReservation(AuthInfo.from(memberChoco), memberReservation.getId());
 
         //then
         assertThat(
@@ -197,7 +197,7 @@ class ReservationServiceTest extends ServiceTest {
                 theme1.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(memberChoco),
+        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.from(memberChoco),
                 reservationRequest)).isInstanceOf(
                 BadRequestException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
     }
@@ -230,7 +230,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2));
 
         //when
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(AuthInfo.of(memberChoco));
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(AuthInfo.from(memberChoco));
 
         //then
         assertAll(

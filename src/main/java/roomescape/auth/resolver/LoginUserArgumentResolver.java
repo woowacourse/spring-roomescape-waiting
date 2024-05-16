@@ -38,6 +38,6 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
                                     WebDataBinderFactory binderFactory) {
 
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        return AuthInfo.of(memberService.findById(authService.fetchByToken(requestHandler.extract(request)).getId()));
+        return AuthInfo.from(memberService.findById(authService.fetchByToken(requestHandler.extract(request)).getId()));
     }
 }

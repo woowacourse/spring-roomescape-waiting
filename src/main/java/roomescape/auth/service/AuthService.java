@@ -44,7 +44,7 @@ public class AuthService {
     public AuthInfo fetchByToken(String token) {
         Member member = memberRepository.findByEmail(tokenProvider.getPayload(token).getValue())
                 .orElseThrow(() -> new AuthenticationException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE));
-        return AuthInfo.of(member);
+        return AuthInfo.from(member);
     }
 
     @Transactional

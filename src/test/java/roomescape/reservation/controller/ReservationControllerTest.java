@@ -105,7 +105,7 @@ class ReservationControllerTest extends ControllerTest {
 
         Member member = memberService.findById(memberResponseOf.id());
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
-                AuthInfo.of(member),
+                AuthInfo.from(member),
                 new ReservationRequest(
                         LocalDate.now().plusDays(10).toString(),
                         reservationTimeResponse.id(),

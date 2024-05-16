@@ -17,7 +17,7 @@ public class AuthInfo {
         this.role = role;
     }
 
-    public static AuthInfo of(Member member) {
+    public static AuthInfo from(Member member) {
         return new AuthInfo(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }
 
