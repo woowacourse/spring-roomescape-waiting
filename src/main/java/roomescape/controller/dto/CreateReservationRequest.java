@@ -15,6 +15,4 @@ public record CreateReservationRequest(
 
     @NotNull(message = "null일 수 없습니다.")
     Long themeId
-) {
-
-}
+) { }
