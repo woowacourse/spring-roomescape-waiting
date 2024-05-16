@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.Role;
+import roomescape.domain.reservation.Role;
 
 public record LoginMember(
         Long id,

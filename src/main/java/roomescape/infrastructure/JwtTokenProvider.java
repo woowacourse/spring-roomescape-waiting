@@ -11,7 +11,7 @@ import java.util.Map;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import roomescape.config.TokenProperties;
-import roomescape.domain.TokenProvider;
+import roomescape.domain.auth.TokenProvider;
 
 @Component
 @EnableConfigurationProperties(TokenProperties.class)
