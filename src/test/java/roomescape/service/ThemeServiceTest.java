@@ -1,7 +1,10 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -34,5 +38,38 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.delete(1L))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 테마를 사용하는 예약이 존재하여 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("성공: 테마 추가")
+    @Test
+    void save() {
+        Theme save = themeService.save("theme4", "desc4", "https://a.com/a.jpg");
+        assertThat(save.getId()).isEqualTo(4L);
+    }
+
+    @DisplayName("성공: 테마 삭제")
+    @Test
+    void delete() {
+        themeService.delete(2L);
+        List<Theme> themes = themeService.findAll();
+        assertThat(themes).hasSize(2);
+    }
+
+    @DisplayName("성공: 전체 테마 조회")
+    @Test
+    void findAll() {
+        List<Theme> themes = themeService.findAll();
+        assertThat(themes).hasSize(3);
+    }
+
+    @DisplayName("성공: 인기 테마 조회")
+    @Test
+    void findPopular() {
+        List<Theme> themes = themeService.findPopular();
+        assertAll(
+            () -> assertThat(themes.get(0).getId()).isEqualTo(1L),
+            () -> assertThat(themes.get(1).getId()).isEqualTo(3L),
+            () -> assertThat(themes.get(2).getId()).isEqualTo(2L)
+        );
     }
 }
