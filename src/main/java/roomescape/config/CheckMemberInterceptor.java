@@ -3,15 +3,13 @@ package roomescape.config;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.domain.Member;
 import roomescape.service.MemberService;
 import roomescape.service.exception.InvalidTokenException;
 import roomescape.service.exception.MemberNotFoundException;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 public class CheckMemberInterceptor implements HandlerInterceptor {
 
