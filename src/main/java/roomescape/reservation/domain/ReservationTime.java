@@ -4,9 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
-import java.util.List;
 
 @Entity
 public class ReservationTime {
@@ -15,8 +13,6 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalTime startAt;
-    @OneToMany(mappedBy = "reservationTime")
-    private List<Reservation> reservations;
 
     public ReservationTime() {
     }
