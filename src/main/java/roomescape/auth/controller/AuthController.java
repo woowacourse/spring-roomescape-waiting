@@ -34,8 +34,6 @@ public class AuthController {
         return ApiResponse.success();
     }
 
-    //TODO: 로그아웃
-
     @PostMapping("/login")
     public ApiResponse<Void> login(@Valid @RequestBody final LoginRequest loginRequest, final HttpServletResponse response) {
         TokenDto tokenDto = authService.login(loginRequest);
@@ -80,13 +78,14 @@ public class AuthController {
     }
 
     private void addTokensToCookie(TokenDto tokenInfo, HttpServletResponse response) {
-        addTokenToCookie(JwtHandler.ACCESS_TOKEN_HEADER_KEY, tokenInfo.accessToken(), response);
-        addTokenToCookie(JwtHandler.REFRESH_TOKEN_HEADER_KEY, tokenInfo.refreshToken(), response);
+        addTokenToCookie(JwtHandler.ACCESS_TOKEN_HEADER_KEY, tokenInfo.accessToken(), response, JwtHandler.ACCESS_TOKEN_EXPIRE_TIME);
+        addTokenToCookie(JwtHandler.REFRESH_TOKEN_HEADER_KEY, tokenInfo.refreshToken(), response, JwtHandler.REFRESH_TOKEN_EXPIRE_TIME);
     }
 
-    private void addTokenToCookie(String cookieName, String token, HttpServletResponse response) {
+    private void addTokenToCookie(String cookieName, String token, HttpServletResponse response, int maxAge) {
         Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(maxAge);
 
         response.addCookie(cookie);
     }

@@ -18,12 +18,8 @@ spring:
     url: jdbc:h2:mem:database-test
     username: sa
     password:
-      
+
 security:
   jwt:
     token:
       secret-key: daijawligagaf@LIJ$@U)9nagnalkkgalijaddljfi
-      access:
-        expire-length: 1800000 # 30 분
-      refresh:
-        expire-length: 604800000 # 7일

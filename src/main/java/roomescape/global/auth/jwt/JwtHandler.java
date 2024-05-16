@@ -19,18 +19,16 @@ import java.util.Date;
 public class JwtHandler {
     public static final String ACCESS_TOKEN_HEADER_KEY = "accessToken";
     public static final String REFRESH_TOKEN_HEADER_KEY = "refreshToken";
+    public static final int ACCESS_TOKEN_EXPIRE_TIME = 1800000;
+    public static final int REFRESH_TOKEN_EXPIRE_TIME = 604800000;
 
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
-    @Value("${security.jwt.token.access.expire-length}")
-    private long accessTokenExpireTime;
-    @Value("${security.jwt.token.refresh.expire-length}")
-    private long refreshTokenExpireTime;
 
     public TokenDto createToken(Long memberId) {
         Date date = new Date();
-        Date accessTokenExpiredAt = new Date(date.getTime() + accessTokenExpireTime);
-        Date refreshTokenExpiredAt = new Date(date.getTime() + accessTokenExpireTime);
+        Date accessTokenExpiredAt = new Date(date.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
+        Date refreshTokenExpiredAt = new Date(date.getTime() + REFRESH_TOKEN_EXPIRE_TIME);
 
         String accessToken = Jwts.builder()
                 .claim(JwtKey.MEMBER_ID.getValue(), memberId)
