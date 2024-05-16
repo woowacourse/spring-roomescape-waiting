@@ -162,7 +162,6 @@ public class ReservationControllerTest {
                 .statusCode(204);
     }
 
-    // TODO: [STEP6 필터링 로직] 동적 쿼리로 변경 후 주석 해제
     @Test
     @DisplayName("특정 날짜의 특정 테마 예약 현황을 조회한다.")
     void readReservationByDateAndThemeId() {
