@@ -17,7 +17,7 @@ public class MemberApiController {
         this.memberService = memberService;
     }
 
-    @GetMapping("/members")
+    @GetMapping("/admin/members")
     public ResponseEntity<List<MemberIdAndNameResponse>> getMembers() {
         List<Member> members = memberService.findMembers();
         return ResponseEntity.ok(
