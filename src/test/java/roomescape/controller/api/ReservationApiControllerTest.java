@@ -49,13 +49,13 @@ public class ReservationApiControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @DisplayName("예약 목록 조회 요청이 정상석으로 수행된다.")
+    @DisplayName("예약 목록 조회 요청이 정상적으로 수행된다.")
     void selectReservationListRequest_Success() {
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("reservations.size()", is(1));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ReservationApiControllerTest extends BaseControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("reservations.size()", is(2));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ReservationApiControllerTest extends BaseControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(0));
+                .body("reservations.size()", is(0));
     }
 
     @Test

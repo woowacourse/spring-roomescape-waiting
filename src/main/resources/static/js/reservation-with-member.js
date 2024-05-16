@@ -24,7 +24,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data.forEach(item => {
+    data.reservations.forEach(item => {
         const row = tableBody.insertRow();
 
         row.insertCell(0).textContent = item.id;              // 예약 id

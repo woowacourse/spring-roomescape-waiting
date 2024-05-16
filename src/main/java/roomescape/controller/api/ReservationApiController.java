@@ -19,8 +19,9 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.request.ReservationSaveRequest;
-import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.reservation.ReservationResponse;
 import roomescape.service.dto.response.UserReservationResponse;
+import roomescape.service.dto.response.reservation.ReservationResponses;
 import roomescape.service.reservation.AdminReservationCreateService;
 import roomescape.service.reservation.ReservationCreateService;
 import roomescape.service.reservation.ReservationDeleteService;
@@ -46,27 +47,19 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
+    public ResponseEntity<ReservationResponses> getReservations() {
         List<Reservation> reservations = reservationFindService.findReservations();
-        return ResponseEntity.ok(
-                reservations.stream()
-                        .map(ReservationResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(ReservationResponses.from(reservations));
     }
 
     @GetMapping("/admin/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> getSearchingReservations(@RequestParam long memberId,
+    public ResponseEntity<ReservationResponses> getSearchingReservations(@RequestParam long memberId,
                                                                               @RequestParam long themeId,
                                                                               @RequestParam LocalDate dateFrom,
                                                                               @RequestParam LocalDate dateTo
     ) {
         List<Reservation> reservations = reservationFindService.searchReservations(memberId, themeId, dateFrom, dateTo);
-        return ResponseEntity.ok(
-                reservations.stream()
-                        .map(ReservationResponse::new)
-                        .toList()
-        );
+        return ResponseEntity.ok(ReservationResponses.from(reservations));
     }
 
     @GetMapping("/reservations-mine")
