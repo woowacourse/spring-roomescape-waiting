@@ -17,7 +17,7 @@ public class MemberName {
     }
 
     private void validateName(final String name) {
-        if (name == null || name.length() == 0) {
+        if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 예약자명을 입력해주세요.");
         }
         if (name.length() > MAX_NAME_LENGTH) {

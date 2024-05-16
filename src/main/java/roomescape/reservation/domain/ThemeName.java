@@ -17,7 +17,7 @@ public class ThemeName {
     }
 
     private void validateName(final String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 테마 이름을 입력해주세요.");
         }
         if (value.length() > MAX_THEME_NAME_LENGTH) {

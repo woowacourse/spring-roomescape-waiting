@@ -35,13 +35,13 @@ public class Theme {
     }
 
     private void validateDescription(final String description) {
-        if (description == null || description.length() == 0) {
+        if (description == null || description.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 테마 설명을 입력해주세요.");
         }
     }
 
     private void validateThumbnail(final String thumbnail) {
-        if (thumbnail == null || thumbnail.length() == 0) {
+        if (thumbnail == null || thumbnail.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 테마 썸네일을 입력해주세요.");
         }
     }

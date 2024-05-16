@@ -22,7 +22,7 @@ public class Email {
     }
 
     private void validateEmail(final String value) {
-        if (value == null || value.length() == 0) {
+        if (value == null || value.isEmpty()) {
             throw new IllegalArgumentException("[ERROR] 이메일을 입력해주세요.");
         }
         if (value.length() > MAX_EMAIL_LENGTH) {
