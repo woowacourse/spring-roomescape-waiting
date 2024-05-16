@@ -69,7 +69,7 @@ public class ReservationTimeService {
 
     private BookResponse getBookResponse(final ReservationTime reservationTime,
                                          final List<ReservationTime> reservedReservationTimes) {
-        Boolean alreadyBooked = reservedReservationTimes.stream()
+        final Boolean alreadyBooked = reservedReservationTimes.stream()
                 .anyMatch(reservedTime -> reservedTime.getId().equals(reservationTime.getId()));
         return new BookResponse(reservationTime.getStartAt(), reservationTime.getId(), alreadyBooked);
     }
