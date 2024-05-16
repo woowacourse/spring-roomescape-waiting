@@ -2,16 +2,23 @@ package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import roomescape.controller.BaseControllerTest;
 import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.response.MemberIdAndNameResponse;
 import roomescape.util.TokenGenerator;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class AuthApiControllerTest {
+class AuthApiControllerTest extends BaseControllerTest {
+
+    @Override
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+    }
 
     @Test
     @DisplayName("올바른 로그인 정보를 입력할 시, 로그인에 성공한다.")

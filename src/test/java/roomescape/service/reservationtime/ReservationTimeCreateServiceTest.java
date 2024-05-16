@@ -8,10 +8,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class ReservationTimeCreateServiceTest {
+class ReservationTimeCreateServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationTimeCreateService reservationTimeCreateService;

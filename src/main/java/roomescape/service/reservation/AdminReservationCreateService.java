@@ -11,8 +11,8 @@ import roomescape.service.dto.request.ReservationAdminSaveRequest;
 @Service
 public class AdminReservationCreateService {
 
-    private final ReservationRepository reservationRepository;
     private final ReservationCreateValidator reservationCreateValidator;
+    private final ReservationRepository reservationRepository;
 
     public AdminReservationCreateService(ReservationRepository reservationRepository, ReservationCreateValidator reservationCreateValidator) {
         this.reservationRepository = reservationRepository;

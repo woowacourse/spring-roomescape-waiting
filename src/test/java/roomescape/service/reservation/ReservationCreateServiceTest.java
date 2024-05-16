@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class ReservationCreateServiceTest {
+class ReservationCreateServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationCreateService reservationCreateService;

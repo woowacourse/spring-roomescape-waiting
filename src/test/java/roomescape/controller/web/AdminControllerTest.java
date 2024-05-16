@@ -1,14 +1,21 @@
 package roomescape.controller.web;
 
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import roomescape.controller.BaseControllerTest;
 import roomescape.service.dto.request.LoginRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class AdminControllerTest {
+class AdminControllerTest extends BaseControllerTest {
+
+    @Override
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+    }
 
     @Test
     @DisplayName("어드민 메인 페이지로 정상적으로 이동한다.")

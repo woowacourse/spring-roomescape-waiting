@@ -5,14 +5,20 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.BaseControllerTest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationTimeApiControllerTest {
+public class ReservationTimeApiControllerTest extends BaseControllerTest {
+
+    @Override
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+    }
 
     @Test
     @DisplayName("예약 시간 추가, 조회, 삭제를 정상적으로 수행한다.")

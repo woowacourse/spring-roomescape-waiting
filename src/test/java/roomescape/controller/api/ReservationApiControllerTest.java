@@ -8,20 +8,26 @@ import io.restassured.http.ContentType;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.BaseControllerTest;
 import roomescape.util.TokenGenerator;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationApiControllerTest {
+public class ReservationApiControllerTest extends BaseControllerTest {
 
     @Autowired
     private ReservationApiController reservationApiController;
+
+    @Override
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+    }
 
     @Test
     @DisplayName("관리자 예약 페이지 요청이 정상적으로 수행된다.")
