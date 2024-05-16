@@ -63,4 +63,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
         return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
+
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            WHERE r.status = :reservationStatus
+            """)
+    List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 }

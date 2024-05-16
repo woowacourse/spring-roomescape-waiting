@@ -195,4 +195,12 @@ public class ReservationService {
 
         reservationRepository.deleteById(reservationId);
     }
+
+    public List<ReservationResponse> getReservationWaitings() {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }

@@ -2,7 +2,9 @@ package roomescape.controller.api;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +36,12 @@ public class AdminController {
 
         return ResponseEntity.created(URI.create("/reservation/" + reservationResponse.id()))
                 .body(reservationResponse);
+    }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<ReservationResponse>> getReservationWaitings() {
+        List<ReservationResponse> reservationResponses = reservationService.getReservationWaitings();
+
+        return ResponseEntity.ok(reservationResponses);
     }
 }
