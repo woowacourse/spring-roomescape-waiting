@@ -95,12 +95,23 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
-    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 500 Internel Server Error를 응답한다.")
+    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 400 NOT FOUND를 응답한다.")
     @Test
     void should_response_bad_request_when_nonExist_id() {
         RestAssured.given().log().all()
                 .when().delete("/reservations/2")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @DisplayName("token을 통해 해당 멤버의 예약목록을 불러 올 수 있다.(200 OK)")
+    @Test
+    void should_response_my_reservation_list() {
+        String cookie = getMemberCookie();
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200);
     }
 }

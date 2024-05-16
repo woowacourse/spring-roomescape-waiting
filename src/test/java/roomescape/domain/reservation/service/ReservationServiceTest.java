@@ -2,6 +2,7 @@ package roomescape.domain.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.member.domain.Role.ADMIN;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
@@ -10,7 +11,10 @@ import static roomescape.fixture.LocalDateFixture.BEFORE_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.TODAY;
 import static roomescape.fixture.LocalTimeFixture.BEFORE_ONE_HOUR;
 import static roomescape.fixture.LocalTimeFixture.TEN_HOUR;
+import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
 import static roomescape.fixture.MemberFixture.MEMBER_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.TEN_RESERVATION_TIME;
+import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -24,15 +28,12 @@ import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.BookableTimeResponse;
 import roomescape.domain.reservation.dto.BookableTimesRequest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.service.FakeThemeRepository;
 import roomescape.global.exception.EscapeApplicationException;
 
 class ReservationServiceTest {
-
-    private static final Member ADMIN_MEMBER = new Member(1L, "어드민", "admin@gmail.com", "123456", ADMIN);
-    private static final ReservationTime TEN_RESERVATION_TIME = new ReservationTime(1L, TEN_HOUR);
-    private static final Theme DUMMY_THEME = new Theme(1L, "dummy", "dummy", "dummy");
 
     private ReservationService reservationService;
     private FakeReservationRepository fakeReservationRepository;
@@ -196,6 +197,25 @@ class ReservationServiceTest {
         List<Reservation> filteredReservationList = reservationService
                 .findFilteredReservationList(1L, 1L, BEFORE_ONE_DAYS_DATE, TODAY);
 
-        assertThat(filteredReservationList).hasSize(1);
+        assertAll(
+                () -> assertThat(filteredReservationList).hasSize(1),
+                () -> assertThat(filteredReservationList.get(0).getDate()).isEqualTo(BEFORE_ONE_DAYS_DATE)
+        );
+
+    }
+
+    @DisplayName("멤버의 ID로 예약목록을 불러 올 수 있다.")
+    @Test
+    void should_find_reservations_by_member_id() {
+        fakeThemeRepository.save(DUMMY_THEME);
+        fakeMemberRepository.save(MEMBER_MEMBER);
+        fakeReservationRepository.save(
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER)
+        );
+
+        List<ReservationMineResponse> memberReservations = reservationService.findReservationByMemberId(
+                MEMBER_MEMBER.getId());
+
+        assertThat(memberReservations).hasSize(1);
     }
 }
