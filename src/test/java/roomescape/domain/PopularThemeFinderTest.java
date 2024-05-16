@@ -28,6 +28,9 @@ class PopularThemeFinderTest {
     private MemberCommandRepository memberCommandRepository;
 
     @Autowired
+    private MemberQueryRepository memberQueryRepository;
+
+    @Autowired
     private Clock clock;
 
     @DisplayName("현재 날짜 이전 1주일 동안 가장 예약이 많이 된 테마 10개를 내림차순 정렬하여 조회한다.")
@@ -35,7 +38,7 @@ class PopularThemeFinderTest {
     void shouldReturnThemesWhenFindPopularThemes() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Theme> themes = themeRepository.findAll();
-        Member member = memberCommandRepository.findAll().get(0);
+        Member member = memberQueryRepository.findAll().get(0);
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));

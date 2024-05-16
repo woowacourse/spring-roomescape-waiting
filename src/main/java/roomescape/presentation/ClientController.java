@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class ClientController {
+
     @GetMapping("/reservation")
     public String reservationPage() {
         return "reservation";

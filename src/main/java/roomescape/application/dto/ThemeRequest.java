@@ -9,6 +9,7 @@ public record ThemeRequest(
         @NotBlank String description,
         @NotBlank String thumbnail
 ) {
+
     public Theme toTheme() {
         return new Theme(new ThemeName(name), description, thumbnail);
     }

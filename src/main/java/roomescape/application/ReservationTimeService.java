@@ -45,7 +45,7 @@ public class ReservationTimeService {
     public void deleteById(Long id) {
         ReservationTime findReservationTime = reservationTimesRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
-        Long reservedCount = reservationQueryRepository.countByTimeId(id);
+        long reservedCount = reservationQueryRepository.countByTimeId(id);
         if (reservedCount > 0) {
             throw new RoomescapeException(RoomescapeErrorCode.ALREADY_RESERVED,
                     String.format("해당 예약 시간에 연관된 예약이 존재하여 삭제할 수 없습니다. 삭제 요청한 시간:%s", findReservationTime.getStartAt()));
@@ -60,7 +60,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, long themeId) {
+    public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         return reservationQueryRepository.findAvailableReservationTimes(date, themeId)
                 .stream()
                 .map(AvailableTimeResponse::from)

@@ -18,7 +18,7 @@ values ('테마1', '테마1 설명', 'https://upload.wikimedia.org/wikipedia/en/
        ('테마5', '테마5 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png'),
        ('테마6', '테마6 설명', 'https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png');
 
-insert into reservation (member_id, date, time_id, theme_id)
+insert into reservation (member_id, date, reservation_time_id, theme_id)
 values (1, '2024-12-24', 1, 2),
        (2, '2024-12-25', 2, 2),
        (3, '2024-12-25', 3, 3),
@@ -34,7 +34,7 @@ values (1, '2024-12-24', 1, 2),
        (1, '2024-12-29', 3, 1),
        (2, '2024-12-29', 4, 1);
 
-insert into reservation (member_id, date, time_id, theme_id)
+insert into reservation (member_id, date, reservation_time_id, theme_id)
 values (1, '2024-4-26', 1, 2),
        (2, '2024-4-26', 2, 2),
        (3, '2024-4-26', 3, 3),
