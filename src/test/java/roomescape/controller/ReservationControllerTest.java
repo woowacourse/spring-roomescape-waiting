@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationControllerTest {
@@ -200,17 +202,18 @@ class ReservationControllerTest {
                 .statusCode(200)
                 .extract().jsonPath().getList(".", ReservationTimeInfoResponse.class);
 
-        assertThat(times).hasSize(INITIAL_TIME_COUNT);
-        assertThat(times.get(0).getIsBooked()).isTrue();
-        assertThat(times.get(0).getTimeId()).isEqualTo(1);
-        assertThat(times.get(1).getIsBooked()).isTrue();
-        assertThat(times.get(1).getTimeId()).isEqualTo(2);
-        assertThat(times.get(2).getIsBooked()).isTrue();
-        assertThat(times.get(2).getTimeId()).isEqualTo(3);
-        assertThat(times.get(3).getIsBooked()).isFalse();
-        assertThat(times.get(3).getTimeId()).isEqualTo(4);
-        assertThat(times.get(4).getIsBooked()).isFalse();
-        assertThat(times.get(4).getTimeId()).isEqualTo(5);
+        assertAll(
+                () -> assertThat(times).hasSize(INITIAL_TIME_COUNT),
+                () -> assertThat(times.get(0).getIsBooked()).isTrue(),
+                () -> assertThat(times.get(0).getTimeId()).isEqualTo(1),
+                () -> assertThat(times.get(1).getIsBooked()).isTrue(),
+                () -> assertThat(times.get(1).getTimeId()).isEqualTo(2),
+                () -> assertThat(times.get(2).getIsBooked()).isTrue(),
+                () -> assertThat(times.get(2).getTimeId()).isEqualTo(3),
+                () -> assertThat(times.get(3).getIsBooked()).isFalse(),
+                () -> assertThat(times.get(3).getTimeId()).isEqualTo(4),
+                () -> assertThat(times.get(4).getIsBooked()).isFalse(),
+                () -> assertThat(times.get(4).getTimeId()).isEqualTo(5));
     }
 
     @DisplayName("날짜, 테마, 사용자 조건으로 예약을 검색한다.")

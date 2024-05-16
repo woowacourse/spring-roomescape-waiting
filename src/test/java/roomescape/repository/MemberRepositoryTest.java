@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import roomescape.model.member.Role;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -30,7 +32,8 @@ class MemberRepositoryTest {
         Password password = new Password(expected.getPassword());
         Optional<Member> actual = memberRepository.findByEmailAndPassword(email, password);
 
-        assertThat(actual).isNotEmpty();
-        assertThat(actual).hasValue(expected);
+        assertAll(
+                () -> assertThat(actual).isNotEmpty(),
+                () -> assertThat(actual).hasValue(expected));
     }
 }

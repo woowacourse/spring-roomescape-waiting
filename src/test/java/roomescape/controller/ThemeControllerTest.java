@@ -145,19 +145,18 @@ class ThemeControllerTest {
                 .statusCode(200)
                 .extract().jsonPath().getList(".", ThemeResponse.class);
 
-        assertAll(() -> {
-            assertThat(popularThemes).hasSize(10);
-            assertThat(popularThemes.get(0).getId()).isEqualTo(5);
-            assertThat(popularThemes.get(1).getId()).isEqualTo(4);
-            assertThat(popularThemes.get(2).getId()).isEqualTo(3);
-            assertThat(popularThemes.get(3).getId()).isEqualTo(2);
-            assertThat(popularThemes.get(4).getId()).isEqualTo(1);
-            assertThat(popularThemes.get(5).getId()).isEqualTo(6);
-            assertThat(popularThemes.get(6).getId()).isEqualTo(7);
-            assertThat(popularThemes.get(7).getId()).isEqualTo(8);
-            assertThat(popularThemes.get(8).getId()).isEqualTo(9);
-            assertThat(popularThemes.get(9).getId()).isEqualTo(10);
-        });
+        assertAll(
+                () -> assertThat(popularThemes).hasSize(10),
+                () -> assertThat(popularThemes.get(0).getId()).isEqualTo(5),
+                () -> assertThat(popularThemes.get(1).getId()).isEqualTo(4),
+                () -> assertThat(popularThemes.get(2).getId()).isEqualTo(3),
+                () -> assertThat(popularThemes.get(3).getId()).isEqualTo(2),
+                () -> assertThat(popularThemes.get(4).getId()).isEqualTo(1),
+                () -> assertThat(popularThemes.get(5).getId()).isEqualTo(6),
+                () -> assertThat(popularThemes.get(6).getId()).isEqualTo(7),
+                () -> assertThat(popularThemes.get(7).getId()).isEqualTo(8),
+                () -> assertThat(popularThemes.get(8).getId()).isEqualTo(9),
+                () -> assertThat(popularThemes.get(9).getId()).isEqualTo(10));
     }
 
     @DisplayName("예약된 전체 테마 개수가 10 이하인 경우, 해당 개수만큼의 인기 테마를 인기 순으로 조회한다.")
@@ -169,14 +168,13 @@ class ThemeControllerTest {
                 .statusCode(200)
                 .extract().jsonPath().getList(".", ThemeResponse.class);
 
-        assertAll(() -> {
-            assertThat(popularThemes).hasSize(5);
-            assertThat(popularThemes.get(0).getId()).isEqualTo(5);
-            assertThat(popularThemes.get(1).getId()).isEqualTo(4);
-            assertThat(popularThemes.get(2).getId()).isEqualTo(3);
-            assertThat(popularThemes.get(3).getId()).isEqualTo(2);
-            assertThat(popularThemes.get(4).getId()).isEqualTo(1);
-        });
+        assertAll(
+                () -> assertThat(popularThemes).hasSize(5),
+                () -> assertThat(popularThemes.get(0).getId()).isEqualTo(5),
+                () -> assertThat(popularThemes.get(1).getId()).isEqualTo(4),
+                () -> assertThat(popularThemes.get(2).getId()).isEqualTo(3),
+                () -> assertThat(popularThemes.get(3).getId()).isEqualTo(2),
+                () -> assertThat(popularThemes.get(4).getId()).isEqualTo(1));
     }
 
     private Integer countAllThemes() {

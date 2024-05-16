@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/init.sql")
 @SpringBootTest
@@ -27,8 +29,9 @@ class AuthServiceTest {
         String accessToken = authService.createToken(authDto);
 
         MemberInfo memberInfo = authService.checkToken(accessToken);
-        assertThat(accessToken).isNotBlank();
-        assertThat(memberInfo.getId()).isEqualTo(1L);
+        assertAll(
+                () -> assertThat(accessToken).isNotBlank(),
+                () -> assertThat(memberInfo.getId()).isEqualTo(1L));
     }
 
     @DisplayName("토큰을 통해 사용자 정보를 조회한다.")

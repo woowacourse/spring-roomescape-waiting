@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -52,11 +54,11 @@ class ThemeRepositoryTest {
     void should_find_theme_ranking_by_date() {
         List<Theme> themes = themeRepository.findRankingByDate(
                 LocalDate.of(2000, 1, 1), LocalDate.of(2000, 1, 2), 10);
-        assertThat(themes).hasSizeLessThanOrEqualTo(10);
-        assertThat(themes).containsExactly(
-                new Theme(1, "n1", "d1", "t1"),
-                new Theme(2, "n2", "d2", "t2")
-        );
+        assertAll(
+                () -> assertThat(themes).hasSizeLessThanOrEqualTo(10),
+                () -> assertThat(themes).containsExactly(
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Theme(2, "n2", "d2", "t2")));
     }
 
     @DisplayName("특정 이름을 가진 테마가 존재할 경우 참을 반환한다.")

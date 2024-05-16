@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -147,8 +149,9 @@ class ReservationServiceTest {
     @Test
     void should_find_reservations_by_memberId_and_themeId_and_date() {
         List<Reservation> reservations = reservationService.findReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
-        assertThat(reservations).hasSize(1);
-        assertThat(reservations.get(0).getId()).isEqualTo(1L);
+        assertAll(
+                () -> assertThat(reservations).hasSize(1),
+                () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));
     }
 
     @DisplayName("특정 멤버의 예약을 조회한다.")
@@ -156,7 +159,8 @@ class ReservationServiceTest {
     void should_find_reservations_by_member() {
         LoginMember member = new LoginMember(1L);
         List<Reservation> reservations = reservationService.findReservationsByMember(member);
-        assertThat(reservations).hasSize(1);
-        assertThat(reservations.get(0).getId()).isEqualTo(1L);
+        assertAll(
+                () -> assertThat(reservations).hasSize(1),
+                () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));
     }
 }
