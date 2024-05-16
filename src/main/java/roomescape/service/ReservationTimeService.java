@@ -2,8 +2,10 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -15,15 +17,11 @@ import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
 import roomescape.web.dto.response.time.ReservationTimeResponse;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
-
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-    }
 
     public List<ReservationTimeResponse> findAllReservationTime() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -50,6 +48,7 @@ public class ReservationTimeService {
         return unavailableTimeIds.contains(targetTimeId);
     }
 
+    @Transactional
     public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new DuplicatedTimeException();
@@ -59,6 +58,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    @Transactional
     public void deleteReservationTime(Long id) {
         ReservationTime reservationTime = findReservationTimeById(id);
         try {

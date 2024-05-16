@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -25,6 +26,7 @@ import roomescape.web.dto.response.reservation.UserReservationResponse;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -53,6 +55,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse saveReservation(ReservationRequest request) {
         ReservationTime time = findReservationTimeById(request.timeId());
         Theme theme = findThemeById(request.themeId());
@@ -82,12 +85,13 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = findReservationById(id);
+        Reservation reservation = getReservationById(id);
         reservationRepository.delete(reservation);
     }
 
-    private Reservation findReservationById(Long id) {
+    private Reservation getReservationById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(NotFoundReservationException::new);
     }

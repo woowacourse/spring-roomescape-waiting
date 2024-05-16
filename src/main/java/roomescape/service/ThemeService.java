@@ -18,6 +18,12 @@ import roomescape.web.dto.response.theme.ThemeResponse;
 public class ThemeService {
     private final ThemeRepository themeRepository;
 
+    public ThemeResponse saveTheme(ThemeRequest request) {
+        Theme theme = request.toTheme();
+        Theme savedTheme = themeRepository.save(theme);
+        return ThemeResponse.from(savedTheme);
+    }
+
     public List<ThemeResponse> findAllTheme() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -25,22 +31,19 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<ThemeResponse> findAllPopularTheme(RankingPolicy rankingPolicy) {
+    public List<ThemeResponse> findAllPopularThemes(RankingPolicy rankingPolicy) {
         LocalDate startDate = rankingPolicy.getStartDateAsString();
         LocalDate endDate = rankingPolicy.getEndDateAsString();
         int limit = rankingPolicy.exposureSize();
 
-        List<Theme> themes = themeRepository.findThemesByPeriodWithLimit(startDate.toString(), endDate.toString(),
+        List<Theme> themes = themeRepository.findThemesByPeriodWithLimit(
+                startDate.toString(),
+                endDate.toString(),
                 limit);
+
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
-    }
-
-    public ThemeResponse saveTheme(ThemeRequest request) {
-        Theme theme = request.toTheme();
-        Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponse.from(savedTheme);
     }
 
     public void deleteTheme(Long id) {
