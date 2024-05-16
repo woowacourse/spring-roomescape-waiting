@@ -1,11 +1,7 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 @Entity
@@ -14,11 +10,9 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Embedded
     private Name name;
-
     private String email;
-
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -34,7 +28,7 @@ public class Member {
         this.password = password;
         this.role = role;
     }
-
+    // TODO 지우기
     public Member(Long id, String name, String email, Role role) {
         this(id, name, email, null, role);
     }

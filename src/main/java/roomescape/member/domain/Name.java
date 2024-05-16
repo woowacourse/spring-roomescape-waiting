@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -8,9 +9,11 @@ import roomescape.exception.ErrorType;
 
 @Embeddable
 public class Name {
+
     private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z가-힣0-9]+(?:\\s+[a-zA-Z가-힣0-9]+)*$");
     private static final int MAX_NAME_LENGTH = 10;
 
+    @Column(nullable = false)
     private String name;
 
     public Name(String name) {
