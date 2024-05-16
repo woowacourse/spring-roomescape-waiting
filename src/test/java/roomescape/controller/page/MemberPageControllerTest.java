@@ -1,35 +1,48 @@
 package roomescape.controller.page;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.controller.ControllerTest;
+import roomescape.service.auth.dto.LoginRequest;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.stream.Stream;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class MemberPageControllerTest extends ControllerTest {
+    private String token;
+
     @DisplayName("사용자 기본 Page 접근 성공 테스트")
     @Test
     void responseMemberMainPage() {
-        Response response = RestAssured.given().log().all()
+        RestAssured.given().log().all()
                 .when().get("/")
-                .then().log().all().extract().response();
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
+                .then().log().all()
+                .assertThat().statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("사용자 예약 Page 접근 성공 테스트")
-    @Test
-    void responseMemberReservationPage() {
-        RestAssured.given().log().all()
-                .when().get("/reservation")
-                .then().log().all()
-                .assertThat().statusCode(HttpStatus.OK.value());
+    @TestFactory
+    Stream<DynamicTest> responseMemberReservationPage() {
+        return Stream.of(
+                DynamicTest.dynamicTest("로그인을 한다.", () -> {
+                    token = RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .body(new LoginRequest("guest123", "guest@email.com"))
+                            .when().post("/login")
+                            .then().log().all().extract().cookie("token");
+                }),
+                DynamicTest.dynamicTest("예약 페이지를 들어간다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", token)
+                            .when().get("/reservation")
+                            .then().log().all()
+                            .assertThat().statusCode(HttpStatus.OK.value());
+                })
+        );
     }
 
     @DisplayName("사용자 로그인 Page 접근 성공 테스트")
@@ -51,11 +64,22 @@ class MemberPageControllerTest extends ControllerTest {
     }
 
     @DisplayName("사용자별 예약 Page 접근 성공 테스트")
-    @Test
-    void responseMemberOwnReservationPage() {
-        RestAssured.given().log().all()
-                .when().get("/member/reservation")
-                .then().log().all()
-                .assertThat().statusCode(HttpStatus.OK.value());
+    @TestFactory
+    Stream<DynamicTest> responseMemberOwnReservationPage() {
+        return Stream.of(
+                DynamicTest.dynamicTest("로그인을 한다.", () -> {
+                    token = RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .body(new LoginRequest("guest123", "guest@email.com"))
+                            .when().post("/login")
+                            .then().log().all().extract().cookie("token");
+                }),
+                DynamicTest.dynamicTest("본인의 예약 페이지를 들어간다", () -> {
+                    RestAssured.given().log().all()
+                            .when().get("/member/reservation")
+                            .then().log().all()
+                            .assertThat().statusCode(HttpStatus.OK.value());
+                })
+        );
     }
 }

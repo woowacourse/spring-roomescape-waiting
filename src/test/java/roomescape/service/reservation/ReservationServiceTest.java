@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql("/truncate-with-guests.sql")
+@Sql("/truncate-with-time-and-theme.sql")
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
