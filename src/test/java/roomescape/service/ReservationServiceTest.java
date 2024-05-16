@@ -11,6 +11,7 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
@@ -140,5 +141,22 @@ class ReservationServiceTest {
         List<ReservationTime> bookedTimes = timesInfo.getBookedTimes();
         List<ReservationTime> notBookedTimes = timesInfo.getNotBookedTimes();
         assertThat(bookedTimes.size() + notBookedTimes.size()).isEqualTo(INITIAL_TIME_COUNT);
+    }
+
+    @DisplayName("특정 멤버, 테마, 날짜 조건에 따라 예약을 조회한다.")
+    @Test
+    void should_find_reservations_by_memberId_and_themeId_and_date() {
+        List<Reservation> reservations = reservationService.findReservationsByConditions(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.get(0).getId()).isEqualTo(1L);
+    }
+
+    @DisplayName("특정 멤버의 예약을 조회한다.")
+    @Test
+    void should_find_reservations_by_member() {
+        LoginMember member = new LoginMember(1L);
+        List<Reservation> reservations = reservationService.findReservationsByMember(member);
+        assertThat(reservations).hasSize(1);
+        assertThat(reservations.get(0).getId()).isEqualTo(1L);
     }
 }
