@@ -1,8 +1,8 @@
 package roomescape.controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,11 +26,12 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody TokenRequest tokenRequest,
-                                               HttpServletResponse response) {
+    public ResponseEntity<TokenResponse> login(@RequestBody TokenRequest tokenRequest) {
         TokenResponse tokenResponse = memberService.createToken(tokenRequest);
-        response.addCookie(createCookie(tokenResponse));
-        return ResponseEntity.ok(tokenResponse);
+        ResponseCookie responseCookie = createCookie(tokenResponse);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(tokenResponse);
     }
 
     @GetMapping("/login/check")
@@ -40,10 +41,11 @@ public class LoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = createEmptyCookie();
-        response.addCookie(cookie);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> logout() {
+        ResponseCookie emptyCookie = createEmptyCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, emptyCookie.toString())
+                .build();
     }
 
     @GetMapping("/members")
@@ -52,17 +54,17 @@ public class LoginController {
         return ResponseEntity.ok(members);
     }
 
-    private Cookie createCookie(TokenResponse tokenResponse) {
-        Cookie cookie = new Cookie(COOKIE_NAME, tokenResponse.accessToken());
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+    private ResponseCookie createCookie(TokenResponse tokenResponse) {
+        return ResponseCookie.from(COOKIE_NAME, tokenResponse.accessToken())
+                .path("/")
+                .httpOnly(true)
+                .build();
     }
 
-    private Cookie createEmptyCookie() {
-        Cookie cookie = new Cookie(COOKIE_NAME, null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+    private ResponseCookie createEmptyCookie() {
+        return ResponseCookie.from(COOKIE_NAME, "")
+                .path("/")
+                .httpOnly(true)
+                .build();
     }
 }

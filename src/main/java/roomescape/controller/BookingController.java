@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.response.BookResponse;
 import roomescape.service.BookService;
@@ -20,9 +20,9 @@ public class BookingController {
         this.bookService = bookService;
     }
 
-    @GetMapping("/{date}/{theme_id}")
-    public ResponseEntity<List<BookResponse>> read(@PathVariable LocalDate date,
-                                                   @PathVariable(value = "theme_id") Long themeId) {
+    @GetMapping
+    public ResponseEntity<List<BookResponse>> read(@RequestParam LocalDate date,
+                                                   @RequestParam Long themeId) {
         List<BookResponse> books = bookService.findAvaliableBookList(date, themeId);
         return ResponseEntity.ok(books);
     }
