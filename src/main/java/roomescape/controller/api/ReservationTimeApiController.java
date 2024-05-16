@@ -50,7 +50,7 @@ public class ReservationTimeApiController {
     public ResponseEntity<ReservationStatusResponses> getReservationTimesIsBooked(
             @RequestParam LocalDate date,
             @RequestParam @Positive(message = "1 이상의 값만 입력해주세요.") long themeId) {
-        ReservationStatuses reservationStatus = reservationTimeFindService.findIsBooked(date, themeId);
+        ReservationStatuses reservationStatus = reservationTimeFindService.findReservationStatuses(date, themeId);
         return ResponseEntity.ok(ReservationStatusResponses.from(reservationStatus));
     }
 

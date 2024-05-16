@@ -20,7 +20,7 @@ class ReservationTimeFindServiceTest extends BaseServiceTest {
     @DisplayName("날짜와 테마가 주어지면 각 시간의 예약 여부를 구한다.")
     void findAvailabilityByDateAndTheme() {
         LocalDate date = LocalDate.now().plusDays(1L);
-        List<ReservationStatus> reservationStatuses = reservationTimeFindService.findIsBooked(date, 1L)
+        List<ReservationStatus> reservationStatuses = reservationTimeFindService.findReservationStatuses(date, 1L)
                 .getReservationStatuses();
         Assertions.assertAll(
                 () -> assertThat(reservationStatuses.size()).isEqualTo(2),
