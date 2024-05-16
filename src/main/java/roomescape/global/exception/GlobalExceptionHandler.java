@@ -21,7 +21,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AuthException.class)
     public ResponseEntity<ErrorResponse> handle(final AuthException exception) {
         logger.error(exception.getMessage(), exception);
-        return new ResponseEntity<>(exception.getErrorResponse(), exception.getErrorResponse().getStatusCode());
+        return ResponseEntity.status(exception.getErrorResponse().getStatusCode())
+                .body(exception.getErrorResponse());
     }
 
     @ExceptionHandler(value = NoSuchElementException.class)
