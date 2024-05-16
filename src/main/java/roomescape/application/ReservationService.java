@@ -18,6 +18,8 @@ import roomescape.exception.RoomescapeException;
 
 @Service
 public class ReservationService {
+    private static final String BOOKED = "예약";
+
     private final ReservationFactory reservationFactory;
     private final ReservationCommandRepository reservationCommandRepository;
     private final ReservationQueryRepository reservationQueryRepository;
@@ -68,7 +70,7 @@ public class ReservationService {
     public List<MyReservationResponse> findMyReservations(Long memberId) {
         return reservationQueryRepository.findAllByMemberIdOrderByDateDesc(memberId).stream()
                 .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                        reservation.getDate(), reservation.getTime().getStartAt(), "예약"))
+                        reservation.getDate(), reservation.getTime().getStartAt(), BOOKED))
                 .toList();
     }
 }
