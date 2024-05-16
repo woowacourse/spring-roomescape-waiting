@@ -7,8 +7,8 @@ import java.time.LocalTime;
 
 public class ReservationTimeDto {
 
-    private Long id;
-    private LocalTime startAt;
+    private final Long id;
+    private final LocalTime startAt;
 
     private ReservationTimeDto(Long id, LocalTime startAt) {
         this.id = id;
@@ -16,8 +16,7 @@ public class ReservationTimeDto {
     }
 
     public ReservationTimeDto(LocalTime startAt) {
-        this.id = null;
-        this.startAt = startAt;
+        this(null, startAt);
     }
 
     public static ReservationTimeDto from(ReservationTimeRequest request) {
