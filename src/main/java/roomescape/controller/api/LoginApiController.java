@@ -1,7 +1,8 @@
 package roomescape.controller.api;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.api.dto.request.LoginMemberRequest;
@@ -22,16 +23,17 @@ public class LoginApiController {
     @PostMapping
     public ResponseEntity<Void> login(@RequestBody final MemberLoginRequest memberLoginRequest, final HttpServletResponse response) {
         final MemberLoginOutput output = memberService.loginMember(memberLoginRequest.toInput());
-        initializeCookie(response, output);
+        final ResponseCookie cookie = initializeCookie(output.token());
+
         return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,cookie.toString())
                 .build();
     }
-
-    private void initializeCookie(final HttpServletResponse response, final MemberLoginOutput output) {
-        final Cookie cookie = new Cookie("token", output.token());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+    private ResponseCookie initializeCookie(final String token){
+        return ResponseCookie.from("token",token)
+                .httpOnly(true)
+                .path("/")
+                .build();
     }
 
     @GetMapping("/check")
