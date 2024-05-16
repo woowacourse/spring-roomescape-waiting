@@ -15,7 +15,4 @@ public record Name(String name) {
         }
     }
 
-    public String asString() {
-        return name;
-    }
 }

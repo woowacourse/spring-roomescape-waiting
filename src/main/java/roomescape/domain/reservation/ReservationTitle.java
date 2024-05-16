@@ -12,7 +12,4 @@ public record ReservationTitle(String name) {
         }
     }
 
-    public String asString() {
-        return name;
-    }
 }

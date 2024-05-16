@@ -42,10 +42,6 @@ public class Member {
         return new Member(id, new Name(name), new Email(email), new Password(password), Role.from(role));
     }
 
-    public boolean isEqualId(final long id) {
-        return this.id.equals(id);
-    }
-
 
     public boolean isNotEqualPassword(final String password) {
         return !this.password.isEqual(password);

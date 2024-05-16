@@ -40,10 +40,6 @@ public class Theme {
         }
     }
 
-    public boolean isEqualId(final long id) {
-        return this.id.equals(id);
-    }
-
     public Long getId() {
         return id;
     }
