@@ -9,7 +9,7 @@ public class ThemeName {
 
     private String name;
 
-    public ThemeName() {
+    ThemeName() {
     }
 
     public ThemeName(String name) {

@@ -12,7 +12,7 @@ public class MemberRole {
     private String name;
     private Role role;
 
-    public MemberRole() {
+    MemberRole() {
     }
 
     public MemberRole(long memberId, String name, Role role) {

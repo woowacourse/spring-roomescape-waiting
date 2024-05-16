@@ -9,7 +9,7 @@ public class PlayerName {
 
     private String name;
 
-    public PlayerName() {
+    PlayerName() {
     }
 
     public PlayerName(String name) {
