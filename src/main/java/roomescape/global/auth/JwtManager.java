@@ -4,9 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -30,7 +29,7 @@ public class JwtManager {
         return Jwts.builder()
             .setSubject(member.getId().toString())
             .setExpiration(validity)
-            .signWith(SignatureAlgorithm.HS256, secretKey)
+            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
             .compact();
     }
 
@@ -61,8 +60,9 @@ public class JwtManager {
 
     private Long parse(String token) {
         try {
-            Claims claims = Jwts.parser()
-                .setSigningKey(secretKey)
+            Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
             return Long.valueOf(claims.getSubject());
@@ -70,8 +70,6 @@ public class JwtManager {
             throw new AuthorizationException("토큰이 만료되었습니다.");
         } catch (UnsupportedJwtException | MalformedJwtException e) {
             throw new AuthorizationException("잘못된 형식의 토큰입니다.");
-        } catch (SignatureException e) {
-            throw new AuthorizationException("잘못된 형식의 서명입니다.");
         } catch (IllegalArgumentException e) {
             throw new AuthorizationException("빈 토큰을 입력할 수 없습니다.");
         }
