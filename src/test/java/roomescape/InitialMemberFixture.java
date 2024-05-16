@@ -40,6 +40,7 @@ public class InitialMemberFixture {
     );
 
     public static final Member NOT_SAVED_MEMBER = new Member(
+            5L,
             new Name("네오"),
             new Email("neo123@email.com"),
             Role.USER,
