@@ -10,6 +10,6 @@ public abstract class AbstractExceptionHandler {
     protected final Logger log = LoggerFactory.getLogger(RoomescapeApplication.class);
 
     protected void logError(Exception exception) {
-        log.error("Error occur {}", exception.toString());
+        log.error("Error occur {}", exception);
     }
 }

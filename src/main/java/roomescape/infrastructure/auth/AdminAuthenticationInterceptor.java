@@ -10,10 +10,10 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Component
-public class CheckLoginInterceptor implements HandlerInterceptor {
+public class AdminAuthenticationInterceptor implements HandlerInterceptor {
     private final AuthService authService;
 
-    public CheckLoginInterceptor(AuthService authService) {
+    public AdminAuthenticationInterceptor(AuthService authService) {
         this.authService = authService;
     }
 

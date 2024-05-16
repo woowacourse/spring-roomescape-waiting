@@ -5,18 +5,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.infrastructure.auth.CheckLoginInterceptor;
+import roomescape.infrastructure.auth.AdminAuthenticationInterceptor;
 import roomescape.infrastructure.auth.LoginMemberArgumentResolver;
+import roomescape.infrastructure.auth.MemberAuthenticationInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
-    private final CheckLoginInterceptor checkLoginInterceptor;
+    private final AdminAuthenticationInterceptor adminAuthenticationInterceptor;
+    private final MemberAuthenticationInterceptor memberAuthenticationInterceptor;
 
     public WebMvcConfig(LoginMemberArgumentResolver loginMemberArgumentResolver,
-                        CheckLoginInterceptor checkLoginInterceptor) {
+                        AdminAuthenticationInterceptor adminAuthenticationInterceptor,
+                        MemberAuthenticationInterceptor memberAuthenticationInterceptor) {
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
-        this.checkLoginInterceptor = checkLoginInterceptor;
+        this.adminAuthenticationInterceptor = adminAuthenticationInterceptor;
+        this.memberAuthenticationInterceptor = memberAuthenticationInterceptor;
     }
 
     @Override
@@ -26,7 +30,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(checkLoginInterceptor)
-                .addPathPatterns("/admin/**");
+        registry.addInterceptor(adminAuthenticationInterceptor)
+                .addPathPatterns("/admin/**")
+                .excludePathPatterns("/", "/login/**", "logout", "/themes/popular")
+                .excludePathPatterns("/css/**", "/js/**", "/image/**");
+
+        registry.addInterceptor(memberAuthenticationInterceptor)
+                .addPathPatterns("/reservations/**", "/themes/**", "/times/**")
+                .excludePathPatterns("/", "/login/**", "/logout", "/themes/popular")
+                .excludePathPatterns("/css/**", "/js/**", "/image/**");
     }
 }

@@ -16,6 +16,7 @@ public enum RoomescapeErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "적합한 권한이 아닙니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "인증 유효기간이 만료되었습니다."),
+    TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "토큰이 존재하지 않습니다. 다시 로그인 해주세요."),
     ;
 
     private final HttpStatus httpStatus;
