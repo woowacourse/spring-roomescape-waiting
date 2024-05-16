@@ -1,6 +1,6 @@
 package roomescape.exception;
 
-public class InvalidClientFieldWithValueException extends BadRequestException {
+public class InvalidClientFieldWithValueException extends IllegalArgumentException {
     private final ErrorType errorType;
     private final String fieldName;
     private final String value;

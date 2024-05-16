@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import roomescape.exception.ErrorType;
-import roomescape.exception.InvalidClientFieldWithValueException;
-
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import roomescape.exception.clienterror.InvalidDataTypeException;
 
 public class LocalTimeDeserializerWithValidation extends JsonDeserializer<LocalTime> {
     @Override
@@ -20,7 +18,7 @@ public class LocalTimeDeserializerWithValidation extends JsonDeserializer<LocalT
         try {
             return LocalTime.parse(value);
         } catch (DateTimeParseException e) {
-            throw new InvalidClientFieldWithValueException(ErrorType.INVALID_DATA_TYPE, fieldName, value);
+            throw new InvalidDataTypeException(fieldName, value);
         }
     }
 }

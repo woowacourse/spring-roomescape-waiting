@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import roomescape.exception.ErrorType;
-import roomescape.exception.InvalidClientFieldWithValueException;
-
 import java.io.IOException;
+import roomescape.exception.clienterror.InvalidDataTypeException;
 
 public class LongDeserializerWithValidation extends JsonDeserializer<Long> {
     @Override
@@ -18,7 +16,7 @@ public class LongDeserializerWithValidation extends JsonDeserializer<Long> {
         try {
             return Long.valueOf(value);
         } catch (NumberFormatException e) {
-            throw new InvalidClientFieldWithValueException(ErrorType.INVALID_DATA_TYPE, fieldName, value);
+            throw new InvalidDataTypeException(fieldName, value);
         }
     }
 }
