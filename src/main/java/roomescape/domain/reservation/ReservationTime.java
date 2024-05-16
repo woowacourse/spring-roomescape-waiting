@@ -8,30 +8,28 @@ import java.time.LocalTime;
 
 @Entity
 public class ReservationTime {
-    private static final long NO_ID = 0;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private LocalTime startAt;
 
     protected ReservationTime() {
     }
 
-    public ReservationTime(long id, LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
     public ReservationTime(LocalTime time) {
-        this(NO_ID, time);
+        this(null, time);
     }
 
     public boolean isSame(ReservationTime other) {
         return startAt.equals(other.startAt);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

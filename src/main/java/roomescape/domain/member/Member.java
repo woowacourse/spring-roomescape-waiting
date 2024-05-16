@@ -12,11 +12,9 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Member {
-    private static final long NO_ID = 0;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "name"))
@@ -36,7 +34,7 @@ public class Member {
     protected Member() {
     }
 
-    public Member(long id, MemberName memberName, Email email, Password password, Role role) {
+    public Member(Long id, MemberName memberName, Email email, Password password, Role role) {
         this.id = id;
         this.memberName = memberName;
         this.email = email;
@@ -45,14 +43,14 @@ public class Member {
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(NO_ID, new MemberName(name), Email.of(email), Password.of(password), role);
+        this(null, new MemberName(name), Email.of(email), Password.of(password), role);
     }
 
     public boolean isPasswordMatches(Password other) {
         return password.equals(other);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

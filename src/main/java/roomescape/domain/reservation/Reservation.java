@@ -11,11 +11,9 @@ import roomescape.domain.member.Member;
 
 @Entity
 public class Reservation {
-    private static final long NO_ID = 0;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     private Member member;
@@ -29,7 +27,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(long id, Member member, Schedule schedule, Theme theme) {
+    public Reservation(Long id, Member member, Schedule schedule, Theme theme) {
         this.id = id;
         this.member = member;
         this.schedule = schedule;
@@ -37,14 +35,14 @@ public class Reservation {
     }
 
     public Reservation(Member member, Schedule schedule, Theme theme) {
-        this(NO_ID, member, schedule, theme);
+        this(null, member, schedule, theme);
     }
 
-    public boolean isReservationOf(long memberId) {
-        return member.getId() == memberId;
+    public boolean isReservationOf(Long memberId) {
+        return memberId.equals(member.getId());
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

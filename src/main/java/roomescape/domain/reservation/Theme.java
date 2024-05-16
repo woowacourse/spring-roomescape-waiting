@@ -10,11 +10,9 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Theme {
-    private static final long NO_ID = 0;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "NAME"))
@@ -31,7 +29,7 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(long id, ThemeName name, Description description, Thumbnail thumbnail) {
+    public Theme(Long id, ThemeName name, Description description, Thumbnail thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -39,10 +37,10 @@ public class Theme {
     }
 
     public Theme(String name, String description, String thumbnail) {
-        this(NO_ID, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
+        this(null, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
