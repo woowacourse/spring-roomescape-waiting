@@ -18,7 +18,6 @@ import roomescape.dto.ReservationTimeResponse;
 import roomescape.service.AvailableTimeService;
 import roomescape.service.ReservationTimeService;
 
-//Todo 일부 기능 관리자만 접근할 수 있도록 깔끔하게 하는 방법 생각해보기
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
