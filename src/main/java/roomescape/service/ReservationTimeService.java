@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
@@ -31,6 +32,7 @@ public class ReservationTimeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -38,6 +40,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse saveTime(ReservationTimeSaveRequest reservationTimeSaveRequest) {
         ReservationTime reservationTime = reservationTimeSaveRequest.toReservationTime();
 
@@ -56,6 +59,7 @@ public class ReservationTimeService {
 
     }
 
+    @Transactional
     public void deleteTime(Long id) {
         ReservationTime foundTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
@@ -67,6 +71,7 @@ public class ReservationTimeService {
         reservationTimeRepository.delete(foundTime);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeBookedResponse> getTimesWithBooked(
             ReservationTimeBookedRequest reservationTimeBookedRequest) {
         Theme foundTheme = themeRepository.findById(reservationTimeBookedRequest.themeId())

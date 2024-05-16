@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
@@ -40,6 +41,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Reservation reservation = createReservation(reservationSaveRequest);
 
@@ -70,6 +72,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         Reservation foundReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
@@ -77,6 +80,7 @@ public class ReservationService {
         reservationRepository.delete(foundReservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
         List<Reservation> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
@@ -94,6 +98,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserReservationResponse> findAllUserReservation(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
                 findMemberById(memberId),

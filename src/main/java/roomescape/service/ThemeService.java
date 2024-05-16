@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
@@ -22,18 +23,21 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ThemeResponse saveTheme(ThemeSaveRequest themeSaveRequest) {
         Theme theme = themeSaveRequest.toTheme();
         Theme savedTheme = themeRepository.save(theme);
         return new ThemeResponse(savedTheme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
         List<Theme> popularThemes = reservationRepository.findTopThemesDurationOrderByCount(
                 popularThemeRequest.startDate(),
@@ -46,6 +50,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         Theme foundTheme = themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));

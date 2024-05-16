@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.service.dto.MemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
@@ -17,6 +18,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public MemberResponse join(MemberJoinRequest memberRequest) {
         Member member = memberRequest.toUserMember();
         if (memberRepository.existsByEmail(member.getEmail())) {
@@ -28,12 +30,14 @@ public class MemberService {
         return MemberResponse.from(savedMember);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
          return memberRepository.findAll().stream()
                  .map(MemberResponse::from)
                  .toList();
     }
 
+    @Transactional
     public void withdraw(Long id) {
         Member foundMember = memberRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
@@ -41,6 +45,7 @@ public class MemberService {
         memberRepository.delete(foundMember);
     }
 
+    @Transactional(readOnly = true)
     public MemberResponse findByEmailAndPassword(String email, String password) {
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
