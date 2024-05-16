@@ -34,7 +34,7 @@ import roomescape.service.schedule.dto.ReservationTimeReadRequest;
 import roomescape.service.schedule.dto.ReservationTimeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeService reservationTimeService;

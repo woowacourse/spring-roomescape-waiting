@@ -32,7 +32,7 @@ import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;

@@ -13,7 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.auth.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = {"classpath:truncate-with-admin-and-guest.sql"})
+@Sql("/truncate-with-admin-and-guest.sql")
 class MemberControllerTest {
     @LocalServerPort
     private int port;

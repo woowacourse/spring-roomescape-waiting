@@ -19,7 +19,7 @@ import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class ReservationControllerTest {
     @LocalServerPort
     private int port;

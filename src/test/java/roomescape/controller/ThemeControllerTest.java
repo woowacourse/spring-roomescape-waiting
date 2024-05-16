@@ -12,13 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.theme.dto.ThemeRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql("/truncate-with-guests.sql")
 class ThemeControllerTest {
     @LocalServerPort
     private int port;
@@ -93,7 +92,7 @@ class ThemeControllerTest {
 
     @DisplayName("인기 테마 조회 성공 테스트")
     @Test
-    @Sql(scripts = {"classpath:insert-past-reservation.sql"})
+    @Sql("/insert-past-reservation.sql")
     void findPopularThemes() {
         //when&then
         RestAssured.given().log().all()

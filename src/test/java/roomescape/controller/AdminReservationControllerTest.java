@@ -22,7 +22,7 @@ import roomescape.service.theme.dto.ThemeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql(scripts = {"classpath:truncate-with-admin-and-guest.sql"})
+@Sql("/truncate-with-admin-and-guest.sql")
 class AdminReservationControllerTest {
     @LocalServerPort
     private int port;
@@ -104,7 +104,7 @@ class AdminReservationControllerTest {
 
     @DisplayName("조건별 예약 내역 조회 테스트 - 사용자, 테마")
     @Test
-    @Sql(scripts = {"classpath:insert-past-reservation.sql"})
+    @Sql("/insert-past-reservation.sql")
     void findByMemberAndTheme() {
         //when & then
         RestAssured.given().log().all()
@@ -118,7 +118,7 @@ class AdminReservationControllerTest {
 
     @DisplayName("조건별 예약 내역 조회 테스트 - 시작 날짜")
     @Test
-    @Sql(scripts = {"classpath:insert-past-reservation.sql"})
+    @Sql("/insert-past-reservation.sql")
     void findByDateFrom() {
         //when & then
         RestAssured.given().log().all()
@@ -131,7 +131,7 @@ class AdminReservationControllerTest {
 
     @DisplayName("조건별 예약 내역 조회 테스트 - 테마")
     @Test
-    @Sql(scripts = {"classpath:insert-past-reservation.sql"})
+    @Sql("/insert-past-reservation.sql")
     void findByTheme() {
         //when & then
         RestAssured.given().log().all()

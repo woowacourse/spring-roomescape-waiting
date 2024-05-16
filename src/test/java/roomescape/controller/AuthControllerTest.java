@@ -14,7 +14,7 @@ import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.SignUpRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class AuthControllerTest {
     @LocalServerPort
     private int port;

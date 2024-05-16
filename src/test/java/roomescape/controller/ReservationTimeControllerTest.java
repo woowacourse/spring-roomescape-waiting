@@ -19,7 +19,7 @@ import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class ReservationTimeControllerTest {
     @LocalServerPort
     private int port;
@@ -92,7 +92,7 @@ class ReservationTimeControllerTest {
 
     @DisplayName("시간 삭제 실패 테스트 - 이미 예약이 존재하는 시간(timeId = 1) 삭제 시도 오류")
     @Test
-    @Sql(scripts = {"classpath:insert-time-with-reservation.sql"})
+    @Sql("/insert-time-with-reservation.sql")
     void cannotDeleteReservationTime() {
         //given
         int timeId = 1;
@@ -106,7 +106,7 @@ class ReservationTimeControllerTest {
 
     @DisplayName("예약 가능한 시간 조회 테스트 - 10:00: 예약 존재, (11:00,12:00): 예약 미존재.")
     @Test
-    @Sql(scripts = {"classpath:insert-time-with-reservation.sql"})
+    @Sql("/insert-time-with-reservation.sql")
     void findAvailableTime() {
         //given
         long themeId = 1;

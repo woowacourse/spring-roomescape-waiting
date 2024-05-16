@@ -14,7 +14,7 @@ import roomescape.domain.member.Role;
 import roomescape.service.member.dto.MemberResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = {"classpath:truncate.sql"})
+@Sql("/truncate.sql")
 class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;

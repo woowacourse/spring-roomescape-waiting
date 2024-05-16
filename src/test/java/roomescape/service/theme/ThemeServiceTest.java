@@ -30,7 +30,7 @@ import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(scripts = {"classpath:truncate-with-guests.sql"})
+@Sql("/truncate-with-guests.sql")
 class ThemeServiceTest {
 
     @Autowired

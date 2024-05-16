@@ -13,10 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.test.context.jdbc.SqlGroup;
 import roomescape.domain.schedule.ReservationDate;
 
 @DataJpaTest
-@Sql(value = {"/insert-reservations-for-filtering.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = "/insert-reservations-for-filtering.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -46,6 +47,10 @@ class ReservationRepositoryTest {
     @DisplayName("주어진 조건으로 필터링하여 검색한다.")
     @ParameterizedTest
     @MethodSource("findByConditionArguments")
+    @SqlGroup({
+            @Sql(value = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD),
+            @Sql("/insert-reservations-for-filtering.sql")
+    })
     void findByTest(Long memberId, Long themeId, ReservationDate dateFrom, ReservationDate dateTo,
                     List<Integer> expected) {
         //when
