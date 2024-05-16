@@ -99,4 +99,27 @@ class ReservationServiceTest {
 
     }
 
+    @Test
+    @DisplayName("예약을 삭제한다.")
+    void deleteReservation_ShouldDeleteReservation_WhenReservationExists() {
+        // given
+        Theme theme = new Theme("theme_name", "desc", "thumbnail");
+        Theme savedTheme = themeRepository.save(theme);
+
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        ReservationTime savedTime = reservationTimeRepository.save(time);
+
+        Member member = new Member("name", "email", "password");
+        Member savedMember = memberRepository.save(member);
+
+        Reservation reservation = new Reservation(LocalDate.of(2023, JANUARY, 1), savedTime, savedTheme,
+                savedMember);
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        Assertions.assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+    }
 }

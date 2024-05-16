@@ -134,4 +134,20 @@ class ReservationControllerTest {
                 .andExpect(content().string(containsString("테마 아이디는 1이상의 정수만 허용합니다.")));
     }
 
+    @Test
+    @DisplayName("예약을 삭제한다.")
+    void deleteReservation() throws Exception {
+        // given
+        Member member = new Member(1L, "name", "email", "password");
+        String token = jwtProvider.encode(member);
+        Mockito.doNothing().when(reservationService).deleteReservation(1L);
+
+        // when & then
+        mockMvc.perform(
+                        post("/reservations/1/delete")
+                                .cookie(new Cookie("token", token))
+                                .contentType(APPLICATION_JSON)
+                )
+                .andExpect(status().isOk());
+    }
 }

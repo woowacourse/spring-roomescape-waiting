@@ -31,7 +31,7 @@ public class ThemeController {
 
     @GetMapping("/ranking")
     public ResponseEntity<List<ThemeResponse>> findAllPopularTheme() {
-        List<ThemeResponse> response = themeService.findAllPopularTheme(new WeeklyRankingPolicy());
+        List<ThemeResponse> response = themeService.findAllPopularThemes(new WeeklyRankingPolicy());
         return ResponseEntity.ok().body(response);
     }
 
