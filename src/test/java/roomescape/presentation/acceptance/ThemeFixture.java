@@ -1,7 +1,7 @@
 package roomescape.presentation.acceptance;
 
-import roomescape.domain.Theme;
-import roomescape.domain.ThemeName;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
 
 class ThemeFixture {
     static Theme defaultValue() {

@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.dto.ReservationRequest;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationFactory;
+import roomescape.domain.reservation.ReservationQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

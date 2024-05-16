@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationQueryRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationQueryRepository;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
     @Autowired

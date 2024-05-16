@@ -9,10 +9,10 @@ import roomescape.application.dto.MyReservationResponse;
 import roomescape.application.dto.ReservationCriteria;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationCommandRepository;
-import roomescape.domain.ReservationFactory;
-import roomescape.domain.ReservationQueryRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationCommandRepository;
+import roomescape.domain.reservation.ReservationFactory;
+import roomescape.domain.reservation.ReservationQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

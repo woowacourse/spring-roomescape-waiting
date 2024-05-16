@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

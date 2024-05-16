@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import roomescape.application.dto.MemberResponse;
 import roomescape.application.dto.TokenRequest;
 import roomescape.application.dto.TokenResponse;
-import roomescape.domain.Email;
-import roomescape.domain.Member;
-import roomescape.domain.MemberQueryRepository;
+import roomescape.domain.member.Email;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ThemeRequest;
 import roomescape.application.dto.ThemeResponse;
-import roomescape.domain.ThemeRepository;
+import roomescape.domain.theme.ThemeRepository;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
     @Autowired

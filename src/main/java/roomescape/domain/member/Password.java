@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;

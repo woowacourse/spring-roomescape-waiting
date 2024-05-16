@@ -9,6 +9,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberCommandRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationCommandRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.theme.PopularThemeFinder;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 
 @ServiceTest
 class PopularThemeFinderTest {

@@ -3,8 +3,8 @@ package roomescape.application;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.application.dto.MemberResponse;
-import roomescape.domain.Member;
-import roomescape.domain.MemberQueryRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberQueryRepository;
 
 @Service
 public class MemberService {

@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

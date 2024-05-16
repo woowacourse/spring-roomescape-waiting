@@ -1,10 +1,10 @@
 package roomescape.presentation.acceptance;
 
-import roomescape.domain.Email;
-import roomescape.domain.Member;
-import roomescape.domain.Password;
-import roomescape.domain.PlayerName;
-import roomescape.domain.Role;
+import roomescape.domain.member.Email;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Password;
+import roomescape.domain.member.PlayerName;
+import roomescape.domain.member.Role;
 
 public class MemberFixture {
     public static Member defaultValue() {

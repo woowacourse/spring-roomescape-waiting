@@ -1,8 +1,10 @@
-package roomescape.domain;
+package roomescape.domain.theme;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import roomescape.domain.DomainService;
+import roomescape.domain.reservation.ReservationQueryRepository;
 
 @DomainService
 public class PopularThemeFinder {

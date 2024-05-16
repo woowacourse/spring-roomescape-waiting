@@ -1,7 +1,7 @@
 package roomescape.application.dto;
 
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 
 public record MemberResponse(long id, String name, String email, Role role) {
     public static MemberResponse from(Member member) {

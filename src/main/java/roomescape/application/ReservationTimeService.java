@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.AvailableTimeResponse;
 import roomescape.application.dto.ReservationTimeRequest;
 import roomescape.application.dto.ReservationTimeResponse;
-import roomescape.domain.ReservationQueryRepository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.reservation.ReservationQueryRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

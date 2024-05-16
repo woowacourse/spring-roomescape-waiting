@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.theme;
 
 import jakarta.persistence.Embeddable;
 import roomescape.exception.RoomescapeErrorCode;

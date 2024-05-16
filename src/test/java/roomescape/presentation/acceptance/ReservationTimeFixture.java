@@ -1,7 +1,7 @@
 package roomescape.presentation.acceptance;
 
 import java.time.LocalTime;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservation.ReservationTime;
 
 class ReservationTimeFixture {
     static ReservationTime defaultValue() {

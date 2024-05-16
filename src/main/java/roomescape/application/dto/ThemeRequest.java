@@ -1,8 +1,8 @@
 package roomescape.application.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import roomescape.domain.Theme;
-import roomescape.domain.ThemeName;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
 
 public record ThemeRequest(
         @NotBlank String name,
