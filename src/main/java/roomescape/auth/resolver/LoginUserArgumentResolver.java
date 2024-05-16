@@ -19,7 +19,8 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
     private final MemberService memberService;
     private final AuthService authService;
 
-    public LoginUserArgumentResolver(RequestHandler requestHandler, MemberService memberService, AuthService authService) {
+    public LoginUserArgumentResolver(RequestHandler requestHandler, MemberService memberService,
+                                     AuthService authService) {
         this.requestHandler = requestHandler;
         this.memberService = memberService;
         this.authService = authService;

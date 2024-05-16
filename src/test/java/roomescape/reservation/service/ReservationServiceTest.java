@@ -1,5 +1,17 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
+import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationTimeFixture.getNoon;
+import static roomescape.fixture.ThemeFixture.getTheme1;
+import static roomescape.fixture.ThemeFixture.getTheme2;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,19 +35,6 @@ import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.util.ServiceTest;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.MemberFixture.getMemberClover;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
-import static roomescape.fixture.ReservationTimeFixture.getNoon;
-import static roomescape.fixture.ThemeFixture.getTheme1;
-import static roomescape.fixture.ThemeFixture.getTheme2;
-
 @DisplayName("예약 로직 테스트")
 class ReservationServiceTest extends ServiceTest {
     @Autowired
@@ -53,6 +52,7 @@ class ReservationServiceTest extends ServiceTest {
     ReservationTime time;
     Theme theme1;
     Member memberChoco;
+
     @BeforeEach
     void setUp() {
         time = reservationTimeRepository.save(getNoon());
@@ -197,7 +197,8 @@ class ReservationServiceTest extends ServiceTest {
                 theme1.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(memberChoco), reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(memberChoco),
+                reservationRequest)).isInstanceOf(
                 BusinessException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
     }
 

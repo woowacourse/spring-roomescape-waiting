@@ -1,7 +1,12 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
@@ -12,7 +17,8 @@ public class Member {
     private Long id;
     @Embedded
     private Name name;
-    private String email;
+    @Embedded
+    private Email email;
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -23,7 +29,7 @@ public class Member {
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
         this.name = new Name(name);
-        this.email = email;
+        this.email = new Email(email);
         this.password = password;
         this.role = role;
     }
@@ -45,7 +51,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email;
+        return email.getEmail();
     }
 
     public String getPassword() {

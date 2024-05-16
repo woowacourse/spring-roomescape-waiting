@@ -1,9 +1,13 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.*;
-import roomescape.member.domain.Member;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import roomescape.member.domain.Member;
 
 @Entity
 public class MemberReservation {
@@ -47,8 +51,12 @@ public class MemberReservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MemberReservation)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof MemberReservation)) {
+            return false;
+        }
         MemberReservation that = (MemberReservation) o;
         return Objects.equals(id, that.id);
     }

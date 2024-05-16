@@ -1,12 +1,12 @@
 package roomescape.reservation.controller.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.ReservationStatus;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-public record MyReservationResponse(long reservationId, String themeName, LocalDate date, LocalTime time, String status) {
+public record MyReservationResponse(long reservationId, String themeName, LocalDate date, LocalTime time,
+                                    String status) {
     public static MyReservationResponse from(MemberReservation memberReservation) {
         return new MyReservationResponse(
                 memberReservation.getId(),

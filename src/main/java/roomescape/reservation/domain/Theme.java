@@ -4,10 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
-
-import java.util.Objects;
 
 @Entity
 public class Theme {

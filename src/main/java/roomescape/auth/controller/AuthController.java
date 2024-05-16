@@ -3,6 +3,7 @@ package roomescape.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +15,6 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.handler.ResponseHandler;
 import roomescape.auth.service.AuthService;
-
-import java.net.URI;
 
 @Controller
 public class AuthController {

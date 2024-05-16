@@ -1,10 +1,9 @@
 package roomescape.fixture;
 
+import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-
-import java.time.LocalDate;
 
 public class ReservationFixture {
     public static Reservation getNextDayReservation(ReservationTime time, Theme theme) {

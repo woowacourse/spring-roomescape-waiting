@@ -1,9 +1,8 @@
 package roomescape.auth.domain;
 
+import java.util.function.Supplier;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
-
-import java.util.function.Supplier;
 
 public class Payload<T> {
     private final T body;

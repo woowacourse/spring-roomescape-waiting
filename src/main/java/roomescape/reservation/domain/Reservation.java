@@ -1,12 +1,16 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.*;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorType;
 
 @Entity
 public class Reservation {

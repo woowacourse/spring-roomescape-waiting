@@ -1,9 +1,8 @@
 package roomescape.auth.domain;
 
+import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-
-import java.util.Objects;
 
 public class AuthInfo {
     private final Long id;

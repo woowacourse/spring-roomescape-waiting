@@ -1,8 +1,7 @@
 package roomescape.fixture;
 
-import roomescape.reservation.domain.ReservationTime;
-
 import java.time.LocalTime;
+import roomescape.reservation.domain.ReservationTime;
 
 public class ReservationTimeFixture {
     public static ReservationTime getNoon() {
