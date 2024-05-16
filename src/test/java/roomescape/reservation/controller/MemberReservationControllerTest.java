@@ -34,7 +34,7 @@ class MemberReservationControllerTest {
         // login
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("parang@gmail.com", "password"))
+                .body(new LoginRequest("bibob@gmail.com", "password"))
                 .when().post("/login")
                 .cookie("token");
     }

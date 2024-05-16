@@ -38,7 +38,7 @@ class MemberControllerTest {
     void signupFailedWhenEnterWrongEmail() {
         Map<String, String> request = new HashMap<>();
         request.put("name", "anna");
-        request.put("email", "parang");
+        request.put("email", "bibob");
         request.put("password", "password");
 
         RestAssured.given()
