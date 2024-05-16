@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.exception.RoomescapeException;
@@ -27,10 +28,12 @@ public class AvailableTimeService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
 
-        var alreadyUsedTimes = new HashSet<>(reservationTimeRepository.findUsedTimeByDateAndTheme(date, theme));
+        HashSet<ReservationTime> alreadyUsedTimes = new HashSet<>(
+                reservationTimeRepository.findUsedTimeByDateAndTheme(date, theme));
 
-        return reservationTimeRepository.findAll().stream()
-                .map(reservationTime -> toResponse(alreadyUsedTimes, reservationTime))
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(reservationTime -> toResponse(reservationTime, alreadyUsedTimes.contains(reservationTime)))
                 .toList();
     }
 }

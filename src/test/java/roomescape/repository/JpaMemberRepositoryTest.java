@@ -17,6 +17,7 @@ import roomescape.domain.Member;
 class JpaMemberRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
     @Autowired
     private MemberRepository memberRepository;
 

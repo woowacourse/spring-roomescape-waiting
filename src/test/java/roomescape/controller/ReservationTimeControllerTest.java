@@ -21,8 +21,10 @@ import roomescape.service.ReservationTimeService;
 class ReservationTimeControllerTest {
     @MockBean
     private ReservationTimeService reservationTimeService;
+
     @MockBean
     private AvailableTimeService availableTimeService;
+
     @Autowired
     private ReservationTimeController reservationTimeController;
 

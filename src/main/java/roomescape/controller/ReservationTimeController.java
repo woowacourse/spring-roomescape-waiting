@@ -25,8 +25,10 @@ public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
     private final AvailableTimeService availableTimeService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService,
-                                     AvailableTimeService availableTimeService) {
+    public ReservationTimeController(
+            ReservationTimeService reservationTimeService,
+            AvailableTimeService availableTimeService
+    ) {
         this.reservationTimeService = reservationTimeService;
         this.availableTimeService = availableTimeService;
     }

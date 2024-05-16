@@ -22,8 +22,7 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws IOException {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         try {
             String token = TokenExtractor.extractFrom(request.getCookies());
             long memberIdFromToken = tokenService.findMemberIdFromToken(token);

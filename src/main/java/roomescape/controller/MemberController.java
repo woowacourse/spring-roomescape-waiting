@@ -29,13 +29,16 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) {
         long memberId = memberService.login(loginRequest);
+
         LocalDateTime now = LocalDateTime.now();
         Duration tokenLifeTime = Duration.between(now, now.plusHours(1));
         String token = tokenService.createToken(memberId, now, tokenLifeTime);
+
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .maxAge(tokenLifeTime)
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();

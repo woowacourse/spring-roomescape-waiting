@@ -15,8 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
     private final AdminCheckInterceptor adminCheckInterceptor;
     private final LoginCheckInterceptor loginCheckInterceptor;
 
-    public WebConfig(AuthArgumentResolver authArgumentResolver, AdminCheckInterceptor adminCheckInterceptor,
-                     LoginCheckInterceptor loginCheckInterceptor) {
+    public WebConfig(
+            AuthArgumentResolver authArgumentResolver,
+            AdminCheckInterceptor adminCheckInterceptor,
+            LoginCheckInterceptor loginCheckInterceptor
+    ) {
         this.authArgumentResolver = authArgumentResolver;
         this.adminCheckInterceptor = adminCheckInterceptor;
         this.loginCheckInterceptor = loginCheckInterceptor;
@@ -26,6 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(adminCheckInterceptor)
                 .addPathPatterns("/admin/**");
+
         registry.addInterceptor(loginCheckInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login/**", "/", "/themes/ranking");

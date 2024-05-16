@@ -12,7 +12,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 
 public class CollectionThemeRepository implements ThemeRepository {
-
     private final List<Theme> themes;
     private final AtomicLong index;
     private final CollectionReservationRepository reservationRepository;
@@ -21,15 +20,14 @@ public class CollectionThemeRepository implements ThemeRepository {
         this(new ArrayList<>(), new AtomicLong(0), null);
     }
 
-    private CollectionThemeRepository(List<Theme> themes, AtomicLong index,
-                                      CollectionReservationRepository reservationRepository) {
+    private CollectionThemeRepository(
+            List<Theme> themes,
+            AtomicLong index,
+            CollectionReservationRepository reservationRepository
+    ) {
         this.themes = themes;
         this.index = index;
         this.reservationRepository = reservationRepository;
-    }
-
-    public CollectionThemeRepository(CollectionReservationRepository reservationRepository) {
-        this(new ArrayList<>(), new AtomicLong(0), reservationRepository);
     }
 
     @Override
@@ -42,11 +40,13 @@ public class CollectionThemeRepository implements ThemeRepository {
         if (reservationRepository == null) {
             throw new UnsupportedOperationException("ReservationRepository 를 사용해 생성하지 않아 메서드를 사용할 수 없습니다.");
         }
+
         Map<Long, Integer> collect = reservationRepository.findAll().stream()
                 .filter(reservation -> isAfterStart(start, reservation))
                 .filter(reservation -> isBeforeEnd(end, reservation))
                 .map(Reservation::getTheme)
                 .collect(Collectors.groupingBy(Theme::getId, Collectors.summingInt(value -> 1)));
+
         return collect.keySet()
                 .stream()
                 .sorted((o1, o2) -> Integer.compare(collect.get(o2), collect.get(o1)))

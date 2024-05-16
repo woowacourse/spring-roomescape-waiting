@@ -21,6 +21,7 @@ import roomescape.service.ReservationService;
 class ReservationControllerTest {
     @MockBean
     private ReservationService reservationService;
+
     @Autowired
     private ReservationController reservationController;
 
@@ -32,6 +33,7 @@ class ReservationControllerTest {
 
         ResponseEntity<ReservationResponse> response = reservationController.saveReservation(
                 DEFAULT_RESERVATION.getId(), DEFAULT_REQUEST);
+
         assertAll(
                 () -> Assertions.assertThat(response.getStatusCode())
                         .isEqualTo(HttpStatusCode.valueOf(201)),
@@ -44,6 +46,7 @@ class ReservationControllerTest {
     @DisplayName("예약 삭제 정상 동작 시 API 명세대로 응답이 생성되는지 확인")
     void delete() {
         ResponseEntity<Void> response = reservationController.delete(DEFAULT_RESERVATION.getId());
+
         Assertions.assertThat(response.getStatusCode())
                 .isEqualTo(HttpStatusCode.valueOf(204));
     }

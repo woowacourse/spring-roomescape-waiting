@@ -18,6 +18,7 @@ class MemberTest {
     void createWithEmptyName() {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
+
         Assertions.assertThatThrownBy(() -> new Member("", "example@example.com", encrypted))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(EMPTY_NAME.getMessage());
@@ -28,6 +29,7 @@ class MemberTest {
     void createWithNullName() {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
+
         Assertions.assertThatThrownBy(() -> new Member(null, "example@example.com", encrypted))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(EMPTY_NAME.getMessage());
@@ -39,6 +41,7 @@ class MemberTest {
     void createWithInvalidEmail(String email) {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
+
         Assertions.assertThatThrownBy(() -> new Member("name", email, encrypted))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(INVALID_EMAIL_FORMAT.getMessage());
@@ -49,6 +52,7 @@ class MemberTest {
     void createWithNullEmail() {
         String password = "1234";
         String encrypted = encryptor.encrypt(password);
+
         Assertions.assertThatThrownBy(() -> new Member("name", null, encrypted))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(INVALID_EMAIL_FORMAT.getMessage());

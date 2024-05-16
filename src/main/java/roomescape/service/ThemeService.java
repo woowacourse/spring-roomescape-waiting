@@ -31,22 +31,27 @@ public class ThemeService {
     public ThemeResponse save(ThemeRequest themeRequest) {
         boolean hasDuplicateTheme = themeRepository.findAll().stream()
                 .anyMatch(theme -> theme.isNameOf(themeRequest.name()));
+
         if (hasDuplicateTheme) {
             throw new RoomescapeException(DUPLICATE_THEME);
         }
+
         Theme saved = themeRepository.save(
                 new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail()));
+
         return toResponse(saved);
     }
 
     public List<ThemeResponse> findAll() {
-        return themeRepository.findAll().stream()
+        return themeRepository.findAll()
+                .stream()
                 .map(ThemeResponseMapper::toResponse)
                 .toList();
     }
 
     public List<ThemeResponse> findAndOrderByPopularity(LocalDate start, LocalDate end, int count) {
-        return themeRepository.findAndOrderByPopularity(start, end, count).stream()
+        return themeRepository.findAndOrderByPopularity(start, end, count)
+                .stream()
                 .map(ThemeResponseMapper::toResponse)
                 .toList();
     }
@@ -57,7 +62,8 @@ public class ThemeService {
     }
 
     private void validateUsedTheme(long id) {
-        themeRepository.findById(id).ifPresent(this::validateUsedTheme);
+        themeRepository.findById(id)
+                .ifPresent(this::validateUsedTheme);
     }
 
     private void validateUsedTheme(Theme theme) {

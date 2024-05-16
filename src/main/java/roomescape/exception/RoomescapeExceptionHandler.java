@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 import static roomescape.exception.ExceptionType.INVALID_DATE_TIME_FORMAT;
+import static roomescape.exception.ExceptionType.UNEXPECTED_ERROR;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -25,11 +26,6 @@ public class RoomescapeExceptionHandler {
                 .body(new ErrorResponse(INVALID_DATE_TIME_FORMAT.getMessage()));
     }
 
-    private String getStackTrace(Exception e) {
-        e.printStackTrace(printWriter);
-        return stringWriter.toString();
-    }
-
     @ExceptionHandler(RoomescapeException.class)
     public ResponseEntity<ErrorResponse> handle(RoomescapeException e) {
         logger.error(getStackTrace(e));
@@ -42,7 +38,12 @@ public class RoomescapeExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(Exception e) {
         logger.error(getStackTrace(e));
         return ResponseEntity
-                .status(500)
-                .body(new ErrorResponse("서버에 오류가 발생했습니다."));
+                .status(UNEXPECTED_ERROR.getStatus())
+                .body(new ErrorResponse(UNEXPECTED_ERROR.getMessage()));
+    }
+
+    private String getStackTrace(Exception e) {
+        e.printStackTrace(printWriter);
+        return stringWriter.toString();
     }
 }

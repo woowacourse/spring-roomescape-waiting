@@ -37,16 +37,19 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(@RequestBody ReservationRequest reservationRequest) {
         ReservationResponse saved = reservationService.save(reservationRequest);
+
         return ResponseEntity.created(URI.create("/reservations/" + saved.id()))
                 .body(saved);
     }
 
     @GetMapping("/reservations")
     @ResponseBody
-    public List<ReservationResponse> search(@RequestParam long memberId,
-                                            @RequestParam long themeId,
-                                            @RequestParam LocalDate start,
-                                            @RequestParam LocalDate end) {
+    public List<ReservationResponse> search(
+            @RequestParam long memberId,
+            @RequestParam long themeId,
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end
+    ) {
         return reservationService.findByMemberAndThemeBetweenDates(memberId, themeId, start, end);
     }
 

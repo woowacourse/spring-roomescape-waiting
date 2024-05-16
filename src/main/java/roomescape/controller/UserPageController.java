@@ -5,11 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class UserPageController {
-    @GetMapping("/reservation")
-    public String reservationPage() {
-        return "reservation";
-    }
-
     @GetMapping("/")
     public String bestThemePage() {
         return "index";
@@ -18,6 +13,11 @@ public class UserPageController {
     @GetMapping("/login")
     public String loginPage() {
         return "login";
+    }
+
+    @GetMapping("/reservation")
+    public String reservationPage() {
+        return "reservation";
     }
 
     @GetMapping("/reservation-mine")

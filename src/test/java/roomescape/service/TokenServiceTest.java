@@ -16,8 +16,8 @@ class TokenServiceTest {
 
         String token = tokenService.createToken(1L, dateTime, Duration.between(dateTime, dateTime.plusHours(1)));
         String expected = "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NjcxOTY3OTksIm1lbWJlcl9pZCI6MX0.sIqOH_FW8ugFJ0TYD1Cjpq-sBEs_BafloUY1g13wAL4";
-        Assertions.assertThat(token)
-                .isEqualTo(expected);
+
+        Assertions.assertThat(token).isEqualTo(expected);
     }
 
     @Test
@@ -26,7 +26,7 @@ class TokenServiceTest {
         TokenService tokenService = new TokenService();
         long memberId = tokenService.findMemberIdFromToken(
                 "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NjcxOTY3OTksIm1lbWJlcl9pZCI6MX0.sIqOH_FW8ugFJ0TYD1Cjpq-sBEs_BafloUY1g13wAL4");
-        Assertions.assertThat(memberId)
-                .isEqualTo(1);
+
+        Assertions.assertThat(memberId).isEqualTo(1);
     }
 }

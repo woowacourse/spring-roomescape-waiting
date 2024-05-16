@@ -15,6 +15,7 @@ public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalTime startAt;
 
     protected ReservationTime() {
@@ -64,7 +65,7 @@ public class ReservationTime {
 
         return Objects.equals(id, that.id);
     }
-
+    // TODO: 제거
     @Override
     public String toString() {
         return "ReservationTime{" +

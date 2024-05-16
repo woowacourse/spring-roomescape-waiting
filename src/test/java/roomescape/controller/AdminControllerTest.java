@@ -20,6 +20,7 @@ import roomescape.service.ReservationService;
 class AdminControllerTest {
     @MockBean
     private ReservationService reservationService;
+
     @Autowired
     private AdminController adminController;
 
@@ -32,8 +33,10 @@ class AdminControllerTest {
 
         Mockito.when(reservationService.save(reservationRequest))
                 .thenReturn(expected);
+
         //when
         ResponseEntity<ReservationResponse> response = adminController.saveReservation(reservationRequest);
+
         //then
         assertAll(
                 () -> Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(201)),

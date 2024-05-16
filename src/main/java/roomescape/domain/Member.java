@@ -18,11 +18,15 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password encryptedPassword;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -31,6 +35,10 @@ public class Member {
 
     public Member(String name, String email, String encryptedPassword) {
         this(null, name, email, encryptedPassword, MEMBER);
+    }
+
+    public Member(Long id, String name, String email, String encryptedPassword) {
+        this(id, name, email, encryptedPassword, MEMBER);
     }
 
     public Member(Long id, String name, String email, String encryptedPassword, Role role) {
@@ -46,10 +54,6 @@ public class Member {
         if (name == null || name.isBlank()) {
             throw new RoomescapeException(EMPTY_NAME);
         }
-    }
-
-    public Member(Long id, String name, String email, String encryptedPassword) {
-        this(id, name, email, encryptedPassword, MEMBER);
     }
 
     public Long getId() {
@@ -79,6 +83,7 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
+        
         if (this == o) {
             return true;
         }
@@ -90,7 +95,7 @@ public class Member {
 
         return Objects.equals(id, member.id);
     }
-
+    // TODO: 제거
     @Override
     public String toString() {
         return "Member{" +

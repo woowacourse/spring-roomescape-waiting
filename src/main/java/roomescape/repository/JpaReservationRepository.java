@@ -27,8 +27,12 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberAndThemeBetweenDates(long memberId, long themeId, LocalDate start,
-                                                              LocalDate end) {
+    public List<Reservation> findByMemberAndThemeBetweenDates(
+            long memberId,
+            long themeId,
+            LocalDate start,
+            LocalDate end
+    ) {
         return jpaReservationDao.findByReservationMember_IdAndTheme_IdAndDateBetween(memberId, themeId, start, end);
     }
 

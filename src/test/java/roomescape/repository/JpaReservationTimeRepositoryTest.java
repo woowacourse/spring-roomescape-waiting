@@ -22,10 +22,13 @@ import roomescape.domain.Theme;
 class JpaReservationTimeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -42,9 +45,9 @@ class JpaReservationTimeRepositoryTest {
     @Test
     @DisplayName("ReservationTime 을 잘 저장하는지 확인한다.")
     void save() {
-        var beforeSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
+        List<Long> beforeSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
         ReservationTime saved = reservationTimeRepository.save(DEFAULT_TIME);
-        var afterSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
+        List<Long> afterSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
 
         Assertions.assertThat(afterSave)
                 .containsAll(beforeSave)

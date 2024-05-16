@@ -35,9 +35,12 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -45,20 +48,18 @@ public class ReservationService {
     }
 
     public ReservationResponse save(ReservationRequest reservationRequest) {
-        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
+        ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
+
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
+
         Member member = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation beforeSave = new Reservation(
-                member,
-                reservationRequest.date(),
-                requestedTime,
-                requestedTheme
-        );
 
-        validateDuplicateReservation(requestedTime, requestedTheme, beforeSave.getDate());
+        Reservation beforeSave = new Reservation(member, reservationRequest.date(), time, theme);
+
+        validateDuplicateReservation(time, theme, beforeSave.getDate());
         validatePastTimeReservation(beforeSave);
 
         Reservation saved = reservationRepository.save(beforeSave);
@@ -84,8 +85,12 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findByMemberAndThemeBetweenDates(long memberId, long themeId, LocalDate start,
-                                                                      LocalDate end) {
+    public List<ReservationResponse> findByMemberAndThemeBetweenDates(
+            long memberId,
+            long themeId,
+            LocalDate start,
+            LocalDate end
+    ) {
         return reservationRepository.findByMemberAndThemeBetweenDates(memberId, themeId, start, end)
                 .stream()
                 .map(ReservationResponseMapper::toResponse)

@@ -16,7 +16,6 @@ import roomescape.repository.CollectionReservationRepository;
 import roomescape.repository.CollectionReservationTimeRepository;
 
 class ReservationTimeServiceTest {
-
     private CollectionReservationRepository reservationRepository;
     private ReservationTimeService reservationTimeService;
 

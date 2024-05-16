@@ -24,8 +24,12 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
+    ) {
         HttpServletRequest nativeRequest = (HttpServletRequest) webRequest.getNativeRequest();
         String token = TokenExtractor.extractFrom(nativeRequest.getCookies());
         return tokenService.findMemberIdFromToken(token);

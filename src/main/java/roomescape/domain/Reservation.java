@@ -1,10 +1,5 @@
 package roomescape.domain;
 
-import static roomescape.exception.ExceptionType.EMPTY_DATE;
-import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
-import static roomescape.exception.ExceptionType.EMPTY_THEME;
-import static roomescape.exception.ExceptionType.EMPTY_TIME;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.exception.ExceptionType;
 import roomescape.exception.RoomescapeException;
 
 @Entity
@@ -21,11 +17,15 @@ public class Reservation implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Member reservationMember;
+
     private LocalDate date;
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
 
@@ -50,31 +50,30 @@ public class Reservation implements Comparable<Reservation> {
 
     private void validateMember(Member reservationMember) {
         if (reservationMember == null) {
-            throw new RoomescapeException(EMPTY_MEMBER);
+            throw new RoomescapeException(ExceptionType.EMPTY_MEMBER);
         }
     }
 
     private void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new RoomescapeException(EMPTY_THEME);
+            throw new RoomescapeException(ExceptionType.EMPTY_THEME);
         }
     }
 
     private void validateTime(ReservationTime time) {
         if (time == null) {
-            throw new RoomescapeException(EMPTY_TIME);
+            throw new RoomescapeException(ExceptionType.EMPTY_TIME);
         }
     }
 
     private void validateDate(LocalDate date) {
         if (date == null) {
-            throw new RoomescapeException(EMPTY_DATE);
+            throw new RoomescapeException(ExceptionType.EMPTY_DATE);
         }
     }
 
     public Reservation(long id, Reservation reservationBeforeSave) {
-        this(id, reservationBeforeSave.reservationMember, reservationBeforeSave.date, reservationBeforeSave.time,
-                reservationBeforeSave.theme);
+        this(id, reservationBeforeSave.reservationMember, reservationBeforeSave.date, reservationBeforeSave.time, reservationBeforeSave.theme);
     }
 
     @Override
@@ -138,7 +137,7 @@ public class Reservation implements Comparable<Reservation> {
 
         return Objects.equals(id, that.id);
     }
-
+    // TODO: 제거
     @Override
     public String toString() {
         return "Reservation{" +

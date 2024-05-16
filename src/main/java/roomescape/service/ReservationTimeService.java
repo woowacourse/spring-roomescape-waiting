@@ -21,8 +21,10 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(ReservationRepository reservationRepository,
-                                  ReservationTimeRepository reservationTimeRepository) {
+    public ReservationTimeService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
@@ -37,7 +39,8 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepository.findAll().stream()
+        return reservationTimeRepository.findAll()
+                .stream()
                 .map(ReservationTimeResponseMapper::toResponse)
                 .toList();
     }

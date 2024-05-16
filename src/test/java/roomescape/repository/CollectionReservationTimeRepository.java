@@ -15,7 +15,6 @@ public class CollectionReservationTimeRepository implements ReservationTimeRepos
     private final AtomicLong atomicLong;
     private final ReservationRepository reservationRepository;
 
-
     public CollectionReservationTimeRepository() {
         this(new ArrayList<>());
     }
@@ -28,8 +27,11 @@ public class CollectionReservationTimeRepository implements ReservationTimeRepos
         this(reservationTimes, atomicLong, null);
     }
 
-    public CollectionReservationTimeRepository(List<ReservationTime> reservationTimes, AtomicLong atomicLong,
-                                               ReservationRepository reservationRepository) {
+    public CollectionReservationTimeRepository(
+            List<ReservationTime> reservationTimes,
+            AtomicLong atomicLong,
+            ReservationRepository reservationRepository
+    ) {
         this.reservationTimes = reservationTimes;
         this.atomicLong = atomicLong;
         this.reservationRepository = reservationRepository;

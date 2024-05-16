@@ -24,10 +24,13 @@ import roomescape.domain.Theme;
 class JpaReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -47,9 +50,9 @@ class JpaReservationRepositoryTest {
     @Test
     @DisplayName("Reservation 을 잘 저장하는지 확인한다.")
     void save() {
-        var beforeSave = reservationRepository.findAll();
+        List<Reservation> beforeSave = reservationRepository.findAll();
         Reservation saved = reservationRepository.save(DEFAULT_RESERVATION);
-        var afterSave = reservationRepository.findAll();
+        List<Reservation> afterSave = reservationRepository.findAll();
 
         Assertions.assertThat(afterSave)
                 .containsAll(beforeSave)
@@ -61,8 +64,8 @@ class JpaReservationRepositoryTest {
     void findAll() {
         List<Reservation> beforeSave = reservationRepository.findAll();
         reservationRepository.save(DEFAULT_RESERVATION);
-
         List<Reservation> afterSave = reservationRepository.findAll();
+
         Assertions.assertThat(afterSave.size())
                 .isEqualTo(beforeSave.size() + 1);
     }
@@ -141,8 +144,7 @@ class JpaReservationRepositoryTest {
         LocalDate startDate = DEFAULT_RESERVATION.getDate();
         LocalDate endDate = startDate.plusDays(1);
         LocalDate notOnPeriodDate = startDate.plusDays(2);
-        Reservation notOnPeriodreservation = new Reservation(DEFAULT_MEMBER, notOnPeriodDate,
-                DEFAULT_TIME, DEFAULT_THEME);
+        Reservation notOnPeriodreservation = new Reservation(DEFAULT_MEMBER, notOnPeriodDate, DEFAULT_TIME, DEFAULT_THEME);
 
         reservationRepository.save(DEFAULT_RESERVATION);
         reservationRepository.save(notOnPeriodreservation);

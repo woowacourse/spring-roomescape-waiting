@@ -11,8 +11,10 @@ public class ReservationResponseMapper {
     public static ReservationResponse toResponse(Reservation reservation) {
         ReservationTime reservationTime = reservation.getReservationTime();
         ReservationTimeResponse reservationTimeResponse = ReservationTimeResponseMapper.toResponse(reservationTime);
+
         Theme theme = reservation.getTheme();
         ThemeResponse themeResponse = ThemeResponseMapper.toResponse(theme);
+
         return new ReservationResponse(reservation.getId(),
                 reservation.getName(), reservation.getDate(), reservationTimeResponse, themeResponse);
     }

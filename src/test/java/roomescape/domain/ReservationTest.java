@@ -60,6 +60,7 @@ class ReservationTest {
                 LocalTime.of(16, 30)), DEFAULT_THEME);
 
         int compareTo = first.compareTo(second);
+
         Assertions.assertThat(compareTo)
                 .isGreaterThan(0);
     }

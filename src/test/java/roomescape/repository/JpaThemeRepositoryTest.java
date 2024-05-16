@@ -23,10 +23,13 @@ import roomescape.fixture.ThemeFixture;
 class JpaThemeRepositoryTest {
     @Autowired
     private JpaThemeRepository themeRepository;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -73,6 +76,7 @@ class JpaThemeRepositoryTest {
         reservationRepository.save(new Reservation(member, date, reservationTime1, theme3));
 
         List<Theme> result = themeRepository.findAndOrderByPopularity(date, date.plusDays(1), 10);
+
         Assertions.assertThat(result)
                 .containsExactly(theme2, theme1, theme3);
     }

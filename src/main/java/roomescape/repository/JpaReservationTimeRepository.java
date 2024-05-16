@@ -16,8 +16,7 @@ public class JpaReservationTimeRepository implements ReservationTimeRepository {
     private final JpaReservationTimeDao jpaReservationTimeDao;
     private final JpaReservationDao jpaReservationDao;
 
-    public JpaReservationTimeRepository(JpaReservationTimeDao jpaReservationTimeDao,
-                                        JpaReservationDao jpaReservationDao) {
+    public JpaReservationTimeRepository(JpaReservationTimeDao jpaReservationTimeDao, JpaReservationDao jpaReservationDao) {
         this.jpaReservationTimeDao = jpaReservationTimeDao;
         this.jpaReservationDao = jpaReservationDao;
     }

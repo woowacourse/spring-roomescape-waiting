@@ -12,7 +12,6 @@ public class CollectionReservationRepository implements ReservationRepository {
     private final List<Reservation> reservations;
     private final AtomicLong atomicLong;
 
-
     public CollectionReservationRepository() {
         this.reservations = new ArrayList<>();
         this.atomicLong = new AtomicLong(0);
@@ -33,8 +32,7 @@ public class CollectionReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberAndThemeBetweenDates(long memberId, long themeId, LocalDate start,
-                                                              LocalDate end) {
+    public List<Reservation> findByMemberAndThemeBetweenDates(long memberId, long themeId, LocalDate start, LocalDate end) {
         return reservations.stream()
                 .filter(reservation -> reservation.getReservationMember().getId() == memberId)
                 .filter(reservation -> reservation.getTheme().getId() == themeId)

@@ -24,8 +24,10 @@ import roomescape.service.TokenService;
 class MemberControllerTest {
     @MockBean
     private MemberService memberService;
+
     @MockBean
     private TokenService tokenService;
+
     @Autowired
     private MemberController memberController;
 
@@ -41,8 +43,10 @@ class MemberControllerTest {
         Mockito.when(tokenService.createToken(Mockito.eq(memberId), Mockito.any(LocalDateTime.class),
                         Mockito.any(Duration.class)))
                 .thenReturn(token);
+
         //when
         ResponseEntity<Void> response = memberController.login(MemberFixture.DEFAULT_MEMBER_LOGIN_REQUEST);
+
         //then
         assertAll(
                 () -> Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200)),

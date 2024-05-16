@@ -13,7 +13,7 @@ class AvailableTimeResponseMapperTest {
     @Test
     @DisplayName("도메인을 응답으로 잘 변환하는지 확인")
     void toResponse() {
-        AvailableTimeResponse response = AvailableTimeResponseMapper.toResponse(Set.of(DEFAULT_TIME), DEFAULT_TIME);
+        AvailableTimeResponse response = AvailableTimeResponseMapper.toResponse(DEFAULT_TIME, true);
 
         Assertions.assertThat(response)
                 .isEqualTo(new AvailableTimeResponse(DEFAULT_TIME.getId(), DEFAULT_TIME.getStartAt(), true));
