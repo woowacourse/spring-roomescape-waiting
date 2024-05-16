@@ -47,11 +47,10 @@ public class ReservationService {
     public ReservationResponse create(ReservationRequest request) {
         Member member = memberRepository.getById(request.memberId());
         Theme theme = themeRepository.getById(request.themeId());
-        ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
-        Reservation reservation = request.toReservation(member, reservationTime, theme, LocalDateTime.now(clock));
+        ReservationTime time = reservationTimeRepository.getById(request.timeId());
+        Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservationTime.getId(),
-                theme.getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), time.getId(), theme.getId())) {
             throw new IllegalArgumentException("이미 존재하는 예약입니다.");
         }
         return ReservationResponse.from(reservationRepository.save(reservation));
