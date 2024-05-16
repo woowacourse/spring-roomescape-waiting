@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
@@ -92,22 +91,5 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
