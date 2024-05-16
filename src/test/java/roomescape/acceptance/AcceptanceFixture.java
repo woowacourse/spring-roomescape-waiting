@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import roomescape.application.auth.TokenManager;
+import roomescape.application.auth.dto.TokenPayload;
 import roomescape.application.member.dto.request.MemberLoginRequest;
 import roomescape.application.member.dto.request.MemberRegisterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
@@ -17,7 +18,6 @@ import roomescape.application.reservation.dto.request.ThemeRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationTimeResponse;
 import roomescape.application.reservation.dto.response.ThemeResponse;
-import roomescape.domain.role.MemberRole;
 import roomescape.domain.role.Role;
 
 @TestComponent
@@ -30,8 +30,8 @@ public class AcceptanceFixture {
 
     @PostConstruct
     void createAdminToken() {
-        MemberRole adminRole = new MemberRole(0L, "admin", Role.ADMIN);
-        adminToken = tokenManager.createToken(adminRole);
+        TokenPayload payload = new TokenPayload(1L, "admin", Role.ADMIN);
+        adminToken = tokenManager.createToken(payload);
     }
 
     public ExtractableResponse<Response> registerMember(MemberRegisterRequest request) {

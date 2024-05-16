@@ -8,7 +8,7 @@ import java.time.Clock;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.domain.role.MemberRole;
+import roomescape.application.auth.dto.TokenPayload;
 import roomescape.domain.role.Role;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
@@ -31,34 +31,34 @@ public class JwtTokenManager implements TokenManager {
     }
 
     @Override
-    public String createToken(MemberRole memberRole) {
+    public String createToken(TokenPayload payload) {
         Date now = Date.from(clock.instant());
         Date expiresAt = new Date(now.getTime() + tokenExpirationMills);
         return JWT.create()
-                .withSubject(String.valueOf(memberRole.getMemberId()))
-                .withClaim(CLAIM_NAME, memberRole.getMemberName())
-                .withClaim(CLAIM_ROLE, memberRole.getRoleName())
+                .withSubject(String.valueOf(payload.memberId()))
+                .withClaim(CLAIM_NAME, payload.name())
+                .withClaim(CLAIM_ROLE, payload.roleName())
                 .withExpiresAt(expiresAt)
                 .sign(secretAlgorithm);
     }
 
     @Override
-    public MemberRole extract(String token) {
+    public TokenPayload extract(String token) {
         try {
             DecodedJWT decodedJWT = JWT.decode(token);
-            return getMemberRoleFrom(decodedJWT);
+            return getTokenPayload(decodedJWT);
         } catch (JWTDecodeException e) {
             throw new InvalidTokenException(e);
         }
     }
 
-    private MemberRole getMemberRoleFrom(DecodedJWT decodedJWT) {
+    private TokenPayload getTokenPayload(DecodedJWT decodedJWT) {
         validateNotExpired(decodedJWT);
         try {
             long memberId = Long.parseLong(decodedJWT.getSubject());
             String name = decodedJWT.getClaim("name").asString();
             String roleName = decodedJWT.getClaim("role").asString();
-            return new MemberRole(memberId, name, Role.from(roleName));
+            return new TokenPayload(memberId, name, Role.from(roleName));
         } catch (IllegalArgumentException e) {
             throw new InvalidTokenException(e);
         }

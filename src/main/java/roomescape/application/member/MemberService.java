@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.auth.TokenManager;
+import roomescape.application.auth.dto.TokenPayload;
 import roomescape.application.member.dto.request.MemberLoginRequest;
 import roomescape.application.member.dto.request.MemberRegisterRequest;
 import roomescape.application.member.dto.response.MemberResponse;
@@ -43,8 +44,8 @@ public class MemberService {
         if (!member.matchPassword(request.password())) {
             throw new IllegalArgumentException("이메일 / 비밀번호를 확인해 주세요.");
         }
-        MemberRole memberRole = roleRepository.getByMemberId(member.getId());
-        String token = tokenManager.createToken(memberRole);
+        MemberRole memberRole = roleRepository.getById(member.getId());
+        String token = tokenManager.createToken(TokenPayload.from(memberRole));
         return new TokenResponse(token);
     }
 

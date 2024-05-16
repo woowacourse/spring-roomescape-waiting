@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import roomescape.application.ServiceTest;
-import roomescape.domain.role.MemberRole;
+import roomescape.application.auth.dto.TokenPayload;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
 
@@ -50,8 +50,8 @@ class JwtTokenManagerTest {
                 .withClaim("role", "member")
                 .withExpiresAt(Date.from(clock.instant().plusMillis(millis)))
                 .sign(Algorithm.HMAC512(TEST_TOKEN_SECRET));
-        MemberRole memberToken = tokenManager.extract(token);
-        assertThat(memberToken.getMemberId()).isEqualTo(1);
+        TokenPayload payload = tokenManager.extract(token);
+        assertThat(payload.memberId()).isEqualTo(1);
     }
 
     @Test

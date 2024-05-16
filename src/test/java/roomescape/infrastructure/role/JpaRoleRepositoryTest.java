@@ -30,9 +30,9 @@ class JpaRoleRepositoryTest {
     @DisplayName("멤버 id로 어드민 여부를 조회한다.")
     void isAdminByMemberIdTest() {
         Member member = new Member("name", "email@test.com", "12341234");
-        long memberId = memberRepository.save(member).getId();
-        entityManager.persist(new MemberRole(memberId, "name", Role.ADMIN));
-        boolean isAdmin = roleRepository.isAdminByMemberId(memberId);
+        Member savedMember = memberRepository.save(member);
+        entityManager.persist(new MemberRole(savedMember, Role.ADMIN));
+        boolean isAdmin = roleRepository.isAdminByMemberId(savedMember.getId());
         assertThat(isAdmin).isTrue();
     }
 }

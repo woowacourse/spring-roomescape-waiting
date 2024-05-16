@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.ServiceTest;
 import roomescape.application.auth.TokenManager;
 import roomescape.application.member.dto.request.MemberLoginRequest;
@@ -70,6 +71,7 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("로그인에 성공하는 경우, 토큰이 생성된다.")
+    @Transactional
     void successLoginTest() {
         String mail = "email@mail.com";
         Member member = memberRepository.save(new Member("name", mail, "12341234"));
@@ -77,7 +79,7 @@ class MemberServiceTest {
         roleRepository.save(new MemberRole(member, Role.MEMBER));
 
         TokenResponse response = memberService.login(request);
-        long id = tokenManager.extract(response.token()).getMemberId();
+        long id = tokenManager.extract(response.token()).memberId();
         assertThat(id).isEqualTo(member.getId());
     }
 }
