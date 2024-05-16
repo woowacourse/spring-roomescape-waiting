@@ -53,12 +53,12 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/search")
-    public List<ReservationResponse> searchReservation(@RequestParam Long themeId,
-                                                       @RequestParam Long memberId,
+    public List<ReservationResponse> searchReservation(@RequestParam(required = false) Long themeId,
+                                                       @RequestParam(required = false) Long memberId,
                                                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
-                                                           LocalDate dateFrom,
+                                                       LocalDate dateFrom,
                                                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
-                                                           LocalDate dateTo) {
+                                                       LocalDate dateTo) {
         return reservationService.searchReservation(themeId, memberId, dateFrom, dateTo);
     }
 

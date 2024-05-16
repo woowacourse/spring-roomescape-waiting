@@ -3,7 +3,6 @@ package roomescape.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
-import static roomescape.exception.ExceptionType.NO_QUERY_PARAMETER;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
 import io.restassured.RestAssured;
@@ -108,7 +107,7 @@ public class ReservationControllerTest {
                             defaultMember));
 
             reservation6 = reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultTime, defaultTheme1, defaultMember));
+                    new Reservation(LocalDate.now(), defaultTime, defaultTheme2, defaultMember));
             reservation7 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme2,
                             defaultMember));
@@ -137,7 +136,7 @@ public class ReservationControllerTest {
         @Test
         void getMembersReservationTest() {
             RestAssured.given().log().all()
-                    .cookie("token",token)
+                    .cookie("token", token)
                     .when().get("/member/reservations")
                     .then().log().all()
                     .statusCode(200)
@@ -243,8 +242,7 @@ public class ReservationControllerTest {
             assertThat(reservationResponses).containsExactlyInAnyOrder(
                     ReservationResponse.from(reservation3),
                     ReservationResponse.from(reservation4),
-                    ReservationResponse.from(reservation5),
-                    ReservationResponse.from(reservation6)
+                    ReservationResponse.from(reservation5)
             );
         }
 
@@ -253,7 +251,7 @@ public class ReservationControllerTest {
         void searchWithoutDateTest() {
             ReservationResponse[] reservationResponses = RestAssured.given()
                     .param("memberId", 1)
-                    .param("themeId", 1).log().all()
+                    .param("themeId", 2).log().all()
                     .get("/reservations/search")
                     .then().log().all()
                     .statusCode(200)
@@ -265,37 +263,13 @@ public class ReservationControllerTest {
             );
         }
 
-        @DisplayName("예약자 아이디를 사용하지 않으면 예외가 발생한다.")
+        @DisplayName("예약자 아이디를 사용하지 않으면 모든 예약자에 대해 조회한다.")
         @Test
         void searchWithoutMemberTest() {
-            RestAssured.given()
-                    .param("themeId", 1).log().all()
-                    .get("/reservations/search")
-                    .then().log().all()
-                    .statusCode(400)
-                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
-        }
-
-        @DisplayName("테마 아이디를 사용하지 않으면 예외가 발생한다.")
-        @Test
-        void searchWithoutThemeTest() {
-            RestAssured.given()
-                    .param("memberId", 1).log().all()
-                    .get("/reservations/search")
-                    .then().log().all()
-                    .statusCode(400)
-                    .body("message", is(NO_QUERY_PARAMETER.getMessage()));
-        }
-
-        @DisplayName("날짜와 테마를 이용해서 검색할 수 있다.")
-        @Test
-        void searchWithDateAndThemeTest() {
             ReservationResponse[] reservationResponses = RestAssured.given().log().all()
-                    .queryParams(Map.of(
-                            "memberId", 1,
-                            "themeId", 1,
-                            "dateFrom", reservation3.getDate().toString(),
-                            "dateTo", reservation7.getDate().toString()
+                    .params(Map.of("themeId", 1,
+                            "dateFrom", reservation1.getDate().toString(),
+                            "dateTo", reservation10.getDate().toString()
                     ))
                     .get("/reservations/search")
                     .then().log().all()
@@ -304,9 +278,54 @@ public class ReservationControllerTest {
                     .body().as(ReservationResponse[].class);
 
             assertThat(reservationResponses).containsExactlyInAnyOrder(
+                    ReservationResponse.from(reservation1),
+                    ReservationResponse.from(reservation2),
+                    ReservationResponse.from(reservation3),
+                    ReservationResponse.from(reservation4),
+                    ReservationResponse.from(reservation5)
+            );
+        }
+
+        @DisplayName("테마 아이디를 사용하지 않으면 모든 테마에 대해 조회한다.")
+        @Test
+        void searchWithoutThemeTest() {
+            ReservationResponse[] reservationResponses = RestAssured.given().log().all()
+                    .params(Map.of(
+                            "memberId", 1,
+                            "dateFrom", reservation1.getDate().toString(),
+                            "dateTo", reservation10.getDate().toString()
+                    ))
+                    .get("/reservations/search")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .body().as(ReservationResponse[].class);
+
+            assertThat(reservationResponses).containsExactlyInAnyOrder(
+                    ReservationResponse.from(reservation1),
+                    ReservationResponse.from(reservation2),
                     ReservationResponse.from(reservation3),
                     ReservationResponse.from(reservation4),
                     ReservationResponse.from(reservation5),
+                    ReservationResponse.from(reservation6),
+                    ReservationResponse.from(reservation7),
+                    ReservationResponse.from(reservation8),
+                    ReservationResponse.from(reservation9),
+                    ReservationResponse.from(reservation10)
+            );
+        }
+
+        @DisplayName("아무 값도 입력하지 않으면 오늘의 날짜로 모든 멤버, 테마에 대해 조회한다.")
+        @Test
+        void searchWithDateAndThemeTest() {
+            ReservationResponse[] reservationResponses = RestAssured.given().log().all()
+                    .get("/reservations/search")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .body().as(ReservationResponse[].class);
+
+            assertThat(reservationResponses).containsExactlyInAnyOrder(
                     ReservationResponse.from(reservation6)
             );
         }
