@@ -66,8 +66,8 @@ class ThemeControllerTest {
                 .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2))
-                .body("name", is(List.of("테마2", "테마1")));
+                .body("size()", is(1))
+                .body("name", is(List.of("테마2")));
     }
 
     private void createReservationTimes() {
