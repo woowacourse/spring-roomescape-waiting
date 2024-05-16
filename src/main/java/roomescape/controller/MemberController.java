@@ -42,9 +42,8 @@ public class MemberController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<MemberInfo> myInfo(@Auth long memberId) {
-        MemberInfo memberInfo = memberService.findByMemberId(memberId);
-        return ResponseEntity.ok(memberInfo);
+    public MemberInfo myInfo(@Auth long memberId) {
+        return memberService.findByMemberId(memberId);
     }
 
     @GetMapping("/members")
