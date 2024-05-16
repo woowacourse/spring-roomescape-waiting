@@ -25,7 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AdminRoleInterceptor(tokenManager, context))
                 .addPathPatterns("/admin/**");
-        registry.addInterceptor(new PermissionCheckInterceptor(tokenManager, context));
+        registry.addInterceptor(new PermissionCheckInterceptor(tokenManager, context))
+                .excludePathPatterns("/image/**", "/css/**", "/js/**", "/favicon.ico");
     }
 
     @Override
