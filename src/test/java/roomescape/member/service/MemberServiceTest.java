@@ -8,8 +8,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.member.dto.MemberDto;
 import roomescape.member.dto.SaveMemberRequest;
-import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
 
 import java.util.List;
@@ -29,7 +29,7 @@ class MemberServiceTest {
     @Test
     void getMembersTest() {
         // When
-        final List<Member> members = memberService.getMembers();
+        final List<MemberDto> members = memberService.getMembers();
 
         // Then
         assertThat(members.size()).isEqualTo(5);
@@ -46,15 +46,14 @@ class MemberServiceTest {
         final SaveMemberRequest saveMemberRequest = new SaveMemberRequest(email, password, name, role);
 
         // When
-        final Member savedMember = memberService.saveMember(saveMemberRequest);
+        final MemberDto savedMember = memberService.saveMember(saveMemberRequest);
 
         // Then
         assertAll(
-                () -> assertThat(savedMember.getId()).isEqualTo(6L),
-                () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
-                () -> assertThat(savedMember.getEmail().getValue()).isEqualTo(email),
-                () -> assertThat(savedMember.getRole()).isEqualTo(role),
-                () -> assertThat(savedMember.getName().getValue()).isEqualTo(name)
+                () -> assertThat(savedMember.id()).isEqualTo(6L),
+                () -> assertThat(savedMember.email().getValue()).isEqualTo(email),
+                () -> assertThat(savedMember.role()).isEqualTo(role),
+                () -> assertThat(savedMember.name().getValue()).isEqualTo(name)
         );
     }
 

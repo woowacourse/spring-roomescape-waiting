@@ -45,6 +45,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationDto> getReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -104,6 +105,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> getMyReservations(final Long memberId) {
         return reservationRepository.findAllByMember_Id(memberId);
     }

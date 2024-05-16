@@ -1,6 +1,8 @@
 package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.dto.MemberDto;
 import roomescape.member.dto.SaveMemberRequest;
 import roomescape.member.encoder.PasswordEncoder;
 import roomescape.member.model.Member;
@@ -9,6 +11,7 @@ import roomescape.member.repository.MemberRepository;
 
 import java.util.List;
 
+@Transactional
 @Service
 public class MemberService {
 
@@ -20,16 +23,20 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<Member> getMembers() {
-        return memberRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<MemberDto> getMembers() {
+        return memberRepository.findAll()
+                .stream()
+                .map(MemberDto::from)
+                .toList();
     }
 
-    public Member saveMember(final SaveMemberRequest request) {
+    public MemberDto saveMember(final SaveMemberRequest request) {
         validateEmailDuplicate(request.email());
         validatePlainPassword(request.password());
 
         final Member member = request.toMember(passwordEncoder.encode(request.password()));
-        return memberRepository.save(member);
+        return MemberDto.from(memberRepository.save(member));
     }
 
     private void validateEmailDuplicate(final String email) {

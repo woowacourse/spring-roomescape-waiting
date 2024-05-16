@@ -1,13 +1,11 @@
 package roomescape.member.dto;
 
-import roomescape.member.model.Member;
-
 public record MemberResponse(Long id, String name, String email) {
-    public static MemberResponse from(final Member member) {
+    public static MemberResponse from(final MemberDto member) {
         return new MemberResponse(
-                member.getId(),
-                member.getName().getValue(),
-                member.getEmail().getValue()
+                member.id(),
+                member.name().getValue(),
+                member.email().getValue()
         );
     }
 }
