@@ -2,7 +2,7 @@ package roomescape.reservation.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +41,7 @@ public class ReservationTimeController {
             @Valid @RequestBody final ReservationTimeRequest reservationTimeRequest,
             final HttpServletResponse response
     ) {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeService.addTime(reservationTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.addTime(reservationTimeRequest);
         response.setHeader(HttpHeaders.LOCATION, "/times/" + reservationTimeResponse.id());
 
         return ApiResponse.success(reservationTimeResponse);
@@ -51,7 +51,7 @@ public class ReservationTimeController {
     @DeleteMapping("/times/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeTime(
-            @NotBlank(message = "timeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long id
+            @NotNull(message = "timeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long id
     ) {
         reservationTimeService.removeTimeById(id);
 

@@ -21,13 +21,13 @@ public class AuthService {
     }
 
     public TokenDto login(final LoginRequest request) {
-        Member member = memberService.findMemberByEmailAndPassword(request.email(), request.password());
+        final Member member = memberService.findMemberByEmailAndPassword(request.email(), request.password());
 
         return jwtHandler.createToken(member.getId());
     }
 
     public LoginCheckResponse checkLogin(final Long memberId) {
-        Member member = memberService.findMemberById(memberId);
+        final Member member = memberService.findMemberById(memberId);
 
         return new LoginCheckResponse(member.getName());
     }
@@ -35,11 +35,12 @@ public class AuthService {
     public TokenDto reissueToken(final String accessToken, final String refreshToken) {
         try {
             jwtHandler.validateToken(refreshToken);
-        } catch (UnauthorizedException e) {
-            throw new UnauthorizedException(ErrorType.INVALID_REFRESH_TOKEN, ErrorType.INVALID_REFRESH_TOKEN.getDescription(), e);
+        } catch (final UnauthorizedException e) {
+            throw new UnauthorizedException(ErrorType.INVALID_REFRESH_TOKEN,
+                    ErrorType.INVALID_REFRESH_TOKEN.getDescription(), e);
         }
 
-        Long memberId = jwtHandler.getMemberIdFromTokenWithNotValidate(accessToken);
+        final Long memberId = jwtHandler.getMemberIdFromTokenWithNotValidate(accessToken);
         return jwtHandler.createToken(memberId);
     }
 }
