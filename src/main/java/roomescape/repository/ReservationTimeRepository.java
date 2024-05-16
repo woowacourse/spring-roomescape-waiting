@@ -12,14 +12,12 @@ import roomescape.domain.ReservationTime;
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
     boolean existsByStartAt(LocalTime localTime);
 
-    // TODO: 쿼리문 사용 방법 확인
-    @Query(value = """
-            SELECT
-                t.id as time_id,
-                t.start_at as time_value
-            FROM reservation as r
-            INNER JOIN reservation_time as t ON r.time_id = t.id
-            INNER JOIN theme as th ON r.theme_id = th.id where date = :date and theme_id = :themeId
-            """, nativeQuery = true)
+    @Query("""
+            SELECT r.time
+            FROM Reservation r
+            INNER JOIN ReservationTime t ON r.time = t
+            INNER JOIN Theme th ON r.theme = th
+            WHERE r.date = :date AND r.theme.id = :themeId
+            """)
     List<ReservationTime> findByDateAndThemeId(final LocalDate date, final Long themeId);
 }

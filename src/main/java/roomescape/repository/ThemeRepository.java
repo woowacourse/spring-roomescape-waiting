@@ -9,7 +9,6 @@ import roomescape.domain.Theme;
 
 @Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
-    // TODO: 쿼리문 사용 방법 확인
     @Query(value = """
             select theme.id, theme.name, theme.description, theme.thumbnail
                          from theme
