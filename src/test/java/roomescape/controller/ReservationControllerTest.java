@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.ReservationRequest;
+import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.service.AuthService;
@@ -228,6 +229,22 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath().getList(".", ReservationResponse.class);
+    }
+
+    @DisplayName("자신의 예약을 조회한다.")
+    @Test
+    void should_find_reservations_of_member() {
+        String token = authService.createToken(userDto);
+
+        List<MemberReservationResponse> responses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList(".", MemberReservationResponse.class);
+
+        assertThat(responses).hasSize(15);
     }
 
     private Integer countAllReservations() {
