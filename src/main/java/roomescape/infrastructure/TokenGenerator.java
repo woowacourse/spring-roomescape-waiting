@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,8 +18,14 @@ public class TokenGenerator {
     private static final String COOKIE_NAME = "token";
     private static final String ADMIN = "ADMIN";
 
-    private final String secretKey = "secret-token-test";
-    private final long validityInMilliseconds = 3600000;
+    private final String secretKey;
+    private final long validityInMilliseconds;
+
+    public TokenGenerator(@Value("${security.jwt.token.secret-key}") String secretKey,
+                          @Value("${security.jwt.token.expire-length}") long validityInMilliseconds) {
+        this.secretKey = secretKey;
+        this.validityInMilliseconds = validityInMilliseconds;
+    }
 
     public String createToken(String payload, String role) {
         Claims claims = Jwts.claims().setSubject(payload);
