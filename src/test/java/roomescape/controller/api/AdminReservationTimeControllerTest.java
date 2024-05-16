@@ -1,6 +1,7 @@
 package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -36,12 +37,10 @@ class AdminReservationTimeControllerTest {
     @DisplayName("성공: 예약 시간 저장 -> 201")
     @Test
     void save() {
-        CreateTimeRequest request = new CreateTimeRequest("00:00");
-
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .contentType(ContentType.JSON)
-            .body(request)
+            .body(new CreateTimeRequest("00:00"))
             .when().post("/admin/times")
             .then().log().all()
             .statusCode(201)
@@ -93,7 +92,7 @@ class AdminReservationTimeControllerTest {
             .when().post("/admin/times")
             .then().log().all()
             .statusCode(400)
-            .body("message", is("잘못된 시간 형식입니다."));
+            .body("message", containsString("HH:mm 형식으로 입력해 주세요."));
     }
 
     @DisplayName("예약이 존재하는 시간 삭제 -> 400")

@@ -6,9 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -32,18 +29,7 @@ class ReservationTimeServiceTest {
     @Test
     void save() {
         ReservationTime saved = reservationTimeService.save(rawTime);
-        assertThat(saved).isEqualTo(new ReservationTime(saved.getId(), rawTime));
-    }
-
-    @DisplayName("실패: 잘못된 시간 포맷을 저장하면 예외가 발생한다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"24:00", "-1:00", "10:60"})
-    @NullAndEmptySource
-    void save_IllegalTimeFormat(String invalidRawTime) {
-        assertThatThrownBy(
-            () -> reservationTimeService.save(invalidRawTime)
-        ).isInstanceOf(RoomescapeException.class)
-            .hasMessage("잘못된 시간 형식입니다.");
+        assertThat(saved.getId()).isEqualTo(3L);
     }
 
     @DisplayName("실패: 이미 존재하는 시간을 추가할 수 없다.")

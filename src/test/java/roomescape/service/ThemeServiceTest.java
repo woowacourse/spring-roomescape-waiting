@@ -4,9 +4,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -21,41 +18,6 @@ class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
-
-    private final String name = "themeName";
-    private final String description = "themeDesc";
-    private final String thumbnail = "https://";
-
-    @DisplayName("실패: 이름이 null 또는 빈 값이면 예외 발생")
-    @ParameterizedTest
-    @NullAndEmptySource
-    void save_IllegalName(String invalidName) {
-        assertThatThrownBy(
-            () -> themeService.save(invalidName, description, thumbnail)
-        ).isInstanceOf(RoomescapeException.class)
-            .hasMessage("테마 이름은 null이거나 비어 있을 수 없습니다.");
-    }
-
-    @DisplayName("실패: description이 null 또는 빈 값이면 예외 발생")
-    @ParameterizedTest
-    @NullAndEmptySource
-    void save_IllegalDescription(String invalidDescription) {
-        assertThatThrownBy(
-            () -> themeService.save(name, invalidDescription, thumbnail)
-        ).isInstanceOf(RoomescapeException.class)
-            .hasMessage("테마 설명은 null이거나 비어 있을 수 없습니다.");
-    }
-
-    @DisplayName("thumbnail 형식이 잘못된 경우 예외 발생")
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"ftp://hello.jpg"})
-    void save_IllegalThumbnail(String invalidThumbnail) {
-        assertThatThrownBy(
-            () -> themeService.save(name, description, invalidThumbnail)
-        ).isInstanceOf(RoomescapeException.class)
-            .hasMessage("썸네일 URL은 https://로 시작해야 합니다.");
-    }
 
     @DisplayName("실패: 이름이 동일한 방탈출 테마를 저장하면 예외 발생")
     @Test

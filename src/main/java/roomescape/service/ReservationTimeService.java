@@ -4,10 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Time;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -26,12 +24,13 @@ public class ReservationTimeService {
     }
 
     public ReservationTime save(String startAt) {
+        ReservationTime reservationTime = new ReservationTime(startAt);
         validateDuplication(startAt);
-        return reservationTimeRepository.save(new ReservationTime(startAt));
+        return reservationTimeRepository.save(reservationTime);
     }
 
-    private void validateDuplication(String rawTime) {
-        if (reservationTimeRepository.existsByStartAt(new Time(rawTime))) {
+    private void validateDuplication(String time) {
+        if (reservationTimeRepository.existsByStartAt(LocalTime.parse(time))) {
             throw new RoomescapeException("이미 존재하는 시간은 추가할 수 없습니다.");
         }
     }
@@ -49,7 +48,7 @@ public class ReservationTimeService {
 
     public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
         List<Reservation> reservations =
-            reservationRepository.findAllByDateAndThemeId(new Date(date.toString()), themeId);
+            reservationRepository.findAllByDateAndThemeId(date, themeId);
 
         List<ReservationTime> reservedTimes = reservations.stream()
             .map(Reservation::getTime)

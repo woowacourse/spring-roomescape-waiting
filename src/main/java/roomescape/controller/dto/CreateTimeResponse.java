@@ -5,4 +5,6 @@ import java.time.LocalTime;
 
 public record CreateTimeResponse(Long id,
                                  @JsonFormat(pattern = "HH:mm")
-                                 LocalTime startAt) { }
+                                 LocalTime startAt) {
+
+}

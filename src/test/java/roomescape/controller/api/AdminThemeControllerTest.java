@@ -1,6 +1,7 @@
 package roomescape.controller.api;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -80,7 +81,7 @@ class AdminThemeControllerTest {
             .when().post("/admin/themes")
             .then().log().all()
             .statusCode(400)
-            .body("message", is("썸네일 URL은 https://로 시작해야 합니다."));
+            .body("message", containsString("올바른 URL 형식이 아닙니다."));
     }
 
     @DisplayName("실패: 중복 테마 추가 -> 400")

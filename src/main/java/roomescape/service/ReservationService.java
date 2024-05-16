@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -35,14 +34,14 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation save(Long memberId, String date, Long timeId, Long themeId) {
+    public Reservation save(Long memberId, String rawDate, Long timeId, Long themeId) {
         Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
-        Reservation reservation = new Reservation(member, date, time, theme, RESERVED);
+        Reservation reservation = new Reservation(member, rawDate, time, theme, RESERVED);
 
-        validatePastReservation(LocalDate.parse(date), time);
-        validateDuplication(date, timeId, themeId);
+        validatePastReservation(reservation.getDate(), time);
+        validateDuplication(reservation.getDate(), timeId, themeId);
 
         return reservationRepository.save(reservation);
     }
@@ -80,8 +79,8 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplication(String rawDate, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(new Date(rawDate), timeId, themeId)) {
+    private void validateDuplication(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new RoomescapeException("해당 시간에 예약이 이미 존재합니다.");
         }
     }
@@ -98,8 +97,7 @@ public class ReservationService {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId,
-            new Date(dateFrom.toString()), new Date(dateTo.toString()));
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId, dateFrom, dateTo);
     }
 
     public List<Reservation> findMyReservations(Long memberId) {

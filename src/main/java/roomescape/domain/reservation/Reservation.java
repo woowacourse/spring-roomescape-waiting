@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,9 +9,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
+import roomescape.global.exception.RoomescapeException;
 
 @Entity
 public class Reservation {
@@ -25,8 +26,7 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Embedded
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "time_id")
@@ -43,14 +43,24 @@ public class Reservation {
         this(null, Member, rawDate, time, theme, status);
     }
 
-    public Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
-        ReservationStatus status) {
+    public Reservation(Long id, Member Member, String rawDate,
+        ReservationTime time, Theme theme, ReservationStatus status) {
+
+        validate(rawDate);
         this.id = id;
         this.member = Member;
-        this.date = new Date(rawDate);
+        this.date = LocalDate.parse(rawDate);
         this.time = time;
         this.theme = theme;
         this.status = status;
+    }
+
+    private void validate(String rawDate) {
+        try {
+            LocalDate.parse(rawDate);
+        } catch (DateTimeParseException e) {
+            throw new RoomescapeException("잘못된 날짜 형식입니다.");
+        }
     }
 
     protected Reservation() {
@@ -65,7 +75,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date.getDate();
+        return date;
     }
 
     public ReservationTime getTime() {
