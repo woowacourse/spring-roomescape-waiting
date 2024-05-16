@@ -1,5 +1,7 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +12,7 @@ import jakarta.persistence.Id;
 import roomescape.member.role.MemberRole;
 import roomescape.name.domain.Name;
 
+@Embeddable
 @Entity
 public class Member {
 
@@ -29,6 +32,7 @@ public class Member {
     private Password password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MemberRole role;
 
     public Member() {

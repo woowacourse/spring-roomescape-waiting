@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import roomescape.global.exception.model.RoomEscapeException;
@@ -8,6 +9,7 @@ import roomescape.reservation.exception.ReservationExceptionCode;
 @Embeddable
 public class Date {
 
+    @Column(nullable = false)
     private LocalDate date;
 
     public Date() {

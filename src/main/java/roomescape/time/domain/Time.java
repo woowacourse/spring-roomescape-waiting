@@ -20,7 +20,7 @@ public class Time {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "start_at")
+    @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
 
     public Time() {
