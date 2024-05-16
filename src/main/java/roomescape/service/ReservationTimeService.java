@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     public AvailableTimeResponses findAvailableReservationTimes(AvailableTimeRequest request) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-        List<ReservationTime> bookedTimes = reservationTimeRepository.findReservedTimeByThemeAndDate(
+        List<ReservationTime> bookedTimes = reservationTimeRepository.findReservedTimeByDateAndTheme(
                 request.getDate(), request.getThemeId());
 
         ReservationTimeStatuses reservationStatuses = new ReservationTimeStatuses(allTimes, bookedTimes);

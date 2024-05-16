@@ -23,7 +23,7 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
             WHERE r.date = :date
             AND r.theme_id = :themeId
             """, nativeQuery = true)
-    List<ReservationTime> findReservedTimeByThemeAndDate(String date, long themeId);
+    List<ReservationTime> findReservedTimeByDateAndTheme(String date, long themeId);
 
     default ReservationTime fetchById(long timeId) {
         return findById(timeId).orElseThrow(TimeNotFoundException::new);
