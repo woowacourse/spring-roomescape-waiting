@@ -7,6 +7,9 @@ import java.util.Optional;
 
 public class CookieUtils {
 
+    private CookieUtils() {
+    }
+
     public static Optional<Cookie> findCookie(HttpServletRequest request, String cookieName) {
         Cookie[] cookies = request.getCookies();
 
