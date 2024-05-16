@@ -1,7 +1,5 @@
 package roomescape.domain.member;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +14,6 @@ public class Member {
     @Embedded
     private PlayerName name;
     @Embedded
-    @AttributeOverride(name = "address", column = @Column(name = "email"))
     private Email email;
     @Embedded
     private Password password;
