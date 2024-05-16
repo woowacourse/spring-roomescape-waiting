@@ -13,10 +13,10 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     @Query("""
                 SELECT mr
                 FROM MemberReservation mr
-                JOIN mr.reservation r
-                JOIN mr.member m
-                JOIN r.time t
-                JOIN r.theme th
+                JOIN FETCH mr.reservation r
+                JOIN FETCH mr.member m
+                JOIN FETCH r.time t
+                JOIN FETCH r.theme th
                 WHERE (:memberId IS NULL OR m.id = :memberId) 
                     AND (:themeId IS NULL OR th.id = :themeId) 
                     AND :startDate <= r.date 
