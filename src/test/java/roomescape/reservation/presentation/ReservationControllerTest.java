@@ -268,6 +268,6 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].theme").value(WOOTECO_THEME_NAME))
                 .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()))
                 .andExpect(jsonPath("$[0].time").value(MIA_RESERVATION_TIME.toString()))
-                .andExpect(jsonPath("$[0].status").value(ReservationStatus.BOOKING.name()));
+                .andExpect(jsonPath("$[0].status").value("예약"));
     }
 }

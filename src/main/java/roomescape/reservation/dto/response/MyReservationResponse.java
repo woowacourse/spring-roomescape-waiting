@@ -13,11 +13,23 @@ public record MyReservationResponse(
         LocalDate date,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
         LocalTime time,
-        ReservationStatus status
+        String status
 ) {
 
     public static MyReservationResponse from(Reservation reservation) {
-        return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus());
+        return new MyReservationResponse(
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                mapReservationStatusToResponse(reservation.getStatus())
+        );
+    }
+
+    private static String mapReservationStatusToResponse(ReservationStatus status) {
+        if (status == ReservationStatus.BOOKING) {
+            return "예약";
+        }
+        return "";
     }
 }
