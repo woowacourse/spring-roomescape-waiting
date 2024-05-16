@@ -4,12 +4,11 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.config.CheckAdminInterceptor;
 import roomescape.controller.api.dto.request.TokenContextRequest;
 import roomescape.domain.user.Role;
@@ -22,7 +21,7 @@ import roomescape.util.TokenProvider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 class CheckAdminInterceptorTest {
     @MockBean
     MemberService memberService;
@@ -38,7 +37,6 @@ class CheckAdminInterceptorTest {
         sut = new CheckAdminInterceptor(memberService, tokenProvider, new TokenContextRequest());
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
-
     }
 
     @Test
