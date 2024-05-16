@@ -25,7 +25,6 @@ public class Member {
     private Role role;
 
     @Embedded
-    @Column(nullable = false, unique = true)
     private Email email;
 
     @Column(nullable = false)
