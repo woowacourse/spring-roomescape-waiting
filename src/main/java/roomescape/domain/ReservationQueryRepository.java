@@ -2,16 +2,22 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.dto.AvailableTimeDto;
 
-public interface ReservationQueryRepository extends JpaRepository<Reservation, Long> {
-    long countByTimeId(long timeId);
+public interface ReservationQueryRepository extends Repository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    Optional<Reservation> findById(Long id);
 
-    List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
+    @Query("""
+            select r from Reservation r
+            join fetch r.member member
+            join fetch r.theme theme
+            join fetch r.time time
+            """)
+    List<Reservation> findAll();
 
     @Query("""
             select new roomescape.domain.dto.AvailableTimeDto(
@@ -24,7 +30,7 @@ public interface ReservationQueryRepository extends JpaRepository<Reservation, L
             )
             from ReservationTime rt
             """)
-    List<AvailableTimeDto> findAvailableReservationTimes(LocalDate date, long themeId);
+    List<AvailableTimeDto> findAvailableReservationTimes(LocalDate date, Long themeId);
 
     @Query("""
             select t
@@ -41,10 +47,18 @@ public interface ReservationQueryRepository extends JpaRepository<Reservation, L
     @Query("""
             select r
             from Reservation r
-            where r.theme.id = :themeId
-            and r.member.id = :memberId
+            join fetch r.theme t
+            join fetch r.member m
+            where t.id = :themeId
+            and m.id = :memberId
             and :dateFrom <= r.date
             and r.date <= :dateTo
             """)
     List<Reservation> findByCriteria(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+
+    long countByTimeId(Long timeId);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
 }

@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,15 +13,20 @@ import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Member {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
+
     @Embedded
     private PlayerName name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password password;
+
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
