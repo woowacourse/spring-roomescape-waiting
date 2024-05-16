@@ -16,7 +16,7 @@
 | GET    | `/reservations`                                  | 전체 예약 정보 요청               |
 | POST   | `/reservations`                                  | 예약 추가 요청                  |
 | DELETE | `/reservations/{id}`                             | 예약 삭제 요청                  |
-| GET    | `/reservations/my`                                | 로그인 유저의 예약 목록 요청          |
+| GET    | `/reservations/my`                               | 로그인 유저의 예약 목록 요청          |
 | GET    | `/times`                                         | 전체 시간 요청                  |
 | POST   | `/times`                                         | 시간 추가 요청                  |
 | DELETE | `/times/{id}`                                    | 시간 삭제 요청                  |
@@ -28,13 +28,13 @@
 
 # 테스트 계정
 
-| 이름  | 이메일              | 비밀번호 | 권한   |
-|-----|------------------|------|------|
+| 이름  | 이메일              | 비밀번호 | 권한     |
+|-----|------------------|------|--------|
 | 안돌  | andole@test.com  | 123  | MEMBER |
 | 파랑  | parang@test.com  | 123  | MEMBER |
 | 리비  | libienz@test.com | 123  | MEMBER |
 | 메이슨 | mason@test.com   | 123  | MEMBER |
-| 어드민 | admin@test.com   | 123  | ADMIN |
+| 어드민 | admin@test.com   | 123  | ADMIN  |
 
 # 도메인 명세
 
@@ -54,6 +54,7 @@
 
 - [x] 멤버 이름은 빈 문자열일 수 없다.
 - [x] 멤버 이름은 Null일 수 없다.
+- [x] 멤버 이름은 1-5자 사이여야 한다.
 - [x] 멤버 이름은 공백 문자로만 이루어질 수 없다
 - [x] 멤버 간 이메일이 중복될 수 없다
 - [x] 멤버 간 이름이 중복될 수 없다
