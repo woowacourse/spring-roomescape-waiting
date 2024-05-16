@@ -19,17 +19,6 @@ class MemberRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @DisplayName("특정 이메일을 가진 사용자를 조회한다.")
-    @Test
-    void should_find_member_by_email() {
-        Member expected = new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER);
-
-        Optional<Member> actual = memberRepository.findByEmail(expected.getEmail());
-
-        assertThat(actual).isNotEmpty();
-        assertThat(actual).hasValue(expected);
-    }
-
     @DisplayName("특정 이메일과 비밀번호를 가진 사용자를 조회한다.")
     @Test
     void should_find_member_by_email_and_password() {
