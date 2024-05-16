@@ -20,7 +20,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @GetMapping("/members")
+    @GetMapping("/admin/members")
     public List<MemberResponse> getMembers() {
         return memberService.getMembers()
                 .stream()
