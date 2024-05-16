@@ -20,7 +20,7 @@ import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.reservation.dto.AdminReservationRequest;
-import roomescape.service.reservation.dto.ReservationFindRequest;
+import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
@@ -123,10 +123,10 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> findByCondition(ReservationFindRequest reservationFindRequest) {
-        ReservationDate dateFrom = ReservationDate.of(reservationFindRequest.dateFrom());
-        ReservationDate dateTo = ReservationDate.of(reservationFindRequest.dateTo());
-        return reservationRepository.findBy(reservationFindRequest.memberId(), reservationFindRequest.themeId(),
+    public List<ReservationResponse> findByCondition(ReservationFilterRequest reservationFilterRequest) {
+        ReservationDate dateFrom = ReservationDate.of(reservationFilterRequest.dateFrom());
+        ReservationDate dateTo = ReservationDate.of(reservationFilterRequest.dateTo());
+        return reservationRepository.findBy(reservationFilterRequest.memberId(), reservationFilterRequest.themeId(),
                 dateFrom, dateTo).stream().map(ReservationResponse::new).toList();
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.dto.AdminReservationRequest;
-import roomescape.service.reservation.dto.ReservationFindRequest;
+import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 @RestController
@@ -42,8 +42,8 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public List<ReservationResponse> findReservations(
-            @ModelAttribute("ReservationFindRequest") ReservationFindRequest reservationFindRequest) {
-        return reservationService.findByCondition(reservationFindRequest);
+            @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {
+        return reservationService.findByCondition(reservationFilterRequest);
     }
 
 }

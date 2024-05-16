@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +28,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
 import roomescape.service.reservation.dto.AdminReservationRequest;
-import roomescape.service.reservation.dto.ReservationFindRequest;
+import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -101,10 +100,10 @@ class ReservationServiceTest {
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
-        ReservationFindRequest reservationFindRequest = new ReservationFindRequest(member.getId(), null, null, null);
+        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null, null);
 
         //when
-        List<ReservationResponse> reservations = reservationService.findByCondition(reservationFindRequest);
+        List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
 
         //then
         assertThat(reservations).hasSize(1);
@@ -118,10 +117,10 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
-        ReservationFindRequest reservationFindRequest = new ReservationFindRequest(member.getId(), notMemberThemeId, null, null);
+        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), notMemberThemeId, null, null);
 
         //when
-        List<ReservationResponse> reservations = reservationService.findByCondition(reservationFindRequest);
+        List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
 
         //then
         assertThat(reservations).isEmpty();
