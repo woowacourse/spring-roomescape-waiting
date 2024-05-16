@@ -23,35 +23,35 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     public List<Reservation> findAllWithSearchConditions(Long memberId, Long themeId, LocalDate from, LocalDate to) {
         JPAQueryFactory jpaQueryFactory = new JPAQueryFactory(entityManager);
         return jpaQueryFactory.selectFrom(reservation)
-                .where(eqMemberId(memberId),
-                        eqThemeId(themeId),
-                        goeFrom(from),
-                        loeTo(to))
+                .where(equalsMemberId(memberId),
+                        equalsThemeId(themeId),
+                        greaterThanOrEqualsFrom(from),
+                        lessThanOrEqualsTo(to))
                 .fetch();
     }
 
-    private BooleanExpression eqMemberId(Long memberId) {
+    private BooleanExpression equalsMemberId(Long memberId) {
         if (memberId == null) {
             return Expressions.TRUE;
         }
         return reservation.member.id.eq(memberId);
     }
 
-    private BooleanExpression eqThemeId(Long themeId) {
+    private BooleanExpression equalsThemeId(Long themeId) {
         if (themeId == null) {
             return Expressions.TRUE;
         }
         return reservation.theme.id.eq(themeId);
     }
 
-    private BooleanExpression goeFrom(LocalDate from) {
+    private BooleanExpression greaterThanOrEqualsFrom(LocalDate from) {
         if (from == null) {
             return Expressions.TRUE;
         }
         return reservation.date.date.goe(from);
     }
 
-    private BooleanExpression loeTo(LocalDate to) {
+    private BooleanExpression lessThanOrEqualsTo(LocalDate to) {
         if (to == null) {
             return Expressions.TRUE;
         }
