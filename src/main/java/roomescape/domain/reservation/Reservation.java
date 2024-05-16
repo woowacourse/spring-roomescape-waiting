@@ -7,8 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import roomescape.domain.member.Member;
+
+import java.time.LocalDate;
 
 @Entity
 public class Reservation {
