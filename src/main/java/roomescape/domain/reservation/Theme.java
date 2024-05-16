@@ -42,14 +42,6 @@ public class Theme {
         this(NO_ID, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
     }
 
-    public Theme(long id, Theme theme) {
-        this(id, theme.name, theme.description, theme.thumbnail);
-    }
-
-    public Theme(ThemeName name, Description description, Thumbnail thumbnail) {
-        this(NO_ID, name, description, thumbnail);
-    }
-
     public long getId() {
         return id;
     }

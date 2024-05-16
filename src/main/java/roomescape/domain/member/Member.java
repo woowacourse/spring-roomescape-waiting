@@ -48,18 +48,6 @@ public class Member {
         this(NO_ID, new MemberName(name), Email.of(email), Password.of(password), role);
     }
 
-    public Member(long id, Member member) {
-        this(id, member.memberName, member.email, member.password, member.role);
-    }
-
-    public Member(long id, String name, String email, String password, String role) {
-        this(id, new MemberName(name), Email.of(email), Password.of(password), Role.valueOf(role));
-    }
-
-    public Member(MemberName name, Email email, Password password, Role role) {
-        this(NO_ID, name, email, password, role);
-    }
-
     public boolean isPasswordMatches(Password other) {
         return password.equals(other);
     }
