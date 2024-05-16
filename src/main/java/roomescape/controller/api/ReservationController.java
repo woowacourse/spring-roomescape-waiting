@@ -1,22 +1,20 @@
 package roomescape.controller.api;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.response.MemberReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")
@@ -24,17 +22,17 @@ import roomescape.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final MemberService memberService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, MemberService memberService) {
         this.reservationService = reservationService;
+        this.memberService = memberService;
     }
 
-    @GetMapping//todo: 관리자와 관련된 것 같은 기능은 다 /admin 으로 변경하기
-    public ResponseEntity<List<ReservationResponse>> getAllReservations() {
-        List<ReservationResponse> responses = reservationService.getAllReservations();
-
-        return ResponseEntity.ok()
-                .body(responses);
+    @GetMapping
+    public ResponseEntity<List<MemberReservationResponse>> getReservationsOf(Member member) {
+        List<MemberReservationResponse> response = memberService.getReservationsOf(member);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -46,25 +44,5 @@ public class ReservationController {
 
         return ResponseEntity.created(location)
                 .body(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteById(id);
-
-        return ResponseEntity.noContent()
-                .build();
-    }
-
-    @GetMapping("/filter")
-    public ResponseEntity<List<ReservationResponse>> getFilteredReservations(
-            @RequestParam(required = false) Long themeId,
-            @RequestParam(required = false) Long memberId,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo
-    ) {
-        List<ReservationResponse> response = reservationService.getFilteredReservations(themeId, memberId, dateFrom, dateTo);
-
-        return ResponseEntity.ok(response);
     }
 }

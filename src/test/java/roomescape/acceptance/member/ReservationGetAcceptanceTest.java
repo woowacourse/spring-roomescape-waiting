@@ -42,7 +42,7 @@ public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
     private ValidatableResponse sendGetRequest() {
         return RestAssured.given().log().ifValidationFails()
                 .cookie("token", customerToken)
-                .when().get("/members/reservations")
+                .when().get("/reservations")
                 .then().log().all();
     }
 }

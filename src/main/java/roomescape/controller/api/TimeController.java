@@ -1,20 +1,14 @@
 package roomescape.controller.api;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
@@ -35,24 +29,6 @@ public class TimeController {
 
         return ResponseEntity.ok()
                 .body(responses);
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationTimeResponse> addTime(@RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.addReservationTime(
-                request);
-        URI location = URI.create("/times/" + response.id());
-
-        return ResponseEntity.created(location)
-                .body(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTime(@PathVariable("id") Long id) {
-        reservationTimeService.deleteReservationTimeById(id);
-
-        return ResponseEntity.noContent()
-                .build();
     }
 
     @GetMapping("/available") // todo: rest 한 api 이름으로 바꾸기

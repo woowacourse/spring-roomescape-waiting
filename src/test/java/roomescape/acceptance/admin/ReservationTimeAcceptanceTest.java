@@ -51,7 +51,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", adminToken)
                 .body(reservationTimeRequest)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .header("location", containsString("/times/"))
@@ -103,7 +103,8 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendDeleteRequest(long existReservationTimeId) {
             return RestAssured.given().log().all()
-                    .when().delete("/times/" + existReservationTimeId)
+                    .cookie("token", adminToken)
+                    .when().delete("/admin/times/" + existReservationTimeId)
                     .then().log().all();
         }
     }

@@ -41,7 +41,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(reservationListFormat);
@@ -141,7 +141,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
                     .statusCode(HttpStatus.NO_CONTENT.value());
         }
 
-        @DisplayName("예외 발생 - 존재하지 않는 예약 삭제한다.")
+        @DisplayName("예외 발생 - 존재하지 않는 예약을 삭제한다.")
         @Test
         void deleteReservation_forNonExist_fail() {
             long notExistReservationId = 0L;
@@ -159,7 +159,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
         private ValidatableResponse sendDeleteRequest(Long id) {
             return RestAssured.given().log().all()
                     .cookie("token", adminToken)
-                    .when().delete("/reservations/" + id)
+                    .when().delete("/admin/reservations/" + id)
                     .then().log().all();
         }
     }

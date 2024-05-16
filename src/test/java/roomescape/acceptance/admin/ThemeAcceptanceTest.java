@@ -53,7 +53,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", adminToken)
                 .body(themeRequest)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .header("location", containsString("/themes/"))
@@ -105,7 +105,8 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
         private ValidatableResponse sendDeleteRequest(long id) {
             return RestAssured.given().log().all()
-                    .when().delete("/themes/" + id)
+                    .cookie("token", adminToken)
+                    .when().delete("/admin/themes/" + id)
                     .then().log().all();
         }
     }

@@ -1,4 +1,4 @@
-package roomescape.controller.api;
+package roomescape.controller.api.admin;
 
 import java.util.List;
 
@@ -10,20 +10,19 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.service.MemberService;
 
-@RequestMapping("/members")
+@RequestMapping("/admin/members")
 @RestController
-public class MemberController {
+public class AdminMemberController {
 
     private final MemberService memberService;
 
-    public MemberController(MemberService memberService) {
+    public AdminMemberController(MemberService memberService) {
         this.memberService = memberService;
     }
 
     @GetMapping
     public ResponseEntity<List<MemberPreviewResponse>> getMembers() {
         List<MemberPreviewResponse> response = memberService.getAllMemberPreview();
-
         return ResponseEntity.ok(response);
     }
 }

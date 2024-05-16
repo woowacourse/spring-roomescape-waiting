@@ -23,7 +23,7 @@ class MemberAcceptanceTest extends BaseAcceptanceTest {
 
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/members")
+                .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(memberListFormat);
