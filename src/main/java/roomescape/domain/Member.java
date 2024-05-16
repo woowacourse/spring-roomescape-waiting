@@ -95,15 +95,4 @@ public class Member {
 
         return Objects.equals(id, member.id);
     }
-    // TODO: 제거
-    @Override
-    public String toString() {
-        return "Member{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", encryptedPassword='" + encryptedPassword + '\'' +
-                ", role=" + role +
-                '}';
-    }
 }

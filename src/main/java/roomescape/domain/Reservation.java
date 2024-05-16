@@ -137,15 +137,4 @@ public class Reservation implements Comparable<Reservation> {
 
         return Objects.equals(id, that.id);
     }
-    // TODO: 제거
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "id=" + id +
-                ", reservationMember=" + reservationMember +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                '}';
-    }
 }

@@ -65,12 +65,4 @@ public class ReservationTime {
 
         return Objects.equals(id, that.id);
     }
-    // TODO: 제거
-    @Override
-    public String toString() {
-        return "ReservationTime{" +
-                "id=" + id +
-                ", startAt=" + startAt +
-                '}';
-    }
 }
