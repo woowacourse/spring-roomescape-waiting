@@ -74,6 +74,23 @@ public class Reservation {
         this.status = status;
     }
 
+    public static Reservation create(
+            LocalDateTime currentDateTime,
+            LocalDate date,
+            Member member,
+            ReservationTime time,
+            Theme theme,
+            ReservationStatus status
+    ) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+
+        if (reservationDateTime.isBefore(currentDateTime)) {
+            throw new IllegalArgumentException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+        }
+
+        return new Reservation(date, member, time, theme, status);
+    }
+
     private void validate(
             LocalDate date,
             Member member,
@@ -100,12 +117,6 @@ public class Reservation {
         if (status == null) {
             throw new IllegalArgumentException("예약 상태는 필수 값입니다.");
         }
-    }
-
-    public boolean isBefore(LocalDateTime dateTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        return reservationDateTime.isBefore(dateTime);
     }
 
     public void updateToReserved() {

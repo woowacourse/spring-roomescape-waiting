@@ -70,20 +70,20 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
         Theme theme = themeRepository.getByIdentifier(themeId);
 
-        Reservation reservation = new Reservation(date, member, reservationTime, theme, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.create(
+                LocalDateTime.now(clock),
+                date,
+                member,
+                reservationTime,
+                theme,
+                ReservationStatus.RESERVED
+        );
 
         validateDuplicatedReservation(reservation);
-        validateDateTimeNotPassed(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(savedReservation);
-    }
-
-    private void validateDateTimeNotPassed(Reservation reservation) {
-        if (reservation.isBefore(LocalDateTime.now(clock))) {
-            throw new IllegalArgumentException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
-        }
     }
 
     private void validateDuplicatedReservation(Reservation reservation) {
@@ -107,7 +107,8 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
         Theme theme = themeRepository.getByIdentifier(themeId);
 
-        Reservation reservation = new Reservation(
+        Reservation reservation = Reservation.create(
+                LocalDateTime.now(clock),
                 date,
                 member,
                 reservationTime,
@@ -115,7 +116,6 @@ public class ReservationService {
                 ReservationStatus.WAITING
         );
 
-        validateDateTimeNotPassed(reservation);
         validateReservationNotExists(reservation);
         validateAlreadyReserved(reservation);
         validateReservationWaitingExists(reservation);
