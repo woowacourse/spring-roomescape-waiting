@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.controller.dto.TokenResponse;
 import roomescape.controller.member.dto.MemberLoginRequest;
@@ -12,9 +14,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.service.exception.DuplicateEmailException;
 import roomescape.service.exception.InvalidTokenException;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class MemberService {
 
@@ -22,7 +21,8 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final EncryptionService encryptionService;
 
-    public MemberService(final MemberRepository memberRepository, final JwtTokenProvider jwtTokenProvider,
+    public MemberService(final MemberRepository memberRepository,
+                         final JwtTokenProvider jwtTokenProvider,
                          final EncryptionService encryptionService) {
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -35,7 +35,8 @@ public class MemberService {
             throw new DuplicateEmailException("해당 email로 사용자가 존재합니다.");
         }
         final String encryptedPassword = encryptionService.encryptPassword(request.password());
-        final Member member = new Member(null, request.name(), request.email(), encryptedPassword, Role.USER);
+        final Member member = new Member(null, request.name(), request.email(), encryptedPassword,
+                Role.USER);
         return memberRepository.save(member);
     }
 

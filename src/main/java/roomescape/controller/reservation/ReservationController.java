@@ -1,6 +1,8 @@
 package roomescape.controller.reservation;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +20,6 @@ import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.controller.reservation.dto.UserCreateReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/reservations")
@@ -40,7 +39,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<MyReservationResponse> getMineReservation(final LoginMember member) {
+    public List<MyReservationResponse> getLoginMemberReservation(final LoginMember member) {
         List<Reservation> reservations = reservationService.getReservationsByMember(member);
         return reservations.stream()
                 .map(MyReservationResponse::from)
