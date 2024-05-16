@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
+import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
@@ -120,7 +121,7 @@ class ReservationServiceTest {
     void given_member_when_findReservationByMember_then_returnReservationMineResponses() {
         //given
         Password password = new Password("hashedpassword", "salt");
-        Member member = new Member(1L, "poke@test.com", password, "poke", "USER");
+        Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when
         final List<ReservationsMineResponse> reservationsByMember = service.findReservationsByMember(member);
         //then

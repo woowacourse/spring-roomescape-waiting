@@ -17,14 +17,14 @@ class ReservationCreateValidatorTest {
     private final ReservationTime reservationTime = new ReservationTime(reservationRequest.timeId(),
             LocalTime.parse("10:00"));
     private final Theme theme = new Theme(reservationRequest.themeId(), "themeName", "description", "thumbnail");
-    private final Member member = new Member("poke@test.com", new Password("password", "salt"), "poke", "role");
+    private final Member member = new Member("poke@test.com", new Password("password", "salt"), "poke", Role.USER);
 
     @DisplayName("예약 요청 값, 테마, 시간 객체를 통해 객체 생성에 성공한다.")
     @Test
     void given_when_new_then_doesNotException() {
         //when, then
-        assertThatCode(() -> new ReservationCreateValidator(reservationRequest, reservationTime, theme,
-                member)).doesNotThrowAnyException();
+        assertThatCode(() -> new ReservationCreateValidator(reservationRequest, reservationTime, theme, member))
+                .doesNotThrowAnyException();
     }
 
     @DisplayName("예약 날짜가 이미 지난 날이면 예약에 실패한다.")
@@ -35,16 +35,16 @@ class ReservationCreateValidatorTest {
         ReservationTime reservationTime = new ReservationTime(pastReservationRequest.timeId(),
                 LocalTime.parse("10:00"));
         //when, then
-        assertThatThrownBy(() -> new ReservationCreateValidator(pastReservationRequest, reservationTime, theme,
-                member)).isInstanceOf(ReservationFailException.class);
+        assertThatThrownBy(() -> new ReservationCreateValidator(pastReservationRequest, reservationTime, theme, member))
+                .isInstanceOf(ReservationFailException.class);
     }
 
     @DisplayName("객체가 생성되면 예약 객체를 반환할 수 있다.")
     @Test
     void given_reservationCreateValidator_when_create_then_returnReservation() {
         //given
-        final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest,
-                reservationTime, theme, member);
+        final ReservationCreateValidator reservationCreateValidator =
+                new ReservationCreateValidator(reservationRequest, reservationTime, theme, member);
         //when, then
         assertThat(reservationCreateValidator.create()).isInstanceOf(Reservation.class);
     }

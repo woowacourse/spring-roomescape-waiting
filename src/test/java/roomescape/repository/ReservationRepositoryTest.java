@@ -13,6 +13,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
 import roomescape.domain.Theme;
 
 @DataJpaTest
@@ -36,7 +37,7 @@ class ReservationRepositoryTest {
     void given_reservation_when_create_then_returnCreatedReservationId() {
         //given
         Reservation expected = new Reservation(
-                new Member("poke@test.com", new Password("password", "salt"), "poke", "role"),
+                new Member("poke@test.com", new Password("password", "salt"), "poke", Role.USER),
                 LocalDate.parse("2099-01-11"),
                 new ReservationTime(1L, LocalTime.parse("10:00")),
                 new Theme(1L, "name", "description", "thumbnail"));
@@ -99,7 +100,7 @@ class ReservationRepositoryTest {
     void given_member_when_findByMember_then_Reservations() {
         //given
         Password password = new Password("hashedpassword", "salt");
-        Member member = new Member(1L, "poke@test.com", password, "poke", "USER");
+        Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when, then
         assertThat(reservationRepository.findByMember(member)).hasSize(7);
     }
