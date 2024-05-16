@@ -1,43 +1,50 @@
 package roomescape.infrastructure;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import roomescape.config.TokenProperties;
 
 @Component
+@EnableConfigurationProperties(TokenProperties.class)
 public class JwtTokenProvider {
 
-    @Value("${security.jwt.token.secret-key}")
-    private String secretKey;
-    @Value("${security.jwt.token.expire-length}")
-    private long validityInMilliseconds;
+    private final TokenProperties tokenProperties;
+
+    public JwtTokenProvider(TokenProperties tokenProperties) {
+        this.tokenProperties = tokenProperties;
+    }
 
     public String createToken(Map<String, Object> payload) {
         Claims claims = Jwts.claims(new HashMap<>(payload));
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + tokenProperties.expireLength());
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(SignatureAlgorithm.HS256, tokenProperties.secretKey())
                 .compact();
     }
 
     public Map<String, Object> getPayload(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKey)
+                .setSigningKey(tokenProperties.secretKey())
                 .parseClaimsJws(token)
                 .getBody();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(tokenProperties.secretKey()).parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
