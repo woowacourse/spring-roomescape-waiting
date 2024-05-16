@@ -39,7 +39,7 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
         Cookie[] cookies = request.getCookies();
         String token = tokenProvider.extractTokenFromCookie(cookies);
 
-        if ("".equals(token)) {
+        if (token == null || token.isEmpty()) {
             throw new AuthenticationException("로그인해 주세요");
         }
         return authService.findMemberByToken(token);

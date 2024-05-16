@@ -36,7 +36,7 @@ public class TokenProvider {
     }
 
     public Long parseToken(String token) {
-        if (token == "") {
+        if (token == null || token.isEmpty()) {
             throw new AuthenticationException("잘못된 토큰 정보입니다.");
         }
         return Long.valueOf(Jwts.parser()
@@ -48,12 +48,12 @@ public class TokenProvider {
 
     public String extractTokenFromCookie(Cookie[] cookies) {
         if (cookies == null) {
-            return "";
+            return null;
         }
         return Arrays.stream(cookies)
                 .filter(cookie -> TOKEN.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
-                .orElse("");
+                .orElse(null);
     }
 }
