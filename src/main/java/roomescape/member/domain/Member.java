@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,10 +15,14 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     public Member() {
@@ -76,9 +81,9 @@ public class Member {
     public String toString() {
         return "Member{" +
                 "id=" + id +
-                ", name=" + name +
-                ", email=" + email +
-                ", password=" + password +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 ", role=" + role +
                 '}';
     }
