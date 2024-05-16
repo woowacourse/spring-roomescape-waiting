@@ -9,6 +9,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 public interface ReservationJpaRepository extends CrudRepository<Reservation, Long> {
+
     boolean existsByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme);
 
     List<Reservation> findByThemeAndMember(Theme theme, Member member);

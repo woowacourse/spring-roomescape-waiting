@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialDataFixture.INITIAL_THEME_COUNT;
 import static roomescape.InitialDataFixture.NOT_RESERVED_THEME;
+import static roomescape.InitialDataFixture.NOT_SAVED_THEME;
 import static roomescape.InitialDataFixture.THEME_1;
 import static roomescape.InitialDataFixture.THEME_3;
 
@@ -17,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -28,21 +28,28 @@ class ThemeJpaRepositoryTest {
     private ThemeJpaRepository themeJpaRepository;
 
     @Test
-    @DisplayName("Theme를 저장한다.")
+    @DisplayName("테마를 저장한다.")
     void save() {
-        Theme theme = new Theme(null, new Name("레벨2"), "레벨2 설명", "레벨2 썸네일");
+        themeJpaRepository.save(NOT_SAVED_THEME);
+        long count = themeJpaRepository.count();
 
-        Theme saved = themeJpaRepository.save(theme);
-
-        assertThat(saved.getId()).isNotNull();
+        assertThat(count).isEqualTo(INITIAL_THEME_COUNT + 1);
     }
 
     @Test
-    @DisplayName("id에 맞는 Theme을 제거한다.")
-    void delete() {
-        themeJpaRepository.deleteById(NOT_RESERVED_THEME.getId());
+    @DisplayName("특정 테마 이름을 가진 테마가 저장되어 있으면 true를 반환한다.")
+    void returnTrueIfExist() {
+        boolean isExist = themeJpaRepository.existsByName(THEME_1.getName());
 
-        assertThat(themeJpaRepository.findById(NOT_RESERVED_THEME.getId()).isEmpty()).isTrue();
+        assertThat(isExist).isTrue();
+    }
+
+    @Test
+    @DisplayName("특정 테마 이름을 가진 테마가 저장되어 있지 않으면 false를 반환한다.")
+    void returnFalseIfNotExist() {
+        boolean isExist = themeJpaRepository.existsByName(NOT_SAVED_THEME.getName());
+
+        assertThat(isExist).isFalse();
     }
 
     @Test
@@ -86,5 +93,13 @@ class ThemeJpaRepositoryTest {
         );
 
         assertThat(trendings).containsExactly(THEME_3);
+    }
+
+    @Test
+    @DisplayName("id에 맞는 Theme을 제거한다.")
+    void delete() {
+        themeJpaRepository.deleteById(NOT_RESERVED_THEME.getId());
+
+        assertThat(themeJpaRepository.findById(NOT_RESERVED_THEME.getId()).isEmpty()).isTrue();
     }
 }
