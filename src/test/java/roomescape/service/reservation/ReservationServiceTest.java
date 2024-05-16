@@ -17,9 +17,9 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
@@ -97,7 +97,8 @@ class ReservationServiceTest {
         Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
-        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null, null);
+        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null,
+                null);
 
         //when
         List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
@@ -114,7 +115,8 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
-        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), notMemberThemeId, null, null);
+        ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(),
+                notMemberThemeId, null, null);
 
         //when
         List<ReservationResponse> reservations = reservationService.findByCondition(reservationFilterRequest);
@@ -161,7 +163,8 @@ class ReservationServiceTest {
     void cannotCreateByUnknownTime() {
         //given
         LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(), 0L, theme.getId());
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(), 0L,
+                theme.getId());
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))

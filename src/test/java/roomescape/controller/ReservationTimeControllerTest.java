@@ -74,7 +74,8 @@ class ReservationTimeControllerTest {
     @Test
     void deleteReservationTimeById() {
         //given
-        var id = RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now()))
+        var id = RestAssured.given().contentType(ContentType.JSON)
+                .body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
                 .then().log().all().extract().response().jsonPath().get("id");
 

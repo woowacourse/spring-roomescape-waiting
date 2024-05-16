@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -28,7 +28,8 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest reservationTimeCreateRequest) {
         validateDuplicated(reservationTimeCreateRequest);
-        ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeCreateRequest.toReservationTime());
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                reservationTimeCreateRequest.toReservationTime());
         return new ReservationTimeResponse(reservationTime);
     }
 
