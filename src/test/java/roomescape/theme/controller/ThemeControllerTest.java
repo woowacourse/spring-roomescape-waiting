@@ -1,7 +1,7 @@
 package roomescape.theme.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.InitialDataFixture.INITIAL_THEME_COUNT;
+import static roomescape.InitialThemeFixture.INITIAL_THEME_COUNT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

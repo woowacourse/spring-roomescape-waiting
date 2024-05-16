@@ -2,17 +2,17 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static roomescape.InitialDataFixture.INITIAL_RESERVATION_COUNT;
-import static roomescape.InitialDataFixture.NOT_RESERVATED_TIME;
-import static roomescape.InitialDataFixture.NOT_RESERVED_THEME;
-import static roomescape.InitialDataFixture.NO_RESERVATION_DATE;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_2;
-import static roomescape.InitialDataFixture.RESERVATION_3;
-import static roomescape.InitialDataFixture.THEME3_MEMBER1_RESERVATION_COUNT;
-import static roomescape.InitialDataFixture.THEME_2;
-import static roomescape.InitialDataFixture.THEME_3;
 import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
+import static roomescape.InitialReservationFixture.RESERVATION_1;
+import static roomescape.InitialReservationFixture.RESERVATION_2;
+import static roomescape.InitialReservationFixture.RESERVATION_3;
+import static roomescape.InitialReservationFixture.THEME3_MEMBER1_RESERVATION_COUNT;
+import static roomescape.InitialReservationTimeFixture.NOT_RESERVATED_TIME;
+import static roomescape.InitialThemeFixture.NOT_RESERVED_THEME;
+import static roomescape.InitialThemeFixture.THEME_2;
+import static roomescape.InitialThemeFixture.THEME_3;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

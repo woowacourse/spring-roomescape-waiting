@@ -1,10 +1,10 @@
 package roomescape.admin.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.InitialDataFixture.INITIAL_RESERVATION_COUNT;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_4;
+import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

@@ -1,7 +1,7 @@
 package roomescape.reservation.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.InitialDataFixture.RESERVATION_1;
+import static roomescape.InitialReservationFixture.RESERVATION_1;
 
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;

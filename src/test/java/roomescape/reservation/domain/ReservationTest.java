@@ -1,9 +1,9 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_2;
 import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialReservationFixture.RESERVATION_1;
+import static roomescape.InitialReservationFixture.RESERVATION_2;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

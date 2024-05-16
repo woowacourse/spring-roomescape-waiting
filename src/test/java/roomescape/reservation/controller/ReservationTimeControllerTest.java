@@ -1,7 +1,7 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.InitialDataFixture.INITIAL_RESERVATION_TIME_COUNT;
+import static roomescape.InitialReservationTimeFixture.INITIAL_RESERVATION_TIME_COUNT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

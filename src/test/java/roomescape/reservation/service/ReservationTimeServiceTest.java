@@ -2,10 +2,10 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.InitialDataFixture.INITIAL_RESERVATION_TIME_COUNT;
-import static roomescape.InitialDataFixture.NOT_RESERVATED_TIME;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_TIME_1;
+import static roomescape.InitialReservationFixture.RESERVATION_1;
+import static roomescape.InitialReservationTimeFixture.INITIAL_RESERVATION_TIME_COUNT;
+import static roomescape.InitialReservationTimeFixture.NOT_RESERVATED_TIME;
+import static roomescape.InitialReservationTimeFixture.RESERVATION_TIME_1;
 
 import java.time.LocalTime;
 import java.util.List;

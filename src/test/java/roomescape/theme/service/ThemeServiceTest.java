@@ -2,11 +2,11 @@ package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static roomescape.InitialDataFixture.INITIAL_THEME_COUNT;
-import static roomescape.InitialDataFixture.NOT_RESERVED_THEME;
-import static roomescape.InitialDataFixture.THEME_1;
-import static roomescape.InitialDataFixture.THEME_2;
-import static roomescape.InitialDataFixture.THEME_3;
+import static roomescape.InitialThemeFixture.INITIAL_THEME_COUNT;
+import static roomescape.InitialThemeFixture.NOT_RESERVED_THEME;
+import static roomescape.InitialThemeFixture.THEME_1;
+import static roomescape.InitialThemeFixture.THEME_2;
+import static roomescape.InitialThemeFixture.THEME_3;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
