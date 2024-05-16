@@ -28,7 +28,7 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,

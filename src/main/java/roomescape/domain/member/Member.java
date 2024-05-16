@@ -18,7 +18,7 @@ public class Member {
     @Embedded
     private Password password;
 
-    Member() {
+    protected Member() {
     }
 
     public Member(Long id, PlayerName name, Email email, Password password) {

@@ -23,7 +23,7 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnailUrl;
 
-    Theme() {
+    protected Theme() {
     }
 
     public Theme(Long id, ThemeName name, String description, String thumbnailUrl) {
