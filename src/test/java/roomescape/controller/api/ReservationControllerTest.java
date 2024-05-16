@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.controller.BaseControllerTest;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -123,7 +124,7 @@ class ReservationControllerTest extends BaseControllerTest {
             softly.assertThat(myReservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
             softly.assertThat(myReservationResponse.time()).isEqualTo(LocalTime.of(11, 0));
             softly.assertThat(myReservationResponse.theme()).isEqualTo("테마 이름");
-            softly.assertThat(myReservationResponse.status()).isEqualTo("예약");
+            softly.assertThat(myReservationResponse.status()).isEqualTo(ReservationStatus.RESERVED);
             softly.assertThat(myReservationResponse.rank()).isEqualTo(0L);
         });
     }

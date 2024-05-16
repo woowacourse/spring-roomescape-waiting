@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWithRankDto;
 
 public record MyReservationResponse(
@@ -11,7 +12,7 @@ public record MyReservationResponse(
         LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
         String theme,
-        String status,
+        ReservationStatus status,
         Long rank
 ) {
 
@@ -24,7 +25,7 @@ public record MyReservationResponse(
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getName(),
-                reservation.getStatus().getName(),
+                reservation.getStatus(),
                 rank
         );
     }

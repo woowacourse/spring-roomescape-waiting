@@ -151,7 +151,7 @@ class ReservationServiceTest extends BaseServiceTest {
             softly.assertThat(myReservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
             softly.assertThat(myReservationResponse.time()).isEqualTo(LocalTime.of(10, 30));
             softly.assertThat(myReservationResponse.theme()).isEqualTo("테마");
-            softly.assertThat(myReservationResponse.status()).isEqualTo("예약");
+            softly.assertThat(myReservationResponse.status()).isEqualTo(ReservationStatus.RESERVED);
             softly.assertThat(myReservationResponse.rank()).isEqualTo(0L);
         });
     }
