@@ -21,6 +21,8 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
+import roomescape.utils.ReservationRequestGenerator;
+import roomescape.utils.ReservationTimeRequestGenerator;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -47,6 +49,9 @@ class ReservationControllerTest {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
+
+        ReservationTimeRequestGenerator.generateOneMinuteAfter();
+        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
     }
 
     @ParameterizedTest

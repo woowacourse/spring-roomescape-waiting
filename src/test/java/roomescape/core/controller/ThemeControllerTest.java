@@ -3,10 +3,6 @@ package roomescape.core.controller;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
-import roomescape.core.dto.reservation.MemberReservationRequest;
-import roomescape.core.dto.reservationtime.ReservationTimeRequest;
+import roomescape.utils.ReservationRequestGenerator;
+import roomescape.utils.ReservationTimeRequestGenerator;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -71,52 +67,13 @@ class ThemeControllerTest {
     }
 
     private void createReservationTimes() {
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(
-                LocalTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm")));
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        ReservationTimeRequest timeRequest2 = new ReservationTimeRequest(
-                LocalTime.now().plusMinutes(2).format(DateTimeFormatter.ofPattern("HH:mm")));
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest2)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        ReservationTimeRequestGenerator.generateOneMinuteAfter();
+        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
     }
 
     private void createReservations() {
-        MemberReservationRequest firstThemeMemberReservationRequest = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                4L, 2L);
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(firstThemeMemberReservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        MemberReservationRequest firstThemeMemberReservationRequest2 = new MemberReservationRequest(
-                LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                5L, 2L);
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(firstThemeMemberReservationRequest2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 2L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(5L, 2L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
     }
 }

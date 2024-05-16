@@ -19,6 +19,8 @@ import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.dto.theme.ThemeRequest;
+import roomescape.utils.ReservationRequestGenerator;
+import roomescape.utils.ReservationTimeRequestGenerator;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -44,6 +46,9 @@ class AdminControllerTest {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
+
+        ReservationTimeRequestGenerator.generateOneMinuteAfter();
+        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
     }
 
     @Test
@@ -117,6 +122,8 @@ class AdminControllerTest {
     @Test
     @DisplayName("시간 삭제 시, 해당 시간을 참조하는 예약이 있으면 예외가 발생한다.")
     void validateTimeDelete() {
+        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
+        
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().delete("/admin/times/1")
@@ -127,19 +134,11 @@ class AdminControllerTest {
     @Test
     @DisplayName("시간 삭제 시, 해당 시간을 참조하는 예약이 없으면 삭제된다.")
     void deleteTime() {
-        ReservationTimeRequest request = new ReservationTimeRequest("10:00");
+        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().delete("/admin/times/4")
+                .when().delete("/admin/times/5")
                 .then().log().all()
                 .statusCode(204);
     }
