@@ -1,8 +1,9 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
 import roomescape.exception.InvalidMemberException;
+
+import java.util.Objects;
 
 @Embeddable
 public class Password {

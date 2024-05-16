@@ -3,6 +3,7 @@ package roomescape.domain.schedule;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 

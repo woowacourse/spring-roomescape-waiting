@@ -1,21 +1,13 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.persistence.*;
 import roomescape.domain.member.Member;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 public class Reservation {

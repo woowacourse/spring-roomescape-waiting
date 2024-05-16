@@ -9,7 +9,6 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Password;
 import roomescape.exception.ForbiddenException;
 import roomescape.exception.InvalidMemberException;
-import roomescape.exception.UnauthorizedException;
 import roomescape.service.auth.dto.LoginCheckResponse;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.LoginResponse;

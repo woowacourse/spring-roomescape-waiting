@@ -1,8 +1,9 @@
 package roomescape.domain.theme;
 
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
 import roomescape.exception.InvalidReservationException;
+
+import java.util.Objects;
 
 @Embeddable
 public class Description {

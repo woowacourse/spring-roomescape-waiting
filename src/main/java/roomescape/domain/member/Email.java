@@ -1,9 +1,10 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
+import roomescape.exception.InvalidMemberException;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.exception.InvalidMemberException;
 
 @Embeddable
 public class Email {

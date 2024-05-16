@@ -1,6 +1,5 @@
 package roomescape.service.member;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -8,6 +7,8 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.exception.InvalidMemberException;
 import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.member.dto.MemberResponse;
+
+import java.util.List;
 
 @Service
 public class MemberService {

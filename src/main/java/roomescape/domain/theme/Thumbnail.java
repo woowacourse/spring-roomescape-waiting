@@ -1,10 +1,11 @@
 package roomescape.domain.theme;
 
 import jakarta.persistence.Embeddable;
+import roomescape.exception.InvalidReservationException;
+
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import roomescape.exception.InvalidReservationException;
 
 @Embeddable
 public class Thumbnail {

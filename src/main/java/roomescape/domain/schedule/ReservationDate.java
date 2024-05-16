@@ -1,6 +1,7 @@
 package roomescape.domain.schedule;
 
 import jakarta.persistence.Embeddable;
+
 import java.time.LocalDate;
 import java.util.Objects;
 

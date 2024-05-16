@@ -1,6 +1,5 @@
 package roomescape.service.schedule;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
@@ -13,6 +12,8 @@ import roomescape.service.schedule.dto.AvailableReservationTimeResponse;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.schedule.dto.ReservationTimeReadRequest;
 import roomescape.service.schedule.dto.ReservationTimeResponse;
+
+import java.util.List;
 
 @Service
 public class ReservationTimeService {
