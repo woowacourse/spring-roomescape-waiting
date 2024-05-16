@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservation.dto.SaveThemeRequest;
-import roomescape.reservation.model.Theme;
+import roomescape.reservation.controller.request.SaveThemeRequest;
+import roomescape.reservation.dto.ThemeDto;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ class ThemeServiceTest {
     @Test
     void getThemesTest() {
         // When
-        final List<Theme> themes = themeService.getThemes();
+        final List<ThemeDto> themes = themeService.getThemes();
 
         // Then
         assertThat(themes).hasSize(15);
@@ -41,16 +41,16 @@ class ThemeServiceTest {
         final SaveThemeRequest saveThemeRequest = new SaveThemeRequest(name, description, thumbnail);
 
         // When
-        final Theme theme = themeService.saveTheme(saveThemeRequest);
+        final ThemeDto theme = themeService.saveTheme(saveThemeRequest);
 
         // Then
-        final List<Theme> themes = themeService.getThemes();
+        final List<ThemeDto> themes = themeService.getThemes();
         Assertions.assertAll(
                 () -> assertThat(themes).hasSize(16),
-                () -> assertThat(theme.getId()).isEqualTo(16L),
-                () -> assertThat(theme.getName().getValue()).isEqualTo(name),
-                () -> assertThat(theme.getDescription().getValue()).isEqualTo(description),
-                () -> assertThat(theme.getThumbnail().getValue()).isEqualTo(thumbnail)
+                () -> assertThat(theme.id()).isEqualTo(16L),
+                () -> assertThat(theme.name().getValue()).isEqualTo(name),
+                () -> assertThat(theme.description().getValue()).isEqualTo(description),
+                () -> assertThat(theme.thumbnail().getValue()).isEqualTo(thumbnail)
         );
     }
 
@@ -61,7 +61,7 @@ class ThemeServiceTest {
         themeService.deleteTheme(7L);
 
         // Then
-        final List<Theme> themes = themeService.getThemes();
+        final List<ThemeDto> themes = themeService.getThemes();
         assertThat(themes).hasSize(14);
     }
 

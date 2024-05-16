@@ -1,4 +1,4 @@
-package roomescape.reservation.dto;
+package roomescape.reservation.controller.request;
 
 import roomescape.member.model.Member;
 import roomescape.reservation.model.Reservation;

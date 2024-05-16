@@ -1,13 +1,13 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.reservation.dto.ReservationTimeDto;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.dto.SaveReservationTimeRequest;
+import roomescape.reservation.controller.request.SaveReservationTimeRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class ReservationTimeService {
@@ -23,14 +23,18 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public List<ReservationTime> getReservationTimes() {
-        return reservationTimeRepository.findAll();
+    public List<ReservationTimeDto> getReservationTimes() {
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTimeDto::from)
+                .toList();
     }
 
-    public ReservationTime saveReservationTime(final SaveReservationTimeRequest request) {
+    public ReservationTimeDto saveReservationTime(final SaveReservationTimeRequest request) {
         validateReservationTimeDuplication(request);
 
-        return reservationTimeRepository.save(request.toReservationTime());
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(request.toReservationTime());
+        return ReservationTimeDto.from(savedReservationTime);
     }
 
     private void validateReservationTimeDuplication(final SaveReservationTimeRequest request) {
@@ -42,11 +46,6 @@ public class ReservationTimeService {
     public void deleteReservationTime(final Long reservationTimeId) {
         validateReservationTimeExist(reservationTimeId);
         reservationTimeRepository.deleteById(reservationTimeId);
-        final int deletedDataCount =1;
-
-        if (deletedDataCount <= 0) {
-            throw new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다.");
-        }
     }
 
     private void validateReservationTimeExist(final Long reservationTimeId) {

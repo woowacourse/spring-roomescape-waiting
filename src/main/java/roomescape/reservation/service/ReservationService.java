@@ -1,11 +1,13 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.dto.SaveReservationRequest;
+import roomescape.reservation.dto.ReservationDto;
+import roomescape.reservation.controller.request.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsParams;
-import roomescape.reservation.dto.SearchReservationsRequest;
+import roomescape.reservation.controller.request.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Transactional
 @Service
 public class ReservationService {
 
@@ -42,11 +45,15 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<Reservation> getReservations() {
-        return reservationRepository.findAll();
+    public List<ReservationDto> getReservations() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(ReservationDto::from)
+                .toList();
     }
 
-    public List<Reservation> searchReservations(final SearchReservationsRequest request) {
+    @Transactional(readOnly = true)
+    public List<ReservationDto> searchReservations(final SearchReservationsRequest request) {
         final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(
                 request.memberId(),
                 request.themeId(),
@@ -54,10 +61,13 @@ public class ReservationService {
                 request.to()
         );
 
-        return customReservationRepository.searchReservations(searchReservationsParams);
+        return customReservationRepository.searchReservations(searchReservationsParams)
+                .stream()
+                .map(ReservationDto::from)
+                .toList();
     }
 
-    public Reservation saveReservation(final SaveReservationRequest request) {
+    public ReservationDto saveReservation(final SaveReservationRequest request) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
         final Theme theme = themeRepository.findById(request.themeId())
@@ -69,7 +79,8 @@ public class ReservationService {
         validateReservationDateAndTime(reservation.getDate(), reservationTime);
         validateReservationDuplication(reservation);
 
-        return reservationRepository.save(reservation);
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationDto.from(savedReservation);
     }
 
     private static void validateReservationDateAndTime(final ReservationDate date, final ReservationTime time) {

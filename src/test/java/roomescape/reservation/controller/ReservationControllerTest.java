@@ -11,7 +11,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.token.TokenProvider;
 import roomescape.member.model.MemberRole;
-import roomescape.reservation.dto.SaveReservationRequest;
+import roomescape.reservation.controller.request.SaveReservationRequest;
 
 import java.time.LocalDate;
 

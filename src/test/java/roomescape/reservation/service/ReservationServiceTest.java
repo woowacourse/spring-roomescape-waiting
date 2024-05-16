@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservation.dto.SaveReservationRequest;
-import roomescape.reservation.model.Reservation;
+import roomescape.reservation.controller.request.SaveReservationRequest;
+import roomescape.reservation.dto.ReservationDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,7 +28,8 @@ class ReservationServiceTest {
     @Test
     void getReservationsTest() {
         // When
-        final List<Reservation> reservations = reservationService.getReservations();
+        final List<ReservationDto> reservations = reservationService.getReservations();
+
         // Then
         assertThat(reservations).hasSize(16);
     }
@@ -41,16 +42,16 @@ class ReservationServiceTest {
         final SaveReservationRequest saveReservationRequest = new SaveReservationRequest(date, 3L, 1L, 1L);
 
         // When
-        final Reservation reservation = reservationService.saveReservation(saveReservationRequest);
+        final ReservationDto reservation = reservationService.saveReservation(saveReservationRequest);
 
         // Then
-        final List<Reservation> reservations = reservationService.getReservations();
+        final List<ReservationDto> reservations = reservationService.getReservations();
         assertAll(
                 () -> assertThat(reservations).hasSize(17),
-                () -> assertThat(reservation.getId()).isEqualTo(17L),
-                () -> assertThat(reservation.getMember().getId()).isEqualTo(3L),
-                () -> assertThat(reservation.getDate().getValue()).isEqualTo(date),
-                () -> assertThat(reservation.getTime().getStartAt()).isEqualTo(LocalTime.of(9, 30))
+                () -> assertThat(reservation.id()).isEqualTo(17L),
+                () -> assertThat(reservation.member().id()).isEqualTo(3L),
+                () -> assertThat(reservation.date().getValue()).isEqualTo(date),
+                () -> assertThat(reservation.time().startAt()).isEqualTo(LocalTime.of(9, 30))
         );
     }
 
@@ -73,7 +74,7 @@ class ReservationServiceTest {
         reservationService.deleteReservation(1L);
 
         // When & Then
-        final List<Reservation> reservations = reservationService.getReservations();
+        final List<ReservationDto> reservations = reservationService.getReservations();
         assertThat(reservations).hasSize(15);
     }
 

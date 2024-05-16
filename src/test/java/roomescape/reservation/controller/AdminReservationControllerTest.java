@@ -11,12 +11,12 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.token.TokenProvider;
 import roomescape.member.model.MemberRole;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.dto.SaveReservationRequest;
-import roomescape.reservation.dto.SaveReservationTimeRequest;
-import roomescape.reservation.dto.SaveThemeRequest;
-import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.controller.response.ReservationTimeResponse;
+import roomescape.reservation.controller.request.SaveReservationRequest;
+import roomescape.reservation.controller.request.SaveReservationTimeRequest;
+import roomescape.reservation.controller.request.SaveThemeRequest;
+import roomescape.reservation.controller.response.ThemeResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

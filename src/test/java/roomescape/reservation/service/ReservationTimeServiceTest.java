@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.reservation.dto.SaveReservationTimeRequest;
-import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.controller.request.SaveReservationTimeRequest;
+import roomescape.reservation.dto.ReservationTimeDto;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -26,7 +26,7 @@ class ReservationTimeServiceTest {
     @Test
     void getReservationTimesTest() {
         // When
-        final List<ReservationTime> reservationTimes = reservationTimeService.getReservationTimes();
+        final List<ReservationTimeDto> reservationTimes = reservationTimeService.getReservationTimes();
 
         // Then
         assertThat(reservationTimes).hasSize(8);
@@ -40,14 +40,14 @@ class ReservationTimeServiceTest {
         final SaveReservationTimeRequest saveReservationTimeRequest = new SaveReservationTimeRequest(startAt);
 
         // When
-        final ReservationTime reservationTime = reservationTimeService.saveReservationTime(saveReservationTimeRequest);
+        final ReservationTimeDto reservationTime = reservationTimeService.saveReservationTime(saveReservationTimeRequest);
 
         // Then
-        final List<ReservationTime> reservationTimes = reservationTimeService.getReservationTimes();
+        final List<ReservationTimeDto> reservationTimes = reservationTimeService.getReservationTimes();
         Assertions.assertAll(
                 () -> assertThat(reservationTimes).hasSize(9),
-                () -> assertThat(reservationTime.getId()).isEqualTo(9L),
-                () -> assertThat(reservationTime.getStartAt()).isEqualTo(startAt)
+                () -> assertThat(reservationTime.id()).isEqualTo(9L),
+                () -> assertThat(reservationTime.startAt()).isEqualTo(startAt)
         );
     }
 
@@ -58,7 +58,7 @@ class ReservationTimeServiceTest {
         reservationTimeService.deleteReservationTime(2L);
 
         // Then
-        final List<ReservationTime> reservationTimes = reservationTimeService.getReservationTimes();
+        final List<ReservationTimeDto> reservationTimes = reservationTimeService.getReservationTimes();
         assertThat(reservationTimes).hasSize(7);
     }
 

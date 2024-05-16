@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.principal.AuthenticatedMember;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.SaveReservationRequest;
-import roomescape.reservation.model.Reservation;
+import roomescape.reservation.controller.response.MyReservationResponse;
+import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.controller.request.SaveReservationRequest;
+import roomescape.reservation.dto.ReservationDto;
 import roomescape.reservation.service.ReservationService;
 import roomescape.resolver.Authenticated;
 
@@ -38,10 +38,10 @@ public class ReservationController {
             @RequestBody final SaveReservationRequest request,
             @Authenticated final AuthenticatedMember authenticatedMember
     ) {
-        final Reservation savedReservation = reservationService.saveReservation(
+        final ReservationDto savedReservation = reservationService.saveReservation(
                 request.setMemberId(authenticatedMember.id()));
 
-        return ResponseEntity.created(URI.create("/reservations/" + savedReservation.getId()))
+        return ResponseEntity.created(URI.create("/reservations/" + savedReservation.id()))
                 .body(ReservationResponse.from(savedReservation));
     }
 
