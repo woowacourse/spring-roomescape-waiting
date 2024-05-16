@@ -73,3 +73,32 @@ class ReservationRepositoryTest {
         assertThat(reservations.get(0).getId()).isEqualTo(1L);
     }
 }
+
+    @DisplayName("특정 시간 아이디의 예약이 존재하면 참을 반환한다.")
+    @Test
+    void should_return_true_when_exist_timeId() {
+        boolean isExist = reservationRepository.existsByTimeId(1L);
+        assertThat(isExist).isTrue();
+    }
+
+    @DisplayName("특정 시간 아이디의 예약이 존재하지 않으면 거짓을 반환한다.")
+    @Test
+    void should_return_false_when_not_exist_timeId() {
+        boolean isExist = reservationRepository.existsByTimeId(3L);
+        assertThat(isExist).isFalse();
+    }
+
+    @DisplayName("특정 테마 아이디의 예약이 존재하면 참을 반환한다.")
+    @Test
+    void should_return_true_when_exist_themeId() {
+        boolean isExist = reservationRepository.existsByThemeId(1L);
+        assertThat(isExist).isTrue();
+    }
+
+    @DisplayName("특정 테마 아이디의 예약이 존재하지 않으면 거짓을 반환한다.")
+    @Test
+    void should_return_false_when_not_exist_themeId() {
+        boolean isExist = reservationRepository.existsByThemeId(3L);
+        assertThat(isExist).isFalse();
+    }
+}
