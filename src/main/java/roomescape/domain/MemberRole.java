@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.util.Arrays;
+import roomescape.exception.member.InvalidMemberRoleException;
 
 public enum MemberRole {
     USER(1),
@@ -16,7 +17,7 @@ public enum MemberRole {
         return Arrays.stream(MemberRole.values())
                 .filter(r -> r.name().equals(role))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 역할입니다."));
+                .orElseThrow(InvalidMemberRoleException::new);
     }
 
     public boolean isLowerThan(MemberRole other) {

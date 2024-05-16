@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import roomescape.domain.MemberRole;
 import roomescape.exception.login.ExpiredTokenException;
 import roomescape.exception.login.InvalidTokenException;
+import roomescape.exception.member.InvalidMemberRoleException;
 
 @Component
 public class JwtTokenProvider {
@@ -46,7 +47,11 @@ public class JwtTokenProvider {
 
     public MemberRole getMemberRole(String token) {
         String role = getClaims(token).get("role", String.class);
-        return MemberRole.findByName(role);
+        try {
+            return MemberRole.findByName(role);
+        } catch (InvalidMemberRoleException e) {
+            throw new InvalidTokenException();
+        }
     }
 
     private Claims getClaims(String token) {
