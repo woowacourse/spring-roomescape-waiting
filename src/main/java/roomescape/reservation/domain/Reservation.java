@@ -18,7 +18,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne
-    private ReservationTime time;
+    private ReservationTime reservationTime;
 
     @ManyToOne
     private Theme theme;
@@ -26,27 +26,27 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    private Reservation() {
+    protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this.id = id;
         this.date = date;
-        this.time = time;
+        this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
     }
 
     public Reservation(Long id, Reservation reservation) {
-        this(id, reservation.date, reservation.time, reservation.theme, reservation.member);
+        this(id, reservation.date, reservation.reservationTime, reservation.theme, reservation.member);
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        this(null, date, reservationTime, theme, member);
     }
 
     public boolean isBeforeNow() {
-        return time.isBeforeNow(date);
+        return reservationTime.isBeforeNow(date);
     }
 
     public boolean isBetweenInclusive(LocalDate dateFrom, LocalDate dateTo) {
@@ -65,8 +65,8 @@ public class Reservation {
         return date.format(formatter);
     }
 
-    public ReservationTime getTime() {
-        return time;
+    public ReservationTime getReservationTime() {
+        return reservationTime;
     }
 
     public Theme getTheme() {

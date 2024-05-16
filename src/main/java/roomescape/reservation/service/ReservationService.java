@@ -5,10 +5,10 @@ import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.LoginMemberRequest;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -43,7 +43,7 @@ public class ReservationService {
 
     public ReservationResponse addReservation(
             ReservationRequest reservationRequest,
-            LoginMemberRequest loginMemberRequest
+            MemberRequest memberRequest
     ) {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(reservationRequest.timeId());
         ThemeResponse themeResponse = themeService.getTheme(reservationRequest.themeId());
@@ -52,7 +52,7 @@ public class ReservationService {
                 reservationRequest.date(),
                 timeResponse.toReservationTime(),
                 themeResponse.toTheme(),
-                loginMemberRequest.toLoginMember()
+                memberRequest.toLoginMember()
         );
         validateIsBeforeNow(reservation);
         validateIsDuplicated(reservation);
@@ -84,7 +84,7 @@ public class ReservationService {
     }
 
     private void validateIsDuplicated(Reservation reservation) {
-        if (reservationJpaRepository.existsByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
+        if (reservationJpaRepository.existsByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme())) {
             throw new DuplicationException("이미 예약이 존재합니다.");
         }
     }
@@ -112,10 +112,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findReservationsByMember(Member member) {
+    public List<ReservationOfMemberResponse> findReservationsByMember(Member member) {
         return reservationJpaRepository.findByMember(member)
                 .stream()
-                .map(MyReservationResponse::new)
+                .map(ReservationOfMemberResponse::new)
                 .toList();
     }
 

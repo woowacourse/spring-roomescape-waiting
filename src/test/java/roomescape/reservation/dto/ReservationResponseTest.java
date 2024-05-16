@@ -19,7 +19,7 @@ class ReservationResponseTest {
                 RESERVATION_1.getId(),
                 RESERVATION_1.getMember().getName().name(),
                 RESERVATION_1.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                new ReservationTimeResponse(RESERVATION_1.getTime()),
+                new ReservationTimeResponse(RESERVATION_1.getReservationTime()),
                 new ThemeResponse(RESERVATION_1.getTheme()),
                 new MemberNameResponse(RESERVATION_1.getMember())
         );

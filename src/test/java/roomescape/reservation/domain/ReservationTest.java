@@ -34,7 +34,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(
                 RESERVATION_1.getId(),
                 RESERVATION_2.getDate(),
-                RESERVATION_2.getTime(),
+                RESERVATION_2.getReservationTime(),
                 RESERVATION_2.getTheme(),
                 MEMBER_1
         );

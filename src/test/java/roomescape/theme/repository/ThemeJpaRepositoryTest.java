@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,5 +72,17 @@ class ThemeJpaRepositoryTest {
         Optional<Theme> theme = themeJpaRepository.findById(-1L);
 
         assertThat(theme.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("이미 예약된 정보를 바탕으로 인기테마를 찾는다.")
+    void findTrendings() {
+        List<Theme> trendings = themeJpaRepository.findTrendingThemesBetweenDates(
+                LocalDate.now().minusDays(7),
+                LocalDate.now().minusDays(1),
+                PageRequest.of(0, 1)
+        );
+
+        assertThat(trendings).containsExactly(THEME_3);
     }
 }

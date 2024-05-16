@@ -20,7 +20,7 @@ public record ReservationResponse(
                 reservation.getId(),
                 reservation.getMember().getName().name(),
                 reservation.getDate(DateTimeFormatter.ISO_DATE),
-                new ReservationTimeResponse(reservation.getTime()),
+                new ReservationTimeResponse(reservation.getReservationTime()),
                 new ThemeResponse(reservation.getTheme()),
                 new MemberNameResponse(reservation.getMember())
         );

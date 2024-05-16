@@ -59,7 +59,7 @@ public class ReservationTimeService {
         Theme theme = themeJpaRepository.findById(themeId).orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));
         List<Long> alreadyBookedTimeIds = reservationJpaRepository.findByDateAndTheme(date, theme)
                 .stream()
-                .map(reservation -> reservation.getTime().getId())
+                .map(reservation -> reservation.getReservationTime().getId())
                 .toList();
 
         List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();

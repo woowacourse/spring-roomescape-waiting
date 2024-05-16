@@ -28,7 +28,7 @@ VALUES ('솔라', 'solar123@email.com', 'password', 'USER');
 INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN');
 
-INSERT INTO reservation(member_id, date, time_id, theme_id) VALUES
+INSERT INTO reservation(member_id, date, reservation_time_id, theme_id) VALUES
                                (1L, DATEADD('DAY', -10, CURRENT_DATE), 1, 3),
                                (1L, DATEADD('DAY', -6, CURRENT_DATE), 2, 3),
                                (1L, DATEADD('DAY', -5, CURRENT_DATE), 3, 3),

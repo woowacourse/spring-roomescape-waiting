@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.ValidationException;
-import roomescape.member.dto.LoginMemberRequest;
+import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 
@@ -24,7 +24,7 @@ import static roomescape.InitialMemberFixture.MEMBER_1;
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
 class ReservationServiceTest {
 
-    private final LoginMemberRequest loginMemberRequest = new LoginMemberRequest(
+    private final MemberRequest memberRequest = new MemberRequest(
             MEMBER_1.getId(),
             MEMBER_1.getName().name(),
             MEMBER_1.getEmail().email(),
@@ -42,11 +42,11 @@ class ReservationServiceTest {
     void savePastGetTime() {
         ReservationRequest reservationRequest = new ReservationRequest(
                 RESERVATION_1.getDate(),
-                RESERVATION_1.getTime().getId(),
+                RESERVATION_1.getReservationTime().getId(),
                 THEME_2.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, loginMemberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -55,11 +55,11 @@ class ReservationServiceTest {
     void saveSameReservation() {
         ReservationRequest reservationRequest = new ReservationRequest(
                 RESERVATION_2.getDate(),
-                RESERVATION_2.getTime().getId(),
+                RESERVATION_2.getReservationTime().getId(),
                 RESERVATION_2.getTheme().getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, loginMemberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
                 .isInstanceOf(ValidationException.class);
     }
 
@@ -73,7 +73,7 @@ class ReservationServiceTest {
         );
 
         ReservationResponse reservationResponse = reservationService.addReservation(
-                reservationRequest, loginMemberRequest);
+                reservationRequest, memberRequest);
 
         assertThat(reservationResponse.id()).isNotNull();
     }
@@ -87,7 +87,7 @@ class ReservationServiceTest {
                 THEME_1.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, loginMemberRequest))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberRequest))
                 .isInstanceOf(ValidationException.class);
     }
 

@@ -25,10 +25,7 @@ public class Member {
     @Embedded
     private Password password;
 
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
-
-    private Member() {
+    protected Member() {
     }
 
     public Member(Long id, Name name, Email email, Role role, Password password) {

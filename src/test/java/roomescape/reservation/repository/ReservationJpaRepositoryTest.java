@@ -4,13 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Reservation;
-import roomescape.theme.domain.Theme;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +29,7 @@ class ReservationJpaRepositoryTest {
     void save() {
         Reservation reservation = new Reservation(
                 RESERVATION_2.getDate(),
-                RESERVATION_2.getTime(),
+                RESERVATION_2.getReservationTime(),
                 THEME_2,
                 MEMBER_1
         );
@@ -47,7 +44,7 @@ class ReservationJpaRepositoryTest {
     void saveOnlySameGetDateGetTime() {
         Reservation reservation = new Reservation(
                 RESERVATION_2.getDate(),
-                RESERVATION_2.getTime(),
+                RESERVATION_2.getReservationTime(),
                 THEME_2,
                 MEMBER_1
         );
@@ -59,7 +56,7 @@ class ReservationJpaRepositoryTest {
     void saveOnlySameTheme() {
         Reservation reservation = new Reservation(
                 RESERVATION_2.getDate().plusDays(1),
-                RESERVATION_2.getTime(),
+                RESERVATION_2.getReservationTime(),
                 RESERVATION_2.getTheme(),
                 MEMBER_1
         );
@@ -106,9 +103,9 @@ class ReservationJpaRepositoryTest {
     @Test
     @DisplayName("이미 존재하는 예약과 날짜, 시간, 테마가 같으면 중복되는 예약이다.")
     void isAlreadyBooked() {
-        boolean alreadyBooked = reservationJpaRepository.existsByDateAndTimeAndTheme(
+        boolean alreadyBooked = reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
                 RESERVATION_1.getDate(),
-                RESERVATION_1.getTime(),
+                RESERVATION_1.getReservationTime(),
                 RESERVATION_1.getTheme()
         );
 
@@ -118,9 +115,9 @@ class ReservationJpaRepositoryTest {
     @Test
     @DisplayName("이미 존재하는 예약과 날짜가 다르면 중복되는 예약이 아니다.")
     void isNotBookedDate() {
-        boolean alreadyBooked = reservationJpaRepository.existsByDateAndTimeAndTheme(
+        boolean alreadyBooked = reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
                 NO_RESERVATION_DATE,
-                RESERVATION_1.getTime(),
+                RESERVATION_1.getReservationTime(),
                 RESERVATION_1.getTheme()
         );
 
@@ -130,7 +127,7 @@ class ReservationJpaRepositoryTest {
     @Test
     @DisplayName("이미 존재하는 예약과 시간이 다르면 중복되는 예약이 아니다.")
     void isNotBookedTime() {
-        boolean alreadyBooked = reservationJpaRepository.existsByDateAndTimeAndTheme(
+        boolean alreadyBooked = reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
                 RESERVATION_1.getDate(),
                 NOT_RESERVATED_TIME,
                 RESERVATION_1.getTheme()
@@ -142,24 +139,12 @@ class ReservationJpaRepositoryTest {
     @Test
     @DisplayName("이미 존재하는 예약과 테마가 다르면 중복되는 예약이 아니다.")
     void isNotBookedTheme() {
-        boolean alreadyBooked = reservationJpaRepository.existsByDateAndTimeAndTheme(
+        boolean alreadyBooked = reservationJpaRepository.existsByDateAndReservationTimeAndTheme(
                 RESERVATION_1.getDate(),
-                RESERVATION_1.getTime(),
+                RESERVATION_1.getReservationTime(),
                 NOT_RESERVED_THEME
         );
 
         assertThat(alreadyBooked).isEqualTo(false);
-    }
-
-    @Test
-    @DisplayName("이미 예약된 정보를 바탕으로 인기테마를 찾는다.")
-    void findTrendings() {
-        List<Theme> trendings = reservationJpaRepository.findTrendingThemesBetweenDates(
-                LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1),
-                PageRequest.of(0, 1)
-        );
-
-        assertThat(trendings).containsExactly(THEME_3);
     }
 }

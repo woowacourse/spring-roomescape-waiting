@@ -19,10 +19,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    @OneToMany(mappedBy = "time")
-    private Set<Reservation> reservations;
-
-    private ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(Long id, LocalTime startAt) {

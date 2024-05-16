@@ -5,7 +5,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
-import roomescape.reservation.repository.ReservationJpaRepository;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
@@ -20,11 +19,9 @@ import java.util.List;
 public class ThemeService {
 
     private final ThemeJpaRepository themeJpaRepository;
-    private final ReservationJpaRepository reservationJpaRepository;
 
-    public ThemeService(ThemeJpaRepository themeJpaRepository, ReservationJpaRepository reservationJpaRepository) {
+    public ThemeService(ThemeJpaRepository themeJpaRepository) {
         this.themeJpaRepository = themeJpaRepository;
-        this.reservationJpaRepository = reservationJpaRepository;
     }
 
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
@@ -55,7 +52,7 @@ public class ThemeService {
         LocalDate trendingStatsStart = now.minusDays(7);
         LocalDate trendingStatsEnd = now.minusDays(1);
 
-        List<Theme> mostReservedThemesBetweenDates = reservationJpaRepository.findTrendingThemesBetweenDates(trendingStatsStart, trendingStatsEnd, PageRequest.of(0, Math.toIntExact(limit)));
+        List<Theme> mostReservedThemesBetweenDates = themeJpaRepository.findTrendingThemesBetweenDates(trendingStatsStart, trendingStatsEnd, PageRequest.of(0, Math.toIntExact(limit)));
         return mostReservedThemesBetweenDates
                 .stream()
                 .map(ThemeResponse::new)

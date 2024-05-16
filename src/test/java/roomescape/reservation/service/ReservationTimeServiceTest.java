@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
     void getGetTime() {
         ReservationTimeResponse timeResponse = reservationTimeService.getTime(RESERVATION_1.getId());
 
-        assertThat(timeResponse.startAt()).isEqualTo(RESERVATION_1.getTime().getStartAt().toString());
+        assertThat(timeResponse.startAt()).isEqualTo(RESERVATION_1.getReservationTime().getStartAt().toString());
     }
 
     @Test

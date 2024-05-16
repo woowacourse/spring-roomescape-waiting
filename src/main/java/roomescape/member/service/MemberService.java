@@ -3,27 +3,35 @@ package roomescape.member.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
-import roomescape.member.dto.LoginMemberRequest;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.repository.MemberJpaRepository;
 
 import javax.naming.AuthenticationException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
 @Service
 public class MemberService {
 
-    private static final String SECRET_KEY = "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E";
+    @Value("${security.jwt.token.secret-key}")
+    private String secretKey;
+    @Value("${security.jwt.token.expire-length}")
+    private long validityInMilliseconds;
+
     private final MemberJpaRepository memberJpaRepository;
 
     public MemberService(MemberJpaRepository MemberJpaRepository) {
@@ -54,13 +62,18 @@ public class MemberService {
     }
 
     private String parseToToken(Member member) {
+        Instant issuedAt = Instant.now();
+        Instant expiration = issuedAt.plusSeconds(validityInMilliseconds);
+
         return Jwts.builder()
                 .setSubject(member.getId().toString())
                 .claim("name", member.getName().name())
                 .claim("email", member.getEmail().email())
                 .claim("role", member.getRole().name())
                 .claim("password", member.getPassword().password())
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .setIssuedAt(Date.from(issuedAt))
+                .setExpiration(Date.from(expiration))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 
@@ -78,7 +91,7 @@ public class MemberService {
     private Member parseTokenToLoginMember(String token) throws AuthenticationException {
         try {
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -95,10 +108,10 @@ public class MemberService {
         }
     }
 
-    public LoginMemberRequest getLoginMemberRequestByToken(String token) throws AuthenticationException {
+    public MemberRequest getLoginMemberRequestByToken(String token) throws AuthenticationException {
         Member member = parseTokenToLoginMember(token);
 
-        return new LoginMemberRequest(member);
+        return new MemberRequest(member);
     }
 
     public Member getById(Long memberId) {

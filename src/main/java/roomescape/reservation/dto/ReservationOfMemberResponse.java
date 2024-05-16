@@ -4,15 +4,14 @@ import roomescape.reservation.domain.Reservation;
 
 import java.time.format.DateTimeFormatter;
 
-public record MyReservationResponse(Long reservationId, String theme, String date, String time, String status) {
+public record ReservationOfMemberResponse(Long reservationId, String themeName, String date, String reservationTime, String status) {
 
-    // TODO: status를 Reservation이 갖도록 수정
-    public MyReservationResponse(Reservation reservation) {
+    public ReservationOfMemberResponse(Reservation reservation) {
         this(
                 reservation.getId(),
                 reservation.getTheme().getName().name(),
                 reservation.getDate(DateTimeFormatter.ISO_DATE),
-                reservation.getTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
+                reservation.getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
                 "예약"
         );
     }

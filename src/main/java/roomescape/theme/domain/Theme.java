@@ -17,10 +17,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    @OneToMany(mappedBy = "theme")
-    private Set<Reservation> reservations;
-
-    private Theme() {
+    protected Theme() {
     }
 
     public Theme(Long id, Name name, String description, String thumbnail) {
