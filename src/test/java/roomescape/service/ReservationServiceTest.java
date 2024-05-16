@@ -13,13 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Theme;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
-import roomescape.service.dto.request.MemberRequest;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.request.ReservationTimeRequest;
-import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.response.MemberResponse;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
@@ -34,48 +39,51 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
-    private ReservationTimeService reservationTimeService;
+    private ReservationRepository reservationRepository;
 
     @Autowired
-    private ThemeService themeService;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private MemberService memberService;
+    private ThemeRepository themeRepository;
 
-    private ReservationTimeResponse reservationTime;
-    private ThemeResponse theme;
-    private MemberResponse member;
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private ReservationTime reservationTime;
+    private Theme theme;
+    private Member member;
 
 
     @BeforeEach
     void insertReservation() {
-        reservationTime = reservationTimeService.createReservationTime(new ReservationTimeRequest(LocalTime.of(10, 0)));
-        theme = themeService.createTheme(new ThemeRequest("happy", "hi", "abcd.html"));
-        member = memberService.createMember(new MemberRequest("sudal", "sudal@email.com", "sudal123", Role.ADMIN));
+        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        theme = themeRepository.save(new Theme("happy", "hi", "abcd.html"));
+        member = memberRepository.save(new Member("sudal", "sudal@email.com", "sudal", Role.USER));
     }
 
     @DisplayName("예약 생성 테스트")
     @Test
     void createReservation() {
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12),
-                reservationTime.id(), theme.id(), member.id());
+                reservationTime.getId(), theme.getId(), member.getId());
 
         ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
                 reservationRequest.memberId());
 
         assertAll(
-                () -> assertThat(reservationResponse.name()).isEqualTo(member.name()),
+                () -> assertThat(reservationResponse.name()).isEqualTo(member.getName()),
                 () -> assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2030, 12, 12)),
-                () -> assertThat(reservationResponse.theme()).isEqualTo(theme),
-                () -> assertThat(reservationResponse.member()).isEqualTo(member),
-                () -> assertThat(reservationResponse.time()).isEqualTo(reservationTime)
+                () -> assertThat(reservationResponse.theme()).isEqualTo(ThemeResponse.from(theme)),
+                () -> assertThat(reservationResponse.member()).isEqualTo(MemberResponse.from(member)),
+                () -> assertThat(reservationResponse.time()).isEqualTo(ReservationTimeResponse.from(reservationTime))
         );
     }
 
     @DisplayName("예약시간이 없는 경우 예외가 발생한다.")
     @Test
     void reservationTimeIsNotExist() {
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12), 1000L, theme.id(),
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12), 1000L, theme.getId(),
                 1L);
 
         assertThatThrownBy(
@@ -87,11 +95,11 @@ class ReservationServiceTest {
     @DisplayName("과거 시간을 예약하는 경우 예외가 발생한다.")
     @Test
     void validatePastTime() {
-        ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(
-                new ReservationTimeRequest(LocalTime.of(10, 0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.of(10, 0)));
 
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12), reservationTime.id(),
-                theme.id(), 1L);
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12), reservationTime.getId(),
+                theme.getId(), 1L);
 
         assertThatThrownBy(
                 () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
@@ -103,46 +111,51 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 조회 테스트")
     @Test
     void findAllReservations() {
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2999, 12, 12), reservationTime.id(),
-                theme.id(), member.id());
-        reservationService.createReservation(reservationRequest, reservationRequest.memberId());
+        List<Reservation> reservations = List.of(
+                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
+                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
 
-        List<ReservationResponse> reservations = reservationService.findAllReservations();
+        reservationRepository.saveAll(reservations);
 
-        assertThat(reservations).hasSize(1);
+        List<ReservationResponse> findReservations = reservationService.findAllReservations();
+
+        assertThat(findReservations).hasSize(2);
     }
 
     @DisplayName("예약 삭제 테스트")
     @Test
     void deleteReservation() {
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2030, 12, 12), reservationTime.id(),
-                theme.id(), member.id());
-        ReservationResponse savedReservation = reservationService.createReservation(reservationRequest,
-                reservationRequest.memberId());
+        List<Reservation> reservations = List.of(
+                new Reservation(member, LocalDate.of(2999,12,12), reservationTime, theme),
+                new Reservation(member, LocalDate.of(2999,12,13), reservationTime, theme));
 
-        reservationService.deleteReservation(savedReservation.id());
+        reservationRepository.saveAll(reservations);
 
-        List<ReservationResponse> reservations = reservationService.findAllReservations();
-        assertThat(reservations).isEmpty();
+        reservationService.deleteReservation(1L);
+
+        List<Reservation> findReservations = reservationRepository.findAll();
+
+        assertThat(findReservations).hasSize(1);
     }
 
     @DisplayName("사용자별 모든 예약 조회 테스트")
     @Test
     void findAllByMemberId() {
-        ReservationTimeResponse reservationTime1 = reservationTimeService.createReservationTime(new ReservationTimeRequest(LocalTime.of(10, 0)));
-        ReservationTimeResponse reservationTime2= reservationTimeService.createReservationTime(new ReservationTimeRequest(LocalTime.of(12, 0)));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.of(12, 0)));
 
-        MemberResponse member1 = memberService.createMember(new MemberRequest("sudal", "sudal@email.com", "sudal123", Role.ADMIN));
-        MemberResponse member2 = memberService.createMember(new MemberRequest("rush", "rush@email.com", "rush", Role.ADMIN));
+        Member member1 = memberRepository.save(
+                new Member("sudal", "sudal@email.com", "sudal123", Role.ADMIN));
+        Member member2 = memberRepository.save(
+                new Member("rush", "rush@email.com", "rush", Role.ADMIN));
 
-        ReservationRequest reservationRequest1 = new ReservationRequest(LocalDate.of(2030, 12, 12), reservationTime1.id(), theme.id(),
-                member1.id());
-        reservationService.createReservation(reservationRequest1, reservationRequest1.memberId());
-        ReservationRequest reservationRequest2 = new ReservationRequest(LocalDate.of(2030, 12, 12), reservationTime2.id(), theme.id(),
-                member2.id());
-        reservationService.createReservation(reservationRequest2, reservationRequest2.memberId());
+        reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
+        reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));
 
-        List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.id());
+
+        List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 
         assertThat(reservations).hasSize(1);
     }

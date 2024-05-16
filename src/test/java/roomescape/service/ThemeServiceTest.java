@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Theme;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 
@@ -18,11 +20,14 @@ class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
+    @Autowired
+    private ThemeRepository themeRepository;
 
     @DisplayName("테마를 저장한다.")
     @Test
     void createTheme() {
         ThemeRequest themeRequest = new ThemeRequest("happy", "hi", "abcd.html");
+
         ThemeResponse theme = themeService.createTheme(themeRequest);
 
         assertAll(
@@ -35,8 +40,7 @@ class ThemeServiceTest {
     @DisplayName("모든 테마를 조회한다.")
     @Test
     void findAllThemes() {
-        ThemeRequest themeRequest = new ThemeRequest("happy", "hi", "abcd.html");
-        ThemeResponse theme = themeService.createTheme(themeRequest);
+        themeRepository.save(new Theme("happy", "hi", "abcd.html"));
 
         List<ThemeResponse> themes = themeService.findAllThemes();
 
@@ -46,12 +50,11 @@ class ThemeServiceTest {
     @DisplayName("테마를 삭제한다.")
     @Test
     void deleteTheme() {
-        ThemeRequest themeRequest = new ThemeRequest("happy", "hi", "abcd.html");
-        ThemeResponse theme = themeService.createTheme(themeRequest);
+        Theme theme = themeRepository.save(new Theme("happy", "hi", "abcd.html"));
 
-        themeService.deleteTheme(theme.id());
+        themeService.deleteTheme(theme.getId());
 
-        List<ThemeResponse> themes = themeService.findAllThemes();
+        List<Theme> themes = themeRepository.findAll();
         assertThat(themes).isEmpty();
     }
 }
