@@ -12,7 +12,10 @@
 | `ADMIN`  | GET    | `/admin/reservationTime`                                | 예약 시간 관리 페이지 요청       | `templates/admin/reservationTime.html` | `@Controller`     |
 | `ADMIN`  | GET    | `/admin/theme`                                          | 테마 관리 페이지 요청          | `templates/admin/theme.html`           | `@Controller`     |
 |          | GET    | `/login`                                                | 로그인 페이지 요청            | `templates/login.html`                 | `@Controller`     |
+|          | GET    | `/signup`                                               | 회원가입 페이지 요청           |                                        | `@Controller`     |
 |          | POST   | `/login`                                                | 로그인 요청                |                                        | `@RestController` |
+|          | POST   | `/signup`                                               | 회원가입 요청               |                                        | `@RestController` |
+|          | POST   | `/logout`                                               | 로그아웃 요청               |                                        | `@RestController` |
 |          | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
 | `MEMBER` | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
@@ -46,6 +49,57 @@ Content-Type: application/json
 ```
 
 - Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+Keep-Alive: timeout=60
+Set-Cookie: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
+Set-Cookie: refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
+```
+
+---
+
+### 회원가입 요청 API
+
+- Request
+
+```
+POST /login HTTP/1.1
+Content-Type: application/json
+
+{
+        "name: "name"
+        "password": "password",
+        "email": "admin@email.com"
+}
+```
+
+- Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+Keep-Alive: timeout=60
+Set-Cookie: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
+Set-Cookie: refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
+```
+
+---
+
+### 로그아웃 요청 API
+
+- Request
+
+```
+POST /login HTTP/1.1
+Content-Type: application/json
+accessToken=eyJhbGciOiJIUzI1NiJ9.eyJtZW1iZXJJZCI6MSwiaWF0IjoxNzE1NjE1OTMyLCJleHAiOjE3MTU2MTc3MzJ9.nfu6IZlKBccnmBbMtKDTP-5TbNWUMhcVY_ee09aNwhE;
+```
+
+- Response
+
+> Cookie를 통해 만료된 토큰 Response
 
 ```
 HTTP/1.1 200 
