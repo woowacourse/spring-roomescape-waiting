@@ -4,20 +4,17 @@ spring:
 
 ---
 
-server:
-  port: 63155
-
 spring:
   datasource:
-    url: jdbc:h2:mem:test;DATABASE_TO_LOWER=TRUE
+    # h2 서버 url
+    # url: jdbc:h2:mem:testtest;DATABASE_TO_LOWER=TRUE
+    # h2 embedded url
+    url: jdbc:h2:~/testtest;AUTO_SERVER=TRUE;DATABASE_TO_LOWER=TRUE
     username: sa
-
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: create
 
     show-sql: true
     properties:
