@@ -6,9 +6,11 @@ public record MemberReservationResponse(long id, String themeName, String date, 
     public static MemberReservationResponse toResponse(final ReservationOutput output) {
         return new MemberReservationResponse(
                 output.id(),
-                output.theme().name(),
+                output.theme()
+                        .name(),
                 output.date(),
-                output.time().startAt(),
+                output.time()
+                        .startAt(),
                 output.reservationStatus()
         );
     }

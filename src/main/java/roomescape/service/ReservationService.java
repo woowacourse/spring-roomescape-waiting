@@ -35,7 +35,6 @@ public class ReservationService {
 
     public List<ReservationOutput> getAllMyReservations(final long memberId) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-
         return ReservationOutput.toOutputs(reservations);
     }
 

@@ -17,7 +17,7 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
     private final TokenContextRequest tokenContextRequest;
 
     private static List<String> initializeCheckList() {
-        return List.of("/login/check","/reservations/mine");
+        return List.of("/login/check", "/reservations/mine");
     }
 
     public CheckLoginInterceptor(final MemberService memberService, final TokenProvider tokenProvider, final TokenContextRequest tokenContextRequest) {

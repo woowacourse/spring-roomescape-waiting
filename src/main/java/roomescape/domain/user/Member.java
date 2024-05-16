@@ -7,7 +7,8 @@ import java.util.Objects;
 @Entity
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
     private Name name;
@@ -28,17 +29,20 @@ public class Member {
         this.password = password;
         this.role = role;
     }
+
     public static Member fromMember(final Long id, final String name, final String email, final String password) {
-        return new Member(id, new Name(name), new Email(email), new Password(password),Role.USER);
+        return new Member(id, new Name(name), new Email(email), new Password(password), Role.USER);
     }
+
     public static Member fromAdmin(final Long id, final String name, final String email, final String password) {
-        return new Member(id, new Name(name), new Email(email), new Password(password),Role.ADMIN);
+        return new Member(id, new Name(name), new Email(email), new Password(password), Role.ADMIN);
     }
 
     public static Member from(final Long id, final String name, final String email, final String password, final String role) {
-        return new Member(id, new Name(name), new Email(email), new Password(password),Role.from(role));
+        return new Member(id, new Name(name), new Email(email), new Password(password), Role.from(role));
     }
-    public boolean isEqualId(final long id){
+
+    public boolean isEqualId(final long id) {
         return this.id.equals(id);
     }
 

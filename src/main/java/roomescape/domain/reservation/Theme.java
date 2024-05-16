@@ -7,7 +7,8 @@ import java.util.Objects;
 @Entity
 public class Theme {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String description;
@@ -39,7 +40,7 @@ public class Theme {
         }
     }
 
-    public boolean isEqualId(final long id){
+    public boolean isEqualId(final long id) {
         return this.id.equals(id);
     }
 

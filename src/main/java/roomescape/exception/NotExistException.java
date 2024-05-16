@@ -6,7 +6,7 @@ public class NotExistException extends IllegalArgumentException {
         super(String.format("%s ID %d에 해당하는 값이 없습니다", exceptionDomainType.getMessage(), id));
     }
 
-    public NotExistException(final String message){
+    public NotExistException(final String message) {
         super(message);
     }
 }

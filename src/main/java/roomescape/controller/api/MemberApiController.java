@@ -24,8 +24,9 @@ public class MemberApiController {
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
                 .build();
     }
+
     @GetMapping
-    public ResponseEntity<MembersResponse> getAllMembers(){
+    public ResponseEntity<MembersResponse> getAllMembers() {
         final var output = memberService.getAllMembers();
         return ResponseEntity.ok(MembersResponse.toResponse(output));
     }

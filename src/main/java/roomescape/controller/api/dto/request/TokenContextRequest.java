@@ -11,9 +11,11 @@ import static org.springframework.web.context.WebApplicationContext.SCOPE_REQUES
 @Scope(value = SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class TokenContextRequest {
     private TokenLoginOutput tokenLoginOutput;
+
     public TokenLoginOutput getTokenLoginOutput() {
         return tokenLoginOutput;
     }
+
     public void setTokenLoginOutput(final TokenLoginOutput tokenLoginOutput) {
         this.tokenLoginOutput = tokenLoginOutput;
     }

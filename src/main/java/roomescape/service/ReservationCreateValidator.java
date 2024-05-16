@@ -40,7 +40,7 @@ public class ReservationCreateValidator {
         final Theme theme = validateExistTheme(input.themeId());
         final Member member = validateExistMember(input.memberId());
 
-        final Reservation reservation = input.toReservation(reservationTime, theme,member);
+        final Reservation reservation = input.toReservation(reservationTime, theme, member);
         if (reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
             throw new AlreadyExistsException(RESERVATION, reservation.getLocalDateTimeFormat());
         }
