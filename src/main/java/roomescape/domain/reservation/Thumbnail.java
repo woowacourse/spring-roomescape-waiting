@@ -12,7 +12,7 @@ public class Thumbnail {
 
     private String value;
 
-    public Thumbnail() {
+    protected Thumbnail() {
     }
 
     public Thumbnail(String value) {

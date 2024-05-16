@@ -26,7 +26,7 @@ public class Schedule {
     @ManyToOne
     private ReservationTime time;
 
-    public Schedule() {
+    protected Schedule() {
     }
 
     public Schedule(long id, ReservationDate date, ReservationTime time) {

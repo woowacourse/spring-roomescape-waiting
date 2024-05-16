@@ -11,7 +11,7 @@ public class Password {
 
     private String value;
 
-    public Password() {
+    protected Password() {
     }
 
     private Password(String value) {

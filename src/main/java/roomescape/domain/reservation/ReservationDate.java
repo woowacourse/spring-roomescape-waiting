@@ -8,7 +8,7 @@ import java.util.Objects;
 public class ReservationDate {
     private LocalDate value;
 
-    public ReservationDate() {
+    protected ReservationDate() {
     }
 
     private ReservationDate(LocalDate value) {

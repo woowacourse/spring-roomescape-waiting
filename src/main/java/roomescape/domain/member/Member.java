@@ -33,7 +33,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(long id, MemberName memberName, Email email, Password password, Role role) {

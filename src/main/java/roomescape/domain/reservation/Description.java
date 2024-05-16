@@ -10,7 +10,7 @@ public class Description {
 
     private String value;
 
-    public Description() {
+    protected Description() {
     }
 
     public Description(String value) {

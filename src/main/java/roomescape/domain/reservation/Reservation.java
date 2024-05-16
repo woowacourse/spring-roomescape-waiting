@@ -26,7 +26,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(long id, Member member, Schedule schedule, Theme theme) {

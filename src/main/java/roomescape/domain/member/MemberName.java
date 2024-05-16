@@ -13,7 +13,7 @@ public class MemberName {
 
     private String value;
 
-    public MemberName() {
+    protected MemberName() {
     }
 
     public MemberName(String value) {

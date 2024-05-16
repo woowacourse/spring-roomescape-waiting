@@ -28,7 +28,7 @@ public class Theme {
     @AttributeOverride(name = "value", column = @Column(name = "THUMBNAIL"))
     private Thumbnail thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(long id, ThemeName name, Description description, Thumbnail thumbnail) {
