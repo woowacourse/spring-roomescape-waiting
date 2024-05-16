@@ -9,6 +9,7 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -47,15 +48,17 @@ public class AuthService {
     }
 
     @Transactional
-    public void signUp(SignUpRequest signUpRequest) {
+    public MemberResponse signUp(SignUpRequest signUpRequest) {
         if (memberRepository.existsByEmail(signUpRequest.email())) {
             throw new BadRequestException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
-        memberRepository.save(new Member(
-                signUpRequest.name(),
-                signUpRequest.email(),
-                passwordEncoder.encode(signUpRequest.password()),
-                Role.USER
-        ));
+        return MemberResponse.from(
+                memberRepository.save(new Member(
+                        signUpRequest.name(),
+                        signUpRequest.email(),
+                        passwordEncoder.encode(signUpRequest.password()),
+                        Role.USER)
+                )
+        );
     }
 }

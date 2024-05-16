@@ -23,7 +23,7 @@ import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.TokenProvider;
-import roomescape.member.controller.dto.MemberResponse;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationRequest;
@@ -115,7 +115,7 @@ class ReservationControllerTest extends ControllerTest {
         return Stream.of(
                 dynamicTest("타인의 예약 삭제 시, 403을 반환한다.", () -> {
                     //given
-                    memberService.create(
+                    authService.signUp(
                             new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(),
                                     getMemberClover().getPassword()));
 

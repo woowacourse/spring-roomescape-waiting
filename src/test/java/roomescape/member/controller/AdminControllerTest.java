@@ -19,8 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.service.AuthService;
 import roomescape.auth.service.TokenProvider;
-import roomescape.member.controller.dto.MemberResponse;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
@@ -45,6 +46,9 @@ class AdminControllerTest extends ControllerTest {
 
     @Autowired
     MemberService memberService;
+
+    @Autowired
+    AuthService authService;
 
     @Autowired
     TokenProvider tokenProvider;
@@ -104,8 +108,8 @@ class AdminControllerTest extends ControllerTest {
                             new ReservationTimeRequest("12:00"));
                     ThemeResponse themeResponse = themeService.create(
                             new ThemeRequest("name", "description", "thumbnail"));
-                    MemberResponse memberResponse = memberService.create(
-                            new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), "1234"));
+                    MemberResponse memberResponse = authService.signUp(
+                            new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), getMemberChoco().getPassword()));
 
                     Map<String, Object> params = new HashMap<>();
                     params.put("memberId", memberResponse.id());

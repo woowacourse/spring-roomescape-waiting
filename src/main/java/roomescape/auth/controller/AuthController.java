@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +15,7 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.handler.ResponseHandler;
 import roomescape.auth.service.AuthService;
+import roomescape.auth.controller.dto.MemberResponse;
 
 @RestController
 public class AuthController {
@@ -50,8 +50,8 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
-        authService.signUp(signUpRequest);
-        return ResponseEntity.created(URI.create("/login")).build();
+    public ResponseEntity<MemberResponse> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
+        MemberResponse memberResponse = authService.signUp(signUpRequest);
+        return ResponseEntity.created(URI.create("/login")).body(memberResponse);
     }
 }
