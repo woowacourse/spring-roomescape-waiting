@@ -1,4 +1,4 @@
-INSERT INTO time (start_at)
+INSERT INTO reservation_time (start_at)
 VALUES ('15:40'),
        ('13:40'),
        ('17:40');
