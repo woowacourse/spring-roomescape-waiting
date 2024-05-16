@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import roomescape.global.exception.error.ErrorType;
+import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
@@ -54,6 +56,14 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.reservationStatus = status;
+
+        validateNotNull();
+    }
+
+    private void validateNotNull() {
+        if (date == null || reservationTime == null || theme == null || member == null || reservationStatus == null) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약(Reservation) 생성에 null이 입력되었습니다.");
+        }
     }
 
     public boolean isReserved() {
