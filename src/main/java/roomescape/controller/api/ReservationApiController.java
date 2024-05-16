@@ -22,7 +22,6 @@ import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
 import roomescape.service.dto.response.reservation.ReservationResponses;
 import roomescape.service.dto.response.reservation.UserReservationResponses;
-import roomescape.service.reservation.AdminReservationCreateService;
 import roomescape.service.reservation.ReservationCreateService;
 import roomescape.service.reservation.ReservationDeleteService;
 import roomescape.service.reservation.ReservationFindService;
@@ -32,16 +31,13 @@ import roomescape.service.reservation.ReservationFindService;
 public class ReservationApiController {
 
     private final ReservationCreateService reservationCreateService;
-    private final AdminReservationCreateService adminReservationCreateService;
     private final ReservationFindService reservationFindService;
     private final ReservationDeleteService reservationDeleteService;
 
     public ReservationApiController(ReservationCreateService reservationCreateService,
-                                    AdminReservationCreateService adminReservationCreateService,
                                     ReservationFindService reservationFindService,
                                     ReservationDeleteService reservationDeleteService) {
         this.reservationCreateService = reservationCreateService;
-        this.adminReservationCreateService = adminReservationCreateService;
         this.reservationFindService = reservationFindService;
         this.reservationDeleteService = reservationDeleteService;
     }
@@ -78,7 +74,7 @@ public class ReservationApiController {
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid ReservationAdminSaveRequest request) {
-        Reservation newReservation = adminReservationCreateService.createReservation(request);
+        Reservation newReservation = reservationCreateService.createReservation(request);
         return ResponseEntity.created(URI.create("/admin/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
