@@ -20,7 +20,7 @@ public class ReservationRepository {
         return reservationDao.save(reservation);
     }
 
-    public Reservations findAll(){
+    public Reservations findAll() {
         return new Reservations(reservationDao.findAll());
     }
 
@@ -29,7 +29,7 @@ public class ReservationRepository {
     }
 
     public Reservations findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
-                                                                    LocalDate dateTo) {
+                                                               LocalDate dateTo) {
         if (themeId != null && memberId != null) {
             return new Reservations(
                     reservationDao.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
@@ -48,7 +48,8 @@ public class ReservationRepository {
     }
 
     public Themes findAndOrderByPopularity(Duration duration, int count) {
-        return new Themes(reservationDao.findAndOrderByPopularity(duration.getStartDate(), duration.getEndDate(), count));
+        return new Themes(
+                reservationDao.findAndOrderByPopularity(duration.getStartDate(), duration.getEndDate(), count));
     }
 
     public boolean existsByTimeId(long timeId) {

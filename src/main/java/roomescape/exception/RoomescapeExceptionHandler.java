@@ -1,7 +1,7 @@
 package roomescape.exception;
 
-import static roomescape.exception.ExceptionType.*;
 import static roomescape.exception.ExceptionType.INVALID_DATE_TIME_FORMAT;
+import static roomescape.exception.ExceptionType.NO_QUERY_PARAMETER;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

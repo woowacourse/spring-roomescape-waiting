@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimes;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;

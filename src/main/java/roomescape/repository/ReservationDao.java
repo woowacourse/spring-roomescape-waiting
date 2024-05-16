@@ -20,16 +20,18 @@ public interface ReservationDao extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findByMemberIdAndDateBetween(Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                             LocalDate dateTo);
 
     @Query("""
-        SELECT r.theme, COUNT(r) AS themeCount 
-        FROM Reservation r 
-        WHERE r.date BETWEEN :startDate AND :endDate 
-        GROUP BY r.theme 
-        ORDER BY themeCount DESC 
-        LIMIT :limit""")
-    List<Theme> findAndOrderByPopularity(@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate endDate, @Param("limit") int limit);
+            SELECT r.theme, COUNT(r) AS themeCount
+            FROM Reservation r
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY r.theme
+            ORDER BY themeCount DESC
+            LIMIT :limit""")
+    List<Theme> findAndOrderByPopularity(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+                                         @Param("limit") int limit);
 
     boolean existsByTimeId(long timeId);
 

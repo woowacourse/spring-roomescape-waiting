@@ -21,7 +21,6 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimes;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
@@ -48,11 +47,13 @@ class ReservationTimeServiceTest {
     private MemberRepository memberRepository;
 
     Theme defaultTheme = new Theme("name", "description", "thumbnail");
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         defaultTheme = themeRepository.save(defaultTheme);
         memberRepository.save(Fixture.defaultMember);
     }
+
     @DisplayName("저장된 시간을 모두 조회할 수 있다.")
     @Test
     void findAllTest() {

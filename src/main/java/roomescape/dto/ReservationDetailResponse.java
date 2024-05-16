@@ -2,8 +2,6 @@ package roomescape.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Map;
-import java.util.Optional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 
@@ -14,7 +12,7 @@ public record ReservationDetailResponse(
         LocalTime time,
         String status
 ) {
-    public static ReservationDetailResponse from(Reservation reservation){
+    public static ReservationDetailResponse from(Reservation reservation) {
         return new ReservationDetailResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),

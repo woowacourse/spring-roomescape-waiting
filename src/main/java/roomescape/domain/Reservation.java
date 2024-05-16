@@ -17,12 +17,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-import jdk.jshell.Snippet.Status;
 import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation implements Comparable<Reservation> {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private LocalDate date;
@@ -96,20 +96,8 @@ public class Reservation implements Comparable<Reservation> {
         return duration.contains(date);
     }
 
-    public boolean hasSameId(long id) {
-        return this.id == id;
-    }
-
     public boolean isReservationTimeOf(long id) {
         return this.time.isIdOf(id);
-    }
-
-    public boolean isDateOf(LocalDate date) {
-        return this.date.equals(date);
-    }
-
-    public boolean isThemeOf(long id) {
-        return this.theme.isIdOf(id);
     }
 
     public boolean isSameReservation(Reservation beforeSave) {

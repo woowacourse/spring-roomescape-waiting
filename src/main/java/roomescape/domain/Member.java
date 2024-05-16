@@ -10,7 +10,8 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Member {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -22,7 +23,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    public Member(){
+    public Member() {
     }
 
     public Member(long id, Member member) {
