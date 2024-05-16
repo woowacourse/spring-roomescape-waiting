@@ -68,7 +68,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservations(Long memberId) {
-        return reservationQueryRepository.findAllByMemberIdOrderByDateDesc(memberId).stream()
+        return reservationQueryRepository.findAllByMemberIdOrderByDateAsc(memberId).stream()
                 .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
                         reservation.getDate(), reservation.getTime().getStartAt(), BOOKED))
                 .toList();

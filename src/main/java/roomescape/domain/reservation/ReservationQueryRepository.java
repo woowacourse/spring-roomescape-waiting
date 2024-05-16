@@ -12,7 +12,7 @@ public interface ReservationQueryRepository extends JpaRepository<Reservation, L
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
+    List<Reservation> findAllByMemberIdOrderByDateAsc(Long memberId);
 
     @Query("select new roomescape.domain.dto.AvailableTimeDto(rt.id, rt.startAt, "
             + "(select count(r) > 0 from Reservation r where r.time.id = rt.id and r.date = :date and r.theme.id = :themeId)) "
