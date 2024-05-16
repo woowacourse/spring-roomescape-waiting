@@ -15,8 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.AdminReservationRequest;
-import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.request.MemberLoginRequest;
+import roomescape.controller.request.ReservationRequest;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

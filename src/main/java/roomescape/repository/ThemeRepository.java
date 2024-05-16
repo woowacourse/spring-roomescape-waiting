@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -17,7 +18,7 @@ public interface ThemeRepository extends CrudRepository<Theme, Long> {
 
     void deleteById(long id); // delete
 
-    Theme findById(long id);
+    Optional<Theme> findById(long id);
 
     @Query("""
             SELECT r.theme

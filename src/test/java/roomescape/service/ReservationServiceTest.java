@@ -73,9 +73,9 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 시간을 반환한다")
     @Test
     void should_return_all_reservation_times() {
-        Theme theme1 = themeRepository.findById(1L);
-        Theme theme2 = themeRepository.findById(2L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -90,8 +90,8 @@ class ReservationServiceTest {
     @DisplayName("검색 조건에 맞는 예약을 반환한다.")
     @Test
     void should_return_filtered_reservation() {
-        Theme theme1 = themeRepository.findById(1L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -144,9 +144,9 @@ class ReservationServiceTest {
     @DisplayName("예약 시간을 삭제한다")
     @Test
     void should_remove_reservation_times() {
-        Theme theme1 = themeRepository.findById(1L);
-        Theme theme2 = themeRepository.findById(2L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -170,9 +170,9 @@ class ReservationServiceTest {
     @DisplayName("존재하는 예약을 삭제하면 예외가 발생하지 않는다.")
     @Test
     void should_not_throw_exception_when_exist_reservation_time() {
-        Theme theme1 = themeRepository.findById(1L);
-        Theme theme2 = themeRepository.findById(2L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -227,9 +227,9 @@ class ReservationServiceTest {
     void should_throw_exception_when_add_exist_reservation() {
         LocalDate date = now().plusDays(2);
 
-        Theme theme1 = themeRepository.findById(1L);
-        Theme theme2 = themeRepository.findById(2L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -245,8 +245,8 @@ class ReservationServiceTest {
     @DisplayName("사용자가 예약한 예약을 반환한다.")
     @Test
     void should_return_member_reservations() {
-        Theme theme1 = themeRepository.findById(1L);
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 

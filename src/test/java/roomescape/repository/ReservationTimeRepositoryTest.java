@@ -72,7 +72,7 @@ class ReservationTimeRepositoryTest {
     void should_get_reservation_time() {
         entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
 
-        ReservationTime reservationTime = reservationTimeRepository.findById(1L);
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
         assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 

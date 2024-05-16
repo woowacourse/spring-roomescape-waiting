@@ -49,7 +49,8 @@ public class ReservationTimeService {
     }
 
     public ReservationTime findReservationTime(long id) {
-        return reservationTimeRepository.findById(id);
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
     }
 
     public List<IsReservedTimeResponse> getIsReservedTime(LocalDate date, long themeId) {
@@ -68,7 +69,8 @@ public class ReservationTimeService {
     }
 
     private void validateReservedTime(long id) {
-        ReservationTime time = reservationTimeRepository.findById(id);
+        ReservationTime time = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
         long countedReservationByTime = reservationRepository.countByTime(time);
         if (countedReservationByTime > 0) {
             throw new BadRequestException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");

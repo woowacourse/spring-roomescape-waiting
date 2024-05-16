@@ -62,7 +62,7 @@ class ThemeRepositoryTest {
         entityManager.persist(new Theme("무빈", "공포", "공포.jpg"));
         entityManager.persist(new Theme("배키", "미스터리", "미스터리.jpg"));
 
-        Theme theme = themeRepository.findById(1L);
+        Theme theme = themeRepository.findById(1L).get();
 
         assertThat(theme).extracting(Theme::getName).isEqualTo("무빈");
     }

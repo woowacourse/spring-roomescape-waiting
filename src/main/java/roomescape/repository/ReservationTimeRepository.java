@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,7 +15,7 @@ public interface ReservationTimeRepository extends CrudRepository<ReservationTim
 
     List<ReservationTime> findAll();
 
-    ReservationTime findById(long id);
+    Optional<ReservationTime> findById(long id);
 
     ReservationTime save(ReservationTime reservationTime);
 
