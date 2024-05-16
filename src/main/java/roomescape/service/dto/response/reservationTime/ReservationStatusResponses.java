@@ -1,18 +1,15 @@
 package roomescape.service.dto.response.reservationTime;
 
 import java.util.List;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatuses;
 
 public record ReservationStatusResponses(List<ReservationStatusResponse> reservationStatuses) {
 
-    public static ReservationStatusResponses from(ReservationStatus reservationStatus) {
-        List<ReservationStatusResponse> responses = reservationStatus.getReservationStatus()
-                .keySet()
+    public static ReservationStatusResponses from(ReservationStatuses reservationStatuses) {
+        List<ReservationStatusResponse> responses = reservationStatuses.getReservationStatuses()
                 .stream()
-                .map(reservationTime -> new ReservationStatusResponse(
-                        reservationTime,
-                        reservationStatus.findReservationStatusBy(reservationTime))
-                ).toList();
+                .map(status -> new ReservationStatusResponse(status.getTime(), status.isBooked()))
+                .toList();
         return new ReservationStatusResponses(responses);
     }
 }

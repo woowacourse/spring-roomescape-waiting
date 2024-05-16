@@ -20,11 +20,12 @@ class ReservationStatusTest {
                 reservationTime1,
                 reservationTime2
         );
-        ReservationStatus reservationStatus = ReservationStatus.of(reservedTimes, reservationTimes);
+        List<ReservationStatus> reservationStatuses = ReservationStatuses.of(reservedTimes, reservationTimes)
+                .getReservationStatuses();
 
         assertAll(
-                () -> assertThat(reservationStatus.findReservationStatusBy(reservationTime1)).isTrue(),
-                () -> assertThat(reservationStatus.findReservationStatusBy(reservationTime2)).isFalse()
+                () -> assertThat(reservationStatuses.get(0).isBooked()).isTrue(),
+                () -> assertThat(reservationStatuses.get(1).isBooked()).isFalse()
         );
     }
 }

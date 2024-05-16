@@ -1,53 +1,39 @@
 package roomescape.domain;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class ReservationStatus {
 
-    private final Map<ReservationTime, Boolean> reservationStatus;
+    private final ReservationTime time;
+    private final boolean isBooked;
 
-    private ReservationStatus(Map<ReservationTime, Boolean> reservationStatus) {
-        this.reservationStatus = reservationStatus;
+    public ReservationStatus(ReservationTime time, boolean isBooked) {
+        this.time = time;
+        this.isBooked = isBooked;
     }
 
-    public static ReservationStatus of(List<ReservationTime> reservedTimes, List<ReservationTime> reservationTimes) {
-        Map<ReservationTime, Boolean> reservationStatus = new HashMap<>();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationStatus.put(reservationTime, isReserved(reservedTimes, reservationTime));
-        }
-        return new ReservationStatus(reservationStatus);
+    public ReservationTime getTime() {
+        return time;
     }
 
-    private static boolean isReserved(List<ReservationTime> reservedTimes, ReservationTime reservationTime) {
-        return reservedTimes.stream()
-                .anyMatch(reservedTime -> reservedTime.equals(reservationTime));
-    }
-
-    public Boolean findReservationStatusBy(ReservationTime reservationTime) {
-        return reservationStatus.get(reservationTime);
-    }
-
-    public Map<ReservationTime, Boolean> getReservationStatus() {
-        return reservationStatus;
+    public boolean isBooked() {
+        return isBooked;
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (object == null || getClass() != object.getClass()) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ReservationStatus that = (ReservationStatus) object;
-        return Objects.equals(reservationStatus, that.reservationStatus);
+        ReservationStatus that = (ReservationStatus) o;
+        return isBooked == that.isBooked && Objects.equals(time, that.time);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reservationStatus);
+        return Objects.hash(time, isBooked);
     }
 }

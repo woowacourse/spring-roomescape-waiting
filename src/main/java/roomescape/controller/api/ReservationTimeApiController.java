@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationStatuses;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 import roomescape.service.dto.response.reservationTime.ReservationStatusResponses;
@@ -50,7 +50,7 @@ public class ReservationTimeApiController {
     public ResponseEntity<ReservationStatusResponses> getReservationTimesIsBooked(
             @RequestParam LocalDate date,
             @RequestParam @Positive(message = "1 이상의 값만 입력해주세요.") long themeId) {
-        ReservationStatus reservationStatus = reservationTimeFindService.findIsBooked(date, themeId);
+        ReservationStatuses reservationStatus = reservationTimeFindService.findIsBooked(date, themeId);
         return ResponseEntity.ok(ReservationStatusResponses.from(reservationStatus));
     }
 
