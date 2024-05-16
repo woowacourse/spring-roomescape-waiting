@@ -3,11 +3,15 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.ReservationTimeDto;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.dto.SaveReservationTimeRequest;
+import roomescape.reservation.model.ReservationTimeAvailabilities;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Transactional
@@ -55,5 +59,13 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new IllegalArgumentException("예약에 포함된 시간 정보는 삭제할 수 없습니다.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationTimeAvailabilities getAvailableReservationTimes(final LocalDate date, final Long themeId) {
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        final List<Reservation> reservations = reservationRepository.findAllByDateAndTheme_Id(new ReservationDate(date), themeId);
+
+        return ReservationTimeAvailabilities.of(reservationTimes, reservations);
     }
 }
