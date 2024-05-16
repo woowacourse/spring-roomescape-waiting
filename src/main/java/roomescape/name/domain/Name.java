@@ -1,5 +1,6 @@
 package roomescape.name.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.global.exception.model.RoomEscapeException;
@@ -11,6 +12,7 @@ public class Name {
     private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
     private static final int MAX_NAME_LENGTH = 255;
 
+    @Column(nullable = false)
     private String name;
 
     public Name(String name) {
