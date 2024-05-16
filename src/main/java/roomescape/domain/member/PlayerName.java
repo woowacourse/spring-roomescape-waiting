@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
@@ -9,6 +10,7 @@ import roomescape.exception.RoomescapeException;
 public class PlayerName {
     public static final int NAME_MAX_LENGTH = 20;
 
+    @Column(nullable = false)
     private String name;
 
     public PlayerName() {

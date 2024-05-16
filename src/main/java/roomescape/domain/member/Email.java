@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.exception.RoomescapeErrorCode;
@@ -11,6 +12,7 @@ public class Email {
     private static final int MIN_LENGTH = 11;
     private static final int MAX_LENGTH = 40;
 
+    @Column(nullable = false)
     private String email;
 
     public Email() {

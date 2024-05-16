@@ -1,5 +1,6 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -8,6 +9,7 @@ import roomescape.exception.RoomescapeException;
 public class ThemeName {
     private static final int NAME_MAX_LENGTH = 20;
 
+    @Column(nullable = false)
     private String name;
 
     public ThemeName(String name) {
