@@ -20,6 +20,7 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Schedule;
@@ -112,7 +113,7 @@ class ThemeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when&then
@@ -136,9 +137,9 @@ class ThemeServiceTest {
         Schedule schedule2 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime));
         Schedule schedule3 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime));
 
-        reservationRepository.save(new Reservation(member, schedule1, theme1));
-        reservationRepository.save(new Reservation(member, schedule2, theme2));
-        reservationRepository.save(new Reservation(member, schedule3, theme3));
+        reservationRepository.save(new Reservation(member, schedule1, theme1, ReservationStatus.RESERVED));
+        reservationRepository.save(new Reservation(member, schedule2, theme2, ReservationStatus.RESERVED));
+        reservationRepository.save(new Reservation(member, schedule3, theme3, ReservationStatus.RESERVED));
 
         //when
         List<ThemeResponse> result = themeService.findPopularThemes();

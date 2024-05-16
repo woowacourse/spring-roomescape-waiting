@@ -9,6 +9,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Schedule;
@@ -58,7 +59,7 @@ public class ReservationService {
         Member member = findMemberById(memberId);
         validate(reservationDate, reservationTime, theme);
         Schedule schedule = getScheduleOf(reservationDate, reservationTime);
-        Reservation reservation = reservationRepository.save(new Reservation(member, schedule, theme));
+        Reservation reservation = reservationRepository.save(new Reservation(member, schedule, theme, ReservationStatus.RESERVED));
 
         return new ReservationResponse(reservation);
     }

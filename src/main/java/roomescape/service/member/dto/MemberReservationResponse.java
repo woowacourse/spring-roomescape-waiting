@@ -18,7 +18,7 @@ public record MemberReservationResponse(
                 reservation.getTheme().getName().getValue(),
                 reservation.getDate(),
                 reservation.getTime(),
-                "예약"
+                reservation.getStatus().getDescription()
         );
     }
 }

@@ -20,6 +20,7 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Schedule;
@@ -83,7 +84,7 @@ class ReservationServiceTest {
     void findAll() {
         //given
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when
@@ -98,7 +99,7 @@ class ReservationServiceTest {
     void findByMember() {
         //given
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         ReservationFindRequest reservationFindRequest = new ReservationFindRequest(member.getId(), null, null, null);
 
@@ -114,7 +115,7 @@ class ReservationServiceTest {
     void findByMemberAndTheme() {
         //given
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
         ReservationFindRequest reservationFindRequest = new ReservationFindRequest(member.getId(), notMemberThemeId, null, null);
@@ -131,7 +132,7 @@ class ReservationServiceTest {
     void deleteById() {
         //given
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         Reservation target = reservationRepository.save(reservation);
 
         //when
@@ -147,7 +148,7 @@ class ReservationServiceTest {
         //given
         LocalDate date = LocalDate.MAX;
         Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(date), reservationTime));
-        Reservation reservation = new Reservation(member, schedule, theme);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
