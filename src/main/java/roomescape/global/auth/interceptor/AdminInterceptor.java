@@ -17,7 +17,6 @@ import roomescape.member.service.MemberService;
 
 @Component
 public class AdminInterceptor implements HandlerInterceptor {
-
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     private final MemberService memberService;

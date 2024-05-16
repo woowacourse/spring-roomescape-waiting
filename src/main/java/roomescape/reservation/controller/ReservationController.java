@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -69,7 +70,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ReservationResponse> saveReservation(
-            @RequestBody final ReservationRequest reservationRequest,
+            @Valid @RequestBody final ReservationRequest reservationRequest,
             @MemberId final Long memberId,
             final HttpServletResponse response
     ) {

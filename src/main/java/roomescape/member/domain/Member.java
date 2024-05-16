@@ -72,10 +72,6 @@ public class Member {
         return role;
     }
 
-    public boolean isRole(final Role role) {
-        return this.role == role;
-    }
-
     @Override
     public String toString() {
         return "Member{" +

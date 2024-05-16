@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,7 @@ public class ReservationTimeController {
     @PostMapping("/times")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ReservationTimeResponse> saveTime(
-            @RequestBody final ReservationTimeRequest reservationTimeRequest,
+            @Valid @RequestBody final ReservationTimeRequest reservationTimeRequest,
             final HttpServletResponse response
     ) {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.addTime(reservationTimeRequest);
