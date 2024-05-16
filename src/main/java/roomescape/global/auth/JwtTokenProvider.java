@@ -6,9 +6,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.global.exception.AuthorizationException;
 import roomescape.global.exception.EscapeApplicationException;
 
 @Component
@@ -32,17 +34,16 @@ public class JwtTokenProvider {
     }
 
     public String extractTokenFromCookie(Cookie[] cookies) {
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")) {
-                return cookie.getValue();
-            }
-        }
-        return "";
+        return Arrays.stream(cookies)
+                .filter((cookie -> cookie.getName().equals("token")))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElseThrow(() -> new EscapeApplicationException("token이 존재하지 않는 쿠키입니다."));
     }
 
     public Long validateAndGetLongSubject(String token) {
         if (token == null || token.isEmpty()) {
-            throw new EscapeApplicationException("토큰이 비어있습니다.");
+            throw new AuthorizationException("로그인 해야 합니다.");
         }
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
