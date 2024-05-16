@@ -83,7 +83,7 @@ class ReservationRepositoryTest {
         final Long themeId = 9L;
 
         // When
-        final boolean isExist = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+        final boolean isExist = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservationDate, timeId, themeId);
 
         // Then
@@ -111,7 +111,7 @@ class ReservationRepositoryTest {
         final Long themeId = 1L;
 
         // When
-        final List<Reservation> allByDateAndThemeId = reservationRepository.findAllByDateAndTheme_Id(reservationDate, themeId);
+        final List<Reservation> allByDateAndThemeId = reservationRepository.findAllByDateAndThemeId(reservationDate, themeId);
 
         // Then
         assertThat(allByDateAndThemeId).hasSize(2);

@@ -52,7 +52,7 @@ public class ThemeService {
 
     public ReservationTimeAvailabilities getAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<Reservation> reservations = reservationRepository.findAllByDateAndTheme_Id(new ReservationDate(date), themeId);
+        final List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new ReservationDate(date), themeId);
 
         return ReservationTimeAvailabilities.of(reservationTimes, reservations);
     }

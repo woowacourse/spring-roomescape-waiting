@@ -80,7 +80,7 @@ public class ReservationService {
     }
 
     private void validateReservationDuplication(final Reservation reservation) {
-        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId())
@@ -94,6 +94,6 @@ public class ReservationService {
     }
 
     public List<Reservation> getMyReservations(final Long memberId) {
-        return reservationRepository.findAllByMember_Id(memberId);
+        return reservationRepository.findAllByMemberId(memberId);
     }
 }
