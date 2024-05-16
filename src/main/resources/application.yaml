@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
     show-sql: true
     properties:
@@ -29,7 +29,11 @@ spring:
   config:
     activate:
       on-profile: local
+  sql:
+    init:
+      mode: always
 
 jwt:
   secret-key: gotjrgoeh2rjtdmsqufakfdldkslqslekgoehrgkwlaktpdydkwhaejrlfdjdigkskqhspdyrhldwkdglekdghkdtmfjq=
   expiration: 1800000
+
