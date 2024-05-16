@@ -127,4 +127,13 @@ class ReservationServiceTest {
         //then
         assertThat(reservationsByMember).hasSize(7);
     }
+
+    @Test
+    @DisplayName("로그인한 회원의 예약 목록을 반환한다.")
+    void given_reservationRequestWithPastDate_when_save_then_throwException() {
+        //given
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);
+        //when, then
+        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(ReservationFailException.class);
+    }
 }

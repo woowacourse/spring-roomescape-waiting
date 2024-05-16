@@ -1,11 +1,11 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationCreateValidator;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
@@ -48,11 +48,10 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTime(reservationRequest);
         final Theme theme = getTheme(reservationRequest);
         final Member member = getMember(reservationRequest);
-        final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest,
-                reservationTime, theme, member);
-        final Reservation newReservation = reservationCreateValidator.create();
-        final Reservation reservation = reservationRepository.save(newReservation);
-        return ReservationResponse.from(reservation);
+        validatePastDate(reservationRequest, reservationTime);
+        final Reservation reservation = new Reservation(member, reservationRequest.date(), reservationTime, theme);
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(savedReservation);
     }
 
     private ReservationTime getReservationTime(final ReservationRequest reservationRequest) {
@@ -78,15 +77,21 @@ public class ReservationService {
         }
     }
 
+    private void validatePastDate(final ReservationRequest reservationRequest, final ReservationTime reservationTime) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(reservationRequest.date(), reservationTime.getStartAt());
+        if (LocalDateTime.now().isAfter(reservationDateTime)) {
+            throw new ReservationFailException("지나간 날짜와 시간으로 예약할 수 없습니다.");
+        }
+    }
+
     public void delete(final Long id) {
         reservationRepository.deleteById(id);
     }
 
     public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                                  final LocalDate dateTo) {
-        final List<ReservationResponse> reservationResponses = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
-                        themeId, memberId, dateFrom,
-                        dateTo)
+        final List<ReservationResponse> reservationResponses = reservationRepository
+                .findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
