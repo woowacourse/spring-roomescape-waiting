@@ -28,7 +28,7 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping()
+    @PostMapping
     private ResponseEntity<ReservationResponse> addAdminReservation(@RequestBody AdminReservationRequest request) {
         ReservationResponse reservationResponse = reservationService.addAdminReservation(request);
 
@@ -36,12 +36,12 @@ public class AdminReservationController {
                 .body(reservationResponse);
     }
 
-    @GetMapping()
-        public ResponseEntity<List<ReservationResponse>> getAllReservations() {
-            List<ReservationResponse> responses = reservationService.getAllReservations();
+    @GetMapping
+    public ResponseEntity<List<ReservationResponse>> getAllReservations() {
+        List<ReservationResponse> responses = reservationService.getAllReservations();
 
-            return ResponseEntity.ok()
-                    .body(responses);
+        return ResponseEntity.ok()
+                .body(responses);
     }
 
     @GetMapping("/filter")
@@ -51,7 +51,8 @@ public class AdminReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<ReservationResponse> response = reservationService.getFilteredReservations(themeId, memberId, dateFrom, dateTo);
+        List<ReservationResponse> response = reservationService.getFilteredReservations(themeId, memberId, dateFrom,
+                dateTo);
 
         return ResponseEntity.ok(response);
     }

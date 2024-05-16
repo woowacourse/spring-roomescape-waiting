@@ -47,6 +47,7 @@ public class AuthController {
         Cookie cookie = CookieUtil.makeCookieExpired();
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+
         return ResponseEntity.ok().build();
     }
 }

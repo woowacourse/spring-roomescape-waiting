@@ -23,6 +23,7 @@ public class AdminMemberController {
     @GetMapping
     public ResponseEntity<List<MemberPreviewResponse>> getMembers() {
         List<MemberPreviewResponse> response = memberService.getAllMemberPreview();
+
         return ResponseEntity.ok(response);
     }
 }

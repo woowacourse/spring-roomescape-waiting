@@ -1,8 +1,8 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
-const MEMBER_API_ENDPOINT = '/members';
+const MEMBER_API_ENDPOINT = '/admin/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -192,7 +192,7 @@ function applyFilter(event) {
     const dateFrom = document.getElementById('date-from').value;
     const dateTo = document.getElementById('date-to').value;
 
-    let apiUrl = '/reservations/filter?';
+    let apiUrl = '/admin/reservations/filter?';
     if (themeId) apiUrl += `themeId=${themeId}&`;
     if (memberId) apiUrl += `memberId=${memberId}&`;
     if (dateFrom) apiUrl += `dateFrom=${dateFrom}&`;
