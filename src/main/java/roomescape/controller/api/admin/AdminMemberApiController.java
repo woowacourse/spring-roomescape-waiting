@@ -1,4 +1,4 @@
-package roomescape.controller.api;
+package roomescape.controller.api.admin;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -9,15 +9,15 @@ import roomescape.service.dto.response.member.MemberIdAndNameResponses;
 import roomescape.service.member.MemberService;
 
 @RestController
-public class MemberApiController {
+public class AdminMemberApiController {
 
     private final MemberService memberService;
 
-    public MemberApiController(MemberService memberService) {
+    public AdminMemberApiController(MemberService memberService) {
         this.memberService = memberService;
     }
 
-    @GetMapping("/members")
+    @GetMapping("/admin/members")
     public ResponseEntity<MemberIdAndNameResponses> getMembers() {
         List<Member> members = memberService.findMembers();
         return ResponseEntity.ok(MemberIdAndNameResponses.from(members));
