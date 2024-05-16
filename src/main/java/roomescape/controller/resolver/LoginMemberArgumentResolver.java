@@ -12,12 +12,12 @@ import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
-public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
     private final MemberService memberService;
 
-    public LoginUserArgumentResolver(AuthService authService, MemberService memberService) {
+    public LoginMemberArgumentResolver(AuthService authService, MemberService memberService) {
         this.authService = authService;
         this.memberService = memberService;
     }
@@ -31,7 +31,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        Long userId = authService.findUserIdByCookie(request.getCookies());
-        return memberService.findUserById(userId);
+        Long memberId = authService.findMemberIdByCookie(request.getCookies());
+        return memberService.findMemberById(memberId);
     }
 }

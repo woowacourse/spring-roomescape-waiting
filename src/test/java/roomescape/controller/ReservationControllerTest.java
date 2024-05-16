@@ -16,7 +16,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.request.ReservationRequest;
-import roomescape.controller.request.UserLoginRequest;
+import roomescape.controller.request.MemberLoginRequest;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -39,7 +39,7 @@ class ReservationControllerTest {
     @DisplayName("예약을 검색한다.")
     @Test
     void should_search_reservations() {
-        UserLoginRequest loginRequest = new UserLoginRequest("2222", "pobi@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("2222", "pobi@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -58,8 +58,8 @@ class ReservationControllerTest {
 
     @DisplayName("사용자가 예약을 추가할 수 있다.")
     @Test
-    void should_insert_reservation_when_user_request() {
-        UserLoginRequest loginRequest = new UserLoginRequest("1234", "sun@email.com");
+    void should_insert_reservation_when_member_request() {
+        MemberLoginRequest loginRequest = new MemberLoginRequest("1234", "sun@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -85,7 +85,7 @@ class ReservationControllerTest {
     @DisplayName("관리자가 예약을 추가할 수 있다.")
     @Test
     void should_insert_reservation_when_admin_request() {
-        UserLoginRequest loginRequest = new UserLoginRequest("2222", "pobi@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("2222", "pobi@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -111,7 +111,7 @@ class ReservationControllerTest {
     @DisplayName("예약을 추가할 수 있다.")
     @Test
     void should_add_reservation_when_admin_request() {
-        UserLoginRequest loginRequest = new UserLoginRequest("1234", "sun@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("1234", "sun@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -161,7 +161,7 @@ class ReservationControllerTest {
     @DisplayName("로그인 정보에 따른 예약 내역을 조회한다.")
     @Test
     void should_find_member_reservation() {
-        UserLoginRequest loginRequest = new UserLoginRequest("1234", "sun@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("1234", "sun@email.com");
 
         String cookie = RestAssured
                 .given().log().all()

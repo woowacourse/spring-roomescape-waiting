@@ -25,7 +25,7 @@ public class JwtTokenProvider implements TokenProvider {
 
     @Override
     public String createToken(Member member) {
-        Map<String, ?> claims = createClaimsByUser(member);
+        Map<String, ?> claims = createClaimsByMember(member);
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
@@ -47,7 +47,7 @@ public class JwtTokenProvider implements TokenProvider {
                 .getPayload();
     }
 
-    private Map<String, Object> createClaimsByUser(Member member) {
+    private Map<String, Object> createClaimsByMember(Member member) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", member.getRole().toString());
         return claims;

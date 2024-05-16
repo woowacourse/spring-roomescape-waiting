@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.controller.request.UserLoginRequest;
+import roomescape.controller.request.MemberLoginRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Member;
@@ -19,24 +19,24 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Member findUserByEmailAndPassword(UserLoginRequest request) {
+    public Member findMemberByEmailAndPassword(MemberLoginRequest request) {
         return memberRepository.findByEmailAndPassword(request.email(), request.password())
                 .orElseThrow(() -> new AuthenticationException(
                         "사용자(email: %s, password: %s)가 존재하지 않습니다.".formatted(request.email(), request.password())));
     }
 
-    public String findUserNameById(Long id) {
+    public String findMemberNameById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다.".formatted(id)));
         return member.getName();
     }
 
-    public Member findUserById(Long id) {
+    public Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id가 %s인 사용자가 존재하지 않습니다."));
     }
 
-    public List<Member> findAllUsers() {
+    public List<Member> findAllMembers() {
         return memberRepository.findAll();
     }
 }

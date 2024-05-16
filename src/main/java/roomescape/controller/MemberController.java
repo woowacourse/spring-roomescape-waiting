@@ -12,39 +12,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.annotation.AuthenticationPrincipal;
-import roomescape.controller.request.UserLoginRequest;
-import roomescape.controller.response.UserNameResponse;
+import roomescape.controller.request.MemberLoginRequest;
+import roomescape.controller.response.MemberNameResponse;
 import roomescape.model.Member;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
 @RestController
-public class UserController {
+public class MemberController {
 
     private final MemberService memberService;
     private final AuthService authService;
 
-    public UserController(MemberService memberService, AuthService authService) {
+    public MemberController(MemberService memberService, AuthService authService) {
         this.memberService = memberService;
         this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody UserLoginRequest request, HttpServletResponse response) {
-        Member member = memberService.findUserByEmailAndPassword(request);
-        Cookie cookie = authService.createCookieByUser(member);
+    public ResponseEntity<Void> login(@RequestBody MemberLoginRequest request, HttpServletResponse response) {
+        Member member = memberService.findMemberByEmailAndPassword(request);
+        Cookie cookie = authService.createCookieByMember(member);
         response.addCookie(cookie);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<UserNameResponse> login(@AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok(new UserNameResponse(member.getName()));
+    public ResponseEntity<MemberNameResponse> login(@AuthenticationPrincipal Member member) {
+        return ResponseEntity.ok(new MemberNameResponse(member.getName()));
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<Member>> getAllUsers() {
-        List<Member> members = memberService.findAllUsers();
+    public ResponseEntity<List<Member>> getAllMembers() {
+        List<Member> members = memberService.findAllMembers();
         return ResponseEntity.ok(members);
     }
 }

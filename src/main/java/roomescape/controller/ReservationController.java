@@ -44,7 +44,7 @@ public class ReservationController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(HttpServletRequest request) {
-        Long memberId = authService.findUserIdByCookie(request.getCookies());
+        Long memberId = authService.findMemberIdByCookie(request.getCookies());
         List<Reservation> memberReservations = reservationService.findMemberReservations(memberId);
         List<MemberReservationResponse> responses =
                 memberReservations.stream()

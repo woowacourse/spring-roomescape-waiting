@@ -21,7 +21,7 @@ class JwtTokenProviderTest {
 
     @DisplayName("주어진 사용자로 토큰을 생성한다.")
     @Test
-    void should_create_token_when_given_user() {
+    void should_create_token_when_given_member() {
         Member member = new Member(1L, "썬", MEMBER, "sun@email.com", "1234");
 
         String token = jwtTokenProvider.createToken(member);
@@ -38,9 +38,9 @@ class JwtTokenProviderTest {
         Claims claims = jwtTokenProvider.getPayload(token);
 
         String role = claims.get("role", String.class);
-        String userId = claims.getSubject();
+        String memberId = claims.getSubject();
         SoftAssertions.assertSoftly(softAssertions -> {
-            softAssertions.assertThat(userId).isEqualTo("1");
+            softAssertions.assertThat(memberId).isEqualTo("1");
             softAssertions.assertThat(role).isEqualTo("MEMBER");
         });
     }

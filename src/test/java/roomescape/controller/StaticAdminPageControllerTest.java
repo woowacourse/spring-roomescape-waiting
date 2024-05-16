@@ -8,7 +8,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.controller.request.UserLoginRequest;
+import roomescape.controller.request.MemberLoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -18,7 +18,7 @@ class StaticAdminPageControllerTest {
     @DisplayName("관리자 권한이 아니면 403을 반환한다.")
     @Test
     void should_status_403_when_not_admin_role() {
-        UserLoginRequest loginRequest = new UserLoginRequest("1111", "dmsgml@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("1111", "dmsgml@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -39,7 +39,7 @@ class StaticAdminPageControllerTest {
     @DisplayName("관리자 권한으로 요청하면 200을 응답한다.")
     @Test
     void should_status_200_when_admin_role() {
-        UserLoginRequest loginRequest = new UserLoginRequest("2222", "pobi@email.com");
+        MemberLoginRequest loginRequest = new MemberLoginRequest("2222", "pobi@email.com");
 
         String cookie = RestAssured
                 .given().log().all()

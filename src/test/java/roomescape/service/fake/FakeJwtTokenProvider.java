@@ -18,7 +18,7 @@ public class FakeJwtTokenProvider implements TokenProvider {
 
     @Override
     public String createToken(Member member) {
-        Map<String, ?> claims = createClaimsByUser(member);
+        Map<String, ?> claims = createClaimsByMember(member);
         return Jwts.builder()
                 .subject(member.getId().toString())
                 .claims(claims)
@@ -36,7 +36,7 @@ public class FakeJwtTokenProvider implements TokenProvider {
                 .getPayload();
     }
 
-    private Map<String, Object> createClaimsByUser(Member member) {
+    private Map<String, Object> createClaimsByMember(Member member) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", member.getRole().toString());
         return claims;

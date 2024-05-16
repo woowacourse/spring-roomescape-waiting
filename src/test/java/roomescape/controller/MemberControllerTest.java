@@ -11,7 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.controller.request.UserLoginRequest;
+import roomescape.controller.request.MemberLoginRequest;
 import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -22,7 +22,7 @@ class MemberControllerTest {
     @DisplayName("로그인 요청시 쿠키를 응답한다.")
     @Test
     void should_response_cookie_when_login() {
-        UserLoginRequest request = new UserLoginRequest("1234", "sun@email.com");
+        MemberLoginRequest request = new MemberLoginRequest("1234", "sun@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -40,8 +40,8 @@ class MemberControllerTest {
 
     @DisplayName("요청시 쿠키를 제공하면 이름을 반환한다.")
     @Test
-    void should_response_user_name_when_given_cookie() {
-        UserLoginRequest request = new UserLoginRequest("1234", "sun@email.com");
+    void should_response_member_name_when_given_cookie() {
+        MemberLoginRequest request = new MemberLoginRequest("1234", "sun@email.com");
 
         String cookie = RestAssured
                 .given().log().all()
@@ -64,7 +64,7 @@ class MemberControllerTest {
 
     @DisplayName("모든 사용자들을 반환한다.")
     @Test
-    void should_response_all_users() {
+    void should_response_all_members() {
         RestAssured
                 .given().log().all()
                 .contentType(ContentType.JSON)

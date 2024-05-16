@@ -106,7 +106,7 @@ class ReservationServiceTest {
 
     @DisplayName("사용자가 예약 시간을 추가한다")
     @Test
-    void should_add_reservation_times_when_give_user_request() {
+    void should_add_reservation_times_when_give_member_request() {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
@@ -132,7 +132,7 @@ class ReservationServiceTest {
 
     @DisplayName("관리자가 예약 시간을 추가할 때 사용자가 없으면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_not_exist_user() {
+    void should_throw_exception_when_not_exist_member() {
         AdminReservationRequest request =
                 new AdminReservationRequest(now().plusDays(2), 1L, 1L, 1L);
 

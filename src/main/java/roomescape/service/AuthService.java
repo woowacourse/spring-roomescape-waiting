@@ -22,7 +22,7 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
-    public Cookie createCookieByUser(Member member) {
+    public Cookie createCookieByMember(Member member) {
         String jwtToken = tokenProvider.createToken(member);
         Cookie cookie = new Cookie(COOKIE_NAME, jwtToken);
         cookie.setHttpOnly(true);
@@ -30,7 +30,7 @@ public class AuthService {
         return cookie;
     }
 
-    public Long findUserIdByCookie(Cookie[] cookies) {
+    public Long findMemberIdByCookie(Cookie[] cookies) {
         Cookie cookie = findCookieIfExist(cookies);
         Claims claims = tokenProvider.getPayload(cookie.getValue());
         String payload = claims.getSubject();
