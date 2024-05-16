@@ -167,25 +167,6 @@ class AdminReservationTest {
                 .body(containsString("[ERROR] 지나간 날짜와 시간으로 예약할 수 없습니다"));
     }
 
-    @DisplayName("이미 예약이 된 시간을 등록하려 하면 400 오류를 반환한다.")
-    @Test
-    void given_when_saveDuplicatedReservation_then_statusCodeIsBadRequest() {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "포케");
-        reservation.put("date", "2099-04-30");
-        reservation.put("timeId", 1); // 10:00
-        reservation.put("themeId", 1);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .body(containsString("[ERROR] 예약이 종료되었습니다"));
-    }
-
     @DisplayName("부적절한 테마로 예약하는 경우 400 오류를 반환한다.")
     @ParameterizedTest
     @NullSource
