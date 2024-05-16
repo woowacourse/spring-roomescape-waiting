@@ -46,6 +46,26 @@ public class JwtHandler {
         return new TokenDto(accessToken, refreshToken);
     }
 
+    public TokenDto createLogoutToken() {
+        Date date = new Date();
+        Date accessTokenExpiredAt = new Date(date.getTime() - ACCESS_TOKEN_EXPIRE_TIME);
+        Date refreshTokenExpiredAt = new Date(date.getTime() - REFRESH_TOKEN_EXPIRE_TIME);
+
+        String accessToken = Jwts.builder()
+                .setIssuedAt(date)
+                .setExpiration(accessTokenExpiredAt)
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+                .compact();
+
+        String refreshToken = Jwts.builder()
+                .setIssuedAt(date)
+                .setExpiration(refreshTokenExpiredAt)
+                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+                .compact();
+
+        return new TokenDto(accessToken, refreshToken);
+    }
+
     public Long getMemberIdFromTokenWithValidate(String token) {
         validateToken(token);
 

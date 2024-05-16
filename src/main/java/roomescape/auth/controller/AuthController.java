@@ -30,7 +30,7 @@ public class AuthController {
     public ApiResponse<Void> signup(@Valid @RequestBody final SignUpRequest signupRequest, final HttpServletResponse response) {
         TokenDto tokenDto = authService.signUp(signupRequest);
         addTokensToCookie(tokenDto, response);
-        
+
         return ApiResponse.success();
     }
 
@@ -38,6 +38,14 @@ public class AuthController {
     public ApiResponse<Void> login(@Valid @RequestBody final LoginRequest loginRequest, final HttpServletResponse response) {
         TokenDto tokenDto = authService.login(loginRequest);
         addTokensToCookie(tokenDto, response);
+
+        return ApiResponse.success();
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(final HttpServletResponse response) {
+        TokenDto logoutTokenDto = authService.logout();
+        addTokensToCookie(logoutTokenDto, response);
 
         return ApiResponse.success();
     }
@@ -66,11 +74,9 @@ public class AuthController {
         for (Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals(JwtHandler.ACCESS_TOKEN_HEADER_KEY)) {
                 accessToken = cookie.getValue();
-                cookie.setMaxAge(0);
             }
             if (cookie.getName().equals(JwtHandler.REFRESH_TOKEN_HEADER_KEY)) {
                 refreshToken = cookie.getValue();
-                cookie.setMaxAge(0);
             }
         }
 
