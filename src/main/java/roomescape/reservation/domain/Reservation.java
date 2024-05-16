@@ -15,20 +15,16 @@ import roomescape.time.domain.Time;
 @Entity
 public class Reservation {
 
+    private final String status = "예약";
     // private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     private Member member;
-
     private LocalDate date;
-
     @ManyToOne
     private Time time;
-
     @ManyToOne
     private Theme theme;
 
@@ -103,6 +99,10 @@ public class Reservation {
 
     public Long getThemeId() {
         return theme.getId();
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {

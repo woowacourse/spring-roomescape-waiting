@@ -66,8 +66,7 @@ class ReservationServiceTest {
                 reservation.getMember(), reservation.getTime()
                 .getId(), reservation.getTheme()
                 .getId());
-        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest,
-                memberProfileInfo);
+        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         assertThat(reservationResponse.id()).isEqualTo(1);
     }
@@ -85,7 +84,7 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.MIN, reservation.getMember(),
                 reservation.getTimeId(), reservation.getThemeId());
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberProfileInfo)).isInstanceOf(
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
                 IllegalReservationDateTimeRequestException.class);
 
     }
@@ -125,7 +124,7 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
                 reservation.getMember(), reservation.getTimeId(), reservation.getThemeId());
 
-        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest, memberProfileInfo)).isInstanceOf(
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
                 ConflictException.class);
     }
 

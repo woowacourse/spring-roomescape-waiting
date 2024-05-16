@@ -8,10 +8,10 @@ import roomescape.exception.IllegalReservationDateTimeRequestException;
 import roomescape.exception.SaveDuplicateContentException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberProfileInfo;
 import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.AdminReservationRequest;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -38,8 +38,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse addReservation(ReservationRequest reservationRequest,
-            MemberProfileInfo memberProfileInfo) {
+    public ReservationResponse addReservation(ReservationRequest reservationRequest) {
         Time time = timeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new IllegalReservationDateTimeRequestException("해당 예약 시간이 존재하지 않습니다."));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
@@ -111,10 +110,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservationsByConditions(ReservationConditionSearchRequest request) {
-        List<Long> reservationIds = reservationRepository.findReservationIdsByMember_Id(request.memberId());
-        List<Reservation> reservations = reservationIds.stream()
-                .map(reservationRepository::findByIdOrderByDateAsc)
-                .toList();
+        List<Reservation> reservations = reservationRepository.findAllByMember_Id(request.memberId());
+
         return reservations.stream()
                 .filter(reservation -> reservation.isReservedAtPeriod(request.dateFrom(), request.dateTo()))
                 .map(ReservationResponse::fromReservation)
@@ -123,6 +120,13 @@ public class ReservationService {
 
     public void removeReservations(long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    public List<MyReservationResponse> findReservationByMemberId(Long id) {
+        List<Reservation> reservationsByMember = reservationRepository.findAllByMember_IdOrderByDateAsc(id);
+        return reservationsByMember.stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 
 }

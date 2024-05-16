@@ -43,18 +43,16 @@ import roomescape.time.domain.Time;
                                   "security.jwt.token.expire-length=3600000"})
 class ReservationControllerTest {
 
-    @Value("${security.jwt.token.secret-key}")
-    private String secretKey;
-    @Value("${security.jwt.token.expire-length}")
-    private long validityInMilliseconds;
-
-    private final Member member = new Member("tester", "test@email.com","pass");
+    private final Member member = new Member("tester", "test@email.com", "pass");
     private final Reservation reservation = new Reservation(
             member,
             LocalDate.MAX,
             new Time(1L, LocalTime.of(12, 0)),
             new Theme(1L, "도비", "도비 방탈출", "이미지~"));
-
+    @Value("${security.jwt.token.secret-key}")
+    private String secretKey;
+    @Value("${security.jwt.token.expire-length}")
+    private long validityInMilliseconds;
     @Autowired
     private MockMvc mockMvc;
 
@@ -79,7 +77,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 정보를 정상적으로 저장하는지 확인한다.")
     void createReservation() throws Exception {
-        Mockito.when(reservationService.addReservation(any(), any()))
+        Mockito.when(reservationService.addReservation(any(ReservationRequest.class)))
                 .thenReturn(ReservationResponse.fromReservation(reservation));
         Mockito.when(memberAuthService.isLoginMember(any()))
                 .thenReturn(true);
