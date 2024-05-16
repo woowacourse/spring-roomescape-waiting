@@ -23,6 +23,11 @@ public class ClientController {
         response.addCookie(new Cookie("token", ""));
     }
 
+    @GetMapping("/signup")
+    public String signup() {
+        return "signup";
+    }
+
     @GetMapping("/reservation-mine")
     public String reservationMinePage() {
         return "reservation-mine";
