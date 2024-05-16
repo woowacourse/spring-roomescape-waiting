@@ -39,7 +39,11 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        Specification<Reservation> specification = request.getSearchSpecification();
+        Specification<Reservation> specification = reservationRepository.getSearchSpecification(
+                request.getEmail(),
+                request.getThemeId(),
+                request.getDateFrom(),
+                request.getDateTo());
 
         return reservationRepository.findAll(specification)
                 .stream().map(ReservationResponse::new)
