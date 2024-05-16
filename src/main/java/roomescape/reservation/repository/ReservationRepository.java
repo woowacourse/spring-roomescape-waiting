@@ -10,7 +10,7 @@ import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
-    List<Long> findTimeIdsByDateAndThemeId(LocalDate date, long themeId);
+    List<Reservation> findByDateAndThemeId(LocalDate date, long themeId);
 
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 

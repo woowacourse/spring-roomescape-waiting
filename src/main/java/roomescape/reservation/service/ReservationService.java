@@ -37,21 +37,21 @@ public class ReservationService {
     }
 
     public ReservationResponse save(final ReservationSaveRequest saveRequest, final Member member) {
-        ReservationTime reservationTime = findReservationTimeById(saveRequest);
-        Theme theme = findThemeById(saveRequest);
+        ReservationTime reservationTime = findReservationTimeById(saveRequest.timeId());
+        Theme theme = findThemeById(saveRequest.themeId());
         validateDuplicateReservation(saveRequest);
 
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
-    private ReservationTime findReservationTimeById(final ReservationSaveRequest reservationSaveRequest) {
-        return reservationTimeRepository.findById(reservationSaveRequest.timeId())
+    private ReservationTime findReservationTimeById(final long timeId) {
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
     }
 
-    private Theme findThemeById(final ReservationSaveRequest reservationSaveRequest) {
-        return themeRepository.findById(reservationSaveRequest.themeId())
+    private Theme findThemeById(final long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
@@ -77,7 +77,7 @@ public class ReservationService {
     }
 
     public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
-        List<Long> usedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
+        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes =
                 StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
                         .toList();
@@ -86,13 +86,14 @@ public class ReservationService {
                 .map(time -> new SelectableTimeResponse(
                         time.getId(),
                         time.getStartAt(),
-                        isAlreadyBooked(time, usedTimeIds)
+                        isAlreadyBooked(time, reservations)
                 ))
                 .toList();
     }
 
-    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Long> usedTimeIds) {
-        return usedTimeIds.contains(reservationTime.getId());
+    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Reservation> reservations) {
+        return reservations.stream()
+                .anyMatch(reservation -> reservation.getTime().getId() == reservationTime.getId());
     }
 
     public List<Reservation> findByDateBetween(final LocalDate startDate, final LocalDate endDate) {
