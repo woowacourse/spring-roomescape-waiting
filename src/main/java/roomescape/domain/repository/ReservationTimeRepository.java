@@ -3,10 +3,10 @@ package roomescape.domain.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.ReservationTime;
 
-public interface ReservationTimeRepository extends CrudRepository<ReservationTime, LocalTime> {
+public interface ReservationTimeRepository extends Repository<ReservationTime, LocalTime> {
     List<ReservationTime> findAll();
 
     Optional<ReservationTime> findById(Long id);

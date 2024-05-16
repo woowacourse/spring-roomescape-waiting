@@ -2,10 +2,10 @@ package roomescape.domain.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.Member;
 
-public interface MemberRepository extends CrudRepository<Member, Long> {
+public interface MemberRepository extends Repository<Member, Long> {
     Member save(Member user);
 
     Optional<Member> findById(Long id);
