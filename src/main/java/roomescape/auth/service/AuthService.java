@@ -28,7 +28,7 @@ public class AuthService {
     }
 
     public TokenDto login(final LoginRequest request) {
-        Member member = memberService.findMemberByEmailAndPassword(request.email(), request.password());
+        Member member = memberService.findMemberByEmailAndPassword(request);
 
         return jwtHandler.createToken(member.getId());
     }

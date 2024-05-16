@@ -1,6 +1,9 @@
 package roomescape.member.domain;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,12 +18,18 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private String name;
-    @Column(nullable = false)
-    private String email;
-    @Column(nullable = false)
-    private String password;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
+    @JsonUnwrapped
+    private MemberName name;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    @JsonUnwrapped
+    private Email email;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+    @JsonUnwrapped
+    private Password password;
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -41,6 +50,10 @@ public class Member {
     }
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
+        this(id, new MemberName(name), new Email(email), new Password(password), role);
+    }
+
+    public Member(final Long id, final MemberName name, final Email email, final Password password, final Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -70,15 +83,15 @@ public class Member {
     }
 
     public String getName() {
-        return name;
+        return name.value();
     }
 
     public String getEmail() {
-        return email;
+        return email.value();
     }
 
     public String getPassword() {
-        return password;
+        return password.value();
     }
 
     public Role getRole() {
@@ -89,9 +102,9 @@ public class Member {
     public String toString() {
         return "Member{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
+                ", name=" + name +
+                ", email=" + email +
+                ", password=" + password +
                 ", role=" + role +
                 '}';
     }
