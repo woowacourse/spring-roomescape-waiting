@@ -45,7 +45,7 @@ public class ReservationService {
 
     public ReservationResponse create(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
-        final ReservationTime reservationTime = getTimeSlot(reservationRequest);
+        final ReservationTime reservationTime = getReservationTime(reservationRequest);
         final Theme theme = getTheme(reservationRequest);
         final Member member = getMember(reservationRequest);
         final ReservationCreateValidator reservationCreateValidator = new ReservationCreateValidator(reservationRequest,
@@ -55,7 +55,7 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
-    private ReservationTime getTimeSlot(final ReservationRequest reservationRequest) {
+    private ReservationTime getReservationTime(final ReservationRequest reservationRequest) {
         return reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new InvalidIdException("timeId", reservationRequest.timeId()));
     }

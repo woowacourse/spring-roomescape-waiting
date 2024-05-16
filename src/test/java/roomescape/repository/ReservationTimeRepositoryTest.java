@@ -22,14 +22,14 @@ class ReservationTimeRepositoryTest {
 
     @DisplayName("Db에 등록된 시간 목록을 조회할 수 있다.")
     @Test
-    void given_when_findAll_then_ReturnTimeSlots() {
+    void given_when_findAll_then_ReturnReservationTimes() {
         //given, when, then
         assertThat(reservationTimeRepository.findAll().size()).isEqualTo(4);
     }
 
     @DisplayName("Db에 시간 정보를 저장한다.")
     @Test
-    void given_timeSlotRequest_when_create_then_returnCreatedTimeId() {
+    void given_reservationTimeRequest_when_create_then_returnCreatedTimeId() {
         //given
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.parse("10:11"));
         ReservationTime expected = reservationTimeRequest.toEntity();

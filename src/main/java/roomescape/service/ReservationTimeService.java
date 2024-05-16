@@ -57,14 +57,20 @@ public class ReservationTimeService {
     }
 
     public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
-        List<ReservationTime> reservationReservationTimes = reservationTimeRepository.findByDateAndThemeId(date,
-                themeId);
+        List<ReservationTime> reservedReservationTimes = reservationTimeRepository
+                .findByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<BookResponse> bookResponses = reservationTimes.stream().map(timeSlot -> {
-            Boolean alreadyBooked = reservationReservationTimes.stream()
-                    .anyMatch(reservationTimeSlot -> reservationTimeSlot.getId().equals(timeSlot.getId()));
-            return new BookResponse(timeSlot.getStartAt(), timeSlot.getId(), alreadyBooked);
-        }).toList();
+
+        final List<BookResponse> bookResponses = reservationTimes.stream()
+                .map(reservationTime -> getBookResponse(reservationTime, reservedReservationTimes))
+                .toList();
         return new BookResponses(bookResponses);
+    }
+
+    private BookResponse getBookResponse(final ReservationTime reservationTime,
+                                         final List<ReservationTime> reservedReservationTimes) {
+        Boolean alreadyBooked = reservedReservationTimes.stream()
+                .anyMatch(reservedTime -> reservedTime.getId().equals(reservationTime.getId()));
+        return new BookResponse(reservationTime.getStartAt(), reservationTime.getId(), alreadyBooked);
     }
 }
