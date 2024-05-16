@@ -3,10 +3,10 @@ package roomescape.core.dto.theme;
 import roomescape.core.domain.Theme;
 
 public class ThemeResponse {
-    private Long id;
-    private String name;
-    private String description;
-    private String thumbnail;
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String thumbnail;
 
     public ThemeResponse(final Theme theme) {
         this(theme.getId(), theme);

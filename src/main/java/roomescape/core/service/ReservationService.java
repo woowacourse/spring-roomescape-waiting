@@ -1,5 +1,6 @@
 package roomescape.core.service;
 
+import io.jsonwebtoken.MalformedJwtException;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -72,7 +73,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
         final Member member = memberRepository.findById(loginMember.getId())
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new MalformedJwtException("올바르지 않은 접근입니다."));
         return reservationRepository.findAllByMember(member)
                 .stream()
                 .map(MyReservationResponse::new)

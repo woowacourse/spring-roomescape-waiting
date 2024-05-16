@@ -6,11 +6,11 @@ import roomescape.core.dto.reservationtime.ReservationTimeResponse;
 import roomescape.core.dto.theme.ThemeResponse;
 
 public class ReservationResponse {
-    private Long id;
-    private String date;
-    private MemberResponse member;
-    private ReservationTimeResponse time;
-    private ThemeResponse theme;
+    private final Long id;
+    private final String date;
+    private final MemberResponse member;
+    private final ReservationTimeResponse time;
+    private final ThemeResponse theme;
 
     public ReservationResponse(final Reservation reservation) {
         this(reservation.getId(), reservation);

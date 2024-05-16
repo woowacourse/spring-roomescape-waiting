@@ -6,8 +6,8 @@ import roomescape.core.domain.ReservationTime;
 public class ReservationTimeResponse {
     public static final String TIME_PATTERN = "HH:mm";
 
-    private Long id;
-    private String startAt;
+    private final Long id;
+    private final String startAt;
 
     public ReservationTimeResponse(final ReservationTime reservationTime) {
         this(reservationTime.getId(), reservationTime);

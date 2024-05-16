@@ -4,9 +4,9 @@ import java.util.List;
 import org.springframework.validation.BindingResult;
 
 public class ExceptionResponse {
-    private int status;
-    private String error;
-    private List<ExceptionDetails> details;
+    private final int status;
+    private final String error;
+    private final List<ExceptionDetails> details;
 
     public ExceptionResponse(final int status, final String error, final BindingResult bindingResult) {
         this.status = status;
