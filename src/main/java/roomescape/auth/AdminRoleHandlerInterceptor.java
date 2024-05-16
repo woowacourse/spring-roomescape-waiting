@@ -23,7 +23,7 @@ public class AdminRoleHandlerInterceptor implements HandlerInterceptor {
         String token = CookieUtils.extractTokenFromCookie(cookies);
         String role = tokenProvider.extractMemberRole(token);
         if (!Role.valueOf(role).isAdmin()) {
-            throw new ForbiddenException("권한이 없는 접근입니다.");
+            throw new ForbiddenException();
         }
         return true;
     }

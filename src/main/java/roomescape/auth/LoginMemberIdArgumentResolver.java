@@ -30,9 +30,6 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new UnauthorizedException("권한이 없는 접근입니다.");
-        }
         String token = CookieUtils.extractTokenFromCookie(cookies);
         return tokenProvider.extractMemberId(token);
     }

@@ -7,6 +7,7 @@ import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Password;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.auth.dto.LoginCheckResponse;
@@ -35,7 +36,7 @@ public class AuthService {
 
     private void validatePassword(LoginRequest request, Member member) {
         if (!member.isPasswordMatches(Password.of(request.password()))) {
-            throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
+            throw new ForbiddenException("이메일 또는 비밀번호가 잘못되었습니다.");
         }
     }
 

@@ -15,6 +15,7 @@ import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
@@ -112,7 +113,7 @@ public class ReservationService {
 
     private void validateAuthority(Reservation reservation, long memberId) {
         if (!reservation.isReservationOf(memberId)) {
-            throw new UnauthorizedException("예약을 삭제할 권한이 없습니다.");
+            throw new ForbiddenException("예약을 삭제할 권한이 없습니다.");
         }
     }
 

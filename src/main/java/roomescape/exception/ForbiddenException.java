@@ -2,7 +2,7 @@ package roomescape.exception;
 
 public class ForbiddenException extends RuntimeException {
     public ForbiddenException() {
-        super();
+        super("권한이 없는 접근입니다.");
     }
 
     public ForbiddenException(final String message) {
