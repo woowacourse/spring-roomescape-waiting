@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.schedule.ReservationDate;
 
 @DataJpaTest
 @Sql(value = {"/insert-reservations-for-filtering.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)

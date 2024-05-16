@@ -10,6 +10,9 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.member.Member;
+import roomescape.domain.schedule.ReservationTime;
+import roomescape.domain.schedule.Schedule;
+import roomescape.domain.theme.Theme;
 
 @Entity
 public class Reservation {
