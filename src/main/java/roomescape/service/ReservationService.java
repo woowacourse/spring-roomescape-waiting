@@ -85,8 +85,8 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),
-                themeRepository.findOneById(reservationConditionRequest.themeId()),
-                memberRepository.findOneById(reservationConditionRequest.memberId())
+                reservationConditionRequest.themeId(),
+                reservationConditionRequest.memberId()
         );
 
         return toReservationResponse(reservations);
