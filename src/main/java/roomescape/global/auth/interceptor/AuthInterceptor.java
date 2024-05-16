@@ -31,9 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
-
-        Auth authAnnotation = handlerMethod.getMethodAnnotation(Auth.class);
-        if (authAnnotation == null) {
+        if (handlerMethod.getMethodAnnotation(Auth.class) == null) {
             return true;
         }
 
@@ -48,9 +46,9 @@ public class AuthInterceptor implements HandlerInterceptor {
                 if (cookie.getName().equals(JwtHandler.ACCESS_TOKEN_HEADER_KEY)) {
                     String accessToken = cookie.getValue();
                     Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
-
                     Member member = memberService.findMemberById(memberId);
                     checkRole(member);
+
                     return memberId;
                 }
             }

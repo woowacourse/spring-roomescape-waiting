@@ -32,9 +32,7 @@ public class AdminInterceptor implements HandlerInterceptor {
             return true;
         }
         HandlerMethod handlerMethod = (HandlerMethod) handler;
-
-        Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
-        if (adminAnnotation == null) {
+        if (handlerMethod.getMethodAnnotation(Admin.class) == null) {
             return true;
         }
 
@@ -49,9 +47,9 @@ public class AdminInterceptor implements HandlerInterceptor {
                 if (cookie.getName().equals(JwtHandler.ACCESS_TOKEN_HEADER_KEY)) {
                     String accessToken = cookie.getValue();
                     Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
-
                     Member member = memberService.findMemberById(memberId);
                     checkRole(member);
+
                     return memberId;
                 }
             }
