@@ -1,11 +1,5 @@
 package roomescape.service.theme;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +21,13 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
 import roomescape.service.theme.dto.ThemeRequest;
 import roomescape.service.theme.dto.ThemeResponse;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql("/truncate-with-guests.sql")

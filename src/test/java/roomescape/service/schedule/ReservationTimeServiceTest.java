@@ -1,13 +1,5 @@
 package roomescape.service.schedule;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +23,15 @@ import roomescape.service.schedule.dto.AvailableReservationTimeResponse;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.schedule.dto.ReservationTimeReadRequest;
 import roomescape.service.schedule.dto.ReservationTimeResponse;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql("/truncate-with-guests.sql")

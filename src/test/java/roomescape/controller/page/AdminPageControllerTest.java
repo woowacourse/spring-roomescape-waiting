@@ -1,7 +1,5 @@
 package roomescape.controller.page;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -9,22 +7,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.controller.ControllerTest;
 import roomescape.service.auth.dto.LoginRequest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql("/truncate-with-admin-and-guest.sql")
-class AdminPageControllerTest {
-    @LocalServerPort
-    private int port;
+class AdminPageControllerTest extends ControllerTest {
     private String token;
 
     @BeforeEach
     void init() {
-        RestAssured.port = port;
-
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("admin123", "admin@email.com"))

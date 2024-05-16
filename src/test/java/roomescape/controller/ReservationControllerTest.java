@@ -1,29 +1,26 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql("/truncate-with-guests.sql")
-class ReservationControllerTest {
-    @LocalServerPort
-    private int port;
-
+class ReservationControllerTest extends ControllerTest {
     private LocalDate date;
     private long timeId;
     private long themeId;
@@ -31,8 +28,6 @@ class ReservationControllerTest {
 
     @BeforeEach
     void init() {
-        RestAssured.port = port;
-
         date = LocalDate.now().plusDays(1);
         timeId = (int) RestAssured.given()
                 .contentType(ContentType.JSON)

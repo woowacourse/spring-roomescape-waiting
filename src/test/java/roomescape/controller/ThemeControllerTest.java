@@ -1,32 +1,22 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.theme.dto.ThemeRequest;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-guests.sql")
-class ThemeControllerTest {
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void initPort() {
-        RestAssured.port = port;
-    }
-
+class ThemeControllerTest extends ControllerTest {
     @DisplayName("테마 추가 성공 테스트")
     @Test
     void createTheme() {
