@@ -2,6 +2,7 @@ package roomescape.config;
 
 import java.util.Objects;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.MethodParameter;
@@ -35,7 +36,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Member resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class));
-        String token = CookieUtil.extractToken(request.getCookies())
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
+        }
+        String token = CookieUtil.extractToken(cookies)
                 .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);

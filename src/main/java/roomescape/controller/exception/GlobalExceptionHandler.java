@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import roomescape.config.ForbiddenAccessException;
+import roomescape.config.TokenValidationFailureException;
 import roomescape.dto.exception.InputNotAllowedException;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -44,8 +45,15 @@ public class GlobalExceptionHandler {
                 .body(new CustomExceptionResponse("토큰이 만료되었습니다", ""));
     }
 
+    @ExceptionHandler(TokenValidationFailureException.class)
+    public ResponseEntity<CustomExceptionResponse> handleTokenValidationFailure(TokenValidationFailureException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new CustomExceptionResponse(e.getTitle(), e.getDetail()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomExceptionResponse> handelError(Exception e) {
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new CustomExceptionResponse("서버 내부 문제가 발생했습니다.", "알 수 없는 문제가 발생했습니다."));
     }
