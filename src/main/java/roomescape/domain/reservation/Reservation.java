@@ -14,7 +14,7 @@ import roomescape.domain.member.Member;
 public class Reservation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,7 +27,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id")
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
 
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
@@ -35,17 +35,6 @@ public class Reservation {
         this.theme = theme;
         this.date = date;
         this.time = time;
-    }
-
-    public Reservation(String email, String password, String memberName, String role,
-                       String themeName, String description, String thumbnail,
-                       String date, String time) {
-        this(
-                new Member(email, password, memberName, role),
-                new Theme(themeName, description, thumbnail),
-                LocalDate.parse(date),
-                new ReservationTime(time)
-        );
     }
 
     protected Reservation() {

@@ -18,7 +18,7 @@ values (1001, '테마1', '테마1입니다', 'https://i.pinimg.com/236x/6e/bc/46
        (1002, '테마2', '테마2입니다', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
        (1003, '테마3', '테마3입니다', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO reservation (id, member_id, theme_id, date, time_id)
+INSERT INTO reservation (id, member_id, theme_id, date, reservation_time_id)
 values (1001, 1001, 1001, '2024-05-07', 1002),
        (1002, 1002, 1002, '2024-05-07', 1002),
        (1003, 1003, 1003, '2024-05-08', 1001),
