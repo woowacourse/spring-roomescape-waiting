@@ -66,7 +66,7 @@ public class Member {
     private void validateRole() {
         if (role == null) {
             throw new ValidateException(ErrorType.REQUEST_DATA_BLANK,
-                    String.format("회원(Member) 역할(Role)에 유효하지 않은 값(null OR 공백)이 입력되었습니다. [values: %s]", this));
+                    String.format("회원(Member) 역할(Role)에 유효하지 않은 값(null OR 공백)이 입력되었습니다."));
         }
     }
 
