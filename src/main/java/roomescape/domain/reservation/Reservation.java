@@ -1,5 +1,8 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,7 +26,8 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    @ManyToOne
+    @Embedded
+    @AttributeOverride(name = "date.value", column = @Column(name = "DATE"))
     private Schedule schedule;
 
     @ManyToOne

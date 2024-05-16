@@ -17,9 +17,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import roomescape.domain.schedule.ReservationDate;
 
 @DataJpaTest
-@Sql(value = "/insert-reservations-for-filtering.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationRepositoryTest {
-
     @Autowired
     private ReservationRepository reservationRepository;
 

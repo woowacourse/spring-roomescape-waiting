@@ -16,13 +16,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
-import roomescape.domain.schedule.ScheduleRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -43,8 +42,6 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private ScheduleRepository scheduleRepository;
 
     @DisplayName("테마를 생성한다.")
     @Test
@@ -110,7 +107,7 @@ class ThemeServiceTest {
         Theme theme = createTheme("레벨2 탈출");
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
@@ -131,9 +128,9 @@ class ThemeServiceTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        Schedule schedule1 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime));
-        Schedule schedule2 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime));
-        Schedule schedule3 = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime));
+        Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
+        Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);
+        Schedule schedule3 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime);
 
         reservationRepository.save(new Reservation(member, schedule1, theme1, ReservationStatus.RESERVED));
         reservationRepository.save(new Reservation(member, schedule2, theme2, ReservationStatus.RESERVED));

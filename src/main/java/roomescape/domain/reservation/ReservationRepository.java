@@ -15,7 +15,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(long themeId);
 
     @Query("""
-            select r from Reservation as r
+            SELECT r FROM Reservation AS r
             WHERE (:memberId is null or r.member.id = :memberId)
             AND (:themeId is null or r.theme.id = :themeId)
             AND (:dateFrom is null or r.schedule.date >= :dateFrom)

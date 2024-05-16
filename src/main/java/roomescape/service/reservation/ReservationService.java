@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
-import roomescape.domain.schedule.ScheduleRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidMemberException;
@@ -30,16 +29,14 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final ScheduleRepository scheduleRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository, ScheduleRepository scheduleRepository) {
+                              MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.scheduleRepository = scheduleRepository;
     }
 
     public ReservationResponse create(AdminReservationRequest adminReservationRequest) {
@@ -58,15 +55,11 @@ public class ReservationService {
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
         validate(reservationDate, reservationTime, theme);
-        Schedule schedule = getScheduleOf(reservationDate, reservationTime);
-        Reservation reservation = reservationRepository.save(new Reservation(member, schedule, theme, ReservationStatus.RESERVED));
+        Schedule schedule = new Schedule(reservationDate, reservationTime);
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, schedule, theme, ReservationStatus.RESERVED));
 
         return new ReservationResponse(reservation);
-    }
-
-    private Schedule getScheduleOf(ReservationDate reservationDate, ReservationTime reservationTime) {
-        return scheduleRepository.findByDateAndTime(reservationDate, reservationTime)
-                    .orElseGet(() -> scheduleRepository.save(new Schedule(reservationDate, reservationTime)));
     }
 
     private ReservationTime findTimeById(long timeId) {

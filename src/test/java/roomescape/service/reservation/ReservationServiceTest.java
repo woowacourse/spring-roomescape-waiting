@@ -23,7 +23,6 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
-import roomescape.domain.schedule.ScheduleRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
@@ -44,8 +43,6 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private ScheduleRepository scheduleRepository;
     private ReservationTime reservationTime;
     private Theme theme;
     private Member member;
@@ -82,7 +79,7 @@ class ReservationServiceTest {
     @Test
     void findAll() {
         //given
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
@@ -97,7 +94,7 @@ class ReservationServiceTest {
     @Test
     void findByMember() {
         //given
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null, null);
@@ -113,7 +110,7 @@ class ReservationServiceTest {
     @Test
     void findByMemberAndTheme() {
         //given
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
@@ -130,7 +127,7 @@ class ReservationServiceTest {
     @Test
     void deleteById() {
         //given
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         Reservation target = reservationRepository.save(reservation);
 
@@ -146,7 +143,7 @@ class ReservationServiceTest {
     void duplicatedReservation() {
         //given
         LocalDate date = LocalDate.MAX;
-        Schedule schedule = scheduleRepository.save(new Schedule(ReservationDate.of(date), reservationTime));
+        Schedule schedule = new Schedule(ReservationDate.of(date), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
