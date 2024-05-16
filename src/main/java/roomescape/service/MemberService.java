@@ -28,9 +28,8 @@ public class MemberService {
         return TokenResponse.from(accessToken);
     }
 
-    public MemberResponse findMemberByToken(String token) {
-        String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
+    public MemberResponse loginCheck(LoginMember loginMember) {
+        Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 회원 입니다"));
         return MemberResponse.from(member);
     }

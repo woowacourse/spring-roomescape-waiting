@@ -1,15 +1,14 @@
 package roomescape.controller;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.dto.LoginMember;
 import roomescape.dto.request.TokenRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.TokenResponse;
@@ -35,15 +34,8 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<MemberResponse> authorizeLogin(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        String token = Arrays.stream(cookies)
-                .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("토큰이 존재하지 않습니다"));
-        MemberResponse response = memberService.findMemberByToken(token);
-
+    public ResponseEntity<MemberResponse> authorizeLogin(LoginMember loginMember) {
+        MemberResponse response = memberService.loginCheck(loginMember);
         return ResponseEntity.ok(response);
     }
 
