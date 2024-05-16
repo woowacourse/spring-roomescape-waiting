@@ -15,10 +15,11 @@ import roomescape.member.controller.dto.request.SignupRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class MemberControllerTest {
+
     @DisplayName("회원가입에 성공한다.")
     @Test
     void signupSuccess() {
-        SignupRequest request = new SignupRequest("anna", "anna@gmail.com", "password");
+        SignupRequest request = new SignupRequest("jerry", "jerry@gmail.com", "password");
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -28,8 +29,8 @@ class MemberControllerTest {
                 .assertThat()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
-                .body("name", equalTo("anna"))
-                .body("email", equalTo("anna@gmail.com"))
+                .body("name", equalTo("jerry"))
+                .body("email", equalTo("jerry@gmail.com"))
                 .body("password", equalTo("password"));
     }
 
@@ -37,8 +38,8 @@ class MemberControllerTest {
     @Test
     void signupFailedWhenEnterWrongEmail() {
         Map<String, String> request = new HashMap<>();
-        request.put("name", "anna");
-        request.put("email", "parang");
+        request.put("name", "duck");
+        request.put("email", "duck");
         request.put("password", "password");
 
         RestAssured.given()

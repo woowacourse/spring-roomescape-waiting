@@ -24,6 +24,7 @@ import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class MemberReservationControllerTest {
+
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -34,7 +35,7 @@ class MemberReservationControllerTest {
         // login
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("parang@gmail.com", "password"))
+                .body(new LoginRequest("duck@gmail.com", "password"))
                 .when().post("/login")
                 .cookie("token");
     }

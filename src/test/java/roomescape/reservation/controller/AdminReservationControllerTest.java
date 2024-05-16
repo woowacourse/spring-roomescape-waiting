@@ -18,6 +18,7 @@ import roomescape.auth.controller.dto.request.LoginRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminReservationControllerTest {
+
     String token;
 
     @BeforeEach
@@ -25,7 +26,7 @@ class AdminReservationControllerTest {
         // login
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("anna@gmail.com", "password"))
+                .body(new LoginRequest("jerry@gmail.com", "password"))
                 .when().post("/login")
                 .cookie("token");
     }
@@ -62,7 +63,7 @@ class AdminReservationControllerTest {
         // given
         String memberToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("parang@gmail.com", "password"))
+                .body(new LoginRequest("duck@gmail.com", "password"))
                 .when().post("/login")
                 .cookie("token");
 
