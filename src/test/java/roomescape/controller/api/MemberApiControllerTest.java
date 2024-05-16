@@ -26,6 +26,6 @@ class MemberApiControllerTest extends BaseControllerTest {
                 .when().get("/members")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("members.size()", is(2));
     }
 }
