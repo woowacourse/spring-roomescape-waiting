@@ -1,6 +1,8 @@
 package roomescape.theme.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +29,6 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @Admin
     @GetMapping("/themes")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ThemesResponse> getAllThemes() {
@@ -37,7 +38,7 @@ public class ThemeController {
     @GetMapping("/themes/top")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ThemesResponse> getTop10Themes(
-            final LocalDate today
+            @NotNull(message = "날짜는 null일 수 없습니다.") final LocalDate today
     ) {
         return ApiResponse.success(themeService.getTop10Themes(today));
     }
@@ -58,7 +59,9 @@ public class ThemeController {
     @Admin
     @DeleteMapping("/themes/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ApiResponse<Void> removeTheme(@PathVariable final Long id) {
+    public ApiResponse<Void> removeTheme(
+            @NotBlank(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long id
+    ) {
         themeService.removeThemeById(id);
 
         return ApiResponse.success();

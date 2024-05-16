@@ -11,7 +11,8 @@ import roomescape.global.exception.model.ValidateException;
 
 @Entity
 public class Member {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
@@ -45,6 +46,10 @@ public class Member {
             throw new ValidateException(ErrorType.REQUEST_DATA_BLANK,
                     String.format("회원(Member) 역할(Role)에 유효하지 않은 값(null OR 공백)이 입력되었습니다. [values: %s]", this));
         }
+    }
+
+    public boolean isRole(final Role role) {
+        return this.role == role;
     }
 
     public Long getId() {

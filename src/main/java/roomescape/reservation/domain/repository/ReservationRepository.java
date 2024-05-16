@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     List<Reservation> findByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
 
-    default List<Reservation> findByThemeIdAndMemberIdBetweenDate(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo) {
+    default List<Reservation> searchWith(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo) {
         return this.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (theme != null) {

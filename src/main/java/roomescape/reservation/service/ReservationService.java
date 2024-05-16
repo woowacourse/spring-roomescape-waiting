@@ -149,12 +149,12 @@ public class ReservationService {
         }
     }
 
-    public ReservationsResponse findReservationsByThemeIdAndMemberIdBetweenDate(
+    public ReservationsResponse searchWith(
             final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
         Member member = memberService.findMemberById(memberId);
         Theme theme = themeService.findThemeById(themeId);
 
-        List<ReservationResponse> response = reservationRepository.findByThemeIdAndMemberIdBetweenDate(theme, member, dateFrom, dateTo).stream()
+        List<ReservationResponse> response = reservationRepository.searchWith(theme, member, dateFrom, dateTo).stream()
                 .map(ReservationResponse::from)
                 .toList();
         return new ReservationsResponse(response);
