@@ -31,6 +31,7 @@ import roomescape.exception.UnAuthorizedException;
 
 @ServiceTest
 class ReservationServiceTest {
+
     @Autowired
     private ReservationService reservationService;
 
@@ -172,7 +173,7 @@ class ReservationServiceTest {
     @DisplayName("관리자가 다른 사람의 예약을 삭제하는 경우, 예약이 삭제된다.")
     void shouldDeleteReservationWhenAdmin() {
         Reservation reservation = saveReservation();
-        Member admin = memberRepository.save(new Member("admin", "admin@admin.com", "12341234"));
+        Member admin = new Member("admin", "admin@admin.com", "12341234");
         roleRepository.save(new MemberRole(admin, Role.ADMIN));
         reservationService.deleteById(admin.getId(), reservation.getId());
 

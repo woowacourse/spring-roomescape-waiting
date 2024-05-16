@@ -36,10 +36,6 @@ public class Member {
         this(null, new PlayerName(name), new Email(email), new Password(password));
     }
 
-    public Member withId(long id) {
-        return new Member(id, name, email, password);
-    }
-
     public boolean hasId(long memberId) {
         return id.equals(memberId);
     }

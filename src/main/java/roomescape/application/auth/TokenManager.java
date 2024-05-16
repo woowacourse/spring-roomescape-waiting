@@ -1,10 +1,10 @@
 package roomescape.application.auth;
 
-import roomescape.domain.role.MemberRole;
+import roomescape.application.auth.dto.TokenPayload;
 
 public interface TokenManager {
 
-    String createToken(MemberRole memberRole);
+    String createToken(TokenPayload payload);
 
-    MemberRole extract(String token);
+    TokenPayload extract(String token);
 }

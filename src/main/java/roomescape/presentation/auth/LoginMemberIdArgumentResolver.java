@@ -7,7 +7,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.auth.TokenManager;
-import roomescape.domain.role.MemberRole;
+import roomescape.application.auth.dto.TokenPayload;
 
 public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResolver {
     private final TokenManager tokenManager;
@@ -31,7 +31,7 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
         }
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String token = AuthInformationExtractor.extractToken(request);
-        MemberRole memberRole = tokenManager.extract(token);
-        return memberRole.getMemberId();
+        TokenPayload payload = tokenManager.extract(token);
+        return payload.memberId();
     }
 }

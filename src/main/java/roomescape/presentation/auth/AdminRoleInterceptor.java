@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.application.auth.TokenManager;
-import roomescape.domain.role.MemberRole;
+import roomescape.application.auth.dto.TokenPayload;
 import roomescape.domain.role.Role;
 
 public class AdminRoleInterceptor implements HandlerInterceptor {
@@ -23,8 +23,8 @@ public class AdminRoleInterceptor implements HandlerInterceptor {
             return true;
         }
         String token = AuthInformationExtractor.extractToken(request);
-        MemberRole memberRole = tokenManager.extract(token);
-        context.setCredentialIfNotPresent(memberRole);
+        TokenPayload payload = tokenManager.extract(token);
+        context.setCredentialIfNotPresent(payload);
         context.validatePermission(Role.ADMIN);
         return true;
     }

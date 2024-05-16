@@ -53,10 +53,6 @@ public class Reservation {
         }
     }
 
-    public Reservation withId(long id) {
-        return new Reservation(id, member, date, time, theme, createdAt);
-    }
-
     public boolean isOwnedBy(long memberId) {
         return member.hasId(memberId);
     }
@@ -81,10 +77,6 @@ public class Reservation {
         return id;
     }
 
-    public String getName() {
-        return member.getName();
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -99,9 +91,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }
