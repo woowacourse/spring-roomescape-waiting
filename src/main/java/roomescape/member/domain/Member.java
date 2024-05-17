@@ -35,7 +35,7 @@ public class Member {
     @Column(nullable = false)
     private MemberRole role;
 
-    public Member() {
+    protected Member() {
     }
 
     private Member(long id, String name, Email email, Password password, MemberRole role) {

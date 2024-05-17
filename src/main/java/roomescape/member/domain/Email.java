@@ -12,7 +12,7 @@ public class Email {
     @Column(nullable = false)
     private String email;
 
-    public Email() {
+    protected Email() {
     }
 
     private Email(String email) {

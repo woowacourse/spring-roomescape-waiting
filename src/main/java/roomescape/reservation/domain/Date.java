@@ -12,7 +12,7 @@ public class Date {
     @Column(nullable = false)
     private LocalDate date;
 
-    public Date() {
+    protected Date() {
     }
 
     private Date(LocalDate date) {
