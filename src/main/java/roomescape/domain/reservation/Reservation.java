@@ -8,13 +8,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 
-@Entity(name = "reservation")
+@Table(name = "reservation")
+@Entity
 public class Reservation {
 
     @Id
