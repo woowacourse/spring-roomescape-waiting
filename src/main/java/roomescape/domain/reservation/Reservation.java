@@ -77,14 +77,15 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
+        Reservation that = (Reservation) o;
         return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 }
