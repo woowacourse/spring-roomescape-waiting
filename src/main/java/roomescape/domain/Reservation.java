@@ -1,11 +1,14 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-@Entity //todo: 롬복 사용
+@Getter
+@Entity
 public class Reservation {
 
     @Id
@@ -26,6 +29,7 @@ public class Reservation {
     public Reservation() {
     }
 
+    @Builder
     public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         this(null, member, date, reservationTime, theme);
     }
@@ -36,26 +40,6 @@ public class Reservation {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getReservationTime() {
-        return reservationTime;
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 
     @Override

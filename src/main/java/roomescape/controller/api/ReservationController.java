@@ -20,9 +20,9 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final MemberService memberService;
 
-    public ReservationController(
-            ReservationService reservationService,
-            MemberService memberService
+    public ReservationController( //todo: 인수가 여러개일 때 줄바꿈 형식 통일하기
+                                  ReservationService reservationService,
+                                  MemberService memberService
     ) {
         this.reservationService = reservationService;
         this.memberService = memberService;

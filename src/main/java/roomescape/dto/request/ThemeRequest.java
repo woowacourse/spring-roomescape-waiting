@@ -1,13 +1,15 @@
 package roomescape.dto.request;
 
 import roomescape.domain.Theme;
-import roomescape.dto.InputValidator;
+
+import static roomescape.dto.InputValidator.validateNotBlank;
+import static roomescape.dto.InputValidator.validateNotNull;
 
 public record ThemeRequest(String name, String description, String thumbnail) {
 
     public ThemeRequest {
-        InputValidator.validateNotNull(name, description, thumbnail);
-        InputValidator.validateNotBlank(name, description, thumbnail);
+        validateNotNull(name, description, thumbnail);
+        validateNotBlank(name, description, thumbnail);
     }
 
     public Theme toTheme() {

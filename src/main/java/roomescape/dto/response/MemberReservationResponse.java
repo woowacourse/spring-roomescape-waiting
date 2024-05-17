@@ -12,8 +12,7 @@ public record MemberReservationResponse(
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
-        String status
-) {
+        String status) {
 
     public static MemberReservationResponse from(Reservation reservation) {
         return new MemberReservationResponse(

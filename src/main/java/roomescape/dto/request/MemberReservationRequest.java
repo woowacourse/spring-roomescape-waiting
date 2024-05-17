@@ -1,12 +1,12 @@
 package roomescape.dto.request;
 
-import roomescape.dto.InputValidator;
-
 import java.time.LocalDate;
+
+import static roomescape.dto.InputValidator.validateNotNull;
 
 public record MemberReservationRequest(LocalDate date, Long timeId, Long themeId) {
 
     public MemberReservationRequest {
-        InputValidator.validateNotNull(date, timeId, themeId);
+        validateNotNull(date, timeId, themeId);
     }
 }

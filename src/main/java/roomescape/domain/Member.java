@@ -1,10 +1,13 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.List;
 
-@Entity //todo: 롬복 사용
+@Getter
+@Entity
 public class Member {
 
     @Id
@@ -23,6 +26,7 @@ public class Member {
     public Member() {
     }
 
+    @Builder
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
         this.name = name;
@@ -33,29 +37,5 @@ public class Member {
 
     public boolean isAdmin() {
         return role.isAdmin();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
     }
 }
