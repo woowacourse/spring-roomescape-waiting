@@ -59,7 +59,7 @@ class ReservationServiceTest {
     void insertReservation() {
         reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         theme = themeRepository.save(new Theme("happy", "hi", "abcd.html"));
-        member = memberRepository.save(new Member("sudal", "sudal@email.com", "sudal", Role.USER));
+        member = memberRepository.save(new Member("sudal", "sudal@email.com", "password", Role.USER));
     }
 
     @DisplayName("예약 생성 테스트")
@@ -147,9 +147,9 @@ class ReservationServiceTest {
                 new ReservationTime(LocalTime.of(12, 0)));
 
         Member member1 = memberRepository.save(
-                new Member("sudal", "sudal@email.com", "sudal123", Role.ADMIN));
+                new Member("sudal", "sudal@email.com", "password", Role.ADMIN));
         Member member2 = memberRepository.save(
-                new Member("rush", "rush@email.com", "rush", Role.ADMIN));
+                new Member("rush", "rush@email.com", "password", Role.ADMIN));
 
         reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
         reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));

@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class EmailTest {
 
-
     @DisplayName("email 형식에 맞게 입력해야 한다.")
     @ValueSource(strings = {"asd@a.com", "a@a.com", "rush@woteco.com"})
     @ParameterizedTest
