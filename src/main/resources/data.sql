@@ -26,24 +26,28 @@ VALUES ('admin@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u
 
 INSERT INTO reservation (date, member_id, time_id, theme_id, status)
 VALUES (CURRENT_DATE() - 7, 1, 1, 5, 'RESERVED'),
-       (CURRENT_DATE() - 7, 2, 2, 5, 'RESERVED'),
-       (CURRENT_DATE() - 7, 3, 3, 5, 'RESERVED'),
-       (CURRENT_DATE() - 6, 4, 1, 5, 'WAITING'),
-       (CURRENT_DATE() - 6, 1, 2, 5, 'WAITING'),
-       (CURRENT_DATE() - 6, 2, 1, 4, 'RESERVED'),
-       (CURRENT_DATE() - 6, 3, 2, 4, 'RESERVED'),
+       (CURRENT_DATE() - 7, 2, 1, 5, 'WAITING'),
+       (CURRENT_DATE() - 7, 3, 1, 5, 'WAITING'),
+
+       (CURRENT_DATE() - 6, 1, 3, 4, 'WAITING'),
+       (CURRENT_DATE() - 6, 2, 3, 4, 'RESERVED'),
+       (CURRENT_DATE() - 6, 3, 3, 4, 'WAITING'),
        (CURRENT_DATE() - 6, 4, 3, 4, 'WAITING'),
-       (CURRENT_DATE() - 6, 1, 4, 4, 'RESERVED'),
-       (CURRENT_DATE() - 5, 2, 1, 3, 'RESERVED'),
-       (CURRENT_DATE() - 5, 3, 2, 3, 'RESERVED'),
+
+       (CURRENT_DATE() - 5, 2, 3, 3, 'RESERVED'),
+       (CURRENT_DATE() - 5, 3, 3, 3, 'RESERVED'),
        (CURRENT_DATE() - 5, 4, 3, 3, 'WAITING'),
+
        (CURRENT_DATE() - 4, 1, 1, 2, 'WAITING'),
-       (CURRENT_DATE() - 4, 2, 2, 2, 'RESERVED'),
-       (CURRENT_DATE() - 4, 3, 1, 1, 'RESERVED'),
-       (CURRENT_DATE() - 3, 4, 2, 1, 'WAITING'),
-       (CURRENT_DATE() - 3, 1, 3, 1, 'RESERVED'),
+       (CURRENT_DATE() - 4, 2, 1, 2, 'RESERVED'),
+       (CURRENT_DATE() - 4, 3, 1, 2, 'RESERVED'),
+
+       (CURRENT_DATE() - 3, 4, 4, 1, 'WAITING'),
+       (CURRENT_DATE() - 3, 1, 4, 1, 'RESERVED'),
        (CURRENT_DATE() - 3, 2, 4, 1, 'RESERVED'),
-       (CURRENT_DATE() - 2, 3, 1, 5, 'RESERVED'),
-       (CURRENT_DATE() - 2, 4, 2, 4, 'RESERVED'),
-       (CURRENT_DATE() - 1, 1, 3, 3, 'RESERVED'),
-       (CURRENT_DATE() - 1, 2, 4, 2, 'WAITING');
+
+       (CURRENT_DATE() - 2, 3, 1, 1, 'RESERVED'),
+       (CURRENT_DATE() - 2, 4, 1, 1, 'RESERVED'),
+
+       (CURRENT_DATE() - 1, 2, 3, 2, 'RESERVED'),
+       (CURRENT_DATE() - 1, 1, 3, 2, 'WAITING');

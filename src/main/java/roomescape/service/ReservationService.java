@@ -203,4 +203,45 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
     }
+
+    @Transactional
+    public ReservationResponse approveReservationWaiting(Long id) {
+        Reservation reservation = reservationRepository
+                .getReferenceById(id);
+
+        validateReservationNotWaiting(reservation);
+        validateReservationExists(reservation);
+
+        reservation.updateToReserved();
+
+        return ReservationResponse.from(reservation);
+    }
+
+    private void validateReservationExists(Reservation reservation) {
+        boolean reservationExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                ReservationStatus.RESERVED
+        );
+        System.out.println("reservationExists: " + reservationExists);
+
+        if (reservationExists) {
+            throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
+        }
+    }
+
+    @Transactional
+    public void rejectReservationWaiting(Long id) {
+        Reservation reservation = reservationRepository.getReferenceById(id);
+        validateReservationNotWaiting(reservation);
+
+        reservationRepository.deleteById(id);
+    }
+
+    private void validateReservationNotWaiting(Reservation reservation) {
+        if (reservation.getStatus() != ReservationStatus.WAITING) {
+            throw new IllegalArgumentException("예약 대기 상태에서만 승인할 수 있습니다.");
+        }
+    }
 }

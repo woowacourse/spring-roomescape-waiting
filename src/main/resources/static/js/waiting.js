@@ -27,7 +27,7 @@ function render(data) {
         const name = item.member.name;
         const theme = item.theme.name;
         const date = item.date;
-        const startAt = item.startAt;
+        const startAt = item.time.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
@@ -71,7 +71,7 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = `/admin/reservations/waiting/${id}/deny`
+    const endpoint = `/admin/reservations/waiting/${id}/reject`
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {

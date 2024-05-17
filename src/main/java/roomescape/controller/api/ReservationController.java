@@ -68,6 +68,13 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservationById(@PathVariable Long id) {
+        reservationService.deleteReservationById(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/waiting")
     public ResponseEntity<ReservationResponse> addReservationWaiting(
             @RequestBody @Valid ReservationWaitingRequest request,
@@ -84,14 +91,7 @@ public class ReservationController {
                 .body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationById(@PathVariable Long id) {
-        reservationService.deleteReservationById(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{id}/waiting")
+    @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteReservationWaiting(
             @PathVariable Long id,
             @Auth Accessor accessor
