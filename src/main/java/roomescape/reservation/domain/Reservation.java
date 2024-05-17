@@ -48,7 +48,7 @@ public class Reservation {
 
     private Reservation(LocalDate date, long timeId, long themeId, long memberId) {
         this(0, Date.saveDateFrom(date), new Time(timeId), Theme.saveThemeFrom(themeId),
-                Member.saveMemberFrom(memberId));
+                Member.from(memberId));
     }
 
     public static Reservation reservationOf(long id, LocalDate date, Time time, Theme theme, Member member) {

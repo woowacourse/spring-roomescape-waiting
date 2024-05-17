@@ -50,17 +50,17 @@ public class Member {
         this(0, name, email, password, role);
     }
 
-    public static Member saveMemberFrom(long id) {
+    public static Member from(long id) {
         return new Member(id, DEFAULT_NAME, Email.from(), Password.from(),
                 MemberRole.MEMBER);
     }
 
-    public static Member memberOf(long id, String name, String email, String password, String role) {
+    public static Member of(long id, String name, String email, String password, String role) {
         return new Member(id, name, Email.from(email), Password.from(password),
                 MemberRole.findMemberRole(role));
     }
 
-    public static Member saveMemberOf(String email, String password, String name) {
+    public static Member of(String email, String password) {
         return new Member(DEFAULT_NAME, Email.from(email), Password.from(password), MemberRole.MEMBER);
     }
 

@@ -32,7 +32,7 @@ class ReservationControllerTest extends ControllerTest {
 
     private final Reservation reservation = Reservation.reservationOf(1L, TODAY,
             new Time(1L, LocalTime.of(10, 0)), Theme.themeOf(1L, "polla", "폴라 방탈출", "이미지~"),
-            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
+            Member.of(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
     private final String expectedStartAt = "10:00:00";
 
     @Autowired
