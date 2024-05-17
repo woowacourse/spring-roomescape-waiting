@@ -92,8 +92,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("테마가 존재하지 않습니다."));
-        long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
-        if (countReservation > 0) {
+        boolean exists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
+        if (exists) {
             throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
         }
     }
@@ -104,8 +104,8 @@ public class ReservationService {
     }
 
     private void validateExistReservation(long id) {
-        long count = reservationRepository.countById(id);
-        if (count <= 0) {
+        boolean exists = reservationRepository.existsById(id);
+        if (!exists) {
             throw new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id));
         }
     }

@@ -81,18 +81,18 @@ class ReservationTimeRepositoryTest {
     void should_return_true_when_id_exist() {
         entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
 
-        long count = reservationTimeRepository.countById(1L);
-        assertThat(count).isEqualTo(1);
+        boolean exists = reservationTimeRepository.existsById(1L);
+        assertThat(exists).isTrue();
     }
 
-    @DisplayName("시간에 해당하는 예약 시간의 개수를 조회한다.")
+    @DisplayName("시간에 해당하는 예약이 존재하면 참을 반환한다.")
     @Test
-    void should_return_reservation_time_count_when_give_start_at() {
+    void should_return_true_when_start_at_reservation_exist() {
         entityManager.persist(new ReservationTime(LocalTime.of(10, 0)));
         entityManager.persist(new ReservationTime(LocalTime.of(10, 0).plusHours(1)));
 
-        long count = reservationTimeRepository.countByStartAt(LocalTime.of(10, 0));
-        assertThat(count).isEqualTo(1);
+        boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
+        assertThat(exists).isTrue();
     }
 
 

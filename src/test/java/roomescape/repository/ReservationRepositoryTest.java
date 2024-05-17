@@ -151,7 +151,7 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.count()).isEqualTo(1);
     }
 
-    @DisplayName("아이디에 해당하는 예약 개수를 반환한다.")
+    @DisplayName("아이디에 해당하는 예약이 존재하면 참을 반환한다.")
     @Test
     void should_return_true_when_id_exist() {
         LocalDate day = LocalDate.of(2024, 5, 15);
@@ -171,13 +171,13 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
-        long count = reservationRepository.countById(1L);
-        assertThat(count).isEqualTo(1);
+        boolean exists = reservationRepository.existsById(1L);
+        assertThat(exists).isTrue();
     }
 
-    @DisplayName("예약시간에 해당하는 예약 개수를 반환한다.")
+    @DisplayName("예약시간에 해당하는 예약이 존재하면 참을 반환한다.")
     @Test
-    void should_return_reservation_count_when_give_time() {
+    void should_return_true_when_time_exist() {
         LocalDate day = LocalDate.of(2024, 5, 15);
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
@@ -195,11 +195,11 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
-        long count = reservationRepository.countByTime(time1);
-        assertThat(count).isEqualTo(1);
+        boolean exists = reservationRepository.existsByTime(time1);
+        assertThat(exists).isTrue();
     }
 
-    @DisplayName("날짜, 시간, 테마에 해당하는 예약 개수를 반환한다.")
+    @DisplayName("날짜, 시간, 테마에 해당하는 예약이 존재하면 참을 반환한다.")
     @Test
     void should_return_reservation_count_when_give_date_and_time_and_theme() {
         LocalDate day = LocalDate.of(2024, 5, 15);
@@ -219,8 +219,8 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
-        long count = reservationRepository.countByDateAndTimeAndTheme(day, time1, theme);
-        assertThat(count).isEqualTo(1);
+        boolean exists = reservationRepository.existsByDateAndTimeAndTheme(day, time1, theme);
+        assertThat(exists).isTrue();
     }
 
     @DisplayName("사용자 아이디에 해당하는 예약을 반환한다.")

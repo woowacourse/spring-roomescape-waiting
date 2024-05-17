@@ -21,9 +21,9 @@ public interface ReservationTimeRepository extends CrudRepository<ReservationTim
 
     void deleteById(long id);
 
-    long countById(long id);
+    boolean existsById(long id);
 
-    long countByStartAt(LocalTime startAt);
+    boolean existsByStartAt(LocalTime startAt);
 
     @Query("""
             SELECT r.time

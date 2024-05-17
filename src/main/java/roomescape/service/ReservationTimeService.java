@@ -42,8 +42,8 @@ public class ReservationTimeService {
     }
 
     private void validateExistTime(LocalTime startAt) {
-        long countReservationTimeByStartAt = reservationTimeRepository.countByStartAt(startAt);
-        if (countReservationTimeByStartAt > 0) {
+        boolean exists = reservationTimeRepository.existsByStartAt(startAt);
+        if (exists) {
             throw new DuplicatedException("이미 존재하는 시간입니다.");
         }
     }
@@ -71,15 +71,15 @@ public class ReservationTimeService {
     private void validateReservedTime(long id) {
         ReservationTime time = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
-        long countedReservationByTime = reservationRepository.countByTime(time);
-        if (countedReservationByTime > 0) {
+        boolean exists = reservationRepository.existsByTime(time);
+        if (exists) {
             throw new BadRequestException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 
     private void validateNotExistReservationTime(long id) {
-        long countedReservationTime = reservationTimeRepository.countById(id);
-        if (countedReservationTime <= 0) {
+        boolean exists = reservationTimeRepository.existsById(id);
+        if (!exists) {
             throw new NotFoundException("id(%s)에 해당하는 예약 시간이 존재하지 않습니다.".formatted(id));
         }
     }

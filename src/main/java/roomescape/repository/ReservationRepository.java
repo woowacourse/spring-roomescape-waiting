@@ -20,11 +20,11 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     void deleteById(long id);
 
-    long countById(long id);
+    boolean existsById(long id);
 
-    long countByTime(ReservationTime time);
+    boolean existsByTime(ReservationTime time);
 
-    long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
