@@ -9,7 +9,7 @@ POST {{base-url}}/reservations
 Content-Type: application/json
 
 {
-  "date": "2024-08-05",
+  "date": "2024-08-06",
   "themeId": 1,
   "timeId": 1,
   "name": "브라운"
@@ -20,7 +20,7 @@ POST {{base-url}}/admin/reservations
 Content-Type: application/json
 
 {
-  "date": "2023-08-05",
+  "date": "2024-08-07",
   "themeId": 1,
   "timeId": 1,
   "memberId": 1

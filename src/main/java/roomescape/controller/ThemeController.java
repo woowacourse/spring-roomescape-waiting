@@ -1,7 +1,6 @@
 package roomescape.controller;
 
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.MemberRole;
 import roomescape.service.ThemeService;
+import roomescape.service.dto.ThemeListResponse;
 import roomescape.service.dto.ThemeRequest;
 import roomescape.service.dto.ThemeResponse;
 
@@ -24,14 +24,14 @@ public class ThemeController {
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<ThemeResponse>> findAllTheme() {
-        List<ThemeResponse> response = themeService.findAllTheme();
+    public ResponseEntity<ThemeListResponse> findAllTheme() {
+        ThemeListResponse response = themeService.findAllTheme();
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/themes/popular")
-    public ResponseEntity<List<ThemeResponse>> findAllPopularTheme() {
-        List<ThemeResponse> response = themeService.findAllPopularTheme();
+    public ResponseEntity<ThemeListResponse> findAllPopularTheme() {
+        ThemeListResponse response = themeService.findAllPopularTheme();
         return ResponseEntity.ok().body(response);
     }
 

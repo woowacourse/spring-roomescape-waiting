@@ -9,7 +9,7 @@ POST {{base-url}}/times
 Content-Type: application/json
 
 {
-  "startAt": "10:00"
+  "startAt": "11:00"
 }
 
 ### 예약 시간 삭제 API (접근 권한: 관리자)

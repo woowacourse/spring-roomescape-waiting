@@ -1,22 +1,24 @@
 package roomescape.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
-public class AvailableReservationTimeResponse {
+public class ReservationTimeAvailableResponse {
     private final Long id;
     private final LocalTime startAt;
     private final boolean alreadyBooked;
 
-    public AvailableReservationTimeResponse(Long id, LocalTime startAt, boolean alreadyBooked) {
+    @JsonCreator
+    public ReservationTimeAvailableResponse(Long id, LocalTime startAt, boolean alreadyBooked) {
         this.id = id;
         this.startAt = startAt;
         this.alreadyBooked = alreadyBooked;
     }
 
-    public AvailableReservationTimeResponse(ReservationTime time, boolean alreadyBooked) {
+    public ReservationTimeAvailableResponse(ReservationTime time, boolean alreadyBooked) {
         this(time.getId(), time.getStartAt(), alreadyBooked);
     }
 
@@ -29,7 +31,7 @@ public class AvailableReservationTimeResponse {
         return startAt;
     }
 
-    public boolean isAlreadyBooked() {
+    public boolean getAlreadyBooked() {
         return alreadyBooked;
     }
 }

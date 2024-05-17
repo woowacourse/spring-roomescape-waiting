@@ -3,15 +3,14 @@ package roomescape.integration;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.service.dto.ReservationTimeAvailableListResponse;
 
 class ReservationTimeIntegrationTest extends IntegrationTest {
     @Nested
@@ -37,12 +36,12 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
                     .when().get("/times/available?date=2024-10-05&theme-id=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("times.size()", is(1));
 
-            List<Map<String, Object>> response = RestAssured.get("/times/available?date=2024-10-05&theme-id=1")
-                    .as(new TypeRef<>() {
-                    });
-            Assertions.assertThat(response.get(0)).containsEntry("alreadyBooked", false);
+            ReservationTimeAvailableListResponse response = RestAssured.get(
+                            "/times/available?date=2024-10-05&theme-id=1")
+                    .as(ReservationTimeAvailableListResponse.class);
+            Assertions.assertThat(response.getTimes().get(0).getAlreadyBooked()).isFalse();
         }
 
         @Test
@@ -51,12 +50,12 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
                     .when().get("/times/available?date=2000-04-01&theme-id=1")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("times.size()", is(1));
 
-            List<Map<String, Object>> response = RestAssured.get("/times/available?date=2000-04-01&theme-id=1")
-                    .as(new TypeRef<>() {
-                    });
-            Assertions.assertThat(response.get(0)).containsEntry("alreadyBooked", true);
+            ReservationTimeAvailableListResponse response = RestAssured.get(
+                            "/times/available?date=2000-04-01&theme-id=1")
+                    .as(ReservationTimeAvailableListResponse.class);
+            Assertions.assertThat(response.getTimes().get(0).getAlreadyBooked()).isTrue();
         }
     }
 

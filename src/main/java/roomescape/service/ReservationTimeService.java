@@ -10,7 +10,9 @@ import roomescape.domain.ReservationTimeRepository;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.exception.time.ReservationReferencedTimeException;
-import roomescape.service.dto.AvailableReservationTimeResponse;
+import roomescape.service.dto.ReservationTimeAvailableListResponse;
+import roomescape.service.dto.ReservationTimeAvailableResponse;
+import roomescape.service.dto.ReservationTimeListResponse;
 import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 
@@ -27,26 +29,26 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimeResponse> findAllReservationTime() {
+    public ReservationTimeListResponse findAllReservationTime() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
+        return new ReservationTimeListResponse(reservationTimes.stream()
                 .map(ReservationTimeResponse::new)
-                .toList();
+                .toList());
     }
 
     @Transactional(readOnly = true)
-    public List<AvailableReservationTimeResponse> findAllAvailableReservationTime(LocalDate date, long themeId) {
+    public ReservationTimeAvailableListResponse findAllAvailableReservationTime(LocalDate date, long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
+        return new ReservationTimeAvailableListResponse(reservationTimes.stream()
                 .map(time -> toAvailableReservationTimeResponse(time, bookedTimeIds))
-                .toList();
+                .toList());
     }
 
-    private AvailableReservationTimeResponse toAvailableReservationTimeResponse(
+    private ReservationTimeAvailableResponse toAvailableReservationTimeResponse(
             ReservationTime time, List<Long> bookedTimeIds) {
         boolean alreadyBooked = time.isAlreadyBooked(bookedTimeIds);
-        return new AvailableReservationTimeResponse(time, alreadyBooked);
+        return new ReservationTimeAvailableResponse(time, alreadyBooked);
     }
 
     public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {

@@ -10,6 +10,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
+import roomescape.service.dto.ThemeListResponse;
 import roomescape.service.dto.ThemeRequest;
 import roomescape.service.dto.ThemeResponse;
 
@@ -27,21 +28,21 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findAllTheme() {
+    public ThemeListResponse findAllTheme() {
         List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
+        return new ThemeListResponse(themes.stream()
                 .map(ThemeResponse::new)
-                .toList();
+                .toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findAllPopularTheme() {
+    public ThemeListResponse findAllPopularTheme() {
         LocalDate startDate = LocalDate.now(clock).minusDays(7L);
         LocalDate endDate = LocalDate.now(clock);
         List<Theme> themes = reservationRepository.findThemeByMostPopularReservation(startDate, endDate);
-        return themes.stream()
+        return new ThemeListResponse(themes.stream()
                 .map(ThemeResponse::new)
-                .toList();
+                .toList());
     }
 
     public ThemeResponse saveTheme(ThemeRequest request) {

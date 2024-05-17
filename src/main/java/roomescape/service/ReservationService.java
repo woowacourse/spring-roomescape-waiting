@@ -19,6 +19,8 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
+import roomescape.service.dto.ReservationListResponse;
+import roomescape.service.dto.ReservationMineListResponse;
 import roomescape.service.dto.ReservationMineResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
@@ -42,21 +44,21 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllReservation(
+    public ReservationListResponse findAllReservation(
             Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 memberId, themeId, dateFrom, dateTo);
-        return reservations.stream()
+        return new ReservationListResponse(reservations.stream()
                 .map(ReservationResponse::new)
-                .toList();
+                .toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationMineResponse> findMyReservation(Member member) {
+    public ReservationMineListResponse findMyReservation(Member member) {
         List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
-        return reservations.stream()
+        return new ReservationMineListResponse(reservations.stream()
                 .map(ReservationMineResponse::new)
-                .toList();
+                .toList());
     }
 
     public ReservationResponse saveReservation(ReservationRequest request, Member member) {

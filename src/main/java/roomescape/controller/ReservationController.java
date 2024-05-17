@@ -2,7 +2,6 @@ package roomescape.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,8 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
-import roomescape.service.dto.ReservationMineResponse;
+import roomescape.service.dto.ReservationListResponse;
+import roomescape.service.dto.ReservationMineListResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
 
@@ -34,19 +34,19 @@ public class ReservationController {
 
     @RoleAllowed(value = MemberRole.ADMIN)
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllReservation(
+    public ResponseEntity<ReservationListResponse> findAllReservation(
             @RequestParam(required = false, name = "member-id") Long memberId,
             @RequestParam(required = false, name = "theme-id") Long themeId,
             @RequestParam(required = false, name = "date-from") LocalDate dateFrom,
             @RequestParam(required = false, name = "date-to") LocalDate dateTo) {
-        List<ReservationResponse> response = reservationService.findAllReservation(memberId, themeId, dateFrom, dateTo);
+        ReservationListResponse response = reservationService.findAllReservation(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok().body(response);
     }
 
     @RoleAllowed
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<ReservationMineResponse>> findMyReservation(@LoginMember Member member) {
-        List<ReservationMineResponse> response = reservationService.findMyReservation(member);
+    public ResponseEntity<ReservationMineListResponse> findMyReservation(@LoginMember Member member) {
+        ReservationMineListResponse response = reservationService.findMyReservation(member);
         return ResponseEntity.ok().body(response);
     }
 

@@ -2,7 +2,6 @@ package roomescape.controller;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.helper.RoleAllowed;
 import roomescape.domain.MemberRole;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.dto.AvailableReservationTimeResponse;
+import roomescape.service.dto.ReservationTimeAvailableListResponse;
+import roomescape.service.dto.ReservationTimeListResponse;
 import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 
@@ -28,15 +28,15 @@ public class ReservationTimeController {
 
     @RoleAllowed(value = MemberRole.ADMIN)
     @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeResponse>> findAllReservationTime() {
-        List<ReservationTimeResponse> response = reservationTimeService.findAllReservationTime();
+    public ResponseEntity<ReservationTimeListResponse> findAllReservationTime() {
+        ReservationTimeListResponse response = reservationTimeService.findAllReservationTime();
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAllAvailableReservationTime(
+    public ResponseEntity<ReservationTimeAvailableListResponse> findAllAvailableReservationTime(
             @RequestParam LocalDate date, @RequestParam(name = "theme-id") Long themeId) {
-        List<AvailableReservationTimeResponse> response =
+        ReservationTimeAvailableListResponse response =
                 reservationTimeService.findAllAvailableReservationTime(date, themeId);
         return ResponseEntity.ok().body(response);
     }

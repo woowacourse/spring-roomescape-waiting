@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.exception.member.NotFoundMemberException;
+import roomescape.service.dto.MemberListResponse;
 import roomescape.service.dto.MemberResponse;
 
 @Service
@@ -18,11 +19,11 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> findAllMember() {
+    public MemberListResponse findAllMember() {
         List<Member> members = memberRepository.findAll();
-        return members.stream()
+        return new MemberListResponse(members.stream()
                 .map(MemberResponse::new)
-                .toList();
+                .toList());
     }
 
     @Transactional(readOnly = true)

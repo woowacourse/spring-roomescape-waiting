@@ -4,14 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.service.dto.ThemeListResponse;
 
 class ThemeIntegrationTest extends IntegrationTest {
     @Nested
@@ -36,12 +35,11 @@ class ThemeIntegrationTest extends IntegrationTest {
                     .when().get("/themes/popular")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("themes.size()", is(1));
 
-            List<Map<String, Object>> response = RestAssured.get("/themes/popular")
-                    .as(new TypeRef<>() {
-                    });
-            assertThat(response.get(0)).containsEntry("id", 1);
+            ThemeListResponse response = RestAssured.get("/themes/popular")
+                    .as(ThemeListResponse.class);
+            assertThat(response.getThemes().get(0).getId()).isEqualTo(1L);
         }
     }
 

@@ -26,8 +26,8 @@ POST /login
 Content-Type: application/json
 
 {
-    "password": "password",
-    "email": "admin@email.com"
+  "password": "password",
+  "email": "admin@email.com"
 }
 ```
 
@@ -70,7 +70,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-    "name": "어드민"
+  "name": "어드민"
 }
 ```
 
@@ -83,9 +83,9 @@ POST /signup
 Content-Type: application/json
 
 {
-    "email": "admin@email.com",
-    "password": "password",
-    "name": "어드민"
+  "email": "admin@email.com",
+  "password": "password",
+  "name": "어드민"
 }
 ```
 
@@ -96,9 +96,9 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-    "id": 1,
-    "name": "브라운",
-    "email": "admin@email.com"
+  "id": 1,
+  "name": "브라운",
+  "email": "admin@email.com"
 }
 ```
 
@@ -119,13 +119,15 @@ HTTP/1.1 200
 Cookie: token=hello.example.token
 Content-Type: application/json
 
-[
+{
+  "members": [
     {
-        "id": 1,
-        "name": "브라운",
-        "email": "admin@email.com"
+      "id": 1,
+      "name": "관리자",
+      "email": "admin@gmail.com"
     }
-]
+  ]
+}
 ```
 
 ## 예약
@@ -145,21 +147,25 @@ Response
 HTTP/1.1 200
 Content-Type: application/json
 
-[
+{
+  "reservations": [
     {
+      "id": 1,
+      "name": "관리자",
+      "date": "2024-08-05",
+      "time": {
         "id": 1,
-        "name": "브라운",
-        "date": "2023-08-05",
-        "time": {
-            "id": 1,
-            "startAt": "10:00"
-        },
-        "theme": {
-            "id": 1,
-            "name": "레벨2 탈출"
-        }
+        "startAt": "10:00"
+      },
+      "theme": {
+        "id": 1,
+        "name": "레벨2 탈출",
+        "description": "우테코 레벨2를 탈출하는 내용입니다.",
+        "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+      }
     }
-]
+  ]
+}
 ```
 
 ### 내 예약 목록 조회 API
@@ -177,29 +183,17 @@ Response
 HTTP/1.1 200 
 Content-Type: application/json
 
-[
+{
+  "reservations": [
     {
-        "reservationId": 1,
-        "theme": "테마1",
-        "date": "2024-03-01",
-        "time": "10:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 2,
-        "theme": "테마2",
-        "date": "2024-03-01",
-        "time": "12:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 3,
-        "theme": "테마3",
-        "date": "2024-03-01",
-        "time": "14:00",
-        "status": "예약"
+      "reservationId": 1,
+      "theme": "레벨2 탈출",
+      "date": "2024-08-05",
+      "time": "10:00:00",
+      "status": "예약"
     }
-]
+  ]
+}
 ```
 
 ### 예약 추가 API
@@ -212,9 +206,9 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-    "date": "2023-08-05",
-    "themeId": 1,
-    "timeId": 1
+  "date": "2023-08-05",
+  "themeId": 1,
+  "timeId": 1
 }
 ```
 
@@ -225,17 +219,19 @@ HTTP/1.1 201
 Content-Type: application/json
 
 {
+  "id": 2,
+  "name": "관리자",
+  "date": "2024-08-06",
+  "time": {
     "id": 1,
-    "name": "브라운",
-    "date": "2023-08-05",
-    "time": {
-        "id": 1,
-        "startAt": "10:00"
-    },
-    "theme": {
-        "id": 1,
-        "name": "레벨2 탈출"
-    }
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "레벨2 탈출",
+    "description": "우테코 레벨2를 탈출하는 내용입니다.",
+    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+  }
 }
 ```
 
@@ -249,10 +245,10 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-    "date": "2023-08-05", 
-    "themeId": 1,
-    "timeId": 1,
-    "memberId": 1
+  "date": "2023-08-05", 
+  "themeId": 1,
+  "timeId": 1,
+  "memberId": 1
 }
 ```
 
@@ -263,17 +259,19 @@ HTTP/1.1 201
 Content-Type: application/json
 
 {
+  "id": 3,
+  "name": "관리자",
+  "date": "2024-08-07",
+  "time": {
     "id": 1,
-    "name": "브라운",
-    "date": "2023-08-05",
-    "time": {
-        "id": 1,
-        "startAt": "10:00"
-    },
-    "theme": {
-        "id": 1,
-        "name": "레벨2 탈출"
-    }
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "레벨2 탈출",
+    "description": "우테코 레벨2를 탈출하는 내용입니다.",
+    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+  }
 }
 ```
 
@@ -309,12 +307,14 @@ Response
 HTTP/1.1 200 
 Content-Type: application/json
 
-[
-   {
-        "id": 1,
-        "startAt": "10:00"
+{
+  "times": [
+    {
+      "id": 1,
+      "startAt": "10:00"
     }
-]
+  ]
+}
 ```
 
 ### 예약 가능 시간 목록 조회 API
@@ -331,13 +331,15 @@ Response
 HTTP/1.1 200 
 Content-Type: application/json
 
-[
-   {
-        "id": 1,
-        "startAt": "10:00",
-        "alreadyBooked": true
+{
+  "times": [
+    {
+      "id": 1,
+      "startAt": "10:00",
+      "alreadyBooked": false
     }
-]
+  ]
+}
 ```
 
 ### 예약 시간 추가 API (접근 권한: 관리자)
@@ -350,7 +352,7 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-    "startAt": "10:00"
+  "startAt": "10:00"
 }
 ```
 
@@ -361,8 +363,8 @@ HTTP/1.1 201
 Content-Type: application/json
 
 {
-    "id": 1,
-    "startAt": "10:00"
+  "id": 2,
+  "startAt": "11:00"
 }
 ```
 
@@ -397,14 +399,16 @@ Response
 HTTP/1.1 200 
 Content-Type: application/json
 
-[
-   {
-        "id": 1,
-        "name": "레벨2 탈출",
-        "description": "우테코 레벨2를 탈출하는 내용입니다.",
-        "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+{
+  "themes": [
+    {
+      "id": 1,
+      "name": "레벨2 탈출",
+      "description": "우테코 레벨2를 탈출하는 내용입니다.",
+      "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
     }
-]
+  ]
+}
 ```
 
 ### 인기 테마 목록 조회 API
@@ -421,14 +425,16 @@ Response
 HTTP/1.1 200
 Content-Type: application/json
 
-[
-   {
-        "id": 1,
-        "name": "레벨2 탈출",
-        "description": "우테코 레벨2를 탈출하는 내용입니다.",
-        "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+{
+  "themes": [
+    {
+      "id": 1,
+      "name": "레벨2 탈출",
+      "description": "우테코 레벨2를 탈출하는 내용입니다.",
+      "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
     }
-]
+  ]
+}
 ```
 
 ### 테마 추가 API (접근 권한: 관리자)
@@ -441,9 +447,9 @@ Cookie: token=hello.example.token
 Content-Type: application/json
 
 {
-    "name": "레벨2 탈출",
-    "description": "우테코 레벨2를 탈출하는 내용입니다.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+  "name": "레벨2 탈출",
+  "description": "우테코 레벨2를 탈출하는 내용입니다.",
+  "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
 }
 ```
 
@@ -455,10 +461,10 @@ Location: /themes/1
 Content-Type: application/json
 
 {
-    "id": 1,
-    "name": "레벨2 탈출",
-    "description": "우테코 레벨2를 탈출하는 내용입니다.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+  "id": 1,
+  "name": "레벨2 탈출",
+  "description": "우테코 레벨2를 탈출하는 내용입니다.",
+  "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
 }
 
 ```
