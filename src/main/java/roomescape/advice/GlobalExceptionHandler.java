@@ -47,8 +47,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
-        System.out.println("e = " + e);
-        e.printStackTrace(System.err);
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse(UNEXPECTED_EXCEPTION_ERROR_MESSAGE));
     }
