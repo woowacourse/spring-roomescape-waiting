@@ -84,7 +84,7 @@ class AuthServiceTest extends ServiceTest {
         authService.signUp(signUpCommand);
 
         //then
-        Optional<Member> memberOptional = memberRepository.findByEmail(getMemberClover().getEmail());
+        Optional<Member> memberOptional = memberRepository.findMemberByEmailAddress(getMemberClover().getEmail());
 
         assertAll(
                 () -> assertThat(memberOptional).isNotNull(),

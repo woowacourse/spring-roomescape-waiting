@@ -29,7 +29,7 @@ public class AuthService {
     }
 
     public void authenticate(LoginRequest loginRequest) {
-        Member member = memberRepository.findByEmail(loginRequest.email())
+        Member member = memberRepository.findMemberByEmailAddress(loginRequest.email())
                 .orElseThrow(() -> new AuthenticationException(ErrorType.MEMBER_NOT_FOUND));
 
         if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
@@ -42,14 +42,14 @@ public class AuthService {
     }
 
     public AuthInfo fetchByToken(String token) {
-        Member member = memberRepository.findByEmail(tokenProvider.getPayload(token).getValue())
+        Member member = memberRepository.findMemberByEmailAddress(tokenProvider.getPayload(token).getValue())
                 .orElseThrow(() -> new AuthenticationException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE));
         return AuthInfo.from(member);
     }
 
     @Transactional
     public MemberResponse signUp(SignUpCommand signUpCommand) {
-        if (memberRepository.existsByEmail(signUpCommand.email())) {
+        if (memberRepository.existsByEmailAddress(signUpCommand.email())) {
             throw new BadRequestException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
         return MemberResponse.from(

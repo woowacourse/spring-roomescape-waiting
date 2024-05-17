@@ -12,12 +12,12 @@ public class Email {
     private static final String EMAIL_REGEX = "^.*@.*\\..*$";
     private static final Pattern pattern = Pattern.compile(EMAIL_REGEX);
 
-    @Column(nullable = false)
-    private String email;
+    @Column(name = "email", nullable = false)
+    private String address;
 
-    public Email(String email) {
-        validate(email);
-        this.email = email;
+    public Email(String address) {
+        validate(address);
+        this.address = address;
     }
 
     public Email() {
@@ -29,8 +29,8 @@ public class Email {
         }
     }
 
-    public String getEmail() {
-        return email;
+    public String getAddress() {
+        return address;
     }
 
     @Override
@@ -42,18 +42,18 @@ public class Email {
             return false;
         }
         Email email1 = (Email) o;
-        return Objects.equals(getEmail(), email1.getEmail());
+        return Objects.equals(getAddress(), email1.getAddress());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getEmail());
+        return Objects.hash(getAddress());
     }
 
     @Override
     public String toString() {
         return "Email{" +
-                "email='" + email + '\'' +
+                "email='" + address + '\'' +
                 '}';
     }
 }
