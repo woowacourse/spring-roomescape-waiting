@@ -93,6 +93,9 @@
 | GET         | `/reservations/mine`                 | 로그인 회원의 예약 목록 조회  |                                                   | [List of MyReservationResponse](#List-of-MyReservationResponse)      |
 | GET         | `/reservations-mine`                 | 로그인 회원의 예약 목록 페이지 |                                                   | `templates/reservation-mine.html`                                    |
 
+### ERD
+![roomescape_waiting_erd](./roomescape_waiting_erd.png)
+
 ### ReservationRequest
 
 ```json
