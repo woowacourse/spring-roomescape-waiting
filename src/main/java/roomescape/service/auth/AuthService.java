@@ -1,7 +1,7 @@
 package roomescape.service.auth;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberPassword;
 import roomescape.exception.AuthenticationException;

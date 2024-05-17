@@ -1,7 +1,7 @@
 package roomescape.service.dto.response.member;
 
 import java.util.List;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 
 public record MemberIdAndNameResponses(List<MemberIdAndNameResponse> members) {
 

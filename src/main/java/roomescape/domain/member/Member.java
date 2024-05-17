@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -8,9 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberPassword;
 
 @Entity
 public class Member {

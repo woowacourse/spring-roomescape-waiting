@@ -7,11 +7,11 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
-import roomescape.domain.Role;
+import roomescape.domain.member.Role;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 

@@ -2,7 +2,7 @@ package roomescape.service.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
