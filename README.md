@@ -1,5 +1,9 @@
 # 방탈출 예약 관리
 
+## ERD
+<img width="896" alt="image" src="https://github.com/PgmJun/spring-roomescape-waiting/assets/84304802/e050da11-0193-4512-bd18-530755f3e767">
+
+
 ## API 명세
 
 | Role     | Method | Endpoint                                                | Description           | File Path                              | Controller Type   |
