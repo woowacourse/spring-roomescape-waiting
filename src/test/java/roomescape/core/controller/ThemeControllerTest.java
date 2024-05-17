@@ -1,9 +1,10 @@
 package roomescape.core.controller;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.core.utils.e2eTest.getAccessToken;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -14,20 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
+import roomescape.core.utils.e2eTest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 class ThemeControllerTest {
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
-
     private String accessToken;
 
     @LocalServerPort
@@ -37,22 +34,14 @@ class ThemeControllerTest {
     void setUp() {
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        accessToken = getAccessToken();
     }
 
     @Test
     @DisplayName("모든 테마 목록을 조회한다.")
     void findAllThemes() {
-        RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/themes");
+        response.statusCode(200)
                 .body("size()", is(5));
     }
 
@@ -61,11 +50,8 @@ class ThemeControllerTest {
     void findPopularThemes() {
         createReservationTimes();
         createReservations();
-
-        RestAssured.given().log().all()
-                .when().get("/themes/popular")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/themes/popular");
+        response.statusCode(200)
                 .body("size()", is(1))
                 .body("name", is(List.of("테마2")));
     }
@@ -74,24 +60,14 @@ class ThemeControllerTest {
         ReservationTimeRequest timeRequest = new ReservationTimeRequest(
                 LocalTime.now().plusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm")));
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response1 = e2eTest.post(timeRequest, "/admin/times", accessToken);
+        response1.statusCode(201);
 
         ReservationTimeRequest timeRequest2 = new ReservationTimeRequest(
                 LocalTime.now().plusMinutes(2).format(DateTimeFormatter.ofPattern("HH:mm")));
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest2)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response2 = e2eTest.post(timeRequest2, "/admin/times", accessToken);
+        response2.statusCode(201);
     }
 
     private void createReservations() {
@@ -99,24 +75,14 @@ class ThemeControllerTest {
                 LocalDate.now().format(DateTimeFormatter.ISO_DATE),
                 4L, 2L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(firstThemeMemberReservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response1 = e2eTest.post(firstThemeMemberReservationRequest, "/reservations", accessToken);
+        response1.statusCode(201);
 
         MemberReservationRequest firstThemeMemberReservationRequest2 = new MemberReservationRequest(
                 LocalDate.now().format(DateTimeFormatter.ISO_DATE),
                 5L, 2L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(firstThemeMemberReservationRequest2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response2 = e2eTest.post(firstThemeMemberReservationRequest2, "/reservations", accessToken);
+        response2.statusCode(201);
     }
 }

@@ -1,9 +1,10 @@
 package roomescape.core.controller;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.core.utils.e2eTest.getAccessToken;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -15,12 +16,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
+import roomescape.core.utils.e2eTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,8 +28,6 @@ import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 class ReservationControllerTest {
     private static final String TOMORROW = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
     private static final String DAY_AFTER_TOMORROW = LocalDate.now().plusDays(2).format(DateTimeFormatter.ISO_DATE);
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
 
     private String accessToken;
 
@@ -40,13 +38,7 @@ class ReservationControllerTest {
     void setUp() {
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        accessToken = getAccessToken();
     }
 
     @ParameterizedTest
@@ -56,13 +48,8 @@ class ReservationControllerTest {
     void validateReservationWithDateFormat(final String date) {
         MemberReservationRequest request = new MemberReservationRequest(date, 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
@@ -70,13 +57,8 @@ class ReservationControllerTest {
     void validateReservationWithPastDate() {
         MemberReservationRequest request = new MemberReservationRequest("2020-10-10", 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
@@ -85,40 +67,24 @@ class ReservationControllerTest {
         ReservationTimeRequest timeRequest = new ReservationTimeRequest(
                 LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm")));
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse timesResponse = e2eTest.post(timeRequest, "/admin/times", accessToken);
+        timesResponse.statusCode(201);
 
         MemberReservationRequest memberReservationRequest = new MemberReservationRequest(
                 LocalDate.now().format(DateTimeFormatter.ISO_DATE),
                 4L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(memberReservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse reservationsResponse = e2eTest.post(memberReservationRequest, "/reservations", accessToken);
+        reservationsResponse.statusCode(400);
     }
-
 
     @Test
     @DisplayName("예약 생성 시, timeId가 null이면 예외가 발생한다.")
     void validateReservationWithNullTimeId() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, null, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
@@ -126,13 +92,8 @@ class ReservationControllerTest {
     void validateReservationWithTimeIdNotFound() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 0L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
@@ -140,21 +101,11 @@ class ReservationControllerTest {
     void validateReservationWithDuplicatedDateAndTime() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse successResponse = e2eTest.post(request, "/reservations", accessToken);
+        successResponse.statusCode(201);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse failResponse = e2eTest.post(request, "/reservations", accessToken);
+        failResponse.statusCode(400);
     }
 
     @Test
@@ -162,13 +113,8 @@ class ReservationControllerTest {
     void validateReservationWithNullThemeId() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, null);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
@@ -176,34 +122,23 @@ class ReservationControllerTest {
     void validateReservationWithThemeIdNotFound() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 0L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", accessToken);
+        response.statusCode(400);
     }
 
     @Test
     @DisplayName("모든 예약 내역을 조회한다.")
     void findAllReservations() {
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/reservations", accessToken);
+        response.statusCode(200)
                 .body("size()", is(1));
     }
 
     @Test
     @DisplayName("예약을 삭제한다.")
     void validateReservationDelete() {
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
+        ValidatableResponse response = e2eTest.delete("/reservations/1", accessToken);
+        response.statusCode(204);
     }
 
     @Test
@@ -211,23 +146,13 @@ class ReservationControllerTest {
     void findReservationsByCondition() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response1 = e2eTest.post(request, "/reservations", accessToken);
+        response1.statusCode(201);
 
         MemberReservationRequest request2 = new MemberReservationRequest(DAY_AFTER_TOMORROW, 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        ValidatableResponse response2 = e2eTest.post(request2, "/reservations", accessToken);
+        response2.statusCode(201);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -248,23 +173,15 @@ class ReservationControllerTest {
     void validateToken() {
         MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
 
-        RestAssured.given().log().all()
-                .cookies("token", "invalid-token")
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(401);
+        ValidatableResponse response = e2eTest.post(request, "/reservations", "invalid-token");
+        response.statusCode(401);
     }
 
     @Test
     @DisplayName("현재 로그인된 회원의 예약 목록을 조회한다.")
     void findLoginMemberReservation() {
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .when().get("/reservations/mine")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/reservations/mine", accessToken);
+        response.statusCode(200)
                 .body("size()", is(1));
     }
 }

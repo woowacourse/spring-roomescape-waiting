@@ -3,6 +3,7 @@ package roomescape.core.controller;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.core.utils.e2eTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -30,20 +32,16 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("전체 시간 목록을 조회한다.")
     void findAll() {
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/times");
+        response.statusCode(200)
                 .body("size()", is(3));
     }
 
     @Test
     @DisplayName("날짜와 테마 정보가 주어지면 예약 가능한 시간 목록을 조회한다.")
     void findBookable() {
-        RestAssured.given().log().all()
-                .when().get("/times?date=" + TOMORROW_DATE + "&theme=1")
-                .then().log().all()
-                .statusCode(200)
+        ValidatableResponse response = e2eTest.get("/times?date=" + TOMORROW_DATE + "&theme=1");
+        response.statusCode(200)
                 .body("size()", is(3));
     }
 }
