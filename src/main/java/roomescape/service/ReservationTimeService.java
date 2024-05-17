@@ -49,24 +49,24 @@ public class ReservationTimeService {
 
     public List<ReservationTimeAppResponse> findAll() {
         return reservationTimeRepository.findAll().stream()
-            .map(ReservationTimeAppResponse::from)
-            .toList();
+                .map(ReservationTimeAppResponse::from)
+                .toList();
     }
 
     public List<BookableReservationTimeAppResponse> findAllWithBookAvailability(String date, Long themeId) {
         List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new ReservationDate(date),
-            themeId);
+                themeId);
         List<ReservationTime> reservedTimes = reservations.stream()
-            .map(Reservation::getReservationTime)
-            .toList();
+                .map(Reservation::getReservationTime)
+                .toList();
 
         return reservationTimeRepository.findAll().stream()
-            .map(time -> BookableReservationTimeAppResponse.of(time, isBooked(reservedTimes, time)))
-            .toList();
+                .map(time -> BookableReservationTimeAppResponse.of(time, isBooked(reservedTimes, time)))
+                .toList();
     }
 
     private boolean isBooked(List<ReservationTime> reservedTimes, ReservationTime time) {
         return reservedTimes.stream()
-            .anyMatch(reservationTime -> Objects.equals(reservationTime.getId(), time.getId()));
+                .anyMatch(reservationTime -> Objects.equals(reservationTime.getId(), time.getId()));
     }
 }

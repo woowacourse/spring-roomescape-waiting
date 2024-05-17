@@ -27,11 +27,11 @@ public class JwtProvider {
         Date validity = new Date(now.getTime() + jwtProperties.expireLength());
 
         return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(now)
-            .setExpiration(validity)
-            .signWith(SignatureAlgorithm.HS256, jwtProperties.secretKey())
-            .compact();
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, jwtProperties.secretKey())
+                .compact();
     }
 
     public String createExpiredToken(String token) {
@@ -39,11 +39,11 @@ public class JwtProvider {
             Claims claims = getClaims(token);
 
             return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(claims.getIssuedAt())
-                .setExpiration(new Date(claims.getIssuedAt().getTime() - jwtProperties.expireLength()))
-                .signWith(SignatureAlgorithm.HS256, jwtProperties.secretKey())
-                .compact();
+                    .setClaims(claims)
+                    .setIssuedAt(claims.getIssuedAt())
+                    .setExpiration(new Date(claims.getIssuedAt().getTime() - jwtProperties.expireLength()))
+                    .signWith(SignatureAlgorithm.HS256, jwtProperties.secretKey())
+                    .compact();
         }
         throw new AuthorizationException("토큰이 만료되었습니다. 다시 로그인해주세요.");
     }
@@ -51,7 +51,7 @@ public class JwtProvider {
     public String getPayload(String token) {
         if (validateToken(token)) {
             return getClaims(token)
-                .getSubject();
+                    .getSubject();
         }
         throw new AuthorizationException("토큰이 만료되었습니다. 다시 로그인해주세요.");
     }
@@ -59,8 +59,8 @@ public class JwtProvider {
     private boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser()
-                .setSigningKey(jwtProperties.secretKey())
-                .parseClaimsJws(token);
+                    .setSigningKey(jwtProperties.secretKey())
+                    .parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
@@ -70,8 +70,8 @@ public class JwtProvider {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-            .setSigningKey(jwtProperties.secretKey())
-            .parseClaimsJws(token)
-            .getBody();
+                .setSigningKey(jwtProperties.secretKey())
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

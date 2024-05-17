@@ -7,8 +7,8 @@ public record BookableReservationTimeAppResponse(Long id, LocalTime startAt, boo
 
     public static BookableReservationTimeAppResponse of(ReservationTime reservationTime, boolean alreadyBooked) {
         return new BookableReservationTimeAppResponse(
-            reservationTime.getId(),
-            reservationTime.getStartAt(),
-            alreadyBooked);
+                reservationTime.getId(),
+                reservationTime.getStartAt(),
+                alreadyBooked);
     }
 }

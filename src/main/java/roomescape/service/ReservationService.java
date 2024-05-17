@@ -28,9 +28,9 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(
-        ReservationRepository reservationRepository,
-        ReservationTimeRepository reservationTimeRepository,
-        ThemeRepository themeRepository, MemberRepository memberRepository) {
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository, MemberRepository memberRepository) {
 
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -55,17 +55,17 @@ public class ReservationService {
 
     private ReservationTime findTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-            .orElseThrow(() -> new NoSuchElementException("예약에 대한 예약시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약에 대한 예약시간이 존재하지 않습니다."));
     }
 
     private Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
-            .orElseThrow(() -> new NoSuchElementException("예약에 대한 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약에 대한 테마가 존재하지 않습니다."));
     }
 
     private Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
-            .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("예약에 대한 사용자가 존재하지 않습니다."));
     }
 
     private void validatePastReservation(Reservation reservation) {
@@ -87,24 +87,24 @@ public class ReservationService {
 
     public List<ReservationAppResponse> findAll() {
         return reservationRepository.findAll().stream()
-            .map(ReservationAppResponse::from)
-            .toList();
+                .map(ReservationAppResponse::from)
+                .toList();
     }
 
     public List<ReservationAppResponse> findAllSearched(AdminSearchedReservationAppRequest request) {
         List<Reservation> searchedReservations = reservationRepository.findAllByMemberIdAndThemeIdInPeriod(
-            request.memberId(), request.themeId(), request.dateFrom(), request.dateTo());
+                request.memberId(), request.themeId(), request.dateFrom(), request.dateTo());
 
         return searchedReservations.stream()
-            .map(ReservationAppResponse::from)
-            .toList();
+                .map(ReservationAppResponse::from)
+                .toList();
     }
 
     public List<ReservationAppResponse> findByMemberId(Long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-            .map(ReservationAppResponse::from)
-            .toList();
+                .map(ReservationAppResponse::from)
+                .toList();
     }
 }

@@ -6,10 +6,10 @@ public record ThemeWebResponse(Long id, String name, String description, String 
 
     public static ThemeWebResponse from(ThemeAppResponse appResponse) {
         return new ThemeWebResponse(
-            appResponse.id(),
-            appResponse.name(),
-            appResponse.description(),
-            appResponse.thumbnail()
+                appResponse.id(),
+                appResponse.name(),
+                appResponse.description(),
+                appResponse.thumbnail()
         );
     }
 }

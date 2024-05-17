@@ -21,9 +21,9 @@ public class CookieHandler {
 
     public static String extractTokenFromCookies(Cookie[] cookies) {
         Optional<String> token = Arrays.stream(cookies)
-            .filter(cookie -> cookie.getName().equals(COOKIE_NAME))
-            .map(Cookie::getValue)
-            .findFirst();
+                .filter(cookie -> cookie.getName().equals(COOKIE_NAME))
+                .map(Cookie::getValue)
+                .findFirst();
 
         return token.orElseThrow(() -> new IllegalArgumentException("토큰이 존재하지 않습니다."));
     }

@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Embeddable;
-
 import java.util.Objects;
 
 @Embeddable

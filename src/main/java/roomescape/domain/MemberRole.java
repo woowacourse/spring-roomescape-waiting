@@ -10,8 +10,8 @@ public enum MemberRole {
 
     public static MemberRole from(String role) {
         return Arrays.stream(values())
-            .filter(memberRole -> memberRole.name().equals(role))
-            .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("올바른 Role을 입력해주세요."));
+                .filter(memberRole -> memberRole.name().equals(role))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("올바른 Role을 입력해주세요."));
     }
 }

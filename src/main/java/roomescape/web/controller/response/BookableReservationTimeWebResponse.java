@@ -5,12 +5,12 @@ import java.time.LocalTime;
 import roomescape.service.response.BookableReservationTimeAppResponse;
 
 public record BookableReservationTimeWebResponse(
-    Long id,
-    @JsonFormat(pattern = "HH:mm") LocalTime startAt,
-    boolean alreadyBooked) {
+        Long id,
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
+        boolean alreadyBooked) {
 
     public static BookableReservationTimeWebResponse from(BookableReservationTimeAppResponse appResponse) {
         return new BookableReservationTimeWebResponse(appResponse.id(), appResponse.startAt(),
-            appResponse.alreadyBooked());
+                appResponse.alreadyBooked());
     }
 }

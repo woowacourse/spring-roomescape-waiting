@@ -47,8 +47,8 @@ public class ThemeService {
 
     public List<ThemeAppResponse> findAll() {
         return themeRepository.findAll().stream()
-            .map(ThemeAppResponse::from)
-            .toList();
+                .map(ThemeAppResponse::from)
+                .toList();
 
     }
 
@@ -56,7 +56,7 @@ public class ThemeService {
         LocalDate from = LocalDate.now().minusDays(BASED_ON_PERIOD_POPULAR_THEME);
         LocalDate to = LocalDate.now().minusDays(1);
         return themeRepository.findMostReservedThemesInPeriod(from, to, MAX_POPULAR_THEME_COUNT).stream()
-            .map(ThemeAppResponse::from)
-            .toList();
+                .map(ThemeAppResponse::from)
+                .toList();
     }
 }

@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Embeddable;
-
 import java.util.Objects;
 
 @Embeddable
@@ -29,6 +28,10 @@ public class MemberName {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
     }
 
     @Override
