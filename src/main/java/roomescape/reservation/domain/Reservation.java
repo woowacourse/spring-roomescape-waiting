@@ -17,13 +17,16 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime reservationTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
 
     protected Reservation() {

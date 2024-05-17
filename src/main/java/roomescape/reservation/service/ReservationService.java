@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
@@ -18,7 +19,6 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -89,12 +89,12 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public List<ReservationResponse> findReservations() {
-        List<ReservationResponse> reservationResponses = new ArrayList<>();
-        for (Reservation reservation : reservationJpaRepository.findAll()) {
-            reservationResponses.add(new ReservationResponse(reservation));
-        }
-        return reservationResponses;
+        return reservationJpaRepository.findAll()
+                .stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
     public List<ReservationResponse> searchReservations(
