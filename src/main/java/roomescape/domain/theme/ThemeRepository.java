@@ -13,20 +13,17 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                 .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
     }
 
-    @Query(value = """
+    @Query("""
                 SELECT
-                th.id,
-                th.name,
-                th.description,
-                th.thumbnail
+                    th
                 FROM Theme AS th
                 JOIN Reservation AS r
-                ON th.id = r.theme_id
+                ON th.id = r.theme.id
                 WHERE r.date BETWEEN :startDate AND :endDate
                 GROUP BY th.id
                 ORDER BY COUNT(th.id) DESC
                 LIMIT :limit
-            """, nativeQuery = true)
+            """)
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
 
     boolean existsByName(String name);
