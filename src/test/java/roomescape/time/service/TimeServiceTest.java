@@ -37,6 +37,8 @@ class TimeServiceTest {
     private static final LocalTime CURRENT_TIME = LocalTime.now();
 
     private final Time time = Time.of(1L, LocalTime.of(17, 3));
+    private static final Theme THEME = Theme.of(1, "미르", "미르 방탈출", "썸네일 Url");
+    public static final Member MEMBER = Member.of(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
 
     @InjectMocks
     private TimeService timeService;
@@ -100,7 +102,7 @@ class TimeServiceTest {
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.from(1), Theme.from(1),
-                Member.from(1)));
+                MEMBER));
 
         when(reservationRepository.findByTimeId(1L))
                 .thenReturn(reservations);

@@ -50,11 +50,6 @@ public class Member {
         this(0, name, email, password, role);
     }
 
-    public static Member from(long id) {
-        return new Member(id, DEFAULT_NAME, Email.from(), Password.from(),
-                MemberRole.MEMBER);
-    }
-
     public static Member of(long id, String name, String email, String password, String role) {
         return new Member(id, name, Email.from(email), Password.from(password),
                 MemberRole.findMemberRole(role));

@@ -60,13 +60,13 @@ class ReservationServiceTest {
                 .thenReturn(reservation);
 
         when(timeRepository.findById(1L))
-                .thenReturn(Optional.of(Time.from(1)));
+                .thenReturn(Optional.of(Time.of(1, LocalTime.now())));
 
         when(themeRepository.findById(1L))
-                .thenReturn(Optional.of(Theme.from(1)));
+                .thenReturn(Optional.of(Theme.of(1, "polla", "설명", "thumbnail")));
 
         when(memberRepository.findMemberById(1L))
-                .thenReturn(Optional.of(Member.from(1)));
+                .thenReturn(Optional.of(Member.of(1, "이름", "polla@gmail.com", "password99", "ADMIN")));
 
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
                 reservation.getReservationTime().getId(), reservation.getTheme().getId());

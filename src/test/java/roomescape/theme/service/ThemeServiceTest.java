@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,9 @@ import roomescape.time.domain.Time;
 @ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {
 
+    public static final Theme THEME = Theme.of(1, "미르", "미르 방탈출", "썸네일 Url");
+    public static final Member MEMBER = Member.of(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
+
     @InjectMocks
     private ThemeService themeService;
     @Mock
@@ -33,7 +37,7 @@ public class ThemeServiceTest {
     @DisplayName("예약이 존재하는 테마는 삭제하지 못한다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.from(1), Theme.from(1), Member.from(1)));
+        reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.of(1, LocalTime.now()), THEME, MEMBER));
 
         when(reservationRepository.findByThemeId(1L))
                 .thenReturn(reservations);
