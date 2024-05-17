@@ -2,6 +2,8 @@ package roomescape.auth.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,8 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -87,7 +91,92 @@ public class AuthControllerTest {
                 .statusCode(401);
     }
 
-    private String getAdminAccessTokenCookie(final String email, final String password) {
+    @Test
+    @DisplayName("회원가입을 하면 jwt AccessToken과 RefreshToken 을 Response한다.")
+    void getJwtAccessTokenWhenSignup() {
+        // given
+        String name = "이름";
+        String email = "test@email.com";
+        String password = "12341234";
+
+        Map<String, String> signupParams = Map.of(
+                "name", name,
+                "email", email,
+                "password", password
+        );
+
+        // when
+        Map<String, String> cookies = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .body(signupParams)
+                .when().post("/signup")
+                .then().statusCode(200).log().all()
+                .extract().cookies();
+
+        // then
+        Assertions.assertThat(cookies.get("accessToken")).isNotNull();
+        Assertions.assertThat(cookies.get("refreshToken")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("로그아웃을 하면 현재 토큰을 만료된 토큰으로 변경하여 Response한다.")
+    void logout() {
+        // given
+        String email = "test@email.com";
+        String password = "12341234";
+        List<String> jwtTokensCookie = getJwtTokensCookie(email, password);
+        String accessToken = jwtTokensCookie.get(0);
+        String refreshToken = jwtTokensCookie.get(1);
+
+        String expiredAccessToken = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header(new Header("Cookie", accessToken))
+                .header(new Header("Cookie", refreshToken))
+                .port(port)
+                .when().post("/logout")
+                .then().log().all().extract().cookie("accessToken");
+
+        // then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header(new Header("Cookie", "accessToken=" + expiredAccessToken))
+                .port(port)
+                .when().get("/login/check")
+                .then().statusCode(401);
+    }
+
+    @Test
+    @DisplayName("토큰 재발급을 요청하면 새로운 AccessToken과 RefreshToken을 Response 한다.")
+    void reissueToken() {
+        // given
+        String email = "test@email.com";
+        String password = "12341234";
+        List<String> jwtTokensCookie = getJwtTokensCookie(email, password);
+        String accessTokenCookie = jwtTokensCookie.get(0);
+        String refreshTokenCookie = jwtTokensCookie.get(1);
+
+        Map<String, String> cookies = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header(new Header("Cookie", accessTokenCookie))
+                .header(new Header("Cookie", refreshTokenCookie))
+                .port(port)
+                .when().get("/token-reissue")
+                .then().statusCode(200).log().all()
+                .extract().cookies();
+
+        String newAccessToken = cookies.get("accessToken");
+        String newRefreshToken = cookies.get("accessToken");
+
+        String olderAccessToken = accessTokenCookie.substring("accessToken=".length());
+        String olderRefreshToken = accessTokenCookie.substring("refreshToken=".length());
+
+        // then
+        Assertions.assertThat(newAccessToken).isNotEqualTo(olderRefreshToken);
+        Assertions.assertThat(newRefreshToken).isNotEqualTo(olderRefreshToken);
+    }
+
+    private List<String> getJwtTokensCookie(final String email, final String password) {
         memberRepository.save(new Member("이름", email, password, Role.ADMIN));
 
         Map<String, String> loginParams = Map.of(
@@ -95,14 +184,21 @@ public class AuthControllerTest {
                 "password", password
         );
 
-        String accessToken = RestAssured.given().log().all()
+        Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
                 .body(loginParams)
-                .when().post("/login")
-                .then().log().all().extract().cookie("accessToken");
+                .when().post("/login");
 
-        return "accessToken=" + accessToken;
+        String accessToken = response
+                .then().log().all().extract().cookie("accessToken");
+        String refreshToken = response
+                .then().log().all().extract().cookie("refreshToken");
+
+        List<String> tokens = new ArrayList<>();
+        tokens.add("accessToken=" + accessToken);
+        tokens.add("refreshToken=" + refreshToken);
+        return tokens;
     }
 
     private String getAccessTokenCookieByLogin(final String email, final String password) {

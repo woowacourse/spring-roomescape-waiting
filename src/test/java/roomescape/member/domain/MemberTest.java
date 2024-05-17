@@ -57,4 +57,11 @@ class MemberTest {
         Assertions.assertThatThrownBy(() -> new Member("name", "abc@aaa.com", password))
                 .isInstanceOf(ValidateException.class);
     }
+
+    @Test
+    @DisplayName("회원의 권한이 null 이면 예외를 발생시킨다.")
+    void validateMemberRoleNull() {
+        Assertions.assertThatThrownBy(() -> new Member("name", "abc@aaa.com", "password", null))
+                .isInstanceOf(ValidateException.class);
+    }
 }

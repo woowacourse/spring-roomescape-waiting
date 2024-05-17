@@ -41,6 +41,7 @@ public class ReservationController {
         return ApiResponse.success(reservationService.findAllReservations());
     }
 
+    //TODO: Restful하게 변경
     @Auth
     @GetMapping("/reservations-mine")
     public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
