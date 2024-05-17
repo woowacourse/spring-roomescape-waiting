@@ -1,11 +1,10 @@
 package roomescape.controller.request;
 
-import java.time.LocalDate;
-
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.Positive;
-
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 public record ReservationRequest(
         @Nonnull

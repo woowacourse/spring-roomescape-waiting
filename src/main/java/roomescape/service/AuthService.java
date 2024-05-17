@@ -1,16 +1,14 @@
 package roomescape.service;
 
-import java.util.Arrays;
-
-import jakarta.servlet.http.Cookie;
-
-import org.springframework.stereotype.Service;
-
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import org.springframework.stereotype.Service;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.BadRequestException;
 import roomescape.model.Member;
 import roomescape.model.Role;
+
+import java.util.Arrays;
 
 @Service
 public class AuthService {

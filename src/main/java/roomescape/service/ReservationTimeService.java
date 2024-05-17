@@ -1,12 +1,6 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.springframework.stereotype.Service;
-
 import roomescape.controller.request.ReservationTimeRequest;
 import roomescape.controller.response.IsReservedTimeResponse;
 import roomescape.exception.BadRequestException;
@@ -15,6 +9,11 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationTimeService {

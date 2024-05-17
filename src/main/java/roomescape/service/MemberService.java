@@ -1,14 +1,13 @@
 package roomescape.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import roomescape.controller.request.MemberLoginRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Member;
 import roomescape.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 public class MemberService {

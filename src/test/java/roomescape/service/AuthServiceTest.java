@@ -1,22 +1,19 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
-import static roomescape.model.Role.ADMIN;
-import static roomescape.model.Role.MEMBER;
-
 import jakarta.servlet.http.Cookie;
-
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import roomescape.exception.BadRequestException;
 import roomescape.model.Member;
 import roomescape.model.Role;
 import roomescape.service.fake.FakeJwtTokenProvider;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static roomescape.model.Role.ADMIN;
+import static roomescape.model.Role.MEMBER;
 
 class AuthServiceTest {
 

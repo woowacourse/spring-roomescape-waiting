@@ -2,9 +2,7 @@ package roomescape.controller.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import roomescape.exception.AuthorizationException;
 import roomescape.model.Role;
 import roomescape.service.AuthService;
