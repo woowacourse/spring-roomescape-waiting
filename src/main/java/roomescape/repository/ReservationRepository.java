@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 
@@ -17,5 +18,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
+    @Query("""
+            SELECT r, r.member, r.theme, r.time FROM Reservation r
+            WHERE r.member.email = :email
+            """)
     List<Reservation> findAllByMemberEmail(String email);
 }
