@@ -37,6 +37,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(final ReservationRequest request) {
+        final Reservation reservation = createReservation(request);
+        reservation.validateDateAndTime();
+
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationResponse(savedReservation.getId(), savedReservation);
+    }
+
+    private Reservation createReservation(final ReservationRequest request) {
         final Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(IllegalArgumentException::new);
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.getTimeId())
@@ -46,11 +54,8 @@ public class ReservationService {
         final Reservation reservation = new Reservation(member, request.getDate(), reservationTime, theme);
 
         validateDuplicatedReservation(reservation, reservationTime);
-        reservation.validateDateAndTime();
 
-        final Reservation savedReservation = reservationRepository.save(reservation);
-
-        return new ReservationResponse(savedReservation.getId(), savedReservation);
+        return reservation;
     }
 
     private void validateDuplicatedReservation(final Reservation reservation, final ReservationTime reservationTime) {
