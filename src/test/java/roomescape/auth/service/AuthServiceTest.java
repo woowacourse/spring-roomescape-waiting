@@ -64,7 +64,7 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("비밀번호가 잘못됐습니다.");
+                .hasMessage("잘못된 사용자 인증 정보입니다.");
     }
 
     @DisplayName("인증 서비스는 회원 가입 요청이 들어오면 가입된 사용자의 이름을 반환한다.")

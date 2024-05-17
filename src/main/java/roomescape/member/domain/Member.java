@@ -2,6 +2,7 @@ package roomescape.member.domain;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import roomescape.exception.BadRequestException;
 
 @Entity
 public class Member {
@@ -55,7 +56,7 @@ public class Member {
 
     public void validatePassword(String password) {
         if (!this.password.equals(password)) {
-            throw new IllegalArgumentException("잘못된 사용자 인증 정보입니다.");
+            throw new BadRequestException("잘못된 사용자 인증 정보입니다.");
         }
     }
 

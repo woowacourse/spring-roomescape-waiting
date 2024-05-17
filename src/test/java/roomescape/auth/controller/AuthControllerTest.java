@@ -83,7 +83,7 @@ class AuthControllerTest {
                 .jsonPath().get("detail");
 
         // then
-        assertThat(detailMessage).isEqualTo("비밀번호가 잘못됐습니다.");
+        assertThat(detailMessage).isEqualTo("잘못된 사용자 인증 정보입니다.");
     }
 
     @DisplayName("로그인 컨트롤러는 존재하지 않는 이메일로 로그인 요청이 들어올 경우 예외가 발생한다.")
