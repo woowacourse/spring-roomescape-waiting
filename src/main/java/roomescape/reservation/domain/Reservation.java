@@ -14,11 +14,14 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @JoinColumn(name = "member_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
     private LocalDate date;
+    @JoinColumn(name = "time_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
+    @JoinColumn(name = "theme_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @Enumerated(value = EnumType.STRING)
