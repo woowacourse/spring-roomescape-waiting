@@ -14,8 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoggedInMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberPassword;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +36,7 @@ class AuthServiceTest {
     @Test
     void createTokenTest_whenMemberNotExist() {
         LoginRequest request = new LoginRequest("not_exist@abc.com", "1234");
-        given(memberRepository.findByEmailAndPassword(new MemberEmail("not_exist@abc.com"), new MemberPassword("1234")))
+        given(memberRepository.findByEmailAndPassword(new Email("not_exist@abc.com"), new Password("1234")))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.createToken(request))
@@ -58,7 +58,7 @@ class AuthServiceTest {
 
     private String makeToken(String name, String email, String password) {
         LoginRequest request = new LoginRequest(email, password);
-        given(memberRepository.findByEmailAndPassword(new MemberEmail(email), new MemberPassword(password)))
+        given(memberRepository.findByEmailAndPassword(new Email(email), new Password(password)))
                 .willReturn(Optional.of(new Member(1L, name, email)));
         return authService.createToken(request);
     }

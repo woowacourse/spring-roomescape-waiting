@@ -8,8 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberPassword;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Password;
 import roomescape.test.RepositoryTest;
 
 class MemberRepositoryTest extends RepositoryTest {
@@ -37,8 +37,8 @@ class MemberRepositoryTest extends RepositoryTest {
     @DisplayName("email과 password로 멤버를 조회할 수 있다.")
     @Test
     void findByEmailAndPasswordTest() {
-        MemberEmail email = new MemberEmail("admin@abc.com");
-        MemberPassword password = new MemberPassword("1234");
+        Email email = new Email("admin@abc.com");
+        Password password = new Password("1234");
         Optional<Member> actual = memberRepository.findByEmailAndPassword(email, password);
 
         assertThat(actual.get().getId()).isEqualTo(1L);

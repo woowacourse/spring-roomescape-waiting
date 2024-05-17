@@ -7,12 +7,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class MemberEmailTest {
+class EmailTest {
     @DisplayName("이메일 형식이 일치하지 않으면, 예외를 던진다.")
     @ParameterizedTest
     @CsvSource({"abc@acac", "acac.com", "avd@@ac.com"})
     void validateTest_whenFormatNotMatch(String email) {
-        assertThatThrownBy(() -> new MemberEmail(email))
+        assertThatThrownBy(() -> new Email(email))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이메일 형식이 일치하지 않습니다.");
     }
@@ -21,7 +21,7 @@ class MemberEmailTest {
     @ParameterizedTest
     @CsvSource({"abc@acac.com", "ac@ac.com", "asd@kw.ac.kr"})
     void validateTest(String email) {
-        assertThatCode(() -> new MemberEmail(email))
+        assertThatCode(() -> new Email(email))
                 .doesNotThrowAnyException();
     }
 }

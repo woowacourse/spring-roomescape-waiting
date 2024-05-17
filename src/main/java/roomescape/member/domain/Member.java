@@ -16,24 +16,24 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    private MemberName name;
+    private Name name;
     @Embedded
-    private MemberEmail email;
+    private Email email;
     @Embedded
-    private MemberPassword password;
+    private Password password;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
 
     public Member(Long id, String name, String email) {
-        this(id, new MemberName(name), new MemberEmail(email), MemberRole.USER);
+        this(id, new Name(name), new Email(email), MemberRole.USER);
     }
 
     public Member(Long id, String name, String email, String role) {
-        this(id, new MemberName(name), new MemberEmail(email), MemberRole.valueOf(role));
+        this(id, new Name(name), new Email(email), MemberRole.valueOf(role));
     }
 
-    private Member(Long id, MemberName name, MemberEmail email, MemberRole role) {
+    private Member(Long id, Name name, Email email, MemberRole role) {
         this.id = Objects.requireNonNull(id);
         this.name = Objects.requireNonNull(name);
         this.email = Objects.requireNonNull(email);
