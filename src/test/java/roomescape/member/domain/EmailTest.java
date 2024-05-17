@@ -16,7 +16,7 @@ class EmailTest {
     @ValueSource(strings = {" ", "vhffk@gmail", "vhffkgmail.com"})
     @DisplayName("잘못된 Email 형식일 경우 예외를 던진다.")
     void validation_ShouldThrowException_WhenIllegalForm(String email) {
-        Throwable illegalEmail = assertThrows(RoomEscapeException.class, () -> Email.emailFrom(email));
+        Throwable illegalEmail = assertThrows(RoomEscapeException.class, () -> Email.from(email));
 
         assertEquals(illegalEmail.getMessage(), MemberExceptionCode.ILLEGAL_EMAIL_FORM_EXCEPTION.getMessage());
     }
@@ -25,6 +25,6 @@ class EmailTest {
     @ValueSource(strings = {"vhffk@naver.com", "vhffk@gmail.com"})
     @DisplayName("정상적인 Email 형식일 경우 Email이 만들어진다.")
     void saveEmail(String email) {
-        assertDoesNotThrow(() -> Email.emailFrom(email));
+        assertDoesNotThrow(() -> Email.from(email));
     }
 }

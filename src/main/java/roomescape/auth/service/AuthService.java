@@ -23,7 +23,7 @@ public class AuthService {
     }
 
     public Token login(LoginRequest loginRequest) {
-        Email email = Email.emailFrom(loginRequest.email());
+        Email email = Email.from(loginRequest.email());
         Password password = Password.passwordFrom(loginRequest.password());
 
         Member member = memberRepository.findMemberByEmailAndPassword(email, password)
