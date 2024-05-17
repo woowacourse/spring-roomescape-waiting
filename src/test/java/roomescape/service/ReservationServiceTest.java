@@ -31,7 +31,7 @@ import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.response.ThemeResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
 class ReservationServiceTest {
 
