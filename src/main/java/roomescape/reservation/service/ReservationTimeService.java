@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
-import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.AvailableTimes;
 import roomescape.reservation.domain.ReservationTime;

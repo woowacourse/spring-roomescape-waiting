@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
-import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;

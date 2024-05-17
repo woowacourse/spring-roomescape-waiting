@@ -96,7 +96,7 @@ public class ReservationService {
 
     @Transactional
     public void delete(long reservationId) {
-        memberReservationRepository.deleteByReservation_Id(reservationId);
+        memberReservationRepository.deleteByReservationId(reservationId);
         reservationRepository.deleteById(reservationId);
     }
 

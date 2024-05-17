@@ -19,7 +19,6 @@ import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
-import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;

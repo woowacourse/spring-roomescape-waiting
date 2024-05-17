@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
-import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
