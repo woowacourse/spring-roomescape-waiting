@@ -40,7 +40,7 @@ class TimeRepositoryTest extends RepositoryTest {
         List<ReservationTime> expected = List.of(
                 new ReservationTime(2L, LocalTime.of(19, 0)));
 
-        List<ReservationTime> actual = timeRepository.findTimesExistsReservationDateAndThemeId(
+        List<ReservationTime> actual = timeRepository.findAllByReservationDateAndThemeId(
                 LocalDate.of(2022, 5, 5), 1L);
 
         assertThat(actual).isEqualTo(expected);
