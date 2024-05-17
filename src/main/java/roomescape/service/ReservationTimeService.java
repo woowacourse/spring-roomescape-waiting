@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeStatuses;
 import roomescape.exception.reservation.TimeDuplicatedException;
@@ -14,6 +15,7 @@ import roomescape.service.dto.time.AvailableTimeRequest;
 import roomescape.service.dto.time.AvailableTimeResponses;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -25,6 +27,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAllReservationTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -32,6 +35,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public AvailableTimeResponses findAvailableReservationTimes(AvailableTimeRequest request) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         List<ReservationTime> bookedTimes = reservationTimeRepository.findReservedTimeByDateAndTheme(

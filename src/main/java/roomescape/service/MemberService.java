@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberPassword;
 import roomescape.exception.member.EmailDuplicatedException;
@@ -14,6 +15,7 @@ import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.dto.member.MemberResponse;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -31,6 +33,7 @@ public class MemberService {
         memberRepository.save(request.toMember());
     }
 
+    @Transactional(readOnly = true)
     public String login(MemberLoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(UnauthorizedEmailException::new);
         MemberPassword requestPassword = new MemberPassword(request.getPassword());
@@ -40,6 +43,7 @@ public class MemberService {
         return jwtManager.generateToken(member);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAllMemberNames() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::new)

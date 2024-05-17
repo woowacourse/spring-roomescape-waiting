@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.ThemeUsingException;
 import roomescape.repository.ReservationRepository;
@@ -21,6 +22,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -28,7 +30,7 @@ public class ThemeService {
                 .toList();
     }
 
-
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
         List<Theme> topBookedThemes = themeRepository.findPopularThemes(request.getStartDate(), request.getEndDate());
 
