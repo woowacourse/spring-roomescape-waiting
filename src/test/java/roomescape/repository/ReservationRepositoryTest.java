@@ -58,7 +58,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member savedMember = memberRepository.save(member);
 
         Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime,
-                savedTheme, ReservationStatus.RESERVED);
+                savedTheme, ReservationStatus.BOOKED);
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(() -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),
                 () -> assertThat(savedReservation.getDate()).isEqualTo("2025-01-01"),

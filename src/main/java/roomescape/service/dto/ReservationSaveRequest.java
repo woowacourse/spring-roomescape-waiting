@@ -27,7 +27,7 @@ public class ReservationSaveRequest {
     private Long themeId;
 
     @NotNull
-    private ReservationStatusRequest status = ReservationStatusRequest.RESERVED;
+    private ReservationStatusRequest status = ReservationStatusRequest.BOOKED;
 
     protected ReservationSaveRequest() {
     }

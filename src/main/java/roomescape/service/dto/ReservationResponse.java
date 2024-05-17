@@ -12,7 +12,8 @@ public record ReservationResponse(
         @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         LocalDate date,
         ReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        String status
 ) {
 
     public static ReservationResponse from(ReservationReadOnly reservation) {
@@ -21,7 +22,8 @@ public record ReservationResponse(
                 MemberResponse.from(reservation.member()),
                 reservation.date(),
                 new ReservationTimeResponse(reservation.time()),
-                new ThemeResponse(reservation.theme())
+                new ThemeResponse(reservation.theme()),
+                reservation.status().getValue()
         );
     }
 
@@ -31,7 +33,8 @@ public record ReservationResponse(
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 new ReservationTimeResponse(reservation.getTime()),
-                new ThemeResponse(reservation.getTheme())
+                new ThemeResponse(reservation.getTheme()),
+                reservation.getStatus().getValue()
         );
     }
 }

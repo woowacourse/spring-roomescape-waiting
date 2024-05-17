@@ -53,7 +53,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
                 LocalDate.parse("2025-11-11"),
-                time.getId(), theme.getId(), ReservationStatusRequest.RESERVED);
+                time.getId(), theme.getId(), ReservationStatusRequest.BOOKED);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         assertAll(
@@ -68,13 +68,38 @@ class ReservationServiceTest extends IntegrationTestSupport {
         );
     }
 
+    @DisplayName("예약 대기 저장")
+    @Test
+    void saveWaitReservation() {
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
+        Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
+        Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
+
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
+                LocalDate.parse("2025-11-11"),
+                time.getId(), theme.getId(), ReservationStatusRequest.WAIT);
+        ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
+
+        assertAll(
+                () -> assertThat(reservationResponse.member().name()).isEqualTo("고구마"),
+                () -> assertThat(reservationResponse.date()).isEqualTo(LocalDate.parse("2025-11-11")),
+                () -> assertThat(reservationResponse.time().id()).isEqualTo(time.getId()),
+                () -> assertThat(reservationResponse.time().startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(reservationResponse.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(reservationResponse.theme().name()).isEqualTo(theme.getName()),
+                () -> assertThat(reservationResponse.theme().description()).isEqualTo(theme.getDescription()),
+                () -> assertThat(reservationResponse.theme().thumbnail()).isEqualTo(theme.getThumbnail()),
+                () -> assertThat(reservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue())
+        );
+    }
+
     @DisplayName("존재하지 않는 예약 시간으로 예약 저장")
     @Test
     void timeForSaveReservationNotFound() {
         Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
-                LocalDate.parse("2025-11-11"), 100L, 1L, ReservationStatusRequest.RESERVED);
+                LocalDate.parse("2025-11-11"), 100L, 1L, ReservationStatusRequest.BOOKED);
         assertThatThrownBy(() -> {
             reservationService.saveReservation(reservationSaveRequest);
         }).isInstanceOf(RoomEscapeBusinessException.class);
@@ -96,13 +121,14 @@ class ReservationServiceTest extends IntegrationTestSupport {
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("중복된 예약 저장")
+    @DisplayName("중복된 예약을 시도하면 예약 대기 상태가 된다.")
     @Test
     void saveDuplicatedReservation() {
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-05-04"),
-                1L, 1L, ReservationStatusRequest.RESERVED);
-        assertThatThrownBy(() -> reservationService.saveReservation(reservationSaveRequest))
-                .isInstanceOf(RoomEscapeBusinessException.class);
+                1L, 1L, ReservationStatusRequest.BOOKED);
+        ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
+
+        assertThat(reservationResponse.status()).isEqualTo("예약대기");
     }
 
     @DisplayName("내 예약을 조회한다.")
@@ -110,7 +136,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     void findAllMyReservations() {
         // given
         long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L, ReservationStatusRequest.RESERVED);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L, ReservationStatusRequest.BOOKED);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
@@ -122,7 +148,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
                 () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationResponse.date()),
                 () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
                 () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
-                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
+                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.BOOKED.getValue())
         );
     }
 }

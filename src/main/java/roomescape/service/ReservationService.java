@@ -45,8 +45,6 @@ public class ReservationService {
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Reservation reservation = createReservation(reservationSaveRequest);
 
-        validateUnique(reservation);
-
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
@@ -61,17 +59,17 @@ public class ReservationService {
         );
     }
 
-    private void validateUnique(Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-
-        if (isReservationExist) {
-            throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
-        }
-    }
+//    private void checkStatus(Reservation reservation) {
+//        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
+//                reservation.getDate(),
+//                reservation.getTime(),
+//                reservation.getTheme()
+//        );
+//
+//        if (isReservationExist) {
+//            throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
+//        }
+//    }
 
     @Transactional
     public void deleteReservation(Long id) {

@@ -8,6 +8,7 @@ public record ReservationReadOnly(
         Member member,
         LocalDate date,
         ReservationTime time,
-        Theme theme
+        Theme theme,
+        ReservationStatus status
 ) {
 }

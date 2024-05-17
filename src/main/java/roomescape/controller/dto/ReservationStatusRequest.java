@@ -3,7 +3,7 @@ package roomescape.controller.dto;
 import roomescape.domain.reservation.ReservationStatus;
 
 public enum ReservationStatusRequest {
-    RESERVED,
+    BOOKED,
     WAIT;
 
     public ReservationStatus toDomain() {

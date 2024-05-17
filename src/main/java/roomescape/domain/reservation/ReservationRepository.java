@@ -33,7 +33,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 r.member,
                 r.date,
                 r.time,
-                r.theme
+                r.theme,
+                r.status
             )
             from Reservation r
             where (:startDate is null or r.date >= :startDate)
