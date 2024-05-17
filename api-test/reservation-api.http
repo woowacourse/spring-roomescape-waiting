@@ -4,7 +4,7 @@ GET http://localhost:8080/reservations
 
 ### 테마 아이디, 회원 아이디, 기간 조건 별 조회 API (dateFrom과 dateTo 파라미터 값 설정 필요)
 
-GET http://localhost:8080/reservations/search?themeId=1&memberId=1&dateFrom=?&dateTo=?
+GET http://localhost:8080/reservations/search?themeId=1&memberId=1&dateFrom=2024-05-19&dateTo=2024-05-21
 
 ### 사용자 별 예약 조회 API
 
@@ -16,7 +16,7 @@ POST http://localhost:8080/reservations
 Content-Type: application/json
 
 {
-  "date": "2024-05-11",
+  "date": "2024-05-20",
   "timeId": 1,
   "themeId": 1
 }
