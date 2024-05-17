@@ -12,12 +12,12 @@ import roomescape.repository.exception.ThemeNotFoundException;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
-            SELECT th 
-            FROM Theme th 
-            LEFT JOIN Reservation r ON th.id = r.theme.id 
-            WHERE r.date 
-            BETWEEN :startDate AND :endDate 
-            GROUP BY th.id 
+            SELECT th
+            FROM Theme th
+            LEFT JOIN Reservation r ON th.id = r.theme.id
+            WHERE r.date
+            BETWEEN :startDate AND :endDate
+            GROUP BY th.id
             ORDER BY count(r) desc
             """)
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate);
