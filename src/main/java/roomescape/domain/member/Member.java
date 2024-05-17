@@ -24,8 +24,10 @@ public class Member {
     private Role role;
 
     public Member(String email, MemberPassword password, String name, Role role) {
+        validateEmail(email);
         this.email = email;
         this.password = password;
+        validateName(name);
         this.name = name;
         this.role = role;
     }
@@ -43,6 +45,24 @@ public class Member {
 
     public boolean isMismatchedPassword(MemberPassword other) {
         return this.password.isMismatchedPassword(other);
+    }
+
+    private void validateEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일은 반드시 입력되어야 합니다.");
+        }
+        if (email.length() > 30) {
+            throw new IllegalArgumentException("이메일 길이는 30글자까지 가능합니다.");
+        }
+    }
+
+    private void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("이름은 반드시 입력되어야 합니다.");
+        }
+        if (name.length() > 15) {
+            throw new IllegalArgumentException("이름 길이는 15글자까지 가능합니다.");
+        }
     }
 
     public Long getId() {
