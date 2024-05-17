@@ -29,6 +29,7 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 시간 로직 테스트")
@@ -50,10 +51,10 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void create() {
         //given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.NOON);
+        ReservationTimeCreate reservationTimeCreate = new ReservationTimeCreate(LocalTime.NOON);
 
         //when
-        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeRequest);
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(reservationTimeCreate);
 
         //then
         assertThat(reservationTimeResponse.startAt()).isEqualTo(LocalTime.NOON.toString());
@@ -104,11 +105,11 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.NOON);
+        ReservationTimeCreate reservationTimeCreate = new ReservationTimeCreate(LocalTime.NOON);
         reservationTimeRepository.save(new ReservationTime(LocalTime.NOON));
 
         //when & then
-        assertThatThrownBy(() -> reservationTimeService.create(reservationTimeRequest))
+        assertThatThrownBy(() -> reservationTimeService.create(reservationTimeCreate))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.DUPLICATED_RESERVATION_TIME_ERROR.getMessage());
     }

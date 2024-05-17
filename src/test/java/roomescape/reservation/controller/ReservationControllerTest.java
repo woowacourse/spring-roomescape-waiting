@@ -17,17 +17,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.auth.controller.dto.SignUpRequest;
-import roomescape.auth.domain.AuthInfo;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.TokenProvider;
-import roomescape.auth.controller.dto.MemberResponse;
+import roomescape.auth.service.dto.SignUpCommand;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
@@ -36,6 +32,9 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.MemberReservationCreate;
+import roomescape.reservation.service.dto.ReservationTimeCreate;
+import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ControllerTest;
 
 @DisplayName("예약 API 통합 테스트")
@@ -62,7 +61,7 @@ class ReservationControllerTest extends ControllerTest {
 
     @BeforeEach
     void setUp() {
-        authService.signUp(new SignUpRequest(
+        authService.signUp(new SignUpCommand(
                 getMemberChoco().getName(),
                 getMemberChoco().getEmail(),
                 getMemberChoco().getPassword()
@@ -75,8 +74,8 @@ class ReservationControllerTest extends ControllerTest {
     void create() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest(LocalTime.NOON));
-        ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2099-08-05");
@@ -97,8 +96,8 @@ class ReservationControllerTest extends ControllerTest {
     @TestFactory
     Stream<DynamicTest> delete() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest(LocalTime.NOON));
-        ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
         MemberResponse memberResponseOf = memberService.findAll()
                 .stream()
                 .filter(memberResponse -> Objects.equals(memberResponse.name(), getMemberChoco().getName()))
@@ -106,18 +105,19 @@ class ReservationControllerTest extends ControllerTest {
 
         Member member = memberService.findById(memberResponseOf.id());
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
-                AuthInfo.from(member),
-                new ReservationRequest(
+                new MemberReservationCreate(
+                        member.getId(),
                         LocalDate.now().plusDays(10),
                         reservationTimeResponse.id(),
-                        themeResponse.id())
+                        themeResponse.id()
+                )
         );
 
         return Stream.of(
                 dynamicTest("타인의 예약 삭제 시, 403을 반환한다.", () -> {
                     //given
                     authService.signUp(
-                            new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(),
+                            new SignUpCommand(getMemberClover().getName(), getMemberClover().getEmail(),
                                     getMemberClover().getPassword()));
 
                     String cloverToken = tokenProvider.createAccessToken(getMemberClover().getEmail());
@@ -156,8 +156,8 @@ class ReservationControllerTest extends ControllerTest {
     void createReservationAfterNow() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest(LocalTime.NOON));
-        ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("date", LocalDate.now().minusDays(2).toString());

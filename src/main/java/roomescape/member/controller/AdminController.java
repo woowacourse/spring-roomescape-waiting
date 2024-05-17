@@ -17,6 +17,7 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.MemberReservationCreate;
 
 @RestController
 @RequestMapping("/admin")
@@ -32,7 +33,9 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(memberReservationRequest);
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                MemberReservationCreate.from(memberReservationRequest)
+        );
         return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.memberReservationId()))
                 .body(reservationResponse);
     }

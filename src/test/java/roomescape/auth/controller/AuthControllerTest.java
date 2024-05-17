@@ -21,9 +21,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.AuthService;
+import roomescape.auth.service.dto.SignUpCommand;
 import roomescape.member.domain.Role;
 import roomescape.util.ControllerTest;
 
@@ -47,7 +47,7 @@ class AuthControllerTest extends ControllerTest {
     @Test
     void login() {
         //given
-        authService.signUp(new SignUpRequest(
+        authService.signUp(new SignUpCommand(
                 getMemberChoco().getName(),
                 getMemberChoco().getEmail(),
                 getMemberChoco().getPassword()
@@ -71,7 +71,7 @@ class AuthControllerTest extends ControllerTest {
     Stream<DynamicTest> loginAndCheck() {
         List<String> tokens = new ArrayList<>();
         List<AuthInfo> authInfos = new ArrayList<>();
-        authService.signUp(new SignUpRequest(
+        authService.signUp(new SignUpCommand(
                 getMemberChoco().getName(),
                 getMemberChoco().getEmail(),
                 getMemberChoco().getPassword()
@@ -129,7 +129,7 @@ class AuthControllerTest extends ControllerTest {
     Stream<DynamicTest> loginAndLogout() {
         List<String> tokens = new ArrayList<>();
         List<String> cookies = new ArrayList<>();
-        authService.signUp(new SignUpRequest(
+        authService.signUp(new SignUpCommand(
                 getMemberChoco().getName(),
                 getMemberChoco().getEmail(),
                 getMemberChoco().getPassword()

@@ -6,7 +6,6 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +21,7 @@ import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.MemberReservationCreate;
 
 @RestController
 @RequestMapping("/reservations")
@@ -46,7 +46,13 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.createMemberReservation(authInfo, reservationRequest);
+        MemberReservationCreate memberReservationCreate = new MemberReservationCreate(
+                authInfo.getId(),
+                reservationRequest.date(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId()
+        );
+        ReservationResponse response = reservationService.createMemberReservation(memberReservationCreate);
         return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
     }
 

@@ -22,6 +22,7 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ServiceTest;
 
 
@@ -61,10 +62,10 @@ class ThemeServiceTest extends ServiceTest {
         String name = "name";
         String description = "description";
         String thumbnail = "thumbnail";
-        ThemeRequest themeRequest = new ThemeRequest(name, description, thumbnail);
+        ThemeCreate themeCreate = new ThemeCreate(name, description, thumbnail);
 
         //when
-        ThemeResponse themeResponse = themeService.create(themeRequest);
+        ThemeResponse themeResponse = themeService.create(themeCreate);
 
         //then
         assertAll(() -> assertThat(themeResponse.name()).isEqualTo(name),

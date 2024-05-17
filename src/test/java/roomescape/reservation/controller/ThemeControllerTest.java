@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ControllerTest;
 
 @DisplayName("테마 API 통합 테스트")
@@ -43,7 +44,7 @@ class ThemeControllerTest extends ControllerTest {
     @Test
     void findAll() {
         //given
-        themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+        themeService.create(new ThemeCreate("name", "description", "thumbnail"));
 
         //when & then
         RestAssured.given().log().all()
@@ -57,7 +58,7 @@ class ThemeControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
+        ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
 
         //when & then
         RestAssured.given().log().all()

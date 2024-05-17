@@ -7,8 +7,6 @@ import static roomescape.fixture.MemberFixture.getMemberChoco;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,10 +19,10 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.TokenProvider;
-import roomescape.auth.controller.dto.MemberResponse;
+import roomescape.auth.service.dto.SignUpCommand;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
@@ -34,6 +32,8 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.ReservationTimeCreate;
+import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ControllerTest;
 
 @DisplayName("관리자 페이지 테스트")
@@ -108,11 +108,12 @@ class AdminControllerTest extends ControllerTest {
                 dynamicTest("관리자 예약 생성 시, 201을 반환한다.", () -> {
                     //given
                     ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                            new ReservationTimeRequest(LocalTime.NOON));
+                            new ReservationTimeCreate(LocalTime.NOON));
                     ThemeResponse themeResponse = themeService.create(
-                            new ThemeRequest("name", "description", "thumbnail"));
+                            new ThemeCreate("name", "description", "thumbnail"));
                     MemberResponse memberResponse = authService.signUp(
-                            new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), getMemberChoco().getPassword()));
+                            new SignUpCommand(getMemberChoco().getName(), getMemberChoco().getEmail(),
+                                    getMemberChoco().getPassword()));
 
                     Map<String, Object> params = new HashMap<>();
                     params.put("memberId", memberResponse.id());

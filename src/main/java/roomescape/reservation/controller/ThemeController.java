@@ -7,7 +7,6 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.ThemeCreate;
 
 @RestController
 @RequestMapping("/themes")
@@ -36,7 +36,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody @Valid ThemeRequest themeRequest) {
-        ThemeResponse response = themeService.create(themeRequest);
+        ThemeResponse response = themeService.create(ThemeCreate.from(themeRequest));
         return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
     }
 

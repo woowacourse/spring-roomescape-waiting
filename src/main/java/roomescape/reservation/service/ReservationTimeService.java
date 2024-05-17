@@ -15,6 +15,7 @@ import roomescape.reservation.domain.AvailableTimes;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.service.dto.ReservationTimeCreate;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,8 +30,8 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
-        LocalTime time = reservationTimeRequest.startAt();
+    public ReservationTimeResponse create(ReservationTimeCreate reservationTimeCreate) {
+        LocalTime time = reservationTimeCreate.startAt();
         if (reservationTimeRepository.existsByStartAt(time)) {
             throw new BadRequestException(ErrorType.DUPLICATED_RESERVATION_TIME_ERROR);
         }

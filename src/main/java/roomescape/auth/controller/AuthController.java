@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.controller.dto.LoginRequest;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.handler.ResponseHandler;
 import roomescape.auth.service.AuthService;
-import roomescape.auth.controller.dto.MemberResponse;
+import roomescape.auth.service.dto.SignUpCommand;
 
 @RestController
 public class AuthController {
@@ -51,7 +52,12 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
-        MemberResponse memberResponse = authService.signUp(signUpRequest);
+        SignUpCommand signUpCommand = new SignUpCommand(
+                signUpRequest.name(),
+                signUpRequest.email(),
+                signUpRequest.password()
+        );
+        MemberResponse memberResponse = authService.signUp(signUpCommand);
         return ResponseEntity.created(URI.create("/login")).body(memberResponse);
     }
 }

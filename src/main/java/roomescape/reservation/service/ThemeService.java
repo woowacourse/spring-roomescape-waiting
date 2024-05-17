@@ -11,6 +11,7 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.service.dto.ThemeCreate;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,8 +32,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse create(ThemeRequest themeRequest) {
-        Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
+    public ThemeResponse create(ThemeCreate themeCreate) {
+        Theme theme = new Theme(themeCreate.name(), themeCreate.description(), themeCreate.thumbnail());
         return ThemeResponse.from(themeRepository.save(theme));
     }
 

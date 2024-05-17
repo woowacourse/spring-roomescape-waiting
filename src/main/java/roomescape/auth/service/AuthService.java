@@ -3,13 +3,13 @@ package roomescape.auth.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.controller.dto.LoginRequest;
-import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.auth.service.dto.SignUpCommand;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
-import roomescape.auth.controller.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -48,15 +48,15 @@ public class AuthService {
     }
 
     @Transactional
-    public MemberResponse signUp(SignUpRequest signUpRequest) {
-        if (memberRepository.existsByEmail(signUpRequest.email())) {
+    public MemberResponse signUp(SignUpCommand signUpCommand) {
+        if (memberRepository.existsByEmail(signUpCommand.email())) {
             throw new BadRequestException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
         return MemberResponse.from(
                 memberRepository.save(new Member(
-                        signUpRequest.name(),
-                        signUpRequest.email(),
-                        passwordEncoder.encode(signUpRequest.password()),
+                        signUpCommand.name(),
+                        signUpCommand.email(),
+                        passwordEncoder.encode(signUpCommand.password()),
                         Role.USER)
                 )
         );

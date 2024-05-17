@@ -23,7 +23,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
@@ -33,6 +32,7 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 로직 테스트")
@@ -66,11 +66,16 @@ class ReservationServiceTest extends ServiceTest {
         //given
         LocalDate date = LocalDate.now().plusMonths(1);
         reservationRepository.save(new Reservation(date, time, theme1));
-        ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme1.getId());
 
         //when
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(AuthInfo.from(memberChoco),
-                reservationRequest);
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(
+                        memberChoco.getId(),
+                        date,
+                        time.getId(),
+                        theme1.getId()
+                )
+        );
 
         //then
         assertAll(() -> assertThat(reservationResponse.date()).isEqualTo(date),
@@ -193,12 +198,14 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation));
 
-        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(), time.getId(),
-                theme1.getId());
-
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.from(memberChoco),
-                reservationRequest)).isInstanceOf(
+        assertThatThrownBy(() -> reservationService.createMemberReservation(
+                new MemberReservationCreate(
+                        memberChoco.getId(),
+                        reservation.getDate(),
+                        time.getId(),
+                        theme1.getId()
+                ))).isInstanceOf(
                 BadRequestException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
     }
 

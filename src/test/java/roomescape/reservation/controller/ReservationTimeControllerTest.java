@@ -4,18 +4,16 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
+import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.util.ControllerTest;
 
 @DisplayName("예약 시간 API 통합 테스트")
@@ -43,7 +41,7 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void findAll() {
         //given
-        reservationTimeService.create(new ReservationTimeRequest(LocalTime.NOON));
+        reservationTimeService.create(new ReservationTimeCreate(LocalTime.NOON));
 
         //when & then
         RestAssured.given().log().all()
@@ -57,7 +55,8 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        ReservationTimeResponse timeResponse = reservationTimeService.create(new ReservationTimeRequest(LocalTime.NOON));
+        ReservationTimeResponse timeResponse = reservationTimeService.create(
+                new ReservationTimeCreate(LocalTime.NOON));
 
         //when & then
         RestAssured.given().log().all()

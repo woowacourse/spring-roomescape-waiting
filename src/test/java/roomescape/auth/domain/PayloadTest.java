@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.AuthenticationException;
-import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 
 @DisplayName("페이로드 테스트")

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.LoginRequest;
-import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.auth.service.dto.SignUpCommand;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
@@ -77,11 +77,11 @@ class AuthServiceTest extends ServiceTest {
     void signUp() {
         //given
         String password = "1234";
-        SignUpRequest signUpRequest =
-                new SignUpRequest(getMemberClover().getName(), getMemberClover().getEmail(), password);
+        SignUpCommand signUpCommand =
+                new SignUpCommand(getMemberClover().getName(), getMemberClover().getEmail(), password);
 
         //when
-        authService.signUp(signUpRequest);
+        authService.signUp(signUpCommand);
 
         //then
         Optional<Member> memberOptional = memberRepository.findByEmail(getMemberClover().getEmail());
@@ -98,11 +98,11 @@ class AuthServiceTest extends ServiceTest {
         //given
         String password = "1234";
         memberRepository.save(getMemberChoco());
-        SignUpRequest signUpRequest =
-                new SignUpRequest(getMemberChoco().getName(), getMemberChoco().getEmail(), password);
+        SignUpCommand signUpCommand =
+                new SignUpCommand(getMemberChoco().getName(), getMemberChoco().getEmail(), password);
 
         //when & then
-        assertThatThrownBy(() -> authService.signUp(signUpRequest))
+        assertThatThrownBy(() -> authService.signUp(signUpCommand))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.DUPLICATED_EMAIL_ERROR.getMessage());
     }

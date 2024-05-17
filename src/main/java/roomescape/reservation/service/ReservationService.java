@@ -11,10 +11,8 @@ import roomescape.exception.ErrorType;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
@@ -24,6 +22,7 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.service.dto.MemberReservationCreate;
 
 @Service
 @Transactional(readOnly = true)
@@ -62,30 +61,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
-        return createMemberReservation(
-                authInfo.getId(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId(),
-                reservationRequest.date()
-        );
-    }
-
-    @Transactional
-    public ReservationResponse createMemberReservation(MemberReservationRequest memberReservationRequest) {
-        return createMemberReservation(
-                memberReservationRequest.memberId(),
-                memberReservationRequest.timeId(),
-                memberReservationRequest.themeId(),
-                memberReservationRequest.date()
-        );
-    }
-
-    private ReservationResponse createMemberReservation(long memberId, long timeId, long themeId, LocalDate date) {
-        ReservationTime reservationTime = getReservationTime(timeId);
-        Theme theme = getTheme(themeId);
-        Member member = getMember(memberId);
-        Reservation reservation = getReservation(date, reservationTime, theme);
+    public ReservationResponse createMemberReservation(MemberReservationCreate memberReservationCreate) {
+        ReservationTime reservationTime = getReservationTime(memberReservationCreate.timeId());
+        Theme theme = getTheme(memberReservationCreate.themeId());
+        Member member = getMember(memberReservationCreate.memberId());
+        Reservation reservation = getReservation(memberReservationCreate.date(), reservationTime, theme);
 
         if (reservation.isPast()) {
             throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
