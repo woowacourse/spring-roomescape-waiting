@@ -1,6 +1,7 @@
 package roomescape.core.service;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
@@ -62,8 +63,11 @@ public class MemberService {
     @Transactional
     public MemberResponse create(final MemberRequest request) {
         final Member member = new Member(request.getName(), request.getEmail(), request.getPassword(), Role.USER);
-        final Member savedMember = memberRepository.save(member);
-
-        return new MemberResponse(savedMember.getId(), savedMember.getName());
+        try {
+            final Member savedMember = memberRepository.save(member);
+            return new MemberResponse(savedMember.getId(), savedMember.getName());
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
     }
 }
