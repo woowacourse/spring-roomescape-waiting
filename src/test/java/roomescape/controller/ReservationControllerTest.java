@@ -82,4 +82,13 @@ class ReservationControllerTest {
                 .statusCode(200)
                 .body("size()", is(3));
     }
+
+    @DisplayName("예약 삭제에 성공하면 204 No-Content를 반환한다.")
+    @Test
+    void deleteReservation() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/{id}", 1)
+                .then().log().all()
+                .statusCode(204);
+    }
 }
