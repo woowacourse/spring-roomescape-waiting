@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -8,6 +9,7 @@ import java.util.Objects;
 @Embeddable
 public class ReservationDate {
 
+    @Column(nullable = false)
     private LocalDate date;
 
     public ReservationDate() {

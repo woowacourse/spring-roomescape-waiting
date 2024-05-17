@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Theme {
@@ -13,12 +12,11 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
-    @NotNull
+    @Column(nullable = false)
     private String description;
-    @NotNull
+    @Column(nullable = false)
     private String thumbnail;
 
     public Theme() {

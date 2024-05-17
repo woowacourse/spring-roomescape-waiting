@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -11,6 +12,7 @@ public class MemberEmail {
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-z0-9]+@[A-z0-9.-]+\\.[A-z]{2,6}$");
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     public MemberEmail() {

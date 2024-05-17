@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
+        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
 })
 public class Reservation {
 
@@ -24,7 +24,7 @@ public class Reservation {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
-    @NotNull
+
     private ReservationDate date;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

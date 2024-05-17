@@ -22,16 +22,13 @@ public class Member {
     private MemberName name;
 
     @Embedded
-    @NotNull
-    @Column(unique = true)
     private MemberEmail email;
 
     @Embedded
-    @NotNull
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
+    @Column(nullable = false)
     private MemberRole role;
 
     public Member() {

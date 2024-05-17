@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
@@ -8,7 +9,7 @@ import java.util.Objects;
 public class MemberName {
 
     private static final int MAX_NAME_SIZE = 10;
-
+    @Column(nullable = false)
     private String name;
 
     public MemberName() {

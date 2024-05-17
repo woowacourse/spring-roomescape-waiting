@@ -1,12 +1,13 @@
 package roomescape.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
 public class MemberPassword {
-
+    @Column(nullable = false)
     private String password;
 
     public MemberPassword() {
