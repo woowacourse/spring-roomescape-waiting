@@ -9,10 +9,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import roomescape.config.TestConfig;
 
-@SqlGroup({
-        @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:truncate.sql"),
-        @Sql(executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD, scripts = "classpath:insert-reservations.sql")
-})
 @SpringBootTest(
         classes = TestConfig.class,
         webEnvironment = WebEnvironment.RANDOM_PORT

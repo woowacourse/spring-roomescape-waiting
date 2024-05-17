@@ -1,6 +1,7 @@
 package roomescape.presentation.acceptance;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -11,20 +12,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
+import roomescape.application.dto.TokenRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationQueryRepository;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
+
     @Autowired
     private ReservationQueryRepository reservationQueryRepository;
 
-    private static String accessToken;
+    private String memberToken;
 
     @BeforeEach
-    void setUp() {
-        accessToken = RestAssured.given()
+    void memberTokenSetUp() {
+        TokenRequest tokenRequest = new TokenRequest("member@wooteco.com", "wootecoCrew6!");
+        memberToken = RestAssured.given()
                 .contentType("application/json")
-                .body("{\"email\":\"admin@wooteco.com\", \"password\":\"wootecoCrew6!\"}")
+                .body(tokenRequest)
                 .when().post("/login")
                 .then()
                 .statusCode(200)
@@ -40,14 +44,14 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         ReservationResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .extract()
                 .as(ReservationResponse.class);
 
-        assertThat(response.member().name()).isEqualTo("운영자");
+        assertThat(response.member().name()).isEqualTo("회원");
         assertThat(response.date()).isEqualTo(LocalDate.of(2024, 1, 1));
     }
 
@@ -59,7 +63,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(404);
@@ -73,7 +77,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(404);
@@ -87,7 +91,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
@@ -105,7 +109,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409);
@@ -116,9 +120,10 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void findMyReservations() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", accessToken)
+                .cookie("token", memberToken)
                 .when().get("/reservations-mine")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("size()", greaterThan(0));
     }
 }

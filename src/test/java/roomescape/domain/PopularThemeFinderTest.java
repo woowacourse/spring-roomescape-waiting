@@ -25,9 +25,6 @@ class PopularThemeFinderTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private MemberCommandRepository memberCommandRepository;
-
-    @Autowired
     private MemberQueryRepository memberQueryRepository;
 
     @Autowired

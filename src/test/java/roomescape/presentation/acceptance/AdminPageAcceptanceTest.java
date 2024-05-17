@@ -5,18 +5,37 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.application.dto.TokenRequest;
 
 class AdminPageAcceptanceTest extends AcceptanceTest {
+
+    private String memberToken;
+
+    @BeforeEach
+    void memberTokenSetUp() {
+        TokenRequest tokenRequest = new TokenRequest("member@wooteco.com", "wootecoCrew6!");
+        memberToken = RestAssured.given()
+                .contentType("application/json")
+                .body(tokenRequest)
+                .when().post("/login")
+                .then()
+                .statusCode(200)
+                .extract()
+                .cookie("token");
+    }
+
     @DisplayName("요청자가 운영자라면 200 OK 응답을 받는다.")
     @Nested
     class Admin {
-        private static String accessToken;
+
+        private String adminToken;
 
         @BeforeEach
-        void setUp() {
-            accessToken = RestAssured.given()
+        void adminTokenSetUp() {
+            TokenRequest tokenRequest = new TokenRequest("admin@wooteco.com", "wootecoCrew6!");
+            adminToken = RestAssured.given()
                     .contentType("application/json")
-                    .body("{\"email\":\"admin@wooteco.com\", \"password\":\"wootecoCrew6!\"}")
+                    .body(tokenRequest)
                     .when().post("/login")
                     .then()
                     .statusCode(200)
@@ -28,7 +47,7 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
         @Test
         void adminPageTest() {
             RestAssured.given().log().all()
-                    .cookie("token", accessToken)
+                    .cookie("token", adminToken)
                     .when().get("/admin")
                     .then().log().all()
                     .statusCode(200);
@@ -38,7 +57,7 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
         @Test
         void reservationPageTest() {
             RestAssured.given().log().all()
-                    .cookie("token", accessToken)
+                    .cookie("token", adminToken)
                     .when().get("/admin/reservation")
                     .then().log().all()
                     .statusCode(200);
@@ -48,7 +67,7 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
         @Test
         void timePageTest() {
             RestAssured.given().log().all()
-                    .cookie("token", accessToken)
+                    .cookie("token", adminToken)
                     .when().get("/admin/time")
                     .then().log().all()
                     .statusCode(200);
@@ -59,8 +78,9 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
     @Test
     void basicMemberUnAuthorized() {
         RestAssured.given().log().all()
+                .cookie("token", memberToken)
                 .when().get("/admin")
                 .then().log().all()
-                .statusCode(401);
+                .statusCode(403);
     }
 }
