@@ -8,7 +8,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationJpaRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -38,10 +37,12 @@ public class AdminPageController {
 
     @GetMapping("/reservation")
     public String getReservationPage(Model model) {
-        List<ReservationResponse> reservationResponses = new ArrayList<>();
-        for (Reservation reservation : reservationJpaRepository.findAll()) {
-            reservationResponses.add(new ReservationResponse(reservation));
-        }
+        List<Reservation> reservations = reservationJpaRepository.findAll();
+        List<ReservationResponse> reservationResponses = reservations
+                .stream()
+                .map(ReservationResponse::new)
+                .toList();
+
         model.addAttribute("reservationResponses", reservationResponses);
         return "/admin/reservation-new";
     }

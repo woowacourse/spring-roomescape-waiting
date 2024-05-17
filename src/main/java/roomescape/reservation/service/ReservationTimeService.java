@@ -48,11 +48,10 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findTimes() {
-        List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();
-        for (ReservationTime reservationTime : reservationTimeJpaRepository.findAll()) {
-            reservationTimeResponses.add(new ReservationTimeResponse(reservationTime));
-        }
-        return reservationTimeResponses;
+        return reservationTimeJpaRepository.findAll()
+                .stream()
+                .map(ReservationTimeResponse::new)
+                .toList();
     }
 
     public List<ReservationTimeResponse> findTimesWithAlreadyBooked(LocalDate date, Long themeId) {
@@ -63,14 +62,10 @@ public class ReservationTimeService {
                 .toList();
 
         List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();
-        for (ReservationTime reservationTime : reservationTimeJpaRepository.findAll()) {
-            ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(
-                    reservationTime,
-                    reservationTime.isBelongTo(alreadyBookedTimeIds)
-            );
-            reservationTimeResponses.add(reservationTimeResponse);
-        }
-        return reservationTimeResponses;
+        return reservationTimeJpaRepository.findAll()
+                .stream()
+                .map(reservationTime -> new ReservationTimeResponse(reservationTime, reservationTime.isBelongTo(alreadyBookedTimeIds)))
+                .toList();
     }
 
     public void deleteTime(Long id) {

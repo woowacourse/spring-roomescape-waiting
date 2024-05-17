@@ -3,7 +3,6 @@ package roomescape.member.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,14 +11,13 @@ import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberJpaRepository;
 
 import javax.naming.AuthenticationException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,11 +42,10 @@ public class MemberService {
     }
 
     public List<MemberIdNameResponse> findMembers() {
-        List<MemberIdNameResponse> memberIdNameResponses = new ArrayList<>();
-        for (Member member : memberJpaRepository.findAll()) {
-            memberIdNameResponses.add(new MemberIdNameResponse(member));
-        }
-        return memberIdNameResponses;
+        return memberJpaRepository.findAll()
+                .stream()
+                .map(MemberIdNameResponse::new)
+                .toList();
     }
 
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
