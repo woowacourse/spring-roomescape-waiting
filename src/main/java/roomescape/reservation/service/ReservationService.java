@@ -24,7 +24,6 @@ public class ReservationService {
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
-
     public ReservationService(ReservationRepository reservationRepository, MemberRepository memberRepository, TimeRepository timeRepository, ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
@@ -40,15 +39,15 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservations(ReservationSearchRequest request) {
-        ReservationSearch reservationSearch = request.createReservationSearch();
-        return reservationRepository.findAllByCondition(request.memberId(), request.themeId(), request.startDate(), request.endDate())
+        ReservationSearch search = request.createReservationSearch();
+        return reservationRepository.findAllByCondition(search.memberId(), search.themeId(), search.startDate(), search.endDate())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<MyReservationResponse> findReservations(Long memberId) {
-        return reservationRepository.findByMember_id(memberId)
+        return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();

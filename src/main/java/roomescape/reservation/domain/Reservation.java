@@ -60,18 +60,6 @@ public class Reservation {
         return time.isBefore(currentDateTime.toLocalTime());
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public Long getId() {
         return id;
     }

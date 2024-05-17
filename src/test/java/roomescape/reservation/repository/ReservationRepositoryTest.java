@@ -60,7 +60,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     void findByMemberIdTest() {
         Long memberId = 2L;
 
-        List<Reservation> actual = reservationRepository.findByMember_id(memberId);
+        List<Reservation> actual = reservationRepository.findByMemberId(memberId);
 
         assertThat(actual).hasSize(2);
     }

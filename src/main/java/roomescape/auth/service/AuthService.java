@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoggedInMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberEmail;
-import roomescape.member.domain.MemberPassword;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -19,8 +19,8 @@ public class AuthService {
     }
 
     public String createToken(LoginRequest request) {
-        MemberEmail email = new MemberEmail(request.email());
-        MemberPassword password = new MemberPassword(request.password());
+        Email email = new Email(request.email());
+        Password password = new Password(request.password());
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
         return tokenProvider.createToken(member.getId());

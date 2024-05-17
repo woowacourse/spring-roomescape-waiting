@@ -18,5 +18,5 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             """)
     List<Reservation> findAllByCondition(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
-    List<Reservation> findByMember_id(Long memberId);
+    List<Reservation> findByMemberId(Long memberId);
 }
