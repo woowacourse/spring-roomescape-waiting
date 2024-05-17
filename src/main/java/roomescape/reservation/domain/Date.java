@@ -19,7 +19,7 @@ public class Date {
         this.date = date;
     }
 
-    public static Date saveDateFrom(LocalDate date) {
+    public static Date saveFrom(LocalDate date) {
         validateAtSave(date);
         return new Date(date);
     }
