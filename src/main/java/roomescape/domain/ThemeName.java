@@ -8,7 +8,7 @@ public class ThemeName {
 
     private String value;
 
-    public ThemeName() {
+    protected ThemeName() {
     }
 
     public ThemeName(String value) {
