@@ -9,10 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import roomescape.global.entity.BaseEntity;
 import roomescape.member.domain.Member;
 
 @Entity
-public class MemberReservation {
+public class MemberReservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
