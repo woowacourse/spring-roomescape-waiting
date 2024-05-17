@@ -30,7 +30,7 @@ import roomescape.theme.service.ThemeService;
 public class ThemeControllerTest extends ControllerTest {
 
     public static final LocalDate TODAY = LocalDate.now();
-    private final Theme theme = Theme.themeOf(1L, "포레스트", "공포 테마",
+    private final Theme theme = Theme.of(1L, "포레스트", "공포 테마",
             "https://zerogangnam.com/storage/AVISPw8N2JfMThKvnk3VJzeY9qywIaYd8pTy46Xx.jpg");
 
     @Autowired
