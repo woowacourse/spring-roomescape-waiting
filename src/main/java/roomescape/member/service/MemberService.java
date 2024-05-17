@@ -5,7 +5,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.naming.AuthenticationException;
@@ -35,11 +34,10 @@ public class MemberService {
     }
 
     public List<MemberIdNameResponse> findMembersIdAndName() {
-        List<MemberIdNameResponse> memberIdNameResponses = new ArrayList<>();
-        for (Member member : memberJpaRepository.findAll()) {
-            memberIdNameResponses.add(new MemberIdNameResponse(member));
-        }
-        return memberIdNameResponses;
+        return memberJpaRepository.findAll()
+                .stream()
+                .map(MemberIdNameResponse::new)
+                .toList();
     }
 
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {

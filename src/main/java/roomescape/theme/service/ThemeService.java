@@ -1,7 +1,6 @@
 package roomescape.theme.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +12,6 @@ import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeJpaRepository;
 
-// TODO: 테스트 추가
 @Service
 public class ThemeService {
 
@@ -53,11 +51,10 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findThemes() {
-        List<ThemeResponse> themeResponses = new ArrayList<>();
-        for (Theme theme : themeJpaRepository.findAll()) {
-            themeResponses.add(new ThemeResponse(theme));
-        }
-        return themeResponses;
+        return themeJpaRepository.findAll()
+                .stream()
+                .map(ThemeResponse::new)
+                .toList();
     }
 
     public void deleteTheme(Long id) {

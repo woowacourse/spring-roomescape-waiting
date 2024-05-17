@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
@@ -13,7 +12,6 @@ import roomescape.reservation.repository.ReservationTimeJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeJpaRepository;
 
-// TODO: 테스트 추가
 @Service
 public class ReservationTimeService {
 
@@ -44,11 +42,10 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findReservationTimes() {
-        List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();
-        for (ReservationTime reservationTime : reservationTimeJpaRepository.findAll()) {
-            reservationTimeResponses.add(new ReservationTimeResponse(reservationTime));
-        }
-        return reservationTimeResponses;
+        return reservationTimeJpaRepository.findAll()
+                .stream()
+                .map(ReservationTimeResponse::new)
+                .toList();
     }
 
     public List<ReservationTimeResponse> findTimesWithAlreadyBooked(LocalDate date, Long themeId) {
@@ -58,15 +55,13 @@ public class ReservationTimeService {
                 .map(reservation -> reservation.getReservationTime().getId())
                 .toList();
 
-        List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();
-        for (ReservationTime reservationTime : reservationTimeJpaRepository.findAll()) {
-            ReservationTimeResponse reservationTimeResponse = new ReservationTimeResponse(
-                    reservationTime,
-                    reservationTime.isBelongTo(alreadyBookedTimeIds)
-            );
-            reservationTimeResponses.add(reservationTimeResponse);
-        }
-        return reservationTimeResponses;
+        return reservationTimeJpaRepository.findAll()
+                .stream()
+                .map(reservationTime -> new ReservationTimeResponse(
+                        reservationTime,
+                        reservationTime.isBelongTo(alreadyBookedTimeIds)
+                ))
+                .toList();
     }
 
     public void deleteTime(Long id) {

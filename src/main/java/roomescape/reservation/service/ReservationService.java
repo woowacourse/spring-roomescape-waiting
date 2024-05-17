@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.admin.dto.AdminReservationRequest;
@@ -20,7 +19,6 @@ import roomescape.reservation.repository.ReservationTimeJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeJpaRepository;
 
-// TODO: 테스트 추가
 @Service
 public class ReservationService {
 
@@ -91,11 +89,10 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservations() {
-        List<ReservationResponse> reservationResponses = new ArrayList<>();
-        for (Reservation reservation : reservationJpaRepository.findAll()) {
-            reservationResponses.add(new ReservationResponse(reservation));
-        }
-        return reservationResponses;
+        return reservationJpaRepository.findAll()
+                .stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
     public List<ReservationResponse> searchReservations(
