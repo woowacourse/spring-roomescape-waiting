@@ -1,7 +1,7 @@
 package roomescape.presentation.acceptance;
 
 import java.time.LocalDate;
-import roomescape.application.dto.ReservationRequest;
+import roomescape.dto.ReservationRequest;
 
 class ReservationRequestFixture {
     static ReservationRequest of(long timeId, long themeId) {

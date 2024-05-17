@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.AuthService;
-import roomescape.application.dto.MemberResponse;
-import roomescape.application.dto.TokenRequest;
-import roomescape.application.dto.TokenResponse;
+import roomescape.dto.MemberResponse;
+import roomescape.dto.TokenRequest;
+import roomescape.dto.TokenResponse;
 
 @RestController
 @RequestMapping("/login")

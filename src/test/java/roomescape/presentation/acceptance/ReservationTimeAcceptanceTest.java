@@ -7,8 +7,8 @@ import io.restassured.http.ContentType;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.application.dto.ReservationTimeRequest;
-import roomescape.application.dto.ReservationTimeResponse;
+import roomescape.dto.ReservationTimeRequest;
+import roomescape.dto.ReservationTimeResponse;
 
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 시간을 추가한다.")

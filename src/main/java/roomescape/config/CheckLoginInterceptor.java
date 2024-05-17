@@ -1,11 +1,11 @@
-package roomescape.infrastructure.auth;
+package roomescape.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.application.AuthService;
-import roomescape.application.dto.MemberResponse;
+import roomescape.dto.MemberResponse;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

@@ -1,4 +1,4 @@
-package roomescape.application.dto;
+package roomescape.dto;
 
 import jakarta.validation.constraints.NotNull;
 import roomescape.domain.member.Email;
