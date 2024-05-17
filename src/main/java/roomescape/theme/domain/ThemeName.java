@@ -5,7 +5,9 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public record ThemeName(@Column(length = 30, nullable = false, unique = true) String name) {
+public record ThemeName(
+        @Column(length = 30, nullable = false, unique = true)
+        String name) {
     private static final int MAX_LENGTH = 30;
 
     public ThemeName {

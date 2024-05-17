@@ -5,11 +5,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
-public record MyReservationResponse(Long id,
-                                    String themeName,
-                                    @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                    @JsonFormat(pattern = "HH:mm") LocalTime startAt,
-                                    String status) {
+public record MyReservationResponse(
+        Long id,
+        String themeName,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate date,
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime startAt,
+        String status) {
     private static final String DEFAULT_STATUS = "예약";
 
     public static MyReservationResponse from(Reservation reservation) {

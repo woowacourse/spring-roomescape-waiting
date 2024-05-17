@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Embeddable
-public record MemberEmail(@Column(name = "email", length = 100, nullable = false, unique = true) String value) {
+public record MemberEmail(
+        @Column(name = "email", length = 100, nullable = false, unique = true)
+        String value) {
     private static final int MAX_LENGTH = 100;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[0-9a-zA-Z]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$");
 

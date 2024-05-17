@@ -7,10 +7,13 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.time.dto.TimeResponse;
 
-public record ReservationResponse(Long id,
-                                  MemberResponse member,
-                                  @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                  TimeResponse time, ThemeResponse theme) {
+public record ReservationResponse(
+        Long id,
+        MemberResponse member,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate date,
+        TimeResponse time,
+        ThemeResponse theme) {
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
