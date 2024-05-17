@@ -23,7 +23,7 @@ public class TimeSlot {
         this.startAt = startAt;
     }
 
-    public boolean isTimeBefore(LocalDateTime dateTime) {
+    public boolean isBefore(LocalDateTime dateTime) {
         LocalTime currentTime = LocalTime.of(dateTime.getHour(), dateTime.getMinute());
         return startAt.isBefore(currentTime);
     }

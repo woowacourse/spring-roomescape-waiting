@@ -28,13 +28,13 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+        this.status = ReservationStatus.BOOKING;
     }
 
     public Long getId() {

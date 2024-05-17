@@ -1,24 +1,22 @@
 package roomescape.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
 
-public record MemberReservationRequest(LocalDate date, Long timeId, Long themeId) {
-
-    public MemberReservationRequest {
-        isValid(date, timeId, themeId);
-    }
-
-    private void isValid(LocalDate date, Long timeId, Long themeId) {
-        if (date == null || date.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("올바르지 않은 예약 날짜입니다.");
-        }
-
-        if (timeId == null) {
-            throw new IllegalArgumentException("올바르지 않은 예약 시간입니다.");
-        }
-
-        if (themeId == null) {
-            throw new IllegalArgumentException("올바르지 않은 테마 입니다.");
-        }
+public record MemberReservationRequest(@NotNull(message = "예약 날짜는 비워둘 수 없습니다.") LocalDate date,
+                                       @NotNull(message = "예약 시간은 비워둘 수 없습니다.") Long timeId,
+                                       @NotNull(message = "테마는 비워둘 수 없습니다.") Long themeId) {
+    public Reservation toEntity(Member member, TimeSlot timeSlot, Theme theme) {
+        return new Reservation(
+                null,
+                member,
+                date,
+                timeSlot,
+                theme
+        );
     }
 }

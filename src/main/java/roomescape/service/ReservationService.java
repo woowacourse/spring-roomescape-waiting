@@ -9,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
+import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -52,14 +53,22 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(ReservationRequest reservationRequest, LocalDateTime now) {
-        Member member = getMemberById(reservationRequest.memberId());
-        TimeSlot timeSlot = getTimeSlotById(reservationRequest.timeId());
-        Theme theme = getThemeById(reservationRequest.themeId());
+    public ReservationResponse create(ReservationRequest request, LocalDateTime now) {
+        Member member = getMemberById(request.memberId());
+        TimeSlot timeSlot = getTimeSlotById(request.timeId());
+        Theme theme = getThemeById(request.themeId());
+        validate(request.date(), timeSlot, theme, now);
+        Reservation reservation = request.toEntity(member, timeSlot, theme);
+        Reservation createdReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(createdReservation);
+    }
 
-        validate(reservationRequest.date(), timeSlot, theme, now);
-
-        Reservation reservation = reservationRequest.toEntity(member, timeSlot, theme);
+    public ReservationResponse create(LoginMember loginMember, MemberReservationRequest request, LocalDateTime now) {
+        Member member = getMemberById(loginMember.id());
+        TimeSlot timeSlot = getTimeSlotById(request.timeId());
+        Theme theme = getThemeById(request.themeId());
+        validate(request.date(), timeSlot, theme, now);
+        Reservation reservation = request.toEntity(member, timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -82,7 +91,8 @@ public class ReservationService {
     }
 
     private void validateReservation(LocalDate date, TimeSlot time, LocalDateTime now) {
-        if (time == null || (time.isTimeBefore(now) && !date.isAfter(LocalDate.now()))) {
+        LocalDate today = LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth());
+        if (date.isBefore(today) || date.isEqual(today) && time.isBefore(now)) {
             throw new IllegalArgumentException("지나간 날짜와 시간으로 예약할 수 없습니다");
         }
     }

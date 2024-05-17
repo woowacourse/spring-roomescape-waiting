@@ -1,38 +1,14 @@
 package roomescape.dto.request;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import roomescape.domain.Theme;
 
-public record ThemeRequest(String name, String description, String thumbnail) {
-
-    public ThemeRequest {
-        isValid(name, description, thumbnail);
-    }
+public record ThemeRequest(@NotNull(message = "테마명은 비어있을 수 없습니다.") @NotBlank(message = "테마명은 비어있을 수 없습니다.") String name,
+                           @NotNull(message = "테마 설명은 비어있을 수 없습니다.") @NotBlank(message = "테마 설명은 비어있을 수 없습니다.") String description,
+                           @NotNull(message = "썸네일은 비어있을 수 없습니다.") @NotBlank(message = "썸네일은 비어있을 수 없습니다.") String thumbnail) {
 
     public Theme toEntity() {
         return new Theme(null, name, description, thumbnail);
-    }
-
-    private void isValid(String name, String description, String thumbnail) {
-        validEmpty(name);
-        validEmpty(description);
-        validEmpty(thumbnail);
-        validThumbnailURL(thumbnail);
-    }
-
-    private void validEmpty(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            throw new IllegalArgumentException("테마 등록 시 빈 값은 허용하지 않습니다");
-        }
-    }
-
-    private void validThumbnailURL(String thumbnail) {
-        String regex = "^(https?|ftp|file)://.+";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(thumbnail);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("썸네일 URL 형식이 올바르지 않습니다");
-        }
     }
 }

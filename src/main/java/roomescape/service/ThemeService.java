@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
@@ -27,6 +29,7 @@ public class ThemeService {
     }
 
     public ThemeResponse create(ThemeRequest themeRequest) {
+        validThumbnailURL(themeRequest.thumbnail());
         Theme theme = themeRequest.toEntity();
         Theme createdTheme = themeRepository.save(theme);
         return ThemeResponse.from(createdTheme);
@@ -47,5 +50,14 @@ public class ThemeService {
     private Theme getThemeById(long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
+    }
+
+    private void validThumbnailURL(String thumbnail) {
+        String regex = "^(https?|ftp|file)://.+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(thumbnail);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("썸네일 URL 형식이 올바르지 않습니다");
+        }
     }
 }
