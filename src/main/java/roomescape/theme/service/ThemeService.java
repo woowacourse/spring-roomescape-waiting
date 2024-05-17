@@ -1,5 +1,6 @@
 package roomescape.theme.service;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.NotFoundException;
@@ -38,9 +39,9 @@ public class ThemeService {
     public ThemesResponse getTop10Themes(final LocalDate today) {
         LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);
-        int limit = 10;
+        Pageable pageable = Pageable.ofSize(10);
 
-        List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate, limit)
+        List<ThemeResponse> response = themeRepository.findTopNThemeBetweenStartDateAndEndDate(startDate, endDate, pageable)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
