@@ -3,13 +3,18 @@ package roomescape.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.infrastructure.TokenExtractor;
 
 @Controller
 public class UserPageController {
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     @GetMapping
     public String showPopularThemePage() {
@@ -23,7 +28,8 @@ public class UserPageController {
 
     @GetMapping("/login")
     public String showLoginPage(HttpServletRequest request) {
-        if (TokenExtractor.fromRequest(request) == null) {
+        String token = TokenExtractor.fromRequest(request);
+        if (token == null || !tokenProvider.validateToken(token)) {
             return "/login";
         }
         return showPopularThemePage();
