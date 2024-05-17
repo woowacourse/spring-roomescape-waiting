@@ -198,15 +198,15 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .then().log().all()
                             .statusCode(400);
                 }),
-                dynamicTest("유저는 예약을 삭제할 수 없다.", () -> {
+                dynamicTest("유저는 이미 예약되면 삭제할 수 없다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().delete("/admin/reservations/" + userReservationId)
+                            .when().delete("/reservations/" + userReservationId)
                             .then().log().all()
-                            .statusCode(404);
+                            .statusCode(400);
                 }),
-                dynamicTest("어드민은 예약을 삭제한다.", () -> {
+                dynamicTest("어드민만 예약을 삭제할 수 있다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
@@ -230,12 +230,11 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .statusCode(200).extract()
                             .response().jsonPath().getList("$").size();
                 }),
-                dynamicTest("예약 대기를 추가한다.", () -> {
+                dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
                             "date", LocalDate.now(),
                             "timeId", 1L,
-                            "themeId", 1L,
-                            "status", "WAIT");
+                            "themeId", 1L);
 
                     userReservationId = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
@@ -266,8 +265,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     Map<String, Object> params = Map.of(
                             "date", LocalDate.now(),
                             "timeId", 1L,
-                            "themeId", 1L,
-                            "status", "WAIT");
+                            "themeId", 1L);
 
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
@@ -281,8 +279,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     Map<String, Object> params = Map.of(
                             "date", LocalDate.now(),
                             "timeId", 1L,
-                            "themeId", 1L,
-                            "status", "WAIT");
+                            "themeId", 1L);
 
                     adminReservationId = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
@@ -303,19 +300,19 @@ class ReservationControllerTest extends IntegrationTestSupport {
 
                     assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue());
                 }),
-                dynamicTest("어드민은 회원의 예약을 삭제한다.", () -> {
+                dynamicTest("자신의 예약 대기를 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", ADMIN_TOKEN)
+                            .when().delete("/reservations/" + adminReservationId)
+                            .then().log().all()
+                            .statusCode(204);
+                }),
+                dynamicTest("어드민은 유저의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().delete("/admin/reservations/" + userReservationId)
-                            .then().log().all()
-                            .statusCode(204);
-                }),
-                dynamicTest("어드민은 자신의 예약을 삭제한다.", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/admin/reservations/" + adminReservationId)
                             .then().log().all()
                             .statusCode(204);
                 })

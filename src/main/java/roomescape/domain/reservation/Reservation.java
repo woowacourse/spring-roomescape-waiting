@@ -65,6 +65,10 @@ public class Reservation {
         return new Reservation(member, date, time, theme, status);
     }
 
+    public boolean isBooked() {
+        return status == ReservationStatus.BOOKED;
+    }
+
     public Long getId() {
         return id;
     }

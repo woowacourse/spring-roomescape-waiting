@@ -18,6 +18,7 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Role;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
@@ -111,11 +112,20 @@ class ReservationServiceTest extends IntegrationTestSupport {
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("예약 삭제")
+    @DisplayName("어드민은 예약을 삭제한다.")
     @Test
-    void deleteReservation() {
+    void deleteReservationAdmin() {
         int size = reservationRepository.findAll().size();
-        reservationService.deleteReservation(1L);
+        reservationService.deleteReservation(1L, Role.ADMIN);
+        assertThat(reservationRepository.findAll()).hasSize(size - 1);
+    }
+
+    @DisplayName("유저는 예약 대기를 삭제한다.")
+    @Test
+    void deleteReservationUser() {
+        int size = reservationRepository.findAll().size();
+
+        reservationService.deleteReservation(18L, Role.USER);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
@@ -123,7 +133,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void deleteReservationNotFound() {
         assertThatThrownBy(() -> {
-            reservationService.deleteReservation(100L);
+            reservationService.deleteReservation(100L, Role.ADMIN);
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 

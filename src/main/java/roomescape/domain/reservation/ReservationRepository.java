@@ -12,6 +12,9 @@ import roomescape.domain.member.Member;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Query("select r.member.id from Reservation r where r.id = :id")
+    Long findMemberIdById(Long id);
+
     @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 
@@ -45,8 +48,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                @Nullable Long memberId);
 
     boolean existsByTime(ReservationTime time);
-
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 
     boolean existsByTheme(Theme theme);

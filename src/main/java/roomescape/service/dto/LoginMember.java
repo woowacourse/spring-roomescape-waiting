@@ -10,4 +10,16 @@ public record LoginMember(
     public MemberResponse toMemberResponse() {
         return new MemberResponse(id, name, role.name());
     }
+
+    public boolean isNotId(Long id) {
+        return !id.equals(this.id);
+    }
+
+    public boolean isUser() {
+        return role == Role.USER;
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
 }

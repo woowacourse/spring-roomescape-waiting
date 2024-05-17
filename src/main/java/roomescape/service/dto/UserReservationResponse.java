@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
 
 public record UserReservationResponse(
-        long reservationId,
+        long id,
         String theme,
         LocalDate date,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul")

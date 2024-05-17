@@ -124,11 +124,11 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         return Stream.of(
                 Arguments.of(
                         new ReservationConditionRequest(null, null, null, null),
-                        17
+                        18
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, null, null, null),
-                        4
+                        5
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(null, 1L, null, null),
@@ -139,7 +139,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                         8
                 ),Arguments.of(
                         new ReservationConditionRequest(null, null, null, LocalDate.parse("2024-05-09")),
-                        11
+                        12
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, 1L, null, null),

@@ -13,6 +13,7 @@ import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Role;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
@@ -76,9 +77,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
+    public void deleteReservation(Long id, Role role) {
         Reservation foundReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
+
+        if (role == Role.USER && foundReservation.isBooked()) {
+            throw new RoomEscapeBusinessException("이미 예약되어 삭제할 수 없습니다.");
+        }
 
         reservationRepository.delete(foundReservation);
     }
@@ -124,6 +129,10 @@ public class ReservationService {
     private ReservationTime findTimeById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
+    }
+
+    public Long findMemberIdById(Long id) {
+        return reservationRepository.findMemberIdById(id);
     }
 }
 
