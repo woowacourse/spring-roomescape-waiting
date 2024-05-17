@@ -45,10 +45,10 @@ public class ReservationService {
 
     public List<Reservation> filterReservation(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
+                .orElse(null);
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId)));
-        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
+                .orElse(null);
+        return reservationRepository.findByConditions(theme, member, dateFrom, dateTo);
     }
 
     public Reservation addReservation(ReservationRequest request, Member member) {

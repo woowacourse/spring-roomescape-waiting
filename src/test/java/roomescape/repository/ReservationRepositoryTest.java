@@ -243,4 +243,51 @@ class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         assertThat(reservations).hasSize(2);
     }
+
+    @DisplayName("조건에 맞는 예약을 반환한다.")
+    @Test
+    void should_return_reservations_when_give_conditions() {
+        LocalDate day1 = LocalDate.of(2024, 5, 15);
+        LocalDate day2 = LocalDate.of(2024, 5, 17);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme1 = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
+        Theme theme2 = new Theme("배키테마", "배키테마설명", "배키테마썸네일");
+        Member member1 = new Member("무빈", MEMBER, "email1@email.com", "password");
+        Member member2 = new Member("배키", MEMBER, "email2@email.com", "password");
+        entityManager.persist(time);
+        entityManager.persist(theme1);
+        entityManager.persist(theme2);
+        entityManager.persist(member1);
+        entityManager.persist(member2);
+
+        Reservation reservation1 = new Reservation(day1, time, theme1, member1);
+        Reservation reservation2 = new Reservation(day1, time, theme1, member2);
+        Reservation reservation3 = new Reservation(day1, time, theme2, member1);
+        Reservation reservation4 = new Reservation(day1, time, theme2, member2);
+        Reservation reservation5 = new Reservation(day2, time, theme1, member1);
+        Reservation reservation6 = new Reservation(day2, time, theme1, member2);
+        Reservation reservation7 = new Reservation(day2, time, theme2, member1);
+        Reservation reservation8 = new Reservation(day2, time, theme2, member2);
+        entityManager.persist(reservation1);
+        entityManager.persist(reservation2);
+        entityManager.persist(reservation3);
+        entityManager.persist(reservation4);
+        entityManager.persist(reservation5);
+        entityManager.persist(reservation6);
+        entityManager.persist(reservation7);
+        entityManager.persist(reservation8);
+
+        LocalDate middle = LocalDate.of(2024, 5, 15);
+
+        List<Reservation> reservations = reservationRepository.findByConditions(theme1, member1, day1, middle);
+        assertThat(reservations).hasSize(1);
+        reservations = reservationRepository.findByConditions(theme1, member1, day1, null);
+        assertThat(reservations).hasSize(2);
+        reservations = reservationRepository.findByConditions(theme1, member1, null, day2);
+        assertThat(reservations).hasSize(2);
+        reservations = reservationRepository.findByConditions(theme1, null, day1, day2);
+        assertThat(reservations).hasSize(4);
+        reservations = reservationRepository.findByConditions(null, member1, day1, day2);
+        assertThat(reservations).hasSize(4);
+    }
 }
