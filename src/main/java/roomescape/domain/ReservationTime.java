@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
@@ -14,7 +15,8 @@ public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "start_at", nullable = false, unique = true)
+    @NotNull
+    @Column(unique = true)
     private LocalTime startAt;
 
 

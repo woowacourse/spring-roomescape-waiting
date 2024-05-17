@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -24,7 +24,7 @@ public class Reservation {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
-    @Column(nullable = false)
+    @NotNull
     private ReservationDate date;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -34,7 +34,7 @@ public class Reservation {
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @NotNull
     private ReservationStatus status;
 
     public Reservation() {

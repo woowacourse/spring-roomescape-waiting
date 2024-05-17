@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Member {
@@ -17,19 +18,20 @@ public class Member {
     private Long id;
 
     @Embedded
-    @Column(nullable = false)
+    @NotNull
     private MemberName name;
 
     @Embedded
-    @Column(nullable = false, unique = true)
+    @NotNull
+    @Column(unique = true)
     private MemberEmail email;
 
     @Embedded
-    @Column(nullable = false)
+    @NotNull
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @NotNull
     private MemberRole role;
 
     public Member() {
