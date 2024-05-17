@@ -25,7 +25,7 @@ public class AuthApiController {
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberIdAndNameResponse> getMemberLoginInfo(@AuthenticatedMember Member member) {
-        return ResponseEntity.ok(new MemberIdAndNameResponse(member.getId(), member.getName()));
+        return ResponseEntity.ok(new MemberIdAndNameResponse(member.getId(), member.getName().getValue()));
     }
 
     @PostMapping("/login")

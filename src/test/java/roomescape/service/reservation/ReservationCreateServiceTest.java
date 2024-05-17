@@ -8,6 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Member;
+import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberPassword;
 import roomescape.domain.Role;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationSaveRequest;
@@ -22,7 +25,11 @@ class ReservationCreateServiceTest extends BaseServiceTest {
     void checkDuplicateReservationTime_Success() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().plusDays(1L), 2L, 2L);
-        Member member = new Member(1L, "capy", "test@naver.com", "1234", Role.USER);
+        Member member = new Member(
+                1L,
+                new MemberName("capy"),
+                new MemberEmail("test@naver.com"),
+                new MemberPassword("1234"), Role.USER);
 
         assertThatCode(() -> reservationCreateService.create(request, member))
                 .doesNotThrowAnyException();
@@ -33,7 +40,10 @@ class ReservationCreateServiceTest extends BaseServiceTest {
     void checkDuplicateReservationTime_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().plusDays(1L), 1L, 1L);
-        Member member = new Member("capy", "abc@gmail.com", "1234", Role.USER);
+        Member member = new Member(
+                new MemberName("capy"),
+                new MemberEmail("test@naver.com"),
+                new MemberPassword("1234"), Role.USER);
 
         assertThatThrownBy(() -> reservationCreateService.create(request, member))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -45,7 +55,10 @@ class ReservationCreateServiceTest extends BaseServiceTest {
     void checkReservationDateTimeIsFuture_Failure() {
         ReservationSaveRequest request = new ReservationSaveRequest(
                 LocalDate.now().minusDays(1L), 2L, 2L);
-        Member member = new Member("capy", "abc@gmail.com", "1234", Role.USER);
+        Member member = new Member(
+                new MemberName("capy"),
+                new MemberEmail("test@naver.com"),
+                new MemberPassword("1234"), Role.USER);
 
         assertThatThrownBy(() -> reservationCreateService.create(request, member))
                 .isInstanceOf(IllegalArgumentException.class)

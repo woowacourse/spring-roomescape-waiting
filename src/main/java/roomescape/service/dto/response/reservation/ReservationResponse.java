@@ -14,7 +14,7 @@ public record ReservationResponse(Long id,
 
     public ReservationResponse(Reservation reservation) {
         this(reservation.getId(),
-                new MemberIdAndNameResponse(reservation.getMember().getId(), reservation.getMember().getName()),
+                new MemberIdAndNameResponse(reservation.getMember().getId(), reservation.getMember().getName().getValue()),
                 reservation.getDate(),
                 new ReservationTimeResponse(reservation.getReservationTime()),
                 new ThemeResponse(reservation.getTheme()));
