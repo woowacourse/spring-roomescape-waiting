@@ -48,10 +48,6 @@ public class Time {
         return startAt;
     }
 
-    public void setIdOnSave(long id) {
-        this.id = id;
-    }
-
     public void validation() {
         if (startAt == null) {
             throw new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
