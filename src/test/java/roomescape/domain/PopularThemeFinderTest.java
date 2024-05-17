@@ -47,7 +47,7 @@ class PopularThemeFinderTest {
         Member member = memberCommandRepository.findAll().get(0);
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
+        reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(1)));
 
         List<Theme> popularThemes = popularThemeFinder.findThemes();
 
