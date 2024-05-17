@@ -11,11 +11,11 @@ public class ReservationDate {
     @Column(name = "date")
     private LocalDate value;
 
-    public ReservationDate() {
-    }
-
     public ReservationDate(LocalDate value) {
         this.value = value;
+    }
+
+    protected ReservationDate() {
     }
 
     public boolean isBefore(LocalDate target) {

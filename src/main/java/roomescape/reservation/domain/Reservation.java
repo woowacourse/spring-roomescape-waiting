@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -31,16 +32,16 @@ public class Reservation {
     private ReservationDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Theme theme;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
-
-    public Reservation() {
-    }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
         this.id = id;
@@ -49,6 +50,9 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
+    }
+
+    protected Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {

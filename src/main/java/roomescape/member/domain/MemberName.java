@@ -17,7 +17,7 @@ public class MemberName {
         this.value = value;
     }
 
-    public MemberName() {
+    protected MemberName() {
     }
 
     private void validate(String value) {

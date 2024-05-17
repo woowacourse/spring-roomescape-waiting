@@ -19,13 +19,13 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime() {
-    }
-
     public ReservationTime(Long id, LocalTime startAt) {
         validateHourlyUnit(startAt);
         this.id = id;
         this.startAt = startAt;
+    }
+
+    protected ReservationTime() {
     }
 
     private void validateHourlyUnit(LocalTime startAt) {
