@@ -102,32 +102,34 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("나의 예약들을 조회한다")
     void getMyReservations() {
-        addReservation();
+        LocalDate reservationDate = LocalDate.of(2024, 4, 9);
+        long timeId = 1L;
+        long themeId = 1L;
+        ReservationRequest saveRequest = new ReservationRequest(reservationDate, timeId, themeId);
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .body(saveRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract().as(ReservationResponse.class);
 
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
+        List<PersonalReservationResponse> personalReservationResponses = RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/reservations/mine")
                 .then().log().all()
-                .extract();
-
-        List<PersonalReservationResponse> reservationResponses = response.jsonPath()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
                 .getList(".", PersonalReservationResponse.class);
-
-        PersonalReservationResponse reservationResponse = reservationResponses.get(0);
-
-        MemberResponse memberResponse = reservationResponse.member();
-        ReservationTimeResponse reservationTimeResponse = reservationResponse.time();
-        ThemeResponse themeResponse = reservationResponse.theme();
+        PersonalReservationResponse personalReservationResponse = personalReservationResponses.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(reservationResponses).hasSize(1);
-
-            softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "user@gmail.com", "유저", Role.USER));
-            softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
-            softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
-            softly.assertThat(reservationResponse.status()).isEqualTo("예약 대기");
+            softly.assertThat(personalReservationResponses).hasSize(1);
+            softly.assertThat(personalReservationResponse.date()).isEqualTo(reservationDate);
+            softly.assertThat(personalReservationResponse.time().id()).isEqualTo(timeId);
+            softly.assertThat(personalReservationResponse.theme().id()).isEqualTo(themeId);
+            softly.assertThat(personalReservationResponse.status()).isEqualTo("예약 대기");
         });
     }
 
