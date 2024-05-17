@@ -32,7 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             GROUP BY r.theme
             ORDER BY COUNT(r) DESC
             LIMIT :limit""")
-    List<Theme> findPopularThemes(
+    List<Theme> findMostBookedThemesBetweenLimited(
             @Param("dateFrom") LocalDate from,
             @Param("dateTo") LocalDate until,
             @Param("limit") int limit);

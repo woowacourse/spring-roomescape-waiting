@@ -74,7 +74,7 @@ class ReservationRepositoryTest {
         );
         //when
         final List<Theme> popularThemes = reservationRepository
-                .findPopularThemes(now.minusDays(8), now.minusDays(1), 10);
+                .findMostBookedThemesBetweenLimited(now.minusDays(8), now.minusDays(1), 10);
         //then
         assertThat(popularThemes).isEqualTo(expected);
     }

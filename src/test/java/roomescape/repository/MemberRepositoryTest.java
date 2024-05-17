@@ -42,7 +42,7 @@ class MemberRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
-    void findByEmailOrThrowNotPresent() {
+    void findByIdOrThrowNotPresent() {
         final long id = 100L;
 
         assertThatThrownBy(() -> memberRepository.findByEmailOrThrow(id)).isInstanceOf(
@@ -50,7 +50,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
+    @DisplayName("존재하지 않는 이메일 조회할 경우 예외가 발생한다.")
     void findByEmailOrThrowNotPresent() {
         final String email = "notfound@email.com";
 
