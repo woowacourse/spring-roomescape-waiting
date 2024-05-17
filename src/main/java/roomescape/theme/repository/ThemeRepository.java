@@ -16,7 +16,7 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
             WHERE r.date >= :startDate AND r.date <= :endDate
             GROUP BY t.id
             ORDER BY count(r.id) DESC
-            LIMIT :count
+            LIMIT :limit
              """)
-    List<Theme> findThemesSortedByCountOfReservation(LocalDate startDate, LocalDate endDate, int count);
+    List<Theme> findOrderByReservationCount(LocalDate startDate, LocalDate endDate, int limit);
 }

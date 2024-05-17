@@ -16,5 +16,5 @@ public interface TimeRepository extends ListCrudRepository<ReservationTime, Long
             WHERE r.date = :date
             AND r.theme.id = :themeId
             """)
-    List<ReservationTime> findAllByReservationDateAndThemeId(LocalDate date, Long themeId);
+    List<ReservationTime> findByReservationDateAndThemeId(LocalDate date, Long themeId);
 }

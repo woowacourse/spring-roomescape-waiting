@@ -48,7 +48,7 @@ class TimeServiceTest {
         given(timeRepository.findAll()).willReturn(List.of(
                 new ReservationTime(1L, LocalTime.of(19, 0)),
                 new ReservationTime(2L, LocalTime.of(10, 0))));
-        given(timeRepository.findAllByReservationDateAndThemeId(date, themeId)).willReturn(List.of(
+        given(timeRepository.findByReservationDateAndThemeId(date, themeId)).willReturn(List.of(
                 new ReservationTime(1L, LocalTime.of(19, 0))));
         List<AvailableTimeResponse> expected = List.of(
                 new AvailableTimeResponse(new TimeResponse(1L, LocalTime.of(19, 0)), true),

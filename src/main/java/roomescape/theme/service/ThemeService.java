@@ -31,7 +31,7 @@ public class ThemeService {
         LocalDate startDate = popularThemePeriod.getStartDate();
         LocalDate endDate = popularThemePeriod.getEndDate();
 
-        return themeRepository.findThemesSortedByCountOfReservation(startDate, endDate, COUNT_OF_POPULAR_THEME)
+        return themeRepository.findOrderByReservationCount(startDate, endDate, COUNT_OF_POPULAR_THEME)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();

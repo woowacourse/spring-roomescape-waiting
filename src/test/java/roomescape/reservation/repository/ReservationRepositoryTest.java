@@ -37,7 +37,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     void findAllByCondition_whenSomeCondition() {
         Long themeId = 1L;
 
-        List<Reservation> actual = reservationRepository.findAllByCondition(null, themeId, null, null);
+        List<Reservation> actual = reservationRepository.findByCondition(null, themeId, null, null);
 
         assertThat(actual).hasSize(3);
     }
@@ -50,7 +50,7 @@ class ReservationRepositoryTest extends RepositoryTest {
         LocalDate startDate = LocalDate.of(2022, 5, 5);
         LocalDate endDate = LocalDate.of(2022, 5, 5);
 
-        List<Reservation> actual = reservationRepository.findAllByCondition(memberId, themeId, startDate, endDate);
+        List<Reservation> actual = reservationRepository.findByCondition(memberId, themeId, startDate, endDate);
 
         assertThat(actual).hasSize(1);
     }

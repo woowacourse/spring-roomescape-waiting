@@ -16,7 +16,7 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             AND (:startDate IS NULL OR r.date >= :startDate)
             AND (:endDate IS NULL OR r.date <= :endDate)
             """)
-    List<Reservation> findAllByCondition(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
+    List<Reservation> findByCondition(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findByMemberId(Long memberId);
 }
