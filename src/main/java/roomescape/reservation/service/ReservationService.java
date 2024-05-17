@@ -118,16 +118,16 @@ public class ReservationService {
         }
     }
 
-    public void validateAlreadyHasReservationByTimeId(final long id) {
-        List<Reservation> reservations = reservationRepository.findByTimeId(id);
+    public void validateAlreadyHasReservationByTimeId(final long timeId) {
+        List<Reservation> reservations = reservationRepository.findByTimeId(timeId);
         if (!reservations.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("[ERROR]  (timeId : " + timeId + ") 에 해당하는 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 
-    public void validateAlreadyHasReservationByThemeId(final long id) {
-        if (!reservationRepository.findByThemeId(id).isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 해당 테마를 사용 중인 예약이 있어 삭제할 수 없습니다.");
+    public void validateAlreadyHasReservationByThemeId(final long themeId) {
+        if (!reservationRepository.findByThemeId(themeId).isEmpty()) {
+            throw new IllegalArgumentException("[ERROR]  (themeId : " + themeId + ") 에 해당하는 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 }
