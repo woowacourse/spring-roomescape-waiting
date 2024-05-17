@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -23,7 +24,7 @@ import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.response.AvailableTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
 class ReservationTimeServiceTest {
 

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -31,7 +32,7 @@ import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.response.ThemeResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
 class ReservationServiceTest {
 
@@ -53,7 +54,6 @@ class ReservationServiceTest {
     private ReservationTime reservationTime;
     private Theme theme;
     private Member member;
-
 
     @BeforeEach
     void insertReservation() {
@@ -107,7 +107,6 @@ class ReservationServiceTest {
                 .hasMessage(ExceptionCode.PAST_TIME_SLOT_RESERVATION.getErrorMessage());
     }
 
-
     @DisplayName("모든 예약 조회 테스트")
     @Test
     void findAllReservations() {
@@ -153,7 +152,6 @@ class ReservationServiceTest {
 
         reservationRepository.save(new Reservation(member1, LocalDate.of(2030, 12, 12),reservationTime1, theme));
         reservationRepository.save(new Reservation(member2, LocalDate.of(2030, 12, 12),reservationTime2, theme));
-
 
         List<MyReservationResponse> reservations = reservationService.findAllByMemberId(member1.getId());
 
