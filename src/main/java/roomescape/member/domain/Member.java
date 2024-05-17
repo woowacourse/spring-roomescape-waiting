@@ -16,7 +16,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    private Name name;
+    private MemberName name;
     @Embedded
     private Email email;
     @Embedded
@@ -26,14 +26,14 @@ public class Member {
     private MemberRole role;
 
     public Member(Long id, String name, String email) {
-        this(id, new Name(name), new Email(email), MemberRole.USER);
+        this(id, new MemberName(name), new Email(email), MemberRole.USER);
     }
 
     public Member(Long id, String name, String email, String role) {
-        this(id, new Name(name), new Email(email), MemberRole.valueOf(role));
+        this(id, new MemberName(name), new Email(email), MemberRole.valueOf(role));
     }
 
-    private Member(Long id, Name name, Email email, MemberRole role) {
+    private Member(Long id, MemberName name, Email email, MemberRole role) {
         this.id = Objects.requireNonNull(id);
         this.name = Objects.requireNonNull(name);
         this.email = Objects.requireNonNull(email);
@@ -73,8 +73,8 @@ public class Member {
         }
         Member member = (Member) object;
         return Objects.equals(id, member.id)
-               && Objects.equals(name, member.name)
-               && Objects.equals(email, member.email);
+                && Objects.equals(name, member.name)
+                && Objects.equals(email, member.email);
     }
 
     @Override
