@@ -81,7 +81,7 @@ class MemberReservationControllerTest {
                 .statusCode(200)
                 .extract()
                 .body()
-                .jsonPath().get("member.name");
+                .jsonPath().get("memberName");
 
         // then
         assertThat(name).isEqualTo("클로버");
