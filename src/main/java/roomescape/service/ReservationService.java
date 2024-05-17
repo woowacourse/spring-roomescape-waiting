@@ -54,10 +54,10 @@ public class ReservationService {
 
     private Reservation createReservation(ReservationSaveRequest reservationSaveRequest) {
         return new Reservation(
-                findMemberById(reservationSaveRequest.memberId()),
-                reservationSaveRequest.date(),
-                findTimeById(reservationSaveRequest.timeId()),
-                findThemeById(reservationSaveRequest.themeId())
+                findMemberById(reservationSaveRequest.getMemberId()),
+                reservationSaveRequest.getDate(),
+                findTimeById(reservationSaveRequest.getTimeId()),
+                findThemeById(reservationSaveRequest.getThemeId())
         );
     }
 

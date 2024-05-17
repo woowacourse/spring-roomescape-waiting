@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
+import roomescape.controller.dto.ReservationStatusRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
@@ -52,7 +53,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
                 LocalDate.parse("2025-11-11"),
-                time.getId(), theme.getId());
+                time.getId(), theme.getId(), ReservationStatusRequest.RESERVED);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         assertAll(
@@ -73,7 +74,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
-                LocalDate.parse("2025-11-11"), 100L, 1L);
+                LocalDate.parse("2025-11-11"), 100L, 1L, ReservationStatusRequest.RESERVED);
         assertThatThrownBy(() -> {
             reservationService.saveReservation(reservationSaveRequest);
         }).isInstanceOf(RoomEscapeBusinessException.class);
@@ -99,7 +100,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void saveDuplicatedReservation() {
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-05-04"),
-                1L, 1L);
+                1L, 1L, ReservationStatusRequest.RESERVED);
         assertThatThrownBy(() -> reservationService.saveReservation(reservationSaveRequest))
                 .isInstanceOf(RoomEscapeBusinessException.class);
     }
@@ -109,7 +110,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     void findAllMyReservations() {
         // given
         long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L, ReservationStatusRequest.RESERVED);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
@@ -118,7 +119,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         // then
         assertAll(
                 () -> assertThat(allUserReservation).hasSize(1),
-                () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationSaveRequest.date()),
+                () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationResponse.date()),
                 () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
                 () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
                 () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
