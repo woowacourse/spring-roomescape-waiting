@@ -21,7 +21,9 @@ public class Member {
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
 
-    private String email;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    private Email email;
 
     private String password;
 
@@ -31,7 +33,7 @@ public class Member {
     protected Member() {
     }
 
-    public Member(Long id, MemberName name, String email, String password, Role role) {
+    public Member(Long id, MemberName name, Email email, String password, Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -40,11 +42,11 @@ public class Member {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
-        this(id, new MemberName(name), email, password, role);
+        this(id, new MemberName(name), new Email(email), password, role);
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(null, new MemberName(name), email, password, role);
+        this(null, new MemberName(name), new Email(email), password, role);
     }
 
     public Long getId() {
@@ -56,7 +58,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email;
+        return email.getValue();
     }
 
     public String getPassword() {

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.repository.MemberRepository;
 import roomescape.handler.exception.CustomException;
@@ -29,7 +30,7 @@ public class LoginService {
     }
 
     private Member findMemberBy(String email) {
-        return memberRepository.findMemberByEmail(email)
+        return memberRepository.findMemberByEmail(new Email(email))
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
     }
 
