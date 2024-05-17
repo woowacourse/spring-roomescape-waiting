@@ -15,7 +15,7 @@ public record ReservationResponse(Long id,
                                   MemberResponse memberResponse) {
     public static ReservationResponse from(Reservation reservation) {
         MemberResponse memberResponse = new MemberResponse(
-                reservation.getMemberId(),
+                reservation.getMember().getId(),
                 reservation.getMemberName(),
                 reservation.getMemberEmail(),
                 reservation.getMemberRole()

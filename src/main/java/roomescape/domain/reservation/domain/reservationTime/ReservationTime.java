@@ -1,16 +1,14 @@
 package roomescape.domain.reservation.domain.reservationTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import roomescape.global.exception.EscapeApplicationException;
 
 import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
+@Table(name = "reservation_time")
 public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
