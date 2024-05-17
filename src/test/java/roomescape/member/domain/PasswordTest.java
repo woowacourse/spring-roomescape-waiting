@@ -16,7 +16,7 @@ class PasswordTest {
     @ValueSource(strings = {" ", "Polla99", "polla"})
     @DisplayName("잘못된 형식의 비밀번호인 경우 예외를 던진다.")
     void validation_ShouldThrowException_WhenIllegalPassword(String password) {
-        Throwable illegalPassword = assertThrows(RoomEscapeException.class, () -> Password.passwordFrom(password));
+        Throwable illegalPassword = assertThrows(RoomEscapeException.class, () -> Password.from(password));
 
         assertEquals(illegalPassword.getMessage(), MemberExceptionCode.ILLEGAL_PASSWORD_FORM_EXCEPTION.getMessage());
     }
@@ -25,6 +25,6 @@ class PasswordTest {
     @ValueSource(strings = {"polla99", "0polla"})
     @DisplayName("정상적인 형식의 비밀번호일 경우 생성한다.")
     void makePassword(String password) {
-        assertDoesNotThrow(() -> Password.passwordFrom(password));
+        assertDoesNotThrow(() -> Password.from(password));
     }
 }

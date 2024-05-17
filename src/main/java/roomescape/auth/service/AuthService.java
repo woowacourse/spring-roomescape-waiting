@@ -24,7 +24,7 @@ public class AuthService {
 
     public Token login(LoginRequest loginRequest) {
         Email email = Email.from(loginRequest.email());
-        Password password = Password.passwordFrom(loginRequest.password());
+        Password password = Password.from(loginRequest.password());
 
         Member member = memberRepository.findMemberByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));

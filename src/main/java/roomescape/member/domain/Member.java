@@ -51,17 +51,17 @@ public class Member {
     }
 
     public static Member saveMemberFrom(long id) {
-        return new Member(id, DEFAULT_NAME, Email.from(), Password.savePasswordFrom(),
+        return new Member(id, DEFAULT_NAME, Email.from(), Password.from(),
                 MemberRole.MEMBER);
     }
 
     public static Member memberOf(long id, String name, String email, String password, String role) {
-        return new Member(id, name, Email.from(email), Password.passwordFrom(password),
+        return new Member(id, name, Email.from(email), Password.from(password),
                 MemberRole.findMemberRole(role));
     }
 
     public static Member saveMemberOf(String email, String password, String name) {
-        return new Member(DEFAULT_NAME, Email.from(email), Password.passwordFrom(password), MemberRole.MEMBER);
+        return new Member(DEFAULT_NAME, Email.from(email), Password.from(password), MemberRole.MEMBER);
     }
 
     public long getId() {

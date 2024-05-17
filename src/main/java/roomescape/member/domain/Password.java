@@ -21,12 +21,12 @@ public class Password {
         this.password = password;
     }
 
-    public static Password passwordFrom(String password) {
+    public static Password from(String password) {
         validation(password);
         return new Password(password);
     }
 
-    public static Password savePasswordFrom() {
+    public static Password from() {
         return new Password(null);
     }
 
