@@ -16,6 +16,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.reservation.MyReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -45,9 +46,9 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findReservationsByMemberEmail(String email) {
+    public List<MyReservationResponse> findReservationsByMemberEmail(String email) {
         return reservationRepository.findAllByMemberEmail(email)
-                .stream().map(ReservationResponse::new)
+                .stream().map(MyReservationResponse::new)
                 .toList();
     }
 

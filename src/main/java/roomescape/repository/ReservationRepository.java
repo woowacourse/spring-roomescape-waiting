@@ -18,6 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     boolean existsByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
-    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    @EntityGraph(attributePaths = {"theme", "time"})
     List<Reservation> findAllByMemberEmail(String email);
 }

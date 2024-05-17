@@ -6,14 +6,11 @@ import roomescape.service.dto.theme.ThemeResponse;
 
 public class ReservationResponse {
 
-    private static final String DEFAULT_STATUS = "예약";
-
     private final long id;
     private final MemberResponse member;
     private final ThemeResponse theme;
     private final String date;
     private final ReservationTimeResponse time;
-    private final String status;
 
     public ReservationResponse(long id, MemberResponse member, ThemeResponse theme, String date,
                                ReservationTimeResponse time) {
@@ -22,7 +19,6 @@ public class ReservationResponse {
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.status = DEFAULT_STATUS;
     }
 
     public ReservationResponse(Reservation reservation) {
@@ -51,9 +47,5 @@ public class ReservationResponse {
 
     public ReservationTimeResponse getTime() {
         return time;
-    }
-
-    public String getStatus() {
-        return status;
     }
 }

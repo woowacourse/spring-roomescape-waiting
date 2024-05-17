@@ -17,6 +17,7 @@ import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.controller.helper.AuthenticationPrincipal;
 import roomescape.controller.helper.LoginMember;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.reservation.MyReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -49,7 +50,7 @@ public class ReservationRestController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
+    public List<MyReservationResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
         return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
     }
 

@@ -7,9 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import roomescape.domain.member.Member;
-
 import java.time.LocalDate;
+import roomescape.domain.member.Member;
 
 @Entity
 public class Reservation {
@@ -67,6 +66,10 @@ public class Reservation {
 
     public String memberEmail() {
         return member.getEmail();
+    }
+
+    public String themeName() {
+        return theme.getName();
     }
 
     public Long themeId() {
