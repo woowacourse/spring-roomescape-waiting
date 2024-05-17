@@ -11,7 +11,6 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -57,7 +56,8 @@ public class ReservationService {
                 findMemberById(reservationSaveRequest.getMemberId()),
                 reservationSaveRequest.getDate(),
                 findTimeById(reservationSaveRequest.getTimeId()),
-                findThemeById(reservationSaveRequest.getThemeId())
+                findThemeById(reservationSaveRequest.getThemeId()),
+                reservationSaveRequest.getStatus().toDomain()
         );
     }
 
@@ -104,7 +104,7 @@ public class ReservationService {
         );
 
         return reservations.stream()
-                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
+                .map(UserReservationResponse::from)
                 .toList();
     }
 

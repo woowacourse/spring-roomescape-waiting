@@ -23,6 +23,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -57,7 +58,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member savedMember = memberRepository.save(member);
 
         Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime,
-                savedTheme);
+                savedTheme, ReservationStatus.RESERVED);
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(() -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),
                 () -> assertThat(savedReservation.getDate()).isEqualTo("2025-01-01"),
