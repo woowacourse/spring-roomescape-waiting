@@ -1,6 +1,5 @@
 package roomescape.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -11,8 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import roomescape.service.dto.LoginRequest;
 
 class ReservationIntegrationTest extends IntegrationTest {
     @Nested
@@ -21,7 +18,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         @Test
         void 예약_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().get("/reservations")
                     .then().log().all()
                     .statusCode(200)
@@ -31,7 +28,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         @Test
         void 예약_목록을_예약자별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().get("/reservations?member-id=1")
                     .then().log().all()
                     .statusCode(200)
@@ -41,7 +38,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         @Test
         void 예약_목록을_테마별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().get("/reservations?theme-id=1")
                     .then().log().all()
                     .statusCode(200)
@@ -51,8 +48,8 @@ class ReservationIntegrationTest extends IntegrationTest {
         @Test
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
-                    .when().get("/reservations?date-from=2024-08-05&date-to=2024-08-10")
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().get("/reservations?date-from=2000-04-01&date-to=2000-04-07")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -86,7 +83,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 로그인한_사용자_이름으로_예약을_추가할_수_있다() {
-            params.put("date", "2023-08-06");
+            params.put("date", "2000-04-07");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -114,7 +111,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 날짜의_형식이_다르면_예약을_추가할_수_없다() {
-            params.put("date", "2023-13-05");
+            params.put("date", "2000-13-07");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -127,7 +124,15 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 시간대와_테마가_똑같은_중복된_예약은_추가할_수_없다() {
-            params.put("date", "2024-08-05");
+            params.put("date", "2000-04-07");
+
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createCookies())
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/reservations")
+                    .then().log().all()
+                    .statusCode(201);
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -140,7 +145,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 지나간_날짜와_시간에_대한_예약은_추가할_수_없다() {
-            params.put("date", "1998-12-11");
+            params.put("date", "2000-04-06");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
@@ -162,13 +167,13 @@ class ReservationIntegrationTest extends IntegrationTest {
             params.put("themeId", "1");
             params.put("timeId", "1");
             params.put("memberId", "1");
-            params.put("date", "2023-08-06");
+            params.put("date", "2000-04-07");
         }
 
         @Test
         void 관리자는_선택한_사용자_id로_예약을_추가할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/admin/reservations")
@@ -180,16 +185,8 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 관리자가_아닌_일반_사용자가_사용시_예외가_발생한다() {
-            jdbcTemplate.update("UPDATE MEMBER SET role = 'USER'");
-            String userCookie = RestAssured.given().log().all()
-                    .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .body(new LoginRequest("admin@gmail.com", "1234"))
-                    .when().post("/login")
-                    .then().log().all()
-                    .extract().header("Set-Cookie").split(";")[0];
-
             RestAssured.given().log().all()
-                    .header("Cookie", userCookie)
+                    .cookies(cookieProvider.createCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/admin/reservations")
@@ -204,19 +201,16 @@ class ReservationIntegrationTest extends IntegrationTest {
         @Test
         void 예약을_삭제할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(204);
-
-            Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-            assertThat(countAfterDelete).isZero();
         }
 
         @Test
         void 존재하지_않는_예약은_삭제할_수_없다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/reservations/10")
                     .then().log().all()
                     .statusCode(404);

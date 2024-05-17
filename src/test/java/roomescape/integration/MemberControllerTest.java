@@ -14,11 +14,11 @@ class MemberControllerTest extends IntegrationTest {
         @Test
         void 사용자_목록을_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().get("/members")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("size()", is(2));
         }
     }
 }

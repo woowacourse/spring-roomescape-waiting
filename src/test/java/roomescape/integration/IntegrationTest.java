@@ -5,14 +5,13 @@ import static org.mockito.BDDMockito.given;
 import io.restassured.RestAssured;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.helper.CookieProvider;
 import roomescape.helper.DatabaseCleaner;
@@ -23,9 +22,6 @@ import roomescape.helper.DatabaseInitializer;
 public abstract class IntegrationTest {
     @LocalServerPort
     int port;
-
-    @Autowired
-    protected JdbcTemplate jdbcTemplate;
 
     @Autowired
     protected DatabaseCleaner databaseCleaner;
@@ -44,7 +40,7 @@ public abstract class IntegrationTest {
         RestAssured.port = port;
         databaseCleaner.execute();
         databaseInitializer.execute();
-        given(clock.instant()).willReturn(Instant.parse("1999-09-19T19:19:00Z"));
-        given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
+        given(clock.instant()).willReturn(Instant.parse("2000-04-07T02:00:00Z"));
+        given(clock.getZone()).willReturn(ZoneOffset.UTC);
     }
 }

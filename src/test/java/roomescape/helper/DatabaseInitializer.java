@@ -21,23 +21,29 @@ public class DatabaseInitializer {
 
     public void execute() {
         Member member = createMember();
+        Member admin = createAdmin();
         ReservationTime time = createTime();
         Theme theme = createTheme();
         Reservation reservation = createReservation(member, time, theme);
     }
 
     private Member createMember() {
+        Member member = new Member("사용자", "user@gmail.com", "1234", MemberRole.USER);
+        entityManager.persist(member);
+        return member;
+    }
+
+    private Member createAdmin() {
         Member member = new Member("어드민", "admin@gmail.com", "1234", MemberRole.ADMIN);
         entityManager.persist(member);
         return member;
     }
 
     private ReservationTime createTime() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(2, 30));
         entityManager.persist(reservationTime);
         return reservationTime;
     }
-
 
     private Theme createTheme() {
         Theme theme = new Theme("레벨2", "내용이다.", "https://www.naver.com/");
@@ -47,7 +53,7 @@ public class DatabaseInitializer {
 
     private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
         Reservation reservation = new Reservation(
-                LocalDate.of(2024, 8, 5), member, time, theme, ReservationStatus.BOOKED);
+                LocalDate.of(2000, 4, 1), member, time, theme, ReservationStatus.BOOKED);
         entityManager.persist(reservation);
         return reservation;
     }

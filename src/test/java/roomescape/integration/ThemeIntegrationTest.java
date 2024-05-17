@@ -32,9 +32,6 @@ class ThemeIntegrationTest extends IntegrationTest {
     class FindAllPopularTheme {
         @Test
         void 최근_일주일동안_예약_건수_많은_순서대로_10개_테마를_인기_테마로_조회할_수_있다() {
-            jdbcTemplate.update("INSERT INTO reservation (date, member_id, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                    "1999-09-18", "1", "1", "1");
-
             RestAssured.given().log().all()
                     .when().get("/themes/popular")
                     .then().log().all()
@@ -59,7 +56,7 @@ class ThemeIntegrationTest extends IntegrationTest {
             params.put("thumbnail", "https://naver.com");
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/themes")
@@ -77,7 +74,7 @@ class ThemeIntegrationTest extends IntegrationTest {
             params.put("thumbnail", "https://naver.com");
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .contentType(ContentType.JSON)
                     .body(params)
                     .when().post("/themes")
@@ -91,10 +88,14 @@ class ThemeIntegrationTest extends IntegrationTest {
     class DeleteTheme {
         @Test
         void 테마를_삭제할_수_있다() {
-            jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", 1);
+            RestAssured.given().log().all()
+                    .cookies(cookieProvider.createAdminCookies())
+                    .when().delete("/reservations/1")
+                    .then().log().all()
+                    .statusCode(204);
 
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/themes/1")
                     .then().log().all()
                     .statusCode(204);
@@ -103,7 +104,7 @@ class ThemeIntegrationTest extends IntegrationTest {
         @Test
         void 존재하지_않는_테마는_삭제할_수_없다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/themes/13")
                     .then().log().all()
                     .statusCode(404);
@@ -112,7 +113,7 @@ class ThemeIntegrationTest extends IntegrationTest {
         @Test
         void 예약이_존재하는_테마는_삭제할_수_없다() {
             RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
+                    .cookies(cookieProvider.createAdminCookies())
                     .when().delete("/themes/1")
                     .then().log().all()
                     .statusCode(400);
