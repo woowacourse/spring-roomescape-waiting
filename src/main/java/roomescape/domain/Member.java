@@ -20,8 +20,6 @@ public class Member {
     private final String password;
     @Enumerated(value = EnumType.STRING)
     private final Role role;
-//    @OneToMany(mappedBy = "member") //TODO 왜 필요한지 고민하기
-//    private final List<Reservation> reservations;
 
     protected Member() {
         this.id = null;
