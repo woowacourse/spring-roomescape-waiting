@@ -16,10 +16,12 @@ public class Reservation {
     private Long id;
     @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
+
 
     public Reservation() {
     }

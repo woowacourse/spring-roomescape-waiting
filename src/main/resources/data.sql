@@ -29,21 +29,21 @@ VALUES ('20:00');
 
 
 -- 예약 추가
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', -2, CURRENT_DATE()), 1, 1);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 16, CURRENT_DATE()), 1, 2);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('YEAR', 1, CURRENT_DATE()), 2, 1);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 1, CURRENT_DATE()), 2, 2);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', -4, CURRENT_DATE()), 3, 3);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 4, CURRENT_DATE()), 3, 4);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('MONTH', 1, CURRENT_DATE()), 3, 4);
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservation(date, reservation_time_id, theme_id)
 VALUES (DATEADD('DAY', 4, CURRENT_DATE()), 3, 4);
 
 

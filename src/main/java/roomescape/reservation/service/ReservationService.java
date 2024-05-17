@@ -42,6 +42,7 @@ public class ReservationService {
         this.memberReservationRepository = memberReservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
         return memberReservationRepository.findBy(request.getMemberId(), request.getThemeId(), request.getStartDate(),
                         request.getEndDate())
@@ -50,6 +51,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
         Member member = getMember(authInfo.getId());
         return memberReservationRepository.findAllByMember(member)

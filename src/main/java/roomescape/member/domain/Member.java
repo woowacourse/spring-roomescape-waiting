@@ -32,16 +32,8 @@ public class Member {
         this.role = role;
     }
 
-    public Member(Long id, String name, String email, Role role) {
-        this(id, name, email, "NotUse", role);
-    }
-
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
-    }
-
-    public Member(Long id, String name) {
-        this(id, name, "NotUse", "NotUse", Role.USER);
     }
 
     private void validate(Long id, String name, String email, String password, Role role) {

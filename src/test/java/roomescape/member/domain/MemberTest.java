@@ -21,8 +21,8 @@ class MemberTest {
         String name2 = "name2";
 
         //when
-        Member member1 = new Member(id1, name1);
-        Member member2 = new Member(id1, name2);
+        Member member1 = new Member(id1, name1, "notUse", "notUse", Role.USER);
+        Member member2 = new Member(id1, name2, "notUse", "notUse", Role.USER);
 
         //then
         assertThat(member1).isEqualTo(member2);
@@ -36,7 +36,7 @@ class MemberTest {
         long id = 1;
 
         //when & then
-        assertThatThrownBy(() -> new Member(1L, invalidName))
+        assertThatThrownBy(() -> new Member(1L, invalidName, "notUse", "notUse", Role.USER))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorType.NAME_FORMAT_ERROR.getMessage());
     }

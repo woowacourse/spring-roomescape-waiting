@@ -18,7 +18,7 @@ class MemberReservationTest {
     void equals() {
         //given
         Long id = 1L;
-        Member member = new Member(2L, "초코칩", "dev.chocochip@gmail.com", Role.USER);
+        Member member = new Member(2L, "notUse", "초코칩", "dev.chocochip@gmail.com", Role.USER);
         ReservationTime noon = getNoon();
         Theme theme = getTheme1();
         Reservation nextDayReservation = getNextDayReservation(noon, theme);
