@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
+    fetch(`/reservations-mine?date=${new Date()}`) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -55,7 +55,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = `/reservations/${id}`;
+    const endpoint = `/reservations/waiting/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

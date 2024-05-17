@@ -64,7 +64,7 @@ public class ReservationTimeService {
         ReservationTime foundTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
 
-        if (reservationRepository.existsByTime(foundTime)) {
+        if (reservationRepository.existsBySlot_Time(foundTime)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
         }
 

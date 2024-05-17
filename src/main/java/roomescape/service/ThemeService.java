@@ -55,7 +55,7 @@ public class ThemeService {
         Theme foundTheme = themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
 
-        if (reservationRepository.existsByTheme(foundTheme)) {
+        if (reservationRepository.existsBySlot_Theme(foundTheme)) {
             throw new RoomEscapeBusinessException("예약이 존재하는 테마입니다.");
         }
         themeRepository.delete(foundTheme);

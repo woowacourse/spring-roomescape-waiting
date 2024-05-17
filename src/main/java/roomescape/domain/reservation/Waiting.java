@@ -1,38 +1,34 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
-public class Reservation {
+public class Waiting {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(nullable = false)
     private Member member;
 
-    @Embedded
-    private ReservationSlot slot;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Reservation reservation;
 
-    public Reservation(Member member, ReservationSlot reservationSlot) {
+    public Waiting(Member member, Reservation reservation) {
         this.member = member;
-        this.slot = reservationSlot;
+        this.reservation = reservation;
     }
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
     public Long getId() {
@@ -43,8 +39,8 @@ public class Reservation {
         return member;
     }
 
-    public ReservationSlot getSlot() {
-        return slot;
+    public Reservation getReservation() {
+        return reservation;
     }
 
     @Override
@@ -52,10 +48,10 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation that)) {
+        if (!(o instanceof Waiting waiting)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+        return Objects.equals(id, waiting.id);
     }
 
     @Override

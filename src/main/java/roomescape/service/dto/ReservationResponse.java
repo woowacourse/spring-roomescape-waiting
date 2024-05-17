@@ -3,8 +3,11 @@ package roomescape.service.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationReadOnly;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.Waiting;
 
 public record ReservationResponse(
         Long id,
@@ -13,28 +16,34 @@ public record ReservationResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        String status
+        ReservationStatus status
 ) {
 
-    public static ReservationResponse from(ReservationReadOnly reservation) {
+    public static ReservationResponse createByWaiting(Waiting waiting) {
+        ReservationSlot slot = waiting.getReservation().getSlot();
+
         return new ReservationResponse(
-                reservation.id(),
-                MemberResponse.from(reservation.member()),
-                reservation.date(),
-                new ReservationTimeResponse(reservation.time()),
-                new ThemeResponse(reservation.theme()),
-                reservation.status().getValue()
+                waiting.getId(),
+                MemberResponse.from(waiting.getMember()),
+                slot.getDate(),
+                new ReservationTimeResponse(slot.getTime()),
+                new ThemeResponse(slot.getTheme()),
+                ReservationStatus.WAIT
         );
     }
 
-    public ReservationResponse(Reservation reservation) {
-        this(
+    public static ReservationResponse createByReservation(Reservation reservation) {
+        return new ReservationResponse(
                 reservation.getId(),
                 MemberResponse.from(reservation.getMember()),
-                reservation.getDate(),
-                new ReservationTimeResponse(reservation.getTime()),
-                new ThemeResponse(reservation.getTheme()),
-                reservation.getStatus().getValue()
+                reservation.getSlot().getDate(),
+                new ReservationTimeResponse(reservation.getSlot().getTime()),
+                new ThemeResponse(reservation.getSlot().getTheme()),
+                ReservationStatus.BOOKED
         );
+    }
+
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.of(date, time.startAt());
     }
 }

@@ -16,7 +16,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -96,7 +96,8 @@ class ThemeServiceTest extends IntegrationTestSupport {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
         Member member = memberRepository.save(Member.createUser("생강", "email@email.com", "1234"));
-        reservationRepository.save(new Reservation(member, LocalDate.parse("2025-05-13"), time, theme, ReservationStatus.BOOKED));
+        ReservationSlot slot = new ReservationSlot(LocalDate.parse("2025-05-13"), time, theme);
+        reservationRepository.save(new Reservation(member, slot));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))

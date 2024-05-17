@@ -21,13 +21,15 @@ import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.dto.ReservationReadOnly;
+import roomescape.domain.reservation.dto.WaitingWithRank;
 import roomescape.service.dto.ReservationConditionRequest;
 
 @Transactional
@@ -45,6 +47,9 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @DisplayName("예약 생성")
     @Test
     void save() {
@@ -57,13 +62,15 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         Member member = Member.createUser("생강", "email@email.com", "1234");
         Member savedMember = memberRepository.save(member);
 
-        Reservation reservation = new Reservation(savedMember, LocalDate.parse("2025-01-01"), savedReservationTime,
-                savedTheme, ReservationStatus.BOOKED);
+        ReservationSlot slot = new ReservationSlot(LocalDate.parse("2025-01-01"), savedReservationTime,
+                savedTheme);
+
+        Reservation reservation = new Reservation(savedMember, slot);
         Reservation savedReservation = reservationRepository.save(reservation);
         assertAll(() -> assertThat(savedReservation.getMember().getName()).isEqualTo("생강"),
-                () -> assertThat(savedReservation.getDate()).isEqualTo("2025-01-01"),
-                () -> assertThat(savedReservation.getTime()).isEqualTo(savedReservationTime),
-                () -> assertThat(savedReservation.getTheme()).isEqualTo(savedTheme));
+                () -> assertThat(savedReservation.getSlot().getDate()).isEqualTo("2025-01-01"),
+                () -> assertThat(savedReservation.getSlot().getTime()).isEqualTo(savedReservationTime),
+                () -> assertThat(savedReservation.getSlot().getTheme()).isEqualTo(savedTheme));
     }
 
     @DisplayName("존재하는 예약 삭제")
@@ -77,15 +84,19 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
     void findTimesByDateAndTheme() {
         // given
         Theme theme = themeRepository.findById(2L).get();
-        LocalDate date = LocalDate.parse("2024-05-13");
+        LocalDate date = LocalDate.parse("2024-05-30");
 
         // when
         List<ReservationTime> times = reservationRepository.findTimesByDateAndTheme(date, theme);
 
         // then
-        assertThat(times).hasSize(3).extracting("id", "startAt")
-                .contains(tuple(2L, LocalTime.parse("10:00")), tuple(3L, LocalTime.parse("11:00")),
-                        tuple(4L, LocalTime.parse("12:00")));
+        assertThat(times).hasSize(4).extracting("id", "startAt")
+                .contains(
+                        tuple(2L, LocalTime.parse("10:00")),
+                        tuple(3L, LocalTime.parse("11:00")),
+                        tuple(4L, LocalTime.parse("12:00")),
+                        tuple(7L, LocalTime.parse("15:00"))
+                );
     }
 
     @DisplayName("특정 기간 동안 예약이 많은 테마를 입력한 수 만큼 찾는다.")
@@ -128,7 +139,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, null, null, null),
-                        5
+                        4
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(null, 1L, null, null),
@@ -136,10 +147,10 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(null, null, LocalDate.parse("2024-05-09"), null),
-                        8
+                        9
                 ),Arguments.of(
                         new ReservationConditionRequest(null, null, null, LocalDate.parse("2024-05-09")),
-                        12
+                        11
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, 1L, null, null),
@@ -147,7 +158,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(2L, null, LocalDate.parse("2024-05-09"), null),
-                        5
+                        6
                 ),
                 Arguments.of(
                         new ReservationConditionRequest(1L, 1L, LocalDate.parse("2024-05-09"), LocalDate.parse("2024-05-30")),
@@ -156,6 +167,19 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         );
     }
 
+    @DisplayName("예약 대기 내역을 순위와 함께 찾는다.")
+    @Test
+    void findWaitingReservations() {
+        // given
+        Member member = memberRepository.findById(1L).get();
+        // when
+        List<WaitingWithRank> waitingReservations = waitingRepository.findByMemberAndDateGreaterThanEqualWithRank(member,
+                LocalDate.parse("2024-05-30"));
 
+        // then
+        assertThat(waitingReservations).hasSize(2)
+                .extracting("rank")
+                .containsExactly(2L, 1L);
+    }
 }
 

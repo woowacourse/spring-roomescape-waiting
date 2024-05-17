@@ -2,8 +2,15 @@ package roomescape.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Stream;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.dto.WaitingWithRank;
 
 public record UserReservationResponse(
         long id,
@@ -13,13 +20,42 @@ public record UserReservationResponse(
         LocalTime time,
         String status
 ) {
-        public static UserReservationResponse from(Reservation reservation) {
+
+        public static Stream<UserReservationResponse> reservationsToResponseStream(List<Reservation> reservation) {
+                return reservation.stream()
+                        .map(UserReservationResponse::createByReservation);
+        }
+
+        private static UserReservationResponse createByReservation(Reservation reservation) {
+                ReservationSlot slot = reservation.getSlot();
                 return new UserReservationResponse(
                         reservation.getId(),
-                        reservation.getTheme().getName(),
-                        reservation.getDate(),
-                        reservation.getTime().getStartAt(),
-                        reservation.getStatus().getValue()
+                        slot.getTheme().getName(),
+                        slot.getDate(),
+                        slot.getTime().getStartAt(),
+                        ReservationStatus.BOOKED.getValue()
                 );
+        }
+
+        public static Stream<UserReservationResponse> waitingsToResponseStream(List<WaitingWithRank> waitingWithRanks) {
+                return waitingWithRanks.stream()
+                        .map(UserReservationResponse::createByWaiting);
+        }
+
+        private static UserReservationResponse createByWaiting(WaitingWithRank waitingWithRank) {
+                Waiting waiting = waitingWithRank.waiting();
+                ReservationSlot slot = waiting.getReservation().getSlot();
+
+                return new UserReservationResponse(
+                        waiting.getId(),
+                        slot.getTheme().getName(),
+                        slot.getDate(),
+                        slot.getTime().getStartAt(),
+                        waitingWithRank.rank() + "번째 " +ReservationStatus.WAIT.getValue()
+                );
+        }
+
+        public LocalDateTime dateTime() {
+                return LocalDateTime.of(date, time);
         }
 }

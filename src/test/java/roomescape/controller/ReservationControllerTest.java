@@ -133,7 +133,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     userReservationSize = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().get("/reservations-mine")
+                            .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200).extract()
                             .response().jsonPath().getList("$").size();
@@ -156,7 +156,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     UserReservationResponse userReservationResponse = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().get("/reservations-mine")
+                            .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200)
                             .body("size()", is(userReservationSize + 1))
@@ -198,15 +198,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .then().log().all()
                             .statusCode(400);
                 }),
-                dynamicTest("유저는 이미 예약되면 삭제할 수 없다.", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", USER_TOKEN)
-                            .when().delete("/reservations/" + userReservationId)
-                            .then().log().all()
-                            .statusCode(400);
-                }),
-                dynamicTest("어드민만 예약을 삭제할 수 있다.", () -> {
+                dynamicTest("어드민은 예약을 삭제할 수 있다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
@@ -225,7 +217,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     userReservationSize = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().get("/reservations-mine")
+                            .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200).extract()
                             .response().jsonPath().getList("$").size();
@@ -248,7 +240,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     UserReservationResponse userReservationResponse = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().get("/reservations-mine")
+                            .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200)
                             .body("size()", is(userReservationSize + 1))
@@ -287,24 +279,24 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .body(params)
                             .when().post("/reservations")
                             .then().log().all()
-                            .statusCode(201).extract().header("location").split("/")[2];
+                            .statusCode(201).extract().header("location").split("/")[3];
                 }),
                 dynamicTest("예약이 있으면 예약 대기 상태로 간다.", () -> {
                     UserReservationResponse userReservationResponse = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().get("/reservations-mine")
+                            .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200)
                             .extract().as(UserReservationResponse[].class)[0];
 
-                    assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue());
+                    assertThat(userReservationResponse.status()).isEqualTo("1번째 " + ReservationStatus.WAIT.getValue());
                 }),
                 dynamicTest("자신의 예약 대기를 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/reservations/" + adminReservationId)
+                            .when().delete("/reservations/waiting/" + adminReservationId)
                             .then().log().all()
                             .statusCode(204);
                 }),

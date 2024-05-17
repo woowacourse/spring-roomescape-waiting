@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
@@ -18,7 +19,6 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Role;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
@@ -67,7 +67,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         );
     }
 
-    @DisplayName("예약 대기 저장")
+    @DisplayName("예약 대기를 하면 몇 번째 대기인지 알 수 있다.")
     @Test
     void saveWaitReservation() {
         // given
@@ -96,7 +96,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
                 () -> assertThat(reservationResponse2.theme().name()).isEqualTo(theme.getName()),
                 () -> assertThat(reservationResponse2.theme().description()).isEqualTo(theme.getDescription()),
                 () -> assertThat(reservationResponse2.theme().thumbnail()).isEqualTo(theme.getThumbnail()),
-                () -> assertThat(reservationResponse2.status()).isEqualTo(ReservationStatus.WAIT.getValue())
+                () -> assertThat(reservationResponse2.status()).isEqualTo(ReservationStatus.WAIT)
         );
     }
 
@@ -114,26 +114,26 @@ class ReservationServiceTest extends IntegrationTestSupport {
 
     @DisplayName("어드민은 예약을 삭제한다.")
     @Test
-    void deleteReservationAdmin() {
+    void deleteByAdminAdminReservationByAdmin() {
         int size = reservationRepository.findAll().size();
-        reservationService.deleteReservation(1L, Role.ADMIN);
+        reservationService.deleteReservation(1L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
     @DisplayName("유저는 예약 대기를 삭제한다.")
     @Test
-    void deleteReservationUser() {
+    void deleteByAdminUser() {
         int size = reservationRepository.findAll().size();
 
-        reservationService.deleteReservation(18L, Role.USER);
+        reservationService.deleteReservation(18L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
     @DisplayName("존재하지 않는 예약 삭제")
     @Test
-    void deleteReservationNotFound() {
+    void deleteByAdminNotFound() {
         assertThatThrownBy(() -> {
-            reservationService.deleteReservation(100L, Role.ADMIN);
+            reservationService.deleteReservation(100L);
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
@@ -150,21 +150,16 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @DisplayName("내 예약을 조회한다.")
     @Test
     void findAllMyReservations() {
-        // given
-        long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L);
-        ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
-
-        // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId);
+        // given // when
+        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(1L, LocalDate.parse("2024-05-30"));
 
         // then
-        assertAll(
-                () -> assertThat(allUserReservation).hasSize(1),
-                () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationResponse.date()),
-                () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
-                () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
-                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.BOOKED.getValue())
-        );
+        assertThat(allUserReservation).hasSize(3)
+                .extracting("id", "status")
+                .containsExactly(
+                        tuple(14L, "예약"),
+                        tuple(2L, "2번째 예약대기"),
+                        tuple(3L, "1번째 예약대기")
+                );
     }
 }
