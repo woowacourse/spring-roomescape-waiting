@@ -99,6 +99,33 @@ public class ReservationControllerTest {
     }
 
     @Test
+    @DisplayName("본인의 예약 정보를 조회한다.")
+    void findMemberReservation() {
+        // given
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
+        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme1 = themeRepository.save(new Theme("테마명1", "설명", "썸네일URL"));
+        Theme theme2 = themeRepository.save(new Theme("테마명2", "설명", "썸네일URL"));
+        Theme theme3 = themeRepository.save(new Theme("테마명3", "설명", "썸네일URL"));
+
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme3, member));
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", accessTokenCookie)
+                .when().get("/reservations/member")
+                .then().log().all()
+                .statusCode(200)
+                .body("data.reservations.size()", is(3));
+    }
+
+    @Test
     @DisplayName("본인의 예약 정보를 삭제할 수 있다.")
     void canRemoveMyReservation() {
         // given
