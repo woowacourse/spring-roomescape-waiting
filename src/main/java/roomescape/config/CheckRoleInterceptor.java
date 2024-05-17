@@ -41,7 +41,7 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
         Member member = memberService.findValidatedSiteUserById(memberId);
-        if (!member.getRole().isAdmin()) {
+        if (!member.isAdmin()) {
             throw new ForbiddenAccessException();
         }
     }
