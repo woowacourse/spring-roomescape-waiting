@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.global.exception.AuthorizationException;
 
 @Component
 public class CheckUserInterceptor implements HandlerInterceptor {
@@ -17,11 +16,7 @@ public class CheckUserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        try {
-            jwtManager.parseToken(request);
-        } catch (AuthorizationException e) {
-            return false;
-        }
+        jwtManager.parseToken(request);
         return true;
     }
 }

@@ -43,9 +43,6 @@ public class LoginController {
 
     @GetMapping("/check")
     public ResponseEntity<LoginCheckResponse> checkLogin(@AuthenticationPrincipal Member member) {
-        if (member == null || member.getId() == null || member.getId() == -1L) {
-            return ResponseEntity.ok(new LoginCheckResponse("", ""));
-        }
         return ResponseEntity.ok(new LoginCheckResponse(member.getName(), member.getRole()));
     }
 }
