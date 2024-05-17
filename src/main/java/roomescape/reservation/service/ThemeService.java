@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -57,7 +56,7 @@ public class ThemeService {
 
     private List<Long> sortByReservationCountAndLimit(final Map<Long, List<Reservation>> collect) {
         return collect.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getValue().size()))
+                .sorted((left, right) -> Integer.compare(left.getValue().size(), right.getValue().size()))
                 .map(Entry::getKey)
                 .limit(10)
                 .toList();
