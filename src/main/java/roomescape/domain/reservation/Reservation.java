@@ -21,13 +21,13 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
     @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
     protected Reservation() {
