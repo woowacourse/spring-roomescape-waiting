@@ -8,10 +8,11 @@ spring:
     driverClassName: org.h2.Driver
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true
-    ddl-auto: validate
     defer-datasource-initialization: true
 
 logging:
