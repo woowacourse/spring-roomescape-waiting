@@ -9,10 +9,11 @@ import java.util.Objects;
 public class MemberName {
 
     private static final int MAX_NAME_SIZE = 10;
+
     @Column(nullable = false)
     private String name;
 
-    public MemberName() {
+    protected MemberName() {
     }
 
     public MemberName(String name) {

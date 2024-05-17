@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,15 +22,12 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
-
+    @Embedded
     private ReservationDate date;
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private ReservationTime time;
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
@@ -37,7 +35,7 @@ public class Reservation {
     @NotNull
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme,

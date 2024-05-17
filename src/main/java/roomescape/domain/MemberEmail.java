@@ -15,7 +15,7 @@ public class MemberEmail {
     @Column(nullable = false, unique = true)
     private String email;
 
-    public MemberEmail() {
+    protected MemberEmail() {
     }
 
     public MemberEmail(String email) {

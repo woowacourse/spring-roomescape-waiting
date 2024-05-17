@@ -10,7 +10,7 @@ public class MemberPassword {
     @Column(nullable = false)
     private String password;
 
-    public MemberPassword() {
+    protected MemberPassword() {
     }
 
     public MemberPassword(String password) {

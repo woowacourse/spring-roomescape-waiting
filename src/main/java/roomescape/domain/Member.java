@@ -16,22 +16,18 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Embedded
     @NotNull
     private MemberName name;
-
     @Embedded
     private MemberEmail email;
-
     @Embedded
     private MemberPassword password;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(MemberName name, MemberEmail email, MemberPassword password, MemberRole role) {
