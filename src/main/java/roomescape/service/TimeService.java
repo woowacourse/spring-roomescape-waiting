@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -39,30 +37,31 @@ public class TimeService {
     }
 
     public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
-        final List<ReservationTime> times = timeRepository.findAll();
-        final Set<ReservationTime> bookedTimes = reservationRepository
-                .findAllByDateAndThemeId(request.date(), request.themeId())
-                .stream()
-                .map(Reservation::getTime)
-                .collect(Collectors.toSet());
-        return getAvailabilityTimes(request.date(), times, bookedTimes);
-    }
-
-    private List<AvailabilityTimeResponse> getAvailabilityTimes(final LocalDate reservationDate,
-                                                                final List<ReservationTime> times,
-                                                                final Set<ReservationTime> bookedTimes) {
         final LocalDate today = LocalDate.now();
-        final LocalTime currentTime = LocalTime.now();
-        if (reservationDate.isBefore(today)) {
+        if (request.date().isBefore(today)) {
             return List.of();
         }
-        if (reservationDate.isEqual(today)) {
-            return times.stream()
-                    .filter(reservationTime -> currentTime.isBefore(reservationTime.getStartAt()))
-                    .map(time -> AvailabilityTimeResponse.from(time, bookedTimes.contains(time)))
-                    .toList();
+        final Set<ReservationTime> bookedTimes
+                = reservationRepository.findBookedTimes(request.date(), request.themeId());
+        if (request.date().isEqual(today)) {
+            return getAvailabilityTimesToday(bookedTimes);
         }
-        return times.stream()
+        return getAvailabilityTimes(bookedTimes);
+    }
+
+    private List<AvailabilityTimeResponse> getAvailabilityTimes(
+            final Set<ReservationTime> bookedTimes) {
+        return timeRepository.findAll()
+                .stream()
+                .map(time -> AvailabilityTimeResponse.from(time, bookedTimes.contains(time)))
+                .toList();
+    }
+
+    private List<AvailabilityTimeResponse> getAvailabilityTimesToday(
+            final Set<ReservationTime> bookedTimes) {
+        return timeRepository.findAll()
+                .stream()
+                .filter(time -> time.getStartAt().isAfter(LocalTime.now()))
                 .map(time -> AvailabilityTimeResponse.from(time, bookedTimes.contains(time)))
                 .toList();
     }
