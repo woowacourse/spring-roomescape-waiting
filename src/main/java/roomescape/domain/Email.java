@@ -9,7 +9,7 @@ public class Email {
 
     private String value;
 
-    public Email() {
+    protected Email() {
     }
 
     public Email(String value) {
