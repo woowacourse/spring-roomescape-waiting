@@ -5,30 +5,16 @@ import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 
 import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 
 @SpringBootTest
-class JpaMemberRepositoryTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+class JpaMemberRepositoryTest extends DatabaseClearBeforeEachTest {
     @Autowired
     private MemberRepository memberRepository;
-
-    @BeforeEach
-    void init() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-    }
 
     @Test
     @DisplayName("이메일과 암호화된 비밀번호로 회원을 잘 조회하는지 확인")

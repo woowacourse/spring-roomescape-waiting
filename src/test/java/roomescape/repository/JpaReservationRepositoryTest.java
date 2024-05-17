@@ -10,36 +10,23 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-@SpringBootTest
-class JpaReservationRepositoryTest {
+class JpaReservationRepositoryTest extends DatabaseClearBeforeEachTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ThemeRepository themeRepository;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
-    @BeforeEach
-    void init() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-
+    @Override
+    public void doAfterClear() {
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
     }
