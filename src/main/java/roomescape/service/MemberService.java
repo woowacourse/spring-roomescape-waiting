@@ -3,30 +3,25 @@ package roomescape.service;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.controller.dto.TokenResponse;
 import roomescape.controller.member.dto.MemberLoginRequest;
 import roomescape.controller.member.dto.SignupRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.domain.exception.InvalidRequestException;
-import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infrastructure.Encryptor;
 import roomescape.repository.MemberRepository;
 import roomescape.service.exception.DuplicateEmailException;
-import roomescape.service.exception.InvalidTokenException;
 
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final EncryptionService encryptionService;
+    private final Encryptor encryptor;
 
     public MemberService(final MemberRepository memberRepository,
-                         final JwtTokenProvider jwtTokenProvider,
-                         final EncryptionService encryptionService) {
+                         final Encryptor encryptor) {
         this.memberRepository = memberRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.encryptionService = encryptionService;
+        this.encryptor = encryptor;
     }
 
     public Member save(final SignupRequest request) {
@@ -34,45 +29,30 @@ public class MemberService {
         if (findMember.isPresent()) {
             throw new DuplicateEmailException("해당 email로 사용자가 존재합니다.");
         }
-        final String encryptedPassword = encryptionService.encryptPassword(request.password());
-        final Member member = new Member(null, request.name(), request.email(), encryptedPassword,
-                Role.USER);
+        final String encryptedPassword = encryptor.encryptPassword(request.password());
+        final Member member = new Member(null, request.name(),
+                request.email(), encryptedPassword, Role.USER);
         return memberRepository.save(member);
     }
 
     public boolean invalidPassword(final String email, final String rawPassword) {
         final Member findMember = memberRepository.fetchByEmail(email);
-        final String encryptedPassword = encryptionService.encryptPassword(rawPassword);
+        final String encryptedPassword = encryptor.encryptPassword(rawPassword);
         return !encryptedPassword.equals(findMember.getPassword());
     }
 
-    public TokenResponse createToken(final MemberLoginRequest request) {
+    public Member find(final MemberLoginRequest request) {
         if (invalidPassword(request.email(), request.password())) {
             throw new InvalidRequestException("Invalid email or password");
         }
-        final Member member = memberRepository.fetchByEmail(request.email());
-
-        final String accessToken = jwtTokenProvider.generateToken(String.valueOf(member.getId()));
-        return new TokenResponse(accessToken);
-    }
-
-    public Member findMemberByToken(final String token) {
-        validateToken(token);
-        String payload = jwtTokenProvider.getPayload(token);
-        return findMember(payload);
-    }
-
-    public void validateToken(final String token) {
-        if (!jwtTokenProvider.validateToken(token)) {
-            throw new InvalidTokenException("유효하지 않은 토큰입니다.");
-        }
+        return memberRepository.fetchByEmail(request.email());
     }
 
     public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
-    private Member findMember(final String principal) {
-        return memberRepository.fetchById(Long.parseLong(principal));
+    public Member findMemberById(Long id) {
+        return memberRepository.fetchById(id);
     }
 }

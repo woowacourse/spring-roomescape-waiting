@@ -1,15 +1,14 @@
-package roomescape.service;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import roomescape.service.exception.AlgorithmNotFoundException;
+package roomescape.infrastructure;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import roomescape.service.exception.AlgorithmNotFoundException;
 
-@Service
-public class EncryptionService {
+@Component
+public class Encryptor {
 
     @Value("${security.password.salt}")
     private String salt;

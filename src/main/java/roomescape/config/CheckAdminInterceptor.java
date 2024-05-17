@@ -1,22 +1,29 @@
 package roomescape.config;
 
-import static roomescape.config.CheckMemberInterceptor.LOGIN_MEMBER;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.controller.exception.AuthorizationException;
-import roomescape.controller.member.dto.LoginMember;
+import roomescape.domain.Role;
+import roomescape.infrastructure.TokenExtractor;
+import roomescape.service.AuthService;
 
 public class CheckAdminInterceptor implements HandlerInterceptor {
+
+    private final AuthService authService;
+
+    public CheckAdminInterceptor(final AuthService authService) {
+        this.authService = authService;
+    }
 
     @Override
     public boolean preHandle(final HttpServletRequest request,
                              final HttpServletResponse response, final Object handler) {
-        final LoginMember loginMember = (LoginMember) request.getAttribute(LOGIN_MEMBER);
-        if (!loginMember.isAdmin()) {
-            throw new AuthorizationException("어드민만 접근할 수 있습니다.");
+        final String token = TokenExtractor.fromRequest(request);
+        final Role role = authService.findMemberRoleByToken(token);
+        if (role.isAdmin()) {
+            return true;
         }
-        return true;
+        throw new AuthorizationException("어드민만 접근할 수 있습니다.");
     }
 }

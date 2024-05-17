@@ -1,7 +1,5 @@
 package roomescape.config;
 
-import static roomescape.config.CheckMemberInterceptor.LOGIN_MEMBER;
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -9,8 +7,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.controller.member.dto.LoginMember;
+import roomescape.infrastructure.TokenExtractor;
+import roomescape.service.AuthService;
 
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+
+    private final AuthService authService;
+
+    public LoginMemberArgumentResolver(final AuthService authService) {
+        this.authService = authService;
+    }
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
@@ -23,6 +29,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                        final NativeWebRequest webRequest,
                                        final WebDataBinderFactory binderFactory) {
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        return (LoginMember) request.getAttribute(LOGIN_MEMBER);
+        final String token = TokenExtractor.fromRequest(request);
+        return new LoginMember(authService.findMemberIdByToken(token));
     }
 }

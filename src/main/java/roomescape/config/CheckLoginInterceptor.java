@@ -1,50 +1,37 @@
 package roomescape.config;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.service.MemberService;
+import roomescape.infrastructure.TokenExtractor;
+import roomescape.service.AuthService;
 import roomescape.service.exception.InvalidTokenException;
 import roomescape.service.exception.MemberNotFoundException;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
-    private final MemberService memberService;
+    private final AuthService authService;
 
-    public CheckLoginInterceptor(final MemberService memberService) {
-        this.memberService = memberService;
+    public CheckLoginInterceptor(final AuthService authService) {
+        this.authService = authService;
     }
 
     @Override
     public boolean preHandle(final HttpServletRequest request,
-                             final HttpServletResponse response, final Object handler) throws IOException {
-        final Cookie[] cookies = request.getCookies();
-        final String token = extractTokenFromCookie(cookies);
+                             final HttpServletResponse response, final Object handler)
+            throws IOException {
+        final String token = TokenExtractor.fromRequest(request);
         if (token == null) {
             response.sendRedirect("/login");
             return false;
         }
         try {
-            memberService.validateToken(token);
+            authService.validateToken(token);
         } catch (final InvalidTokenException | MemberNotFoundException e) {
             response.sendRedirect("/login");
             return false;
         }
         return true;
-    }
-
-    private String extractTokenFromCookie(final Cookie[] cookies) {
-        if (cookies == null) {
-            return null;
-        }
-        return Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals("token"))
-                .map(Cookie::getValue)
-                .findAny()
-                .orElse(null);
     }
 }

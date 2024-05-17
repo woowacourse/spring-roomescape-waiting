@@ -9,26 +9,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.TokenResponse;
 import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.member.dto.MemberLoginRequest;
+import roomescape.domain.Member;
+import roomescape.service.AuthService;
 import roomescape.service.MemberService;
-import roomescape.controller.dto.TokenResponse;
 
 @RestController
 @RequestMapping("/login")
 public class AuthController {
 
     private final MemberService memberService;
+    private final AuthService authService;
 
-    public AuthController(final MemberService memberService) {
+    public AuthController(final MemberService memberService, AuthService authService) {
         this.memberService = memberService;
+        this.authService = authService;
     }
 
     @PostMapping
-    public ResponseEntity<TokenResponse> login(@RequestBody @Valid final MemberLoginRequest memberLoginRequest,
-                                               final HttpServletResponse response) {
-        final TokenResponse token = memberService.createToken(memberLoginRequest);
+    public ResponseEntity<TokenResponse> login(
+            @RequestBody @Valid final MemberLoginRequest memberLoginRequest,
+            final HttpServletResponse response) {
+        final Member member = memberService.find(memberLoginRequest);
+        final TokenResponse token = authService.createToken(member);
 
         final Cookie cookie = new Cookie("token", token.assessToken());
         cookie.setHttpOnly(true);
@@ -36,13 +42,15 @@ public class AuthController {
         cookie.setMaxAge(3600000);
         response.addCookie(cookie);
         response.setHeader("Keep-Alive", "timeout=60");
-        return ResponseEntity.ok().body(token);
+        return ResponseEntity.ok()
+                .build();
     }
 
     @GetMapping("/check")
     public ResponseEntity<CookieMemberResponse> check(@Valid final LoginMember loginMember) {
         if (loginMember != null) {
-            return ResponseEntity.ok(new CookieMemberResponse(loginMember.name()));
+            final Member member = memberService.findMemberById(loginMember.id());
+            return ResponseEntity.ok(new CookieMemberResponse(member.getName()));
         }
         return ResponseEntity.ok()
                 .build();

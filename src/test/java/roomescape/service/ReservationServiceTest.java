@@ -1,5 +1,11 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +18,6 @@ import roomescape.domain.Reservation;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 class ReservationServiceTest {
@@ -30,7 +29,8 @@ class ReservationServiceTest {
     @DisplayName("from, to 날짜가 역순이면 예외가 발생한다.")
     void searchReservationsByReversedFromToThrowsException() {
         LocalDate now = LocalDate.now();
-        ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L, now, now.minusDays(1));
+        ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L, now,
+                now.minusDays(1));
         assertThatThrownBy(() -> reservationService.searchReservations(condition))
                 .isInstanceOf(InvalidSearchDateException.class);
     }
@@ -39,7 +39,8 @@ class ReservationServiceTest {
     @DisplayName("중복된 예약을 시도하면 예외가 발생한다.")
     void addDuplicatedReservationThrowsException() {
         final LocalDate now = LocalDate.now();
-        CreateReservationRequest request = new CreateReservationRequest(1L, 2L, now.plusDays(1), 3L);
+        CreateReservationRequest request = new CreateReservationRequest(1L, 2L, now.plusDays(1),
+                3L);
 
         reservationService.addReservation(request);
 
@@ -57,8 +58,9 @@ class ReservationServiceTest {
     @Test
     @DisplayName("자신의 예약 목록을 조회한다.")
     void getReservationsByMember() {
-        final LoginMember member = new LoginMember(3L, "제제", "USER");
-        final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(member);
+        final LoginMember member = new LoginMember(3L);
+        final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(
+                member);
 
         final List<Reservation> expected = List.of(
                 new Reservation(5L, null, null, null, null),
