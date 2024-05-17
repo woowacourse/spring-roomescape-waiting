@@ -30,6 +30,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
             .addPathPatterns("/admin/**");
 
         registry.addInterceptor(checkUserInterceptor)
+            .addPathPatterns("/reservation")
             .addPathPatterns("/reservations")
             .addPathPatterns("/reservations-mine")
             .addPathPatterns("/login/check");
