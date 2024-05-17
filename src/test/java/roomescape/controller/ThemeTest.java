@@ -37,7 +37,7 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(15));
     }
 
     @DisplayName("theme 등록 및 삭제 요청이 올바르게 동작한다.")
@@ -60,10 +60,10 @@ class ThemeTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(16));
 
         RestAssured.given().log().all()
-                .when().delete("/themes/4")
+                .when().delete("/themes/{id}", 15)
                 .then().log().all()
                 .statusCode(204);
     }

@@ -52,7 +52,7 @@ class AdminReservationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(7));
+                .body("size()", is(22));
     }
 
     @DisplayName("reservation 페이지에 새로운 예약 정보를 추가, 조회, 삭제할 수 있다.")
@@ -74,7 +74,7 @@ class AdminReservationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(8));
+                .body("size()", is(23));
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -168,7 +168,7 @@ class AdminReservationTest {
     void findAllByMemberAndThemeAndPeriod() {
         LocalDate from = LocalDate.now().minusDays(3);
         LocalDate to = LocalDate.now();
-        String uriPath = "/admin/reservations?memberId=1&themeId=2&dateFrom=" + from + "&dateTo=" + to;
+        String uriPath = "/admin/reservations?memberId=1&themeId=5&dateFrom=" + from + "&dateTo=" + to;
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -176,6 +176,6 @@ class AdminReservationTest {
                 .when().get(uriPath)
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(5));
     }
 }

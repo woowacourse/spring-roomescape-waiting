@@ -65,7 +65,7 @@ class ReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(7));
+                .body("size()", is(22));
     }
 
     /* 예약 현황
@@ -80,7 +80,7 @@ class ReservationControllerTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(12));
     }
 
     @DisplayName("예약 삭제에 성공하면 204 No-Content를 반환한다.")
