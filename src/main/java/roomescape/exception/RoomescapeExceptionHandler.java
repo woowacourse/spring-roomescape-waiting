@@ -33,7 +33,7 @@ public class RoomescapeExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(Exception e) {
         logger.error(e.getMessage(), e);
         return ResponseEntity
-                .status(500)
+                .internalServerError()
                 .body(new ErrorResponse("서버에 오류가 발생했습니다."));
     }
 }
