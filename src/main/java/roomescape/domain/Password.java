@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import roomescape.exception.NonEncryptedPassword;
 
 @Embeddable
 public class Password {
@@ -23,11 +24,11 @@ public class Password {
     private void validate(String encryptedPassword) {
         String errorMessage = "암호화된 비밀번호로 생성하세요!";
         if (encryptedPassword == null) {
-            throw new IllegalArgumentException(errorMessage);
+            throw new NonEncryptedPassword(errorMessage);
         }
         Matcher matcher = SHA_256_PATTERN.matcher(encryptedPassword);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException(errorMessage);
+            throw new NonEncryptedPassword(errorMessage);
         }
     }
 
