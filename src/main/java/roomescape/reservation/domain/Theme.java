@@ -32,7 +32,8 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme() {
+    protected Theme() {
+
     }
 
     private void validateDescription(final String description) {

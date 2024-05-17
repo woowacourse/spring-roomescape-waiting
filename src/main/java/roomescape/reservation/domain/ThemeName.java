@@ -13,7 +13,8 @@ public class ThemeName {
         this.value = value;
     }
 
-    public ThemeName() {
+    protected ThemeName() {
+        
     }
 
     private void validateName(final String value) {

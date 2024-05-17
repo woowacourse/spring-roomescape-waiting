@@ -20,7 +20,8 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime() {
+    protected ReservationTime() {
+
     }
 
     private void validateStartAt(final LocalTime startAt) {

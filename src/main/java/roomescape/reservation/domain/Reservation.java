@@ -51,7 +51,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation() {
+    protected Reservation() {
+
     }
 
     private void validateDate(final LocalDate date) {

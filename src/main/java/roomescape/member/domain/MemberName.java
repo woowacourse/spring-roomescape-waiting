@@ -13,7 +13,8 @@ public class MemberName {
         this.value = name;
     }
 
-    public MemberName() {
+    protected MemberName() {
+
     }
 
     private void validateName(final String name) {

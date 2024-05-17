@@ -14,7 +14,8 @@ public class Password {
         this.value = value;
     }
 
-    public Password() {
+    protected Password() {
+
     }
 
     private void validatePassword(final String value) {

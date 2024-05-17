@@ -18,7 +18,7 @@ public class Email {
         this.value = value;
     }
 
-    public Email() {
+    protected Email() {
 
     }
 

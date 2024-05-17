@@ -16,15 +16,19 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
     private MemberName memberName;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
     private Email email;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "member_role")
     private Role role;
@@ -40,7 +44,8 @@ public class Member {
         this.role = role;
     }
 
-    public Member() {
+    protected Member() {
+
     }
 
     public static Member of(final String name, final String email, final String password, final String role) {
