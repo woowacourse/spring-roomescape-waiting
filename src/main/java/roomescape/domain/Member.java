@@ -6,9 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,16 +14,21 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String email;
-    private String password;
+    private final Long id;
+    private final String name;
+    private final String email;
+    private final String password;
     @Enumerated(value = EnumType.STRING)
-    private Role role;
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations;
+    private final Role role;
+//    @OneToMany(mappedBy = "member") //TODO 왜 필요한지 고민하기
+//    private final List<Reservation> reservations;
 
     protected Member() {
+        this.id = null;
+        this.name = null;
+        this.email = null;
+        this.password = null;
+        this.role = null;
     }
 
     public Member(final Long id, final String name, final String email, final String password, final Role role) {

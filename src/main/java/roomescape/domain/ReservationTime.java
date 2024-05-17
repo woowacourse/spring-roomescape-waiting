@@ -13,10 +13,12 @@ public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private LocalTime startAt;
+    private final Long id;
+    private final LocalTime startAt;
 
     protected ReservationTime() {
+        this.id = null;
+        this.startAt = null;
     }
 
     public ReservationTime(final Long id, final LocalTime startAt) {

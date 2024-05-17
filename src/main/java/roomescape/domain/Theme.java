@@ -15,12 +15,16 @@ public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String description;
-    private String thumbnail;
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String thumbnail;
 
     protected Theme() {
+        this.id = null;
+        this.name = null;
+        this.description = null;
+        this.thumbnail = null;
     }
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {

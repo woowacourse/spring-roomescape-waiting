@@ -14,16 +14,21 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final Long id;
     @ManyToOne
-    private Member member;
-    private LocalDate date;
+    private final Member member;
+    private final LocalDate date;
     @ManyToOne
-    private ReservationTime time;
+    private final ReservationTime time;
     @ManyToOne
-    private Theme theme;
+    private final Theme theme;
 
     protected Reservation() {
+        this.id = null;
+        this.member = null;
+        this.date = null;
+        this.time = null;
+        this.theme = null;
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date,
