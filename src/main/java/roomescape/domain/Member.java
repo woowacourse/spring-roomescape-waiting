@@ -1,11 +1,13 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
 import java.util.Objects;
 
 @Entity
@@ -15,16 +17,16 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String email;
+    @Embedded
+    private Email email;
     private String password;
-
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
         this.name = name;
-        this.email = email;
+        this.email = new Email(email);
         this.password = password;
         this.role = role;
     }
@@ -34,7 +36,6 @@ public class Member {
     }
 
     public Member() {
-
     }
 
     public Long getId() {
@@ -46,7 +47,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email;
+        return email.getEmail();
     }
 
     public String getPassword() {
@@ -58,17 +59,11 @@ public class Member {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name)
-                && Objects.equals(email, member.email) && Objects.equals(password, member.password)
-                && role == member.role;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Member member = (Member) object;
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && role == member.role;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package roomescape.service.auth;
 
 import org.springframework.stereotype.Service;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.exception.AuthenticationException;
 import roomescape.repository.MemberRepository;
@@ -24,7 +25,7 @@ public class AuthService {
     }
 
     public String login(LoginRequest request) {
-        Member member = memberRepository.findByEmailAndPassword(request.email(), request.password())
+        Member member = memberRepository.findByEmailAndPassword(new Email(request.email()), request.password())
                 .orElseThrow(() -> new AuthenticationException("잘못된 로그인 정보입니다."));
 
         return tokenProvider.generateAccessToken(member.getId());

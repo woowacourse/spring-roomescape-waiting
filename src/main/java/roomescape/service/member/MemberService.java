@@ -1,6 +1,7 @@
 package roomescape.service.member;
 
 import org.springframework.stereotype.Service;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.SignupRequest;
@@ -21,7 +22,7 @@ public class MemberService {
     }
 
     public Member signUp(SignupRequest request) {
-        if (memberRepository.existsByEmail(request.email())) {
+        if (memberRepository.existsByEmail(new Email(request.email()))) {
             throw new IllegalArgumentException("사용할 수 없는 이메일 입니다.");
         }
         return memberRepository.save(request.toEntity(request));
