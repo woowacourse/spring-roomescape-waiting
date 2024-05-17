@@ -1,6 +1,8 @@
 package roomescape.controller.theme;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +17,6 @@ import roomescape.controller.theme.dto.CreateThemeRequest;
 import roomescape.controller.theme.dto.PopularThemeRequest;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.service.ThemeService;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/themes")
@@ -38,10 +37,10 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> addTheme(
             @RequestBody @Valid final CreateThemeRequest createThemeRequest) {
         final ThemeResponse theme = themeService.addTheme(createThemeRequest);
+
         final URI uri = UriComponentsBuilder.fromPath("/themes/{id}")
                 .buildAndExpand(theme.id())
                 .toUri();
-
         return ResponseEntity.created(uri)
                 .body(theme);
     }
@@ -54,8 +53,10 @@ public class ThemeController {
     }
 
     @GetMapping(value = "/popular", params = {"from", "until", "limit"})
-    public List<PopularThemeResponse> getPopularThemes(@Valid final PopularThemeRequest popularThemeRequest) {
-        return themeService.getPopularThemes(popularThemeRequest.from(), popularThemeRequest.until(),
+    public List<PopularThemeResponse> getPopularThemes(
+            @Valid final PopularThemeRequest popularThemeRequest) {
+        return themeService.getPopularThemes(popularThemeRequest.from(),
+                popularThemeRequest.until(),
                 popularThemeRequest.limit());
     }
 }

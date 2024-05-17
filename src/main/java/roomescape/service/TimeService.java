@@ -22,11 +22,14 @@ public class TimeService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
     public TimeService(final ReservationRepository reservationRepository,
-                       final ReservationTimeRepository timeRepository) {
+                       final ReservationTimeRepository timeRepository,
+                       ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
     public List<ReadTimeResponse> getTimes() {
@@ -66,8 +69,7 @@ public class TimeService {
 
     public AvailabilityTimeResponse addTime(final CreateTimeRequest createTimeRequest) {
         final ReservationTime time = createTimeRequest.toDomain();
-        final List<ReservationTime> times = timeRepository.findAll();
-        validateDuplicate(times, time);
+        validateDuplicate(time);
 
         final ReservationTime savedTime = timeRepository.save(time);
         return AvailabilityTimeResponse.from(savedTime, false);
@@ -81,10 +83,8 @@ public class TimeService {
         timeRepository.deleteById(findTime.getId());
     }
 
-    private void validateDuplicate(final List<ReservationTime> times,
-                                   final ReservationTime parsedTime) {
-        final boolean hasSameTime = times.stream()
-                .anyMatch(time -> time.isSameTime(parsedTime));
+    private void validateDuplicate(final ReservationTime time) {
+        final boolean hasSameTime = reservationTimeRepository.existsByStartAt(time.getStartAt());
         if (hasSameTime) {
             throw new DuplicateTimeException("중복된 시간은 생성이 불가합니다.");
         }

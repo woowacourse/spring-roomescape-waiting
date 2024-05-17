@@ -50,15 +50,13 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody @Valid final UserCreateReservationRequest request,
             @Valid final LoginMember loginMember) {
-
         final CreateReservationRequest create = new CreateReservationRequest(loginMember.id(),
                 request.themeId(), request.date(), request.timeId());
-
         final Reservation reservation = reservationService.addReservation(create);
+
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.getId())
                 .toUri();
-
         return ResponseEntity.created(uri)
                 .body(ReservationResponse.from(reservation));
     }
