@@ -8,9 +8,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.global.exception.ViolationException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.MIA_EMAIL;
-import static roomescape.TestFixture.TEST_PASSWORD;
-import static roomescape.member.domain.Role.USER;
 
 class NameTest {
 
@@ -20,7 +17,7 @@ class NameTest {
     @DisplayName("사용자 이름은 10자 이하이다.")
     void validateLength(String invalidName) {
         // when & then
-        assertThatThrownBy(() -> new Member(MIA_EMAIL, invalidName, TEST_PASSWORD, USER))
+        assertThatThrownBy(() -> new Name(invalidName))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -31,7 +28,7 @@ class NameTest {
         String invalidName = "123456";
 
         // when & then
-        assertThatThrownBy(() -> new Member(MIA_EMAIL, invalidName, TEST_PASSWORD, USER))
+        assertThatThrownBy(() -> new Name(invalidName))
                 .isInstanceOf(ViolationException.class);
 
     }

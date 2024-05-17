@@ -8,9 +8,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.global.exception.ViolationException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.MIA_NAME;
-import static roomescape.TestFixture.TEST_PASSWORD;
-import static roomescape.member.domain.Role.USER;
 
 class EmailTest {
 
@@ -20,7 +17,7 @@ class EmailTest {
     @DisplayName("사용자 email의 형식은 [계정]@[도메인].[최상위도메인]이다.")
     void validatePattern(String invalidEmail) {
         // when & then
-        assertThatThrownBy(() -> new Member(MIA_NAME, invalidEmail, TEST_PASSWORD, USER))
+        assertThatThrownBy(() -> new Email(invalidEmail))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -30,7 +27,7 @@ class EmailTest {
     @DisplayName("사용자 email은 비어있을 수 없다.")
     void validateBlank(String invalidEmail) {
         // when & then
-        assertThatThrownBy(() -> new Member(MIA_NAME, invalidEmail, TEST_PASSWORD, USER))
+        assertThatThrownBy(() -> new Email(invalidEmail))
                 .isInstanceOf(ViolationException.class);
     }
 }
