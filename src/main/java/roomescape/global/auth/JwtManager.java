@@ -36,7 +36,7 @@ public class JwtManager {
     public Long parseToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            throw new AuthorizationException("쿠키가 비어 있습니다.");
+            throw new AuthorizationException("로그인 후 이용하세요.");
         }
         return parse(extractToken(cookies));
     }
