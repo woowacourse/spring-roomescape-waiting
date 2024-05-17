@@ -1,7 +1,9 @@
 package roomescape.service;
 
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -39,15 +41,34 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
-        Specification<Reservation> specification = reservationRepository.getSearchSpecification(
-                request.getEmail(),
-                request.getThemeId(),
-                request.getDateFrom(),
-                request.getDateTo());
+        Specification<Reservation> specification = getSearchSpecification(request);
 
         return reservationRepository.findAll(specification)
                 .stream().map(ReservationResponse::new)
                 .toList();
+    }
+
+    private Specification<Reservation> getSearchSpecification(ReservationSearchParams request) {
+        return ((root, query, builder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            root.fetch("member");
+            root.fetch("theme");
+            root.fetch("time");
+
+            if (request.getEmail() != null) {
+                predicates.add(builder.equal(root.get("member").get("email"), request.getEmail()));
+            }
+            if (request.getThemeId() != null) {
+                predicates.add(builder.equal(root.get("theme").get("id"), request.getThemeId()));
+            }
+            if (request.getDateFrom() != null) {
+                predicates.add(builder.greaterThanOrEqualTo(root.get("date"), request.getDateFrom()));
+            }
+            if (request.getDateTo() != null) {
+                predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getDateTo()));
+            }
+            return builder.and(predicates.toArray(new Predicate[0]));
+        });
     }
 
     public List<ReservationResponse> findReservationsByMemberEmail(String email) {
