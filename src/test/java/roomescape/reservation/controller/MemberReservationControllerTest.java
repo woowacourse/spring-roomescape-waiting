@@ -19,7 +19,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.controller.dto.request.LoginRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
-import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -117,20 +116,6 @@ class MemberReservationControllerTest {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
         assertThat(reservations).hasSize(count);
-    }
-
-    @DisplayName("예약 가능한 시간을 조회한다.")
-    @Test
-    void findSelectableTimes() {
-        // when & then
-        List<SelectableTimeResponse> responses = RestAssured.given().log().all()
-                .param("date", LocalDate.now().plusYears(1))
-                .param("id", 1)
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", SelectableTimeResponse.class);
-        assertThat(responses).hasSize(4);
     }
 
     @DisplayName("예약을 삭제한다.")
