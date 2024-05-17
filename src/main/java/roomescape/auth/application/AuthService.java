@@ -3,8 +3,8 @@ package roomescape.auth.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AuthorizationException;
-import roomescape.member.domain.Member;
 import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
 @Service

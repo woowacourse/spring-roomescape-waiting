@@ -18,9 +18,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import roomescape.auth.exception.AuthorizationException;
+import roomescape.global.dto.ErrorResponse;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
-import roomescape.global.dto.ErrorResponse;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
