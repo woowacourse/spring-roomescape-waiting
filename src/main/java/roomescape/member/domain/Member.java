@@ -3,24 +3,18 @@ package roomescape.member.domain;
 import jakarta.persistence.*;
 import roomescape.global.exception.ViolationException;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @Entity
 public class Member {
-    private static final Pattern NAME_PATTERN = Pattern.compile("^\\d+$");
-    private static final int NAME_MAXIMUM_LENGTH = 10;
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @Embedded
+    private Name name;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Embedded
+    private Email email;
 
     @Column(nullable = false)
     private String password;
@@ -41,37 +35,16 @@ public class Member {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
-        validateName(name);
-        validateEmail(email);
+        this(id, new Name(name), new Email(email), password, role);
+    }
+
+    public Member(Long id, Name name, Email email, String password, Role role) {
         validatePassword(password);
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new ViolationException("사용 이름은 비어있을 수 없습니다.");
-        }
-        Matcher matcher = NAME_PATTERN.matcher(name);
-        if (matcher.matches()) {
-            throw new ViolationException("사용 이름은 숫자로만 구성될 수 없습니다.");
-        }
-        if (name.length() > NAME_MAXIMUM_LENGTH) {
-            throw new ViolationException("사용자 이름은 10자 이하입니다.");
-        }
-    }
-
-    private void validateEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new ViolationException("이메일은 비어있을 수 없습니다.");
-        }
-        Matcher matcher = EMAIL_PATTERN.matcher(email);
-        if (!matcher.matches()) {
-            throw new ViolationException("이메일 형식에 맞지 않습니다.");
-        }
     }
 
     private void validatePassword(String password) {
@@ -93,10 +66,10 @@ public class Member {
     }
 
     public String getName() {
-        return name;
+        return name.getValue();
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 

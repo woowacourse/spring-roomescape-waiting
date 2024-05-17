@@ -35,7 +35,7 @@ class MemberRepositoryTest extends RepositoryTest {
         memberRepository.save(USER_MIA());
 
         // when
-        Optional<Member> foundMember = memberRepository.findByEmail(MIA_EMAIL);
+        Optional<Member> foundMember = memberRepository.findByEmail(new Email(MIA_EMAIL));
 
         // then
         assertThat(foundMember).isNotEmpty();

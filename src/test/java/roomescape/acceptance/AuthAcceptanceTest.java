@@ -22,7 +22,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     void login() {
         // given
         Member member = createTestMember();
-        LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
+        LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
 
         // when
         ExtractableResponse<Response> response = RestAssured.given().log().all()

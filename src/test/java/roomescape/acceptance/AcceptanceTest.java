@@ -99,7 +99,7 @@ public abstract class AcceptanceTest {
     }
 
     protected String createTestToken(Member member) {
-        LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
+        LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)

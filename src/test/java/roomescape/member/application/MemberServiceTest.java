@@ -47,7 +47,7 @@ class MemberServiceTest extends ServiceTest {
     void createWithDuplicatedEmail() {
         // given
         Member mia = memberService.create(USER_MIA());
-        Member duplicatedEmailMember = new Member(TOMMY_NAME, mia.getEmail(), TEST_PASSWORD, USER);
+        Member duplicatedEmailMember = new Member(TOMMY_NAME, mia.getEmail().getValue(), TEST_PASSWORD, USER);
 
         // when & then
         assertThatThrownBy(() -> memberService.create(duplicatedEmailMember))
