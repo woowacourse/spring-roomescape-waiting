@@ -186,8 +186,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservationWaitingById(Long reservationId, Long memberId) {
         Reservation reservation = reservationRepository
-                .findByIdAndStatus(reservationId, ReservationStatus.WAITING)
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 대기가 존재하지 않습니다."));
+                .getByIdAndStatus(reservationId, ReservationStatus.WAITING);
 
         if (!reservation.getMember().getId().equals(memberId)) {
             throw new UnauthorizedException("자신의 예약 대기만 취소할 수 있습니다.");
@@ -224,7 +223,6 @@ public class ReservationService {
                 reservation.getTheme().getId(),
                 ReservationStatus.RESERVED
         );
-        System.out.println("reservationExists: " + reservationExists);
 
         if (reservationExists) {
             throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
@@ -234,6 +232,7 @@ public class ReservationService {
     @Transactional
     public void rejectReservationWaiting(Long id) {
         Reservation reservation = reservationRepository.getReferenceById(id);
+
         validateReservationNotWaiting(reservation);
 
         reservationRepository.deleteById(id);

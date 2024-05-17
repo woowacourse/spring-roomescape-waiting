@@ -23,6 +23,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
 
+    default Reservation getByIdAndStatus(long id, ReservationStatus status) {
+        return findByIdAndStatus(id, status)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+    }
+
     @Query("""
                 SELECT r
                 FROM Reservation r
