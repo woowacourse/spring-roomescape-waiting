@@ -56,7 +56,6 @@ public class Reservation {
     }
 
     public static Reservation saveReservationOf(LocalDate date, long timeId, long themeId, long memberId) {
-        System.out.println("여기서 났나요?");
         return new Reservation(date, timeId, themeId, memberId);
     }
 
