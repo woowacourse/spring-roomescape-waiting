@@ -18,3 +18,7 @@ security:
     token:
       secret-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
       expire-length: 3600000
+
+logging:
+  level:
+    org.springframework.transaction.interceptor: TRACE
