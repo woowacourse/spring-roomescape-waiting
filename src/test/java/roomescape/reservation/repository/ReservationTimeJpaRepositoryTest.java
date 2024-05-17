@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialReservationTimeFixture.INITIAL_RESERVATION_TIME_COUNT;
 import static roomescape.InitialReservationTimeFixture.NOT_RESERVATED_TIME;
+import static roomescape.InitialReservationTimeFixture.NOT_SAVED_TIME;
 import static roomescape.InitialReservationTimeFixture.RESERVATION_TIME_1;
 
 import java.time.LocalTime;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exceptions.NotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -63,17 +65,48 @@ class ReservationTimeJpaRepositoryTest {
 
     @Test
     @DisplayName("id에 맞는 ReservationTime을 찾는다.")
-    void findBy() {
+    void findById() {
         ReservationTime found = reservationTimeJpaRepository.findById(RESERVATION_TIME_1.getId()).get();
 
-        assertThat(found.getStartAt()).isEqualTo(RESERVATION_TIME_1.getStartAt());
+        assertThat(found).isEqualTo(RESERVATION_TIME_1);
     }
 
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 빈 Optional 객체를 반환한다.")
-    void findEmpty() {
+    void EmptyIfNotExistId() {
         Optional<ReservationTime> reservationTime = reservationTimeJpaRepository.findById(-1L);
 
         assertThat(reservationTime.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("id에 맞는 ReservationTime을 찾는다.")
+    void getById() {
+        ReservationTime found = reservationTimeJpaRepository.getById(RESERVATION_TIME_1.getId());
+
+        assertThat(found).isEqualTo(RESERVATION_TIME_1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id가 들어오면 예외를 발생시킨다.")
+    void throwExceptionIfIdNotExists() {
+        assertThatThrownBy(() -> reservationTimeJpaRepository.getById(-1L))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("특정 예약시간이 존재하면 true를 반환한다.")
+    void trueIfStartAtExists() {
+        boolean isExist = reservationTimeJpaRepository.existsByStartAt(RESERVATION_TIME_1.getStartAt());
+
+        assertThat(isExist).isTrue();
+    }
+
+    @Test
+    @DisplayName("특정 예약시간이 존재하지 않으면 false를 반환한다.")
+    void falseIfStartAtNotExists() {
+        boolean isExist = reservationTimeJpaRepository.existsByStartAt(NOT_SAVED_TIME.getStartAt());
+
+        assertThat(isExist).isFalse();
     }
 }

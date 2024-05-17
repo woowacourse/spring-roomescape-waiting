@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -69,7 +70,7 @@ class ThemeJpaRepositoryTest {
 
     @Test
     @DisplayName("id에 맞는 theme를 찾는다.")
-    void findBy() {
+    void findById() {
         Theme found = themeJpaRepository.findById(THEME_1.getId()).get();
 
         assertThat(found.getName()).isEqualTo(THEME_1.getName());
@@ -77,10 +78,25 @@ class ThemeJpaRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 빈 Optional 객체를 반환한다.")
-    void findEmpty() {
+    void returnEmptyIfIdNotExists() {
         Optional<Theme> theme = themeJpaRepository.findById(-1L);
 
         assertThat(theme.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("id에 맞는 theme를 찾는다.")
+    void getById() {
+        Theme found = themeJpaRepository.findById(THEME_1.getId()).get();
+
+        assertThat(found.getName()).isEqualTo(THEME_1.getName());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 id가 들어오면 예외가 발생한다.")
+    void throwExceptionIfIdNotExists() {
+        assertThatThrownBy(() -> themeJpaRepository.getById(-1L))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
