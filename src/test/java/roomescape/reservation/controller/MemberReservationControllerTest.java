@@ -125,7 +125,7 @@ class MemberReservationControllerTest {
         // when & then
         List<SelectableTimeResponse> responses = RestAssured.given().log().all()
                 .param("date", LocalDate.now().plusYears(1))
-                .param("themeId", 1)
+                .param("id", 1)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200).extract()

@@ -127,7 +127,7 @@ public class ReservationService {
 
     public void validateAlreadyHasReservationByThemeId(final long themeId) {
         if (!reservationRepository.findByThemeId(themeId).isEmpty()) {
-            throw new IllegalArgumentException("[ERROR]  (themeId : " + themeId + ") 에 해당하는 테마에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("[ERROR]  (id : " + themeId + ") 에 해당하는 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 }

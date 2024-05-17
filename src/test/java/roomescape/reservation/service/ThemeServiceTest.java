@@ -54,7 +54,7 @@ class ThemeServiceTest {
         // then
         assertNotNull(response);
         assertEquals("새 테마", response.name());
-        assertTrue(themeRepository.findById(response.themeId()).isPresent());
+        assertTrue(themeRepository.findById(response.id()).isPresent());
     }
 
     @DisplayName("모든 테마를 조회한다.")
@@ -87,8 +87,8 @@ class ThemeServiceTest {
         // then
         assertNotNull(responses);
         assertThat(responses.size()).isEqualTo(2);
-        assertThat(responses.get(0).themeId()).isEqualTo(2);
-        assertThat(responses.get(1).themeId()).isEqualTo(1);
+        assertThat(responses.get(0).id()).isEqualTo(2);
+        assertThat(responses.get(1).id()).isEqualTo(1);
     }
 
     @DisplayName("테마 ID로 테마를 삭제한다.")
