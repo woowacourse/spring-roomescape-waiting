@@ -30,7 +30,7 @@ class ReservationControllerTest extends ControllerTest {
 
     private static final LocalDate TODAY = LocalDate.now();
 
-    private final Reservation reservation = Reservation.reservationOf(1L, TODAY,
+    private final Reservation reservation = Reservation.of(1L, TODAY,
             new Time(1L, LocalTime.of(10, 0)), Theme.of(1L, "polla", "폴라 방탈출", "이미지~"),
             Member.of(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
     private final String expectedStartAt = "10:00:00";

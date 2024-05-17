@@ -97,7 +97,7 @@ class TimeServiceTest {
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.saveReservationOf(LocalDate.now(), 1, 1, 1));
+        reservations.add(Reservation.of(LocalDate.now(), 1, 1, 1));
 
         when(reservationRepository.findByTimeId(1L))
                 .thenReturn(reservations);

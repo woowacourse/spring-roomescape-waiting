@@ -38,7 +38,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(long id, Date date, Time time, Theme theme, Member member) {
+    private Reservation(long id, Date date, Time time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -51,15 +51,15 @@ public class Reservation {
                 Member.from(memberId));
     }
 
-    public static Reservation reservationOf(long id, LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(long id, LocalDate date, Time time, Theme theme, Member member) {
         return new Reservation(id, Date.dateFrom(date), time, theme, member);
     }
 
-    public static Reservation saveReservationOf(LocalDate date, long timeId, long themeId, long memberId) {
+    public static Reservation of(LocalDate date, long timeId, long themeId, long memberId) {
         return new Reservation(date, timeId, themeId, memberId);
     }
 
-    public static Reservation saveReservationOf(LocalDate date, Time time, Theme theme, Member member) {
+    public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
         return new Reservation(0, Date.dateFrom(date), time, theme, member);
     }
@@ -82,10 +82,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public void setIdOnSave(long id) {
-        this.id = id;
     }
 
     private static void validateAtSaveDateAndTime(LocalDate date, Time time) {
