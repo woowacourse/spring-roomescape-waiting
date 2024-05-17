@@ -12,7 +12,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
-import roomescape.reservation.dto.ReservationSearchCondRequest;
+import roomescape.reservation.dto.ReservationSearchConditionRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -84,7 +84,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
+    public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                         request.themeId(),
                         request.memberId(),

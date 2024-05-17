@@ -15,7 +15,7 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
-import roomescape.reservation.dto.ReservationSearchCondRequest;
+import roomescape.reservation.dto.ReservationSearchConditionRequest;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -43,9 +43,9 @@ public class ReservationApiController {
 
     @GetMapping("/reservations/search")
     public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
-            @Valid @ModelAttribute ReservationSearchCondRequest reservationSearchCondRequest
+            @Valid @ModelAttribute ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCond(reservationSearchCondRequest);
+        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
 
         return ResponseEntity.ok(reservationResponses);
     }

@@ -28,7 +28,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.ReservationSearchCondRequest;
+import roomescape.reservation.dto.ReservationSearchConditionRequest;
 
 @DataJpaTest
 public class ReservationRepositoryTest {
@@ -181,7 +181,7 @@ public class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime, Status.SUCCESS));
 
-        ReservationSearchCondRequest request = new ReservationSearchCondRequest(
+        ReservationSearchConditionRequest request = new ReservationSearchConditionRequest(
                 theme.getId(),
                 member.getId(),
                 LocalDate.now(),
