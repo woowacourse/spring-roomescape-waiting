@@ -40,7 +40,7 @@ public class Reservation {
     @JoinColumn(name = "time_id")
     private ReservationTime reservationTime;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {

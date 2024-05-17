@@ -11,7 +11,7 @@ public class MemberName {
 
     private String name;
 
-    public MemberName() {
+    protected MemberName() {
     }
 
     public MemberName(String name) {

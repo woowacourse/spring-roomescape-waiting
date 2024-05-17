@@ -11,7 +11,7 @@ public class ThemeName {
 
     private String name;
 
-    public ThemeName() {
+    protected ThemeName() {
     }
 
     public ThemeName(String name) {

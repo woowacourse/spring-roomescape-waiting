@@ -31,7 +31,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(MemberName name, String email, String password) {

@@ -11,7 +11,7 @@ public class Description {
 
     private String text;
 
-    public Description() {
+    protected Description() {
     }
 
     public Description(final String text) {
