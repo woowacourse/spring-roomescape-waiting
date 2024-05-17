@@ -44,7 +44,7 @@ public class MemberReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAll() {
-        return ResponseEntity.ok(reservationService.getAllResponses());
+        return ResponseEntity.ok(reservationService.getAll());
     }
 
     @GetMapping("/times")

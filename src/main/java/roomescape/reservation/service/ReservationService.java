@@ -65,14 +65,9 @@ public class ReservationService {
         return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
     }
 
-    public List<ReservationResponse> getAllResponses() {
-        return getAllReservations().stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public List<Reservation> getAllReservations() {
+    public List<ReservationResponse> getAll() {
         return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
