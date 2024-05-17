@@ -15,18 +15,27 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId,
-                                                     ReservationStatus status);
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(
+            LocalDate date,
+            long timeId,
+            long themeId,
+            ReservationStatus status
+    );
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(LocalDate date, long timeId, long themeId,
-                                                                long memberId, ReservationStatus status);
-
-    Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+            LocalDate date,
+            long timeId,
+            long themeId,
+            long memberId,
+            ReservationStatus status
+    );
 
     default Reservation getByIdAndStatus(long id, ReservationStatus status) {
         return findByIdAndStatus(id, status)
                 .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
+
+    Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
 
     @Query("""
                 SELECT r
@@ -81,4 +90,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.status = :reservationStatus
             """)
     List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
+
+    default Reservation getByIdentifier(long id) {
+        return findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+    }
 }
