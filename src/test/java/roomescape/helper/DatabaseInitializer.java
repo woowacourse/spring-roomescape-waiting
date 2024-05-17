@@ -17,11 +17,7 @@ import roomescape.domain.Theme;
 @Transactional
 public class DatabaseInitializer {
     @PersistenceContext
-    private final EntityManager entityManager;
-
-    public DatabaseInitializer(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    private EntityManager entityManager;
 
     public void execute() {
         Member member = createMember();

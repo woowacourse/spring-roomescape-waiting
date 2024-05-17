@@ -11,10 +11,6 @@ public class DatabaseCleaner {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public DatabaseCleaner(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     public void execute() {
         clearReservation();
         clearMember();
