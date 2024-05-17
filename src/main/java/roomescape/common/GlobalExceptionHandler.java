@@ -42,7 +42,11 @@ public class GlobalExceptionHandler {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            jsonMappingException.getPath().get(0).getFieldName() + " 필드의 형식이 잘못되었습니다."));
+                            jsonMappingException.getPath()
+                                    .stream()
+                                    .map(JsonMappingException.Reference::getFieldName)
+                                    .collect(Collectors.joining(", "))
+                                    + " 필드의 형식이 잘못되었습니다."));
         }
 
         return ResponseEntity
