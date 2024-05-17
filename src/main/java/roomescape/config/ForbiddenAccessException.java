@@ -5,7 +5,7 @@ import roomescape.controller.exception.BaseException;
 public class ForbiddenAccessException extends BaseException {
 
     public ForbiddenAccessException() {
-        this("");
+        super("접근 권한이 없습니다.", "");
     }
 
     public ForbiddenAccessException(String detail) {
