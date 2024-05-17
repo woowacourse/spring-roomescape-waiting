@@ -22,6 +22,7 @@ import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
@@ -123,7 +124,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
         Member member = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(member, reservation));
+        memberReservationRepository.save(new MemberReservation(member, reservation, ReservationStatus.BOOKED));
 
         //when
         List<AvailableTimeResponse> availableTimes

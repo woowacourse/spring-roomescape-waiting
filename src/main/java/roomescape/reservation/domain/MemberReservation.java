@@ -1,6 +1,8 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,18 +21,21 @@ public class MemberReservation {
     private Member member;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Reservation reservation;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus reservationStatus;
 
     public MemberReservation() {
     }
 
-    public MemberReservation(Long id, Member member, Reservation reservation) {
+    public MemberReservation(Long id, Member member, Reservation reservation, ReservationStatus reservationStatus) {
         this.id = id;
         this.member = member;
         this.reservation = reservation;
+        this.reservationStatus = reservationStatus;
     }
 
-    public MemberReservation(Member member, Reservation reservation) {
-        this(null, member, reservation);
+    public MemberReservation(Member member, Reservation reservation, ReservationStatus reservationStatus) {
+        this(null, member, reservation, reservationStatus);
     }
 
     public boolean isRegisteredMember(Member member) {
@@ -47,6 +52,10 @@ public class MemberReservation {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
     }
 
     @Override

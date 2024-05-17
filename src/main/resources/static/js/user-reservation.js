@@ -187,11 +187,11 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
-        fetch('', {
+        fetch('/reservations/waitlist', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -20,8 +20,10 @@ import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.WaitingRequest;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
+import roomescape.reservation.service.dto.WaitingCreate;
 
 @RestController
 @RequestMapping("/reservations")
@@ -66,5 +68,18 @@ public class ReservationController {
     @GetMapping("/my")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser AuthInfo authInfo) {
         return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
+    }
+
+    @PostMapping("/waitlist")
+    public ResponseEntity<ReservationResponse> addWaitList(@LoginUser AuthInfo authInfo,
+                                            @RequestBody @Valid WaitingRequest waitingRequest) {
+        WaitingCreate waitingCreate = new WaitingCreate(
+                authInfo.getId(),
+                waitingRequest.date(),
+                waitingRequest.timeId(),
+                waitingRequest.themeId()
+        );
+
+        return ResponseEntity.ok().body(reservationService.addWaitingList(waitingCreate));
     }
 }

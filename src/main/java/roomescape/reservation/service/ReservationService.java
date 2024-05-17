@@ -16,6 +16,7 @@ import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
@@ -23,6 +24,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
+import roomescape.reservation.service.dto.WaitingCreate;
 
 @Service
 @Transactional(readOnly = true)
@@ -67,17 +69,18 @@ public class ReservationService {
         Member member = getMember(memberReservationCreate.memberId());
         Reservation reservation = getReservation(memberReservationCreate.date(), reservationTime, theme);
 
-        if (reservation.isPast()) {
-            throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
-        }
+        validatePastReservation(reservation);
+        validateDuplicatedReservation(reservation, member);
 
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(member, reservation, ReservationStatus.BOOKED));
+        return ReservationResponse.from(memberReservation.getId(), reservation, member);
+    }
+
+    private void validateDuplicatedReservation(Reservation reservation, Member member) {
         if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
             throw new BadRequestException(ErrorType.DUPLICATED_RESERVATION_ERROR);
         }
-
-        MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation));
-        return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
     @Transactional
@@ -98,6 +101,28 @@ public class ReservationService {
     public void delete(long reservationId) {
         memberReservationRepository.deleteByReservationId(reservationId);
         reservationRepository.deleteById(reservationId);
+    }
+
+    @Transactional
+    public ReservationResponse addWaitingList(WaitingCreate waitingCreate) {
+        ReservationTime reservationTime = getReservationTime(waitingCreate.timeId());
+        Theme theme = getTheme(waitingCreate.themeId());
+        Member member = getMember(waitingCreate.memberId());
+        Reservation reservation = getReservation(waitingCreate.date(), reservationTime, theme);
+
+        validatePastReservation(reservation);
+        validateDuplicatedReservation(reservation, member);
+
+        MemberReservation memberReservation = memberReservationRepository.save(
+                new MemberReservation(member, reservation, ReservationStatus.WAITING));
+
+        return ReservationResponse.from(memberReservation.getId(), reservation, member);
+    }
+
+    private void validatePastReservation(Reservation reservation) {
+        if (reservation.isPast()) {
+            throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
+        }
     }
 
     private ReservationTime getReservationTime(long timeId) {
