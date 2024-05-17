@@ -10,7 +10,7 @@ import roomescape.application.ServiceTest;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationFactory;
-import roomescape.domain.reservation.ReservationQueryRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -20,7 +20,7 @@ class ReservationFactoryTest {
     private ReservationFactory reservationFactory;
 
     @Autowired
-    private ReservationQueryRepository reservationQueryRepository;
+    private ReservationRepository reservationRepository;
 
     @DisplayName("존재하지 않는 예약 시간으로 예약을 생성시 예외를 반환한다.")
     @Test
@@ -47,7 +47,7 @@ class ReservationFactoryTest {
     @DisplayName("중복된 예약을 하는 경우 예외를 반환한다.")
     @Test
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
-        Reservation existReservation = reservationQueryRepository.findAll().get(0);
+        Reservation existReservation = reservationRepository.findAll().get(0);
         ReservationRequest reservationRequest = ReservationRequestFixture.of(existReservation.getDate(),
                 existReservation.getTime().getId(),
                 existReservation.getTheme().getId());

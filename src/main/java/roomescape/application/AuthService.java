@@ -9,7 +9,7 @@ import roomescape.application.dto.TokenRequest;
 import roomescape.application.dto.TokenResponse;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberQueryRepository;
+import roomescape.domain.member.MemberRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -17,13 +17,13 @@ import roomescape.exception.RoomescapeException;
 public class AuthService {
     private final TokenProvider tokenProvider;
     private final TokenManager tokenManager;
-    private final MemberQueryRepository memberQueryRepository;
+    private final MemberRepository memberRepository;
 
     public AuthService(TokenProvider tokenProvider, TokenManager tokenManager,
-                       MemberQueryRepository memberQueryRepository) {
+                       MemberRepository memberRepository) {
         this.tokenProvider = tokenProvider;
         this.tokenManager = tokenManager;
-        this.memberQueryRepository = memberQueryRepository;
+        this.memberRepository = memberRepository;
     }
 
     public TokenResponse createToken(TokenRequest tokenRequest) {
@@ -44,13 +44,13 @@ public class AuthService {
     }
 
     private Member getMemberBy(String email) {
-        return memberQueryRepository.findByEmail(new Email(email))
+        return memberRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER,
                         String.format("존재하지 않는 회원입니다. 입력한 회원 email:%s", email)));
     }
 
     private Member getMemberBy(long id) {
-        return memberQueryRepository.findById(id)
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER,
                         String.format("존재하지 않는 회원입니다. 입력한 회원 id:%d", id)));
     }

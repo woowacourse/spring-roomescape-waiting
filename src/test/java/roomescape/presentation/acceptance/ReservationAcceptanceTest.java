@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationQueryRepository;
+import roomescape.domain.reservation.ReservationRepository;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
     @Autowired
-    private ReservationQueryRepository reservationQueryRepository;
+    private ReservationRepository reservationRepository;
 
     private static String accessToken;
 
@@ -96,7 +96,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("이미 존재하는 예약을 요청하면 에러가 발생한다.")
     @Test
     void createDuplicatedReservation() {
-        Reservation reservation = reservationQueryRepository.findAll().get(0);
+        Reservation reservation = reservationRepository.findAll().get(0);
 
         ReservationRequest request = ReservationRequestFixture.of(reservation.getDate(),
                 reservation.getTheme().getId(),

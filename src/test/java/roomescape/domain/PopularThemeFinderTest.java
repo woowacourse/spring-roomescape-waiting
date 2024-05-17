@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberCommandRepository;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationCommandRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.theme.PopularThemeFinder;
@@ -25,16 +25,16 @@ class PopularThemeFinderTest {
     private PopularThemeFinder popularThemeFinder;
 
     @Autowired
-    private ReservationCommandRepository reservationCommandRepository;
+    private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
-    private MemberCommandRepository memberCommandRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
     private Clock clock;
@@ -44,10 +44,10 @@ class PopularThemeFinderTest {
     void shouldReturnThemesWhenFindPopularThemes() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Theme> themes = themeRepository.findAll();
-        Member member = memberCommandRepository.findAll().get(0);
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(1)));
+        Member member = memberRepository.findAll().get(0);
+        reservationRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
+        reservationRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
+        reservationRepository.save(createReservation(member, reservationTimes.get(0), themes.get(1)));
 
         List<Theme> popularThemes = popularThemeFinder.findThemes();
 

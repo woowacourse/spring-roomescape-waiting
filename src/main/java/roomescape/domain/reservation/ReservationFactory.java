@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.domain.DomainService;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberQueryRepository;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.RoomescapeErrorCode;
@@ -13,25 +13,25 @@ import roomescape.exception.RoomescapeException;
 
 @DomainService
 public class ReservationFactory {
-    private final ReservationQueryRepository reservationQueryRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final MemberQueryRepository memberQueryRepository;
+    private final MemberRepository memberRepository;
     private final Clock clock;
 
-    public ReservationFactory(ReservationQueryRepository reservationQueryRepository,
+    public ReservationFactory(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository, MemberQueryRepository memberQueryRepository,
+                              ThemeRepository themeRepository, MemberRepository memberRepository,
                               Clock clock) {
-        this.reservationQueryRepository = reservationQueryRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.memberQueryRepository = memberQueryRepository;
+        this.memberRepository = memberRepository;
         this.clock = clock;
     }
 
     public Reservation create(long memberId, ReservationRequest request) {
-        Member member = memberQueryRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_THEME));
@@ -51,7 +51,7 @@ public class ReservationFactory {
     }
 
     private void validateUniqueReservation(ReservationRequest request) {
-        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId())
         ) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");

@@ -4,7 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import roomescape.domain.DomainService;
-import roomescape.domain.reservation.ReservationQueryRepository;
+import roomescape.domain.reservation.ReservationRepository;
 
 @DomainService
 public class PopularThemeFinder {
@@ -12,11 +12,11 @@ public class PopularThemeFinder {
     private static final int END_DATE_TO_SUBTRACT = 1;
     private static final int COUNT_OF_LIMIT = 10;
 
-    private final ReservationQueryRepository reservationQueryRepository;
+    private final ReservationRepository reservationRepository;
     private final Clock clock;
 
-    public PopularThemeFinder(ReservationQueryRepository reservationQueryRepository, Clock clock) {
-        this.reservationQueryRepository = reservationQueryRepository;
+    public PopularThemeFinder(ReservationRepository reservationRepository, Clock clock) {
+        this.reservationRepository = reservationRepository;
         this.clock = clock;
     }
 
@@ -24,7 +24,7 @@ public class PopularThemeFinder {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDate = today.minusDays(START_DAY_TO_SUBTRACT);
         LocalDate endDate = today.minusDays(END_DATE_TO_SUBTRACT);
-        return reservationQueryRepository.findPopularThemesDateBetween(startDate, endDate).stream()
+        return reservationRepository.findPopularThemesDateBetween(startDate, endDate).stream()
                 .limit(COUNT_OF_LIMIT).toList();
     }
 }
