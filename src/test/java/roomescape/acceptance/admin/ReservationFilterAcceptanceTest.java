@@ -6,9 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.adminToken;
@@ -20,9 +19,9 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("필터링하지 않음")
     void filterNone() {
-        List<ReservationResponse> response = sendRequestFiltering("");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_1),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_2),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_3),
@@ -33,9 +32,9 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("사용자로 필터링")
     void filterByMemberId() {
-        List<ReservationResponse> response = sendRequestFiltering("?memberId=2");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("?memberId=2");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_1),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_2),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_3)
@@ -45,9 +44,9 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("테마로 필터링")
     void filterByThemeId() {
-        List<ReservationResponse> response = sendRequestFiltering("?themeId=2");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("?themeId=2");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_1),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_3)
         );
@@ -56,9 +55,9 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("시작 날짜로 필터링")
     void filterByDateFrom() {
-        List<ReservationResponse> response = sendRequestFiltering("?dateFrom=2024-05-02");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("?dateFrom=2024-05-02");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_2),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_4)
         );
@@ -67,9 +66,9 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("끝 날짜로 필터링")
     void filterByTimeId() {
-        List<ReservationResponse> response = sendRequestFiltering("?dateTo=2024-05-01");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("?dateTo=2024-05-01");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_1),
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_3)
         );
@@ -78,15 +77,15 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
     @Test
     @DisplayName("종합 필터링")
     void filterComprehensive() {
-        List<ReservationResponse> response = sendRequestFiltering("?memberId=2&themeId=3&dateFrom=2024-05-02&dateTo=2024-05-02");
+        MultipleResponse<ReservationResponse> response = sendRequestFiltering("?memberId=2&themeId=3&dateFrom=2024-05-02&dateTo=2024-05-02");
 
-        assertThat(response).containsExactlyInAnyOrder(
+        assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(PRE_INSERTED_RESERVATION_2)
         );
     }
 
-    private List<ReservationResponse> sendRequestFiltering(String path) {
-        TypeRef<List<ReservationResponse>> memberListFormat = new TypeRef<>() {
+    private MultipleResponse<ReservationResponse> sendRequestFiltering(String path) {
+        TypeRef<MultipleResponse<ReservationResponse>> memberListFormat = new TypeRef<>() {
         };
 
         return RestAssured.given().log().all()

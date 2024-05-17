@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.MemberPreviewResponse;
-
-import java.util.List;
+import roomescape.dto.response.MultipleResponse;
 
 import static roomescape.acceptance.Fixture.adminToken;
 
@@ -17,7 +16,7 @@ class MemberAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 간소화된 사용자 목록을 조회한다.")
     @Test
     void getAllMemberPreview_success() {
-        TypeRef<List<MemberPreviewResponse>> memberListFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<MemberPreviewResponse>> membersPreviewFormat = new TypeRef<>() {
         };
 
         RestAssured.given().log().all()
@@ -25,6 +24,6 @@ class MemberAcceptanceTest extends BaseAcceptanceTest {
                 .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .extract().as(memberListFormat);
+                .extract().as(membersPreviewFormat);
     }
 }

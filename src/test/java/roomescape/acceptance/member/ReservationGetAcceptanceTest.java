@@ -8,27 +8,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.MemberReservationResponse;
-
-import java.util.List;
+import roomescape.dto.response.MultipleResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.customerToken;
 import static roomescape.acceptance.PreInsertedData.*;
 
-public class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
+class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
 
     @DisplayName("고객이 자신의 예약 목록을 조회한다.")
     @Test
     void getMyReservation_success() {
-        TypeRef<List<MemberReservationResponse>> reservationListFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<MemberReservationResponse>> reservationListFormat = new TypeRef<>() {
         };
 
-        List<MemberReservationResponse> response = sendGetRequest()
+        MultipleResponse<MemberReservationResponse> response = sendGetRequest()
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(reservationListFormat);
 
-        assertThat(response).containsExactly(
+        assertThat(response.items()).containsExactly(
                 MemberReservationResponse.from(PRE_INSERTED_RESERVATION_1),
                 MemberReservationResponse.from(PRE_INSERTED_RESERVATION_2),
                 MemberReservationResponse.from(PRE_INSERTED_RESERVATION_3)

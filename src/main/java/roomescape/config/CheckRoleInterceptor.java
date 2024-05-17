@@ -10,8 +10,6 @@ import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;
 import roomescape.util.JwtProvider;
 
-import java.util.Optional;
-
 @Component
 public class CheckRoleInterceptor implements HandlerInterceptor {
 

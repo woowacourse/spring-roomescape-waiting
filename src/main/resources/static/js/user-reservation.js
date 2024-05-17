@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderTheme(themes) {
     const themeSlots = document.getElementById('theme-slots');
     themeSlots.innerHTML = '';
-    themes.forEach(theme => {
+    themes.items.forEach(theme => {
         themeSlots.appendChild(createSlot('theme', theme.name, theme.id));
     });
 }
@@ -106,7 +106,7 @@ function renderAvailableTimes(times) {
         timeSlots.innerHTML = '<div class="no-times">선택할 수 있는 시간이 없습니다.</div>';
         return;
     }
-    times.forEach(time => {
+    times.items.forEach(time => {
         const div = createSlot('time', time.startAt, time.timeId, time.alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
         timeSlots.appendChild(div);
     });

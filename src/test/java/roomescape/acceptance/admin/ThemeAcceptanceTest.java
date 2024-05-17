@@ -12,9 +12,8 @@ import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.dto.request.ThemeRequest;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ThemeResponse;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -28,7 +27,7 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 테마 목록을 조회한다.")
     @Test
     void getThemes_success() {
-        TypeRef<List<ThemeResponse>> ThemesFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<ThemeResponse>> ThemesFormat = new TypeRef<>() {
         };
 
         RestAssured.given().log().all()

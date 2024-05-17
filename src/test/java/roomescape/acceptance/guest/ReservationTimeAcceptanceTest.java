@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
+import roomescape.dto.response.MultipleResponse;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static roomescape.acceptance.PreInsertedData.*;
 
@@ -22,15 +22,16 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         LocalDate date = PRE_INSERTED_RESERVATION_1.getDate();
         long themeId = PRE_INSERTED_RESERVATION_1.getTheme().getId();
 
-        TypeRef<List<AvailableReservationTimeResponse>> availableTimesFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<AvailableReservationTimeResponse>> availableTimesFormat = new TypeRef<>() {
         };
-        List<AvailableReservationTimeResponse> availableReservationTimeResponses = RestAssured.given().log().all()
+        MultipleResponse<AvailableReservationTimeResponse> availableReservationTimeResponses
+                = RestAssured.given().log().all()
                 .when().get("/times/available?date=" + date + "&themeId=" + themeId)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(availableTimesFormat);
 
-        Assertions.assertThat(availableReservationTimeResponses).containsExactlyInAnyOrder(
+        Assertions.assertThat(availableReservationTimeResponses.items()).containsExactlyInAnyOrder(
                 AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_1, false),
                 AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_2, true),
                 AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_3, true)

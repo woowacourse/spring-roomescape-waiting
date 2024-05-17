@@ -12,10 +12,10 @@ import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 
 import java.time.LocalTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -29,7 +29,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 예약 시간 목록을 조회한다.")
     @Test
     void getReservationTimes_success() {
-        TypeRef<List<ReservationTimeResponse>> reservationTimesFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<ReservationTimeResponse>> reservationTimesFormat = new TypeRef<>() {
         };
 
         RestAssured.given().log().all()

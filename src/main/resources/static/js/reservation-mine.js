@@ -12,7 +12,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data.forEach(item => {
+    data.items.forEach(item => {
         const row = tableBody.insertRow();
 
         const themeName = item.theme.name;

@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
 
@@ -20,18 +21,20 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> getAllThemes() {
-        List<ThemeResponse> responses = themeService.getAllThemes();
+    public ResponseEntity<MultipleResponse<ThemeResponse>> getAllThemes() {
+        List<ThemeResponse> themes = themeService.getAllThemes();
+        MultipleResponse<ThemeResponse> response = new MultipleResponse<>(themes);
 
         return ResponseEntity.ok()
-                .body(responses);
+                .body(response);
     }
 
     @GetMapping("/rankings")
-    public ResponseEntity<List<ThemeResponse>> getMostReservedThemes() {
-        List<ThemeResponse> responses = themeService.getMostReservedThemes();
+    public ResponseEntity<MultipleResponse<ThemeResponse>> getMostReservedThemes() {
+        List<ThemeResponse> themes = themeService.getMostReservedThemes();
+        MultipleResponse<ThemeResponse> response = new MultipleResponse<>(themes);
 
         return ResponseEntity.ok()
-                .body(responses);
+                .body(response);
     }
 }

@@ -10,10 +10,10 @@ import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.acceptance.NestedAcceptanceTest;
 import roomescape.controller.exception.CustomExceptionResponse;
 import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +27,7 @@ class ReservationAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("관리자가 예약 목록을 조회한다.")
     @Test
     void getReservations_success() {
-        TypeRef<List<ReservationResponse>> reservationListFormat = new TypeRef<>() {
+        TypeRef<MultipleResponse<ReservationResponse>> reservationListFormat = new TypeRef<>() {
         };
 
         RestAssured.given().log().all()

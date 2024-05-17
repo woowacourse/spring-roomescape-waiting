@@ -20,8 +20,7 @@ public class AdminTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> addTime(@RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.addReservationTime(
-                request);
+        ReservationTimeResponse response = reservationTimeService.addReservationTime(request);
         URI location = URI.create("/times/" + response.id());
 
         return ResponseEntity.created(location)

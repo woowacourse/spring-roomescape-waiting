@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.response.MemberReservationResponse;
+import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
@@ -19,21 +20,24 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final MemberService memberService;
 
-    public ReservationController(ReservationService reservationService, MemberService memberService) {
+    public ReservationController(
+            ReservationService reservationService,
+            MemberService memberService
+    ) {
         this.reservationService = reservationService;
         this.memberService = memberService;
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberReservationResponse>> getReservationsOf(Member member) {
-        List<MemberReservationResponse> response = memberService.getReservationsOf(member);
+    public ResponseEntity<MultipleResponse<MemberReservationResponse>> getReservationsOf(Member member) {
+        List<MemberReservationResponse> reservations = memberService.getReservationsOf(member);
+        MultipleResponse<MemberReservationResponse> response = new MultipleResponse<>(reservations);
+
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(
-            @RequestBody MemberReservationRequest request,
-            Member member) {
+    public ResponseEntity<ReservationResponse> addReservation(@RequestBody MemberReservationRequest request, Member member) {
         ReservationResponse response = reservationService.addMemberReservation(request, member);
         URI location = URI.create("/reservations/" + response.id());
 
