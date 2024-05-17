@@ -13,6 +13,10 @@ import roomescape.service.exception.ReservationNotFoundException;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Override
+    @EntityGraph(attributePaths = {"theme", "time", "member"})
+    List<Reservation> findAll();
+
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
     default Reservation findByIdOrThrow(long id) {
