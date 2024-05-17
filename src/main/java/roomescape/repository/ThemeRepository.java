@@ -19,8 +19,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             BETWEEN :startDate AND :endDate
             GROUP BY th.id
             ORDER BY count(r) desc
+            LIMIT :limit
             """)
-    List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate);
+    List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
 
     default Theme fetchById(long themeId) {
         return findById(themeId).orElseThrow(ThemeNotFoundException::new);

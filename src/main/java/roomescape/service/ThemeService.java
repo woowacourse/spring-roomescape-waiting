@@ -30,10 +30,12 @@ public class ThemeService {
 
 
     public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
-        List<Theme> topBookedThemes = themeRepository.findPopularThemes(request.getStartDate(), request.getEndDate());
+        List<Theme> topBookedThemes = themeRepository.findPopularThemes(
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getCount());
 
         return topBookedThemes.stream()
-                .limit(request.getCount())
                 .map(ThemeResponse::new)
                 .toList();
     }
