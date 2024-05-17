@@ -206,7 +206,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse approveReservationWaiting(Long id) {
         Reservation reservation = reservationRepository
-                .getReferenceById(id);
+                .getByIdentifier(id);
 
         validateReservationNotWaiting(reservation);
         validateReservationExists(reservation);
