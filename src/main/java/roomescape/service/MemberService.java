@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberPassword;
 import roomescape.exception.member.EmailDuplicatedException;
+import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.member.UnauthorizedPasswordException;
 import roomescape.global.JwtManager;
 import roomescape.repository.MemberRepository;
@@ -31,7 +32,7 @@ public class MemberService {
     }
 
     public String login(MemberLoginRequest request) {
-        Member member = memberRepository.fetchByEmail(request.getEmail());
+        Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(UnauthorizedEmailException::new);
         MemberPassword requestPassword = new MemberPassword(request.getPassword());
         if (member.isMismatchedPassword(requestPassword)) {
             throw new UnauthorizedPasswordException();
