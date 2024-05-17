@@ -122,11 +122,9 @@ class AdminControllerTest {
     @Test
     @DisplayName("시간 삭제 시, 해당 시간을 참조하는 예약이 있으면 예외가 발생한다.")
     void validateTimeDelete() {
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
-        
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .when().delete("/admin/times/1")
+                .when().delete("/admin/times/4")
                 .then().log().all()
                 .statusCode(400);
     }
