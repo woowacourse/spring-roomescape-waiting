@@ -23,7 +23,7 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Long memberId = jwtManager.parseToken(request);
         Member member = memberService.findById(memberId);
-        if (!member.isAdmin()) {
+        if (member.isNotAdmin()) {
             throw new AuthorizationException("접근 권한이 없습니다.");
         }
         return true;
