@@ -49,7 +49,7 @@ public class IntegrationTest {
     }
 
     protected void saveMemberAsKaki() {
-        String sql = "insert into member (name, email, password, role) values ('카키', 'kaki@email.com', '1234', default)";
+        String sql = "insert into member (name, email, password, role) values ('카키', 'kaki@email.com', '1234', 'MEMBER')";
 
         jdbcTemplate.update(sql);
     }

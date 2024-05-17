@@ -8,12 +8,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicInsert;
 import roomescape.auth.domain.Role;
 
 @Entity
-@DynamicInsert
 public class Member {
 
     @Id
@@ -21,8 +18,8 @@ public class Member {
     private Long id;
 
     @Enumerated(value = EnumType.STRING)
-    @ColumnDefault("'MEMBER'")
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.MEMBER;
 
     @Embedded
     @Column(nullable = false)
