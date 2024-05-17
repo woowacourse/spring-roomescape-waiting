@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -14,16 +13,20 @@ import roomescape.reservation.controller.dto.response.ThemeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
     private final ReservationService reservationService;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationService reservationService) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository,
+                        ReservationService reservationService) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationService = reservationService;
     }
 
@@ -39,27 +42,24 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findPopularThemes() {
-        List<Reservation> reservations = reservationService.findByDateBetween(
-                LocalDate.now().minusWeeks(1),
-                LocalDate.now()
+        List<Reservation> reservations = reservationRepository.findByDateBetween(
+                LocalDate.now().minusDays(8),
+                LocalDate.now().minusDays(1)
         );
-        List<Long> popularThemes = sortByReservationCountAndLimit(getReservationCountsPerThemeId(reservations));
+        List<Long> popularThemeIds = getPopularThemeIds(reservations);
 
-        return popularThemes.stream()
+        return popularThemeIds.stream()
                 .map(id -> ThemeResponse.from(themeRepository.findById(id).get()))
                 .toList();
     }
 
-    private Map<Long, List<Reservation>> getReservationCountsPerThemeId(final List<Reservation> reservations) {
+    private List<Long> getPopularThemeIds(final List<Reservation> reservations) {
         return reservations.stream()
-                .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()));
-    }
-
-    private List<Long> sortByReservationCountAndLimit(final Map<Long, List<Reservation>> collect) {
-        return collect.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getValue().size()))
-                .map(Entry::getKey)
+                .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId()))
+                .entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> -entry.getValue().size()))
                 .limit(10)
+                .map(Entry::getKey)
                 .toList();
     }
 

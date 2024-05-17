@@ -78,9 +78,7 @@ public class ReservationService {
 
     public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
         List<Long> usedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes =
-                StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
-                        .toList();
+        List<ReservationTime> reservationTimes = getAllReservationTimes();
 
         return reservationTimes.stream()
                 .map(time -> new SelectableTimeResponse(
@@ -91,12 +89,13 @@ public class ReservationService {
                 .toList();
     }
 
-    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Long> usedTimeIds) {
-        return usedTimeIds.contains(reservationTime.getId());
+    private List<ReservationTime> getAllReservationTimes() {
+        return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
+                .toList();
     }
 
-    public List<Reservation> findByDateBetween(final LocalDate startDate, final LocalDate endDate) {
-        return reservationRepository.findByDateBetween(startDate, endDate);
+    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Long> usedTimeIds) {
+        return usedTimeIds.contains(reservationTime.getId());
     }
 
     public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
