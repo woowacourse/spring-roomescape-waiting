@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,15 +20,15 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
@@ -116,5 +117,17 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", member=" + member +
+                ", date=" + date +
+                ", time=" + time +
+                ", theme=" + theme +
+                ", status=" + status +
+                '}';
     }
 }
