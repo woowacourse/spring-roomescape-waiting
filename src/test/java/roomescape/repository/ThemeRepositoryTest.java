@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +28,6 @@ class ThemeRepositoryTest {
         LocalDate end = LocalDate.now().minusDays(1);
         List<Theme> themes = themeRepository.findPopular(start, end, 10);
 
-        Assertions.assertAll(
-            () -> assertThat(themes.get(0).getId()).isEqualTo(1L),
-            () -> assertThat(themes.get(1).getId()).isEqualTo(3L),
-            () -> assertThat(themes.get(2).getId()).isEqualTo(2L)
-        );
+        assertThat(themes).extracting(Theme::getId).containsExactly(1L, 3L, 2L);
     }
 }

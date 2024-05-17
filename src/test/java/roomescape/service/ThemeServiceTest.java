@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -66,10 +65,6 @@ class ThemeServiceTest {
     @Test
     void findPopular() {
         List<Theme> themes = themeService.findPopular();
-        assertAll(
-            () -> assertThat(themes.get(0).getId()).isEqualTo(1L),
-            () -> assertThat(themes.get(1).getId()).isEqualTo(3L),
-            () -> assertThat(themes.get(2).getId()).isEqualTo(2L)
-        );
+        assertThat(themes).extracting(Theme::getId).containsExactly(1L, 3L, 2L);
     }
 }
