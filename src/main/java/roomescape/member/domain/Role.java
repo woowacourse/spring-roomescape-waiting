@@ -5,7 +5,7 @@ public enum Role {
     USER,
     ;
 
-    public boolean isAdminRole() {
-        return this.equals(ADMIN);
+    public boolean isNotAdminRole() {
+        return !this.equals(ADMIN);
     }
 }

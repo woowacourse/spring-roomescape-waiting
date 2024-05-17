@@ -41,7 +41,7 @@ public class RoleCheckHandlerInterceptor implements HandlerInterceptor {
     }
 
     private void checkAdminRole(Role role) {
-        if (!role.isAdminRole()) {
+        if (role.isNotAdminRole()) {
             throw new ForbiddenException("허용되지 않는 사용자입니다.");
         }
     }
