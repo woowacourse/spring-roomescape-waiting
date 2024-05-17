@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,7 +14,8 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+    @Embedded
+    private MemberName name;
     @Column(unique = true)
     private String email;
     private String password;
@@ -23,7 +25,7 @@ public class Member {
     public Member() {
     }
 
-    public Member(Long id, String name, String email, String password, MemberRole role) {
+    public Member(Long id, MemberName name, String email, String password, MemberRole role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -31,8 +33,12 @@ public class Member {
         this.role = role;
     }
 
-    public Member(String name, String email, String password, MemberRole role) {
+    public Member(MemberName name, String email, String password, MemberRole role) {
         this(null, name, email, password, role);
+    }
+
+    public boolean isDifferentPassword(String target) {
+        return !password.equals(target);
     }
 
     public Long getId() {
@@ -40,7 +46,7 @@ public class Member {
     }
 
     public String getName() {
-        return name;
+        return name.getName();
     }
 
     public String getEmail() {

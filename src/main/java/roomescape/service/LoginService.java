@@ -8,6 +8,7 @@ import roomescape.domain.MemberRole;
 import roomescape.exception.login.InvalidTokenException;
 import roomescape.exception.login.UnauthorizedEmailException;
 import roomescape.exception.login.UnauthorizedPasswordException;
+import roomescape.exception.member.DuplicatedMemberEmailException;
 import roomescape.service.dto.LoginCheckResponse;
 import roomescape.service.dto.LoginRequest;
 import roomescape.service.dto.SignupRequest;
@@ -29,7 +30,7 @@ public class LoginService {
     public String login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(UnauthorizedEmailException::new);
-        if (!member.getPassword().equals(request.getPassword())) {
+        if (member.isDifferentPassword(request.getPassword())) {
             throw new UnauthorizedPasswordException();
         }
         return jwtTokenProvider.createToken(member.getEmail(), member.getRole());
@@ -57,8 +58,15 @@ public class LoginService {
     }
 
     public SignupResponse signup(SignupRequest request) {
+        validateDuplicateEmail(request.getEmail());
         Member member = request.toMember(MemberRole.USER);
         Member savedMember = memberRepository.save(member);
         return new SignupResponse(savedMember);
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new DuplicatedMemberEmailException();
+        }
     }
 }

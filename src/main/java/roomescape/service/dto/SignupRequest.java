@@ -1,6 +1,7 @@
 package roomescape.service.dto;
 
 import roomescape.domain.Member;
+import roomescape.domain.MemberName;
 import roomescape.domain.MemberRole;
 
 public class SignupRequest {
@@ -22,7 +23,7 @@ public class SignupRequest {
     }
 
     public Member toMember(MemberRole role) {
-        return new Member(name, email, password, role);
+        return new Member(new MemberName(name), email, password, role);
     }
 
     public String getEmail() {
