@@ -26,17 +26,10 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         Member member = findMemberByEmail(request.email());
-
-        validatePassword(request, member);
+        member.validatePassword(request.password());
 
         String accessToken = jwtTokenProvider.generate(member);
         return new LoginResponse(accessToken);
-    }
-
-    private void validatePassword(LoginRequest request, Member member) {
-        if (!member.getPassword().equals(request.password())) {
-            throw new BadRequestException("비밀번호가 잘못됐습니다.");
-        }
     }
 
     public LoginCheckResponse checkLogin(LoginMember loginMember) {

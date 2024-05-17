@@ -53,8 +53,10 @@ public class Member {
         return id.equals(other.id);
     }
 
-    public boolean isAdminUser() {
-        return role.equals(Role.ADMIN);
+    public void validatePassword(String password) {
+        if (!this.password.equals(password)) {
+            throw new IllegalArgumentException("잘못된 사용자 인증 정보입니다.");
+        }
     }
 
     public Long getId() {
