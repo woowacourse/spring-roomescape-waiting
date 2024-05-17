@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -37,6 +38,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationAppResponse save(ReservationAppRequest request) {
         Member member = findMember(request.memberId());
         ReservationDate date = new ReservationDate(request.date());
@@ -78,6 +80,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }

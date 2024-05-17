@@ -1,8 +1,16 @@
 package roomescape.web.controller.api;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
@@ -11,9 +19,6 @@ import roomescape.web.controller.request.LoginMemberInformation;
 import roomescape.web.controller.request.MemberReservationWebRequest;
 import roomescape.web.controller.response.MemberReservationWebResponse;
 import roomescape.web.controller.response.ReservationMineWebResponse;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/reservations")
@@ -30,14 +35,14 @@ public class MemberReservationController {
                                                                 @Valid @Auth
                                                                 LoginMemberInformation loginMemberInformation) {
         ReservationAppResponse appResponse = reservationService.save(
-                new ReservationAppRequest(request.date(), request.timeId(),
-                        request.themeId(), loginMemberInformation.id()));
+            new ReservationAppRequest(request.date(), request.timeId(),
+                request.themeId(), loginMemberInformation.id()));
 
         Long id = appResponse.id();
         MemberReservationWebResponse memberReservationWebResponse = MemberReservationWebResponse.from(appResponse);
 
         return ResponseEntity.created(URI.create("/reservations/" + id))
-                .body(memberReservationWebResponse);
+            .body(memberReservationWebResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -51,18 +56,20 @@ public class MemberReservationController {
     public ResponseEntity<List<MemberReservationWebResponse>> getReservations() {
         List<ReservationAppResponse> appResponses = reservationService.findAll();
         List<MemberReservationWebResponse> memberReservationWebResponse = appResponses.stream()
-                .map(MemberReservationWebResponse::from)
-                .toList();
+            .map(MemberReservationWebResponse::from)
+            .toList();
 
         return ResponseEntity.ok(memberReservationWebResponse);
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineWebResponse>> getMyReservations(@Auth LoginMemberInformation loginMember) {
-        List<ReservationMineWebResponse> reservationMineWebResponses = reservationService.findByMemberId(loginMember.id())
-                .stream()
-                .map(ReservationMineWebResponse::new)
-                .toList();
+    public ResponseEntity<List<ReservationMineWebResponse>> getMyReservations(
+        @Auth LoginMemberInformation loginMember) {
+        List<ReservationMineWebResponse> reservationMineWebResponses = reservationService.findByMemberId(
+                loginMember.id())
+            .stream()
+            .map(ReservationMineWebResponse::new)
+            .toList();
 
         return ResponseEntity.ok(reservationMineWebResponses);
     }

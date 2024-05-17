@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -10,10 +13,6 @@ import roomescape.service.exception.ReservationExistsException;
 import roomescape.service.request.ReservationTimeAppRequest;
 import roomescape.service.response.BookableReservationTimeAppResponse;
 import roomescape.service.response.ReservationTimeAppResponse;
-
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ReservationTimeService {
@@ -50,23 +49,24 @@ public class ReservationTimeService {
 
     public List<ReservationTimeAppResponse> findAll() {
         return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeAppResponse::from)
-                .toList();
+            .map(ReservationTimeAppResponse::from)
+            .toList();
     }
 
     public List<BookableReservationTimeAppResponse> findAllWithBookAvailability(String date, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new ReservationDate(date), themeId);
+        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(new ReservationDate(date),
+            themeId);
         List<ReservationTime> reservedTimes = reservations.stream()
-                .map(Reservation::getReservationTime)
-                .toList();
+            .map(Reservation::getReservationTime)
+            .toList();
 
         return reservationTimeRepository.findAll().stream()
-                .map(time -> BookableReservationTimeAppResponse.of(time, isBooked(reservedTimes, time)))
-                .toList();
+            .map(time -> BookableReservationTimeAppResponse.of(time, isBooked(reservedTimes, time)))
+            .toList();
     }
 
     private boolean isBooked(List<ReservationTime> reservedTimes, ReservationTime time) {
         return reservedTimes.stream()
-                .anyMatch(reservationTime -> Objects.equals(reservationTime.getId(), time.getId()));
+            .anyMatch(reservationTime -> Objects.equals(reservationTime.getId(), time.getId()));
     }
 }

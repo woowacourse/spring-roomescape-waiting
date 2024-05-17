@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.ReservationRepository;
@@ -7,9 +9,6 @@ import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.ReservationExistsException;
 import roomescape.service.request.ThemeAppRequest;
 import roomescape.service.response.ThemeAppResponse;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class ThemeService {
@@ -48,15 +47,16 @@ public class ThemeService {
 
     public List<ThemeAppResponse> findAll() {
         return themeRepository.findAll().stream()
-                .map(ThemeAppResponse::from)
-                .toList();
+            .map(ThemeAppResponse::from)
+            .toList();
+
     }
 
     public List<ThemeAppResponse> findPopular() {
         LocalDate from = LocalDate.now().minusDays(BASED_ON_PERIOD_POPULAR_THEME);
         LocalDate to = LocalDate.now().minusDays(1);
         return themeRepository.findMostReservedThemesInPeriod(from, to, MAX_POPULAR_THEME_COUNT).stream()
-                .map(ThemeAppResponse::from)
-                .toList();
+            .map(ThemeAppResponse::from)
+            .toList();
     }
 }
