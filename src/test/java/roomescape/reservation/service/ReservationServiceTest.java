@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.name.domain.Name;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
@@ -31,7 +32,7 @@ import roomescape.time.repository.TimeRepository;
 class ReservationServiceTest {
 
     private final Reservation reservation = Reservation.of(1L, LocalDate.now().plusDays(1),
-            new Time(1L, LocalTime.now()), Theme.of(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
+            Time.of(1L, LocalTime.now()), Theme.of(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
             Member.of(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
 
     @InjectMocks
@@ -46,6 +47,10 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
+    private MemberRepository memberRepository;
+
+
+    @Mock
     private Name name;
 
     @Test
@@ -55,10 +60,13 @@ class ReservationServiceTest {
                 .thenReturn(reservation);
 
         when(timeRepository.findById(1L))
-                .thenReturn(Optional.of(new Time(1)));
+                .thenReturn(Optional.of(Time.from(1)));
 
         when(themeRepository.findById(1L))
-                .thenReturn(Optional.of(new Theme()));
+                .thenReturn(Optional.of(Theme.from(1)));
+
+        when(memberRepository.findMemberById(1L))
+                .thenReturn(Optional.of(Member.from(1)));
 
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
                 reservation.getReservationTime().getId(), reservation.getTheme().getId());

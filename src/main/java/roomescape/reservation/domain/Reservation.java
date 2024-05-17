@@ -46,22 +46,13 @@ public class Reservation {
         this.member = member;
     }
 
-    private Reservation(LocalDate date, long timeId, long themeId, long memberId) {
-        this(0, Date.saveFrom(date), new Time(timeId), Theme.from(themeId),
-                Member.from(memberId));
-    }
-
     public static Reservation of(long id, LocalDate date, Time time, Theme theme, Member member) {
         return new Reservation(id, Date.dateFrom(date), time, theme, member);
     }
 
-    public static Reservation of(LocalDate date, long timeId, long themeId, long memberId) {
-        return new Reservation(date, timeId, themeId, memberId);
-    }
-
     public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
-        return new Reservation(0, Date.dateFrom(date), time, theme, member);
+        return new Reservation(0, Date.saveFrom(date), time, theme, member);
     }
 
     public long getId() {

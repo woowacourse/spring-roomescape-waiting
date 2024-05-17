@@ -21,8 +21,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -34,7 +36,7 @@ class TimeServiceTest {
 
     private static final LocalTime CURRENT_TIME = LocalTime.now();
 
-    private final Time time = new Time(1L, LocalTime.of(17, 3));
+    private final Time time = Time.of(1L, LocalTime.of(17, 3));
 
     @InjectMocks
     private TimeService timeService;
@@ -97,7 +99,8 @@ class TimeServiceTest {
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.of(LocalDate.now(), 1, 1, 1));
+        reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.from(1), Theme.from(1),
+                Member.from(1)));
 
         when(reservationRepository.findByTimeId(1L))
                 .thenReturn(reservations);

@@ -14,9 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
+import roomescape.time.domain.Time;
 
 @ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {
@@ -30,7 +33,7 @@ public class ThemeServiceTest {
     @DisplayName("예약이 존재하는 테마는 삭제하지 못한다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.of(LocalDate.now(), 1, 1, 1));
+        reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.from(1), Theme.from(1), Member.from(1)));
 
         when(reservationRepository.findByThemeId(1L))
                 .thenReturn(reservations);

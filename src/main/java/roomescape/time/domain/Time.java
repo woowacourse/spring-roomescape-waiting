@@ -26,18 +26,22 @@ public class Time {
     protected Time() {
     }
 
-    public Time(LocalTime startAt) {
-        this(0, startAt);
-        validation();
-    }
-
-    public Time(long id, LocalTime startAt) {
+    private Time(long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
-    public Time(long id) {
-        this(id, null);
+    public static Time from(LocalTime startAt) {
+        validation(startAt);
+        return new Time(0, startAt);
+    }
+
+    public static Time from(long id) {
+        return new Time(id, null);
+    }
+
+    public static Time of(long id, LocalTime startAt) {
+        return new Time(id, startAt);
     }
 
     public long getId() {
@@ -48,7 +52,7 @@ public class Time {
         return startAt;
     }
 
-    public void validation() {
+    private static void validation(LocalTime startAt) {
         if (startAt == null) {
             throw new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
         }

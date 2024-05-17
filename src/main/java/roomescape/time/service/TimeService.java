@@ -26,7 +26,7 @@ public class TimeService {
 
     public TimeResponse addReservationTime(TimeRequest timeRequest) {
         validateDuplicateTime(timeRequest.startAt());
-        Time reservationTime = new Time(timeRequest.startAt());
+        Time reservationTime = Time.from(timeRequest.startAt());
         Time savedReservationTime = timeRepository.save(reservationTime);
 
         return toResponse(savedReservationTime);

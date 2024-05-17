@@ -41,29 +41,28 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
-        Reservation reservation = reservationRequest.fromRequest(memberId);
-
-        Time time = timeRepository.findById(reservation.getReservationTime().getId())
+        Time time = timeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
-        Theme theme = themeRepository.findById(reservation.getTheme().getId())
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
+        Member member = memberRepository.findMemberById(memberId)
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
-        Reservation saveReservation = Reservation.of(reservation.getDate(), time,
-                theme, reservation.getMember());
+        Reservation saveReservation = Reservation.of(reservationRequest.date(), time, theme, member);
+
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
 
     public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
-        Reservation reservation = adminReservationRequest.fromRequest();
-
-        Time time = timeRepository.findById(reservation.getReservationTime().getId())
+        Time time = timeRepository.findById(adminReservationRequest.timeId())
                 .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
-        Theme theme = themeRepository.findById(reservation.getTheme().getId())
+        Theme theme = themeRepository.findById(adminReservationRequest.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
-        Reservation saveReservation = Reservation.of(reservation.getDate(), time, theme, member);
+        Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member);
+
         ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
 
