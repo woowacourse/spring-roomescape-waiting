@@ -10,7 +10,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    ddl-auto: create-drop
+    hibernate:
+      ddl-auto: update
     defer-datasource-initialization: true
 
 security:
