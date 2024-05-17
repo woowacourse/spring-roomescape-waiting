@@ -25,7 +25,7 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(PlayerName name, Email email, Password password, Role role) {

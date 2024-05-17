@@ -30,7 +30,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
