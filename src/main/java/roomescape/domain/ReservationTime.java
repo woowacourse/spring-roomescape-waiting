@@ -5,10 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.util.Set;
 
 @Entity
 public class ReservationTime {
@@ -19,8 +17,6 @@ public class ReservationTime {
     @Column(name = "start_at", nullable = false, unique = true)
     private LocalTime startAt;
 
-    @OneToMany(mappedBy = "time")
-    private Set<Reservation> reservations;
 
     public ReservationTime() {
     }

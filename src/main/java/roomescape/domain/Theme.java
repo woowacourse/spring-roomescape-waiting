@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.Set;
 
 @Entity
 public class Theme {
@@ -20,8 +18,6 @@ public class Theme {
     private String description;
     @Column(nullable = false)
     private String thumbnail;
-    @OneToMany(mappedBy = "theme")
-    private Set<Reservation> reservations;
 
     public Theme() {
     }

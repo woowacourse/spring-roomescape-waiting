@@ -8,8 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.Set;
 
 @Entity
 public class Member {
@@ -33,9 +31,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
-
-    @OneToMany(mappedBy = "member")
-    private Set<Reservation> reservations;
 
     public Member() {
     }
