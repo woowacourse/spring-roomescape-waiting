@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
@@ -20,7 +20,7 @@ import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = "/data.sql")
 class ReservationServiceTest {
     private final ReservationService service;
 
