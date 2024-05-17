@@ -46,9 +46,9 @@ public class ReservationService {
 
     public List<Reservation> filterReservation(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId)));
         return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
     }
 
@@ -89,9 +89,9 @@ public class ReservationService {
 
     private void validateDuplicatedReservation(LocalDate date, Long themeId, Long timeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
         Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
         boolean exists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
         if (exists) {
             throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
