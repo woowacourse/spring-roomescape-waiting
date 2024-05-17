@@ -55,9 +55,7 @@ public class AdminController {
     }
 
     @PostMapping("/reservations/waiting/{id}/approve")
-    public ResponseEntity<ReservationResponse> approveReservationWaiting(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<ReservationResponse> approveReservationWaiting(@PathVariable Long id) {
         ReservationResponse reservationResponse = reservationService.approveReservationWaiting(id);
 
         return ResponseEntity.ok(reservationResponse);
