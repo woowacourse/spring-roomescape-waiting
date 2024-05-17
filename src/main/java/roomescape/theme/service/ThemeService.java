@@ -11,7 +11,7 @@ import roomescape.time.domain.PopularThemePeriod;
 
 @Service
 public class ThemeService {
-    private static final int COUNT_OF_POPULAR_THEME = 10;
+    private static final int POPULAR_THEME_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
 
@@ -31,7 +31,7 @@ public class ThemeService {
         LocalDate startDate = popularThemePeriod.getStartDate();
         LocalDate endDate = popularThemePeriod.getEndDate();
 
-        return themeRepository.findOrderByReservationCount(startDate, endDate, COUNT_OF_POPULAR_THEME)
+        return themeRepository.findOrderByReservationCount(startDate, endDate, POPULAR_THEME_LIMIT)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
