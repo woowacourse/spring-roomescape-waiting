@@ -75,7 +75,9 @@ public class ReservationService {
                 .orElseThrow(IllegalArgumentException::new);
         return reservationRepository.findAllByMember(member)
                 .stream()
-                .map(MyReservationResponse::new)
+                .map(reservation -> new MyReservationResponse(
+                        reservation.getId(), reservation.getTheme().getName(), reservation.getDateString(),
+                        reservation.getReservationTime().getStartAtString(), reservation.getStatus().getValue()))
                 .toList();
     }
 
