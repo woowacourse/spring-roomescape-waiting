@@ -29,14 +29,10 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
         if (cookies == null) {
             throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
         }
-        Optional<String> token = CookieUtil.extractToken(cookies);
 
-        token.ifPresentOrElse(
-                this::validateAdmin,
-                () -> {
-                    throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
-                }
-        );
+        String token = CookieUtil.extractToken(cookies)
+                .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
+        validateAdmin(token);
 
         return true;
     }
