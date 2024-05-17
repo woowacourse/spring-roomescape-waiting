@@ -99,7 +99,7 @@ class ReservationTimeServiceTest {
                 new Theme("공포", "호러 방탈출", "http://asdf.jpg")).getId();
         Theme theme = themeRepository.findById(themeId).get();
 
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now())).getId();
+        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00"))).getId();
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
 
         Long memberId = memberRepository.save(
