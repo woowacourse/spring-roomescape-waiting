@@ -48,25 +48,16 @@ public class ReservationService {
     }
 
     private Member findMember(Long memberId) {
-        if (memberId == null) {
-            throw new RoomescapeException("사용자 ID는 null일 수 없습니다.");
-        }
         return memberRepository.findById(memberId)
             .orElseThrow(() -> new RoomescapeException("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다."));
     }
 
     private ReservationTime findTime(Long timeId) {
-        if (timeId == null) {
-            throw new RoomescapeException("시간 ID는 null일 수 없습니다.");
-        }
         return reservationTimeRepository.findById(timeId)
             .orElseThrow(() -> new RoomescapeException("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다."));
     }
 
     private Theme findTheme(Long themeId) {
-        if (themeId == null) {
-            throw new RoomescapeException("테마 ID는 null일 수 없습니다.");
-        }
         return themeRepository.findById(themeId)
             .orElseThrow(() -> new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다."));
     }
