@@ -35,17 +35,14 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public boolean invalidPassword(final String email, final String rawPassword) {
-        final Member findMember = memberRepository.findByEmailOrThrow(email);
-        final String encryptedPassword = encryptor.encryptPassword(rawPassword);
-        return !encryptedPassword.equals(findMember.getPassword());
-    }
-
     public Member find(final MemberLoginRequest request) {
-        if (invalidPassword(request.email(), request.password())) {
-            throw new InvalidRequestException("Invalid email or password");
+
+        final Member foundMember = memberRepository.findByEmailOrThrow(request.email());
+        final String encryptedPassword = encryptor.encryptPassword(request.password());
+        if (encryptedPassword.equals(foundMember.getPassword())) {
+            return foundMember;
         }
-        return memberRepository.findByEmailOrThrow(request.email());
+        throw new InvalidRequestException("Invalid email or password");
     }
 
     public List<Member> findAll() {
