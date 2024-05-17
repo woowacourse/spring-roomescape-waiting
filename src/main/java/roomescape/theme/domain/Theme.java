@@ -1,7 +1,5 @@
 package roomescape.theme.domain;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,16 +13,13 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "name", nullable = false)
     private ThemeName name;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "description", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "description", nullable = false)
     private Description description;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "thumbnail", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "thumbnail", nullable = false)
     private Thumbnail thumbnail;
 
     public Theme() {
@@ -54,15 +49,15 @@ public class Theme {
     }
 
     public String getName() {
-        return name.value();
+        return name.name();
     }
 
     public String getDescription() {
-        return description.value();
+        return description.description();
     }
 
     public String getThumbnail() {
-        return thumbnail.value();
+        return thumbnail.thumbnail();
     }
 
     @Override

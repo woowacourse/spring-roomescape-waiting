@@ -1,7 +1,5 @@
 package roomescape.member.domain;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -19,16 +17,13 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "name", nullable = false)
     private MemberName name;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "email", nullable = false)
     private Email email;
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
-    @JsonUnwrapped
+    @Column(name = "password", nullable = false)
     private Password password;
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
@@ -83,15 +78,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.value();
+        return name.name();
     }
 
     public String getEmail() {
-        return email.value();
+        return email.email();
     }
 
     public String getPassword() {
-        return password.value();
+        return password.password();
     }
 
     public Role getRole() {

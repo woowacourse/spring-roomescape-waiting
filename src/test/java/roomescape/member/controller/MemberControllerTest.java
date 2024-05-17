@@ -28,15 +28,20 @@ class MemberControllerTest {
     private int port;
 
     @Test
-    @DisplayName("/reservation 으로 GET 요청을 보내면 방탈출 예약 페이지와 200 OK 를 받는다.")
+    @DisplayName("/members 으로 GET 요청을 보내면 회원 정보와 200 OK 를 받는다.")
     void getAdminPage() {
         // given
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
-        memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
-        memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
-        memberRepository.save(new Member("이름3", "test@test.com", "password", Role.MEMBER));
-        memberRepository.save(new Member("이름4", "test@test.com", "password", Role.MEMBER));
+        Member member1 = memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
+        Member member3 = memberRepository.save(new Member("이름3", "test@test.com", "password", Role.MEMBER));
+        Member member4 = memberRepository.save(new Member("이름4", "test@test.com", "password", Role.MEMBER));
+
+        System.out.println(member1);
+        System.out.println(member2);
+        System.out.println(member3);
+        System.out.println(member4);
 
         // when & then
         RestAssured.given().log().all()
