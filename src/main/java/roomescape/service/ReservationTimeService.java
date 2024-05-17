@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,9 @@ public class ReservationTimeService {
     }
 
     public List<AvailableTimeResponse> findAvailableReservationTimes(AvailableTimeRequest request) {
+        LocalDate date = LocalDate.parse(request.getDate());
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-        Set<ReservationTime> bookedTimes = reservationTimeRepository
-                .findReservedTimeByThemeAndDate(request.getDate(), request.getThemeId());
+        Set<ReservationTime> bookedTimes = reservationTimeRepository.findReservedTime(date, request.getThemeId());
 
         return allTimes.stream()
                 .map(time -> parseAvailableTime(time, bookedTimes))

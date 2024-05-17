@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,16 +15,14 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
     boolean existsByStartAt(LocalTime startAt);
 
     @Query(value = """
-            SELECT
-            t.id AS reservation_time_id,
-            t.start_at AS time_value
-            FROM reservation AS r
-            INNER JOIN reservation_time AS t ON r.reservation_time_id = t.id
-            INNER JOIN theme AS th ON r.theme_id = th.id
+            SELECT rt
+            FROM ReservationTime rt
+            INNER JOIN Reservation r ON rt.id = r.time.id
+            INNER JOIN Theme th ON th.id = r.theme.id
             WHERE r.date = :date
-            AND r.theme_id = :themeId
-            """, nativeQuery = true)
-    Set<ReservationTime> findReservedTimeByThemeAndDate(String date, long themeId);
+            AND r.theme.id = :themeId
+            """)
+    Set<ReservationTime> findReservedTime(LocalDate date, long themeId);
 
     default ReservationTime fetchById(long timeId) {
         return findById(timeId).orElseThrow(TimeNotFoundException::new);
