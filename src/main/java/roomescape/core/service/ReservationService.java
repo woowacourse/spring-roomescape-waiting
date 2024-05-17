@@ -89,12 +89,9 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(final Long memberId, final Long themeId,
                                                                       final String from, final String to) {
-        final Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(themeId).orElseThrow(IllegalArgumentException::new);
         final LocalDate dateFrom = LocalDate.parse(from);
         final LocalDate dateTo = LocalDate.parse(to);
-
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, dateFrom, dateTo)
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::new)
                 .toList();

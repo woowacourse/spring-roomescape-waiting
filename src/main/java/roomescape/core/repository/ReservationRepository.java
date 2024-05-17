@@ -3,6 +3,8 @@ package roomescape.core.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
@@ -11,10 +13,20 @@ import roomescape.core.domain.Theme;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findAllByDateAndTheme(final LocalDate date, final Theme theme);
 
-    List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member,
-                                                            final Theme theme,
-                                                            final LocalDate dateFrom,
-                                                            final LocalDate dateTo);
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            INNER JOIN r.theme t
+            INNER JOIN r.member m
+            WHERE t.id = :themeId
+            AND m.id = :memberId
+            AND r.date >= :from
+            AND r.date <= :to
+            """)
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(@Param("themeId") final Long themeId,
+                                                                @Param("memberId") final Long memberId,
+                                                                @Param("from") final LocalDate from,
+                                                                @Param("to") final LocalDate to);
 
     List<Reservation> findAllByMember(final Member member);
 
