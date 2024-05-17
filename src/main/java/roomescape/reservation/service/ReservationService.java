@@ -10,6 +10,7 @@ import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -77,7 +78,8 @@ public class ReservationService {
 
     public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
         List<Time> allTimes = timeRepository.findAllByOrderByStartAt();
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate_Date(themeId, date);
+        Date findDate = Date.dateFrom(date);
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate(themeId, findDate);
         List<Time> bookedTimes = extractReservationTimes(reservations);
 
         return allTimes.stream()
@@ -88,7 +90,7 @@ public class ReservationService {
     public List<ReservationResponse> findFilteredReservations(ReservationFilterRequest reservationFilterRequest) {
         FilterInfo filterInfo = reservationFilterRequest.toFilterInfo();
 
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDate_DateBetween(filterInfo.getMemberId(),
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(filterInfo.getMemberId(),
                         filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate()).stream()
                 .map(ReservationResponse::fromReservation)
                 .toList();

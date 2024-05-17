@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.Theme;
 
@@ -13,10 +14,10 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAllByOrderByDateAscTimeAsc();
 
-    List<Reservation> findAllByThemeIdAndDate_Date(long themeId, LocalDate date);
+    List<Reservation> findAllByThemeIdAndDate(long themeId, Date date);
 
-    List<Reservation> findAllByMemberIdAndThemeIdAndDate_DateBetween(long memberId, long themeId, LocalDate fromDate,
-                                                                     LocalDate toDate);
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, Date fromDate,
+                                                                Date toDate);
 
     List<Reservation> findByTimeId(long timeId);
 

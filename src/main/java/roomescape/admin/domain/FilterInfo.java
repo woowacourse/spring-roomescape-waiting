@@ -2,21 +2,22 @@ package roomescape.admin.domain;
 
 import java.time.LocalDate;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.reservation.domain.Date;
 import roomescape.reservation.exception.ReservationExceptionCode;
 
 public class FilterInfo {
 
     private final Long memberId;
     private final Long themeId;
-    private final LocalDate fromDate;
-    private final LocalDate toDate;
+    private final Date fromDate;
+    private final Date toDate;
 
     public FilterInfo(Long memberId, Long themeId, LocalDate fromDate, LocalDate toDate) {
         validation(memberId, themeId, fromDate, toDate);
         this.memberId = memberId;
         this.themeId = themeId;
-        this.fromDate = fromDate;
-        this.toDate = toDate;
+        this.fromDate = Date.dateFrom(fromDate);
+        this.toDate = Date.dateFrom(toDate);
     }
 
     public Long getMemberId() {
@@ -27,11 +28,11 @@ public class FilterInfo {
         return themeId;
     }
 
-    public LocalDate getFromDate() {
+    public Date getFromDate() {
         return fromDate;
     }
 
-    public LocalDate getToDate() {
+    public Date getToDate() {
         return toDate;
     }
 

@@ -5,7 +5,9 @@ import roomescape.auth.domain.Token;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.provider.model.TokenProvider;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
 
@@ -21,8 +23,10 @@ public class AuthService {
     }
 
     public Token login(LoginRequest loginRequest) {
-        Member member = memberRepository.findMemberByEmail_EmailAndPassword_Password(loginRequest.email(),
-                        loginRequest.password())
+        Email email = Email.emailFrom(loginRequest.email());
+        Password password = Password.passwordFrom(loginRequest.password());
+
+        Member member = memberRepository.findMemberByEmailAndPassword(email, password)
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
         return tokenProvider.getAccessToken(member.getId());
