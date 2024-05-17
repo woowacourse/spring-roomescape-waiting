@@ -72,7 +72,7 @@ public class ReservationController {
 
     @PostMapping("/waitlist")
     public ResponseEntity<ReservationResponse> addWaitList(@LoginUser AuthInfo authInfo,
-                                            @RequestBody @Valid WaitingRequest waitingRequest) {
+                                                           @RequestBody @Valid WaitingRequest waitingRequest) {
         WaitingCreate waitingCreate = new WaitingCreate(
                 authInfo.getId(),
                 waitingRequest.date(),
@@ -81,5 +81,12 @@ public class ReservationController {
         );
 
         return ResponseEntity.ok().body(reservationService.addWaitingList(waitingCreate));
+    }
+
+    @DeleteMapping("/waitlist/{id}")
+    public ResponseEntity<Void> deleteFromWaitList(@LoginUser AuthInfo authInfo,
+                                                   @PathVariable("id") @Min(1) long reservationMemberId) {
+        reservationService.deleteMemberReservation(authInfo, reservationMemberId);
+        return ResponseEntity.noContent().build();
     }
 }

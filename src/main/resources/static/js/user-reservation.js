@@ -203,7 +203,7 @@ function onWaitButtonClick() {
                 return response.json();
             })
             .then(data => {
-                alert('Reservation waiting successful!');
+                alert('대기 등록이 완료 되었습니다.');
                 window.location.href = "/";
             })
             .catch(error => {

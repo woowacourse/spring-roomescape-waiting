@@ -42,11 +42,11 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    const endpoint = '';
+    const endpoint = `/reservations/waitlist/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;
-        throw new Error('Delete failed');
+        throw new Error('삭제에 실패했습니다.');
     });
 }
