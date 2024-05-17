@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.dto.ReservationRequest;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationFactory;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
