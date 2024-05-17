@@ -46,7 +46,12 @@ public class ReservationService {
         validateNotPast(request.date(), reservationTime.getStartAt());
         validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
 
-        Reservation reservation = new Reservation(member, request.date(), reservationTime, theme);
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .date(request.date())
+                .reservationTime(reservationTime)
+                .theme(theme)
+                .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(savedReservation);
@@ -55,11 +60,16 @@ public class ReservationService {
     public ReservationResponse addAdminReservation(AdminReservationRequest request) {
         ReservationTime reservationTime = findValidatedReservationTime(request.timeId());
         Theme theme = findValidatedTheme(request.themeId());
-        Member customer = findValidatedMember(request.memberId());
         validateNotPast(request.date(), reservationTime.getStartAt());
         validateNotDuplicatedReservation(request.date(), request.timeId(), request.themeId());
 
-        Reservation reservation = new Reservation(customer, request.date(), reservationTime, theme);
+        Member customer = findValidatedMember(request.memberId());
+        Reservation reservation = Reservation.builder()
+                .member(customer)
+                .date(request.date())
+                .reservationTime(reservationTime)
+                .theme(theme)
+                .build();
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(savedReservation);
@@ -70,7 +80,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    // todo: 이거 삭제
     private Reservation findValidatedReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약을 찾을 수 없습니다."));
