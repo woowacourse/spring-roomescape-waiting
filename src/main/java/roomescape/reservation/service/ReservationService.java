@@ -9,48 +9,49 @@ import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.service.MemberService;
+import roomescape.member.repository.MemberJpaRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationJpaRepository;
+import roomescape.reservation.repository.ReservationTimeJpaRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.ThemeResponse;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.repository.ThemeJpaRepository;
 
+// TODO: 테스트 추가
 @Service
 public class ReservationService {
 
     private final ReservationJpaRepository reservationJpaRepository;
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
-    private final MemberService memberService;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private final ThemeJpaRepository themeJpaRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     public ReservationService(
             ReservationJpaRepository ReservationJpaRepository,
-            ReservationTimeService reservationTimeService,
-            ThemeService themeService,
-            MemberService memberService
+            ReservationTimeJpaRepository reservationTimeJpaRepository,
+            ThemeJpaRepository themeJpaRepository,
+            MemberJpaRepository memberJpaRepository
     ) {
         this.reservationJpaRepository = ReservationJpaRepository;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-        this.memberService = memberService;
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
+        this.themeJpaRepository = themeJpaRepository;
+        this.memberJpaRepository = memberJpaRepository;
     }
 
     public ReservationResponse addReservation(
             ReservationRequest reservationRequest,
             MemberRequest memberRequest
     ) {
-        ReservationTimeResponse timeResponse = reservationTimeService.getTime(reservationRequest.timeId());
-        ThemeResponse themeResponse = themeService.getTheme(reservationRequest.themeId());
+        ReservationTime reservationTime = reservationTimeJpaRepository.getById(reservationRequest.timeId());
+        Theme theme = themeJpaRepository.getById(reservationRequest.themeId());
 
         Reservation reservation = new Reservation(
                 reservationRequest.date(),
-                timeResponse.toReservationTime(),
-                themeResponse.toTheme(),
+                reservationTime,
+                theme,
                 memberRequest.toMember()
         );
         validateIsBeforeNow(reservation);
@@ -60,14 +61,14 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(AdminReservationRequest adminReservationRequest) {
-        Member member = memberService.getMemberById(adminReservationRequest.memberId());
-        ReservationTimeResponse timeResponse = reservationTimeService.getTime(adminReservationRequest.timeId());
-        ThemeResponse themeResponse = themeService.getTheme(adminReservationRequest.themeId());
+        Member member = memberJpaRepository.getById(adminReservationRequest.memberId());
+        ReservationTime reservationTime = reservationTimeJpaRepository.getById(adminReservationRequest.timeId());
+        Theme theme = themeJpaRepository.getById(adminReservationRequest.themeId());
 
         Reservation reservation = new Reservation(
                 adminReservationRequest.date(),
-                timeResponse.toReservationTime(),
-                themeResponse.toTheme(),
+                reservationTime,
+                theme,
                 member
         );
         validateIsBeforeNow(reservation);
@@ -103,8 +104,8 @@ public class ReservationService {
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        Theme theme = themeService.getById(themeId);
-        Member member = memberService.getMemberById(memberId);
+        Theme theme = themeJpaRepository.getById(themeId);
+        Member member = memberJpaRepository.getById(memberId);
         return reservationJpaRepository.findByThemeAndMember(theme, member)
                 .stream()
                 .filter(reservation -> reservation.isBetweenInclusive(dateFrom, dateTo))

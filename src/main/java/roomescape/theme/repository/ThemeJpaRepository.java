@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 
@@ -25,4 +26,8 @@ public interface ThemeJpaRepository extends CrudRepository<Theme, Long> {
             @Param("endDate") LocalDate endDate,
             Pageable pageable
     );
+
+    default Theme getById(Long id) {
+        return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. themeId = " + id));
+    }
 }

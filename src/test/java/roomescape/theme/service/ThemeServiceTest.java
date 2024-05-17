@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static roomescape.InitialThemeFixture.INITIAL_THEME_COUNT;
 import static roomescape.InitialThemeFixture.NOT_RESERVED_THEME;
 import static roomescape.InitialThemeFixture.THEME_1;
-import static roomescape.InitialThemeFixture.THEME_2;
 import static roomescape.InitialThemeFixture.THEME_3;
 
 import java.util.List;
@@ -68,14 +67,6 @@ class ThemeServiceTest {
         List<ThemeResponse> themes = themeService.findTrendingThemes(1L);
 
         assertThat(themes).containsExactly(new ThemeResponse(THEME_3));
-    }
-
-    @Test
-    @DisplayName("id값으로 테마를 조회한다.")
-    void getTheme() {
-        ThemeResponse themeResponse = themeService.getTheme(THEME_2.getId());
-
-        assertThat(themeResponse).isEqualTo(new ThemeResponse(THEME_2));
     }
 
     @Test

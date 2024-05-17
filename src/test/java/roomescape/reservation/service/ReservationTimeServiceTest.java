@@ -49,7 +49,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("모든 예약 가능 시간을 조회한다.")
     void getTimes() {
-        List<ReservationTimeResponse> times = reservationTimeService.findTimes();
+        List<ReservationTimeResponse> times = reservationTimeService.findReservationTimes();
 
         assertThat(times).hasSize(INITIAL_RESERVATION_TIME_COUNT);
     }
@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("id에 맞는 예약 가능 시간을 조회한다.")
     void getGetTime() {
-        ReservationTimeResponse timeResponse = reservationTimeService.getTime(RESERVATION_1.getId());
+        ReservationTimeResponse timeResponse = reservationTimeService.getReservationTimeById(RESERVATION_1.getId());
 
         assertThat(timeResponse.startAt()).isEqualTo(RESERVATION_1.getReservationTime().getStartAt().toString());
     }

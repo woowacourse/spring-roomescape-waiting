@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
-import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 
@@ -29,21 +28,6 @@ class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
-
-    @Test
-    @DisplayName("memberId로 Member를 조회한다.")
-    void getMemberById() {
-        Member found = memberService.getMemberById(MEMBER_1.getId());
-
-        assertThat(found).isEqualTo(MEMBER_1);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 memberId로 Member를 조회하면 예외가 발생한다.")
-    void throwExceptionIfNotExistId() {
-        assertThatThrownBy(() -> memberService.getMemberById(NOT_SAVED_MEMBER.getId()))
-                .isInstanceOf(NotFoundException.class);
-    }
 
     @Test
     @DisplayName("모든 Member들의 id와 name을 조회한다.")

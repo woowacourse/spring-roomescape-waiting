@@ -7,13 +7,13 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
-import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeJpaRepository;
 
+// TODO: 테스트 추가
 @Service
 public class ThemeService {
 
@@ -39,13 +39,6 @@ public class ThemeService {
         }
     }
 
-    public ThemeResponse getTheme(Long id) {
-        Theme theme = themeJpaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 id입니다. theme_id = " + id));
-
-        return new ThemeResponse(theme);
-    }
-
     public List<ThemeResponse> findTrendingThemes(Long limit) {
         LocalDate now = LocalDate.now();
         LocalDate trendingStatsStart = now.minusDays(7);
@@ -69,10 +62,5 @@ public class ThemeService {
 
     public void deleteTheme(Long id) {
         themeJpaRepository.deleteById(id);
-    }
-
-    public Theme getById(Long themeId) {
-        return themeJpaRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));
     }
 }

@@ -34,11 +34,6 @@ public class MemberService {
         this.memberJpaRepository = MemberJpaRepository;
     }
 
-    public Member getMemberById(Long memberId) {
-        return memberJpaRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원 id입니다. memberId = " + memberId));
-    }
-
     public List<MemberIdNameResponse> findMembersIdAndName() {
         List<MemberIdNameResponse> memberIdNameResponses = new ArrayList<>();
         for (Member member : memberJpaRepository.findAll()) {

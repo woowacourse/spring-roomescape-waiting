@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.DuplicationException;
-import roomescape.exceptions.NotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
@@ -14,6 +13,7 @@ import roomescape.reservation.repository.ReservationTimeJpaRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeJpaRepository;
 
+// TODO: 테스트 추가
 @Service
 public class ReservationTimeService {
 
@@ -39,14 +39,11 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(reservationTime);
     }
 
-    public ReservationTimeResponse getTime(Long id) {
-        ReservationTime reservationTime = reservationTimeJpaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간 id입니다. time_id = " + id));
-
-        return new ReservationTimeResponse(reservationTime);
+    public ReservationTimeResponse getReservationTimeById(Long id) {
+        return new ReservationTimeResponse(reservationTimeJpaRepository.getById(id));
     }
 
-    public List<ReservationTimeResponse> findTimes() {
+    public List<ReservationTimeResponse> findReservationTimes() {
         List<ReservationTimeResponse> reservationTimeResponses = new ArrayList<>();
         for (ReservationTime reservationTime : reservationTimeJpaRepository.findAll()) {
             reservationTimeResponses.add(new ReservationTimeResponse(reservationTime));
@@ -55,8 +52,7 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findTimesWithAlreadyBooked(LocalDate date, Long themeId) {
-        Theme theme = themeJpaRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("id에 맞는 테마가 없습니다. themeId = " + themeId));
+        Theme theme = themeJpaRepository.getById(themeId);
         List<Long> alreadyBookedTimeIds = reservationJpaRepository.findByDateAndTheme(date, theme)
                 .stream()
                 .map(reservation -> reservation.getReservationTime().getId())

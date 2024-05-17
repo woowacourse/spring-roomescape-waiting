@@ -36,7 +36,7 @@ public class ReservationTimeController {
 
     @GetMapping
     public List<ReservationTimeResponse> findTimes() {
-        return reservationTimeService.findTimes();
+        return reservationTimeService.findReservationTimes();
     }
 
     @GetMapping("/available")
@@ -49,7 +49,7 @@ public class ReservationTimeController {
 
     @GetMapping("/{id}")
     public ReservationTimeResponse getTime(@PathVariable Long id) {
-        return reservationTimeService.getTime(id);
+        return reservationTimeService.getReservationTimeById(id);
     }
 
     @DeleteMapping("/{id}")
