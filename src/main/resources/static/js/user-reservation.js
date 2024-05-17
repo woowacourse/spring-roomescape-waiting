@@ -107,7 +107,7 @@ function renderAvailableTimes(times) {
         return;
     }
 
-    times.availableTimeResponses.forEach(time => {
+    times.forEach(time => {
         const startAt = time.timeResponseDto.startAt;
         const timeId = time.timeResponseDto.id;
         const booked = time.booked;
