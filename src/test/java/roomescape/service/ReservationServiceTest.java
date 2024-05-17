@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.controller.dto.ReservationStatusRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
@@ -52,8 +51,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
-                LocalDate.parse("2025-11-11"),
-                time.getId(), theme.getId(), ReservationStatusRequest.BOOKED);
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         assertAll(
@@ -78,11 +76,9 @@ class ReservationServiceTest extends IntegrationTestSupport {
         Member member2 = memberRepository.save(Member.createUser("고구마2", "email2@email.com", "1234"));
 
         ReservationSaveRequest reservationSaveRequest1 = new ReservationSaveRequest(member1.getId(),
-                LocalDate.parse("2025-11-11"),
-                time.getId(), theme.getId(), ReservationStatusRequest.WAIT);
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
         ReservationSaveRequest reservationSaveRequest2 = new ReservationSaveRequest(member2.getId(),
-                LocalDate.parse("2025-11-11"),
-                time.getId(), theme.getId(), ReservationStatusRequest.WAIT);
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
 
         ReservationResponse reservationResponse1 = reservationService.saveReservation(reservationSaveRequest1);
 
@@ -109,7 +105,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
-                LocalDate.parse("2025-11-11"), 100L, 1L, ReservationStatusRequest.BOOKED);
+                LocalDate.parse("2025-11-11"), 100L, 1L);
         assertThatThrownBy(() -> {
             reservationService.saveReservation(reservationSaveRequest);
         }).isInstanceOf(RoomEscapeBusinessException.class);
@@ -135,7 +131,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void saveDuplicatedReservation() {
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-05-04"),
-                1L, 1L, ReservationStatusRequest.BOOKED);
+                1L, 1L);
 
         assertThatThrownBy(() -> reservationService.saveReservation(reservationSaveRequest))
                 .isInstanceOf(RoomEscapeBusinessException.class);
@@ -146,7 +142,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     void findAllMyReservations() {
         // given
         long memberId = 2L;
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L, ReservationStatusRequest.BOOKED);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(memberId, LocalDate.now(), 1L, 1L);
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when

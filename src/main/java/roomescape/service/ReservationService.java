@@ -46,20 +46,20 @@ public class ReservationService {
         Reservation reservation = createReservation(reservationSaveRequest);
 
         validateDuplicateReservation(reservation);
-        reservation.changeStatus(isAlreadyBooked(reservation));
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
     private Reservation createReservation(ReservationSaveRequest reservationSaveRequest) {
-        return new Reservation(
-                findMemberById(reservationSaveRequest.getMemberId()),
-                reservationSaveRequest.getDate(),
-                findTimeById(reservationSaveRequest.getTimeId()),
-                findThemeById(reservationSaveRequest.getThemeId()),
-                reservationSaveRequest.getStatus().toDomain()
-        );
+        Member member = findMemberById(reservationSaveRequest.memberId());
+        LocalDate date = reservationSaveRequest.date();
+        ReservationTime time = findTimeById(reservationSaveRequest.timeId());
+        Theme theme = findThemeById(reservationSaveRequest.themeId());
+
+        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
+
+        return Reservation.create(member, date, time, theme, isAlreadyBooked);
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
@@ -73,14 +73,6 @@ public class ReservationService {
         if (isReservationExist) {
             throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
         }
-    }
-
-    private boolean isAlreadyBooked(Reservation reservation) {
-        return reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
     }
 
     @Transactional

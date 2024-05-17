@@ -8,56 +8,22 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import roomescape.service.dto.ReservationSaveRequest;
 
-public class UserReservationSaveRequest {
+public record UserReservationSaveRequest(
         @NotNull
         @FutureOrPresent(message = "지나간 날짜의 예약을 할 수 없습니다.")
         @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-        private LocalDate date;
+        LocalDate date,
 
         @NotNull
         @Positive
-        private Long timeId;
+        Long timeId,
 
         @NotNull
         @Positive
-        private Long themeId;
+        Long themeId
+) {
 
-        @NotNull
-        private ReservationStatusRequest status = ReservationStatusRequest.BOOKED;
-
-        protected UserReservationSaveRequest() {
-        }
-
-        public UserReservationSaveRequest(
-                Long memberId,
-                LocalDate date,
-                Long timeId,
-                Long themeId,
-                ReservationStatusRequest status
-        ) {
-                this.date = date;
-                this.timeId = timeId;
-                this.themeId = themeId;
-                this.status = status;
-        }
-
-        public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
-                return new ReservationSaveRequest(memberId, date, timeId, themeId, status);
-        }
-
-        public LocalDate getDate() {
-                return date;
-        }
-
-        public Long getTimeId() {
-                return timeId;
-        }
-
-        public Long getThemeId() {
-                return themeId;
-        }
-
-        public ReservationStatusRequest getStatus() {
-                return status;
-        }
+    public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
+        return new ReservationSaveRequest(memberId, date, timeId, themeId);
+    }
 }

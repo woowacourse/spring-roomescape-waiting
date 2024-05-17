@@ -20,7 +20,8 @@ import roomescape.domain.member.Member;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"member_id", "date", "time_id", "theme_id"})})
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,22 +54,15 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public void changeStatus(boolean alreadyBooked) {
-        if (isBooked() && alreadyBooked) {
-            status = ReservationStatus.WAIT;
-            return;
-        }
-        if (isWait() && !alreadyBooked) {
-            status = ReservationStatus.BOOKED;
-        }
-    }
-
-    private boolean isBooked() {
-        return status == ReservationStatus.BOOKED;
-    }
-
-    private boolean isWait() {
-        return status == ReservationStatus.WAIT;
+    public static Reservation create(
+            Member member,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            boolean isAlreadyBooked
+    ) {
+        ReservationStatus status = isAlreadyBooked ? ReservationStatus.WAIT : ReservationStatus.BOOKED;
+        return new Reservation(member, date, time, theme, status);
     }
 
     public Long getId() {

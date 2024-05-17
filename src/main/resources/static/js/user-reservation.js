@@ -203,8 +203,7 @@ function onWaitButtonClick() {
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
-      timeId: selectedTimeId,
-      status: 'WAIT'
+      timeId: selectedTimeId
     };
 
     /*
