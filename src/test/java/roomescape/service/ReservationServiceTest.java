@@ -71,25 +71,35 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @DisplayName("예약 대기 저장")
     @Test
     void saveWaitReservation() {
+        // given
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
         Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
-        Member member = memberRepository.save(Member.createUser("고구마", "email@email.com", "1234"));
+        Member member1 = memberRepository.save(Member.createUser("고구마1", "email1@email.com", "1234"));
+        Member member2 = memberRepository.save(Member.createUser("고구마2", "email2@email.com", "1234"));
 
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(member.getId(),
+        ReservationSaveRequest reservationSaveRequest1 = new ReservationSaveRequest(member1.getId(),
                 LocalDate.parse("2025-11-11"),
                 time.getId(), theme.getId(), ReservationStatusRequest.WAIT);
-        ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
+        ReservationSaveRequest reservationSaveRequest2 = new ReservationSaveRequest(member2.getId(),
+                LocalDate.parse("2025-11-11"),
+                time.getId(), theme.getId(), ReservationStatusRequest.WAIT);
 
+        ReservationResponse reservationResponse1 = reservationService.saveReservation(reservationSaveRequest1);
+
+        // when
+        ReservationResponse reservationResponse2 = reservationService.saveReservation(reservationSaveRequest2);
+
+        // then
         assertAll(
-                () -> assertThat(reservationResponse.member().name()).isEqualTo("고구마"),
-                () -> assertThat(reservationResponse.date()).isEqualTo(LocalDate.parse("2025-11-11")),
-                () -> assertThat(reservationResponse.time().id()).isEqualTo(time.getId()),
-                () -> assertThat(reservationResponse.time().startAt()).isEqualTo(time.getStartAt()),
-                () -> assertThat(reservationResponse.theme().id()).isEqualTo(theme.getId()),
-                () -> assertThat(reservationResponse.theme().name()).isEqualTo(theme.getName()),
-                () -> assertThat(reservationResponse.theme().description()).isEqualTo(theme.getDescription()),
-                () -> assertThat(reservationResponse.theme().thumbnail()).isEqualTo(theme.getThumbnail()),
-                () -> assertThat(reservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue())
+                () -> assertThat(reservationResponse2.member().name()).isEqualTo("고구마2"),
+                () -> assertThat(reservationResponse2.date()).isEqualTo(LocalDate.parse("2025-11-11")),
+                () -> assertThat(reservationResponse2.time().id()).isEqualTo(time.getId()),
+                () -> assertThat(reservationResponse2.time().startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(reservationResponse2.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(reservationResponse2.theme().name()).isEqualTo(theme.getName()),
+                () -> assertThat(reservationResponse2.theme().description()).isEqualTo(theme.getDescription()),
+                () -> assertThat(reservationResponse2.theme().thumbnail()).isEqualTo(theme.getThumbnail()),
+                () -> assertThat(reservationResponse2.status()).isEqualTo(ReservationStatus.WAIT.getValue())
         );
     }
 
@@ -121,14 +131,14 @@ class ReservationServiceTest extends IntegrationTestSupport {
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("중복된 예약을 시도하면 예약 대기 상태가 된다.")
+    @DisplayName("한 사람이 중복된 예약을 할 수 없다.")
     @Test
     void saveDuplicatedReservation() {
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-05-04"),
                 1L, 1L, ReservationStatusRequest.BOOKED);
-        ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
-        assertThat(reservationResponse.status()).isEqualTo("예약대기");
+        assertThatThrownBy(() -> reservationService.saveReservation(reservationSaveRequest))
+                .isInstanceOf(RoomEscapeBusinessException.class);
     }
 
     @DisplayName("내 예약을 조회한다.")

@@ -45,6 +45,9 @@ public class ReservationService {
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Reservation reservation = createReservation(reservationSaveRequest);
 
+        validateDuplicateReservation(reservation);
+        reservation.changeStatus(isAlreadyBooked(reservation));
+
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
@@ -59,17 +62,26 @@ public class ReservationService {
         );
     }
 
-//    private void checkStatus(Reservation reservation) {
-//        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndTheme(
-//                reservation.getDate(),
-//                reservation.getTime(),
-//                reservation.getTheme()
-//        );
-//
-//        if (isReservationExist) {
-//            throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
-//        }
-//    }
+    private void validateDuplicateReservation(Reservation reservation) {
+        boolean isReservationExist = reservationRepository.existsByDateAndTimeAndThemeAndMember(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getMember()
+        );
+
+        if (isReservationExist) {
+            throw new RoomEscapeBusinessException("이미 존재하는 예약입니다.");
+        }
+    }
+
+    private boolean isAlreadyBooked(Reservation reservation) {
+        return reservationRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+    }
 
     @Transactional
     public void deleteReservation(Long id) {
@@ -80,7 +92,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
+    public List<ReservationResponse> findReservationsByCondition(
+            ReservationConditionRequest reservationConditionRequest) {
         List<ReservationReadOnly> reservations = reservationRepository.findByConditions(
                 reservationConditionRequest.dateFrom(),
                 reservationConditionRequest.dateTo(),

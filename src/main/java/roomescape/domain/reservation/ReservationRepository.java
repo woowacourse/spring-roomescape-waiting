@@ -47,6 +47,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTime(ReservationTime time);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 
     boolean existsByTheme(Theme theme);
 }

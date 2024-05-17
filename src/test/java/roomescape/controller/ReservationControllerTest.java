@@ -20,7 +20,8 @@ import roomescape.service.dto.UserReservationResponse;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 
-    String createdId;
+    String userReservationId;
+    String adminReservationId;
     int adminReservationSize;
     int userReservationSize;
 
@@ -44,7 +45,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             "timeId", 1L,
                             "themeId", 1L);
 
-                    createdId = RestAssured.given().log().all()
+                    adminReservationId = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .body(params)
@@ -109,7 +110,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/admin/reservations/" + createdId)
+                            .when().delete("/admin/reservations/" + adminReservationId)
                             .then().log().all()
                             .statusCode(204);
                 }),
@@ -117,7 +118,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/admin/reservations/" + createdId)
+                            .when().delete("/admin/reservations/" + adminReservationId)
                             .then().log().all()
                             .statusCode(400);
                 })
@@ -143,7 +144,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             "timeId", 1L,
                             "themeId", 1L);
 
-                    createdId = RestAssured.given().log().all()
+                    userReservationId = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
                             .body(params)
@@ -201,7 +202,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
-                            .when().delete("/admin/reservations/" + createdId)
+                            .when().delete("/admin/reservations/" + userReservationId)
                             .then().log().all()
                             .statusCode(404);
                 }),
@@ -209,7 +210,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/admin/reservations/" + createdId)
+                            .when().delete("/admin/reservations/" + userReservationId)
                             .then().log().all()
                             .statusCode(204);
                 })
@@ -236,7 +237,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             "themeId", 1L,
                             "status", "WAIT");
 
-                    createdId = RestAssured.given().log().all()
+                    userReservationId = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
                             .body(params)
@@ -244,7 +245,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .then().log().all()
                             .statusCode(201).extract().header("location").split("/")[2];
                 }),
-                dynamicTest("내 예약 목록을 조회하면 사이즈가 1증가한다.", () -> {
+                dynamicTest("예약이 없으면 예약 상태로 간다.", () -> {
                     UserReservationResponse userReservationResponse = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
@@ -258,14 +259,63 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             () -> assertThat(userReservationResponse.theme()).isEqualTo("이름1"),
                             () -> assertThat(userReservationResponse.date()).isEqualTo(LocalDate.now()),
                             () -> assertThat(userReservationResponse.time()).isEqualTo(LocalTime.of(9, 0, 0)),
-                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue())
+                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.BOOKED.getValue())
                     );
                 }),
-                dynamicTest("어드민은 예약을 삭제한다.", () -> {
+                dynamicTest("한사람이 중복 예약을 생성할 수 없다.", () -> {
+                    Map<String, Object> params = Map.of(
+                            "date", LocalDate.now(),
+                            "timeId", 1L,
+                            "themeId", 1L,
+                            "status", "WAIT");
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", USER_TOKEN)
+                            .body(params)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(400);
+                }),
+                dynamicTest("어드민이 예약 대기를 추가한다.", () -> {
+                    Map<String, Object> params = Map.of(
+                            "date", LocalDate.now(),
+                            "timeId", 1L,
+                            "themeId", 1L,
+                            "status", "WAIT");
+
+                    adminReservationId = RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", ADMIN_TOKEN)
+                            .body(params)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201).extract().header("location").split("/")[2];
+                }),
+                dynamicTest("예약이 있으면 예약 대기 상태로 간다.", () -> {
+                    UserReservationResponse userReservationResponse = RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", ADMIN_TOKEN)
+                            .when().get("/reservations-mine")
+                            .then().log().all()
+                            .statusCode(200)
+                            .extract().as(UserReservationResponse[].class)[0];
+
+                    assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.WAIT.getValue());
+                }),
+                dynamicTest("어드민은 회원의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
-                            .when().delete("/admin/reservations/" + createdId)
+                            .when().delete("/admin/reservations/" + userReservationId)
+                            .then().log().all()
+                            .statusCode(204);
+                }),
+                dynamicTest("어드민은 자신의 예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", ADMIN_TOKEN)
+                            .when().delete("/admin/reservations/" + adminReservationId)
                             .then().log().all()
                             .statusCode(204);
                 })

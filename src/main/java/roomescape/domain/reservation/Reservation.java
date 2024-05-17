@@ -17,7 +17,7 @@ import java.util.Objects;
 import roomescape.domain.member.Member;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"member_id", "date", "time_id", "theme_id"})})
 public class Reservation {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +51,24 @@ public class Reservation {
     }
 
     protected Reservation() {
+    }
+
+    public void changeStatus(boolean alreadyBooked) {
+        if (isBooked() && alreadyBooked) {
+            status = ReservationStatus.WAIT;
+            return;
+        }
+        if (isWait() && !alreadyBooked) {
+            status = ReservationStatus.BOOKED;
+        }
+    }
+
+    private boolean isBooked() {
+        return status == ReservationStatus.BOOKED;
+    }
+
+    private boolean isWait() {
+        return status == ReservationStatus.WAIT;
     }
 
     public Long getId() {
