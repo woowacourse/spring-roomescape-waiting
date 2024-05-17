@@ -42,19 +42,19 @@ class MemberRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
-    void fetchByIdNotPresent() {
+    void findByEmailOrThrowNotPresent() {
         final long id = 100L;
 
-        assertThatThrownBy(() -> memberRepository.fetchById(id)).isInstanceOf(
+        assertThatThrownBy(() -> memberRepository.findByEmailOrThrow(id)).isInstanceOf(
                 MemberNotFoundException.class);
     }
 
     @Test
     @DisplayName("존재하지 않는 id를 조회할 경우 예외가 발생한다.")
-    void fetchByEmailNotPresent() {
+    void findByEmailOrThrowNotPresent() {
         final String email = "notfound@email.com";
 
-        assertThatThrownBy(() -> memberRepository.fetchByEmail(email)).isInstanceOf(
+        assertThatThrownBy(() -> memberRepository.findByEmailOrThrow(email)).isInstanceOf(
                 MemberNotFoundException.class);
     }
 }

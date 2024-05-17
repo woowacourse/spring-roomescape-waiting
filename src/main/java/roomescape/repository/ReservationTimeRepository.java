@@ -6,7 +6,7 @@ import roomescape.service.exception.TimeNotFoundException;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    default ReservationTime fetchById(long id) {
+    default ReservationTime findByIdOrThrow(long id) {
         return findById(id).orElseThrow(() -> new TimeNotFoundException("존재하지 않는 시간입니다."));
     }
 }

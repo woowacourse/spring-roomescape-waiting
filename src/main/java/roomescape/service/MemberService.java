@@ -36,7 +36,7 @@ public class MemberService {
     }
 
     public boolean invalidPassword(final String email, final String rawPassword) {
-        final Member findMember = memberRepository.fetchByEmail(email);
+        final Member findMember = memberRepository.findByEmailOrThrow(email);
         final String encryptedPassword = encryptor.encryptPassword(rawPassword);
         return !encryptedPassword.equals(findMember.getPassword());
     }
@@ -45,7 +45,7 @@ public class MemberService {
         if (invalidPassword(request.email(), request.password())) {
             throw new InvalidRequestException("Invalid email or password");
         }
-        return memberRepository.fetchByEmail(request.email());
+        return memberRepository.findByEmailOrThrow(request.email());
     }
 
     public List<Member> findAll() {
@@ -53,6 +53,6 @@ public class MemberService {
     }
 
     public Member findMemberById(Long id) {
-        return memberRepository.fetchById(id);
+        return memberRepository.findByEmailOrThrow(id);
     }
 }

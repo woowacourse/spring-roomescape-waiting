@@ -35,7 +35,7 @@ class ThemeRepositoryTest {
     void findByIdNotPresent() {
         long id = 100L;
 
-        assertThatThrownBy(() -> themeRepository.fetchById(id)).isInstanceOf(
+        assertThatThrownBy(() -> themeRepository.findByIdOrThrow(id)).isInstanceOf(
                 ThemeNotFoundException.class);
     }
 }

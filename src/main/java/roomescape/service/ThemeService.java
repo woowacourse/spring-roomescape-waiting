@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.controller.theme.dto.CreateThemeRequest;
@@ -10,16 +12,14 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.ThemeUsedException;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Service
 public class ThemeService {
 
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
-    public ThemeService(final ReservationRepository reservationRepository, final ThemeRepository themeRepository) {
+    public ThemeService(final ReservationRepository reservationRepository,
+                        final ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
     }
@@ -40,7 +40,7 @@ public class ThemeService {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ThemeUsedException("예약된 테마는 삭제할 수 없습니다.");
         }
-        final Theme findTheme = themeRepository.fetchById(id);
+        final Theme findTheme = themeRepository.findByIdOrThrow(id);
         themeRepository.deleteById(findTheme.getId());
     }
 
@@ -49,7 +49,8 @@ public class ThemeService {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }
-        final List<Theme> reservations = reservationRepository.findPopularThemes(from, until, limit);
+        final List<Theme> reservations = reservationRepository.findPopularThemes(from, until,
+                limit);
         return reservations.stream()
                 .map(PopularThemeResponse::from)
                 .toList();

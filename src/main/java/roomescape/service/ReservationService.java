@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
@@ -15,9 +17,6 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -51,11 +50,13 @@ public class ReservationService {
     }
 
     public Reservation addReservation(final CreateReservationRequest reservationRequest) {
-        final ReservationTime time = reservationTimeRepository.fetchById(reservationRequest.timeId());
-        final Theme theme = themeRepository.fetchById(reservationRequest.themeId());
-        final Member member = memberRepository.fetchById(reservationRequest.memberId());
+        final ReservationTime time = reservationTimeRepository.findByIdOrThrow(
+                reservationRequest.timeId());
+        final Theme theme = themeRepository.findByIdOrThrow(reservationRequest.themeId());
+        final Member member = memberRepository.findByEmailOrThrow(reservationRequest.memberId());
 
-        final Reservation reservation = new Reservation(null, member, reservationRequest.date(), time, theme);
+        final Reservation reservation = new Reservation(null, member, reservationRequest.date(),
+                time, theme);
 
         validateDuplicate(theme, time, reservation);
         final LocalDateTime reservationDateTime = reservation.getDate().atTime(time.getStartAt());
@@ -65,7 +66,7 @@ public class ReservationService {
     }
 
     public void deleteReservation(final long id) {
-        final Reservation fetchReservation = reservationRepository.fetchById(id);
+        final Reservation fetchReservation = reservationRepository.findByIdOrThrow(id);
         reservationRepository.deleteById(fetchReservation.getId());
     }
 
@@ -75,9 +76,11 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicate(final Theme theme, final ReservationTime time, final Reservation reservation) {
+    private void validateDuplicate(final Theme theme, final ReservationTime time,
+                                   final Reservation reservation) {
         final boolean isExistsReservation = reservationRepository
-                .existsByThemeIdAndTimeIdAndDate(theme.getId(), time.getId(), reservation.getDate());
+                .existsByThemeIdAndTimeIdAndDate(theme.getId(), time.getId(),
+                        reservation.getDate());
         if (isExistsReservation) {
             throw new DuplicateReservationException("중복된 시간으로 예약이 불가합니다.");
         }
