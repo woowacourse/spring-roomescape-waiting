@@ -41,8 +41,7 @@ public class MemberService {
         validateExist(signupRequest);
         Password password = passwordEncoder.encode(signupRequest.password());
         final Member member = memberRepository.save(signupRequest.toEntity(password));
-        String accessToken = jwtTokenProvider.createToken(signupRequest.email());
-        return new SignupResponse(member.getId(), accessToken);
+        return new SignupResponse(member.getId());
     }
 
     private void validateExist(final SignupRequest signupRequest) {

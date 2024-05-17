@@ -1,7 +1,7 @@
 package roomescape.controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,17 +28,18 @@ public class ClientMemberController {
     }
 
     @PostMapping("/members")
-    ResponseEntity<SignupResponse> signup(@RequestBody SignupRequest signupRequest, HttpServletResponse response) {
+    ResponseEntity<SignupResponse> signup(@RequestBody SignupRequest signupRequest) {
         final SignupResponse signupResponse = memberService.createUser(signupRequest);
-        setCookie(response, signupResponse.accessToken());
         return ResponseEntity.ok(signupResponse);
     }
 
     @PostMapping("/login")
-    ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) {
         final TokenResponse tokenResponse = memberService.login(loginRequest);
-        setCookie(response, tokenResponse.accessToken());
-        return ResponseEntity.ok().build();
+        final ResponseCookie cookie = createCookie(tokenResponse.accessToken());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
     @GetMapping("/login/check")
@@ -48,16 +49,17 @@ public class ClientMemberController {
     }
 
     @PostMapping("/logout")
-    ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie(authorizationExtractor.TOKEN_NAME, "");
-        response.addCookie(cookie);
-        return ResponseEntity.ok().build();
+    ResponseEntity<Void> logout() {
+        ResponseCookie cookie = createCookie("");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
-    private void setCookie(final HttpServletResponse response, final String accessToken) {
-        Cookie cookie = new Cookie(authorizationExtractor.TOKEN_NAME, accessToken);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+    private ResponseCookie createCookie(final String accessToken) {
+        return ResponseCookie.from(authorizationExtractor.TOKEN_NAME, accessToken)
+                .httpOnly(true)
+                .path("/")
+                .build();
     }
 }
