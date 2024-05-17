@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,13 +22,21 @@ public class RoleCheckInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Cookie[] cookies = request.getCookies();
-        String token = CookieUtils.extractTokenFrom(cookies);
-
-        LoginMemberInToken loginMemberInToken = tokenProvider.getLoginMember(token);
-        if (!loginMemberInToken.role().isAdmin()) {
-            throw new InValidRoleException("접근 권한이 없습니다.");
+        if (!hasPermission(request)) {
+            throw new InValidRoleException("권한이 없습니다.");
         }
         return true;
+    }
+
+    private boolean hasPermission(final HttpServletRequest request) {
+        try {
+            Cookie[] cookies = request.getCookies();
+            String token = CookieUtils.extractTokenFrom(cookies);
+
+            LoginMemberInToken loginMemberInToken = tokenProvider.getLoginMember(token);
+            return loginMemberInToken.role().isAdmin();
+        } catch (IllegalArgumentException | JwtException e) {
+            return false;
+        }
     }
 }
