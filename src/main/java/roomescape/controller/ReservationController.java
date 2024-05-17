@@ -52,7 +52,7 @@ public class ReservationController {
             throw new AuthorizationException();
         }
 
-        reservationService.deleteReservation(id, member.role());
+        reservationService.deleteByUser(id);
         return ResponseEntity.noContent().build();
     }
 }
