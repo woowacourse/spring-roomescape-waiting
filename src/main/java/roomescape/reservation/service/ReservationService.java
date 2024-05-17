@@ -131,7 +131,7 @@ public class ReservationService {
         if (requestDate.isBefore(today)) {
             return true;
         }
-        if (requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime)) {
+        if (requestDate.isEqual(today) && requestReservationTime.isBefore(nowTime)) {
             return true;
         }
         return false;
