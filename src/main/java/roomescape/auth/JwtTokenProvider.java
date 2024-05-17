@@ -1,11 +1,14 @@
 package roomescape.auth;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.exception.AccessNotAllowException;
-
-import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
@@ -29,7 +32,7 @@ public class JwtTokenProvider {
 
     public String getPayload(String token) {
         if (!validateToken(token)) {
-            throw new AccessNotAllowException("유효하지 않는 토큰입니다.");
+            throw new AccessNotAllowException("유효하지 않은 토큰입니다.");
         }
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }

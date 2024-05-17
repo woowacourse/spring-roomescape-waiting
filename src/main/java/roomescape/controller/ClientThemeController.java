@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.dto.ThemeResponses;
 import roomescape.service.ThemeService;
-
-import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/themes")
@@ -25,7 +24,9 @@ public class ClientThemeController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<ThemeResponses> read(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate, @RequestParam Long size) {
+    public ResponseEntity<ThemeResponses> read(@RequestParam LocalDate startDate,
+                                               @RequestParam LocalDate endDate,
+                                               @RequestParam Long size) {
         return ResponseEntity.ok(themeService.getPopularThemeList(startDate, endDate, size));
     }
 }

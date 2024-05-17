@@ -1,11 +1,11 @@
 package roomescape.domain.dto;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SignupRequestTest {
     @DisplayName("필드 중 빈 값이 존재할 경우 예외를 발생한다.")

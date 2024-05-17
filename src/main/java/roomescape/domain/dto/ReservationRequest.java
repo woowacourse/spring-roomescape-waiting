@@ -1,9 +1,8 @@
 package roomescape.domain.dto;
 
+import java.time.LocalDate;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 import roomescape.exception.clienterror.InvalidIdException;
-
-import java.time.LocalDate;
 
 public record ReservationRequest(LocalDate date, Long timeId, Long themeId, Long memberId) {
 
