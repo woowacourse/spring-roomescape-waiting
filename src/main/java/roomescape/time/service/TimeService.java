@@ -26,7 +26,8 @@ public class TimeService {
 
     public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<ReservationTime> allTime = timeRepository.findAll();
-        List<ReservationTime> alreadyBookedTime = timeRepository.findTimesExistsReservationDateAndThemeId(date, themeId);
+        List<ReservationTime> alreadyBookedTime = timeRepository.findTimesExistsReservationDateAndThemeId(date,
+                themeId);
 
         return allTime.stream()
                 .map(time -> AvailableTimeResponse.of(time, alreadyBookedTime.contains(time)))

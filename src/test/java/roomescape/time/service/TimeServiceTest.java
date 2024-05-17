@@ -1,5 +1,11 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,13 +17,6 @@ import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.TimeCreateRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.repository.TimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class TimeServiceTest {

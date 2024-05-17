@@ -40,10 +40,6 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme withId(Long id) {
-        return new Theme(id, this.name, this.description, this.thumbnail);
-    }
-
     public Long getId() {
         return id;
     }

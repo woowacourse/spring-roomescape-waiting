@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.member.domain.Member;
 import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
 import roomescape.test.RepositoryTest;
 

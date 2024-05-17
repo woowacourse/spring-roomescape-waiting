@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoggedInMember;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.member.domain.Member;
 import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 

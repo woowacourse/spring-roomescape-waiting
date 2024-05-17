@@ -90,10 +90,10 @@ public class Reservation {
         }
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id)
-               && Objects.equals(member, that.member)
-               && Objects.equals(date, that.date)
-               && Objects.equals(time, that.time)
-               && Objects.equals(theme, that.theme);
+                && Objects.equals(member, that.member)
+                && Objects.equals(date, that.date)
+                && Objects.equals(time, that.time)
+                && Objects.equals(theme, that.theme);
     }
 
     @Override
