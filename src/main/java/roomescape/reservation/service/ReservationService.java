@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
@@ -89,7 +88,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional
     public List<ReservationResponse> findReservations() {
         return reservationJpaRepository.findAll()
                 .stream()

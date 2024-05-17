@@ -7,8 +7,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.InitialDataFixture.RESERVATION_1;
-import static roomescape.InitialDataFixture.RESERVATION_2;
+import static roomescape.InitialDataFixture.*;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 
 class ReservationTest {
@@ -18,8 +17,8 @@ class ReservationTest {
     void formatGetDate() {
         Reservation reservation = new Reservation(
                 LocalDate.of(2024, 4, 24),
-                null,
-                null,
+                RESERVATION_TIME_1,
+                THEME_1,
                 MEMBER_1
         );
 

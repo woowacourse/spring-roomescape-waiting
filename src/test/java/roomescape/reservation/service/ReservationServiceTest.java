@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationRequest;
@@ -102,6 +103,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("모든 예약들을 조회한다.")
+    @Transactional
     void getReservations() {
         List<ReservationResponse> reservations = reservationService.findReservations();
 

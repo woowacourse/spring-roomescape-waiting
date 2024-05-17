@@ -1,10 +1,12 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.*;
-import roomescape.reservation.domain.Reservation;
+import roomescape.exceptions.MissingRequiredFieldException;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
+import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Member {
@@ -29,6 +31,7 @@ public class Member {
     }
 
     public Member(Long id, Name name, Email email, Role role, Password password) {
+        validateNotNull(name, email, role, password);
         this.id = id;
         this.name = name;
         this.email = email;
@@ -42,6 +45,21 @@ public class Member {
 
     public Member(Long id, String name, String email, String role, String password) {
         this(id, new Name(name), new Email(email), Role.valueOf(role), new Password(password));
+    }
+
+    private void validateNotNull(Name name, Email email, Role role, Password password) {
+        if (name == null) {
+            throw new MissingRequiredFieldException(LocalDate.class.getSimpleName() + "값이 null 입니다.");
+        }
+        if (email == null) {
+            throw new MissingRequiredFieldException(ReservationTime.class.getSimpleName() + "값이 null 입니다.");
+        }
+        if (role == null) {
+            throw new MissingRequiredFieldException(Theme.class.getSimpleName() + "값이 null 입니다.");
+        }
+        if (password == null) {
+            throw new MissingRequiredFieldException(Member.class.getSimpleName() + "값이 null 입니다.");
+        }
     }
 
     public boolean isAdmin() {
