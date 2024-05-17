@@ -8,7 +8,7 @@ GET http://localhost:8080/reservations/search?themeId=1&memberId=1&dateFrom=2024
 
 ### 사용자 별 예약 조회 API
 
-GET http://localhost:8080/reservations-mine
+GET http://localhost:8080/reservations/mine
 
 ### 사용자 예약 추가 API
 
