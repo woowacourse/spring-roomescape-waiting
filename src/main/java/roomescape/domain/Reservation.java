@@ -72,10 +72,6 @@ public class Reservation {
         return theme;
     }
 
-    public Reservation withId(long id) {
-        return new Reservation(id, member, date, time, theme);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
