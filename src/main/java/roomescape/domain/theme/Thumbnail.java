@@ -2,9 +2,9 @@ package roomescape.domain.theme;
 
 public class Thumbnail {
 
-    private  String thumbnail;
+    private String thumbnail;
 
-    public Thumbnail() {
+    protected Thumbnail() {
     }
 
     public Thumbnail(String thumbnail) {

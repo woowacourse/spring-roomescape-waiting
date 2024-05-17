@@ -22,7 +22,7 @@ public class Theme {
     @Embedded
     private Thumbnail thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(String name, String description, String thumbnail) {
