@@ -140,7 +140,7 @@ class ReservationServiceTest {
     @Test
     void deleteNonExistingReservationThrowsException() {
         // given
-        long reservationId = 5L;
+        long reservationId = 999L;
 
         // when & then
         assertThrows(NoSuchElementException.class, () -> reservationService.delete(reservationId));
