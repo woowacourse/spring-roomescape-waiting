@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -35,6 +36,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponses findEntireReservationList() {
         final List<ReservationResponse> reservationResponses = reservationRepository.findAll()
                 .stream()
@@ -88,6 +90,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponses findReservations(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                                  final LocalDate dateTo) {
         final List<ReservationResponse> reservationResponses = reservationRepository
@@ -98,6 +101,7 @@ public class ReservationService {
         return new ReservationResponses(reservationResponses);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationsMineResponse> findReservationsByMember(final Member member) {
         return reservationRepository.findByMember(member)
                 .stream()
