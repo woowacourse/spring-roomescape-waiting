@@ -22,6 +22,16 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
+    @Query("""
+            SELECT r FROM Reservation AS r
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+            AND (:memberId IS NULL OR r.member.id = :memberId)
+            AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+            AND (:dateTo IS NULL OR r.date <= :dateTo)
+            """)
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId,
+                                                             LocalDate dateFrom, LocalDate dateTo);
+
     @Modifying
     @Query("delete from Reservation where id = :id")
     int deleteById(@Param("id") long id);
