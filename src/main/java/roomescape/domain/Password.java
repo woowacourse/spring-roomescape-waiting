@@ -1,10 +1,13 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Password {
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String salt;
 
     protected Password() {
