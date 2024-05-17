@@ -11,7 +11,7 @@ public class PlayerName {
 
     private String name;
 
-    public PlayerName() {
+    protected PlayerName() {
     }
 
     public PlayerName(String name) {

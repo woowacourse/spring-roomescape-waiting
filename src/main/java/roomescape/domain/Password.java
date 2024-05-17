@@ -12,7 +12,7 @@ public class Password {
 
     private String password;
 
-    public Password() {
+    protected Password() {
     }
 
     public Password(String password) {
@@ -26,11 +26,11 @@ public class Password {
         this.password = password;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public boolean matches(String password) {
         return this.password.matches(password);
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

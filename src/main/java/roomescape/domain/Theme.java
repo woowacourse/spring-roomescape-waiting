@@ -25,7 +25,7 @@ public class Theme {
 
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(ThemeName name, String description, String thumbnail) {
@@ -56,7 +56,7 @@ public class Theme {
     }
 
     public String getName() {
-        return name.asText();
+        return name.getName();
     }
 
     public String getDescription() {
