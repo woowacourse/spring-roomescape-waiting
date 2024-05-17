@@ -33,7 +33,7 @@ public class MemberReservation {
         this(null, member, reservation);
     }
 
-    public boolean isMember(Member member) {
+    public boolean isRegisteredMember(Member member) {
         return this.member.equals(member);
     }
 

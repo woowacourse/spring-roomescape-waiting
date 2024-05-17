@@ -84,10 +84,14 @@ public class ReservationService {
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         Member member = getMember(authInfo.getId());
-        if (!member.isAdmin() && !memberReservation.isMember(member)) {
+        if (!canDelete(member, memberReservation)) {
             throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
         memberReservationRepository.deleteById(memberReservationId);
+    }
+
+    private boolean canDelete(Member member, MemberReservation memberReservation) {
+        return member.isAdmin() || memberReservation.isRegisteredMember(member);
     }
 
     @Transactional
