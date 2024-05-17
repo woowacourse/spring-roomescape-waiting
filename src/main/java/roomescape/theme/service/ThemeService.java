@@ -28,7 +28,6 @@ public class ThemeService {
     }
 
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        themeRepository.existsById(1L);
         Theme theme = themeRequest.toTheme();
         Theme savedTheme = themeRepository.save(theme);
         return ThemeResponse.fromTheme(savedTheme);
