@@ -72,7 +72,7 @@ public class ReservationTimeService {
 
     private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Reservation> reservations) {
         return reservations.stream()
-                .anyMatch(reservation -> Objects.equals(reservation.getTimeId(), reservationTime.getId()));
+                .anyMatch(reservation -> Objects.equals(reservation.getReservationTime(), reservationTime));
     }
 
     @Transactional

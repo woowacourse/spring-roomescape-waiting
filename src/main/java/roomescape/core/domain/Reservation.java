@@ -22,21 +22,18 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    @Column(nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id")
-    @Column(nullable = false)
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
-    @Column(nullable = false)
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
@@ -91,10 +88,6 @@ public class Reservation {
         return id;
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
     public Member getMember() {
         return member;
     }
@@ -107,16 +100,8 @@ public class Reservation {
         return date.format(DateTimeFormatter.ISO_DATE);
     }
 
-    public Long getTimeId() {
-        return time.getId();
-    }
-
     public ReservationTime getReservationTime() {
         return time;
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
     }
 
     public Theme getTheme() {
