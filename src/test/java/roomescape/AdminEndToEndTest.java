@@ -1,24 +1,22 @@
 package roomescape;
 
+import static org.hamcrest.CoreMatchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.is;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminEndToEndTest {
 
     @LocalServerPort
@@ -33,8 +31,7 @@ class AdminEndToEndTest {
         accessToken = RestAssured
                 .given().log().all()
                 .body(new MemberLoginRequest("redddy@gmail.com", "0000"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(ContentType.JSON)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
     }
@@ -75,7 +72,8 @@ class AdminEndToEndTest {
     @Test
     @DisplayName("테마 저장 및 삭제")
     void saveAndDeleteTheme() {
-        final Map<String, String> params = Map.of("name", "v1", "description", "blah", "thumbnail", "dkdk");
+        final Map<String, String> params = Map.of("name", "v1", "description", "blah", "thumbnail",
+                "dkdk");
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
@@ -108,8 +106,10 @@ class AdminEndToEndTest {
     @Test
     @DisplayName("예약 저장 및 삭제")
     void saveAndDeleteReservation() {
-        final Map<String, String> params = Map.of("date", LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE),
-                "timeId", "1", "themeId", "1");
+        final Map<String, String> params = Map.of(
+                "date", LocalDate.now().plusDays(1).toString(),
+                "timeId", "1",
+                "themeId", "1");
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)

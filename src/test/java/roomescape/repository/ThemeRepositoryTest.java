@@ -1,22 +1,21 @@
 package roomescape.repository;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.Theme;
-import roomescape.service.exception.ThemeNotFoundException;
-
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Theme;
+import roomescape.service.exception.ThemeNotFoundException;
+
+@DataJpaTest
 class ThemeRepositoryTest {
 
     @Autowired
-    private ThemeRepository themeRepository;
+    ThemeRepository themeRepository;
 
     @Test
     @DisplayName("모든 테마 목록을 조회한다.")
@@ -36,6 +35,7 @@ class ThemeRepositoryTest {
     void findByIdNotPresent() {
         long id = 100L;
 
-        assertThatThrownBy(() -> themeRepository.fetchById(id)).isInstanceOf(ThemeNotFoundException.class);
+        assertThatThrownBy(() -> themeRepository.fetchById(id)).isInstanceOf(
+                ThemeNotFoundException.class);
     }
 }

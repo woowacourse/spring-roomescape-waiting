@@ -2,20 +2,20 @@ package roomescape.controller.reservation;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.reservation.dto.CreateReservationRequest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
-
-import java.time.LocalDate;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationControllerTest {
 
     @LocalServerPort
@@ -34,6 +34,16 @@ class AdminReservationControllerTest {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
+    }
+
+    @Test
+    @DisplayName("ADMIN이 관리자 메인 페이지로 이동")
+    void moveToAdminMainPage() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(200);
     }
 
     @Test
