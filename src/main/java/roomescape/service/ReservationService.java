@@ -10,6 +10,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.request.ReservationFilterRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -41,13 +42,14 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findDistinctReservations(Long memberId, Long themeId,
-                                                              String dateFrom, String dateTo) {
-        LocalDate from = LocalDate.parse(dateFrom);
-        LocalDate to = LocalDate.parse(dateTo);
-        Member member = getMemberById(memberId);
-        Theme theme = getThemeById(themeId);
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to)
+    public List<ReservationResponse> findDistinctReservations(ReservationFilterRequest request) {
+        Member member = getMemberById(request.memberId());
+        Theme theme = getThemeById(request.themeId());
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                        member,
+                        theme,
+                        request.dateFrom(),
+                        request.dateTo())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

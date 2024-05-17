@@ -162,4 +162,20 @@ class AdminReservationTest {
                 .statusCode(400)
                 .body(containsString("[ERROR] 테마는 비워둘 수 없습니다."));
     }
+
+    @DisplayName("필터링 된 예약 내역을 조회하면 200 OK와 응답을 반환한다.")
+    @Test
+    void findAllByMemberAndThemeAndPeriod() {
+        LocalDate from = LocalDate.now().minusDays(3);
+        LocalDate to = LocalDate.now();
+        String uriPath = "/admin/reservations?memberId=1&themeId=2&dateFrom=" + from + "&dateTo=" + to;
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", accessToken)
+                .when().get(uriPath)
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2));
+    }
 }
