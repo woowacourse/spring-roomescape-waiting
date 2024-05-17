@@ -1,11 +1,13 @@
 package roomescape.member.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Embeddable;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 
 import java.util.regex.Pattern;
 
+@Embeddable
 public record Email(String value) {
     private static final Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 

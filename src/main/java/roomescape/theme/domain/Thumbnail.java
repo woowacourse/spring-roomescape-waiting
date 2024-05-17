@@ -1,9 +1,11 @@
 package roomescape.theme.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Embeddable;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 
+@Embeddable
 public record Thumbnail(String value) {
 
     public Thumbnail(final String value) {

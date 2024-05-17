@@ -1,9 +1,11 @@
 package roomescape.member.domain;
 
 import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Embeddable;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
 
+@Embeddable
 public record Password(String value) {
     public static final int MIN_LENGTH = 8;
     public static final int MAX_LENGTH = 16;
