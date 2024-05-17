@@ -1,5 +1,6 @@
 package roomescape.core.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -7,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,14 +20,27 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    @Column(nullable = false)
     private Member member;
+
+    @Column(nullable = false)
     private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
+    @Column(nullable = false)
     private ReservationTime time;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
+    @Column(nullable = false)
     private Theme theme;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     public Reservation() {
