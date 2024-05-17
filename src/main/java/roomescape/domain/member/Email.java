@@ -12,7 +12,7 @@ public class Email {
     private static final int MIN_LENGTH = 11;
     private static final int MAX_LENGTH = 40;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     public Email() {
