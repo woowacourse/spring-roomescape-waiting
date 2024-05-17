@@ -14,13 +14,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
     @Query("""
-                  SELECT r         
-                    FROM Reservation AS r 
-                    JOIN ReservationTime AS t ON r.time.id = t.id
-                    JOIN Theme AS th ON r.theme.id = th.id
-                    JOIN Member AS m ON r.member.id = m.id
-                   WHERE (:memberId = m.id OR :memberId IS NULL)
-                   AND (:themeId = th.id OR :themeId IS NULL)
+                  SELECT r, r.time, r.theme, r.member
+                    FROM Reservation AS r
+                    JOIN FETCH r.theme
+                    JOIN FETCH r.member
+                    JOIN FETCH r.time
+                   WHERE (:memberId = r.member.id OR :memberId IS NULL)
+                   AND (:themeId = r.theme.id OR :themeId IS NULL)
                    AND (
                     (:from IS NULL AND :to IS NULL)
                     OR (:to IS NULL AND r.date.date >= :from)
