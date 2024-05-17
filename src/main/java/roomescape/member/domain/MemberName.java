@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import java.util.Objects;
 import roomescape.global.exception.member.InvalidMemberNameException;
 
-public class Name {
+public class MemberName {
 
     private static final int MIN_LENGTH = 1;
     private static final int MAX_LENGTH = 5;
@@ -12,12 +12,12 @@ public class Name {
     @Column(name = "name", nullable = false)
     private String value;
 
-    public Name(String value) {
+    public MemberName(String value) {
         validate(value);
         this.value = value;
     }
 
-    public Name() {
+    public MemberName() {
     }
 
     private void validate(String value) {
@@ -57,8 +57,8 @@ public class Name {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Name name = (Name) o;
-        return Objects.equals(value, name.value);
+        MemberName memberName = (MemberName) o;
+        return Objects.equals(value, memberName.value);
     }
 
     @Override

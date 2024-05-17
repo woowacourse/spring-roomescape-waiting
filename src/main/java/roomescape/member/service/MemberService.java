@@ -6,8 +6,8 @@ import roomescape.global.exception.DuplicateSaveException;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.domain.Name;
 import roomescape.member.dto.JoinRequest;
 import roomescape.member.dto.MemberResponse;
 
@@ -35,8 +35,8 @@ public class MemberService {
             throw new DuplicateSaveException("중복되는 이메일의 회원이 존재합니다");
         }
 
-        Name joinName = new Name(joinRequest.name());
-        if (memberRepository.existsByName(joinName)) {
+        MemberName joinMemberName = new MemberName(joinRequest.name());
+        if (memberRepository.existsByMemberName(joinMemberName)) {
             throw new DuplicateSaveException("중복되는 이름의 회원이 존재합니다");
         }
 

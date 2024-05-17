@@ -16,7 +16,7 @@ public class Member {
     private Long id;
 
     @Embedded
-    private Name name;
+    private MemberName memberName;
 
     @Embedded
     private Email email;
@@ -32,7 +32,7 @@ public class Member {
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
-        this.name = new Name(name);
+        this.memberName = new MemberName(name);
         this.email = new Email(email);
         this.password = new Password(password);
         this.role = role;
@@ -55,7 +55,7 @@ public class Member {
     }
 
     public String getName() {
-        return name.getValue();
+        return memberName.getValue();
     }
 
     public String getEmail() {
