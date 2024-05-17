@@ -11,6 +11,7 @@ import roomescape.infrastructure.auth.MemberAuthenticationInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
     private final AdminAuthenticationInterceptor adminAuthenticationInterceptor;
     private final MemberAuthenticationInterceptor memberAuthenticationInterceptor;

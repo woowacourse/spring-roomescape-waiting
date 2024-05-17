@@ -2,7 +2,6 @@ package roomescape.presentation.acceptance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 import io.restassured.RestAssured;
@@ -17,6 +16,7 @@ import roomescape.application.dto.TokenRequest;
 import roomescape.domain.ThemeRepository;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
+
     @Autowired
     private ThemeRepository themeRepository;
 

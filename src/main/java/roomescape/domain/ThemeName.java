@@ -6,6 +6,7 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class ThemeName {
+
     private static final int NAME_MAX_LENGTH = 20;
 
     private String name;

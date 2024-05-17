@@ -11,6 +11,7 @@ import roomescape.exception.RoomescapeException;
 
 @Component
 public class JwtTokenManager implements TokenManager {
+
     private static final String TOKEN_KEY = "token";
     private static final int ONE_MINUTE = 60;
 

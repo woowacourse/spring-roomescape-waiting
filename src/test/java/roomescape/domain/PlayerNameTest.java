@@ -11,6 +11,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 class PlayerNameTest {
+
     @DisplayName("이름이 비어있거나 null이면 예외가 발생한다.")
     @ParameterizedTest
     @NullAndEmptySource

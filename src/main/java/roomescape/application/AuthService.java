@@ -15,6 +15,7 @@ import roomescape.exception.RoomescapeException;
 
 @Service
 public class AuthService {
+
     private final TokenProvider tokenProvider;
     private final TokenManager tokenManager;
     private final MemberQueryRepository memberQueryRepository;

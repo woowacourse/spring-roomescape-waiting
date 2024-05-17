@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeException;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
+
     private final JwtTokenProperties jwtTokenProperties;
 
     public JwtTokenProvider(JwtTokenProperties jwtTokenProperties) {

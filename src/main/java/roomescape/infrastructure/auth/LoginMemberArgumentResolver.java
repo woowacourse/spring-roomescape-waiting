@@ -15,6 +15,7 @@ import roomescape.exception.RoomescapeException;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+
     private final AuthService authService;
 
     public LoginMemberArgumentResolver(AuthService authService) {

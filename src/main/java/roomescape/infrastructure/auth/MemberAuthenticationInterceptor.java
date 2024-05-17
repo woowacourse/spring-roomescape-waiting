@@ -11,6 +11,7 @@ import roomescape.exception.RoomescapeException;
 
 @Component
 public class MemberAuthenticationInterceptor implements HandlerInterceptor {
+
     private final AuthService authService;
 
     public MemberAuthenticationInterceptor(AuthService authService) {

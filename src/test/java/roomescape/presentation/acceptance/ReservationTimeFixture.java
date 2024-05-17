@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
 class ReservationTimeFixture {
+
     static ReservationTime defaultValue() {
         return of(0, 0);
     }

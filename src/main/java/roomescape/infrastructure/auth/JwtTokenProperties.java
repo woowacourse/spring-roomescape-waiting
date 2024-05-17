@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "security.jwt.token")
 public class JwtTokenProperties {
+
     private static final int SECOND = 1000;
     private static final int MINUTE = 60;
 

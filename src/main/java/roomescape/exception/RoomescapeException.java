@@ -1,6 +1,7 @@
 package roomescape.exception;
 
 public class RoomescapeException extends RuntimeException {
+
     private final RoomescapeErrorCode errorCode;
     private final String message;
 

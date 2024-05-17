@@ -12,6 +12,7 @@ import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Theme {
+
     private static final int MAX_DESCRIPTION_LENGTH = 255;
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

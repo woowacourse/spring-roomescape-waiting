@@ -13,6 +13,7 @@ import roomescape.application.dto.ReservationTimeResponse;
 import roomescape.application.dto.TokenRequest;
 
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
+
     private String adminToken;
 
     @BeforeEach

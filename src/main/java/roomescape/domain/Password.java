@@ -7,6 +7,7 @@ import roomescape.exception.RoomescapeException;
 
 @Embeddable
 public class Password {
+
     private static final Pattern PASSWORD_REGEX = Pattern.compile(
             "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,20}$", Pattern.CASE_INSENSITIVE);
 

@@ -4,6 +4,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeName;
 
 class ThemeFixture {
+
     static Theme defaultValue() {
         return of("themeName", "description", "url");
     }

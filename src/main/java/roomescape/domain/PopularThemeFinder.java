@@ -6,6 +6,7 @@ import java.util.List;
 
 @DomainService
 public class PopularThemeFinder {
+
     private static final int START_DAY_TO_SUBTRACT = 8;
     private static final int END_DATE_TO_SUBTRACT = 1;
     private static final int COUNT_OF_LIMIT = 10;

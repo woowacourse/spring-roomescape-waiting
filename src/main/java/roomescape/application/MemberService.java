@@ -8,6 +8,7 @@ import roomescape.domain.MemberQueryRepository;
 
 @Service
 public class MemberService {
+
     private final MemberQueryRepository memberQueryRepository;
 
     public MemberService(MemberQueryRepository memberQueryRepository) {

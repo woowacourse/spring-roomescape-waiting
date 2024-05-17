@@ -19,6 +19,7 @@ import roomescape.infrastructure.auth.AuthenticationPrincipal;
 
 @RestController
 public class ReservationController {
+
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {

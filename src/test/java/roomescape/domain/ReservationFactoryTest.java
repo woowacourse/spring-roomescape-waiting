@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeException;
 
 @ServiceTest
 class ReservationFactoryTest {
+
     @Autowired
     private ReservationFactory reservationFactory;
 

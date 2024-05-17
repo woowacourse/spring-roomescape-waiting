@@ -16,6 +16,7 @@ import roomescape.exception.RoomescapeException;
 
 @Service
 public class ReservationTimeService {
+
     private final ReservationTimeRepository reservationTimesRepository;
     private final ReservationQueryRepository reservationQueryRepository;
 

@@ -7,6 +7,7 @@ import roomescape.domain.PlayerName;
 import roomescape.domain.Role;
 
 public class MemberFixture {
+
     public static Member defaultValue() {
         return of("test", "admin@wooteco.com", "wootecoCrew6!", Role.ADMIN);
     }

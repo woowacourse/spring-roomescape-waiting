@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeException;
 
 @ServiceTest
 class ReservationTimeServiceTest {
+
     @Autowired
     private ReservationTimeService reservationTimeService;
 

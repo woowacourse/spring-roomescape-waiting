@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeException;
 
 @Service
 public class ThemeService {
+
     private final ThemeRepository themeRepository;
     private final PopularThemeFinder popularThemeFinder;
 

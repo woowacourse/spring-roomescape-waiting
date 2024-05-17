@@ -12,6 +12,7 @@ import roomescape.application.ServiceTest;
 
 @ServiceTest
 class PopularThemeFinderTest {
+
     @Autowired
     private PopularThemeFinder popularThemeFinder;
 

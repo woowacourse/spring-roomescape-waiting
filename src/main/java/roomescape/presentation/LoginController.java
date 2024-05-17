@@ -17,6 +17,7 @@ import roomescape.application.dto.TokenResponse;
 @RestController
 @RequestMapping("/login")
 public class LoginController {
+
     private final AuthService authService;
 
     public LoginController(AuthService authService) {

@@ -13,6 +13,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 class JwtTokenProviderTest {
+
     private static final String TEST_SECRET_KEY = "i-appreciate-your-kindness-her0807";
 
     @DisplayName("이메일로 토큰을 생성한다.")
