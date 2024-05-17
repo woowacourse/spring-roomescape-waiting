@@ -1,6 +1,8 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.*;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorType;
 
 import java.util.Objects;
 
@@ -22,15 +24,16 @@ public class Member {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
+        validate(id, name, email, password, role);
         this.id = id;
         this.name = new Name(name);
         this.email = email;
         this.password = password;
         this.role = role;
     }
-    // TODO 지우기
+
     public Member(Long id, String name, String email, Role role) {
-        this(id, name, email, null, role);
+        this(id, name, email, "NotUse", role);
     }
 
     public Member(String name, String email, String password, Role role) {
@@ -38,7 +41,19 @@ public class Member {
     }
 
     public Member(Long id, String name) {
-        this(id, name, null, null, Role.USER);
+        this(id, name, "NotUse", "NotUse", Role.USER);
+    }
+
+    private void validate(Long id, String name, String email, String password, Role role) {
+        if (name == null || name.isBlank()) {
+            throw new BusinessException(ErrorType.NAME_FORMAT_ERROR);
+        }
+        if (email == null || email.isBlank()) {
+            throw new BusinessException(ErrorType.EMAIL_FORMAT_ERROR);
+        }
+        if (password == null || password.isBlank()) {
+            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+        }
     }
 
     public boolean isAdmin() {
