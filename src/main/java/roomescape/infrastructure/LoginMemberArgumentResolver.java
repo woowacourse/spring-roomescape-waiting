@@ -1,6 +1,5 @@
 package roomescape.infrastructure;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -9,17 +8,14 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.dto.LoginMember;
-import roomescape.service.MemberService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberService memberService;
-    private final TokenGenerator tokenGenerator;
+    private final AuthenticationExtractor authenticationExtractor;
 
-    public LoginMemberArgumentResolver(MemberService memberService, TokenGenerator tokenGenerator) {
-        this.memberService = memberService;
-        this.tokenGenerator = tokenGenerator;
+    public LoginMemberArgumentResolver(AuthenticationExtractor authenticationExtractor) {
+        this.authenticationExtractor = authenticationExtractor;
     }
 
     @Override
@@ -31,12 +27,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        String token = tokenGenerator.getTokenFromCookies(request);
-
-        try {
-            return memberService.findLoginMemberByToken(token);
-        } catch (JwtException e) {
-            throw new JwtException("로그인이 필요합니다.");
-        }
+        return authenticationExtractor.getTokenFromCookies(request);
     }
 }

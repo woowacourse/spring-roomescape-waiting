@@ -17,9 +17,13 @@ public class Member {
     private String email;
     private String password;
     @Enumerated(value = EnumType.STRING)
-    private Role role;
+    private MemberRole role;
 
     protected Member() {
+    }
+
+    public boolean isAdmin() {
+        return role.isAdmin();
     }
 
     public Long getId() {
@@ -38,7 +42,7 @@ public class Member {
         return password;
     }
 
-    public Role getRole() {
+    public MemberRole getRole() {
         return role;
     }
 }

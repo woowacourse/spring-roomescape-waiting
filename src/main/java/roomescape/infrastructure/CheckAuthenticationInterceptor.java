@@ -2,24 +2,27 @@ package roomescape.infrastructure;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class CheckAuthenticationInterceptor implements HandlerInterceptor {
 
-    private final TokenGenerator tokenGenerator;
+    private final AuthenticationExtractor authenticationExtractor;
 
-    public CheckAuthenticationInterceptor(TokenGenerator tokenGenerator) {
-        this.tokenGenerator = tokenGenerator;
+    public CheckAuthenticationInterceptor(AuthenticationExtractor authenticationExtractor) {
+        this.authenticationExtractor = authenticationExtractor;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = tokenGenerator.getTokenFromCookies(request);
-
-        tokenGenerator.validateTokenRole(token);
-
+        try {
+            authenticationExtractor.validateTokenRole(request);
+        } catch (SecurityException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return false;
+        }
         return true;
     }
 }

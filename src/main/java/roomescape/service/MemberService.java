@@ -41,6 +41,13 @@ public class MemberService {
         return LoginMember.from(member);
     }
 
+    public boolean hasAdminRole(String token) {
+        String email = tokenGenerator.getPayload(token);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        return member.isAdmin();
+    }
+
     public List<MemberResponse> findAll() {
         return memberRepository.findAll()
                 .stream()
