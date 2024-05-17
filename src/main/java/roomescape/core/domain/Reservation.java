@@ -1,5 +1,6 @@
 package roomescape.core.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,12 +21,14 @@ public class Reservation {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+    @Column(nullable = false)
     private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     public Reservation() {
