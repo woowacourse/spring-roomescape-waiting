@@ -12,11 +12,11 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     protected Reservation() {

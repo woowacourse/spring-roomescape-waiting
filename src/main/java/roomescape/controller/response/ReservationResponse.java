@@ -1,7 +1,6 @@
 package roomescape.controller.response;
 
 import roomescape.model.Reservation;
-import roomescape.model.Theme;
 
 import java.time.LocalDate;
 
@@ -11,7 +10,7 @@ public class ReservationResponse {
     private String name;
     private LocalDate date;
     private ReservationTimeResponse time;
-    private Theme theme;
+    private ReservationThemeResponse theme;
 
     private ReservationResponse() {
     }
@@ -21,7 +20,7 @@ public class ReservationResponse {
         this.name = reservation.getMember().getName();
         this.date = reservation.getDate();
         this.time = ReservationTimeResponse.of(reservation.getTime());
-        this.theme = reservation.getTheme();
+        this.theme = ReservationThemeResponse.of(reservation.getTheme());
     }
 
     public Long getId() {
@@ -40,7 +39,7 @@ public class ReservationResponse {
         return time;
     }
 
-    public Theme getTheme() {
+    public ReservationThemeResponse getTheme() {
         return theme;
     }
 
