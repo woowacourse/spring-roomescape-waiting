@@ -1,10 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +10,16 @@ import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
+import roomescape.domain.dto.ReservationResponses;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -135,5 +137,19 @@ class ReservationServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);
         //when, then
         assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(ReservationFailException.class);
+    }
+
+    @Test
+    @DisplayName("사용자 Id 테마 Id 시작 및 종료 날짜로 예약 목록을 반환한다.")
+    void given_memberIdAndThemeIdAndDateFromAndDateTo_when_findReservations_then_returnReservationResponses() {
+        //given
+        Long themeId = 2L;
+        Long memberId = 1L;
+        LocalDate dateFrom = LocalDate.parse("2024-04-30");
+        LocalDate dateTo = LocalDate.parse("2024-05-01");
+        //when
+        final ReservationResponses reservationResponses = service.findReservations(themeId, memberId, dateFrom, dateTo);
+        //then
+        assertThat(reservationResponses.getData()).hasSize(3);
     }
 }

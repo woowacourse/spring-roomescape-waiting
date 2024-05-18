@@ -1,11 +1,7 @@
 package roomescape.controller.admin;
 
-import static org.hamcrest.Matchers.containsString;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +14,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
 import roomescape.controller.TestAccessToken;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -250,5 +251,16 @@ class AdminReservationTest {
                 .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(401);
+    }
+
+    @DisplayName("특정 테마의 예약을 검색하면 200을 반환한다.")
+    @Test
+    void given_when_search_then_statusCodeIsOk() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .contentType(ContentType.JSON)
+                .when().get("/admin/reservations/search?themeId=2&memberId=1&dateFrom=2024-04-30&dateTo=2024-05-01")
+                .then().log().all()
+                .statusCode(200);
     }
 }
