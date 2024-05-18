@@ -20,7 +20,7 @@ import roomescape.exception.ConflictException;
 public class GlobalExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.getName());
 
-    @ExceptionHandler({AuthorizationExpiredException.class , AuthorizationMismatchExpiredException.class})
+    @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<String> handleAuthorizationException(AuthorizationException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(exception.getMessage());
