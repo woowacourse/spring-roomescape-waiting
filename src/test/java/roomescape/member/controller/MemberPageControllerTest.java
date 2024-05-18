@@ -47,7 +47,7 @@ class MemberPageControllerTest extends IntegrationTest {
     void myReservationPage() {
         RestAssured.given().log().all()
                 .when()
-                .get("/reservation-mine")
+                .get("/reservation/mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.HTML);
