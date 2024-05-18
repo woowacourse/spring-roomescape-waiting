@@ -1,4 +1,4 @@
-insert into member (id, email, name, password, role)
+insert into members (id, email, name, password, role)
 values (1, 'mrmrmr@woowa.net', '미르', 'anything', 'ADMIN'),
        (2, 'mangcho@woowa.net', '망쵸', 'nothing', 'NORMAL'),
        (3, 'fram@woowa.net', '프람', 'something', 'NORMAL'),
