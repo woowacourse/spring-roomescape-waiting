@@ -73,11 +73,10 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("로그인에 성공하는 경우, 토큰이 생성된다.")
-    @Transactional
     void successLoginTest() {
-        String email = "email@mail.com";
-        Member member = memberRepository.save(new Member(new MemberName("name"), new Email(email), new Password("12341234")));
-        MemberLoginRequest request = new MemberLoginRequest(email, "12341234");
+        String mail = "email@mail.com";
+        Member member = new Member(new MemberName("name"), new Email(mail), new Password("12341234"));
+        MemberLoginRequest request = new MemberLoginRequest(mail, "12341234");
         roleRepository.save(new MemberRole(member, Role.MEMBER));
 
         TokenResponse response = memberService.login(request);
