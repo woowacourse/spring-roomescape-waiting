@@ -3,7 +3,7 @@ package roomescape.member.domain;
 public enum MemberRole {
     USER("USER"),
     ADMIN("ADMIN"),
-    GUEST("GUEST");
+    ;
 
     private final String role;
 
@@ -11,11 +11,11 @@ public enum MemberRole {
         this.role = role;
     }
 
-    public String getRole() {
-        return role;
-    }
-
     public boolean isAdmin() {
         return this == ADMIN;
+    }
+
+    public String getRole() {
+        return role;
     }
 }
