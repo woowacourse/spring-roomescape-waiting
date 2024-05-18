@@ -30,8 +30,7 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Long id, final ReservationDate date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus reservationStatus) {
-        this.id = id;
+    public Reservation(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus reservationStatus) {
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -40,12 +39,12 @@ public class Reservation {
     }
 
 
-    public static Reservation fromComplete(final Long id, final String date, final ReservationTime time, final Theme theme, final Member member) {
-        return Reservation.from(id, date, time, theme, member, ReservationStatus.COMPLETE);
+    public static Reservation fromComplete(final String date, final ReservationTime time, final Theme theme, final Member member) {
+        return Reservation.from(date, time, theme, member, ReservationStatus.COMPLETE);
     }
 
-    private static Reservation from(final Long id, final String date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus status) {
-        return new Reservation(id, ReservationDate.from(date), time, theme, member, status);
+    private static Reservation from(final String date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus status) {
+        return new Reservation(ReservationDate.from(date), time, theme, member, status);
     }
 
     public Long getId() {

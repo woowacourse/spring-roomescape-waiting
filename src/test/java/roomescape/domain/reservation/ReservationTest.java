@@ -22,9 +22,8 @@ class ReservationTest {
     void create_with_id_name_reservationDate_reservationTime() {
         assertThatCode(() ->
                 new Reservation(
-                        null,
                         ReservationDate.from("2024-04-03"),
-                        ReservationTime.from(null, "10:00"),
+                        ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
                         MemberFixture.getDomain(),
                         ReservationStatus.COMPLETE
@@ -37,9 +36,8 @@ class ReservationTest {
     void create_with_factory_method() {
         assertThatCode(() ->
                 Reservation.fromComplete(
-                        null,
                         "2024-04-03",
-                        ReservationTime.from(null, "10:00"),
+                        ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
                         MemberFixture.getDomain()))
                 .doesNotThrowAnyException();
@@ -47,9 +45,9 @@ class ReservationTest {
 
     private static Stream<Arguments> maskingDateAndTime() {
         return Stream.of(
-                Arguments.arguments(Reservation.fromComplete(null, "2024-04-01", ReservationTime.from(null, "10:00"),
+                Arguments.arguments(Reservation.fromComplete("2024-04-01", ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain())),
-                Arguments.arguments(Reservation.fromComplete(null, "2024-04-02", ReservationTime.from(null, "09:59"),
+                Arguments.arguments(Reservation.fromComplete("2024-04-02", ReservationTime.from("09:59"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain()))
         );
     }

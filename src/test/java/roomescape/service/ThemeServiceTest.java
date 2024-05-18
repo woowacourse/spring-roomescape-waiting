@@ -97,7 +97,7 @@ class ThemeServiceTest {
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.fromComplete(
-                null,
+                 
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput.id(), themeOutput.name(), themeOutput.description(), themeOutput.thumbnail()),
@@ -123,21 +123,21 @@ class ThemeServiceTest {
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.fromComplete(
-                null,
+                 
                 "2024-06-01",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
                 member
         ));
         reservationRepository.save(Reservation.fromComplete(
-                null,
+                 
                 "2024-06-02",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
                 member
         ));
         reservationRepository.save(Reservation.fromComplete(
-                null,
+                 
                 "2024-06-03",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput2.id(), themeOutput2.name(), themeOutput2.description(), themeOutput2.thumbnail()),
