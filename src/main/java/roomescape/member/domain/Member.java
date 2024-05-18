@@ -79,9 +79,9 @@ public class Member {
         if (password == null || password.isBlank()) {
             throw new ViolationException("비밀번호는 비어있을 수 없습니다.");
         }
-//        if (password.length() > PASSWORD_MAXIMUM_LENGTH) {
-//            throw new ViolationException("비밀번호는 20자 이하입니다.");
-//        }
+        if (password.length() > PASSWORD_MAXIMUM_LENGTH) {
+            throw new ViolationException("비밀번호는 20자 이하입니다.");
+        }
     }
 
     public boolean hasSamePassword(String password) {
