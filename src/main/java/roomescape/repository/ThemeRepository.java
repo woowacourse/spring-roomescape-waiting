@@ -1,13 +1,12 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
 
-@Repository
+import java.time.LocalDate;
+import java.util.List;
+
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(value = """
             select theme.id, theme.name, theme.description, theme.thumbnail
