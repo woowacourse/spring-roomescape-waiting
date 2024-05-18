@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import jakarta.persistence.Embeddable;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Embeddable
@@ -27,5 +28,18 @@ public class Email {
 
     public String getEmail() {
         return email;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Email email1 = (Email) object;
+        return Objects.equals(email, email1.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
 }

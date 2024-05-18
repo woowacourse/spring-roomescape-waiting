@@ -24,6 +24,7 @@ public class Member {
     private Role role;
 
     public Member(Long id, String name, String email, String password, Role role) {
+        validate(name, email, password, role);
         this.id = id;
         this.name = name;
         this.email = new Email(email);
@@ -36,6 +37,21 @@ public class Member {
     }
 
     protected Member() {
+    }
+
+    private void validate(String name, String email, String password, Role role) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("사용자의 이름을 입력해주세요.");
+        }
+        if (email == null) {
+            throw new IllegalArgumentException("사용자의 이메일을 입력해주세요.");
+        }
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("사용자의 비밀번호를 입력해주세요.");
+        }
+        if (role == null) {
+            throw new IllegalArgumentException("사용자의 역할을 지정해주세요.");
+        }
     }
 
     public Long getId() {
@@ -63,7 +79,11 @@ public class Member {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Member member = (Member) object;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && role == member.role;
+        return Objects.equals(id, member.id)
+               && Objects.equals(name, member.name)
+               && Objects.equals(email, member.email)
+               && Objects.equals(password, member.password)
+               && role == member.role;
     }
 
     @Override

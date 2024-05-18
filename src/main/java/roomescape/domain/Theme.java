@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
 import java.util.Objects;
 
 @Entity
@@ -16,9 +17,6 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    protected Theme() {
-    }
-
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
         this.name = name;
@@ -28,6 +26,21 @@ public class Theme {
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
+    }
+
+    protected Theme() {
+    }
+
+    private void validate(String name, String description, String thumbnail) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("테마 이름을 선택해주세요");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("테마 설명이 존재하지 않습니다.");
+        }
+        if (thumbnail == null) {
+            throw new IllegalArgumentException("테마 썸네일이 존재하지 않습니다.");
+        }
     }
 
     public Long getId() {
@@ -56,9 +69,9 @@ public class Theme {
         }
         Theme theme = (Theme) object;
         return Objects.equals(id, theme.id) &&
-                Objects.equals(name, theme.name) &&
-                Objects.equals(description, theme.description) &&
-                Objects.equals(thumbnail, theme.thumbnail);
+               Objects.equals(name, theme.name) &&
+               Objects.equals(description, theme.description) &&
+               Objects.equals(thumbnail, theme.thumbnail);
     }
 
     @Override

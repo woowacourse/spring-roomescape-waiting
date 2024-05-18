@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -27,10 +28,8 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    protected Reservation() {
-    }
-
     public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+        validate(member, date, reservationTime, theme);
         this.id = id;
         this.member = member;
         this.date = date;
@@ -40,6 +39,24 @@ public class Reservation {
 
     public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         this(null, member, date, reservationTime, theme);
+    }
+
+    protected Reservation() {
+    }
+
+    private void validate(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+        if (member == null) {
+            throw new IllegalArgumentException("예약하려는 사용자를 선택해주세요.");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("예약날짜를 선택해주세요.");
+        }
+        if (reservationTime == null) {
+            throw new IllegalArgumentException("예약시간을 선택해주세요.");
+        }
+        if (theme == null) {
+            throw new IllegalArgumentException("예약하려는 테마를 선택해주세요.");
+        }
     }
 
     public Long getId() {

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -15,16 +16,23 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    protected ReservationTime() {
-    }
-
     public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
+        validate(startAt);
         this.id = id;
         this.startAt = startAt;
+    }
+
+    protected ReservationTime() {
+    }
+
+    private void validate(LocalTime startAt) {
+        if (startAt == null) {
+            throw new IllegalArgumentException("예약시간을 선택해주세요.");
+        }
     }
 
     public Long getId() {
