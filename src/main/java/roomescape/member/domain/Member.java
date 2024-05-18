@@ -9,23 +9,24 @@ import java.util.regex.Pattern;
 @Entity
 public class Member {
     private static final Pattern NAME_PATTERN = Pattern.compile("^\\d+$");
-    private static final int NAME_MAXIMUM_LENGTH = 10;
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$");
+    private static final int NAME_MAXIMUM_LENGTH = 10;
+    private static final int PASSWORD_MAXIMUM_LENGTH = 20;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = NAME_MAXIMUM_LENGTH)
     private String name;
 
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = PASSWORD_MAXIMUM_LENGTH)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
@@ -78,6 +79,9 @@ public class Member {
         if (password == null || password.isBlank()) {
             throw new ViolationException("비밀번호는 비어있을 수 없습니다.");
         }
+//        if (password.length() > PASSWORD_MAXIMUM_LENGTH) {
+//            throw new ViolationException("비밀번호는 20자 이하입니다.");
+//        }
     }
 
     public boolean hasSamePassword(String password) {

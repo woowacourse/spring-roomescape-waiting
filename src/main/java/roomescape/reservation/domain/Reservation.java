@@ -26,7 +26,7 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 7)
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 

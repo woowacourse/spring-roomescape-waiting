@@ -37,8 +37,8 @@ class MemberTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = " ")
-    @DisplayName("사용자 비밀번호는 비어있을 수 없다.")
+    @ValueSource(strings = {" ", "abcdefghijklmnopqrstu"})
+    @DisplayName("사용자 비밀번호는 비어있거나 20자를 초과할 수 없다.")
     void validatePassword(String password) {
         // when & then
         assertThatThrownBy(() -> new Member(MIA_NAME, MIA_EMAIL, password, USER))
