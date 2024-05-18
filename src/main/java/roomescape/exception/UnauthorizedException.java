@@ -4,4 +4,7 @@ public class UnauthorizedException extends IllegalArgumentException {
     public UnauthorizedException() {
         super("토큰이 없습니다.");
     }
+    public UnauthorizedException(final String message) {
+        super(message);
+    }
 }

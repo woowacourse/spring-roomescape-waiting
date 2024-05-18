@@ -5,6 +5,7 @@ import roomescape.domain.user.Email;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.input.MemberCreateInput;
 import roomescape.service.dto.input.MemberLoginInput;
@@ -43,9 +44,9 @@ public class MemberService {
 
     public MemberLoginOutput loginMember(final MemberLoginInput memberLoginInput) {
         final Member member = memberRepository.findByEmail(new Email(memberLoginInput.email()))
-                .orElseThrow(() -> new NotExistException(String.format("%s 해당하는 멤버가 없습니다", memberLoginInput.email())));
+                .orElseThrow(() -> new UnauthorizedException(String.format("%s 해당하는 멤버가 없습니다", memberLoginInput.email())));
         if (member.isNotEqualPassword(memberLoginInput.password())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
         }
         return new MemberLoginOutput(tokenProvider.generateToken(member));
     }

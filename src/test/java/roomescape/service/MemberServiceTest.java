@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
-import roomescape.exception.NotExistException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.input.MemberCreateInput;
 import roomescape.service.dto.input.MemberLoginInput;
@@ -46,7 +46,7 @@ class MemberServiceTest {
     void throw_exception_when_not_exist_email() {
         final var input = new MemberLoginInput("sample@naver.com", "password1234");
         Assertions.assertThatThrownBy(() -> sut.loginMember(input))
-                .isInstanceOf(NotExistException.class);
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test
