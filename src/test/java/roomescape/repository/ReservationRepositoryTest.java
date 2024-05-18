@@ -89,7 +89,8 @@ class ReservationRepositoryTest {
                 now.minusDays(7), now.minusDays(1));
         final List<Reservation> expected = List.of(new Reservation(1L, null, null, null, null));
         //when
-        final List<Reservation> reservations = reservationRepository.searchReservations(condition);
+        final List<Reservation> reservations = reservationRepository.findReservationsByCondition(condition.dateFrom(), condition.dateTo(),
+                condition.themeId(), condition.memberId());
         //then
         assertThat(reservations).isEqualTo(expected);
     }

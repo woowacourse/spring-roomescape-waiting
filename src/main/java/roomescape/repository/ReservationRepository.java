@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import org.springframework.lang.Nullable;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -37,12 +37,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                   @Param("until") LocalDate until,
                                   @Param("limitCount") int limitCount);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId, LocalDate from, LocalDate until);
-
-    default List<Reservation> searchReservations(ReservationSearchCondition condition) {
-        return findAllByThemeIdAndMemberIdAndDateBetween(condition.themeId(), condition.memberId(),
-                condition.dateFrom(), condition.dateTo());
-    }
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.theme
+            JOIN FETCH r.time
+            JOIN FETCH r.member
+            WHERE (:dateFrom IS NULL OR r.date >= :dateFrom)
+                AND (:dateTo IS NULL OR r.date <= :dateTo)
+                AND (:themeId IS NULL OR r.theme.id = :themeId)
+                AND (:memberId IS NULL OR r.member.id = :memberId)
+            """)
+    List<Reservation> findReservationsByCondition(@Nullable @Param("dateFrom") LocalDate dateFrom,
+                                                  @Nullable @Param("dateTo") LocalDate dateTo,
+                                                  @Nullable @Param("themeId") Long themeId,
+                                                  @Nullable @Param("memberId") Long memberId);
 
     @EntityGraph(attributePaths = {"theme", "time"})
     List<Reservation> findAllByMemberId(long id);
