@@ -4,22 +4,30 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.global.exception.IllegalReservationDateException;
 
 @Embeddable
 public class ReservationDate {
 
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private LocalDate value;
 
     public ReservationDate(LocalDate value) {
+        validateNotNull(value);
         this.value = value;
     }
 
     protected ReservationDate() {
     }
 
-    public boolean isBefore(LocalDate target) {
-        return value.isBefore(target);
+    public void validateNotNull(LocalDate value) {
+        if (value == null) {
+            throw new IllegalReservationDateException("예약 날짜는 필수 입니다");
+        }
+    }
+
+    public boolean isPast() {
+        return value.isBefore(LocalDate.now());
     }
 
     public LocalDate getValue() {

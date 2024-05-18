@@ -71,8 +71,8 @@ public class Reservation {
         );
     }
 
-    public boolean isDateBefore(LocalDate target) {
-        return date.isBefore(target);
+    public boolean isPast() {
+        return date.isPast();
     }
 
     public Long getId() {
