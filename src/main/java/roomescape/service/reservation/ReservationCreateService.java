@@ -39,7 +39,7 @@ public class ReservationCreateService {
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 getMember(request.memberId()));
-        return create(reservation);
+        return saveReservation(reservation);
     }
 
     public Reservation create(ReservationSaveRequest request, Member member) {
@@ -48,10 +48,10 @@ public class ReservationCreateService {
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 member);
-        return create(reservation);
+        return saveReservation(reservation);
     }
 
-    private Reservation create(Reservation request) {
+    private Reservation saveReservation(Reservation request) {
         validateDateIsFuture(request.getDate(), request.getReservationTime());
         validateAlreadyBooked(request.getDate(), request.getReservationTime().getId(), request.getTheme().getId());
         return reservationRepository.save(request);
