@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Theme {
@@ -11,37 +12,25 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String description;
+
+    @NotBlank
     private String thumbnail;
 
     public Theme() {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {
-        validate(name, description, thumbnail);
+        validateThumbnailFormat(thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    private void validate(String name, String description, String thumbnail) {
-        validateNullField(name, description, thumbnail);
-        validateNotBlank(name, description, thumbnail);
-        validateThumbnailFormat(thumbnail);
-    }
-
-    private void validateNullField(String name, String description, String thumbnail) {
-        if (name == null || description == null || thumbnail == null) {
-            throw new IllegalArgumentException("테마 필드에는 빈 값이 들어올 수 없습니다.");
-        }
-    }
-
-    private void validateNotBlank(String name, String description, String thumbnail) {
-        if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
-            throw new IllegalArgumentException("테마의 정보는 비어있을 수 없습니다.");
-        }
     }
 
     private void validateThumbnailFormat(String thumbnail) {

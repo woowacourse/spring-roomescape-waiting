@@ -1,6 +1,15 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
@@ -9,9 +18,18 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
     private String name;
+
+    @Email
+    @NotNull
+    @Column(unique = true)
     private String email;
+
+    @NotBlank
     private String password;
+
     @Enumerated(EnumType.STRING)
     @ColumnDefault(value = "'USER'")
     private Role role;
@@ -20,25 +38,11 @@ public class Member {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
-        validateNotNull(name, email, password, role);
-        validateNotBlank(name, email, password);
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    private void validateNotNull(String name, String email, String password, Role role) {
-        if (name == null || email == null || password == null || role == null) {
-            throw new IllegalArgumentException("멤버의 필드는 null 값이 들어올 수 없습니다.");
-        }
-    }
-
-    private void validateNotBlank(String name, String email, String password) {
-        if (name.isBlank() || email.isBlank() || password.isBlank()) {
-            throw new IllegalArgumentException("멤버의 필드는 비어있을 수 없습니다.");
-        }
     }
 
     public Member(Long id, String name, String email, String password) {

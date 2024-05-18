@@ -1,11 +1,17 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-
 import java.time.LocalDate;
 
 @Entity
@@ -14,13 +20,19 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Member member;
+
+    @NotNull
     private LocalDate date;
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
+
     @Enumerated(value = EnumType.STRING)
     @ColumnDefault(value = "'CONFIRMATION'")
     private ReservationStatus status;
@@ -29,30 +41,12 @@ public class Reservation {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
-        validate(member, date, time, theme);
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    private void validate(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        validateNullField(member, date, time, theme);
-        validateName(member.getName());
-    }
-
-    private void validateNullField(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        if (member == null || date == null || time == null || theme == null) {
-            throw new IllegalArgumentException("예약 필드에는 빈 값이 들어올 수 없습니다.");
-        }
-    }
-
-    private void validateName(String name) {
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("이름은 공백일 수 없습니다.");
-        }
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
