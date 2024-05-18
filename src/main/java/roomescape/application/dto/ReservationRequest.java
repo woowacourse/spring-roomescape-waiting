@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Time;
 
 public record ReservationRequest(
         @NotNull LocalDate date,
@@ -13,7 +13,7 @@ public record ReservationRequest(
         Long themeId
 ) {
 
-    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme) {
-        return new Reservation(member, date, reservationTime, theme);
+    public Reservation toReservation(Member member, Time time, Theme theme) {
+        return new Reservation(member, date, time, theme);
     }
 }

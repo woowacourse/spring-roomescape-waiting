@@ -11,22 +11,22 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class ReservationTime {
+public class Time {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reservation_time_id")
+    @Column(name = "time_id")
     private Long id;
 
     private LocalTime startAt;
 
-    protected ReservationTime() {
+    protected Time() {
     }
 
-    public ReservationTime(LocalTime startAt) {
+    public Time(LocalTime startAt) {
         this(null, startAt);
     }
 
-    public ReservationTime(Long id, LocalTime startAt) {
+    public Time(Long id, LocalTime startAt) {
         if (startAt == null) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 시간은 필수 입력값 입니다.");
         }
@@ -47,7 +47,7 @@ public class ReservationTime {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReservationTime that)) {
+        if (!(o instanceof Time that)) {
             return false;
         }
         return Objects.equals(id, that.id);

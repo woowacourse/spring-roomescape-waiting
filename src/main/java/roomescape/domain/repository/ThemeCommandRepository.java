@@ -7,5 +7,5 @@ public interface ThemeCommandRepository extends Repository<Theme, Long> {
 
     Theme save(Theme theme);
 
-    void deleteById(Long id);
+    void delete(Theme theme);
 }

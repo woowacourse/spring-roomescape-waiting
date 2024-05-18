@@ -7,7 +7,7 @@ public record ReservationResponse(
         Long id,
         MemberResponse member,
         LocalDate date,
-        ReservationTimeResponse time,
+        TimeResponse time,
         ThemeResponse theme
 ) {
 
@@ -16,7 +16,7 @@ public record ReservationResponse(
                 reservation.getId(),
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
+                TimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
     }

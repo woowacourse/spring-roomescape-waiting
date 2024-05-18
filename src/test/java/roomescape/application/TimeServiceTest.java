@@ -5,28 +5,32 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.application.dto.ReservationTimeRequest;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.repository.ReservationTimeCommandRepository;
+import roomescape.application.dto.TimeRequest;
+import roomescape.domain.Time;
+import roomescape.domain.repository.TimeCommandRepository;
+import roomescape.domain.repository.TimeQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @ServiceTest
-class ReservationTimeServiceTest {
+class TimeServiceTest {
 
     @Autowired
-    private ReservationTimeService reservationTimeService;
+    private TimeService timeService;
 
     @Autowired
-    private ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private TimeCommandRepository timeCommandRepository;
+
+    @Autowired
+    private TimeQueryRepository timeQueryRepository;
 
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")
     @Test
     void shouldThrowsIllegalStateExceptionWhenCreateExistStartAtTime() {
-        ReservationTime reservationTime = reservationTimeCommandRepository.findAll().get(0);
-        ReservationTimeRequest request = new ReservationTimeRequest(reservationTime.getStartAt());
+        Time time = timeQueryRepository.findAll().get(0);
+        TimeRequest request = new TimeRequest(time.getStartAt());
 
-        assertThatCode(() -> reservationTimeService.create(request))
+        assertThatCode(() -> timeService.create(request))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.DUPLICATED_TIME);
@@ -35,9 +39,9 @@ class ReservationTimeServiceTest {
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")
     @Test
     void shouldThrowsExceptionReservationWhenReservedInTime() {
-        ReservationTime reservationTime = reservationTimeCommandRepository.findAll().get(0);
+        Time time = timeQueryRepository.findAll().get(0);
 
-        assertThatCode(() -> reservationTimeService.deleteById(reservationTime.getId()))
+        assertThatCode(() -> timeService.deleteById(time.getId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.ALREADY_RESERVED);
@@ -46,8 +50,9 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하지 않는 예약 시간을 삭제 요청하면, IllegalArgumentException 예외가 발생한다.")
     @Test
     void shouldThrowsIllegalArgumentExceptionWhenReservationTimeDoesNotExist() {
-        assertThatCode(() -> reservationTimeService.deleteById(99L))
+        assertThatCode(() -> timeService.deleteById(99L))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(RoomescapeErrorCode.NOT_FOUND_TIME.getMessage());
+                .extracting("errorCode")
+                .isEqualTo(RoomescapeErrorCode.NOT_FOUND_TIME);
     }
 }

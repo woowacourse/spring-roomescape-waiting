@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
+import roomescape.domain.Time;
 import roomescape.domain.dto.AvailableTimeDto;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -32,7 +33,7 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
                 and r.date = :date
                 and r.theme.id = :themeId)
             )
-            from ReservationTime rt
+            from Time rt
             """)
     List<AvailableTimeDto> findAvailableReservationTimes(LocalDate date, Long themeId);
 
@@ -60,7 +61,9 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
             """)
     List<Reservation> findByCriteria(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    long countByTimeId(Long timeId);
+    boolean existsByTime(Time time);
+
+    boolean existsByTheme(Theme theme);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

@@ -38,7 +38,7 @@ public class ReservationService {
     @Transactional
     public void deleteById(Long id) {
         Reservation reservation = reservationQueryRepository.getById(id);
-        reservationCommandRepository.deleteById(reservation.getId());
+        reservationCommandRepository.delete(reservation);
     }
 
     public List<ReservationResponse> findAll() {

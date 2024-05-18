@@ -121,7 +121,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", memberToken)
-                .when().get("/reservations-mine")
+                .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", greaterThan(0));

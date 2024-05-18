@@ -27,8 +27,8 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_time_id")
-    private ReservationTime time;
+    @JoinColumn(name = "time_id")
+    private Time time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
@@ -37,11 +37,11 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
         this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
         if (date == null) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
         }
@@ -64,7 +64,7 @@ public class Reservation {
         return date;
     }
 
-    public ReservationTime getTime() {
+    public Time getTime() {
         return time;
     }
 

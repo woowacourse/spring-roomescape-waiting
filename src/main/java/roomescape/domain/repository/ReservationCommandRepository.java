@@ -7,5 +7,5 @@ public interface ReservationCommandRepository extends Repository<Reservation, Lo
 
     Reservation save(Reservation reservation);
 
-    void deleteById(Long id);
+    void delete(Reservation reservation);
 }

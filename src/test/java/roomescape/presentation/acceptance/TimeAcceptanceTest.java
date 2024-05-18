@@ -8,11 +8,11 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.application.dto.ReservationTimeRequest;
-import roomescape.application.dto.ReservationTimeResponse;
+import roomescape.application.dto.TimeRequest;
+import roomescape.application.dto.TimeResponse;
 import roomescape.application.dto.TokenRequest;
 
-class ReservationTimeAcceptanceTest extends AcceptanceTest {
+class TimeAcceptanceTest extends AcceptanceTest {
 
     private String adminToken;
 
@@ -32,8 +32,8 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 시간을 추가한다.")
     @Test
     void createReservationTimeTest() {
-        ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 30));
-        ReservationTimeResponse response = RestAssured.given().log().all()
+        TimeRequest request = new TimeRequest(LocalTime.of(10, 30));
+        TimeResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", adminToken)
                 .body(request)
@@ -41,7 +41,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(201)
                 .extract()
-                .as(ReservationTimeResponse.class);
+                .as(TimeResponse.class);
 
         assertThat(response.startAt()).isEqualTo("10:30");
     }

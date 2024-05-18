@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.domain.repository.MemberQueryRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
-import roomescape.domain.repository.ReservationTimeCommandRepository;
+import roomescape.domain.repository.TimeCommandRepository;
+import roomescape.domain.repository.TimeQueryRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
+import roomescape.domain.repository.ThemeQueryRepository;
 
 @ServiceTest
 class PopularThemeFinderTest {
@@ -24,10 +26,16 @@ class PopularThemeFinderTest {
     private ReservationCommandRepository reservationCommandRepository;
 
     @Autowired
-    private ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private TimeCommandRepository timeCommandRepository;
+
+    @Autowired
+    private TimeQueryRepository timeQueryRepository;
 
     @Autowired
     private ThemeCommandRepository themeCommandRepository;
+
+    @Autowired
+    private ThemeQueryRepository themeQueryRepository;
 
     @Autowired
     private MemberQueryRepository memberQueryRepository;
@@ -38,23 +46,23 @@ class PopularThemeFinderTest {
     @DisplayName("현재 날짜 이전 1주일 동안 가장 예약이 많이 된 테마 10개를 내림차순 정렬하여 조회한다.")
     @Test
     void shouldReturnThemesWhenFindPopularThemes() {
-        List<ReservationTime> reservationTimes = reservationTimeCommandRepository.findAll();
-        List<Theme> themes = themeCommandRepository.findAll();
+        List<Time> times = timeQueryRepository.findAll();
+        List<Theme> themes = themeQueryRepository.findAll();
         Member member = memberQueryRepository.findAll().get(0);
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
-        reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
+        reservationCommandRepository.save(createReservation(member, times.get(0), themes.get(0)));
+        reservationCommandRepository.save(createReservation(member, times.get(1), themes.get(1)));
+        reservationCommandRepository.save(createReservation(member, times.get(1), themes.get(1)));
 
         List<Theme> popularThemes = popularThemeFinder.findThemes();
 
         assertThat(popularThemes).containsExactly(themes.get(1), themes.get(0));
     }
 
-    private Reservation createReservation(Member member, ReservationTime reservationTime, Theme theme) {
+    private Reservation createReservation(Member member, Time time, Theme theme) {
         return new Reservation(
                 member,
                 LocalDate.now(clock).minusDays(1),
-                reservationTime,
+                time,
                 theme
         );
     }
