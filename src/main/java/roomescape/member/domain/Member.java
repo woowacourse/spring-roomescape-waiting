@@ -50,6 +50,10 @@ public class Member {
         return role == Role.ADMIN;
     }
 
+    public boolean isSamePassword(String password) {
+        return this.password.equals(password);
+    }
+
     public Long getId() {
         return id;
     }

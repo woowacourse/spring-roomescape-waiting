@@ -23,14 +23,14 @@ public class AuthService {
     }
 
     public Token login(LoginRequest loginRequest) {
-        Member findMember = memberRepository.findByEmail(loginRequest.email())
+        Member foundMember = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new NoSuchRecordException("이메일: " + loginRequest.email() + " 해당하는 멤버를 찾을 수 없습니다"));
 
-        if (!findMember.getPassword().equals(loginRequest.password())) {
+        if (!foundMember.isSamePassword(loginRequest.password())) {
             throw new WrongPasswordException("비밀번호가 틀렸습니다");
         }
 
-        return jwtTokenProvider.createToken(findMember);
+        return jwtTokenProvider.createToken(foundMember);
     }
 
     public LoginCheckResponse checkLogin(Accessor accessor) {
