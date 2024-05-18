@@ -103,16 +103,20 @@ public class ReservationControllerTest {
     void findMemberReservation() {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
+        Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
         String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(18, 30)));
         Theme theme1 = themeRepository.save(new Theme("테마명1", "설명", "썸네일URL"));
         Theme theme2 = themeRepository.save(new Theme("테마명2", "설명", "썸네일URL"));
         Theme theme3 = themeRepository.save(new Theme("테마명3", "설명", "썸네일URL"));
 
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme2, member));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme3, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme1, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme2, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime2, theme3, member));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme3, anotherMember));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime2, theme2, anotherMember));
 
         // when & then
         RestAssured.given().log().all()
