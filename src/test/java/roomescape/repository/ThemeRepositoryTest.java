@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
 
@@ -16,7 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.THEME_DETECTIVE;
 import static roomescape.TestFixture.THEME_HORROR;
 
-class ThemeRepositoryTest extends RepositoryTest {
+@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;

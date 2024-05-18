@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationTime;
 
 import java.util.List;
@@ -13,7 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
 
-class ReservationTimeRepositoryTest extends RepositoryTest {
+@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -22,7 +26,7 @@ class ReservationTimeRepositoryTest extends RepositoryTest {
 
     @BeforeEach
     void setUp() {
-       reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SEVEN());
+        reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SEVEN());
     }
 
     @Test

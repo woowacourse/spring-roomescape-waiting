@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Name;
 import roomescape.domain.member.Role;
@@ -14,7 +16,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.MEMBER_BROWN;
 
-class MemberRepositoryTest extends RepositoryTest {
+@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
