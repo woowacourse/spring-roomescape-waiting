@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import org.antlr.v4.runtime.misc.NotNull;
 
 @Entity
 public class Member {
@@ -16,16 +18,24 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @Embedded
+    @Column(nullable = false)
     private Name name;
 
+    @NotNull
     @Embedded
+    @Column(nullable = false)
     private Email email;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
+    @NotNull
     @Embedded
+    @Column(nullable = false)
     private Password password;
 
     protected Member() {

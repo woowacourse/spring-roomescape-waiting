@@ -9,6 +9,8 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.lang.NonNull;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
@@ -20,13 +22,16 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne
     private ReservationTime reservationTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne
     private Theme theme;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne
     private Member member;
 
     protected Reservation() {
