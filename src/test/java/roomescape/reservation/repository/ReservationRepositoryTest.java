@@ -86,7 +86,7 @@ public class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
-        List<Reservation> reservations = reservationRepository.findAllByMember_Id(kaki.getId());
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
 
         assertThat(reservations.size()).isEqualTo(1);
     }
@@ -155,7 +155,7 @@ public class ReservationRepositoryTest {
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
-        boolean exist = reservationRepository.existsByDateAndReservationTime_StartAt(savedReservation.getDate(),
+        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAt(savedReservation.getDate(),
                 savedReservation.getStartAt());
 
         assertThat(exist).isTrue();
@@ -188,7 +188,7 @@ public class ReservationRepositoryTest {
                 tomorrow
         );
 
-        List<Reservation> reservations = reservationRepository.findAllByTheme_IdAndMember_IdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),

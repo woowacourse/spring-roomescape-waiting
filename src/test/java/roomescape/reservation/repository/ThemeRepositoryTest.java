@@ -63,7 +63,7 @@ class ThemeRepositoryTest {
     void findByIdNameTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         Theme savedTheme = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findByThemeName_Name(savedTheme.getName()).get();
+        Theme findTheme = themeRepository.findByThemeNameName(savedTheme.getName()).get();
 
         assertAll(
                 () -> assertThat(findTheme.getName()).isEqualTo(HORROR_THEME_NAME),

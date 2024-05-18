@@ -22,7 +22,7 @@ public class ThemeService {
 
     @Transactional
     public ThemeResponse save(ThemeSaveRequest themeSaveRequest) {
-        themeRepository.findByThemeName_Name(themeSaveRequest.name()).ifPresent(empty -> {
+        themeRepository.findByThemeNameName(themeSaveRequest.name()).ifPresent(empty -> {
             throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
         });
         Theme theme = themeSaveRequest.toTheme();

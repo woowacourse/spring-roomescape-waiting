@@ -62,7 +62,7 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndReservationTime_StartAt(reservation.getDate(), reservation.getStartAt())) {
+        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(), reservation.getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
         }
     }
@@ -81,14 +81,14 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findAllByMember_Id(loginMember.id())
+        return reservationRepository.findAllByMemberId(loginMember.id())
                 .stream()
                 .map(MemberReservationResponse::toResponse)
                 .toList();
     }
 
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
-        return reservationRepository.findAllByTheme_IdAndMember_IdAndDateBetween(
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                         request.themeId(),
                         request.memberId(),
                         request.dateFrom(),

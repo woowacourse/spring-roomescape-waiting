@@ -12,14 +12,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("select r.reservationTime.id from Reservation r where r.date = :date and r.theme.id = :themeId")
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByMember_Id(Long memberId);
+    List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAllByTheme_IdAndMember_IdAndDateBetween(
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
             LocalDate dateTo
     );
 
-    boolean existsByDateAndReservationTime_StartAt(LocalDate date, LocalTime startAt);
+    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
 }
