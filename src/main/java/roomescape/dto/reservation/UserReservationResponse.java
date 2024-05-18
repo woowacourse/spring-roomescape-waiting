@@ -19,7 +19,7 @@ public record UserReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"
+                reservation.getState().getDescription()
         );
     }
 }
