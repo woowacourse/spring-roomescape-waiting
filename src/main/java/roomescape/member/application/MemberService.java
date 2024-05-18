@@ -1,5 +1,6 @@
 package roomescape.member.application;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class MemberService {
         validateDuplicatedEmail(member);
         try {
             return memberRepository.save(member);
-        } catch (DuplicateKeyException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new ViolationException("중복된 이메일입니다.");
         }
     }
