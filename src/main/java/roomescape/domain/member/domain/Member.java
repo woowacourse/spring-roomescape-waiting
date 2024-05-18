@@ -25,7 +25,7 @@ public class Member {
     @Column(name = "role", nullable = false)
     private Role role;
 
-    public Member() {
+    protected Member() {
 
     }
 

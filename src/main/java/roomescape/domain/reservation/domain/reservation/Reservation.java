@@ -28,7 +28,7 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 

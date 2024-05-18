@@ -21,7 +21,7 @@ public class Theme {
     @Column(name = "thumbnail")
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
 
     }
 
