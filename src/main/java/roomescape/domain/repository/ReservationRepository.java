@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
@@ -22,22 +23,18 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    @Query(value = """
-            SELECT reservation.id, reservation.date,
-            `time`.id AS time_id, `time`.start_at AS time_start_at,
-            theme.id AS theme_id, theme.name AS theme_name,
-            theme.description AS theme_description, theme.thumbnail AS theme_thumbnail,
-            members.id AS member_id, members.name AS member_name, members.email AS member_email, members.role AS member_role
-            FROM reservation
-            INNER JOIN members ON reservation.member_id = members.id
-            INNER JOIN theme ON reservation.theme_id = theme.id
-            INNER JOIN reservation_time AS `time` ON reservation.time_id = `time`.id
-            WHERE date >= ? AND date <= ?
-            AND members.name = ?
-            AND theme.name = ?
-            """, nativeQuery = true)
-    List<Reservation> findByPeriodAndMemberAndTheme(LocalDate start, LocalDate end, String memberName,
-                                                    String themeName);
+    @Query(""" 
+            select r from Reservation r
+            join fetch r.member m 
+            inner join r.theme th 
+            where r.date >= :start and r.date <= :end
+            and m.name = :memberName
+            and th.name = :themeName """)
+    List<Reservation> findByPeriodAndMemberAndTheme(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            @Param("memberName") String memberName,
+            @Param("themeName") String themeName);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
