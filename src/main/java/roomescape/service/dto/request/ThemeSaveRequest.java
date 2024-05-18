@@ -6,7 +6,7 @@ import roomescape.domain.Theme;
 
 public record ThemeSaveRequest(
         @NotBlank
-        @Size(max = 30)
+        @Size(max = 30) // TODO 예외 메시지 설정하기
         String name,
 
         @NotBlank
