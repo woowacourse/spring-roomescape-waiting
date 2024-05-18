@@ -67,9 +67,9 @@ public class ReservationService {
             Long themeId,
             Long memberId
     ) {
-        Member member = memberRepository.getByIdentifier(memberId);
-        ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
-        Theme theme = themeRepository.getByIdentifier(themeId);
+        Member member = memberRepository.getById(memberId);
+        ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
+        Theme theme = themeRepository.getById(themeId);
 
         Reservation reservation = Reservation.create(
                 LocalDateTime.now(clock),
@@ -104,9 +104,9 @@ public class ReservationService {
             Long themeId,
             Long memberId
     ) {
-        Member member = memberRepository.getByIdentifier(memberId);
-        ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
-        Theme theme = themeRepository.getByIdentifier(themeId);
+        Member member = memberRepository.getById(memberId);
+        ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
+        Theme theme = themeRepository.getById(themeId);
 
         Reservation reservation = Reservation.create(
                 LocalDateTime.now(clock),
@@ -207,7 +207,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse approveReservationWaiting(Long id) {
         Reservation reservation = reservationRepository
-                .getByIdentifier(id);
+                .getById(id);
 
         validateReservationNotWaiting(reservation);
         validateReservationExists(reservation);
@@ -232,7 +232,7 @@ public class ReservationService {
 
     @Transactional
     public void rejectReservationWaiting(Long id) {
-        Reservation reservation = reservationRepository.getReferenceById(id);
+        Reservation reservation = reservationRepository.getById(id);
 
         validateReservationNotWaiting(reservation);
 

@@ -2,12 +2,14 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
 
-public interface ThemeRepository extends JpaRepository<Theme, Long> {
+public interface ThemeRepository extends CrudRepository<Theme, Long> {
+
+    List<Theme> findAll();
 
     boolean existsByName(String name);
 
@@ -31,7 +33,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             @Param("limit") int limit
     );
 
-    default Theme getByIdentifier(Long id) {
+    default Theme getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new DomainNotFoundException("해당 id의 테마가 존재하지 않습니다."));
     }

@@ -3,13 +3,15 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
 
-public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
+public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
+
+    List<ReservationTime> findAll();
 
     boolean existsByStartAt(LocalTime startAt);
 
@@ -30,7 +32,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             @Param("themeId") Long themeId
     );
 
-    default ReservationTime getByIdentifier(Long id) {
+    default ReservationTime getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new DomainNotFoundException("해당 id의 예약 시간이 존재하지 않습니다."));
     }

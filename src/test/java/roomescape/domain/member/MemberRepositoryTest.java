@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.domain.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

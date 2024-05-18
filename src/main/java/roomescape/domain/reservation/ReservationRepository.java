@@ -3,13 +3,15 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.ReservationWithRankDto;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends CrudRepository<Reservation, Long> {
+
+    List<Reservation> findAll();
 
     boolean existsByTimeId(long id);
 
@@ -93,7 +95,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 
-    default Reservation getByIdentifier(long id) {
+    default Reservation getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
     }
