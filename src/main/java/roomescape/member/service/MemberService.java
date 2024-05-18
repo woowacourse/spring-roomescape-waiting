@@ -4,13 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.exception.AuthorizationLoginFailException;
-import roomescape.exception.ConflictException;
+import roomescape.exception.BadRequestException;
+import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.MemberCreateRequest;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
-import roomescape.member.repository.MemberRepository;
 
 @Service
 public class MemberService {
@@ -23,29 +21,17 @@ public class MemberService {
     public List<MemberProfileInfo> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
-                .map(MemberProfileInfo::from)
+                .map(member -> new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))
                 .toList();
     }
 
     public Member findMember(MemberLoginRequest memberLoginRequest) {
         return memberRepository.findByEmail(memberLoginRequest.email())
-                .orElseThrow(AuthorizationLoginFailException::new);
+                .orElseThrow(() -> new BadRequestException("등록되지 않은 이메일입니다."));
     }
 
     public Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(AuthorizationLoginFailException::new);
-    }
-
-    public MemberProfileInfo createMember(MemberCreateRequest request) {
-        memberRepository.findByEmail(request.email())
-                .ifPresent(member -> {
-                    throw new ConflictException("해당 이메일을 사용하는 사용자가 존재합니다.");
-                });
-
-        Member member = request.createMember();
-        member = memberRepository.save(member);
-
-        return MemberProfileInfo.from(member);
+                .orElseThrow(() -> new BadRequestException("등록되지 않은 회원 ID 입니다."));
     }
 }

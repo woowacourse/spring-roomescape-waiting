@@ -20,20 +20,12 @@ import roomescape.member.service.MemberService;
 @RestController
 @RequestMapping("/login")
 public class MemberLoginController {
-    private final MemberAuthService memberAuthService;
     private final MemberService memberService;
+    private final MemberAuthService memberAuthService;
 
     public MemberLoginController(MemberAuthService memberAuthService, MemberService memberService) {
         this.memberAuthService = memberAuthService;
         this.memberService = memberService;
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<MemberLoginResponse> loginCheck(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        String memberName = memberAuthService.extractNameFromPayload(cookies);
-
-        return ResponseEntity.ok(new MemberLoginResponse(memberName));
     }
 
     @PostMapping
@@ -50,5 +42,13 @@ public class MemberLoginController {
 
         return ResponseEntity.ok()
                 .build();
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<MemberLoginResponse> loginCheck(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        String memberName = memberAuthService.extractNameFromPayload(cookies);
+
+        return ResponseEntity.ok(new MemberLoginResponse(memberName));
     }
 }

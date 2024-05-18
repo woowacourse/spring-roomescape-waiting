@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
-import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -26,24 +26,24 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
+    @PostMapping
+    public ResponseEntity<ReservationResponse> createReservation(
+            @RequestBody AdminReservationRequest adminReservationRequest) {
+        ReservationResponse reservationCreateResponse = reservationService.addReservation(adminReservationRequest);
+        URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
+        return ResponseEntity.created(uri)
+                .body(reservationCreateResponse);
+    }
+
     @GetMapping("/search")
-    public ResponseEntity<List<ReservationResponse>> findReservationsInCondition(
+    public List<ReservationResponse> reservationListInCondition(
             @RequestParam("themeId") long themeId,
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo
     ) {
-        ReservationConditionSearchRequest request
-                = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
-        List<ReservationResponse> response = reservationService.findReservationsByConditions(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest request) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
-        URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
-        return ResponseEntity.created(uri)
-                .body(reservationCreateResponse);
+        ReservationConditionSearchRequest request = new ReservationConditionSearchRequest(memberId, themeId, dateFrom,
+                dateTo);
+        return reservationService.findReservationsByConditions(request);
     }
 }
