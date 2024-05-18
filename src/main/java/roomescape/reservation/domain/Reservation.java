@@ -15,9 +15,9 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @ManyToOne(fetch = FetchType.LAZY)

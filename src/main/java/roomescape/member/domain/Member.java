@@ -7,9 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.List;
-import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class Member {
@@ -22,8 +19,6 @@ public class Member {
     private String name;
     private String email;
     private String password;
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations;
 
     public Member() {
     }
