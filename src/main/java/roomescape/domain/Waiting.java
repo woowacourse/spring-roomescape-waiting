@@ -10,14 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.exception.RoomescapeErrorCode;
-import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reservation_id")
+    @Column(name = "waiting_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,35 +32,19 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
+    public Waiting(Member member, LocalDate date, Time time, Theme theme) {
         this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
-        validateNotNull(member, date, time, theme);
+    public Waiting(Long id, Member member, LocalDate date, Time time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-    }
-
-    private void validateNotNull(Member member, LocalDate date, Time time, Theme theme) {
-        if (member == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약자는 필수입니다.");
-        }
-        if (date == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
-        }
-        if (time == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 시간은 필수입니다.");
-        }
-        if (theme == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "테마는 필수입니다.");
-        }
     }
 
     public Long getId() {
@@ -90,10 +72,10 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation that)) {
+        if (!(o instanceof Waiting waiting)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+        return Objects.equals(id, waiting.id);
     }
 
     @Override

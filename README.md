@@ -357,25 +357,72 @@
 ```json
 [
   {
-    "reservationId": 1,
+    "id": 1,
     "theme": "테마1",
     "date": "2024-03-01",
     "time": "10:00",
     "status": "예약"
   },
   {
-    "reservationId": 2,
+    "id": 2,
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
     "status": "예약"
   },
   {
-    "reservationId": 3,
+    "id": 3,
     "theme": "테마3",
     "date": "2024-03-01",
     "time": "14:00",
     "status": "예약"
+  }
+]
+```
+
+---
+
+## 예약 대기 요청
+
+### Request
+
+- POST /waiting
+- content-type: application/json
+
+```json
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+```json
+[
+  {
+    "waitingResponse": {
+      "id": 1,
+      "member": {
+        "id": 1,
+        "name": "회원",
+        "email": "member@wooteco.com",
+        "role": "BASIC"
+      },
+      "date": "2024-05-19",
+      "time": {
+        "id": 1,
+        "startAt": "10:00"
+      },
+      "theme": {
+        "id": 1,
+        "name": "테마1",
+        "description": "설명1",
+        "thumbnail": "썸네일1"
+      },
+      "rank": 1
+    }
   }
 ]
 ```

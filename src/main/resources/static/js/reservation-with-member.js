@@ -177,9 +177,9 @@ function saveRow(event) {
 
 function deleteRow(event) {
   const row = event.target.closest('tr');
-  const reservationId = row.cells[0].textContent;
+  const id = row.cells[0].textContent;
 
-  requestDelete(reservationId)
+  requestDelete(id)
       .then(() => row.remove())
       .catch(error => console.error('Error:', error));
 }
@@ -191,11 +191,6 @@ function applyFilter(event) {
   const memberId = document.getElementById('member').value;
   const dateFrom = document.getElementById('date-from').value;
   const dateTo = document.getElementById('date-to').value;
-
-  /*
-  TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
-        요청 포맷에 맞게 설정
-  */
 
   const queryParams = new URLSearchParams({
     themeId: themeId,

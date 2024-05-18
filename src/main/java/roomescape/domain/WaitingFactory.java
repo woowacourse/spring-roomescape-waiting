@@ -7,12 +7,12 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @DomainService
-public class ReservationFactory {
+public class WaitingFactory {
 
-    public Reservation create(Member member, LocalDate date, Time time, Theme theme, Clock clock) {
+    public Waiting create(Member member, LocalDate date, Time time, Theme theme, Clock clock) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime, clock);
-        return new Reservation(member, date, time, theme);
+        return new Waiting(member, date, time, theme);
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDateTime dateTime, Clock clock) {

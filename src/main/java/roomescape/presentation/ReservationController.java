@@ -15,6 +15,8 @@ import roomescape.application.dto.MyReservationResponse;
 import roomescape.application.dto.ReservationCriteria;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
+import roomescape.application.dto.WaitingRequest;
+import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.infrastructure.authentication.AuthenticationPrincipal;
 
 @RestController
@@ -55,7 +57,7 @@ public class ReservationController {
     @GetMapping("/reservations/my")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(
             @AuthenticationPrincipal LoginMember loginMember) {
-        List<MyReservationResponse> responses = reservationService.findMyReservations(loginMember.id());
+        List<MyReservationResponse> responses = reservationService.findMyReservationsAndWaiting(loginMember.id());
         return ResponseEntity.ok(responses);
     }
 }

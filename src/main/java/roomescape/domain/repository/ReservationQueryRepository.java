@@ -61,16 +61,23 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
             """)
     List<Reservation> findByCriteria(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
+    Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, Time time, Theme theme);
+
     boolean existsByTime(Time time);
 
     boolean existsByTheme(Theme theme);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, Time time, Theme theme);
 
     List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
 
     default Reservation getById(Long id) {
         return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION,
                 String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
+    }
+
+    default Reservation getByDateAndTimeAndTheme(LocalDate date, Time time, Theme theme) {
+        return findByDateAndTimeAndTheme(date, time, theme).orElseThrow(
+                () -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION));
     }
 }
