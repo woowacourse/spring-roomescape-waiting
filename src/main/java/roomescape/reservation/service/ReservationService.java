@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
-import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.exception.MemberExceptionCode;
+import roomescape.member.exception.model.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
@@ -18,10 +17,10 @@ import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeExceptionCode;
+import roomescape.theme.exception.model.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
-import roomescape.time.exception.TimeExceptionCode;
+import roomescape.time.exception.model.TimeNotFoundException;
 import roomescape.time.repository.TimeRepository;
 
 @Service
@@ -42,11 +41,11 @@ public class ReservationService {
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
         Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
+                .orElseThrow(TimeNotFoundException::new);
         Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
+                .orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findMemberById(memberId)
-                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
+                .orElseThrow(MemberNotFoundException::new);
 
         Reservation saveReservation = Reservation.of(reservationRequest.date(), time, theme, member);
 
@@ -55,11 +54,11 @@ public class ReservationService {
 
     public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
         Time time = timeRepository.findById(adminReservationRequest.timeId())
-                .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
+                .orElseThrow(TimeNotFoundException::new);
         Theme theme = themeRepository.findById(adminReservationRequest.themeId())
-                .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
+                .orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
-                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
+                .orElseThrow(MemberNotFoundException::new);
 
         Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member);
 

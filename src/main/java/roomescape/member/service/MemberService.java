@@ -7,6 +7,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginCheckResponse;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.exception.MemberExceptionCode;
+import roomescape.member.exception.model.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.role.MemberRole;
 
@@ -21,7 +22,7 @@ public class MemberService {
 
     public MemberLoginCheckResponse findLoginMemberInfo(long id) {
         Member member = memberRepository.findMemberById(id)
-                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
+                .orElseThrow(MemberNotFoundException::new);
 
         return new MemberLoginCheckResponse(member.getName());
     }

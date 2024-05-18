@@ -12,6 +12,8 @@ import roomescape.time.exception.TimeExceptionCode;
 
 public class TimeTest {
 
+    private static final String TIME_NOT_EXIST_MESSAGE = "해당하는 시간이 존재하지 않습니다.";
+
     @Test
     @DisplayName("전달 받은 데이터로 Time 객체를 정상적으로 생성한다.")
     void constructTime() {
@@ -27,7 +29,7 @@ public class TimeTest {
     void validation_ShouldThrowException_WhenStartAtIsNull() {
         Throwable nullStartAt = assertThrows(
                 RoomEscapeException.class, () -> Time.from(null));
-        assertEquals(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION.getMessage(), nullStartAt.getMessage());
+        assertEquals(TIME_NOT_EXIST_MESSAGE, nullStartAt.getMessage());
     }
 
     @Test

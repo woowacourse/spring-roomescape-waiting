@@ -4,18 +4,26 @@ import org.springframework.http.HttpStatus;
 
 public class RoomEscapeException extends RuntimeException {
 
-    private final ExceptionCode exceptionCode;
+    private final HttpStatus httpStatus;
+    private final String message;
 
     public RoomEscapeException(ExceptionCode exceptionCode) {
         super(exceptionCode.getMessage());
-        this.exceptionCode = exceptionCode;
+        this.httpStatus = exceptionCode.getHttpStatus();
+        this.message = exceptionCode.getMessage();
+    }
+
+    public RoomEscapeException(String message, HttpStatus httpStatus) {
+        super(message);
+        this.httpStatus = httpStatus;
+        this.message = message;
     }
 
     public HttpStatus getHttpStatus() {
-        return exceptionCode.getHttpStatus();
+        return httpStatus;
     }
 
     public String getMessage() {
-        return exceptionCode.getMessage();
+        return message;
     }
 }

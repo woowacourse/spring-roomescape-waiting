@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.time.exception.TimeExceptionCode;
+import roomescape.time.exception.model.TimeNotFoundException;
 
 @Entity
 public class Time {
@@ -46,7 +47,7 @@ public class Time {
 
     private static void validation(LocalTime startAt) {
         if (startAt == null) {
-            throw new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
+            throw new TimeNotFoundException();
         }
         if (startAt.isBefore(OPEN_TIME) || startAt.isAfter(CLOSE_TIME)) {
             throw new RoomEscapeException(TimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME);
