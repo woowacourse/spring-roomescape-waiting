@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import org.springframework.lang.NonNull;
 
 @Entity
 public class Theme {
@@ -16,16 +15,13 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     @Embedded
     @Column(nullable = false)
     private Name name;
 
-    @NonNull
     @Column(nullable = false)
     private String description;
 
-    @NonNull
     @Column(nullable = false)
     private String thumbnail;
 

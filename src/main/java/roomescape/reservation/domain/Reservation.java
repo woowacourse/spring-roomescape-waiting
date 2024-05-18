@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,8 +8,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.springframework.lang.NonNull;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
@@ -22,15 +19,12 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @NotNull
     @ManyToOne
     private ReservationTime reservationTime;
 
-    @NotNull
     @ManyToOne
     private Theme theme;
 
-    @NotNull
     @ManyToOne
     private Member member;
 
