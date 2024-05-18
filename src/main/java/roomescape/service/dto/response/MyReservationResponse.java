@@ -20,8 +20,7 @@ public record MyReservationResponse(
         LocalTime time,
         @NotBlank
         String status
-)
-{
+) {
     public static MyReservationResponse from(Reservation reservation, String status) {
         return new MyReservationResponse(
                 reservation.getId(),
