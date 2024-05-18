@@ -1,10 +1,10 @@
 package roomescape.domain.theme.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.global.exception.EscapeApplicationException;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class ThemeService {
 
     public void removeTheme(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
-            throw new EscapeApplicationException("해당 id를 가진 테마가 존재하지 않습니다.");
+            throw new EntityNotFoundException("해당 id를 가진 테마가 존재하지 않습니다.");
         }
         themeRepository.deleteById(id);
     }

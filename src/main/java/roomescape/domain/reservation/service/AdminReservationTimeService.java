@@ -1,5 +1,6 @@
 package roomescape.domain.reservation.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
@@ -31,7 +32,7 @@ public class AdminReservationTimeService {
 
     public void removeReservationTime(Long id) {
         if (reservationTimeRepository.findById(id).isEmpty()) {
-            throw new EscapeApplicationException("해당 id를 가진 예약시간이 존재하지 않습니다.");
+            throw new EntityNotFoundException("해당 id를 가진 예약시간이 존재하지 않습니다.");
         }
         reservationTimeRepository.deleteById(id);
     }
