@@ -1,10 +1,7 @@
 package roomescape.controller;
 
-import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
-import static roomescape.TestFixture.ADMIN_ZEZE;
 import static roomescape.TestFixture.DATE_AFTER_1DAY;
 import static roomescape.TestFixture.MEMBER_BROWN;
-import static roomescape.TestFixture.MEMBER_LOGIN_REQUEST;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 import static roomescape.TestFixture.VALID_STRING_DATE;
@@ -23,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -77,7 +74,10 @@ class ReservationControllerTest {
     @DisplayName("모든 예약 내역 조회 성공 테스트")
     @Test
     void findAllReservations() {
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().get("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
@@ -86,15 +86,7 @@ class ReservationControllerTest {
     @Test
     void createMemberReservation() {
         // given
-        memberRepository.save(MEMBER_BROWN);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getMemberToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
                 RESERVATION_TIME_10AM, ROOM_THEME1);
@@ -112,15 +104,7 @@ class ReservationControllerTest {
     @Test
     void createAdminReservation() {
         // given
-        memberRepository.save(ADMIN_ZEZE);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(ADMIN_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getAdminToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
                 RESERVATION_TIME_10AM, ROOM_THEME1);
@@ -138,15 +122,7 @@ class ReservationControllerTest {
     @Test
     void findMyReservations() {
         // given
-        memberRepository.save(MEMBER_BROWN);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getMemberToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
                 RESERVATION_TIME_10AM, ROOM_THEME1);
@@ -173,15 +149,7 @@ class ReservationControllerTest {
     @ValueSource(strings = {"20223-10-11", "2024-13-1"})
     void invalidDateReservation(String value) {
         // given
-        memberRepository.save(MEMBER_BROWN);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getMemberToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, value, RESERVATION_TIME_10AM,
                 ROOM_THEME1);
@@ -199,15 +167,7 @@ class ReservationControllerTest {
     @Test
     void outdatedReservation() {
         // given
-        memberRepository.save(MEMBER_BROWN);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getMemberToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, "2023-12-12",
                 RESERVATION_TIME_10AM, ROOM_THEME1);
@@ -224,15 +184,7 @@ class ReservationControllerTest {
     @Test
     void duplicateReservation() {
         // given
-        memberRepository.save(MEMBER_BROWN);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getMemberToken(memberRepository);
 
         Map<String, Object> reservationRequest = createReservationRequest(MEMBER_BROWN, VALID_STRING_DATE,
                 RESERVATION_TIME_10AM, ROOM_THEME1);
@@ -258,15 +210,7 @@ class ReservationControllerTest {
     @Test
     void noPrimaryKeyReservation() {
         // given
-        memberRepository.save(ADMIN_ZEZE);
-
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(ADMIN_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getAdminToken(memberRepository);
 
         // when & then
         RestAssured.given().log().all()
@@ -287,13 +231,7 @@ class ReservationControllerTest {
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
 
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getAdminToken(memberRepository);
 
         // when & then
         Long id = savedReservation.getId();
@@ -309,14 +247,7 @@ class ReservationControllerTest {
         // given
         long invalidId = 0;
 
-        memberRepository.save(MEMBER_BROWN);
-        String accessToken = RestAssured
-                .given().log().all()
-                .body(MEMBER_LOGIN_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+        String accessToken = TestFixture.getAdminToken(memberRepository);
 
         // when & then
         RestAssured.given().log().all()

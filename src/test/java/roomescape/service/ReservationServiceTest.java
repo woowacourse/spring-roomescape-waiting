@@ -106,7 +106,7 @@ class ReservationServiceTest {
     void findByDateException() {
         assertThatThrownBy(() -> reservationService.findBy(1L, 1L, DATE_AFTER_2DAY, DATE_AFTER_1DAY))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("날짜를 잘못 입력하셨습니다.");
+                .hasMessage("종료 날짜가 시작 날짜 이전일 수 없습니다.");
     }
 
     @DisplayName("예약 저장")

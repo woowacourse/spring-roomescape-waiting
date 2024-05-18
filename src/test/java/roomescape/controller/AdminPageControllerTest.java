@@ -1,7 +1,5 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.containsString;
-
 import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -82,7 +80,7 @@ class AdminPageControllerTest {
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("관리자가 아닌 회원이 접속하면 로그인 페이지로 이동한다.")
+    @DisplayName("관리자가 아닌 회원은 접속할 수 없다.")
     @Test
     void responseAdminPageWithoutAdmin() {
         String accessToken = TestFixture.getMemberToken(memberRepository);
@@ -91,6 +89,6 @@ class AdminPageControllerTest {
                 .header("cookie", accessToken)
                 .when().get("/admin")
                 .then().log().all()
-                .body(containsString("<title>Login</title>"));
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 }
