@@ -1,0 +1,5 @@
+### 인기 테마 목록 페이지 조회
+GET http://localhost:8080/
+
+### 예약 페이지 조회
+GET http://localhost:8080/reservation

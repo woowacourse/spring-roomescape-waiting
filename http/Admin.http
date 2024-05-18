@@ -1,0 +1,8 @@
+### 어드민 메인 페이지 조회
+GET http://localhost:8080/admin
+
+### 예약 관리 페이지 조회
+GET http://localhost:8080/admin/reservation
+
+### 시간 관리 페이지 조회
+GET http://localhost:8080/admin/time
