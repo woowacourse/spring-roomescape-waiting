@@ -21,7 +21,6 @@ public class Name {
     }
 
     public Name() {
-
     }
 
     public String getName() {
