@@ -67,7 +67,7 @@ public class DatabaseInitializer {
 
     private Reservation createReservation(Member member, ReservationTime time, Theme theme) {
         Reservation reservation = new Reservation(
-                LocalDate.of(2000, 4, 1), member, time, theme, ReservationStatus.BOOKED);
+                ReservationStatus.BOOKED, LocalDate.of(2000, 4, 1), time, theme, member);
         entityManager.persist(reservation);
         return reservation;
     }

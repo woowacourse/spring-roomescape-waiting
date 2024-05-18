@@ -67,7 +67,7 @@ public class ReservationService {
         Theme theme = findThemeById(request.getThemeId());
         validateDateTimeReservation(request, time);
 
-        Reservation reservation = request.toReservation(member, time, theme, ReservationStatus.BOOKED);
+        Reservation reservation = request.toReservation(ReservationStatus.BOOKED, time, theme, member);
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }

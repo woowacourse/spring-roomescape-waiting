@@ -39,8 +39,8 @@ public class ReservationRequest {
     }
 
     public Reservation toReservation(
-            Member member, ReservationTime reservationTime, Theme theme, ReservationStatus status) {
-        return new Reservation(date, member, reservationTime, theme, status);
+            ReservationStatus status, ReservationTime reservationTime, Theme theme, Member member) {
+        return new Reservation(status, date, reservationTime, theme, member);
     }
 
     public LocalDate getDate() {

@@ -17,43 +17,43 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
     private LocalDate date;
-    @ManyToOne
-    private Member member;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    @ManyToOne
+    private Member member;
 
     public Reservation() {
     }
 
     public Reservation(
-            Long id, LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
+            Long id, ReservationStatus status, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
+        this.status = status;
         this.date = date;
-        this.member = member;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+        this.member = member;
     }
 
-    public Reservation(LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, date, member, time, theme, status);
+    public Reservation(ReservationStatus status, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(null, status, date, time, theme, member);
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public ReservationStatus getStatus() {
+        return status;
     }
 
-    public Member getMember() {
-        return member;
+    public LocalDate getDate() {
+        return date;
     }
 
     public ReservationTime getTime() {
@@ -64,7 +64,7 @@ public class Reservation {
         return theme;
     }
 
-    public ReservationStatus getStatus() {
-        return status;
+    public Member getMember() {
+        return member;
     }
 }
