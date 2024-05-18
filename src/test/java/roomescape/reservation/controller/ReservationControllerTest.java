@@ -7,13 +7,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.servlet.http.Cookie;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+
+import jakarta.servlet.http.Cookie;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +25,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.crypto.JwtTokenProvider;
 import roomescape.member.security.service.MemberAuthService;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
@@ -40,15 +45,16 @@ import roomescape.time.domain.Time;
 
 @WebMvcTest(ReservationController.class)
 @TestPropertySource(properties = {"security.jwt.token.secret-key=test_secret_key",
-                                  "security.jwt.token.expire-length=3600000"})
+        "security.jwt.token.expire-length=3600000"})
 class ReservationControllerTest {
-
     private final Member member = new Member("tester", "test@email.com", "pass");
-    private final Reservation reservation = new Reservation(
-            member,
-            LocalDate.MAX,
-            new Time(1L, LocalTime.of(12, 0)),
-            new Theme(1L, "도비", "도비 방탈출", "이미지~"));
+    private final Reservation reservation = new ReservationBuilder()
+            .member(member)
+            .date(LocalDate.MAX)
+            .time(new Time(1L, LocalTime.of(12, 0)))
+            .theme(new Theme(1L, "도비", "도비 방탈출", "이미지~"))
+            .build();
+
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
     @Value("${security.jwt.token.expire-length}")

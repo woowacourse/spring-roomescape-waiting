@@ -16,32 +16,33 @@ import roomescape.time.domain.Time;
 
 @Entity
 public class Reservation {
-    private final String status = "예약";
+    private static final String status = "예약";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     private Member member;
-    private LocalDate date;
     @ManyToOne
     private Time time;
     @ManyToOne
     private Theme theme;
+    private LocalDate date;
 
     public Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Time time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member, Theme theme, Time time, LocalDate date) {
+        this(null, member,theme, time, date);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Time time, Theme theme) {
+    public Reservation(Long id, Member member, Theme theme, Time time, LocalDate date) {
         validate(member, date, time, theme);
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
         this.theme = theme;
+        this.time = time;
+        this.date = date;
     }
 
     private void validate(Member member, LocalDate date, Time time, Theme theme) {

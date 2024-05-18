@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -16,6 +17,11 @@ public record ReservationRequest(
         long themeId
 ) {
     public Reservation toReservation(Time time, Theme theme) {
-        return new Reservation(member, date, time, theme);
+        return new ReservationBuilder()
+                .date(date)
+                .member(member)
+                .time(time)
+                .theme(theme)
+                .build();
     }
 }

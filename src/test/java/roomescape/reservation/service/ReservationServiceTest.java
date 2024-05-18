@@ -36,7 +36,7 @@ class ReservationServiceTest {
     private final Time time = new Time(1L, LocalTime.of(12, 0));
     private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
     private final Member member = new Member("켬미", "kyummi@email.com", "pass");
-    private final Reservation reservation = new Reservation(1L, member, LocalDate.MAX, time, theme);
+    private final Reservation reservation = new Reservation(1L, member, theme, time, LocalDate.MAX);
 
     private final MemberProfileInfo memberProfileInfo = new MemberProfileInfo(1L, "Dobby", "kimdobby@wotaeco.com");
     @InjectMocks
