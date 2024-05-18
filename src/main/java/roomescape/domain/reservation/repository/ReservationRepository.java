@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByTheme_IdAndMember_IdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    boolean existsByDateAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    List<Reservation> findByDateAndTheme_Id(LocalDate date, Long themeId);
+    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findByMember_Id(Long memberId);
+    List<Reservation> findByMemberId(Long memberId);
 }

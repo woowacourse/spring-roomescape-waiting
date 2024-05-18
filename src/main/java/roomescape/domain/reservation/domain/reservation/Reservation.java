@@ -2,7 +2,6 @@ package roomescape.domain.reservation.domain.reservation;
 
 import jakarta.persistence.*;
 import roomescape.domain.member.domain.Member;
-import roomescape.domain.member.domain.Role;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
 
@@ -47,22 +46,6 @@ public class Reservation {
         return id;
     }
 
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public String getMemberName() {
-        return member.getName();
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -77,14 +60,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public String getMemberEmail() {
-        return member.getEmail();
-    }
-
-    public Role getMemberRole() {
-        return member.getRole();
     }
 
     @Override

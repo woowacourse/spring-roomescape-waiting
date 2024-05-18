@@ -42,11 +42,11 @@ public class ReservationService {
 
     public List<Reservation> findFilteredReservationList(Long themeId, Long memberId,
                                                          LocalDate dateFrom, LocalDate dateTo) {
-        return reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, dateFrom, dateTo);
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
     }
 
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
-        if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservationAddRequest.date(),
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
         }
@@ -75,7 +75,7 @@ public class ReservationService {
     }
 
     public List<BookableTimeResponse> findBookableTimes(BookableTimesRequest bookableTimesRequest) {
-        List<Reservation> bookedReservations = reservationRepository.findByDateAndTheme_Id(bookableTimesRequest.date(),
+        List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(bookableTimesRequest.date(),
                 bookableTimesRequest.themeId());
         List<ReservationTime> bookedTimes = bookedReservations.stream()
                 .map(Reservation::getTime)
@@ -98,7 +98,7 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findReservationByMemberId(Long memberId) {
-        return reservationRepository.findByMember_Id(memberId).stream()
+        return reservationRepository.findByMemberId(memberId).stream()
                 .map(ReservationMineResponse::new)
                 .toList();
     }

@@ -16,9 +16,9 @@ public record ReservationResponse(Long id,
     public static ReservationResponse from(Reservation reservation) {
         MemberResponse memberResponse = new MemberResponse(
                 reservation.getMember().getId(),
-                reservation.getMemberName(),
-                reservation.getMemberEmail(),
-                reservation.getMemberRole()
+                reservation.getMember().getName(),
+                reservation.getMember().getEmail(),
+                reservation.getMember().getRole()
         );
         return new ReservationResponse(reservation.getId(),
                 reservation.getDate(),
