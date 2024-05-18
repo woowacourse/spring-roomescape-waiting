@@ -3,8 +3,9 @@ package roomescape.config;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Objects;
+
 import org.springframework.web.servlet.HandlerInterceptor;
+
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;

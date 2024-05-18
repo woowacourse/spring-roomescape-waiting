@@ -2,7 +2,9 @@ package roomescape.time.service;
 
 import java.time.LocalTime;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import roomescape.exception.ConflictException;
 import roomescape.reservation.dao.ReservationRepository;
 import roomescape.time.dao.TimeRepository;
@@ -12,7 +14,6 @@ import roomescape.time.dto.TimeResponse;
 
 @Service
 public class TimeService {
-
     private final TimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -55,5 +56,4 @@ public class TimeService {
             throw new ConflictException("삭제를 요청한 시간에 예약이 존재합니다.");
         }
     }
-
 }

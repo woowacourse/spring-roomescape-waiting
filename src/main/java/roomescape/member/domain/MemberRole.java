@@ -1,7 +1,6 @@
 package roomescape.member.domain;
 
 public enum MemberRole {
-
     USER("USER"),
     ADMIN("ADMIN"),
     GUEST("GUEST");

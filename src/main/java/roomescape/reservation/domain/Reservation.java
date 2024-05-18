@@ -1,12 +1,14 @@
 package roomescape.reservation.domain;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.util.Objects;
+
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
@@ -14,9 +16,7 @@ import roomescape.time.domain.Time;
 
 @Entity
 public class Reservation {
-
     private final String status = "예약";
-    // private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,14 +48,7 @@ public class Reservation {
         if (member == null || date == null || time == null || theme == null) {
             throw new BadRequestException("예약 정보가 부족합니다.");
         }
-        //validateName(name);
     }
-
-    /**
-     * private void validateName(String name) { if (name.isBlank()) { throw new BadRequestException("공백으로 이루어진 이름으로 예약할
-     * 수 없습니다."); } if (ILLEGAL_NAME_REGEX.matcher(name) .matches()) { throw new BadRequestException("특수문자가 포함된 이름으로 예약을
-     * 시도하였습니다."); } }
-     **/
 
     public Long getId() {
         return id;
@@ -135,7 +128,6 @@ public class Reservation {
     @Override
     public String toString() {
         return "Reservation{" + "date=" + date + ", id=" + id + ", member=" + member + ", time=" + time + ", theme="
-                + theme + '}';
+               + theme + '}';
     }
-
 }

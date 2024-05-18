@@ -2,6 +2,7 @@ package roomescape.reservation.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 import roomescape.reservation.domain.Reservation;
 
 public record MyReservationResponse(
@@ -11,7 +12,6 @@ public record MyReservationResponse(
         LocalTime time,
         String status
 ) {
-
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
@@ -23,5 +23,4 @@ public record MyReservationResponse(
                 reservation.getStatus()
         );
     }
-
 }

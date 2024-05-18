@@ -1,17 +1,17 @@
 package roomescape.time.domain;
 
+import java.time.LocalTime;
+import java.util.Objects;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalTime;
-import java.util.Objects;
-import roomescape.exception.BadRequestException;
+
 import roomescape.exception.BadRequestException;
 
 @Entity
 public class Time {
-
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
     @Id
@@ -70,5 +70,4 @@ public class Time {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }

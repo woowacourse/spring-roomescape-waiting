@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Theme {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,5 +52,4 @@ public class Theme {
     public String getThumbnail() {
         return thumbnail;
     }
-
 }

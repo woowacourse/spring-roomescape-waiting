@@ -17,7 +17,6 @@ import roomescape.member.security.crypto.TokenProvider;
 
 @Service
 public class MemberAuthService {
-
     public static final String TOKEN_NAME = "token";
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
@@ -70,5 +69,4 @@ public class MemberAuthService {
     public boolean isAdmin(Member member) {
         return member.isAdmin();
     }
-
 }

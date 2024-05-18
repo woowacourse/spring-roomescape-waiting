@@ -1,14 +1,14 @@
 package roomescape.member.domain;
 
+import java.util.Objects;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
 
 @Entity
 public class Member {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -70,7 +70,7 @@ public class Member {
         }
         return Objects.equals(id, member.id) && Objects.equals(email, member.email) && Objects.equals(password,
                 member.password)
-                && Objects.equals(name, member.name);
+               && Objects.equals(name, member.name);
     }
 
     @Override
@@ -82,5 +82,4 @@ public class Member {
     public String toString() {
         return "Member{" + "email='" + email + '\'' + ", id=" + id + ", name='" + name + '\'' + '}';
     }
-
 }

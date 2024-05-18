@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
-import roomescape.exception.BadRequestException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dao.ReservationRepository;
@@ -25,7 +24,6 @@ import roomescape.time.domain.Time;
 
 @Service
 public class ReservationService {
-
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
@@ -130,5 +128,4 @@ public class ReservationService {
                 .map(MyReservationResponse::from)
                 .toList();
     }
-
 }

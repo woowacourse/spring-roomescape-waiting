@@ -9,12 +9,9 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import roomescape.exception.AuthorizationException;
-import roomescape.exception.AuthorizationExpiredException;
-import roomescape.exception.AuthorizationMismatchExpiredException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 

@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class UserViewController {
-
     @GetMapping
     public String mainThemeRankPage() {
         return "index";
@@ -25,5 +24,4 @@ public class UserViewController {
     public String reservationMinePage() {
         return "/reservation-mine";
     }
-
 }
