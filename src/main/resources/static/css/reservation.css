@@ -1,0 +1,13 @@
+.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+#theme-slots .theme-slot.active, #time-slots .time-slot.active {
+    background-color: #0A3711 !important;
+    color: white;
+}
+#time-slots .time-slot.disabled {
+    background-color: #CCCCCC;
+    color: #666666;
+    cursor: not-allowed;
+}
