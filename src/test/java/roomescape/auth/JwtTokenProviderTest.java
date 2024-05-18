@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infra.JwtTokenProvider;
 
 class JwtTokenProviderTest {
 

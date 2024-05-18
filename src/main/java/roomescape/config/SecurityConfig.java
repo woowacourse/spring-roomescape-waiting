@@ -3,7 +3,7 @@ package roomescape.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import roomescape.application.PasswordEncoder;
-import roomescape.infrastructure.BcryptPasswordEncoder;
+import roomescape.infra.BcryptPasswordEncoder;
 
 @Configuration
 public class SecurityConfig {
