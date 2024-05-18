@@ -9,6 +9,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.user.Member;
+import roomescape.domain.user.Role;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
 import roomescape.fixture.MemberFixture;
@@ -81,7 +82,7 @@ class ReservationTimeServiceTest {
                 "2024-04-30",
                 ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
                 Theme.of(themeOutput.id(), themeOutput.name(), themeOutput.description(), themeOutput.thumbnail()),
-                Member.fromMember(memberOutput.id(), memberOutput.name(), memberOutput.email(), memberOutput.password())
+                Member.from(memberOutput.id(), memberOutput.name(), memberOutput.email(), memberOutput.password(), Role.USER)
         ));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeOutput.id()))

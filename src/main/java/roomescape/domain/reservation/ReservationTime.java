@@ -24,6 +24,9 @@ public class ReservationTime {
         this.id = id;
         this.startAt = startAt;
     }
+    public static ReservationTime from(final String startAt){
+        return ReservationTime.from(null,startAt);
+    }
 
     public static ReservationTime from(final Long id, final String startAt) {
         try {

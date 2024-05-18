@@ -9,6 +9,6 @@ public record MemberCreateInput(String name, String email, String password, Role
     }
 
     public Member toMember() {
-        return Member.from(null, name, email, password, role.getValue());
+        return Member.from(name, email, password, role);
     }
 }

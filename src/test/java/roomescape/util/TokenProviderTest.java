@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.user.Member;
+import roomescape.domain.user.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +18,7 @@ class TokenProviderTest {
     @DisplayName("토큰을 생성하고,추출한다")
     void some() {
         final var token = tokenProvider.generateToken(
-                Member.fromMember(3L, "조이썬", "joyson5582@gmail.com", "password1234"));
+                Member.from(3L, "조이썬", "joyson5582@gmail.com", "password1234", Role.ADMIN));
         final var decodeInfo = tokenProvider.decodeToken(token);
         assertThat(decodeInfo.getId()).isEqualTo(3);
     }

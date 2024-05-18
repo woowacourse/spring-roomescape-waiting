@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.user.Member;
+import roomescape.domain.user.Role;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.MemberRepository;
@@ -34,7 +35,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("존재하는 이메일과 이메일에 해당하는 비밀번호를 통해 로그인을 하면 성공한다")
     void login_success_with_exist_email_and_equal_password() {
-        memberRepository.save(Member.fromMember(null, "조이썬", "i894@naver.com", "password1234"));
+        memberRepository.save(Member.from( "조이썬", "i894@naver.com", "password1234",Role.USER));
 
         final var input = new MemberLoginInput("i894@naver.com", "password1234");
         assertThatCode(() -> sut.loginMember(input))
@@ -52,7 +53,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("이메일과 일치하지 않는 비밀번호로 로그인을 하면 예외가 발생한다.")
     void throw_exception_when_not_equal_password() {
-        memberRepository.save(Member.fromMember(null, "조이썬", "i894@naver.com", "password5678"));
+        memberRepository.save(Member.from("조이썬", "i894@naver.com", "password5678", Role.USER));
 
         final var input = new MemberLoginInput("sample@naver.com", "password1234");
         Assertions.assertThatThrownBy(() -> sut.loginMember(input))
@@ -70,6 +71,7 @@ class MemberServiceTest {
         assertThatCode(() -> memberRepository.findById(result.id())
                 .get()).doesNotThrowAnyException();
     }
+
     @Test
     @DisplayName("이미 존재하는 이메일로 회원가입 시, 예외를 발생한다.")
     void throw_exception_when_already_exist_email() {

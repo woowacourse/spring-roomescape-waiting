@@ -30,16 +30,12 @@ public class Member {
         this.role = role;
     }
 
-    public static Member fromMember(final Long id, final String name, final String email, final String password) {
-        return new Member(id, new Name(name), new Email(email), new Password(password), Role.USER);
+    public static Member from(final String name, final String email, final String password, final Role role) {
+        return new Member(null, new Name(name), new Email(email), new Password(password), role);
     }
 
-    public static Member fromAdmin(final Long id, final String name, final String email, final String password) {
-        return new Member(id, new Name(name), new Email(email), new Password(password), Role.ADMIN);
-    }
-
-    public static Member from(final Long id, final String name, final String email, final String password, final String role) {
-        return new Member(id, new Name(name), new Email(email), new Password(password), Role.from(role));
+    public static Member from(final Long id, final String name, final String email, final String password, final Role role) {
+        return new Member(id, new Name(name), new Email(email), new Password(password), role);
     }
 
 
