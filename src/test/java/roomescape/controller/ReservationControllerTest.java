@@ -139,8 +139,12 @@ class ReservationControllerTest extends ControllerTest {
         jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)",
                 VALID_ADMIN_NAME.getName(), VALID_ADMIN_EMAIL.getEmail(),
                 VALID_ADMIN_PASSWORD.getPassword(), MemberRole.ADMIN.name());
+        jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)",
+                VALID_THEME.getName(), VALID_THEME.getDescription(), VALID_THEME.getThumbnail());
         jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
                 "2026-02-01", 1L, 1L, 2L, "RESERVATION");
+        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
+                "2026-03-02", 1L, 2L, 1L, "RESERVATION");
 
         return Stream.of(dynamicTest("테마 아이디로 예약 필터링", () ->
                         RestAssured.given().log().all()
@@ -155,21 +159,29 @@ class ReservationControllerTest extends ControllerTest {
                                 .when().get("/admin/reservations/search?memberId=1")
                                 .then().log().all()
                                 .statusCode(200)
-                                .body("size()", is(1))),
-                dynamicTest("날짜로 예약 필터링", () ->
+                                .body("size()", is(2))),
+                dynamicTest("시작 날짜로 예약 필터링", () ->
                         RestAssured.given().log().all()
                                 .cookie(COOKIE_NAME, getAdminToken())
-                                .when().get("/admin/reservations/search?from=2026-02-01")
+                                .when().get("/admin/reservations/search?dateFrom=2026-02-02")
                                 .then().log().all()
                                 .statusCode(200)
-                                .body("size()", is(2))),
+                                .body("size()", is(1))),
                 dynamicTest("전체 조건으로 예약 필터링", () ->
                         RestAssured.given().log().all()
                                 .cookie(COOKIE_NAME, getAdminToken())
-                                .when().get("/admin/reservations/search?memberId=1&themeId=1&from=2026-02-01&to=2026-03-01")
+                                .when().get("/admin/reservations/search?memberId=1&themeId=1&dateFrom=2026-02-01&dateTo=2026-03-02")
                                 .then().log().all()
                                 .statusCode(200)
-                                .body("size()", is(1)))
+                                .body("size()", is(1))),
+                dynamicTest("종료 날짜로 예약 필터링", () ->
+                        RestAssured.given().log().all()
+                                .cookie(COOKIE_NAME, getAdminToken())
+                                .when().get("/admin/reservations/search?dateTo=2026-03-01")
+                                .then().log().all()
+                                .statusCode(200)
+                                .body("size()", is(2)))
+
         );
     }
 }

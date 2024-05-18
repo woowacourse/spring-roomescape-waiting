@@ -23,11 +23,8 @@ VALUES ('10:00');
 INSERT INTO member(name, email, password, role)
 VALUES ('wiib', 'asd@gmail.com', '1!2@3#', 'ADMIN');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 1);
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1, 'RESERVATION'),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1, 'RESERVATION'),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1, 'RESERVATION'),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 1, 'RESERVATION');

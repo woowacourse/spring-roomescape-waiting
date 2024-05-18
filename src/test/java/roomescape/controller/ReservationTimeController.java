@@ -7,6 +7,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.ReservationStatus;
 import roomescape.web.controller.request.ReservationTimeWebRequest;
 
 class ReservationTimeController extends ControllerTest {
@@ -75,8 +76,8 @@ class ReservationTimeController extends ControllerTest {
             "https://url1");
         jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)", "wiib", "asd@naver.com",
             "123asd", "ADMIN");
-        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id) VALUES (?,?,?,?)",
-            "2026-02-01", 1L, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
+            "2026-02-01", 1L, 1L, 1L, ReservationStatus.RESERVATION.name());
 
         RestAssured.given().log().all()
             .when().delete("/times/1")
