@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.user.Email;
 import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
@@ -30,7 +29,7 @@ public class MemberService {
     }
 
     public MemberCreateOutput createMember(final MemberCreateInput memberCreateInput) {
-        if (memberRepository.existsByEmail(new Email(memberCreateInput.email()))) {
+        if (memberRepository.existsByEmailAddress(memberCreateInput.email())) {
             throw new AlreadyExistsException(String.format("%s 는 이미 존재합니다.", memberCreateInput.email()));
         }
         final Member member = memberRepository.save(memberCreateInput.toMember());
@@ -43,7 +42,7 @@ public class MemberService {
     }
 
     public MemberLoginOutput loginMember(final MemberLoginInput memberLoginInput) {
-        final Member member = memberRepository.findByEmail(new Email(memberLoginInput.email()))
+        final Member member = memberRepository.findByEmailAddress(memberLoginInput.email())
                 .orElseThrow(() -> new UnauthorizedException(String.format("%s 해당하는 멤버가 없습니다", memberLoginInput.email())));
         if (member.isNotEqualPassword(memberLoginInput.password())) {
             throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");

@@ -1,15 +1,17 @@
 package roomescape.domain.user;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.util.regex.Pattern;
 
 @Embeddable
-public record Email(String email) {
+public record Email(
+        @Column(name = "email") String address) {
     private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
     public Email {
-        validate(email);
+        validate(address);
     }
 
     private void validate(final String value) {

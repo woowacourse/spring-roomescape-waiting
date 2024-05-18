@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.user.Email;
 import roomescape.fixture.MemberFixture;
 import roomescape.util.DatabaseCleaner;
 
@@ -52,13 +51,13 @@ class MemberRepositoryTest {
     void findByEmail(){
         sut.save(MemberFixture.getDomain("alphaka@gmail.com"));
 
-        final var result = sut.findByEmail(new Email("alphaka@gmail.com"));
+        final var result = sut.findByEmailAddress("alphaka@gmail.com");
         assertThat(result).contains(MemberFixture.getDomain("alphaka@gmail.com"));
     }
     @Test
-    void existsByEmail(){
+    void existsByEmailAddress(){
         sut.save(MemberFixture.getDomain("alphaka@gmail.com"));
-        final var result = sut.existsByEmail(new Email("alphaka@gmail.com"));
+        final var result = sut.existsByEmailAddress("alphaka@gmail.com");
         assertThat(result).isTrue();
     }
 }
