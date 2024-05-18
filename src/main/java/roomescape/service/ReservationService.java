@@ -8,7 +8,7 @@ import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationTimeRepository;
 import roomescape.infrastructure.ThemeRepository;
 import roomescape.service.exception.PastReservationException;
-import roomescape.service.exception.ReservationSpecification;
+import roomescape.service.specification.ReservationSpecification;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;

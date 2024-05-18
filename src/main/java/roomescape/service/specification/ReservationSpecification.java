@@ -1,4 +1,4 @@
-package roomescape.service.exception;
+package roomescape.service.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.Reservation;
@@ -23,7 +23,7 @@ public class ReservationSpecification {
             specifications.add((root, query, criteriaBuilder) ->
                     criteriaBuilder.greaterThanOrEqualTo(root.get("date").get("date"), request.dateFrom()));
         }
-        if (request.dateFrom() != null) {
+        if (request.dateTo() != null) {
             specifications.add((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThanOrEqualTo(root.get("date").get("date"), request.dateTo()));
         }
