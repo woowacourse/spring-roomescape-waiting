@@ -19,7 +19,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(final Long id, final Name name, final Email email, final Password password, final Role role) {
