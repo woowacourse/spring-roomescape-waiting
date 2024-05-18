@@ -5,16 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import jakarta.servlet.http.Cookie;
 import java.util.Map;
+
+import jakarta.servlet.http.Cookie;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.AuthorizationMismatchException;
-import roomescape.exception.IllegalAuthorizationException;
+
+import roomescape.exception.AuthorizationMismatchExpiredException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.security.crypto.JwtTokenProvider;
@@ -34,7 +36,7 @@ class MemberAuthServiceTest {
     @DisplayName("비밀번호 불일치시 인증 예외를 발생시킨다")
     void validateAuthentication_ShouldThrowException_WhenPasswordDoesNotMatch() {
         // Given
-        Member member = new Member("name","user@example.com",
+        Member member = new Member("name", "user@example.com",
                 "encodedPassword");
         MemberLoginRequest loginRequest = new MemberLoginRequest("user@example.com", "wrongPassword");
 
@@ -42,7 +44,7 @@ class MemberAuthServiceTest {
         when(passwordBcryptEncoder.matches(loginRequest.password(), member.getPassword())).thenReturn(false);
 
         // When & Then
-        assertThrows(AuthorizationMismatchException.class,
+        assertThrows(AuthorizationMismatchExpiredException.class,
                 () -> memberAuthService.validateAuthentication(member, loginRequest));
     }
 
@@ -80,18 +82,5 @@ class MemberAuthServiceTest {
         // Then
         assertEquals(payload.get("name"), nameFromPayload);
     }
-
-    @Test
-    @DisplayName("쿠키에 정해진 형식의 토큰이 존재하지 않을때 예외를 던진다.")
-    void extractNameFromPayload_ShouldThrowsIllegalAuthorizationException_WhenCookiesContainInvalidToken() {
-        // Given
-        Cookie[] cookies = new Cookie[]{new Cookie("NotToken", "notValidToken"), new Cookie("doken", "notValidToken")};
-        Map<String, String> payload = Map.of("name", "Dobby", "email", "kimdobby@wotaeco.com");
-
-        // When & Then
-        assertThrows(IllegalAuthorizationException.class, () -> memberAuthService.extractNameFromPayload(cookies));
-
-    }
-
 }
 

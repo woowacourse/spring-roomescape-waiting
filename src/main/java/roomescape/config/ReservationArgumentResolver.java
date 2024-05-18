@@ -19,7 +19,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import roomescape.exception.AuthorizationException;
+import roomescape.exception.AuthorizationExpiredException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
@@ -58,7 +58,7 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
                     reservationRequest.themeId()
             );
         }
-        throw new AuthorizationException("로그인이 만료되었습니다. 다시 로그인 해주세요.");
+        throw new AuthorizationExpiredException();
     }
 
     private ReservationRequest convertToRequestBody(HttpServletRequest request) {
@@ -68,7 +68,7 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
                 new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
             return objectMapper.readValue(reader, ReservationRequest.class);
         } catch (IOException e) {
-            throw new AuthorizationException("로그인이 만료되었습니다. 다시 로그인 해주세요.");
+            throw new AuthorizationExpiredException();
         }
     }
 

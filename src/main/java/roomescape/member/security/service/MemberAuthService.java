@@ -1,12 +1,14 @@
 package roomescape.member.security.service;
 
-import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+
+import jakarta.servlet.http.Cookie;
+
 import org.springframework.stereotype.Service;
-import roomescape.exception.AuthorizationMismatchException;
-import roomescape.exception.IllegalAuthorizationException;
+
+import roomescape.exception.AuthorizationMismatchExpiredException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
@@ -26,9 +28,9 @@ public class MemberAuthService {
     }
 
     public void validateAuthentication(Member member, MemberLoginRequest memberLoginRequest)
-            throws AuthorizationMismatchException {
+            throws AuthorizationMismatchExpiredException {
         if (!passwordEncoder.matches(memberLoginRequest.password(), member.getPassword())) {
-            throw new AuthorizationMismatchException("비밀번호가 일치하지 않습니다.");
+            throw new AuthorizationMismatchExpiredException();
         }
     }
 
@@ -62,7 +64,7 @@ public class MemberAuthService {
                 .filter(cookie -> TOKEN_NAME.equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalAuthorizationException("잘못된 쿠키 값입니다."));
+                .orElseThrow(AuthorizationMismatchExpiredException::new);
     }
 
     public boolean isAdmin(Member member) {

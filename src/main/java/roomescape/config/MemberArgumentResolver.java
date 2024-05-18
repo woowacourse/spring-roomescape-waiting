@@ -8,7 +8,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.exception.AuthorizationException;
+import roomescape.exception.AuthorizationExpiredException;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
 
@@ -35,6 +35,6 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
         if (memberAuthService.isLoginMember(cookies)) {
             return memberAuthService.extractPayload(cookies);
         }
-        throw new AuthorizationException("로그인이 만료되었습니다. 다시 로그인 해주세요.");
+        throw new AuthorizationExpiredException();
     }
 }

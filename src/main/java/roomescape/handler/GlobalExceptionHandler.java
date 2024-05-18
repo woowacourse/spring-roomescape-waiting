@@ -1,6 +1,7 @@
 package roomescape.handler;
 
 import java.sql.SQLException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -8,16 +9,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 import roomescape.exception.AuthorizationException;
-import roomescape.exception.AuthorizationMismatchException;
+import roomescape.exception.AuthorizationExpiredException;
+import roomescape.exception.AuthorizationMismatchExpiredException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
-import roomescape.exception.IllegalAuthorizationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class.getName());
+
+    @ExceptionHandler({AuthorizationExpiredException.class , AuthorizationMismatchExpiredException.class})
+    public ResponseEntity<String> handleAuthorizationException(AuthorizationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(exception.getMessage());
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception exception) {
@@ -54,23 +61,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError()
                 .body("데이터 저장 중 문제가 발생하였습니다.");
     }
-
-    @ExceptionHandler(AuthorizationException.class)
-    public ResponseEntity<String> handleAuthorizationException(AuthorizationException exception) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(exception.getMessage());
-    }
-
-    @ExceptionHandler(AuthorizationMismatchException.class)
-    public ResponseEntity<String> handleIllegalAuthorizationException(AuthorizationMismatchException exception) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(exception.getMessage());
-    }
-
-    @ExceptionHandler(IllegalAuthorizationException.class)
-    public ResponseEntity<String> handleIllegalAuthorizationException(IllegalAuthorizationException exception) {
-        return ResponseEntity.badRequest()
-                .body(exception.getMessage());
-    }
-
 }
