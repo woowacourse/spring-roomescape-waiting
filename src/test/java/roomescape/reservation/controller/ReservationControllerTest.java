@@ -190,7 +190,7 @@ class ReservationControllerTest extends ControllerTest {
         //when & then
         RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().get("/reservations/my")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200);
     }

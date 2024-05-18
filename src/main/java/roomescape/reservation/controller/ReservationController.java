@@ -51,7 +51,7 @@ public class ReservationController {
         reservationService.deleteMemberReservation(authInfo, reservationMemberId);
     }
 
-    @GetMapping("/reservations/my")
+    @GetMapping("/reservations/mine")
     public List<MyReservationResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
         return reservationService.findMyReservations(authInfo);
     }
