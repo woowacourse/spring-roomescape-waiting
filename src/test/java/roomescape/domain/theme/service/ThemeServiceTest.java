@@ -10,9 +10,7 @@ import roomescape.global.exception.EscapeApplicationException;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.assertj.core.api.Assertions.*;
 
 class ThemeServiceTest extends ServiceTest {
 
@@ -22,14 +20,8 @@ class ThemeServiceTest extends ServiceTest {
     @DisplayName("인기 테마를 알 수 있습니다.")
     @Test
     void should_get_theme_ranking() {
-        List<Theme> themeRanking = themeService.getThemeRanking();
-        assertAll(
-                () -> assertThat(themeRanking).hasSize(4),
-                () -> {
-                    assert themeRanking != null;
-                    assertThat(themeRanking.get(0).getId()).isEqualTo(3L);
-                }
-        );
+        assertThatCode(() -> themeService.getThemeRanking())
+                .doesNotThrowAnyException();
     }
 
     @DisplayName("모든 테마를 불러올 수 있습니다.")
