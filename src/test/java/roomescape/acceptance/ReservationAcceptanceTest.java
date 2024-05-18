@@ -28,7 +28,7 @@ import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
-    @DisplayName("[Step2, Step5] 예약 목록을 조회한다.")
+    @DisplayName("예약 목록을 조회한다.")
     void findReservations() {
         // given & when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -46,7 +46,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step3, Step6, Step8] 예약을 추가한다.")
+    @DisplayName("예약을 추가한다.")
     void createOneReservation() {
         // given
         Member member = createTestMember();
@@ -168,7 +168,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step3, Step6, Step8] 예약 날짜가 없는 예약을 추가한다.")
+    @DisplayName("예약 날짜가 없는 예약을 추가한다.")
     void createInvalidReservation() {
         // given
         Member member = createTestMember();
@@ -197,7 +197,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[Step3, Step6, Step8] 존재하지 않는 예약 시간에 예약을 추가한다.")
+    @DisplayName("존재하지 않는 예약 시간에 예약을 추가한다.")
     void createReservationWithNotExistingTime() {
         // given
         Member member = createTestMember();
@@ -227,7 +227,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @TestFactory
-    @DisplayName("[Step3, Step6, Step8] 예약을 추가하고 삭제한다.")
+    @DisplayName("예약을 추가하고 삭제한다.")
     Stream<DynamicTest> createThenDeleteReservation() {
         return Stream.of(
                 dynamicTest("예약을 하나 생성한다.", this::createOneReservation),
@@ -267,7 +267,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("[3 - Step2] 사용자의 예약 목록을 조회한다.")
+    @DisplayName("사용자의 예약 목록을 조회한다.")
     void findMyReservations() {
         // given
         Long themeId = createTestTheme();

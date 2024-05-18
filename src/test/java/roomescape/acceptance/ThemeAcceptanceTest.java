@@ -24,7 +24,7 @@ import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
     @Test
-    @DisplayName("[2 - Step2] 테마를 추가한다.")
+    @DisplayName("테마를 추가한다.")
     void createTheme() {
         // given
         ThemeSaveRequest request = new ThemeSaveRequest(WOOTECO_THEME_NAME, WOOTECO_THEME_DESCRIPTION, THEME_THUMBNAIL);
@@ -47,7 +47,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     }
 
     @TestFactory
-    @DisplayName("[2 - Step2] 테마를 추가하고 삭제한다.")
+    @DisplayName("테마를 추가하고 삭제한다.")
     Stream<DynamicTest> createThenDeleteTheme() {
         return Stream.of(
                 dynamicTest("테마를 하나 생성한다.", this::createTestTheme),
@@ -86,7 +86,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
 
     @Test
     @Sql({"/test-schema.sql", "/past-reservation-data.sql"})
-    @DisplayName("[2 - Step3] 인기 테마 목록을 조회한다.")
+    @DisplayName("인기 테마 목록을 조회한다.")
     void findAllPopularThemes() {
         // given
         Long secondRankThemeId = 1L;
