@@ -44,25 +44,34 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     public Reservation(Long id, Reservation reservation) {
-        this(id, reservation.member, reservation.date, reservation.time, reservation.theme);
+        this(id, reservation.member, reservation.date, reservation.time, reservation.theme, reservation.status);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time,
+                       Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.BOOKING;
+        this.status = status;
     }
 
     public boolean isBeforeOrOnToday(LocalDate today) {
         return date.isBefore(today) || date.equals(today);
+    }
+
+    public boolean isBooking() {
+        return status.isBooking();
+    }
+
+    public boolean isWaiting() {
+        return status.isWaiting();
     }
 
     public String getMemberName() {

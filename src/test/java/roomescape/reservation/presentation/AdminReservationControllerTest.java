@@ -33,6 +33,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 @WebMvcTest(
         value = AdminReservationController.class,
@@ -59,7 +60,7 @@ class AdminReservationControllerTest extends ControllerTest {
         AdminReservationSaveRequest request = new AdminReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L, 1L);
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Theme expectedTheme = WOOTECO_THEME(1L);
-        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L));
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);

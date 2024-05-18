@@ -16,10 +16,12 @@ import static roomescape.TestFixture.HORROR_THEME;
 import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TOMMY_RESERVATION;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.USER_TOMMY;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 class ReservationRepositoryTest extends RepositoryTest {
     @Autowired
@@ -53,7 +55,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("예약을 저장한다.")
     void save() {
         // given
-        Reservation reservation = MIA_RESERVATION(reservationTime, wootecoTheme, mia);
+        Reservation reservation = MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING);
 
         // when
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -66,7 +68,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("동일 시간대의 예약이 존재하는지 조회한다.")
     void existByDateAndTimeIdAndThemeId() {
         // given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
 
         // when
         boolean existByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeAndTheme(
@@ -80,7 +82,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAllWithDetails() {
         // given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
 
         // when
         List<Reservation> reservations = reservationRepository.findAllWithDetails();
@@ -101,10 +103,10 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("예약자, 테마, 날짜로 예약 목록을 조회한다.")
     void findAllByMemberIdAndThemeIdAndDateBetween() {
         // given
-        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme));
-        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE.plusDays(2), reservationTime, wootecoTheme));
-        reservationRepository.save(new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme));
-        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, horrorTheme));
+        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE.plusDays(2), reservationTime, wootecoTheme, BOOKING));
+        reservationRepository.save(new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, horrorTheme, BOOKING));
 
         // when
         List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(
@@ -123,7 +125,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("Id로 예약을 삭제한다.")
     void deleteById() {
         // given
-        Long id = reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia)).getId();
+        Long id = reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING)).getId();
 
         // when
         reservationRepository.deleteById(id);
@@ -148,8 +150,8 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("날짜와 themeId로 예약 목록을 조회한다.")
     void findAllByDateAndThemeId() {
         // given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
 
         // when
         List<Long> reservationsByDateAndThemeId = reservationRepository.findAllTimeIdsByDateAndTheme(
@@ -163,9 +165,9 @@ class ReservationRepositoryTest extends RepositoryTest {
     @DisplayName("사용자의 예약 목록을 조회한다.")
     void findAllByMember() {
         //given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, tommy));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
+        reservationRepository.save(TOMMY_RESERVATION(reservationTime, wootecoTheme, tommy, BOOKING));
 
         //when
         List<Reservation> reservations = reservationRepository.findAllByMemberWithDetails(mia);

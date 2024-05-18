@@ -32,7 +32,7 @@ public class ReservationService {
     @Transactional
     public Reservation create(Reservation reservation) {
         validateReservationDate(reservation);
-        validateDuplicatedReservation(reservation);
+        validateReservationTimeSlot(reservation);
         return reservationRepository.save(reservation);
     }
 
@@ -43,11 +43,14 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedReservation(Reservation reservation) {
+    private void validateReservationTimeSlot(Reservation reservation) {
         boolean existReservationInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
                 reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        if (existReservationInSameTime) {
+        if (existReservationInSameTime && reservation.isBooking()) {
             throw new ViolationException("해당 시간대에 예약이 모두 찼습니다.");
+        }
+        if (!existReservationInSameTime && reservation.isWaiting()) {
+            throw new ViolationException("해당 시간대에 예약이 가능합니다. 대기 말고 예약을 해주세요.");
         }
     }
 

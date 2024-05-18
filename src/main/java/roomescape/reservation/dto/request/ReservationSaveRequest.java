@@ -1,8 +1,10 @@
 package roomescape.reservation.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
@@ -14,9 +16,12 @@ public record ReservationSaveRequest(
         @NotNull(message = "예약 시간 Id는 비어있을 수 없습니다.")
         Long timeId,
         @NotNull(message = "테마 Id는 비어있을 수 없습니다.")
-        Long themeId) {
+        Long themeId,
+        @NotBlank(message = "예약 상태는 비어있을 수 없습니다.")
+        String status)
+{
 
     public Reservation toModel(Theme theme, ReservationTime time, Member member) {
-        return new Reservation(member, date, time, theme);
+        return new Reservation(member, date, time, theme, ReservationStatus.valueOf(status));
     }
 }

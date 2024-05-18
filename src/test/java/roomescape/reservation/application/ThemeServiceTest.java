@@ -24,6 +24,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 class ThemeServiceTest extends ServiceTest {
     @Autowired
@@ -99,7 +100,7 @@ class ThemeServiceTest extends ServiceTest {
         ReservationTime reservationTime = reservationTimeService.create(new ReservationTime(MIA_RESERVATION_TIME));
         Member member = memberService.create(USER_MIA());
         reservationRepository.save(new Reservation(
-                member, LocalDate.now().minusDays(1), reservationTime, firstRankTheme));
+                member, LocalDate.now().minusDays(1), reservationTime, firstRankTheme, BOOKING));
 
         // when
         List<Theme> themes = themeService.findAllPopular();

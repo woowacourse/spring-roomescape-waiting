@@ -3,6 +3,7 @@ package roomescape.reservation.dto.request;
 import jakarta.validation.constraints.NotNull;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 
@@ -19,6 +20,6 @@ public record AdminReservationSaveRequest(
         Long memberId) {
 
     public Reservation toModel(Theme theme, ReservationTime time, Member member) {
-        return new Reservation(member, date, time, theme);
+        return new Reservation(member, date, time, theme, ReservationStatus.BOOKING);
     }
 }

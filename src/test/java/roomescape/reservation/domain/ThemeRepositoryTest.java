@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 class ThemeRepositoryTest extends RepositoryTest {
     @Autowired
@@ -106,9 +107,12 @@ class ThemeRepositoryTest extends RepositoryTest {
         Member member = memberRepository.save(USER_MIA());
 
         LocalDate today = LocalDate.now();
-        reservationRepository.save(new Reservation(member, today.minusDays(7), reservationTime, firstRankTheme));
-        reservationRepository.save(new Reservation(member, today.minusDays(6), reservationTime, firstRankTheme));
-        reservationRepository.save(new Reservation(member, today.minusDays(1), reservationTime, secondRankTheme));
+        reservationRepository.save(
+                new Reservation(member, today.minusDays(7), reservationTime, firstRankTheme, BOOKING));
+        reservationRepository.save(
+                new Reservation(member, today.minusDays(6), reservationTime, firstRankTheme, BOOKING));
+        reservationRepository.save(
+                new Reservation(member, today.minusDays(1), reservationTime, secondRankTheme, BOOKING));
 
         LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);

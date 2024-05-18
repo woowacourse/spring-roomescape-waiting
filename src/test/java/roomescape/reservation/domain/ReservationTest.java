@@ -13,6 +13,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 class ReservationTest {
 
@@ -21,7 +22,8 @@ class ReservationTest {
     @DisplayName("예약자 날짜가 당일 혹은 이전인지 확인한다.")
     void validateName(LocalDate date, boolean expectedResult) {
         // given
-        Reservation reservation = new Reservation(USER_MIA(), date, new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME());
+        Reservation reservation = new Reservation(
+                USER_MIA(), date, new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME(), BOOKING);
 
         // when
         boolean actualResult = reservation.isBeforeOrOnToday(MIA_RESERVATION_DATE);

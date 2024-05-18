@@ -24,6 +24,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
@@ -84,7 +85,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         ReservationTime reservationTime = reservationTimeService.create(new ReservationTime(MIA_RESERVATION_TIME));
         Theme theme = themeService.create(WOOTECO_THEME());
         Member member = memberService.create(USER_MIA());
-        reservationService.create(MIA_RESERVATION(reservationTime, theme, member));
+        reservationService.create(MIA_RESERVATION(reservationTime, theme, member, BOOKING));
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTime.getId()))
@@ -98,7 +99,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         ReservationTime miaReservationTime = reservationTimeService.create(new ReservationTime(MIA_RESERVATION_TIME));
         Theme theme = themeService.create(WOOTECO_THEME());
         Member mia = memberService.create(USER_MIA());
-        Reservation miaReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, theme, mia));
+        Reservation miaReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, theme, mia, BOOKING));
 
         reservationTimeService.create(new ReservationTime(LocalTime.of(16, 0)));
 

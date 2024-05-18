@@ -18,7 +18,7 @@ import roomescape.common.ControllerTest;
 import roomescape.common.TestWebMvcConfiguration;
 import roomescape.global.config.WebMvcConfiguration;
 import roomescape.global.exception.NotFoundException;
-import roomescape.member.application.MemberService;
+import roomescape.global.exception.ViolationException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
@@ -46,6 +46,7 @@ import static roomescape.TestFixture.TEST_ERROR_MESSAGE;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 @Import(TestWebMvcConfiguration.class)
 @WebMvcTest(
@@ -65,15 +66,12 @@ class ReservationControllerTest extends ControllerTest {
     @MockBean
     private ThemeService themeService;
 
-    @MockBean
-    private MemberService memberService;
-
     @Test
     @DisplayName("예약 목록 GET 요청 시 상태코드 200을 반환한다.")
     void findReservations() throws Exception {
         // given
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
-        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
         BDDMockito.given(reservationService.findAll())
                 .willReturn(List.of(expectedReservation));
@@ -94,7 +92,7 @@ class ReservationControllerTest extends ControllerTest {
     void findReservationsByMemberIdAndThemeIdAndDateBetween() throws Exception {
         // given
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
-        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
         BDDMockito.given(reservationService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
                 .willReturn(List.of(expectedReservation));
@@ -133,10 +131,10 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("예약 POST 요청 시 상태코드 201을 반환한다.")
     void createReservation() throws Exception {
         // given
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L);
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L, "BOOKING");
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Theme expectedTheme = WOOTECO_THEME(1L);
-        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L));
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
 
         BDDMockito.given(reservationService.create(any()))
                 .willReturn(expectedReservation);
@@ -174,9 +172,10 @@ class ReservationControllerTest extends ControllerTest {
 
     private static Stream<ReservationSaveRequest> invalidPostRequests() {
         return Stream.of(
-                new ReservationSaveRequest(null, 1L, 1L),
-                new ReservationSaveRequest(MIA_RESERVATION_DATE, null, 1L),
-                new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, null)
+                new ReservationSaveRequest(null, 1L, 1L, BOOKING.name()),
+                new ReservationSaveRequest(MIA_RESERVATION_DATE, null, 1L, BOOKING.name()),
+                new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, null, BOOKING.name()),
+                new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L, null)
         );
     }
 
@@ -197,12 +196,40 @@ class ReservationControllerTest extends ControllerTest {
     }
 
     @Test
+    @DisplayName("서비스 정책에 맞지 않는 예약 POST 요청 시 상태코드 401을 반환한다.")
+    void createDuplicatedReservation() throws Exception {
+        // given
+        Long themeId = 1L;
+        Long timeId = 1L;
+        ReservationSaveRequest request = new ReservationSaveRequest(
+                MIA_RESERVATION_DATE, timeId, themeId, BOOKING.name());
+
+        BDDMockito.given(themeService.findById(themeId))
+                .willReturn(WOOTECO_THEME(themeId));
+        BDDMockito.given(reservationTimeService.findById(timeId))
+                .willReturn(new ReservationTime(1L, MIA_RESERVATION_TIME));
+        BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
+                .given(reservationService)
+                .create(any());
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(COOKIE)
+                        .content(objectMapper.writeValueAsBytes(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약 시간의 예약 POST 요청 시 상태코드 404를 반환한다.")
     void createReservationWithNotExistingTime() throws Exception {
         // given
         Long notExistingTimeId = 1L;
         Long themeId = 1L;
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, notExistingTimeId, themeId);
+        ReservationSaveRequest request = new ReservationSaveRequest(
+                MIA_RESERVATION_DATE, notExistingTimeId, themeId, BOOKING.name());
 
         BDDMockito.given(themeService.findById(themeId))
                 .willReturn(WOOTECO_THEME(themeId));
@@ -226,7 +253,8 @@ class ReservationControllerTest extends ControllerTest {
         // given
         Long timeId = 1L;
         Long notExistingThemeId = 1L;
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, notExistingThemeId);
+        ReservationSaveRequest request = new ReservationSaveRequest(
+                MIA_RESERVATION_DATE, timeId, notExistingThemeId, BOOKING.name());
 
         BDDMockito.given(reservationTimeService.findById(timeId))
                 .willReturn(new ReservationTime(1L, MIA_RESERVATION_TIME));
@@ -264,7 +292,7 @@ class ReservationControllerTest extends ControllerTest {
     void findMyReservations() throws Exception {
         // given
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
-        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA());
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
         BDDMockito.given(reservationService.findAllByMember(any()))
                 .willReturn(List.of(expectedReservation));

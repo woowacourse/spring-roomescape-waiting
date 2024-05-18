@@ -23,6 +23,8 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.reservation.domain.ReservationStatus.BOOKING;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
@@ -52,7 +54,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId);
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.name());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -74,6 +76,98 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    @DisplayName("예약 대기를 추가한다.")
+    void createWaitingReservation() {
+        // given
+        Member member = createTestMember();
+        String token = createTestToken(member);
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, WAITING);
+
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, WAITING.name());
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        // when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract();
+        ReservationResponse reservationResponse = response.as(ReservationResponse.class);
+
+        // then
+        assertSoftly(softly -> {
+            checkHttpStatusCreated(softly, response);
+            softly.assertThat(reservationResponse.id()).isNotNull();
+        });
+    }
+
+    @Test
+    @DisplayName("동일한 시간에 중복 예약을 추가한다.")
+    void createDuplicatedReservation() {
+        // given
+        Member member = createTestMember();
+        String token = createTestToken(member);
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
+
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.name());
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        // when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract();
+        ErrorResponse errorResponse = response.as(ErrorResponse.class);
+
+        // then
+        assertSoftly(softly -> {
+            checkHttpStatusBadRequest(softly, response);
+            softly.assertThat(errorResponse.message()).isNotNull();
+        });
+    }
+
+    @Test
+    @DisplayName("동일한 시간에 예약이 없을 때 예약 대기를 추가한다.")
+    void createInvalidWaitingReservation() {
+        // given
+        Member member = createTestMember();
+        String token = createTestToken(member);
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, WAITING.name());
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        // when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract();
+        ErrorResponse errorResponse = response.as(ErrorResponse.class);
+
+        // then
+        assertSoftly(softly -> {
+            checkHttpStatusBadRequest(softly, response);
+            softly.assertThat(errorResponse.message()).isNotNull();
+        });
+    }
+
+    @Test
     @DisplayName("[Step3, Step6, Step8] 예약 날짜가 없는 예약을 추가한다.")
     void createInvalidReservation() {
         // given
@@ -82,7 +176,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(null, timeId, themeId);
+        ReservationSaveRequest request = new ReservationSaveRequest(null, timeId, themeId, BOOKING.name());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -111,7 +205,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long notExistingTimeId = 1L;
         Long themeId = createTestTheme();
 
-        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, notExistingTimeId, themeId);
+        ReservationSaveRequest request = new ReservationSaveRequest(
+                MIA_RESERVATION_DATE, notExistingTimeId, themeId, BOOKING.name());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -181,7 +276,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         String token = createTestToken(member);
         Cookie cookie = new Cookie.Builder("token", token).build();
 
-        createTestReservation(timeId, themeId, token);
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
 
         //  when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
