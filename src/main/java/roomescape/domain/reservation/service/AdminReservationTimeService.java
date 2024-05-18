@@ -1,7 +1,6 @@
 package roomescape.domain.reservation.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
