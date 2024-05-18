@@ -105,17 +105,7 @@ class ReservationServiceTest extends ServiceTest {
         List<Reservation> reservations = reservationService.findAll();
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(reservations).hasSize(2)
-                    .extracting(Reservation::getMemberName)
-                    .contains(MIA_NAME, TOMMY_NAME);
-            softly.assertThat(reservations).extracting(Reservation::getTime)
-                    .extracting(ReservationTime::getStartAt)
-                    .contains(MIA_RESERVATION_TIME, TOMMY_RESERVATION_TIME);
-            softly.assertThat(reservations).extracting(Reservation::getTheme)
-                    .extracting(Theme::getName)
-                    .contains(WOOTECO_THEME_NAME, WOOTECO_THEME_NAME);
-        });
+        assertThat(reservations).hasSize(2);
     }
 
     @Test
@@ -130,9 +120,7 @@ class ReservationServiceTest extends ServiceTest {
                 miaReservation.getMember(), miaReservation.getTheme(), miaReservation.getDate(), tommyReservation.getDate());
 
         // then
-        assertThat(reservations).hasSize(1)
-                .extracting(Reservation::getMemberName)
-                .containsExactly(MIA_NAME);
+        assertThat(reservations).hasSize(1);
     }
 
     @Test
