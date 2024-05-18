@@ -13,12 +13,18 @@ import java.util.Objects;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "date", nullable = false)
     private LocalDate date; //todo: reservationDate 검증
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
+
     @ManyToOne
     private Member member;
 

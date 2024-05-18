@@ -12,7 +12,10 @@ import java.util.Objects;
 public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "startAt", nullable = false)
     private LocalTime startAt;
 
     public ReservationTime() {

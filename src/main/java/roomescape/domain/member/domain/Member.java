@@ -9,12 +9,20 @@ import java.util.Objects;
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
     @Embedded
     private Name name; //todo: 네임 검증 추가
+
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @Column(name = "password", nullable = false)
     private String password;
+
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     private Role role;
 
     public Member() {

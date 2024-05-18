@@ -9,9 +9,16 @@ import java.util.Objects;
 public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "thumbnail")
     private String thumbnail;
 
     public Theme() {
