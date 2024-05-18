@@ -1,4 +1,4 @@
-package roomescape.dto.exception;
+package roomescape.dto.request.exception;
 
 import roomescape.controller.exception.BaseException;
 
