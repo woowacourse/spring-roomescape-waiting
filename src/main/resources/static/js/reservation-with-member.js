@@ -62,7 +62,7 @@ function fetchThemes() {
 function fetchMembers() {
   requestRead(MEMBER_API_ENDPOINT)
       .then(data => {
-        membersOptions.push(...data);
+        membersOptions.push(...data.responses);
         populateSelect('member', membersOptions, 'name');
       })
       .catch(error => console.error('Error fetching member:', error));
