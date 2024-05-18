@@ -1,8 +1,10 @@
 package roomescape.member.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.service.PasswordEncoder;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorType;
 import roomescape.member.controller.dto.MemberResponse;
@@ -12,10 +14,13 @@ import roomescape.member.domain.repository.MemberRepository;
 
 @Service
 public class MemberService {
-    private final MemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<MemberResponse> findAll() {
@@ -25,7 +30,8 @@ public class MemberService {
     }
 
     public MemberResponse create(SignUpRequest signUpRequest) {
-        Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
+        String encodedPassword = passwordEncoder.encode(signUpRequest.password());
+        Member member = memberRepository.save(new Member(signUpRequest.name(), signUpRequest.email(), encodedPassword, Role.USER));
         return new MemberResponse(member.getId(), member.getName());
     }
 

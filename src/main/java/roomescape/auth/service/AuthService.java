@@ -16,14 +16,18 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider) {
+    public AuthService(MemberRepository memberRepository, TokenProvider tokenProvider, PasswordEncoder passwordEncoder) {
         this.memberRepository = memberRepository;
         this.tokenProvider = tokenProvider;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void authenticate(LoginRequest loginRequest) {
-        if (!memberRepository.existsByEmailAndPassword(loginRequest.email(), loginRequest.password())) {
+        Member findMember = memberRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+        if (!passwordEncoder.matches(loginRequest.password(), findMember.getPassword())) {
             throw new BusinessException(ErrorType.MEMBER_NOT_FOUND);
         }
     }
@@ -43,6 +47,6 @@ public class AuthService {
             throw new BusinessException(ErrorType.DUPLICATED_EMAIL_ERROR);
         }
         memberRepository.save(
-                new Member(signUpRequest.name(), signUpRequest.email(), signUpRequest.password(), Role.USER));
+                new Member(signUpRequest.name(), signUpRequest.email(), passwordEncoder.encode(signUpRequest.password()), Role.USER));
     }
 }

@@ -9,11 +9,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
-    @Query("""
-            SELECT count(*) > 0 FROM Member m 
-            WHERE m.email = :email AND m.password = :password
-            """)
-    boolean existsByEmailAndPassword(String email, String password);
-
     boolean existsByEmail(String email);
 }
