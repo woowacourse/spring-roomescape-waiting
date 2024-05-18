@@ -98,4 +98,12 @@ public class PreInsertedData {
             TIME_12_00,
             THEME_3
     );
+
+    public static final Reservation RESERVATION_CUSTOMER2_THEME3_240503_1200 = new Reservation(
+            5L,
+            CUSTOMER_2,
+            LocalDate.parse("2024-05-03"),
+            TIME_12_00,
+            THEME_3
+    );
 }
