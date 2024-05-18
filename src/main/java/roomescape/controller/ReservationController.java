@@ -38,12 +38,10 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation
-            (@Valid @RequestBody ReservationCreateMemberRequest memberRequest,
-             AuthInfo authInfo) {
-        ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(
-                memberRequest,
-                authInfo.id());
+    public ResponseEntity<ReservationResponse> createReservation(
+            @Valid @RequestBody ReservationCreateMemberRequest memberRequest, AuthInfo authInfo
+    ) {
+        ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(memberRequest, authInfo.id());
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
         return ResponseEntity.created(URI.create("admin/reservation")).body(reservationResponse);
     }
@@ -57,10 +55,10 @@ public class ReservationController {
 
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findBy(
-            @RequestParam(required = false, value = "themeId") Long themeId,
-            @RequestParam(required = false, value = "memberId") Long memberId,
-            @RequestParam(required = false, value = "dateFrom") LocalDate dateFrom,
-            @RequestParam(required = false, value = "dateTo") LocalDate dateTo
+            @RequestParam(required = false) Long themeId,
+            @RequestParam(required = false) Long memberId,
+            @RequestParam(required = false) LocalDate dateFrom,
+            @RequestParam(required = false) LocalDate dateTo
     ) {
         return ResponseEntity.ok().body(reservationService.findBy(themeId, memberId, dateFrom, dateTo));
     }

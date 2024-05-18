@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest) {
         String token = authService.login(loginRequest);
 
         ResponseCookie cookie = ResponseCookie
