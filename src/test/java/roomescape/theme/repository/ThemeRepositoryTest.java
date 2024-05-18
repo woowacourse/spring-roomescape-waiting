@@ -43,7 +43,7 @@ class ThemeRepositoryTest extends RepositoryTest {
         LocalDate endDate = LocalDate.now();
         int count = 2;
 
-        List<Theme> actual = themeRepository.findOrderByReservationCount(startDate, endDate, count);
+        List<Theme> actual = themeRepository.findOrderByReservationCountDesc(startDate, endDate, count);
 
         assertThat(actual).isEqualTo(expected);
     }

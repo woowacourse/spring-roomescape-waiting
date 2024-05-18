@@ -18,5 +18,5 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
             ORDER BY count(r.id) DESC
             LIMIT :limit
              """)
-    List<Theme> findOrderByReservationCount(LocalDate startDate, LocalDate endDate, int limit);
+    List<Theme> findOrderByReservationCountDesc(LocalDate startDate, LocalDate endDate, int limit);
 }

@@ -45,7 +45,7 @@ class ThemeServiceTest {
         LocalDate startDate = currentDate.minusDays(7);
         LocalDate endDate = currentDate.minusDays(1);
         int count = 10;
-        given(themeRepository.findOrderByReservationCount(startDate, endDate, count)).willReturn(List.of(
+        given(themeRepository.findOrderByReservationCountDesc(startDate, endDate, count)).willReturn(List.of(
                 new Theme(2L, "레벨3 탈출", "레벨3 탈출하기", "https://img.jpg"),
                 new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
         List<ThemeResponse> expected = List.of(
