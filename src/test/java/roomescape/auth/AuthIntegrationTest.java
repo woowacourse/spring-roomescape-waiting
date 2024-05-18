@@ -53,8 +53,6 @@ class AuthIntegrationTest {
     @Test
     @DisplayName("로그인을 시도한 이메일이 존재하지 않을 경우, 예외를 반환한다.")
     void login_WhenMemberNotExist() {
-        // memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
-
         Map<String, Object> params = new HashMap<>();
         params.put("email", "login@naver.com");
         params.put("password", "hihi");
