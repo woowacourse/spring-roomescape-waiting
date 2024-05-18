@@ -5,7 +5,10 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public record ThemeThumbnail(@Column(length = 500, nullable = false) String thumbnail) {
+public record ThemeThumbnail(
+        @Column(length = 500, nullable = false)
+        String thumbnail) {
+
     private static final int MAX_LENGTH = 500;
 
     public ThemeThumbnail {

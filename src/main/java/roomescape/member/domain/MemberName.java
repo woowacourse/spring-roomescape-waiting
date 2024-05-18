@@ -5,7 +5,10 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public record MemberName(@Column(length = 20, nullable = false, unique = true) String name) {
+public record MemberName(
+        @Column(length = 20, nullable = false, unique = true)
+        String name) {
+
     private static final int MAX_LENGTH = 20;
 
     public MemberName {

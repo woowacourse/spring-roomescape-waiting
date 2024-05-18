@@ -5,7 +5,10 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public record Password(@Column(length = 100, nullable = false) String password) {
+public record Password(
+        @Column(length = 100, nullable = false)
+        String password) {
+
     private static final int MAX_LENGTH = 100;
 
     public Password {
