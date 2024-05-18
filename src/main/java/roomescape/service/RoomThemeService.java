@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.domain.RoomTheme;
 import roomescape.repository.RoomThemeRepository;
@@ -11,6 +10,9 @@ import roomescape.service.dto.response.RoomThemeResponse;
 
 @Service
 public class RoomThemeService {
+
+    private static final int DEFAULT_BEST_THEME_COUNT = 10;
+
     private final RoomThemeRepository roomThemeRepository;
 
     public RoomThemeService(RoomThemeRepository roomThemeRepository) {
@@ -28,7 +30,7 @@ public class RoomThemeService {
         LocalDate dateTo = LocalDate.now().minusDays(1);
         LocalDate dateFrom = dateTo.minusDays(7);
 
-        return roomThemeRepository.findAllRanking(dateFrom, dateTo, Pageable.ofSize(10))
+        return roomThemeRepository.findMostReservedThemeInPeriodByCount(dateFrom, dateTo, DEFAULT_BEST_THEME_COUNT)
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();
