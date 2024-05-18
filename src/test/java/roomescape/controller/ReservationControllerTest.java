@@ -13,6 +13,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,10 @@ class ReservationControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    @AfterEach
+    void tearDown() {
         List<Reservation> reservations = reservationRepository.findAll();
         for (Reservation reservation : reservations) {
             reservationRepository.deleteById(reservation.getId());
@@ -281,9 +286,19 @@ class ReservationControllerTest {
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+
+        String accessToken = RestAssured
+                .given().log().all()
+                .body(MEMBER_LOGIN_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+
         // when & then
         Long id = savedReservation.getId();
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().delete("/reservations/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -293,8 +308,19 @@ class ReservationControllerTest {
     void deleteReservationFail() {
         // given
         long invalidId = 0;
+
+        memberRepository.save(MEMBER_BROWN);
+        String accessToken = RestAssured
+                .given().log().all()
+                .body(MEMBER_LOGIN_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+
         // when & then
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().delete("/reservations/" + invalidId)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }

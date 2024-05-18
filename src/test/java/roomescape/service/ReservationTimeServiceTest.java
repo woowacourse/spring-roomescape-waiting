@@ -9,7 +9,7 @@ import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.RESERVATION_TIME_11AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 import static roomescape.TestFixture.ROOM_THEME2;
-import static roomescape.TestFixture.TIME;
+import static roomescape.TestFixture.TIME_10AM;
 import static roomescape.TestFixture.VALID_STRING_TIME;
 
 import java.util.List;
@@ -147,7 +147,7 @@ class ReservationTimeServiceTest {
     @Test
     void save() {
         // given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME_10AM);
         // when
         ReservationTimeResponse response = reservationTimeService.save(reservationTimeRequest);
         // then
@@ -161,7 +161,7 @@ class ReservationTimeServiceTest {
     @Test
     void duplicatedTimeSaveThrowsException() {
         // given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME_10AM);
         reservationTimeService.save(reservationTimeRequest);
         // when & then
         assertThatThrownBy(() -> reservationTimeService.save(reservationTimeRequest))
@@ -174,7 +174,7 @@ class ReservationTimeServiceTest {
     void deleteById() {
         // given
         ReservationTimeResponse response = reservationTimeService
-                .save(new ReservationTimeRequest(TIME));
+                .save(new ReservationTimeRequest(TIME_10AM));
         // when
         reservationTimeService.deleteById(response.id());
         // then

@@ -1,12 +1,13 @@
 package roomescape.controller;
 
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.TIME;
+import static roomescape.TestFixture.TIME_10AM;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -44,6 +46,10 @@ class ReservationTimeControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+    }
+
+    @AfterEach
+    void tearDown() {
         List<Reservation> reservations = reservationRepository.findAll();
         for (Reservation reservation : reservations) {
             reservationRepository.deleteById(reservation.getId());
@@ -65,7 +71,10 @@ class ReservationTimeControllerTest {
     @DisplayName("모든 예약 시간 조회 테스트")
     @Test
     void findAllReservationTime() {
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().get("/times")
                 .then().log().all().assertThat().statusCode(HttpStatus.OK.value());
     }
@@ -73,9 +82,12 @@ class ReservationTimeControllerTest {
     @DisplayName("예약 시간 추가 테스트")
     @Test
     void createReservationTime() {
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeRequest(TIME))
+                .body(new ReservationTimeRequest(TIME_10AM))
                 .when().post("/times")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
@@ -84,7 +96,10 @@ class ReservationTimeControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "24:01", "12:60"})
     void invalidTypeReservationTime(String startAt) {
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
                 .body(Map.of("startAt", startAt))
                 .when().post("/times")
@@ -95,11 +110,14 @@ class ReservationTimeControllerTest {
     @Test
     void duplicateReservationTime() {
         // given
-        createReservationTime();
+        reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         // when & then
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeRequest(TIME))
+                .body(new ReservationTimeRequest(TIME_10AM))
                 .when().post("/times")
                 .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
@@ -110,8 +128,11 @@ class ReservationTimeControllerTest {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         Long id = reservationTime.getId();
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         // when & then
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().delete("/times/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -121,8 +142,11 @@ class ReservationTimeControllerTest {
     void deleteReservationTimeFail() {
         // given
         long invalidId = 0;
+        String accessToken = TestFixture.getAdminToken(memberRepository);
+
         // when & then
         RestAssured.given().log().all()
+                .header("cookie", accessToken)
                 .when().delete("/reservations/" + invalidId)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
     }

@@ -3,7 +3,7 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
-import static roomescape.TestFixture.TIME;
+import static roomescape.TestFixture.TIME_10AM;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,17 +73,17 @@ class ReservationTimeRepositoryTest {
         // then
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다."));
-        assertThat(reservationTime.getStartAt()).isEqualTo(TIME);
+        assertThat(reservationTime.getStartAt()).isEqualTo(TIME_10AM);
     }
 
     @DisplayName("중복된 예약 시간이 존재하는 지 여부를 반환한다.")
     @Test
     void existsByStartAt() {
         // given
-        boolean existsFalse = reservationTimeRepository.existsByStartAt(TIME);
+        boolean existsFalse = reservationTimeRepository.existsByStartAt(TIME_10AM);
         reservationTimeRepository.save(RESERVATION_TIME_10AM);
         // when
-        boolean existsTrue = reservationTimeRepository.existsByStartAt(TIME);
+        boolean existsTrue = reservationTimeRepository.existsByStartAt(TIME_10AM);
         // then
         assertAll(
                 () -> assertThat(existsFalse).isFalse(),

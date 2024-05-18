@@ -1,20 +1,24 @@
 package roomescape;
 
+import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.springframework.http.MediaType;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.RoomTheme;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.LoginRequest;
 
 public class TestFixture {
+
     public static String VALID_STRING_DATE = LocalDate.now().plusDays(1).toString();
     public static LocalDate DATE_AFTER_1DAY = LocalDate.parse(VALID_STRING_DATE);
     public static LocalDate DATE_AFTER_2DAY = LocalDate.now().plusDays(2);
     public static String VALID_STRING_TIME = "10:00";
-    public static LocalTime TIME = LocalTime.parse(VALID_STRING_TIME);
-    public static ReservationTime RESERVATION_TIME_10AM = new ReservationTime(TIME);
+    public static LocalTime TIME_10AM = LocalTime.parse(VALID_STRING_TIME);
+    public static ReservationTime RESERVATION_TIME_10AM = new ReservationTime(TIME_10AM);
     public static ReservationTime RESERVATION_TIME_11AM = new ReservationTime(LocalTime.parse("11:00"));
 
     // MEMBER 로그인 정보
@@ -37,4 +41,26 @@ public class TestFixture {
     public static RoomTheme ROOM_THEME2 = new RoomTheme("레벨 2 탈출",
             "우테코 레벨2를 탈출하는 내용입니다.",
             "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+
+    public static String getMemberToken(MemberRepository memberRepository) {
+        memberRepository.save(MEMBER_BROWN);
+        return RestAssured
+                .given().log().all()
+                .body(MEMBER_LOGIN_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+    }
+
+    public static String getAdminToken(MemberRepository memberRepository) {
+        memberRepository.save(ADMIN_ZEZE);
+        return RestAssured
+                .given().log().all()
+                .body(ADMIN_LOGIN_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when().post("/login")
+                .then().log().all().extract().header("Set-Cookie").split(";")[0];
+    }
 }
