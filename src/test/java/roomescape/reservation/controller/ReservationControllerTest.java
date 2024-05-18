@@ -65,8 +65,6 @@ class ReservationControllerTest {
     @MockBean
     private ReservationService reservationService;
     @MockBean
-    private MemberService memberService;
-    @MockBean
     private MemberAuthService memberAuthService;
 
     private JwtTokenProvider jwtTokenProvider;
@@ -89,12 +87,14 @@ class ReservationControllerTest {
                 .thenReturn(true);
         Mockito.when(memberAuthService.extractPayload(any()))
                 .thenReturn(new MemberProfileInfo(1L, "어드민", "admin@email.com"));
+
         Member member = new Member(1L, "valid", "testUser@email.com", "pass");
         token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
                 .writeValueAsString(new ReservationRequest(reservation.getDate(), member, 1L, 1L));
 
-        mockMvc.perform(post("/reservations").cookie(new Cookie("token", token))
+        mockMvc.perform(post("/reservations")
+                        .cookie(new Cookie("token", token))
                         .content(content)
                         .contentType("application/Json")
                         .accept(MediaType.APPLICATION_JSON))
