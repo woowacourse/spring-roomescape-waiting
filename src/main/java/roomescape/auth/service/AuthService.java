@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.member.domain.Member;
@@ -9,6 +10,7 @@ import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberRepository memberRepository;
@@ -19,6 +21,7 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional
     public String createMemberToken(LoginRequest loginRequest) {
         Member member = findByEmailAndPassword(loginRequest);
 

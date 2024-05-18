@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.TimeResponse;
@@ -11,6 +12,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
@@ -24,6 +26,7 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public TimeResponse save(TimeSaveRequest timeSaveRequest) {
         ReservationTime reservationTime = timeSaveRequest.toReservationTime();
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -55,6 +58,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long id) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findReservationTimesThatReservationReferById(id);
         if (!reservationTimes.isEmpty()) {

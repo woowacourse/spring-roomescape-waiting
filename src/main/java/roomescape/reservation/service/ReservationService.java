@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.repository.MemberRepository;
@@ -18,6 +19,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -37,6 +39,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponse save(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
         Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember);
         validateDuplicateReservation(reservation);
@@ -95,6 +98,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }

@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
@@ -10,6 +11,7 @@ import roomescape.reservation.dto.ThemeSaveRequest;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -18,6 +20,7 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public ThemeResponse save(ThemeSaveRequest themeSaveRequest) {
         themeRepository.findByThemeName_Name(themeSaveRequest.name()).ifPresent(empty -> {
             throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
@@ -52,6 +55,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long id) {
         List<Theme> themes = themeRepository.findThemesThatReservationReferById(id);
         if (!themes.isEmpty()) {
