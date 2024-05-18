@@ -11,11 +11,11 @@ import roomescape.config.TestConfig;
 import roomescape.dto.request.LoginRequest;
 import roomescape.support.extension.DatabaseClearExtension;
 
-@ExtendWith(DatabaseClearExtension.class)
 @SpringBootTest(
         classes = TestConfig.class,
         webEnvironment = WebEnvironment.RANDOM_PORT
 )
+@ExtendWith(DatabaseClearExtension.class)
 public abstract class BaseControllerTest {
 
     protected static final Long ADMIN_ID = 1L;
