@@ -120,16 +120,14 @@ public class DataLoader implements ApplicationRunner {
                 new Member("관리자", "admin@roomescape.com",
                         "$2a$10$5xUHgA2/scLa/9YzqkCrXuAoIwLYiZTif8F8QrjuFfSFRgsUdJYhC", Role.ADMIN));
 
-        MemberReservation memberReservation1 = memberReservationRepository.save(new MemberReservation(member1, reservation1, ReservationStatus.BOOKED));
-        MemberReservation memberReservation2 = memberReservationRepository.save(new MemberReservation(member1, reservation3, ReservationStatus.BOOKED));
-        MemberReservation memberReservation3 = memberReservationRepository.save(new MemberReservation(member1, reservation7, ReservationStatus.BOOKED));
-        MemberReservation memberReservation4 = memberReservationRepository.save(new MemberReservation(member2, reservation2, ReservationStatus.BOOKED));
-        MemberReservation memberReservation5 = memberReservationRepository.save(new MemberReservation(member2, reservation4, ReservationStatus.BOOKED));
-        MemberReservation memberReservation6 = memberReservationRepository.save(new MemberReservation(member2, reservation8, ReservationStatus.BOOKED));
-        MemberReservation memberReservation7 = memberReservationRepository.save(new MemberReservation(member3, reservation3, ReservationStatus.BOOKED));
-        MemberReservation memberReservation8 = memberReservationRepository.save(new MemberReservation(member3, reservation5, ReservationStatus.BOOKED));
-        MemberReservation memberReservation9 = memberReservationRepository.save(new MemberReservation(member3, reservation6, ReservationStatus.BOOKED));
-        MemberReservation memberReservation10 =memberReservationRepository.save( new MemberReservation(member3, reservation7, ReservationStatus.BOOKED));
+        MemberReservation memberReservation1 = memberReservationRepository.save(new MemberReservation(member1, reservation1, ReservationStatus.APPROVED));
+        MemberReservation memberReservation2 = memberReservationRepository.save(new MemberReservation(member1, reservation3, ReservationStatus.APPROVED));
+        MemberReservation memberReservation3 = memberReservationRepository.save(new MemberReservation(member1, reservation7, ReservationStatus.APPROVED));
+        MemberReservation memberReservation4 = memberReservationRepository.save(new MemberReservation(member2, reservation2, ReservationStatus.APPROVED));
+        MemberReservation memberReservation5 = memberReservationRepository.save(new MemberReservation(member2, reservation4, ReservationStatus.APPROVED));
+        MemberReservation memberReservation6 = memberReservationRepository.save(new MemberReservation(member2, reservation8, ReservationStatus.APPROVED));
+        MemberReservation memberReservation8 = memberReservationRepository.save(new MemberReservation(member3, reservation5, ReservationStatus.APPROVED));
+        MemberReservation memberReservation9 = memberReservationRepository.save(new MemberReservation(member3, reservation6, ReservationStatus.APPROVED));
     }
 
 }

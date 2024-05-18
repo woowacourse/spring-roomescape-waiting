@@ -82,6 +82,7 @@ public class MemberReservation extends BaseEntity {
                 "id=" + id +
                 ", member=" + member +
                 ", reservation=" + reservation +
+                ", reservationStatus=" + reservationStatus +
                 '}';
     }
 }

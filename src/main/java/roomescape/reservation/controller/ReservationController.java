@@ -67,25 +67,30 @@ public class ReservationController {
 
     @GetMapping("/my")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginUser AuthInfo authInfo) {
-        return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
+        List<MyReservationResponse> responses = reservationService.findMyReservations(authInfo)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
-    @PostMapping("/waitlist")
-    public ResponseEntity<ReservationResponse> addWaitList(@LoginUser AuthInfo authInfo,
-                                                           @RequestBody @Valid WaitingRequest waitingRequest) {
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> addWaiting(@LoginUser AuthInfo authInfo,
+                                                          @RequestBody @Valid WaitingRequest waitingRequest) {
         WaitingCreate waitingCreate = new WaitingCreate(
                 authInfo.getId(),
                 waitingRequest.date(),
                 waitingRequest.timeId(),
                 waitingRequest.themeId()
         );
-
-        return ResponseEntity.ok().body(reservationService.addWaitingList(waitingCreate));
+        ReservationResponse reservationResponse = reservationService.addWaiting(waitingCreate);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.memberReservationId()))
+                .body(reservationResponse);
     }
 
-    @DeleteMapping("/waitlist/{id}")
-    public ResponseEntity<Void> deleteFromWaitList(@LoginUser AuthInfo authInfo,
-                                                   @PathVariable("id") @Min(1) long reservationMemberId) {
+    @DeleteMapping("/{id}/waiting")
+    public ResponseEntity<Void> deleteWaiting(@LoginUser AuthInfo authInfo,
+                                              @PathVariable("id") @Min(1) long reservationMemberId) {
         reservationService.deleteMemberReservation(authInfo, reservationMemberId);
         return ResponseEntity.noContent().build();
     }

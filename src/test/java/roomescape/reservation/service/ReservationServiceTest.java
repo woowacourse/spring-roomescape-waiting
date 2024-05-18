@@ -21,7 +21,6 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
@@ -30,10 +29,12 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
+import roomescape.reservation.service.dto.MyReservationInfo;
 import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ServiceTest;
 
@@ -92,10 +93,10 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.APPROVED));
 
         Member memberClover = memberRepository.save(getMemberClover());
-        memberReservationRepository.save(new MemberReservation(memberClover, reservation2, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberClover, reservation2, ReservationStatus.APPROVED));
 
         //when
         List<ReservationResponse> reservations = reservationService.findMemberReservations(
@@ -115,10 +116,10 @@ class ReservationServiceTest extends ServiceTest {
         //given
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
 
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         Member memberClover = memberRepository.save(getMemberClover());
-        memberReservationRepository.save(new MemberReservation(memberClover, reservation, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberClover, reservation, ReservationStatus.APPROVED));
 
         //when
         List<ReservationResponse> reservations = reservationService.findMemberReservations(
@@ -139,8 +140,8 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.BOOKED));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.APPROVED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.APPROVED));
 
         //when
         List<ReservationResponse> reservations = reservationService.findMemberReservations(
@@ -161,8 +162,8 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.BOOKED));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.APPROVED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.APPROVED));
 
         //when
         List<ReservationResponse> reservations = reservationService.findMemberReservations(
@@ -182,7 +183,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = getNextDayReservation(time, theme1);
         reservationRepository.save(reservation);
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(memberChoco, reservation, ReservationStatus.BOOKED));
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when
         reservationService.deleteMemberReservation(AuthInfo.from(memberChoco), memberReservation.getId());
@@ -198,7 +199,7 @@ class ReservationServiceTest extends ServiceTest {
     void duplicatedReservation() {
         //given
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when & then
         assertThatThrownBy(() -> reservationService.createMemberReservation(
@@ -216,7 +217,7 @@ class ReservationServiceTest extends ServiceTest {
     void deleteMemberReservation() {
         //given
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
 
         //when
         reservationService.delete(reservation.getId());
@@ -235,17 +236,14 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation1 = reservationRepository.save(getNextDayReservation(time, theme1));
         Reservation reservation2 = reservationRepository.save(getNextDayReservation(time, theme2));
 
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.BOOKED));
-        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation1, ReservationStatus.APPROVED));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.APPROVED));
 
         //when
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(AuthInfo.from(memberChoco));
+        List<MyReservationInfo> myReservations = reservationService.findMyReservations(AuthInfo.from(memberChoco));
 
         //then
-        assertAll(
-                () -> assertThat(myReservations).hasSize(2),
-                () -> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
-        );
+        assertThat(myReservations).hasSize(2);
     }
 
     @DisplayName("예약 대기에 성공한다.")
@@ -259,12 +257,20 @@ class ReservationServiceTest extends ServiceTest {
         );
 
         //when
-        ReservationResponse waitingResponse = reservationService.addWaitingList(
+        ReservationResponse waitingResponse = reservationService.addWaiting(
                 new WaitingCreate(memberClover.getId(), date, time.getId(), theme1.getId())
         );
+        List<MyReservationProjection> response = memberReservationRepository.findByMember(
+                memberClover.getId());
 
         //then
-        assertThat(reservationResponse.memberReservationId()).isNotEqualTo(waitingResponse.memberReservationId());
+        assertAll(
+                () -> assertThat(reservationResponse.memberReservationId()).isNotEqualTo(
+                        waitingResponse.memberReservationId()),
+                () -> assertThat(response.get(0)).isNotNull(),
+                () -> assertThat(response.get(0).getWaitingNumber()).isEqualTo(2)
+        );
+
     }
 
     @DisplayName("중복 예약 시 예외가 발생한다.")
@@ -277,10 +283,32 @@ class ReservationServiceTest extends ServiceTest {
         );
 
         //when & then
-        assertThatThrownBy(() -> reservationService.addWaitingList(
+        assertThatThrownBy(() -> reservationService.addWaiting(
                 new WaitingCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         ))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
+    }
+
+    @DisplayName("대기한 예약 취소에 성공한다.")
+    @Test
+    void deleteWaiting() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+        LocalDate date = LocalDate.now();
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
+        );
+        ReservationResponse waitingResponse = reservationService.addWaiting(
+                new WaitingCreate(memberClover.getId(), date, time.getId(), theme1.getId())
+        );
+
+        //when
+        AuthInfo authInfo = new AuthInfo(memberClover.getId(), memberClover.getName(), memberClover.getEmail(),
+                memberClover.getRole());
+        reservationService.deleteMemberReservation(authInfo, waitingResponse.memberReservationId());
+
+        //then
+        assertThat(memberReservationRepository.findByMember(memberClover.getId())).hasSize(0);
     }
 }

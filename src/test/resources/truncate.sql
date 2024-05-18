@@ -12,7 +12,7 @@ ALTER TABLE reservation ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE reservation_time ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE theme ALTER COLUMN ID RESTART WITH 1;
 
-INSERT INTO member(name, email, password, role)
-VALUES ('관리자', 'admin@roomescape.com', '$2a$10$5xUHgA2/scLa/9YzqkCrXuAoIwLYiZTif8F8QrjuFfSFRgsUdJYhC', 'ADMIN');
+INSERT INTO member(name, email, password, role, created_at, updated_at)
+VALUES ('관리자', 'admin@roomescape.com', '$2a$10$5xUHgA2/scLa/9YzqkCrXuAoIwLYiZTif8F8QrjuFfSFRgsUdJYhC', 'ADMIN', NOW(), NOW());
 
 SET REFERENTIAL_INTEGRITY TRUE;

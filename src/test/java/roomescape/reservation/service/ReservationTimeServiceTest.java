@@ -124,7 +124,7 @@ class ReservationTimeServiceTest extends ServiceTest {
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
         Member member = memberRepository.save(getMemberChoco());
-        memberReservationRepository.save(new MemberReservation(member, reservation, ReservationStatus.BOOKED));
+        memberReservationRepository.save(new MemberReservation(member, reservation, ReservationStatus.APPROVED));
 
         //when
         List<AvailableTimeResponse> availableTimes

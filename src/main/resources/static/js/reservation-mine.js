@@ -42,7 +42,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    const endpoint = `/reservations/waitlist/${id}`;
+    const endpoint = `/reservations/${id}/waiting`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

@@ -11,7 +11,6 @@ import roomescape.exception.ErrorType;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.MemberReservation;
@@ -24,6 +23,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
+import roomescape.reservation.service.dto.MyReservationInfo;
 import roomescape.reservation.service.dto.WaitingCreate;
 
 @Service
@@ -54,11 +54,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
+    public List<MyReservationInfo> findMyReservations(AuthInfo authInfo) {
         Member member = getMember(authInfo.getId());
-        return memberReservationRepository.findAllByMember(member)
+        return memberReservationRepository.findByMember(member.getId())
                 .stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationInfo::of)
                 .toList();
     }
 
@@ -73,7 +73,7 @@ public class ReservationService {
         validateDuplicatedReservation(reservation, member);
 
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation, ReservationStatus.BOOKED));
+                new MemberReservation(member, reservation, ReservationStatus.APPROVED));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
@@ -104,7 +104,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addWaitingList(WaitingCreate waitingCreate) {
+    public ReservationResponse addWaiting(WaitingCreate waitingCreate) {
         ReservationTime reservationTime = getReservationTime(waitingCreate.timeId());
         Theme theme = getTheme(waitingCreate.themeId());
         Member member = getMember(waitingCreate.memberId());
@@ -114,7 +114,7 @@ public class ReservationService {
         validateDuplicatedReservation(reservation, member);
 
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation, ReservationStatus.WAITING));
+                new MemberReservation(member, reservation, ReservationStatus.PENDING));
 
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
@@ -141,8 +141,8 @@ public class ReservationService {
     }
 
     private Reservation getReservation(LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.findByDateAndTimeAndTheme(date, time, theme)
-                .orElse(reservationRepository.save(new Reservation(date, time, theme)));
+        return reservationRepository.findReservationByDateAndTimeAndTheme(date, time, theme)
+                .orElseGet(() -> reservationRepository.save(new Reservation(date, time, theme)));
     }
 
     private MemberReservation getMemberReservation(long memberReservationId) {

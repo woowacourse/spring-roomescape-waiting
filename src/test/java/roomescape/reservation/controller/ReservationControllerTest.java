@@ -8,7 +8,9 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -27,6 +29,7 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeResponse;
+import roomescape.reservation.controller.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
@@ -157,16 +160,16 @@ class ReservationControllerTest extends ControllerTest {
                 new ReservationTimeCreate(LocalTime.NOON));
         ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
 
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", LocalDate.now().minusDays(2).toString());
-        reservation.put("timeId", reservationTimeResponse.id());
-        reservation.put("themeId", themeResponse.id());
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", LocalDate.now().minusDays(2).toString());
+        params.put("timeId", reservationTimeResponse.id());
+        params.put("themeId", themeResponse.id());
 
         //when & then
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
-                .body(reservation)
+                .body(params)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
@@ -183,5 +186,62 @@ class ReservationControllerTest extends ControllerTest {
                 .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @DisplayName("예약 대기를 등록하고 삭제한다.")
+    @TestFactory
+    Stream<DynamicTest> waitingAndDelete() {
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(new ThemeCreate("name", "description", "thumbnail"));
+        MemberResponse memberResponseOf = memberService.findAll()
+                .stream()
+                .filter(memberResponse -> Objects.equals(memberResponse.name(), getMemberChoco().getName()))
+                .findAny().orElseThrow();
+
+        Member member = memberService.findById(memberResponseOf.id());
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(
+                        member.getId(),
+                        LocalDate.now().plusDays(10),
+                        reservationTimeResponse.id(),
+                        themeResponse.id()
+                )
+        );
+        String cloverToken = tokenProvider.createAccessToken(getMemberClover().getEmail());
+
+        List<ReservationResponse> waitingResponses = new ArrayList<>();
+        return Stream.of(
+                dynamicTest("예약 대기 시, 201을 반환한다.", () -> {
+                    //given
+                    authService.signUp(
+                            new SignUpCommand(getMemberClover().getName(), getMemberClover().getEmail(),
+                                    getMemberClover().getPassword()));
+
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("date", reservationResponse.date().toString());
+                    params.put("timeId", reservationResponse.time().id());
+                    params.put("themeId", reservationResponse.theme().id());
+
+                    // when & then
+                    ReservationResponse waitingResponse = RestAssured.given().log().all()
+                            .cookie("token", cloverToken)
+                            .contentType(ContentType.JSON)
+                            .body(params)
+                            .when().post("/reservations/waiting")
+                            .then().log().all()
+                            .statusCode(201).extract().as(ReservationResponse.class);
+
+                    waitingResponses.add(waitingResponse);
+                }),
+                dynamicTest("예약 대기 삭제 시 204를 반환한다.", () -> {
+                    //given & when & then
+                    RestAssured.given().log().all()
+                            .cookie("token", cloverToken)
+                            .when().delete("/reservations/" + waitingResponses.get(0).memberReservationId() + "/waiting")
+                            .then().log().all()
+                            .statusCode(204);
+                })
+        );
     }
 }

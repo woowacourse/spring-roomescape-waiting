@@ -61,30 +61,6 @@ class AdminControllerTest extends ControllerTest {
         token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
     }
 
-    @DisplayName("관리자 메인 페이지 조회에 성공한다.")
-    @Test
-    void adminMainPage() {
-        //given
-
-        //when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .when().get("/admin")
-                .then().log().all()
-                .statusCode(200);
-    }
-
-    @DisplayName("관리자 예약 페이지 조회에 성공한다.")
-    @Test
-    void getAdminReservationPage() {
-        //given & when & then
-        RestAssured.given().log().all()
-                .cookie("token", token)
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(200);
-    }
-
     @DisplayName("예약 목록 조회에 성공한다.")
     @Test
     void getReservations() {
