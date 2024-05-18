@@ -20,10 +20,12 @@ class AdminPageControllerTest extends BaseControllerTest {
     @ParameterizedTest(name = "{0} 페이지를 조회한다.")
     @ValueSource(strings = {
             "/admin",
-            "/admin/reservation",
             "/admin/time",
-            "/admin/theme"
+            "/admin/theme",
+            "/admin/reservation",
+            "/admin/waiting",
     })
+    @DisplayName("어드민 페이지를 조회한다.")
     void pageTest(String path) {
         adminLogin();
 

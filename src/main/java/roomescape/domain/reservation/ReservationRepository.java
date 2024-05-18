@@ -3,14 +3,16 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.ReservationWithRankDto;
 
-public interface ReservationRepository extends CrudRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Override
     List<Reservation> findAll();
 
     boolean existsByTimeId(long id);
