@@ -8,9 +8,11 @@ import roomescape.ServiceTest;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ThemeServiceTest extends ServiceTest {
 
@@ -20,8 +22,9 @@ class ThemeServiceTest extends ServiceTest {
     @DisplayName("인기 테마를 알 수 있습니다.")
     @Test
     void should_get_theme_ranking() {
-        assertThatCode(() -> themeService.getThemeRanking())
-                .doesNotThrowAnyException();
+        LocalDate now = LocalDate.of(2024, 5, 15);
+
+        assertThat(themeService.getThemeRanking(now)).hasSize(4);
     }
 
     @DisplayName("모든 테마를 불러올 수 있습니다.")
