@@ -19,9 +19,6 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
-    private ReservationTimeService reservationTimeService;
-
     @DisplayName("날짜의 시작과 끝을 기준으로 예약을 조회한다.")
     @Test
     void findByDateFromAndDateTo() {
