@@ -33,7 +33,7 @@ public class Reservation {
     }
 
     public Reservation(Member member, Theme theme, Time time, LocalDate date) {
-        this(null, member,theme, time, date);
+        this(null, member, theme, time, date);
     }
 
     public Reservation(Long id, Member member, Theme theme, Time time, LocalDate date) {
@@ -65,6 +65,10 @@ public class Reservation {
 
     public String getMemberName() {
         return member.getName();
+    }
+
+    public Long getMemberId() {
+        return member.getId();
     }
 
     public LocalDate getDate() {

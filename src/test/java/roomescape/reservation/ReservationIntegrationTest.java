@@ -2,12 +2,11 @@ package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,11 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
@@ -124,7 +126,7 @@ class ReservationIntegrationTest {
             @Test
             @DisplayName("예약을 DB에 추가할 수 있다.")
             void createReservation() {
-                ReservationRequest params = new ReservationRequest(LocalDate.now().plusDays(1), MEMBER, 1L, 1L);
+                ReservationRequest params = new ReservationRequest(1L, 1L, 1L, LocalDate.now().plusDays(1));
 
                 RestAssured.given()
                         .contentType(ContentType.JSON)

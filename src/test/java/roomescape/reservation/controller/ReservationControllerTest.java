@@ -33,7 +33,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.crypto.JwtTokenProvider;
 import roomescape.member.security.service.MemberAuthService;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.dto.ReservationRequest;
@@ -90,7 +89,7 @@ class ReservationControllerTest {
         Member member = new Member(1L, "valid", "testUser@email.com", "pass");
         token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(new ReservationRequest(reservation.getDate(), member, 1L, 1L));
+                .writeValueAsString(new ReservationRequest(1L, 1L, 1L, reservation.getDate()));
 
         mockMvc.perform(post("/reservations")
                         .cookie(new Cookie("token", token))
