@@ -27,7 +27,8 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
                 ReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1100),
                 ReservationResponse.from(RESERVATION_CUSTOMER1_THEME3_240502_1100),
                 ReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1200),
-                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240502_1200)
+                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240502_1200),
+                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240503_1200)
         );
     }
 
@@ -61,7 +62,8 @@ class ReservationFilterAcceptanceTest extends BaseAcceptanceTest {
 
         assertThat(response.items()).containsExactlyInAnyOrder(
                 ReservationResponse.from(RESERVATION_CUSTOMER1_THEME3_240502_1100),
-                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240502_1200)
+                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240502_1200),
+                ReservationResponse.from(RESERVATION_CUSTOMER2_THEME3_240503_1200)
         );
     }
 

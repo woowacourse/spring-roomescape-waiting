@@ -45,6 +45,13 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
 
     static Stream<Arguments> filterProvider() {
         return Stream.of(
+                Arguments.of(null, null, null, null,
+                        List.of(
+                                RESERVATION_CUSTOMER2_THEME3_240503_1200,
+                                RESERVATION_CUSTOMER1_THEME3_240502_1100,
+                                RESERVATION_CUSTOMER2_THEME3_240502_1200,
+                                RESERVATION_CUSTOMER2_THEME3_240503_1200
+                        )),
                 Arguments.of(THEME_3.getId(), null, null, null,
                         List.of(
                                 RESERVATION_CUSTOMER2_THEME3_240503_1200,
