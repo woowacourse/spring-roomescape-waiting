@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.repository.dto.AvailableReservationTimeResult;
 
@@ -22,4 +23,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
                     ON rt.id = r.time_id AND r.date = ? AND r.theme_id = ?
             """, nativeQuery = true)
     List<AvailableReservationTimeResult> getAvailableReservationTimeByThemeIdAndDate(LocalDate date, Long themeId);
+
+    @Transactional
+    long deleteReservationTimeById(long timeId);
 }

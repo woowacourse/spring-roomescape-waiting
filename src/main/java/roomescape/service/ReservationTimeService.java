@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
+import roomescape.exception.NotExistException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.dto.AvailableReservationTimeResult;
@@ -54,6 +55,8 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ExistReservationException(RESERVATION_TIME, id);
         }
-        reservationTimeRepository.deleteById(id);
+        if(reservationTimeRepository.deleteReservationTimeById(id)==0){
+            throw new NotExistException(RESERVATION_TIME, id);
+        }
     }
 }
