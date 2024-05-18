@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.exception.BadRequestException;
-import roomescape.member.dao.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;

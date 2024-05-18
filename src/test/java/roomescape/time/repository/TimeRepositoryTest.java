@@ -1,4 +1,4 @@
-package roomescape.time.dao;
+package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,8 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

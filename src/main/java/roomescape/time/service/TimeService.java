@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.exception.ConflictException;
-import roomescape.reservation.dao.ReservationRepository;
-import roomescape.time.dao.TimeRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;

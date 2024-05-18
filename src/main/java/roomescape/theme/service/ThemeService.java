@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.theme.dao.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;
 import roomescape.theme.dto.ThemeRequest;
