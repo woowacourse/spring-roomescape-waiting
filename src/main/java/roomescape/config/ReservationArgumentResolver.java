@@ -20,15 +20,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import roomescape.exception.AuthorizationExpiredException;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationRequest;
 
 public class ReservationArgumentResolver implements HandlerMethodArgumentResolver {
     private final MemberAuthService memberAuthService;
+    private final MemberService memberService;
 
-    public ReservationArgumentResolver(MemberAuthService memberAuthService) {
+    public ReservationArgumentResolver(MemberAuthService memberAuthService, MemberService memberService) {
         this.memberAuthService = memberAuthService;
+        this.memberService = memberService;
     }
 
     @Override
@@ -45,12 +49,13 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
 
         if (memberAuthService.isLoginMember(cookies)) {
             MemberProfileInfo payload = memberAuthService.extractPayload(cookies);
+            Member member = memberService.findMemberById(payload.id());
             ReservationRequest reservationRequest = convertToRequestBody(request);
             return new ReservationRequest(
-                    reservationRequest.themeId(),
-                    payload.id(),
+                    LocalDate.from(reservationRequest.date()),
+                    member,
                     reservationRequest.timeId(),
-                    LocalDate.from(reservationRequest.date())
+                    reservationRequest.themeId()
             );
         }
         throw new AuthorizationExpiredException();
@@ -66,4 +71,5 @@ public class ReservationArgumentResolver implements HandlerMethodArgumentResolve
             throw new AuthorizationExpiredException();
         }
     }
+
 }
