@@ -71,15 +71,4 @@ public class Reservation {
     public Member getMember() {
         return member;
     }
-
-    @Override
-    public String toString() {
-        return "Reservation{" +
-               "id=" + id +
-               ", date=" + date +
-               ", time=" + time +
-               ", theme=" + theme +
-               ", member=" + member +
-               '}';
-    }
 }
