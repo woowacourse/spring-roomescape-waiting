@@ -32,6 +32,7 @@ import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.service.FakeThemeRepository;
 import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 class ReservationServiceTest {
 
@@ -73,7 +74,7 @@ class ReservationServiceTest {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);//
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("존재 하지 않는 멤버로 예약할 수 없습니다.");
     }
 
@@ -84,7 +85,7 @@ class ReservationServiceTest {
         fakeMemberRepository.save(ADMIN_MEMBER);
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("존재 하지 않는 테마로 예약할 수 없습니다");
     }
 
@@ -97,7 +98,7 @@ class ReservationServiceTest {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_TWO_DAYS_DATE, 1L, 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("존재 하지 않는 예약시각으로 예약할 수 없습니다.");
     }
 
@@ -178,7 +179,7 @@ class ReservationServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_with_non_exist_id() {
         assertThatThrownBy(() -> reservationService.removeReservation(1L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("해당 id를 가진 예약이 존재하지 않습니다.");
     }
 

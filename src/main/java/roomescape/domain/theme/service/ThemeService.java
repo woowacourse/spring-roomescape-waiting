@@ -6,13 +6,13 @@ import roomescape.domain.reservation.repository.reservation.ReservationRepositor
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 @Service
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository; //TODO: 불필요한 멤버 삭제
 
     public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
@@ -30,7 +30,7 @@ public class ThemeService {
 
     public void removeTheme(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
-            throw new EscapeApplicationException("해당 id를 가진 테마가 존재하지 않습니다.");
+            throw new NoMatchingDataException("해당 id를 가진 테마가 존재하지 않습니다.");
         }
         themeRepository.deleteById(id);
     }

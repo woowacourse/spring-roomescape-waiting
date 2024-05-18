@@ -6,6 +6,7 @@ import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
 import roomescape.domain.reservation.repository.reservationTime.ReservationTimeRepository;
 import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 @Service
 public class AdminReservationTimeService {
@@ -30,7 +31,7 @@ public class AdminReservationTimeService {
 
     public void removeReservationTime(Long id) {
         if (reservationTimeRepository.findById(id).isEmpty()) {
-            throw new EscapeApplicationException("해당 id를 가진 예약시간이 존재하지 않습니다.");
+            throw new NoMatchingDataException("해당 id를 가진 예약시간이 존재하지 않습니다.");
         }
         reservationTimeRepository.deleteById(id);
     }

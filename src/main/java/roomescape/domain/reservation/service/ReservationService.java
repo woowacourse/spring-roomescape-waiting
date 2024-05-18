@@ -17,6 +17,7 @@ import roomescape.domain.reservation.repository.reservationTime.ReservationTimeR
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 @Service
 public class ReservationService {
@@ -71,17 +72,17 @@ public class ReservationService {
 
     private Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new EscapeApplicationException("존재 하지 않는 테마로 예약할 수 없습니다"));
+                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 테마로 예약할 수 없습니다"));
     }
 
     private ReservationTime getReservationTime(Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new EscapeApplicationException("존재 하지 않는 예약시각으로 예약할 수 없습니다."));
+                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 예약시각으로 예약할 수 없습니다."));
     }
 
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new EscapeApplicationException("존재 하지 않는 멤버로 예약할 수 없습니다."));
+                .orElseThrow(() -> new NoMatchingDataException("존재 하지 않는 멤버로 예약할 수 없습니다."));
     }
 
     public List<BookableTimeResponse> findBookableTimes(BookableTimesRequest bookableTimesRequest) {
@@ -102,7 +103,7 @@ public class ReservationService {
 
     public void removeReservation(Long id) {
         if (reservationRepository.findById(id).isEmpty()) {
-            throw new EscapeApplicationException("해당 id를 가진 예약이 존재하지 않습니다.");
+            throw new NoMatchingDataException("해당 id를 가진 예약이 존재하지 않습니다.");
         }
         reservationRepository.deleteById(id);
     }

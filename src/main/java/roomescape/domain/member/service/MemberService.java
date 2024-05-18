@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.exception.InvalidEmailPasswordException;
 import roomescape.domain.member.repository.MemberRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 @Service
 public class MemberService {
@@ -22,7 +22,7 @@ public class MemberService {
 
     public Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new EscapeApplicationException("없는 member를 조회 했습니다."));
+                .orElseThrow(() -> new NoMatchingDataException("없는 member를 조회 했습니다."));
     }
 
     public Member findMemberByEmailAndPassword(String email, String password) {

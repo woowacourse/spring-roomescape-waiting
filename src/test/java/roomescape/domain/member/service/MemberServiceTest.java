@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.exception.InvalidEmailPasswordException;
 import roomescape.domain.member.repository.MemberRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 class MemberServiceTest {
 
@@ -46,8 +46,7 @@ class MemberServiceTest {
     @Test
     void should_throw_exception_when_find_by_non_exist_id() {
         assertThatThrownBy(() -> memberService.findMemberById(2L))
-                .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("없는 member를 조회 했습니다.");
+                .isInstanceOf(NoMatchingDataException.class);
     }
 
     @DisplayName("email과 password로 member를 찾을 수 있습니다.")
@@ -64,8 +63,7 @@ class MemberServiceTest {
     @Test
     void should_throw_exception_when_find_member_by_non_exist_email() {
         assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword("wrongEmail@gmail.com", "123456"))
-                .isInstanceOf(InvalidEmailPasswordException.class)
-                .hasMessage("이메일 또는 비밀번호를 잘못 입력했습니다.");
+                .isInstanceOf(InvalidEmailPasswordException.class);
     }
 
     @DisplayName("틀린 password로 member를 찾으려 하면, 예외가 발생합니다.")

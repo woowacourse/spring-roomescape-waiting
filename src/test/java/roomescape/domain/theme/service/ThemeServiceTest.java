@@ -18,7 +18,7 @@ import roomescape.domain.reservation.service.FakeReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -62,7 +62,7 @@ class ThemeServiceTest {
         ReservationRepository reservationRepository = new FakeReservationRepository();
         themeService = new ThemeService(themeRepository, reservationRepository);
         assertThatThrownBy(() -> themeService.removeTheme(1L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");
     }
 

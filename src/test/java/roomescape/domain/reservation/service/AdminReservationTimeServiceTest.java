@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
 import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.NoMatchingDataException;
 
 class AdminReservationTimeServiceTest {
 
@@ -72,7 +73,7 @@ class AdminReservationTimeServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_time_with_non_exist_id() {
         assertThatThrownBy(() -> adminReservationTimeService.removeReservationTime(1L)).isInstanceOf(
-                        EscapeApplicationException.class)
+                        NoMatchingDataException.class)
                 .hasMessage("해당 id를 가진 예약시간이 존재하지 않습니다.");
     }
 }
