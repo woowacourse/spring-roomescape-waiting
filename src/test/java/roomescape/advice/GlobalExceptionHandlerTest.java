@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import roomescape.advice.dto.ErrorResponse;
 import roomescape.auth.exception.AdminAuthorizationException;
@@ -30,7 +31,7 @@ class GlobalExceptionHandlerTest {
     void handleNullPointerExceptionTest() {
         NullPointerException exception = new NullPointerException();
         ResponseEntity<ErrorResponse> expected = ResponseEntity.badRequest()
-                .body(new ErrorResponse("인자 중 null 값이 존재합니다."));
+                .body(new ErrorResponse("잘못된 요청입니다."));
 
         ResponseEntity<ErrorResponse> actual = globalExceptionHandler.handleNullPointerException(exception);
 
@@ -57,6 +58,18 @@ class GlobalExceptionHandlerTest {
                 .body(new ErrorResponse(exception.getMessage()));
 
         ResponseEntity<ErrorResponse> actual = globalExceptionHandler.handleAdminAuthorizationException(exception);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("데이터 정합성 에러가 발생하면 400 에러를 반환한다.")
+    @Test
+    void handleDataIntegrityViolationExceptionTest() {
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("예외 메시지");
+        ResponseEntity<ErrorResponse> expected = ResponseEntity.status(400)
+                .body(new ErrorResponse("잘못된 요청입니다."));
+
+        ResponseEntity<ErrorResponse> actual = globalExceptionHandler.handleDataIntegrityViolationException(exception);
 
         assertThat(actual).isEqualTo(expected);
     }
