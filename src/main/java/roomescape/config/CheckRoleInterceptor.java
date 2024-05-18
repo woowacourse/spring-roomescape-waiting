@@ -22,8 +22,8 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Cookie[] cookies = Objects.requireNonNull(request)
-                .getCookies();
+        Cookie[] cookies = request.getCookies();
+
         if (memberAuthService.isLoginMember(cookies)) {
             MemberProfileInfo memberProfile = memberAuthService.extractPayload(cookies);
             Member member = memberService.findMemberById(memberProfile.id());
