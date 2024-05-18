@@ -22,7 +22,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 
 //@formatter:off
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class LoginApiControllerTest {
+class AuthApiControllerTest {
     @Autowired
     MemberService memberService;
     @LocalServerPort
@@ -53,7 +53,7 @@ class LoginApiControllerTest {
         member.put("password", "password");
 
         RestAssured.given().contentType(ContentType.JSON).body(member)
-                .when().post("/members")
+                .when().post("/signup")
                 .then().statusCode(201);
 
         final var token = RestAssured.given().contentType(ContentType.JSON)
@@ -63,7 +63,7 @@ class LoginApiControllerTest {
 
         final var result = RestAssured.given().cookie("token",token)
                 .when().get("/login/check")
-                .then().statusCode(200).extract().as(TokenLoginResponse.class);
+                .then().log().all().statusCode(200).extract().as(TokenLoginResponse.class);
 
         assertThat(result.name()).isEqualTo("조이썬");
     }

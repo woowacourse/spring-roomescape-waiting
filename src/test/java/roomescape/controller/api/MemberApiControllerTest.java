@@ -38,7 +38,7 @@ class MemberApiControllerTest {
         member.put("password", "password");
 
         RestAssured.given().contentType(ContentType.JSON).body(member)
-                   .when().post("/members")
+                   .when().post("/signup")
                    .then().statusCode(201);
     }
 
