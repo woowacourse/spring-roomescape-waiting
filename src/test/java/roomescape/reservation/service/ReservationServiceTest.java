@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,26 +17,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ConflictException;
+
 import roomescape.exception.BadRequestException;
-import roomescape.member.repository.MemberRepository;
+import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.time.repository.TimeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
+import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
     private final Time time = new Time(1L, LocalTime.of(12, 0));
     private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
-    private final Member member = new Member("켬미", "kyummi@email.com", "pass");
+    private final Member member = new Member(1L, "켬미", "kyummi@email.com", "pass");
     private final Reservation reservation = new Reservation(1L, member, theme, time, LocalDate.MAX);
 
     private final MemberProfileInfo memberProfileInfo = new MemberProfileInfo(1L, "Dobby", "kimdobby@wotaeco.com");
@@ -58,14 +60,16 @@ class ReservationServiceTest {
 
         Mockito.when(timeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getTime()));
-
         Mockito.when(themeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getTheme()));
+        Mockito.when(memberRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getMember()));
 
-        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
-                reservation.getMember(), reservation.getTime()
-                .getId(), reservation.getTheme()
-                .getId());
+        ReservationRequest reservationRequest = new ReservationRequest(
+                reservation.getMemberId(),
+                reservation.getThemeId(),
+                reservation.getTimeId(),
+                reservation.getDate());
         ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         assertThat(reservationResponse.id()).isEqualTo(1);
@@ -81,8 +85,11 @@ class ReservationServiceTest {
         Mockito.when(themeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getTheme()));
 
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.MIN, reservation.getMember(),
-                reservation.getTimeId(), reservation.getThemeId());
+        ReservationRequest reservationRequest = new ReservationRequest(
+                reservation.getMemberId(),
+                reservation.getThemeId(),
+                reservation.getTimeId(),
+                LocalDate.MIN);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
                 BadRequestException.class);
@@ -120,9 +127,14 @@ class ReservationServiceTest {
                 .thenReturn(Optional.ofNullable(reservation.getTime()));
         Mockito.when(themeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.ofNullable(reservation.getTheme()));
+        Mockito.when(memberRepository.findById(any(Long.class)))
+                .thenReturn(Optional.ofNullable(reservation.getMember()));
 
-        ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
-                reservation.getMember(), reservation.getTimeId(), reservation.getThemeId());
+        ReservationRequest reservationRequest = new ReservationRequest(
+                reservation.getMemberId(),
+                reservation.getThemeId(),
+                reservation.getTimeId(),
+                reservation.getDate());
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
                 ConflictException.class);

@@ -7,21 +7,19 @@ import org.springframework.stereotype.Service;
 
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
-import roomescape.member.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationBuilder;
-import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.time.repository.TimeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
+import roomescape.time.repository.TimeRepository;
 
 @Service
 public class ReservationService {
@@ -30,7 +28,8 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
+    public ReservationService(ReservationRepository reservationRepository,
+                              TimeRepository timeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
@@ -39,78 +38,11 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse addReservation(ReservationRequest reservationRequest) {
-        Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new BadRequestException("해당 예약 시간이 존재하지 않습니다."));
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new BadRequestException("선택하신 테마가 존재하지 않습니다."));
-        validateReservationRequest(reservationRequest, time);
-        Reservation reservation = reservationRequest.toReservation(time, theme);
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.fromReservation(savedReservation);
-    }
-
-    private void validateReservationRequest(ReservationRequest reservationRequest, Time time) {
-        if (reservationRequest.date()
-                .isBefore(LocalDate.now())) {
-            throw new BadRequestException("지난 날짜의 예약을 시도하였습니다.");
-        }
-        validateDuplicateReservation(reservationRequest, time);
-    }
-
-    private void validateDuplicateReservation(ReservationRequest reservationRequest, Time time) {
-        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(reservationRequest.themeId(), reservationRequest.date());
-        if (isTimeBooked(time, bookedTimes)) {
-            throw new ConflictException("해당 시간에 예약이 존재합니다.");
-        }
-    }
-
-    private List<Time> getBookedTimesOfThemeAtDate(long themeId, LocalDate date) {
-        List<Reservation> reservationsOfThemeInDate = reservationRepository.findAllByTheme_IdAndDate(themeId, date);
-        return extractReservationTimes(reservationsOfThemeInDate);
-    }
-
-    private boolean isTimeBooked(Time time, List<Time> bookedTimes) {
-        return bookedTimes.contains(time);
-    }
-
-    private List<Time> extractReservationTimes(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(Reservation::getTime)
-                .toList();
-    }
-
-    public ReservationResponse addReservation(AdminReservationRequest reservationRequest) {
-        Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new BadRequestException("해당 예약 시간이 존재하지 않습니다."));
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new BadRequestException("선택한 테마가 존재하지 않습니다."));
-        Member member = memberRepository.findById(reservationRequest.memberId())
-                .orElseThrow();
-
-        Reservation reservation = new ReservationBuilder()
-                .date(reservationRequest.date())
-                .time(time)
-                .theme(theme)
-                .build();
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.fromReservation(savedReservation);
-    }
-
     public List<ReservationResponse> findReservations() {
         List<Reservation> reservations = reservationRepository.findAllByOrderByDateAsc();
 
         return reservations.stream()
                 .map(ReservationResponse::fromReservation)
-                .toList();
-    }
-
-    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
-        List<Time> allTimes = timeRepository.findAllByOrderByStartAtAsc();
-        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(themeId, date);
-
-        return allTimes.stream()
-                .map(time -> ReservationTimeAvailabilityResponse.fromTime(time, isTimeBooked(time, bookedTimes)))
                 .toList();
     }
 
@@ -123,14 +55,54 @@ public class ReservationService {
                 .toList();
     }
 
-    public void removeReservations(long reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
-
     public List<MyReservationResponse> findReservationByMemberId(Long id) {
         List<Reservation> reservationsByMember = reservationRepository.findAllByMember_IdOrderByDateAsc(id);
         return reservationsByMember.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    public ReservationResponse addReservation(ReservationRequest reservationRequest) {
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
+                .orElseThrow(() -> new BadRequestException("선택하신 테마가 존재하지 않습니다."));
+        Time time = timeRepository.findById(reservationRequest.timeId())
+                .orElseThrow(() -> new BadRequestException("해당 예약 시간이 존재하지 않습니다."));
+        Member member = memberRepository.findById(reservationRequest.memberId())
+                .orElseThrow(() -> new BadRequestException("해당 멤버 정보가 존재하지 않습니다."));
+        validateReservationRequest(reservationRequest, time);
+
+        Reservation reservation = reservationRequest.toReservation(member, theme, time);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResponse.fromReservation(savedReservation);
+    }
+
+    private void validateReservationRequest(ReservationRequest reservationRequest, Time time) {
+        if (reservationRequest.isBeforeDate(LocalDate.now())) {
+            throw new BadRequestException("지난 날짜의 예약을 시도하였습니다.");
+        }
+        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(reservationRequest.themeId(), reservationRequest.date());
+        if (bookedTimes.contains(time)) {
+            throw new ConflictException("해당 시간에 예약이 존재합니다.");
+        }
+    }
+
+    private List<Time> getBookedTimesOfThemeAtDate(long themeId, LocalDate date) {
+        List<Reservation> reservations = reservationRepository.findAllByTheme_IdAndDate(themeId, date);
+        return reservations.stream()
+                .map(Reservation::getTime)
+                .toList();
+    }
+
+    public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
+        List<Time> allTimes = timeRepository.findAllByOrderByStartAtAsc();
+        List<Time> bookedTimes = getBookedTimesOfThemeAtDate(themeId, date);
+
+        return allTimes.stream()
+                .map(time -> ReservationTimeAvailabilityResponse.fromTime(time, bookedTimes.contains(time)))
+                .toList();
+    }
+
+    public void removeReservations(long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 }
