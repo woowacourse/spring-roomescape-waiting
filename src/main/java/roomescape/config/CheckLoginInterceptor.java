@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.AuthenticationException;
 import roomescape.infrastructure.AuthenticationExtractor;
 import roomescape.service.AuthService;
-import roomescape.service.dto.LoginMember;
+import roomescape.service.dto.request.LoginMember;
 
 public class CheckLoginInterceptor implements HandlerInterceptor {
 

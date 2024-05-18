@@ -2,11 +2,11 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.service.dto.MemberResponse;
+import roomescape.service.dto.response.MemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.MemberJoinRequest;
+import roomescape.service.dto.request.MemberJoinRequest;
 
 @Service
 public class MemberService {

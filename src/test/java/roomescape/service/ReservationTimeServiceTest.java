@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.ReservationTimeBookedRequest;
-import roomescape.service.dto.ReservationTimeBookedResponse;
-import roomescape.service.dto.ReservationTimeResponse;
-import roomescape.service.dto.ReservationTimeSaveRequest;
+import roomescape.service.dto.request.ReservationTimeBookedRequest;
+import roomescape.service.dto.response.ReservationTimeBookedResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
 @Transactional
 class ReservationTimeServiceTest extends IntegrationTestSupport {

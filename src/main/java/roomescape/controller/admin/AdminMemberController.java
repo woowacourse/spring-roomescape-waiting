@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.MemberService;
-import roomescape.service.dto.MemberResponse;
+import roomescape.service.dto.response.MemberResponse;
 
 @RestController
 @RequestMapping("/admin/members")

@@ -7,9 +7,9 @@ import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.PopularThemeRequest;
-import roomescape.service.dto.ThemeResponse;
-import roomescape.service.dto.ThemeSaveRequest;
+import roomescape.service.dto.request.PopularThemeRequest;
+import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.dto.request.ThemeSaveRequest;
 
 @Service
 public class ThemeService {

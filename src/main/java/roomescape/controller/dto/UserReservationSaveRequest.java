@@ -6,7 +6,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import roomescape.service.dto.ReservationSaveRequest;
+import roomescape.service.dto.request.ReservationSaveRequest;
 
 public record UserReservationSaveRequest(
         @NotNull

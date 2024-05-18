@@ -21,9 +21,9 @@ import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.ReservationResponse;
-import roomescape.service.dto.ReservationSaveRequest;
-import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.UserReservationResponse;
 
 @Transactional
 class ReservationServiceTest extends IntegrationTestSupport {

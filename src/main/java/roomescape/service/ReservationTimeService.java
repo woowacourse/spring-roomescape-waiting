@@ -9,10 +9,10 @@ import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
-import roomescape.service.dto.ReservationTimeBookedRequest;
-import roomescape.service.dto.ReservationTimeBookedResponse;
-import roomescape.service.dto.ReservationTimeResponse;
-import roomescape.service.dto.ReservationTimeSaveRequest;
+import roomescape.service.dto.request.ReservationTimeBookedRequest;
+import roomescape.service.dto.response.ReservationTimeBookedResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
 @Service
 public class ReservationTimeService {

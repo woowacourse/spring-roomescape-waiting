@@ -1,4 +1,4 @@
-package roomescape.service.dto;
+package roomescape.service.dto.request;
 
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;

@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.UserReservationSaveRequest;
 import roomescape.infrastructure.Login;
 import roomescape.service.ReservationService;
-import roomescape.service.dto.LoginMember;
-import roomescape.service.dto.ReservationResponse;
-import roomescape.service.dto.ReservationSaveRequest;
-import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.request.LoginMember;
+import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.UserReservationResponse;
 
 @RestController
 public class ReservationController {

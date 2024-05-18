@@ -11,8 +11,8 @@ import roomescape.infrastructure.Login;
 import roomescape.controller.dto.TokenRequest;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
-import roomescape.service.dto.LoginMember;
-import roomescape.service.dto.MemberResponse;
+import roomescape.service.dto.request.LoginMember;
+import roomescape.service.dto.response.MemberResponse;
 
 @Controller
 public class LoginController {

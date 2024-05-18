@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    //TODO ErrorResponse 객체 만들기
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> authenticationException(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

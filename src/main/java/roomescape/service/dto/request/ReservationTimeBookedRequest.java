@@ -1,22 +1,19 @@
-package roomescape.service.dto;
+package roomescape.service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
-public record PopularThemeRequest(
+public record ReservationTimeBookedRequest(
         @NotNull
         @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-        LocalDate startDate,
-
-        @NotNull
-        @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-        LocalDate endDate,
+        LocalDate date,
 
         @NotNull
         @Positive
-        Integer limit
+        Long themeId
 ) {
 }

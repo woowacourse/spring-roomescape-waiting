@@ -16,7 +16,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.ReservationStatus;
-import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.response.UserReservationResponse;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 

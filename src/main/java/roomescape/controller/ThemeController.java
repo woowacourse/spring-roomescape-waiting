@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ThemeService;
-import roomescape.service.dto.PopularThemeRequest;
-import roomescape.service.dto.ThemeResponse;
+import roomescape.service.dto.request.PopularThemeRequest;
+import roomescape.service.dto.response.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
