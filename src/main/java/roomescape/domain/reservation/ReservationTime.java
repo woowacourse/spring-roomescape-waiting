@@ -1,10 +1,6 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
@@ -22,7 +18,7 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(final String startAt) {
