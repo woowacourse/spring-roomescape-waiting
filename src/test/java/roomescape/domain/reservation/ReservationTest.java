@@ -5,16 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Theme;
 
 class ReservationTest {
 
@@ -88,5 +85,26 @@ class ReservationTest {
         assertThatThrownBy(reservation::updateToReserved)
                 .isInstanceOf(DomainValidationException.class)
                 .hasMessage("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
+    }
+
+    @Test
+    @DisplayName("create 메서드로 예약을 생성한다.")
+    void create_reservation() {
+        LocalDateTime currentDateTime = DATE.minusDays(1).atTime(10, 0);
+
+        Reservation reservation = Reservation.create(currentDateTime, DATE, MEMBER, RESERVATION_TIME, THEME, STATUS);
+
+        assertThat(reservation).isNotNull();
+    }
+
+    @Test
+    @DisplayName("create 메서드로 예약을 생성할 때 지나간 날짜/시간이면 예외가 발생한다.")
+    void create_fail_when_date_time_is_past() {
+        LocalDate pastDate = LocalDate.of(2020, 5, 5);
+        LocalDateTime currentDateTime = LocalDateTime.of(2024, 5, 4, 10, 0);
+
+        assertThatThrownBy(() -> Reservation.create(currentDateTime, pastDate, MEMBER, RESERVATION_TIME, THEME, STATUS))
+                .isInstanceOf(DomainValidationException.class)
+                .hasMessage("지나간 날짜/시간에 대한 예약은 불가능합니다.");
     }
 }
