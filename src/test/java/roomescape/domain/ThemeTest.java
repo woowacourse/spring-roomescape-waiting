@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.reservation.Theme;
 
 class ThemeTest {
@@ -25,7 +26,7 @@ class ThemeTest {
     @ValueSource(strings = {" "})
     void validateName(String name) {
         assertThatThrownBy(() -> new Theme(name, "description", "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이름은 필수 값입니다.");
     }
 
@@ -35,7 +36,7 @@ class ThemeTest {
         String name = "a".repeat(31);
 
         assertThatThrownBy(() -> new Theme(name, "description", "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이름은 30자를 넘을 수 없습니다.");
     }
 
@@ -45,7 +46,7 @@ class ThemeTest {
     @ValueSource(strings = {" "})
     void validateDescription(String description) {
         assertThatThrownBy(() -> new Theme("name", description, "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("설명은 필수 값입니다.");
     }
 
@@ -55,7 +56,7 @@ class ThemeTest {
         String description = "a".repeat(256);
 
         assertThatThrownBy(() -> new Theme("name", description, "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("설명은 255자를 넘을 수 없습니다.");
     }
 
@@ -65,7 +66,7 @@ class ThemeTest {
     @ValueSource(strings = {" "})
     void validateThumbnail(String thumbnail) {
         assertThatThrownBy(() -> new Theme("name", "description", thumbnail))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이미지는 필수 값입니다.");
     }
 
@@ -75,7 +76,7 @@ class ThemeTest {
         String thumbnail = "a".repeat(256);
 
         assertThatThrownBy(() -> new Theme("name", "description", thumbnail))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이미지는 255자를 넘을 수 없습니다.");
     }
 }

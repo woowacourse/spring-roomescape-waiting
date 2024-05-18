@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.reservation.ReservationTime;
 
 class ReservationTimeTest {
@@ -21,7 +22,7 @@ class ReservationTimeTest {
     @DisplayName("시작 시간이 없으면 예외가 발생한다.")
     void validateStartAt() {
         assertThatThrownBy(() -> new ReservationTime(null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("시작 시간은 필수 값입니다.");
     }
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 
@@ -26,7 +27,7 @@ class MemberTest {
     @ValueSource(strings = {" "})
     void validateEmail(String email) {
         assertThatThrownBy(() -> new Member(email, "abc123", "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이메일은 필수 값입니다.");
     }
 
@@ -36,7 +37,7 @@ class MemberTest {
         String email = "a".repeat(256);
 
         assertThatThrownBy(() -> new Member(email, "abc123", "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이메일은 255자를 넘을 수 없습니다.");
     }
 
@@ -46,7 +47,7 @@ class MemberTest {
     @ValueSource(strings = {" "})
     void validatePassword(String password) {
         assertThatThrownBy(() -> new Member("example@gmail.com", password, "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("비밀번호는 필수 값입니다.");
     }
 
@@ -56,7 +57,7 @@ class MemberTest {
         String password = "a".repeat(256);
 
         assertThatThrownBy(() -> new Member("example@gmail.com", password, "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("비밀번호는 255자를 넘을 수 없습니다.");
     }
 
@@ -66,7 +67,7 @@ class MemberTest {
     @ValueSource(strings = {" "})
     void validateName(String name) {
         assertThatThrownBy(() -> new Member("example@gmail.com", "abc123", name, Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이름은 필수 값입니다.");
     }
 
@@ -76,7 +77,7 @@ class MemberTest {
         String name = "a".repeat(31);
 
         assertThatThrownBy(() -> new Member("example@gmail.com", "abc123", name, Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("이름은 30자를 넘을 수 없습니다.");
     }
 
@@ -84,7 +85,7 @@ class MemberTest {
     @DisplayName("역할이 없으면 예외가 발생한다.")
     void validateRole() {
         assertThatThrownBy(() -> new Member("example@gmail.com", "abc123", "구름", null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("역할은 필수 값입니다.");
     }
 }

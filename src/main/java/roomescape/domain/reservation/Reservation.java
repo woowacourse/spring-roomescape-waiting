@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 
 @Entity
@@ -83,7 +84,7 @@ public class Reservation {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
 
         if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new IllegalArgumentException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+            throw new DomainValidationException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
         }
 
         return new Reservation(date, member, time, theme, status);
@@ -97,29 +98,29 @@ public class Reservation {
             ReservationStatus status
     ) {
         if (date == null) {
-            throw new IllegalArgumentException("날짜는 필수 값입니다.");
+            throw new DomainValidationException("날짜는 필수 값입니다.");
         }
 
         if (member == null) {
-            throw new IllegalArgumentException("회원은 필수 값입니다.");
+            throw new DomainValidationException("회원은 필수 값입니다.");
         }
 
         if (time == null) {
-            throw new IllegalArgumentException("예약 시간은 필수 값입니다.");
+            throw new DomainValidationException("예약 시간은 필수 값입니다.");
         }
 
         if (theme == null) {
-            throw new IllegalArgumentException("테마는 필수 값입니다.");
+            throw new DomainValidationException("테마는 필수 값입니다.");
         }
 
         if (status == null) {
-            throw new IllegalArgumentException("예약 상태는 필수 값입니다.");
+            throw new DomainValidationException("예약 상태는 필수 값입니다.");
         }
     }
 
     public void updateToReserved() {
         if (status != ReservationStatus.WAITING) {
-            throw new IllegalArgumentException("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
+            throw new DomainValidationException("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
         }
 
         status = ReservationStatus.RESERVED;

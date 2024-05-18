@@ -1,6 +1,6 @@
 package roomescape.exception;
 
-public class UnauthorizedException extends RuntimeException {
+public class UnauthorizedException extends ApplicationException {
 
     private static final String MESSAGE = "로그인이 필요합니다.";
 

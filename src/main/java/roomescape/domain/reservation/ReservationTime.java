@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.domain.exception.DomainValidationException;
 
 @Entity
 public class ReservationTime {
@@ -34,7 +35,7 @@ public class ReservationTime {
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException("시작 시간은 필수 값입니다.");
+            throw new DomainValidationException("시작 시간은 필수 값입니다.");
         }
     }
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.ReservationWithRankDto;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -33,7 +34,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     default Reservation getByIdAndStatus(long id, ReservationStatus status) {
         return findByIdAndStatus(id, status)
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
     }
 
     Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
@@ -94,6 +95,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     default Reservation getByIdentifier(long id) {
         return findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
     }
 }

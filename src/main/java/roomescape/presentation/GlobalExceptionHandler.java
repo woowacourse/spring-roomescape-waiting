@@ -1,6 +1,5 @@
 package roomescape.presentation;
 
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +14,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import roomescape.domain.exception.DomainNotFoundException;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.exception.AccessDeniedException;
-import roomescape.exception.ErrorResponse;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.TokenException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.exception.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -66,9 +69,36 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponse("요청 값이 잘못되었습니다."));
     }
 
+    @ExceptionHandler(DomainValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(DomainValidationException e) {
+        log.error("[DomainValidationException]", e);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(DomainNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(DomainNotFoundException e) {
+        log.error("[DomainNotFoundException]", e);
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
         log.error("[UnauthorizedException]", e);
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ErrorResponse> handleTokenException(TokenException e) {
+        log.error("[TokenException]", e);
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -84,21 +114,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("[IllegalArgumentException]", e);
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
+        log.error("[BadRequestException]", e);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(e.getMessage()));
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException e) {
-        log.error("[NoSuchElementException]", e);
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage()));
     }
 

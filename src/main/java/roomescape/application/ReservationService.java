@@ -4,9 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -19,6 +19,7 @@ import roomescape.domain.reservation.ThemeRepository;
 import roomescape.domain.reservation.dto.ReservationWithRankDto;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.UnauthorizedException;
 
 @Service
@@ -92,7 +93,7 @@ public class ReservationService {
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()
         )) {
-            throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
+            throw new BadRequestException("해당 날짜/시간에 이미 예약이 존재합니다.");
         }
     }
 
@@ -133,7 +134,7 @@ public class ReservationService {
         );
 
         if (reservationNotExists) {
-            throw new IllegalArgumentException("예약이 존재하지 않아 예약 대기를 할 수 없습니다.");
+            throw new BadRequestException("예약이 존재하지 않아 예약 대기를 할 수 없습니다.");
         }
     }
 
@@ -147,7 +148,7 @@ public class ReservationService {
         );
 
         if (reservationExists) {
-            throw new IllegalArgumentException("이미 예약을 하셨습니다.");
+            throw new BadRequestException("이미 예약을 하셨습니다.");
         }
     }
 
@@ -161,14 +162,14 @@ public class ReservationService {
         );
 
         if (reservationWaitingExists) {
-            throw new IllegalArgumentException("이미 예약 대기를 하셨습니다.");
+            throw new BadRequestException("이미 예약 대기를 하셨습니다.");
         }
     }
 
     @Transactional
     public void deleteReservationById(Long id) {
         if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("해당 id의 예약이 존재하지 않습니다.");
+            throw new DomainNotFoundException("해당 id의 예약이 존재하지 않습니다.");
         }
 
         reservationRepository.deleteById(id);
@@ -225,7 +226,7 @@ public class ReservationService {
         );
 
         if (reservationExists) {
-            throw new IllegalArgumentException("해당 날짜/시간에 이미 예약이 존재합니다.");
+            throw new BadRequestException("해당 날짜/시간에 이미 예약이 존재합니다.");
         }
     }
 
@@ -240,7 +241,7 @@ public class ReservationService {
 
     private void validateReservationNotWaiting(Reservation reservation) {
         if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new IllegalArgumentException("예약 대기 상태에서만 승인할 수 있습니다.");
+            throw new BadRequestException("예약 대기 상태에서만 승인할 수 있습니다.");
         }
     }
 }

@@ -8,6 +8,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
+import roomescape.exception.BadRequestException;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,7 +32,7 @@ public class MemberService {
         );
 
         if (memberRepository.existsByEmail(member.getEmail())) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new BadRequestException("이미 가입된 이메일입니다.");
         }
 
         Member savedMember = memberRepository.save(member);

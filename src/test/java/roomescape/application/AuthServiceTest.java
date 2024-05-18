@@ -15,6 +15,7 @@ import roomescape.domain.member.Role;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
+import roomescape.exception.BadRequestException;
 
 class AuthServiceTest extends BaseServiceTest {
 
@@ -69,7 +70,7 @@ class AuthServiceTest extends BaseServiceTest {
         LoginRequest request = new LoginRequest(EMAIL, "wrong_password");
 
         assertThatThrownBy(() -> authService.validatePassword(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
     }
 

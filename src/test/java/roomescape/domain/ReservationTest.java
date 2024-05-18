@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
@@ -34,7 +35,7 @@ class ReservationTest {
     @DisplayName("날짜가 없으면 예외가 발생한다.")
     void validateDate() {
         assertThatThrownBy(() -> new Reservation(null, MEMBER, RESERVATION_TIME, THEME, STATUS))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("날짜는 필수 값입니다.");
     }
 
@@ -42,7 +43,7 @@ class ReservationTest {
     @DisplayName("회원이 없으면 예외가 발생한다.")
     void validateMember() {
         assertThatThrownBy(() -> new Reservation(DATE, null, RESERVATION_TIME, THEME, STATUS))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("회원은 필수 값입니다.");
     }
 
@@ -50,7 +51,7 @@ class ReservationTest {
     @DisplayName("예약 시간이 없으면 예외가 발생한다.")
     void validateTime() {
         assertThatThrownBy(() -> new Reservation(DATE, MEMBER, null, THEME, STATUS))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("예약 시간은 필수 값입니다.");
     }
 
@@ -58,7 +59,7 @@ class ReservationTest {
     @DisplayName("테마가 없으면 예외가 발생한다.")
     void validateTheme() {
         assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, null, STATUS))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("테마는 필수 값입니다.");
     }
 
@@ -66,7 +67,7 @@ class ReservationTest {
     @DisplayName("예약 상태가 없으면 예외가 발생한다.")
     void validateStatus() {
         assertThatThrownBy(() -> new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("예약 상태는 필수 값입니다.");
     }
 
@@ -85,7 +86,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(DATE, MEMBER, RESERVATION_TIME, THEME, ReservationStatus.RESERVED);
 
         assertThatThrownBy(reservation::updateToReserved)
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DomainValidationException.class)
                 .hasMessage("예약 대기 상태에서만 예약으로 변경할 수 있습니다.");
     }
 }

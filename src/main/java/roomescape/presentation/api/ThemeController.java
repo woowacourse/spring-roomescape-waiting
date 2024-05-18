@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ThemeService;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.BadRequestException;
 
 @RestController
 @RequestMapping("/themes")
@@ -72,11 +73,11 @@ public class ThemeController {
         }
 
         if (limit < POPULAR_THEME_MIN_LIMIT) {
-            throw new IllegalArgumentException(String.format("limit은 %d 이상이어야 합니다.", POPULAR_THEME_MIN_LIMIT));
+            throw new BadRequestException(String.format("limit은 %d 이상이어야 합니다.", POPULAR_THEME_MIN_LIMIT));
         }
 
         if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
+            throw new BadRequestException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
         }
 
         List<ThemeResponse> themeResponses = themeService.getPopularThemes(startDate, endDate, limit);
