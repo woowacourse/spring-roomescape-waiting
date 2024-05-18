@@ -9,13 +9,13 @@ spring:
     password:
     driver-class-name: org.h2.Driver
   jpa:
-    show-sql: true
     hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        format_sql: true
-    defer-datasource-initialization: true
+      ddl-auto: validate
+    defer-datasource-initialization: false
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      mode: embedded
 
 security:
   jwt:
