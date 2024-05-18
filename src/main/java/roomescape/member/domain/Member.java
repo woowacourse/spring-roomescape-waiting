@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 public class Member {
@@ -31,7 +30,6 @@ public class Member {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @ColumnDefault(value = "'USER'")
     private Role role;
 
     protected Member() {
