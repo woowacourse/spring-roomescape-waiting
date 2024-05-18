@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.fixture.DateTimeFixture;
 
 @DataJpaTest
@@ -20,9 +19,6 @@ class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
 
     @DisplayName("가장 예약이 많은 인기테마를 조회할 수 있다")
     @Test
