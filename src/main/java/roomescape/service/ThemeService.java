@@ -18,6 +18,7 @@ public class ThemeService {
 
     public static final int ANALYSIS_PERIOD = 7;
     public static final int ANALYSIS_COUNT_LIMIT = 10;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 

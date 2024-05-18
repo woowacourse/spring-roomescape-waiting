@@ -13,12 +13,14 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, updatable = false)
     private Long id;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @ManyToOne
     private Member member;
-
-    private LocalDate date;
 
     @ManyToOne
     private ReservationTime reservationTime;

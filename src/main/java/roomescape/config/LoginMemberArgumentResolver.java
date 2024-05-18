@@ -42,6 +42,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                 .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
+
         return memberService.findValidatedSiteUserById(memberId);
     }
 }
