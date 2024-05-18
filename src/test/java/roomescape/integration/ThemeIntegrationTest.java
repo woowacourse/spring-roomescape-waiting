@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.integration;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import roomescape.model.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
-class ThemeControllerTest {
+class ThemeIntegrationTest {
 
     @DisplayName("전체 테마를 조회한다.")
     @Test

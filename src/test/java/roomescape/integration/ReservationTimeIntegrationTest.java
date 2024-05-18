@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.integration;
 
 import java.time.LocalTime;
 
@@ -14,7 +14,7 @@ import roomescape.model.ReservationTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
-class ReservationTimeControllerTest {
+class ReservationTimeIntegrationTest {
     @DisplayName("모든 예약 시간을 조회한다")
     @Test
     void should_get_reservation_times() {

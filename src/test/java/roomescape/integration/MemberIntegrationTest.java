@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -6,7 +6,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
@@ -16,7 +15,7 @@ import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
-class MemberControllerTest {
+class MemberIntegrationTest {
 
     @DisplayName("로그인 요청시 쿠키를 응답한다.")
     @Test

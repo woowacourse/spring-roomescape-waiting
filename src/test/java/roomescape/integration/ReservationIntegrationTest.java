@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.integration;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -13,6 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import roomescape.controller.ReservationController;
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.request.MemberLoginRequest;
 import roomescape.controller.request.ReservationRequest;
@@ -20,7 +21,7 @@ import roomescape.controller.request.ReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
-class ReservationControllerTest {
+class ReservationIntegrationTest {
 
     @Autowired
     private ReservationController reservationController;
