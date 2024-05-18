@@ -10,7 +10,6 @@ import roomescape.member.service.MemberService;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     private final MemberAuthService memberAuthService;
     private final MemberService memberService;
 

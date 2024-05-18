@@ -13,7 +13,6 @@ import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
 
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
-
     private final MemberAuthService memberAuthService;
 
     public MemberArgumentResolver(MemberAuthService memberAuthService) {
@@ -28,14 +27,14 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public MemberProfileInfo resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws AuthorizationException {
+                                             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Cookie[] cookies = Objects.requireNonNull(request)
                 .getCookies();
+
         if (memberAuthService.isLoginMember(cookies)) {
             return memberAuthService.extractPayload(cookies);
         }
         throw new AuthorizationException("로그인이 만료되었습니다. 다시 로그인 해주세요.");
     }
-
 }
