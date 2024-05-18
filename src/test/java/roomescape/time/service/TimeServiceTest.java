@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.time.LocalTime;
 import java.util.List;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,16 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import roomescape.exception.ConflictException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
-import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TimeServiceTest {
+
     private final Time time = new Time(1L, LocalTime.of(17, 3));
 
     @InjectMocks
@@ -93,4 +92,5 @@ class TimeServiceTest {
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("삭제를 요청한 시간에 예약이 존재합니다.");
     }
+
 }

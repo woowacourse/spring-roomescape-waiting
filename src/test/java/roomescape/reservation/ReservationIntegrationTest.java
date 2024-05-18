@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
-import roomescape.reservation.dao.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.theme.domain.Theme;

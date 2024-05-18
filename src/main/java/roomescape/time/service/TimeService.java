@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 
 import roomescape.exception.ConflictException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
-import roomescape.time.repository.TimeRepository;
 
 @Service
 public class TimeService {
@@ -20,14 +20,6 @@ public class TimeService {
     public TimeService(TimeRepository timeRepository, ReservationRepository reservationRepository) {
         this.timeRepository = timeRepository;
         this.reservationRepository = reservationRepository;
-    }
-
-    public List<TimeResponse> findReservationTimes() {
-        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
-
-        return reservationTimes.stream()
-                .map(TimeResponse::toResponse)
-                .toList();
     }
 
     public TimeResponse addReservationTime(TimeRequest timeRequest) {
@@ -43,6 +35,14 @@ public class TimeService {
         if (duplicateTimeCount > 0) {
             throw new ConflictException("이미 존재하는 예약 시간입니다.");
         }
+    }
+
+    public List<TimeResponse> findReservationTimes() {
+        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
+
+        return reservationTimes.stream()
+                .map(TimeResponse::toResponse)
+                .toList();
     }
 
     public void removeReservationTime(long reservationTimeId) {
