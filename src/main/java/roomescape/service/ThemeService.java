@@ -44,8 +44,7 @@ public class ThemeService {
         themeRepository.deleteById(findTheme.getId());
     }
 
-    public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until,
-                                                       final int limit) {
+    public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until, final int limit) {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }

@@ -17,11 +17,15 @@ import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.service.ThemeService;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
+
+    private static final Map<PopularThemeRequest, List<PopularThemeResponse>> popularThemeCache = new HashMap<>();
 
     private final ThemeService themeService;
 
@@ -55,7 +59,8 @@ public class ThemeController {
 
     @GetMapping(value = "/popular", params = {"from", "until", "limit"})
     public List<PopularThemeResponse> getPopularThemes(@Valid final PopularThemeRequest popularThemeRequest) {
-        return themeService.getPopularThemes(popularThemeRequest.from(), popularThemeRequest.until(),
-                popularThemeRequest.limit());
+        return popularThemeCache.computeIfAbsent(popularThemeRequest, request ->
+                themeService.getPopularThemes(request.from(), request.until(), request.limit())
+        );
     }
 }
