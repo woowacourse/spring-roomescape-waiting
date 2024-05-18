@@ -13,7 +13,6 @@ import roomescape.member.domain.Member;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
-
     private final String secretKey;
     private final long validityInMilliseconds;
 
@@ -27,9 +26,9 @@ public class JwtTokenProvider implements TokenProvider {
     @Override
     public String createToken(Member member, Date issuedAt) {
         Claims claims = Jwts.claims()
-                .setSubject(member.getEmail());
+                .setSubject(String.valueOf(member.getId()));
+        claims.put("email", member.getEmail());
         claims.put("name", member.getName());
-        claims.put("id", String.valueOf(member.getId()));
 
         Date validity = new Date(issuedAt.getTime() + validityInMilliseconds);
 
@@ -48,14 +47,14 @@ public class JwtTokenProvider implements TokenProvider {
                 .parseClaimsJws(token);
 
         Claims claimsBody = claims.getBody();
-        String email = claimsBody.getSubject();
+        String id = claimsBody.getSubject();
+        String email = claimsBody.get("email", String.class);
         String name = claimsBody.get("name", String.class);
-        String id = claimsBody.get("id", String.class);
 
         return Map.of(
+                "id", id,
                 "email", email,
-                "name", name,
-                "id", id
+                "name", name
         );
     }
 
@@ -73,5 +72,4 @@ public class JwtTokenProvider implements TokenProvider {
             return false;
         }
     }
-
 }
