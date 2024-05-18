@@ -3,6 +3,7 @@ package roomescape.infrastructure.persistence;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,11 +20,10 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
               FROM Reservation r
               WHERE r.date BETWEEN :startDate AND :endDate
               GROUP BY r.theme.id
-              ORDER BY count(*) DESC
-              LIMIT 10
+              ORDER BY count(*) DESC, r.theme.id ASC
             """
     )
-    List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate);
+    List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate, Pageable limitTen);
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Reservation> findAll();

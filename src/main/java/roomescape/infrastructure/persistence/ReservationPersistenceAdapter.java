@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -39,7 +40,8 @@ class ReservationPersistenceAdapter implements ReservationRepository {
 
     @Override
     public List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate) {
-        return repository.findThemeReservationCountsForDate(startDate, endDate);
+        PageRequest limitTen = PageRequest.of(0, 10);
+        return repository.findThemeReservationCountsForDate(startDate, endDate, limitTen);
     }
 
     @Override
