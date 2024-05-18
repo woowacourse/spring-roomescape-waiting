@@ -2,8 +2,8 @@ package roomescape.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import roomescape.service.BcryptPasswordEncoder;
-import roomescape.service.PasswordEncoder;
+import roomescape.application.PasswordEncoder;
+import roomescape.infrastructure.BcryptPasswordEncoder;
 
 @Configuration
 public class SecurityConfig {
