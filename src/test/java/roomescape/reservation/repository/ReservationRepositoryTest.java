@@ -1,4 +1,4 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

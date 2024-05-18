@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BadRequestException;
-import roomescape.member.dao.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 

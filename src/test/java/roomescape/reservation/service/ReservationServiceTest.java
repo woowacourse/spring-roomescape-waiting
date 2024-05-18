@@ -18,16 +18,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ConflictException;
 import roomescape.exception.BadRequestException;
-import roomescape.member.dao.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
-import roomescape.reservation.dao.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.theme.dao.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.time.dao.TimeRepository;
+import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 
 @ExtendWith(MockitoExtension.class)

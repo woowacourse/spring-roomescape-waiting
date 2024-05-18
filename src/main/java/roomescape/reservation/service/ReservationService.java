@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
-import roomescape.member.dao.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.dao.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.dto.AdminReservationRequest;
@@ -18,9 +18,9 @@ import roomescape.reservation.dto.ReservationConditionSearchRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.theme.dao.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.time.dao.TimeRepository;
+import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 
 @Service
