@@ -39,9 +39,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(Long id) {
-        Reservation reservation = reservationQueryRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION,
-                        String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
+        Reservation reservation = reservationQueryRepository.getById(id);
         reservationCommandRepository.deleteById(reservation.getId());
     }
 

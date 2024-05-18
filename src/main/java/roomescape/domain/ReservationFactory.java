@@ -27,12 +27,9 @@ public class ReservationFactory {
     }
 
     public Reservation create(long memberId, ReservationRequest request) {
-        Member member = memberQueryRepository.findById(memberId)
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
-        Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_THEME));
-        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
+        Member member = memberQueryRepository.getById(memberId);
+        Theme theme = themeRepository.getById(request.themeId());
+        ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         LocalDateTime dateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
         validateUniqueReservation(request);
@@ -47,9 +44,7 @@ public class ReservationFactory {
     }
 
     private void validateUniqueReservation(ReservationRequest request) {
-        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())
-        ) {
+        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");
         }
     }

@@ -44,8 +44,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long id) {
-        ReservationTime findReservationTime = reservationTimesRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
+        ReservationTime findReservationTime = reservationTimesRepository.getById(id);
         long reservedCount = reservationQueryRepository.countByTimeId(id);
         if (reservedCount > 0) {
             throw new RoomescapeException(RoomescapeErrorCode.ALREADY_RESERVED,

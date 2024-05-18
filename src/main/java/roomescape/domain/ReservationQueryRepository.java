@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.dto.AvailableTimeDto;
+import roomescape.exception.RoomescapeErrorCode;
+import roomescape.exception.RoomescapeException;
 
 public interface ReservationQueryRepository extends Repository<Reservation, Long> {
 
@@ -61,4 +63,9 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
+
+    default Reservation getById(Long id) {
+        return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION,
+                String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
+    }
 }
