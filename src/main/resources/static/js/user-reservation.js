@@ -37,7 +37,7 @@ function renderTheme(themes) {
     themeSlots.innerHTML = '';
     themes.forEach(theme => {
         const name = theme.name;
-        const themeId = theme.themeId;
+        const themeId = theme.id;
         createSlot('theme', name, themeId);
 
         themeSlots.appendChild(createSlot('theme', name, themeId));
@@ -82,9 +82,9 @@ function checkDateAndTheme() {
         fetchAvailableTimes(selectedDate, selectedThemeId);
     }
 }
-    
+
 function fetchAvailableTimes(date, themeId) {
-    fetch('/reservations/times?date=' + date + '&themeId=' + themeId, {
+    fetch('/times/selectable?date=' + date + '&themeId=' + themeId, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ function renderAvailableTimes(times) {
     }
     times.forEach(time => {
         const startAt = time.startAt;
-        const timeId = time.timeId;
+        const timeId = time.id;
         const alreadyBooked = time.alreadyBooked;
 
         const div = createSlot('time', startAt, timeId, alreadyBooked);

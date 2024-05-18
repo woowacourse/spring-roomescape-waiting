@@ -1,6 +1,7 @@
 package roomescape.reservation.controller.dto.response;
 
 import java.time.LocalDate;
+import java.util.List;
 import roomescape.member.controller.dto.response.MemberNameResponse;
 import roomescape.reservation.domain.Reservation;
 
@@ -11,6 +12,7 @@ public record ReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
+
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
@@ -19,5 +21,11 @@ public record ReservationResponse(
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
+    }
+
+    public static List<ReservationResponse> list(final List<Reservation> reservations) {
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 }
