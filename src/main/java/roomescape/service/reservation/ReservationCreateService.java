@@ -72,13 +72,13 @@ public class ReservationCreateService {
                 .orElseThrow(() -> new InvalidRequestException("존재하지 않는 사용자입니다."));
     }
 
-    public void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
+    private void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new InvalidRequestException("해당 시간에 이미 예약된 테마입니다.");
         }
     }
 
-    public void validateDateIsFuture(LocalDate date, ReservationTime reservationTime) {
+    private void validateDateIsFuture(LocalDate date, ReservationTime reservationTime) {
         LocalDateTime localDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (localDateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidRequestException("지나간 날짜와 시간에 대한 예약 생성은 불가능합니다.");
