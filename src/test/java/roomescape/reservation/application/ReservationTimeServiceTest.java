@@ -15,10 +15,15 @@ import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.*;
 import static roomescape.TestFixture.MIA_RESERVATION;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.WOOTECO_THEME;
 
 class ReservationTimeServiceTest extends ServiceTest {
     @Autowired

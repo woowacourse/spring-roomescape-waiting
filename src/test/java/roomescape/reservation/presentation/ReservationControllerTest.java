@@ -32,11 +32,20 @@ import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TEST_ERROR_MESSAGE;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 @Import(TestWebMvcConfiguration.class)
 @WebMvcTest(

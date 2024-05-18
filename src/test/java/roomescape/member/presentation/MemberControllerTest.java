@@ -10,10 +10,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import roomescape.global.config.WebMvcConfiguration;
 import roomescape.auth.presentation.AdminAuthorizationInterceptor;
 import roomescape.auth.presentation.LoginMemberArgumentResolver;
 import roomescape.common.ControllerTest;
+import roomescape.global.config.WebMvcConfiguration;
 import roomescape.member.application.MemberService;
 import roomescape.member.dto.request.MemberJoinRequest;
 
@@ -26,7 +26,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
+import static roomescape.TestFixture.TEST_PASSWORD;
+import static roomescape.TestFixture.TOMMY_NAME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.USER_TOMMY;
 
 @WebMvcTest(
         value = MemberController.class,

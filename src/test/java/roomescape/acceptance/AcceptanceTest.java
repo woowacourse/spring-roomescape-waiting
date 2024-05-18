@@ -16,7 +16,6 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.MemberJoinRequest;
 import roomescape.member.dto.response.MemberResponse;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.dto.request.ThemeSaveRequest;
@@ -25,7 +24,16 @@ import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.ThemeResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.ADMIN_EMAIL;
+import static roomescape.TestFixture.ADMIN_NAME;
+import static roomescape.TestFixture.MIA_EMAIL;
+import static roomescape.TestFixture.MIA_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TEST_PASSWORD;
+import static roomescape.TestFixture.THEME_THUMBNAIL;
+import static roomescape.TestFixture.WOOTECO_THEME_DESCRIPTION;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.member.domain.Role.ADMIN;
 import static roomescape.member.domain.Role.USER;
 

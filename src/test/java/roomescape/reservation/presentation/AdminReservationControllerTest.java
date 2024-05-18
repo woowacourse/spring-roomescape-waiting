@@ -27,7 +27,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.WOOTECO_THEME;
 
 @WebMvcTest(
         value = AdminReservationController.class,

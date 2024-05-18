@@ -18,8 +18,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.HORROR_THEME;
+import static roomescape.TestFixture.HORROR_THEME_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 class ThemeServiceTest extends ServiceTest {
     @Autowired

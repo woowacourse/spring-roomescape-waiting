@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.WOOTECO_THEME;
 
 class ThemeRepositoryTest extends RepositoryTest {
     @Autowired

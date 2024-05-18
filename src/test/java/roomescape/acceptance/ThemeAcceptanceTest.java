@@ -18,7 +18,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.THEME_THUMBNAIL;
+import static roomescape.TestFixture.WOOTECO_THEME_DESCRIPTION;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
     @Test

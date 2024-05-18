@@ -12,7 +12,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.HORROR_THEME;
+import static roomescape.TestFixture.MIA_RESERVATION;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.USER_TOMMY;
+import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 class ReservationRepositoryTest extends RepositoryTest {
     @Autowired

@@ -18,9 +18,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.MIA_NAME;
+import static roomescape.TestFixture.MIA_RESERVATION;
+import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TOMMY_NAME;
+import static roomescape.TestFixture.TOMMY_RESERVATION;
+import static roomescape.TestFixture.TOMMY_RESERVATION_TIME;
+import static roomescape.TestFixture.USER_MIA;
+import static roomescape.TestFixture.USER_TOMMY;
+import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 
 class ReservationServiceTest extends ServiceTest {
     @Autowired
