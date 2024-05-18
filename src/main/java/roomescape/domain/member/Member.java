@@ -32,10 +32,6 @@ public class Member {
         this(null, name, email, password);
     }
 
-    public Member(String name, String email, String password) {
-        this(null, new MemberName(name), new Email(email), new Password(password));
-    }
-
     public boolean hasId(long memberId) {
         return id.equals(memberId);
     }

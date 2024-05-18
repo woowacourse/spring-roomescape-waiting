@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
+import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.Password;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -173,7 +176,7 @@ class ReservationServiceTest {
     @DisplayName("관리자가 다른 사람의 예약을 삭제하는 경우, 예약이 삭제된다.")
     void shouldDeleteReservationWhenAdmin() {
         Reservation reservation = saveReservation();
-        Member admin = new Member("admin", "admin@admin.com", "12341234");
+        Member admin = new Member(new MemberName("admin"), new Email("admin@admin.com"), new Password("12341234"));
         roleRepository.save(new MemberRole(admin, Role.ADMIN));
         reservationService.deleteById(admin.getId(), reservation.getId());
 
