@@ -18,7 +18,7 @@ import roomescape.exception.dto.ErrorResponse;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -30,12 +30,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<Object> handleAuthorizationException() {
         return makeErrorResponseEntity(ErrorCode.NOT_FOUND);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        logger.error(e.getMessage(), e);
-        return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
     }
 
     @ExceptionHandler(RoomEscapeBusinessException.class)
@@ -61,8 +55,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception e) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Object> handleException(RuntimeException e) {
         logger.error(e.getMessage(), e);
         return makeErrorResponseEntity(ErrorCode.INTERNAL_SERVER, e.getMessage());
     }
