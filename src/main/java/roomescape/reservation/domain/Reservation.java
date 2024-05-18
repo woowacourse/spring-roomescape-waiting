@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,8 +23,10 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "TIME_ID")
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "THEME_ID")
     private Theme theme;
 
     public Reservation() {

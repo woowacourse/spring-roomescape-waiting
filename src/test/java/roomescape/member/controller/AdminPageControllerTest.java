@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.service.TokenProvider;
 import roomescape.util.ControllerTest;
 
+@DisplayName("관리자 페이지 테스트")
 class AdminPageControllerTest extends ControllerTest {
     @Autowired
     TokenProvider tokenProvider;
