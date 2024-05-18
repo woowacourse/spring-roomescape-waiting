@@ -1,24 +1,22 @@
 package roomescape.time.domain;
 
-import java.time.LocalTime;
-import java.util.Objects;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
+import java.time.LocalTime;
+import java.util.Objects;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.BadRequestException;
 
 @Entity
 public class Time {
+
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
     public Time() {
@@ -48,32 +46,29 @@ public class Time {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public LocalTime getStartAt() {
         return startAt;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Time time)) return false;
-
-        if (id == null || time.id == null) {
-            return Objects.equals(startAt, time.startAt);
+        if (this == o) {
+            return true;
         }
-        return Objects.equals(id, time.id);
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Time time = (Time) o;
+        return id == time.id;
     }
 
     @Override
     public int hashCode() {
-        if (id == null) return Objects.hash(startAt);
         return Objects.hash(id);
     }
 
-    @Override
-    public String toString() {
-        return "Time{" +
-               "id=" + id +
-               ", startAt=" + startAt +
-               '}';
-    }
 }
