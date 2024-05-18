@@ -145,11 +145,14 @@ class ReservationRepositoryTest extends RepositoryTest {
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia));
 
         // when
-        List<Long> reservationsByDateAndThemeId = reservationRepository.findAllTimeIdsByDateAndThemeId(
-                MIA_RESERVATION_DATE, wootecoTheme);
+        List<Long> result = reservationRepository.findAllByDateAndTheme(MIA_RESERVATION_DATE, wootecoTheme)
+                .stream()
+                .map(Reservation::getTime)
+                .map(ReservationTime::getId)
+                .toList();
 
         // then
-        assertThat(reservationsByDateAndThemeId).hasSize(2);
+        assertThat(result).hasSize(2);
     }
 
     @Test

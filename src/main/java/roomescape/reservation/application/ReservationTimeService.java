@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 
 import java.time.LocalDate;
@@ -57,7 +54,8 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(LocalDate date, Theme theme) {
-        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findAllTimeIdsByDateAndThemeId(date, theme));
+        final List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(date, theme);
+        Set<Long> reservedTimeIds = new HashSet<>(toTimeIds(reservations));
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream()
@@ -66,5 +64,11 @@ public class ReservationTimeService {
                     return AvailableReservationTimeResponse.of(reservationTime, isReserved);
                 })
                 .collect(Collectors.toList());
+    }
+
+    private List<Long> toTimeIds(final List<Reservation> reservations) {
+        return reservations.stream()
+                .map(Reservation::getTimeId)
+                .toList();
     }
 }

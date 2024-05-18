@@ -58,6 +58,10 @@ public class Reservation {
         return member.getName();
     }
 
+    public Long getTimeId() {
+        return time.getId();
+    }
+
     public Long getId() {
         return id;
     }
