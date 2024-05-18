@@ -25,7 +25,8 @@ public class AuthService {
 
     public ResponseCookie login(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password())
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("일치하는 회원 정보가 없습니다. email = " + loginRequest.email()
+                        + ", password = " + loginRequest.password()));
 
         String token = jwtTokenManager.createToken(member);
         return tokenCookieManager.createTokenCookie(token);

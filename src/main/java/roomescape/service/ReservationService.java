@@ -71,7 +71,8 @@ public class ReservationService {
 
     public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
-                .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다."));
+                .orElseThrow(
+                        () -> new NotFoundException("예약시간을 찾을 수 없습니다. timeId = " + reservationCreateRequest.timeId()));
         validateOutdatedDateTime(
                 reservationCreateRequest.date(),
                 reservationTime.getStartAt());
@@ -81,10 +82,12 @@ public class ReservationService {
                 reservationCreateRequest.themeId());
 
         Member member = memberRepository.findById(reservationCreateRequest.memberId())
-                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(
+                        "사용자를 찾을 수 없습니다. memberId = " + reservationCreateRequest.memberId()));
 
         RoomTheme roomTheme = roomThemeRepository.findById(reservationCreateRequest.themeId())
-                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다."));
+                .orElseThrow(
+                        () -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + reservationCreateRequest.themeId()));
 
         Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -96,8 +99,8 @@ public class ReservationService {
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {
-        if (dateFrom != null && dateTo != null && dateFrom.isAfter(dateTo)) {
-            throw new BadRequestException("날짜를 잘못 입력하셨습니다.");
+        if (dateFrom.isAfter(dateTo)) {
+            throw new BadRequestException("종료 날짜가 시작 날짜 이전일 수 없습니다.");
         }
     }
 

@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ExceptionResponse> handleException(BadRequestException exception) {
-        exception.printStackTrace();
+        logger.error("잘못된 요청 ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, exception.getMessage());
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ExceptionResponse> handleException(AuthenticationException exception) {
-        logger.error("로그인 에러 = {}", exception.getMessage());
+        logger.error("인증 예외 ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
         ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "다시 로그인해 주세요.");
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ExceptionResponse> handleException(AuthorizationException exception) {
-        logger.error("접근 권한 불일치 = {}", exception.getMessage());
+        logger.error("접근 권한 불일치 ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
         ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "관리자만 접근이 가능합니다.");
@@ -50,16 +50,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleException(NotFoundException exception) {
-        exception.printStackTrace();
+        logger.error("데이터 조회 예외 ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, exception.getMessage());
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "데이터를 찾을 수 없습니다.");
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleException(MethodArgumentNotValidException exception) {
-        logger.error("요청 입력에서의 예외. 메시지 = {}", exception.getMessage());
+        logger.error("요청 입력에서의 예외. ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         String messages = exception.getBindingResult().getAllErrors().stream()
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionResponse> handleException(HttpMessageNotReadableException exception) {
-        logger.error("요청 입력에서의 예외. 메시지 = {}", exception.getMessage());
+        logger.error("요청 입력에서의 예외. ({}", exception.getMessage() + ")");
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "입력값을 확인해 주세요.");
