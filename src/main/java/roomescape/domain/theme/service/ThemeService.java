@@ -2,7 +2,6 @@ package roomescape.domain.theme.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.repository.reservation.ReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -12,11 +11,9 @@ import roomescape.global.exception.NoMatchingDataException;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository; //TODO: 불필요한 멤버 삭제
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public List<Theme> findAllTheme() {

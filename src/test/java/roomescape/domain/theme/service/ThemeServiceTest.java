@@ -13,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.reservation.repository.reservation.ReservationRepository;
-import roomescape.domain.reservation.service.FakeReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -33,8 +31,7 @@ class ThemeServiceTest {
     @Test
     void should_get_all_theme() {
         ThemeRepository themeRepository = new FakeThemeRepository();
-        ReservationRepository reservationRepository = new FakeReservationRepository();
-        themeService = new ThemeService(themeRepository, reservationRepository);
+        themeService = new ThemeService(themeRepository);
         themeRepository.save(new Theme(1L, "테마1", "테마1설명", "url"));
 
         List<Theme> allTheme = themeService.findAllTheme();
@@ -46,8 +43,7 @@ class ThemeServiceTest {
     @Test
     void should_add_theme() {
         ThemeRepository themeRepository = new FakeThemeRepository();
-        ReservationRepository reservationRepository = new FakeReservationRepository();
-        themeService = new ThemeService(themeRepository, reservationRepository);
+        themeService = new ThemeService(themeRepository);
         Theme expectedTheme = new Theme(1L, "테마1", "테마1설명", "url");
 
         Theme savedTheme = themeService.addTheme(new ThemeAddRequest("테마1", "테마1설명", "url"));
@@ -59,8 +55,7 @@ class ThemeServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_theme_id_no_exist() {
         ThemeRepository themeRepository = new FakeThemeRepository();
-        ReservationRepository reservationRepository = new FakeReservationRepository();
-        themeService = new ThemeService(themeRepository, reservationRepository);
+        themeService = new ThemeService(themeRepository);
         assertThatThrownBy(() -> themeService.removeTheme(1L))
                 .isInstanceOf(NoMatchingDataException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");
@@ -70,9 +65,8 @@ class ThemeServiceTest {
     @Test
     void should_remove_theme() {
         FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
-        FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
         fakeThemeRepository.save(DUMMY_THEME);
-        themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
+        themeService = new ThemeService(fakeThemeRepository);
 
         themeService.removeTheme(1L);
 
