@@ -8,15 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.service.AuthService;
+import roomescape.service.auth.AuthService;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.LoginRequest;
 import roomescape.service.dto.response.MemberResponse;
 
 @RestController
 public class AuthController {
-
-    public static final String TOKEN_COOKIE_NAME = "token";
 
     private final AuthService authService;
 
@@ -26,14 +24,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest loginRequest) {
-        String token = authService.login(loginRequest);
-
-        ResponseCookie cookie = ResponseCookie
-                .from(TOKEN_COOKIE_NAME, token)
-                .httpOnly(true)
-                .path("/")
-                .build();
-
+        ResponseCookie cookie = authService.login(loginRequest);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 
@@ -49,12 +40,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
-        ResponseCookie cookie = ResponseCookie
-                .from(TOKEN_COOKIE_NAME, null)
-                .httpOnly(true)
-                .path("/")
-                .build();
-
+        ResponseCookie cookie = authService.logout();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 }
