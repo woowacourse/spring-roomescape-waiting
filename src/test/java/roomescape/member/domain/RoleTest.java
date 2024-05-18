@@ -12,7 +12,7 @@ class RoleTest {
     @Test
     @DisplayName("문자열로부터, 해당하는 권한 Enum을 반환한다.")
     void findMemberRole() {
-        assertThat(Role.getMemberRole("USER")).isEqualTo(Role.USER);
+        assertThat(Role.valueOf("USER")).isEqualTo(Role.USER);
     }
 
     @Test
