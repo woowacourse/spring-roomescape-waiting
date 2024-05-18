@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
@@ -24,7 +23,6 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    @NotNull
     private LocalDate date;
 
     @ManyToOne
