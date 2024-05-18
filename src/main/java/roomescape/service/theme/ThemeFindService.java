@@ -1,13 +1,12 @@
 package roomescape.service.theme;
 
-import java.awt.print.Pageable;
-import java.time.LocalDate;
-import java.util.List;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ThemeFindService {
@@ -27,10 +26,10 @@ public class ThemeFindService {
     }
 
     public List<Theme> findThemeRanks() {
-        return themeRepository.findRanksByPeriodAndCount(
+        return themeRepository.findPopularThemes(
                 LocalDate.now().minusDays(START_DAYS_SUBTRACT),
                 LocalDate.now().minusDays(END_DAYS_SUBTRACT),
-                PageRequest.of(0,RANK_COUNT)
+                PageRequest.of(0, RANK_COUNT)
         );
     }
 }
