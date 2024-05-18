@@ -1,10 +1,11 @@
-package roomescape.dto.request;
+package roomescape.presentation.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
+import roomescape.application.dto.request.ReservationWaitingRequest;
 
-public record ReservationWaitingRequest(
+public record ReservationWaitingWebRequest(
         @NotNull(message = "날짜를 입력해주세요.")
         LocalDate date,
 
@@ -16,4 +17,8 @@ public record ReservationWaitingRequest(
         @Positive
         Long themeId
 ) {
+
+    public ReservationWaitingRequest toReservationWaitingRequest(Long memberId) {
+        return new ReservationWaitingRequest(date, timeId, themeId, memberId);
+    }
 }

@@ -129,8 +129,8 @@ class ReservationRepositoryTest {
         createReservation();
 
         LocalDate date = LocalDate.of(2024, 5, 4);
-        assertThat(reservationRepository.existsByReservation(date, 1L, 1L)).isTrue();
-        assertThat(reservationRepository.existsByReservation(date, 1L, 2L)).isFalse();
+        assertThat(reservationRepository.existsByReservation(date, 1L, 1L, ReservationStatus.RESERVED)).isTrue();
+        assertThat(reservationRepository.existsByReservation(date, 1L, 2L, ReservationStatus.RESERVED)).isFalse();
     }
 
     private void createReservation() {

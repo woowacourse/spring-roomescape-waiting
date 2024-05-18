@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.application.dto.request.ReservationTimeRequest;
+import roomescape.application.dto.response.AvailableReservationTimeResponse;
+import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.support.BaseServiceTest;
 
 class ReservationTimeServiceTest extends BaseServiceTest {

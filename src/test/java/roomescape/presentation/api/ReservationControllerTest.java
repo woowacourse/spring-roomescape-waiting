@@ -23,12 +23,12 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.MemberResponse;
-import roomescape.dto.response.MyReservationResponse;
-import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.presentation.dto.request.ReservationWebRequest;
+import roomescape.application.dto.response.MemberResponse;
+import roomescape.application.dto.response.MyReservationResponse;
+import roomescape.application.dto.response.ReservationResponse;
+import roomescape.application.dto.response.ReservationTimeResponse;
+import roomescape.application.dto.response.ThemeResponse;
 import roomescape.support.BaseControllerTest;
 
 @Sql("/member.sql")
@@ -70,7 +70,7 @@ class ReservationControllerTest extends BaseControllerTest {
     @Test
     @DisplayName("지나간 날짜/시간에 대한 예약은 실패한다.")
     void failWhenDateTimePassed() {
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 7), 1L, 1L);
+        ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 7), 1L, 1L);
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -130,7 +130,7 @@ class ReservationControllerTest extends BaseControllerTest {
     }
 
     private void addReservation() {
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
+        ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -194,7 +194,7 @@ class ReservationControllerTest extends BaseControllerTest {
     }
 
     private void addReservationFailWhenDuplicatedReservation() {
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
+        ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)

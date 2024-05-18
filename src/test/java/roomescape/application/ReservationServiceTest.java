@@ -9,6 +9,9 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.application.dto.request.ReservationRequest;
+import roomescape.application.dto.response.MyReservationResponse;
+import roomescape.application.dto.response.ReservationResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -19,8 +22,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.dto.response.MyReservationResponse;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.support.BaseServiceTest;
 
 class ReservationServiceTest extends BaseServiceTest {
@@ -85,12 +86,13 @@ class ReservationServiceTest extends BaseServiceTest {
         Theme theme = themeRepository.save(new Theme("테마", "테마 설명", "https://example.com"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
 
-        ReservationResponse response = reservationService.addReservation(
+        ReservationRequest request = new ReservationRequest(
                 LocalDate.of(2024, 4, 9),
                 time.getId(),
                 theme.getId(),
                 member.getId()
         );
+        ReservationResponse response = reservationService.addReservation(request);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.date()).isEqualTo("2024-04-09");

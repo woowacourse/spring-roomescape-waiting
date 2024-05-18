@@ -9,9 +9,9 @@ import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
-import roomescape.dto.request.ReservationTimeRequest;
-import roomescape.dto.response.AvailableReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.application.dto.request.ReservationTimeRequest;
+import roomescape.application.dto.response.AvailableReservationTimeResponse;
+import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.exception.BadRequestException;
 
 @Service

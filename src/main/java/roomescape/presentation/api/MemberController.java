@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.MemberService;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.request.SignupRequest;
+import roomescape.application.dto.response.MemberResponse;
 
 @RestController
 @RequestMapping("/members")

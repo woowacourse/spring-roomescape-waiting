@@ -8,8 +8,8 @@ import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.application.dto.request.ThemeRequest;
+import roomescape.application.dto.response.ThemeResponse;
 import roomescape.exception.BadRequestException;
 
 @Service

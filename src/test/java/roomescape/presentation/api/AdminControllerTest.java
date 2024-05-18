@@ -20,11 +20,11 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.MemberResponse;
-import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.presentation.dto.request.AdminReservationWebRequest;
+import roomescape.application.dto.response.MemberResponse;
+import roomescape.application.dto.response.ReservationResponse;
+import roomescape.application.dto.response.ReservationTimeResponse;
+import roomescape.application.dto.response.ThemeResponse;
 import roomescape.support.BaseControllerTest;
 
 @Sql("/member.sql")
@@ -61,7 +61,7 @@ class AdminControllerTest extends BaseControllerTest {
     }
 
     void addAdminReservation() {
-        AdminReservationRequest request = new AdminReservationRequest(
+        AdminReservationWebRequest request = new AdminReservationWebRequest(
                 LocalDate.of(2024, 6, 22),
                 1L,
                 1L,
@@ -93,7 +93,7 @@ class AdminControllerTest extends BaseControllerTest {
     }
 
     void addAdminReservationFailWhenNotAdmin() {
-        AdminReservationRequest request = new AdminReservationRequest(
+        AdminReservationWebRequest request = new AdminReservationWebRequest(
                 LocalDate.of(2024, 6, 22),
                 1L,
                 1L,

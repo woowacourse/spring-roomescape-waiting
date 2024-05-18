@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.request.SignupRequest;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.support.BaseServiceTest;
 
 class MemberServiceTest extends BaseServiceTest {

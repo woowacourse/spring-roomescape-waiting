@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
-import roomescape.dto.Accessor;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.ReservationWaitingRequest;
-import roomescape.dto.response.MyReservationResponse;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.application.dto.request.ReservationRequest;
+import roomescape.application.dto.request.ReservationWaitingRequest;
+import roomescape.application.dto.response.MyReservationResponse;
+import roomescape.application.dto.response.ReservationResponse;
 import roomescape.presentation.Auth;
+import roomescape.presentation.dto.Accessor;
+import roomescape.presentation.dto.request.ReservationWaitingWebRequest;
+import roomescape.presentation.dto.request.ReservationWebRequest;
 
 @RestController
 @RequestMapping("/reservations")
@@ -46,23 +48,19 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservationWithRanks(@Auth Accessor accessor) {
-        List<MyReservationResponse> reservationResponses = reservationService
+        List<MyReservationResponse> myReservationResponses = reservationService
                 .getMyReservationWithRanks(accessor.id());
 
-        return ResponseEntity.ok(reservationResponses);
+        return ResponseEntity.ok(myReservationResponses);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
-            @RequestBody @Valid ReservationRequest request,
+            @RequestBody @Valid ReservationWebRequest request,
             @Auth Accessor accessor
     ) {
-        ReservationResponse reservationResponse = reservationService.addReservation(
-                request.date(),
-                request.timeId(),
-                request.themeId(),
-                accessor.id()
-        );
+        ReservationRequest reservationRequest = request.toReservationRequest(accessor.id());
+        ReservationResponse reservationResponse = reservationService.addReservation(reservationRequest);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
@@ -77,18 +75,14 @@ public class ReservationController {
 
     @PostMapping("/waiting")
     public ResponseEntity<ReservationResponse> addReservationWaiting(
-            @RequestBody @Valid ReservationWaitingRequest request,
+            @RequestBody @Valid ReservationWaitingWebRequest request,
             @Auth Accessor accessor
     ) {
-        ReservationResponse response = reservationService.addReservationWaiting(
-                request.date(),
-                request.timeId(),
-                request.themeId(),
-                accessor.id()
-        );
+        ReservationWaitingRequest reservationWaitingRequest = request.toReservationWaitingRequest(accessor.id());
+        ReservationResponse reservationResponse = reservationService.addReservationWaiting(reservationWaitingRequest);
 
-        return ResponseEntity.created(URI.create("/reservations/" + response.id() + "/waiting"))
-                .body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id() + "/waiting"))
+                .body(reservationResponse);
     }
 
     @DeleteMapping("/waiting/{id}")

@@ -3,23 +3,19 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.ReservationWithRankDto;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
-    @Override
     List<Reservation> findAll();
 
     boolean existsByTimeId(long id);
 
     boolean existsByThemeId(long id);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(
             LocalDate date,
@@ -35,11 +31,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             long memberId,
             ReservationStatus status
     );
-
-    default Reservation getByIdAndStatus(long id, ReservationStatus status) {
-        return findByIdAndStatus(id, status)
-                .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
-    }
 
     Optional<Reservation> findByIdAndStatus(long id, ReservationStatus status);
 
@@ -83,10 +74,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<ReservationWithRankDto> findReservationWithRanksByMemberId(Long memberId);
 
-    default boolean existsByReservation(LocalDate date, long timeId, long themeId) {
-        return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
-    }
-
     @Query("""
             SELECT r
             FROM Reservation r
@@ -100,5 +87,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     default Reservation getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
+    }
+
+    default Reservation getByIdAndStatus(long id, ReservationStatus status) {
+        return findByIdAndStatus(id, status)
+                .orElseThrow(() -> new DomainNotFoundException("예약이 존재하지 않습니다."));
+    }
+
+    default boolean existsByReservation(LocalDate date, long timeId, long themeId, ReservationStatus status) {
+        return existsByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, status);
+    }
+
+    default boolean existsByReservationWithMemberId(
+            LocalDate date,
+            long timeId,
+            long themeId,
+            long memberId,
+            ReservationStatus status
+    ) {
+        return existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(date, timeId, themeId, memberId, status);
     }
 }

@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import roomescape.domain.member.Role;
-import roomescape.dto.request.LoginRequest;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.request.LoginRequest;
+import roomescape.application.dto.request.SignupRequest;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.exception.BadRequestException;
 import roomescape.support.BaseServiceTest;
 

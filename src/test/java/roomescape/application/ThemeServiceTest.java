@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.application.dto.request.ThemeRequest;
+import roomescape.application.dto.response.ThemeResponse;
 import roomescape.support.BaseServiceTest;
 
 class ThemeServiceTest extends BaseServiceTest {

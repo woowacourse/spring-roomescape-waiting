@@ -9,9 +9,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.AuthService;
 import roomescape.application.AuthorizationExtractor;
 import roomescape.application.MemberService;
-import roomescape.dto.Accessor;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.exception.UnauthorizedException;
+import roomescape.presentation.dto.Accessor;
 
 @Component
 public class AuthArgumentResolver implements HandlerMethodArgumentResolver {

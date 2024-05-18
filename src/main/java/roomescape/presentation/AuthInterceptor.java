@@ -8,7 +8,7 @@ import roomescape.application.AuthService;
 import roomescape.application.AuthorizationExtractor;
 import roomescape.application.MemberService;
 import roomescape.domain.member.Role;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.exception.AccessDeniedException;
 import roomescape.exception.UnauthorizedException;
 

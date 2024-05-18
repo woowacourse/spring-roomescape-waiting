@@ -14,8 +14,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import roomescape.domain.member.Role;
-import roomescape.dto.request.SignupRequest;
-import roomescape.dto.response.MemberResponse;
+import roomescape.application.dto.request.SignupRequest;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.support.BaseControllerTest;
 
 class MemberControllerTest extends BaseControllerTest {
