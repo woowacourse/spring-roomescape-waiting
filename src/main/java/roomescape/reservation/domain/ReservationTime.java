@@ -17,7 +17,7 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "start_at")
     private LocalTime startAt;
 
     protected ReservationTime() {

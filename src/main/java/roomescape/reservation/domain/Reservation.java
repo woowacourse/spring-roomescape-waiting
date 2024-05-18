@@ -21,21 +21,21 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "member_id")
     private Member member;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "date")
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "time_id")
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "theme_id")
     private Theme theme;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "status")
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
