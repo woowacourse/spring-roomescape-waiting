@@ -17,7 +17,7 @@ public class ThemeResponse {
 
     public ThemeResponse(Theme theme) {
         this(theme.getId(),
-                theme.getName(),
+                theme.getName().getName(),
                 theme.getDescription(),
                 theme.getThumbnail()
         );

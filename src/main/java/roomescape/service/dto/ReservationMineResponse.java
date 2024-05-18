@@ -21,7 +21,7 @@ public class ReservationMineResponse {
 
     public ReservationMineResponse(Reservation reservation) {
         this(reservation.getId(),
-                reservation.getTheme().getName(),
+                reservation.getTheme().getName().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getStatus().getDescription()

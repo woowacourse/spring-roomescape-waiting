@@ -10,7 +10,7 @@ class MemberPasswordTest {
     @ParameterizedTest
     @CsvSource({"7", "17"})
     void 비밀번호_생성시__길이가_8자_이상_16자_이하가_아니면_예외가_발생한다(int length) {
-        String password = "p".repeat(length);
+        String password = "도".repeat(length);
         assertThatThrownBy(() -> new MemberPassword(password))
                 .isInstanceOf(InvalidMemberPasswordLengthException.class);
     }

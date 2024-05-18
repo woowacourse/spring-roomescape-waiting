@@ -15,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.ThemeName;
 
 @Component
 @Transactional
@@ -59,7 +60,7 @@ public class DatabaseInitializer {
     }
 
     private Theme createTheme() {
-        Theme theme = new Theme("레벨2", "내용이다.", "https://www.naver.com/");
+        Theme theme = new Theme(new ThemeName("레벨2"), "내용이다.", "https://www.naver.com/");
         entityManager.persist(theme);
         return theme;
     }

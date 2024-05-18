@@ -6,10 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.exception.member.InvalidMemberNameLengthException;
 
-class MemberNameTest {
+class ThemeNameTest {
     @ParameterizedTest
-    @CsvSource({"안", "안녕하세요오"})
-    void 사용자_이름_생성시__길이가_2자_이상_5자_이하가_아니면_예외가_발생한다(String name) {
+    @CsvSource({"17", "18"})
+    void 테마_이름_생성시_길이가_16자_이하가_아니면_예외가_발생한다(int length) {
+        String name = "도".repeat(length);
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(InvalidMemberNameLengthException.class);
     }

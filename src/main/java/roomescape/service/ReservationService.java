@@ -62,11 +62,10 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(ReservationRequest request, Member member) {
+        validateDuplicateReservation(request);
         ReservationTime time = findReservationTimeById(request.getTimeId());
         Theme theme = findThemeById(request.getThemeId());
-
         validateDateTimeReservation(request, time);
-        validateDuplicateReservation(request);
 
         Reservation reservation = request.toReservation(member, time, theme, ReservationStatus.BOOKED);
         Reservation savedReservation = reservationRepository.save(reservation);

@@ -1,6 +1,7 @@
 package roomescape.service.dto;
 
 import roomescape.domain.Theme;
+import roomescape.domain.ThemeName;
 
 public class ThemeRequest {
     private final String name;
@@ -21,7 +22,7 @@ public class ThemeRequest {
     }
 
     public Theme toTheme() {
-        return new Theme(name, description, thumbnail);
+        return new Theme(new ThemeName(name), description, thumbnail);
     }
 
     public String getName() {
