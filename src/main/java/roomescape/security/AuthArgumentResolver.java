@@ -6,7 +6,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.controller.exception.UnauthorizedException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.dto.response.MemberResponse;
 import roomescape.service.MemberService;
 import roomescape.util.CookieUtil;

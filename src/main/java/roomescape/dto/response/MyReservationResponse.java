@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.ReservationWithRankDto;
+import roomescape.domain.reservation.dto.ReservationWithRankDto;
 
 public record MyReservationResponse(
         Long id,

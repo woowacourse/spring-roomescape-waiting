@@ -12,8 +12,8 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
 
 class ReservationTest {
 

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 

@@ -15,10 +15,10 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeRepository;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.ThemeRepository;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 

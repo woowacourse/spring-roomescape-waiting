@@ -1,4 +1,4 @@
-package roomescape.controller.exception;
+package roomescape.exception;
 
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;

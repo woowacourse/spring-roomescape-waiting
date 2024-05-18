@@ -14,8 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
 
 @Entity
 public class Reservation {

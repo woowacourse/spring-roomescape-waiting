@@ -1,4 +1,4 @@
-package roomescape.domain.reservationtime;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
@@ -14,7 +15,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
 
     @Query("""
             SELECT
-                  new roomescape.domain.reservationtime.AvailableReservationTimeDto(
+                  new roomescape.domain.reservation.dto.AvailableReservationTimeDto(
                       rt.id,
                       rt.startAt,
                       CASE WHEN COUNT(r.id) > 0 THEN true ELSE false END

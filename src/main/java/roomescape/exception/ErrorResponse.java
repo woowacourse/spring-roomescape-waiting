@@ -1,4 +1,4 @@
-package roomescape.controller.exception;
+package roomescape.exception;
 
 public record ErrorResponse(String message) {
 }
