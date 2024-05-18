@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.api.validator.IdPositive;
 import roomescape.domain.ReservationStatuses;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
@@ -64,7 +65,7 @@ public class ReservationTimeApiController {
 
     @DeleteMapping("/times/{timeId}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable
-                                                      @Positive(message = "1 이상의 값만 입력해주세요.") long timeId) {
+                                                      @IdPositive long timeId) {
         reservationTimeDeleteService.deleteReservationTime(timeId);
         return ResponseEntity.noContent().build();
     }
