@@ -8,7 +8,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.theme.ThemeResponse;
 
-public record AdminReservationSaveRequest (
+public record ReservationSaveRequest(
         Long memberId,
         String date,
         Long timeId,

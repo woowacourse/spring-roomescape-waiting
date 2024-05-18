@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.auth.AuthenticationPrincipal;
 import roomescape.domain.reservation.Reservation;
+import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
-import roomescape.dto.MemberResponse;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.MemberService;
@@ -34,12 +35,10 @@ public class ReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
-    public ReservationController(
-            final MemberService memberService,
-            final ReservationService reservationService,
-            final ReservationTimeService reservationTimeService,
-            final ThemeService themeService)
-    {
+    public ReservationController(final MemberService memberService,
+                                 final ReservationService reservationService,
+                                 final ReservationTimeService reservationTimeService,
+                                 final ThemeService themeService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
@@ -47,14 +46,15 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
-            @AuthenticationPrincipal final LoginMember loginMember,
-            @RequestBody final MemberReservationSaveRequest request) {
+    public ResponseEntity<ReservationResponse> createReservation(@AuthenticationPrincipal final LoginMember loginMember,
+                                                                 @RequestBody final MemberReservationSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(loginMember.id());
+        ReservationSaveRequest saveRequest = request.generateReservationSaveRequest(memberResponse);
+
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation reservation = request.toModel(memberResponse, themeResponse, reservationTimeResponse);
+        final Reservation reservation = saveRequest.toModel(memberResponse, themeResponse, reservationTimeResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservation));
     }
 

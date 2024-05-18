@@ -9,16 +9,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
-import roomescape.dto.reservation.AdminReservationSaveRequest;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+
 import java.util.List;
 
 @RequestMapping("/admin/reservations")
@@ -30,12 +31,10 @@ public class AdminReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
-    public AdminReservationController(
-            final MemberService memberService,
-            final ReservationService reservationService,
-            final ReservationTimeService reservationTimeService,
-            final ThemeService themeService)
-    {
+    public AdminReservationController(final MemberService memberService,
+                                      final ReservationService reservationService,
+                                      final ReservationTimeService reservationTimeService,
+                                      final ThemeService themeService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
@@ -43,7 +42,7 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody final AdminReservationSaveRequest request) {
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(request.memberId());
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
@@ -53,7 +52,7 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findReservations (
+    public ResponseEntity<List<ReservationResponse>> findReservations(
             @ModelAttribute final ReservationFilterParam reservationFilterParam) {
         return ResponseEntity.ok(reservationService.findAllBy(reservationFilterParam));
     }

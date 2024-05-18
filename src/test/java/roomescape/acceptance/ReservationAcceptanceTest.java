@@ -3,10 +3,12 @@ package roomescape.acceptance;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.dto.reservation.AdminReservationSaveRequest;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
+import roomescape.dto.reservation.ReservationSaveRequest;
 
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.ADMIN_EMAIL;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.MEMBER_MIA_EMAIL;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
 
@@ -25,7 +27,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondCreatedWhenAdminCreateReservation() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final AdminReservationSaveRequest request = new AdminReservationSaveRequest(1L, DATE_MAY_EIGHTH, timeId, themeId);
+        final ReservationSaveRequest request = new ReservationSaveRequest(1L, DATE_MAY_EIGHTH, timeId, themeId);
 
         assertCreateResponseWithToken(request, ADMIN_EMAIL, "/admin/reservations", 201);
     }
@@ -54,10 +56,10 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindReservations() {
         saveReservation();
-        
+
         assertGetResponse("/reservations", 200);
     }
-    
+
     @Test
     @DisplayName("테마, 사용자, 예약 날짜로 예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFilteredFindReservations() {
@@ -74,7 +76,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(200);
     }
-    
+
     @Test
     @DisplayName("예약을 성공적으로 삭제하면 204를 응답한다.")
     void respondNoContentWhenDeleteReservation() {
