@@ -101,14 +101,14 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
 
     @DisplayName("특정 기간 동안 예약이 많은 테마를 입력한 수 만큼 찾는다.")
     @Test
-    void findTopThemesDurationOrderByCount() {
+    void findPopularThemes() {
         // given
         LocalDate startDate = LocalDate.parse("2024-05-04");
         LocalDate endDate = LocalDate.parse("2024-05-30");
         Limit limit = Limit.of(2);
 
         // when
-        List<Theme> themes = reservationRepository.findTopThemesDurationOrderByCount(startDate, endDate, limit);
+        List<Theme> themes = reservationRepository.findPopularThemes(startDate, endDate, limit);
 
         // then
         assertThat(themes).hasSize(2)
@@ -173,7 +173,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         // given
         Member member = memberRepository.findById(1L).get();
         // when
-        List<WaitingWithRank> waitingReservations = waitingRepository.findWaitingRankByMember(member,
+        List<WaitingWithRank> waitingReservations = waitingRepository.findWaitingRankByMemberAndDateAfter(member,
                 LocalDate.parse("2024-05-30"));
 
         // then

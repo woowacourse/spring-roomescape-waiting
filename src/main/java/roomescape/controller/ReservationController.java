@@ -47,22 +47,22 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<UserReservationResponse>> findAllUserReservation(
+    public ResponseEntity<List<UserReservationResponse>> findAllReservationAndWaiting(
             @Login LoginMember member,
             @RequestParam LocalDate date
     ){
-        List<UserReservationResponse> reservationResponses = reservationService.findAllUserReservation(member.id(), date);
+        List<UserReservationResponse> reservationResponses = reservationService.findAllReservationAndWaiting(member.id(), date);
         return ResponseEntity.ok(reservationResponses);
     }
 
     @DeleteMapping("/reservations/waiting/{id}")
-    public ResponseEntity<Void> deleteReservation(@Login LoginMember member, @PathVariable Long id) {
+    public ResponseEntity<Void> cancelWaiting(@Login LoginMember member, @PathVariable Long id) {
         Long memberId = reservationService.findMemberIdByWaitingId(id);
         if (member.isNotSameId(memberId)) {
             throw new AuthorizationException();
         }
 
-        reservationService.deleteWaiting(id);
+        reservationService.cancelWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }

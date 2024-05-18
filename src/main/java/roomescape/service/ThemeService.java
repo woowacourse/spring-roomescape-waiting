@@ -39,7 +39,7 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
-        List<Theme> popularThemes = reservationRepository.findTopThemesDurationOrderByCount(
+        List<Theme> popularThemes = reservationRepository.findPopularThemes(
                 popularThemeRequest.startDate(),
                 popularThemeRequest.endDate(),
                 Limit.of(popularThemeRequest.limit())

@@ -116,7 +116,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void deleteByAdminAdminReservationByAdmin() {
         int size = reservationRepository.findAll().size();
-        reservationService.deleteReservation(1L);
+        reservationService.cancelReservation(1L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
@@ -125,7 +125,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     void deleteByAdminUser() {
         int size = reservationRepository.findAll().size();
 
-        reservationService.deleteReservation(18L);
+        reservationService.cancelReservation(18L);
         assertThat(reservationRepository.findAll()).hasSize(size - 1);
     }
 
@@ -133,7 +133,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void deleteByAdminNotFound() {
         assertThatThrownBy(() -> {
-            reservationService.deleteReservation(100L);
+            reservationService.cancelReservation(100L);
         }).isInstanceOf(RoomEscapeBusinessException.class);
     }
 
@@ -151,7 +151,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void findAllMyReservations() {
         // given // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(1L, LocalDate.parse("2024-05-30"));
+        List<UserReservationResponse> allUserReservation = reservationService.findAllReservationAndWaiting(1L, LocalDate.parse("2024-05-30"));
 
         // then
         assertThat(allUserReservation).hasSize(3)

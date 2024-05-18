@@ -90,11 +90,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserReservationResponse> findAllUserReservation(Long memberId, LocalDate date) {
+    public List<UserReservationResponse> findAllReservationAndWaiting(Long memberId, LocalDate date) {
         Member member = findMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
 
-        List<WaitingWithRank> waitings = waitingRepository.findWaitingRankByMember(member, date);
+        List<WaitingWithRank> waitings = waitingRepository.findWaitingRankByMemberAndDateAfter(member, date);
 
         return Stream.concat(
                         UserReservationResponse.reservationsToResponseStream(reservations),
@@ -105,7 +105,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
+    public void cancelReservation(Long id) {
         Reservation foundReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
 
@@ -113,7 +113,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteWaiting(Long id) {
+    public void cancelWaiting(Long id) {
         Waiting foundWaiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 대기입니다."));
 

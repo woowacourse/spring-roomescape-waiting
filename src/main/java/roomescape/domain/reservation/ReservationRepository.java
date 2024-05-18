@@ -28,7 +28,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             group by r.slot.theme
             order by count(r) desc
             """)
-    List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Limit limit);
+    List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, Limit limit);
 
     @Query("""
             select new roomescape.domain.reservation.dto.ReservationReadOnly(

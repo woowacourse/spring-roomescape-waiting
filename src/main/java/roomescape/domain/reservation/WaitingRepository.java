@@ -19,7 +19,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             from Waiting w
             where w.member = :member and w.reservation.slot.date >= :date
             """)
-    List<WaitingWithRank> findWaitingRankByMember(Member member, LocalDate date);
+    List<WaitingWithRank> findWaitingRankByMemberAndDateAfter(Member member, LocalDate date);
 
     @Query("select w.member.id from Waiting w where w.id = :id")
     Long findMemberIdById(Long id);
