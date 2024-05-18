@@ -21,7 +21,7 @@ public class MemberService {
 
     public MemberLoginCheckResponse findLoginMemberInfo(long id) {
         Member member = memberRepository.findMemberById(id)
-                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.ID_AND_PASSWORD_NOT_MATCH_OR_EXIST));
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
         return new MemberLoginCheckResponse(member.getName());
     }

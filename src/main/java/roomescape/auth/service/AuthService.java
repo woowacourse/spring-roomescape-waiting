@@ -27,7 +27,7 @@ public class AuthService {
         Password password = Password.from(loginRequest.password());
 
         Member member = memberRepository.findMemberByEmailAndPassword(email, password)
-                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
+                .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.ID_AND_PASSWORD_NOT_MATCH_OR_EXIST));
 
         return tokenProvider.getAccessToken(member.getId());
     }
