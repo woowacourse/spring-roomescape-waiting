@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservation.slot;
 
 import java.time.LocalTime;
 import org.springframework.data.jpa.repository.JpaRepository;

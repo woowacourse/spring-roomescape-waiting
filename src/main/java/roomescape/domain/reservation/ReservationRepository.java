@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
+import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 

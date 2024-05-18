@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.Objects;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.slot.ReservationSlot;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
@@ -21,15 +22,15 @@ public class Reservation {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Embedded
     private ReservationSlot slot;
 
-    public Reservation(Member member, ReservationSlot reservationSlot) {
+    public Reservation(Member member, ReservationSlot slot) {
         this.member = member;
-        this.slot = reservationSlot;
+        this.slot = slot;
     }
 
     protected Reservation() {

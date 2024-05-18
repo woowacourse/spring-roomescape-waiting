@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservation.slot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -15,11 +15,11 @@ public class ReservationSlot {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.UserReservationSaveRequest;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.service.dto.ReservationStatus;
 import roomescape.exception.AuthorizationException;
 import roomescape.infrastructure.Login;
 import roomescape.service.ReservationService;
@@ -47,16 +47,18 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<UserReservationResponse>> findAllUserReservation(@Login LoginMember member, @RequestParam
-                                                                                LocalDate date){
+    public ResponseEntity<List<UserReservationResponse>> findAllUserReservation(
+            @Login LoginMember member,
+            @RequestParam LocalDate date
+    ){
         List<UserReservationResponse> reservationResponses = reservationService.findAllUserReservation(member.id(), date);
         return ResponseEntity.ok(reservationResponses);
     }
 
     @DeleteMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> deleteReservation(@Login LoginMember member, @PathVariable Long id) {
-        Long memberId = reservationService.findMemberIdById(id);
-        if (member.isNotId(memberId)) {
+        Long memberId = reservationService.findMemberIdByWaitingId(id);
+        if (member.isNotSameId(memberId)) {
             throw new AuthorizationException();
         }
 

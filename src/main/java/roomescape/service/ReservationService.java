@@ -13,11 +13,11 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTimeRepository;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.exception.RoomEscapeBusinessException;
@@ -101,7 +101,7 @@ public class ReservationService {
 
         return reservations.stream()
                 .map(ReservationBookedResponse::from)
-                .sorted(Comparator.comparing(ReservationBookedResponse::getDateTime))
+                .sorted(Comparator.comparing(ReservationBookedResponse::dateTime))
                 .toList();
     }
 
@@ -110,13 +110,13 @@ public class ReservationService {
         Member member = findMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
 
-        List<WaitingWithRank> waitings = waitingRepository.findByMemberAndDateGreaterThanEqualWithRank(member, date);
+        List<WaitingWithRank> waitings = waitingRepository.findWaitingRankByMember(member, date);
 
         return Stream.concat(
                         UserReservationResponse.reservationsToResponseStream(reservations),
                         UserReservationResponse.waitingsToResponseStream(waitings)
                 )
-                .sorted(Comparator.comparing(UserReservationResponse::date))
+                .sorted(Comparator.comparing(UserReservationResponse::dateTime))
                 .toList();
     }
 
@@ -131,9 +131,13 @@ public class ReservationService {
     @Transactional
     public void deleteWaiting(Long id) {
         Waiting foundWaiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 대기입니다."));
 
         waitingRepository.delete(foundWaiting);
+    }
+
+    public Long findMemberIdByWaitingId(Long waitingId) {
+        return waitingRepository.findMemberIdById(waitingId);
     }
 
     private Member findMemberById(Long memberId) {
@@ -149,10 +153,6 @@ public class ReservationService {
     private ReservationTime findTimeById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
-    }
-
-    public Long findMemberIdById(Long id) {
-        return waitingRepository.findMemberIdById(id);
     }
 }
 

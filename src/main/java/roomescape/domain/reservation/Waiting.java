@@ -16,11 +16,11 @@ public class Waiting {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
 
     public Waiting(Member member, Reservation reservation) {

@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTimeRepository;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationTimeBookedRequest;
 import roomescape.service.dto.ReservationTimeBookedResponse;
@@ -32,14 +32,6 @@ public class ReservationTimeService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional(readOnly = true)
-    public List<ReservationTimeResponse> getTimes() {
-        return reservationTimeRepository.findAll()
-                .stream()
-                .map(ReservationTimeResponse::new)
-                .toList();
-    }
-
     @Transactional
     public ReservationTimeResponse saveTime(ReservationTimeSaveRequest reservationTimeSaveRequest) {
         ReservationTime reservationTime = reservationTimeSaveRequest.toReservationTime();
@@ -59,16 +51,12 @@ public class ReservationTimeService {
 
     }
 
-    @Transactional
-    public void deleteTime(Long id) {
-        ReservationTime foundTime = reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
-
-        if (reservationRepository.existsBySlot_Time(foundTime)) {
-            throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
-        }
-
-        reservationTimeRepository.delete(foundTime);
+    @Transactional(readOnly = true)
+    public List<ReservationTimeResponse> getTimes() {
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTimeResponse::new)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -87,5 +75,17 @@ public class ReservationTimeService {
                 .sorted(Comparator.comparing(ReservationTime::getStartAt))
                 .map(time -> ReservationTimeBookedResponse.of(time, bookedTimes.contains(time)))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteTime(Long id) {
+        ReservationTime foundTime = reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 시간입니다."));
+
+        if (reservationRepository.existsBySlot_Time(foundTime)) {
+            throw new RoomEscapeBusinessException("예약이 존재하는 시간입니다.");
+        }
+
+        reservationTimeRepository.delete(foundTime);
     }
 }

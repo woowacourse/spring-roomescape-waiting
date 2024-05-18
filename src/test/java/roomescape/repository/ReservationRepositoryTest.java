@@ -22,11 +22,11 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTimeRepository;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.dto.WaitingWithRank;
@@ -173,7 +173,7 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
         // given
         Member member = memberRepository.findById(1L).get();
         // when
-        List<WaitingWithRank> waitingReservations = waitingRepository.findByMemberAndDateGreaterThanEqualWithRank(member,
+        List<WaitingWithRank> waitingReservations = waitingRepository.findWaitingRankByMember(member,
                 LocalDate.parse("2024-05-30"));
 
         // then

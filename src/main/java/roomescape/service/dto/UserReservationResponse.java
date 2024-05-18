@@ -7,8 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.dto.WaitingWithRank;
 

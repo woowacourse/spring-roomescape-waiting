@@ -1,6 +1,6 @@
 package roomescape.service.dto;
 
-import roomescape.domain.reservation.Role;
+import roomescape.domain.member.Role;
 
 public record LoginMember(
         Long id,
@@ -11,7 +11,7 @@ public record LoginMember(
         return new MemberResponse(id, name, role.name());
     }
 
-    public boolean isNotId(Long id) {
+    public boolean isNotSameId(Long id) {
         return !id.equals(this.id);
     }
 
