@@ -32,19 +32,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ExceptionResponse> handleException(AuthenticationException exception) {
-        exception.printStackTrace();
+        logger.error("로그인 에러 = {}", exception.getMessage());
 
         HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, exception.getMessage());
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "다시 로그인해 주세요.");
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ExceptionResponse> handleException(AuthorizationException exception) {
-        exception.printStackTrace();
+        logger.error("접근 권한 불일치 = {}", exception.getMessage());
 
         HttpStatus httpStatus = HttpStatus.FORBIDDEN;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, exception.getMessage());
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "관리자만 접근이 가능합니다.");
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
