@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.domain.Reservation;
@@ -14,30 +14,30 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
-    private final MemberService memberService;
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
-    public ReservationService(
-            final ReservationTimeService reservationTimeService,
-            final ThemeService themeService,
-            final MemberService memberService,
-            final ReservationRepository reservationRepository
-    ) {
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-        this.memberService = memberService;
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public Reservation save(final ReservationSaveRequest saveRequest, final Member member) {
-        ReservationTime reservationTime = reservationTimeService.getById(saveRequest.timeId());
-        Theme theme = themeService.getById(saveRequest.themeId());
+        ReservationTime reservationTime = reservationTimeRepository.getById(saveRequest.timeId());
+        Theme theme = themeRepository.getById(saveRequest.themeId());
         validateDuplicateReservation(saveRequest);
 
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
@@ -55,7 +55,7 @@ public class ReservationService {
     }
 
     public Reservation save(final AdminReservationSaveRequest adminReservationSaveRequest) {
-        Member member = memberService.findById(adminReservationSaveRequest.memberId());
+        Member member = memberRepository.getById(adminReservationSaveRequest.memberId());
         return save(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 

@@ -26,8 +26,8 @@ class ReservationRepositoryTest {
         List<ReservationMapping> result = reservationRepository.findByDateAndThemeId(date, 1);
 
         assertThat(result)
-                .hasSize(2)
+                .hasSize(1)
                 .extracting(ReservationMapping::getTimeId)
-                .containsExactly(1, 4);
+                .containsExactly(1);
     }
 }

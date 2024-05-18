@@ -35,11 +35,6 @@ public class ReservationTimeService {
         return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false).toList();
     }
 
-    public ReservationTime getById(final long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
-    }
-
     public List<SelectableTime> findSelectableTimes(final LocalDate date, final long themeId) {
         List<ReservationMapping> usedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = getAll();

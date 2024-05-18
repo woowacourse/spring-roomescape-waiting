@@ -11,10 +11,6 @@ import roomescape.reservation.domain.ReservationMapping;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
-    List<ReservationMapping> findByDateAndThemeId(LocalDate date, long themeId);
-
-    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
-
     List<Reservation> findByTimeId(long timeId);
 
     List<Reservation> findByThemeId(long themeId);
@@ -22,6 +18,10 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     List<Reservation> findByMemberId(long memberId);
 
     List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
+
+    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    List<ReservationMapping> findByDateAndThemeId(LocalDate date, long themeId);
 
     @Query("""
             SELECT r FROM Reservation AS r
