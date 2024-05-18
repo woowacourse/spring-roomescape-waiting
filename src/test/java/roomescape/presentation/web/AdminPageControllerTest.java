@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,8 +49,10 @@ class AdminPageControllerTest extends BaseControllerTest {
 
         ErrorResponse errorResponse = response.as(ErrorResponse.class);
 
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-        assertThat(errorResponse.message()).isEqualTo("로그인이 필요합니다.");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+            softly.assertThat(errorResponse.message()).isEqualTo("로그인이 필요합니다.");
+        });
     }
 
     @Test
@@ -65,7 +68,9 @@ class AdminPageControllerTest extends BaseControllerTest {
 
         ErrorResponse errorResponse = response.as(ErrorResponse.class);
 
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.FORBIDDEN.value());
-        assertThat(errorResponse.message()).isEqualTo("어드민 권한이 필요합니다.");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.FORBIDDEN.value());
+            softly.assertThat(errorResponse.message()).isEqualTo("어드민 권한이 필요합니다.");
+        });
     }
 }
