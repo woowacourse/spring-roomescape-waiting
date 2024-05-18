@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.exception.AuthenticationException;
+import roomescape.exception.customexception.AuthenticationException;
 import roomescape.infrastructure.AuthenticationExtractor;
 import roomescape.service.AuthService;
 import roomescape.service.dto.request.LoginMember;

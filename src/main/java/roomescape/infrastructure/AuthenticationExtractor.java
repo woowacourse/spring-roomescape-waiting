@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import org.springframework.stereotype.Component;
-import roomescape.exception.AuthenticationException;
+import roomescape.exception.customexception.AuthenticationException;
 
 @Component
 public class AuthenticationExtractor {

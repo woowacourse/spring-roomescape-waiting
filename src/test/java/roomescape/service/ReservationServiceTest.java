@@ -20,7 +20,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.RoomEscapeBusinessException;
+import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.UserReservationResponse;

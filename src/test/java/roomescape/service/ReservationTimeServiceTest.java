@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
-import roomescape.exception.RoomEscapeBusinessException;
+import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.ReservationTimeBookedRequest;
 import roomescape.service.dto.response.ReservationTimeBookedResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
