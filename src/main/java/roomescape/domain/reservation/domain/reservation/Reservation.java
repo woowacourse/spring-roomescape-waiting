@@ -17,7 +17,7 @@ public class Reservation {
     private Long id;
 
     @Column(name = "date", nullable = false)
-    private LocalDate date; //todo: reservationDate 검증
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "time_id")
