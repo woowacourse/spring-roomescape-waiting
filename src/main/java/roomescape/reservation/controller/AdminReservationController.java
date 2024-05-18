@@ -13,36 +13,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
-import roomescape.reservation.service.AdminReservationService;
+import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final AdminReservationService adminReservationService;
+    private final ReservationService reservationService;
 
-    public AdminReservationController(final AdminReservationService adminReservationService) {
-        this.adminReservationService = adminReservationService;
+    public AdminReservationController(final ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> save(
             @RequestBody @Valid final AdminReservationSaveRequest reservationSaveRequest
     ) {
-        ReservationResponse reservationResponse = adminReservationService.save(reservationSaveRequest);
+        ReservationResponse reservationResponse =
+                ReservationResponse.from(reservationService.save(reservationSaveRequest));
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getByFilter(
+    public ResponseEntity<List<ReservationResponse>> findByFilter(
             @RequestParam(required = false) final Long memberId,
             @RequestParam(required = false) final Long themeId,
             @RequestParam(required = false) final LocalDate dateFrom,
             @RequestParam(required = false) final LocalDate dateTo
     ) {
-        return ResponseEntity.ok(
-                adminReservationService.getByFilter(memberId, themeId, dateFrom, dateTo)
-        );
+        List<ReservationResponse> reservationResponses =
+                ReservationResponse.list(reservationService.findByFilter(memberId, themeId, dateFrom, dateTo));
+        return ResponseEntity.ok(reservationResponses);
     }
 }

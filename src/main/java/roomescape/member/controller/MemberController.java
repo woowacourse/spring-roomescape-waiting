@@ -16,6 +16,7 @@ import roomescape.member.service.MemberService;
 @RestController
 @RequestMapping("/members")
 public class MemberController {
+
     private final MemberService memberService;
 
     public MemberController(final MemberService memberService) {
@@ -24,11 +25,13 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<SignupResponse> save(@RequestBody @Valid final SignupRequest signupRequest) {
-        return ResponseEntity.ok(memberService.save(signupRequest));
+        SignupResponse signupResponse = SignupResponse.from(memberService.save(signupRequest));
+        return ResponseEntity.ok(signupResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getAll() {
-        return ResponseEntity.ok(memberService.getAll());
+        List<MemberResponse> memberResponses = MemberResponse.list(memberService.getAll());
+        return ResponseEntity.ok(memberResponses);
     }
 }

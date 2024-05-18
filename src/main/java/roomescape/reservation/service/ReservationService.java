@@ -6,53 +6,42 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
+import roomescape.member.service.MemberService;
+import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
-import roomescape.reservation.controller.dto.response.MemberReservationResponse;
-import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
-import roomescape.reservation.controller.dto.response.ReservationResponse;
-import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
+    private final MemberService memberService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
     public ReservationService(
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository
+            final ReservationTimeService reservationTimeService,
+            final ThemeService themeService,
+            final MemberService memberService,
+            final ReservationRepository reservationRepository
     ) {
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
+        this.memberService = memberService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
     }
 
-    public ReservationResponse save(final ReservationSaveRequest saveRequest, final Member member) {
-        ReservationTime reservationTime = findReservationTimeById(saveRequest);
-        Theme theme = findThemeById(saveRequest);
+    public Reservation save(final ReservationSaveRequest saveRequest, final Member member) {
+        ReservationTime reservationTime = reservationTimeService.getById(saveRequest.timeId());
+        Theme theme = themeService.getById(saveRequest.themeId());
         validateDuplicateReservation(saveRequest);
 
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
-        return ReservationResponse.from(reservationRepository.save(reservation));
-    }
-
-    private ReservationTime findReservationTimeById(final ReservationSaveRequest reservationSaveRequest) {
-        return reservationTimeRepository.findById(reservationSaveRequest.timeId())
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
-    }
-
-    private Theme findThemeById(final ReservationSaveRequest reservationSaveRequest) {
-        return themeRepository.findById(reservationSaveRequest.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
+        return reservationRepository.save(reservation);
     }
 
     private void validateDuplicateReservation(ReservationSaveRequest saveRequest) {
@@ -65,62 +54,32 @@ public class ReservationService {
         return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
     }
 
-    public List<ReservationResponse> getAll() {
-        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
-                .map(ReservationResponse::from)
-                .toList();
+    public Reservation save(final AdminReservationSaveRequest adminReservationSaveRequest) {
+        Member member = memberService.findById(adminReservationSaveRequest.memberId());
+        return save(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 
-    public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
-        List<Long> usedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes = getAllReservationTimes();
-
-        return reservationTimes.stream()
-                .map(time -> new SelectableTimeResponse(
-                        time.getId(),
-                        time.getStartAt(),
-                        isAlreadyBooked(time, usedTimeIds)
-                ))
-                .toList();
+    public List<Reservation> getAll() {
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false).toList();
     }
 
-    private List<ReservationTime> getAllReservationTimes() {
-        return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
-                .toList();
+    public List<Reservation> findByFilter(final Long memberId, final Long themeId,
+                                          final LocalDate dateFrom, final LocalDate dateTo) {
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
     }
 
-    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Long> usedTimeIds) {
-        return usedTimeIds.contains(reservationTime.getId());
+    public List<Reservation> findByMemberId(final long memberId) {
+        return reservationRepository.findByMemberId(memberId);
     }
 
-    public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
-        return reservationRepository.findByMemberId(memberId)
-                .stream()
-                .map(MemberReservationResponse::from)
-                .toList();
-    }
-
-    public ReservationDeleteResponse delete(final long id) {
+    public int delete(final long id) {
         validateNotExitsReservationById(id);
-        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
+        return reservationRepository.deleteById(id);
     }
 
     private void validateNotExitsReservationById(final long id) {
         if (reservationRepository.findById(id).isEmpty()) {
-            throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약이 존재하지 않습니다.");
-        }
-    }
-
-    public void validateAlreadyHasReservationByTimeId(final long id) {
-        List<Reservation> reservations = reservationRepository.findByTimeId(id);
-        if (!reservations.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
-        }
-    }
-
-    public void validateAlreadyHasReservationByThemeId(final long id) {
-        if (!reservationRepository.findByThemeId(id).isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 해당 테마를 사용 중인 예약이 있어 삭제할 수 없습니다.");
+            throw new NoSuchElementException("[ERROR] (themeId : " + id + ") 에 대한 예약이 존재하지 않습니다.");
         }
     }
 }
