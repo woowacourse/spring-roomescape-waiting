@@ -36,14 +36,6 @@ public class Time {
         return new Time(0, startAt);
     }
 
-    public static Time from(long id) {
-        return new Time(id, null);
-    }
-
-    public static Time of(long id, LocalTime startAt) {
-        return new Time(id, startAt);
-    }
-
     public long getId() {
         return id;
     }

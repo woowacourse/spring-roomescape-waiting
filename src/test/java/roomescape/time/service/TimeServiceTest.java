@@ -35,10 +35,9 @@ import roomescape.time.repository.TimeRepository;
 class TimeServiceTest {
 
     private static final LocalTime CURRENT_TIME = LocalTime.now();
-
-    private final Time time = Time.of(1L, LocalTime.of(17, 3));
-    private static final Theme THEME = Theme.of(1, "미르", "미르 방탈출", "썸네일 Url");
-    public static final Member MEMBER = Member.of(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
+    private static final Time TIME = Time.from(LocalTime.of(17, 3));
+    private static final Theme THEME = Theme.of("미르", "미르 방탈출", "썸네일 Url");
+    public static final Member MEMBER = Member.of("polla@gmail.com", "polla99");
 
     @InjectMocks
     private TimeService timeService;
@@ -51,20 +50,22 @@ class TimeServiceTest {
     @DisplayName("시간을 추가한다.")
     void addReservationTime() {
         when(timeRepository.save(any()))
-                .thenReturn(time);
+                .thenReturn(TIME);
 
-        TimeRequest timeRequest = new TimeRequest(time.getStartAt());
+        TimeRequest timeRequest = new TimeRequest(TIME.getStartAt());
         TimeResponse timeResponse = timeService.addReservationTime(timeRequest);
 
-        Assertions.assertThat(timeResponse.id())
-                .isEqualTo(1);
+        assertAll(
+                () -> assertEquals(timeResponse.id(), TIME.getId()),
+                () -> assertEquals(timeResponse.startAt(), TIME.getStartAt())
+        );
     }
 
     @Test
     @DisplayName("시간을 찾는다.")
     void findReservationTimes() {
         when(timeRepository.findAllByOrderByStartAt())
-                .thenReturn(List.of(time));
+                .thenReturn(List.of(TIME));
 
         List<TimeResponse> timeResponses = timeService.findReservationTimes();
 
@@ -76,7 +77,7 @@ class TimeServiceTest {
     @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
     void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
         when(timeRepository.findByStartAt(any()))
-                .thenReturn(Optional.of(time));
+                .thenReturn(Optional.of(TIME));
 
         assertAll(() -> {
                     Throwable duplicateStartAt = assertThrows(
@@ -92,17 +93,16 @@ class TimeServiceTest {
     void removeReservationTime() {
         doNothing()
                 .when(timeRepository)
-                .deleteById(time.getId());
+                .deleteById(TIME.getId());
 
-        assertDoesNotThrow(() -> timeService.removeReservationTime(time.getId()));
+        assertDoesNotThrow(() -> timeService.removeReservationTime(TIME.getId()));
     }
 
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
         List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.of(LocalDate.now().plusDays(1), Time.from(1), Theme.from(1),
-                MEMBER));
+        reservations.add(Reservation.of(LocalDate.now().plusDays(1), TIME, THEME, MEMBER));
 
         when(reservationRepository.findByTimeId(1L))
                 .thenReturn(reservations);

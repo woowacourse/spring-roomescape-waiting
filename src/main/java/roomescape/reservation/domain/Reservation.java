@@ -45,11 +45,7 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
     }
-
-    public static Reservation of(long id, LocalDate date, Time time, Theme theme, Member member) {
-        return new Reservation(id, Date.dateFrom(date), time, theme, member);
-    }
-
+    
     public static Reservation of(LocalDate date, Time time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
         return new Reservation(0, Date.saveFrom(date), time, theme, member);

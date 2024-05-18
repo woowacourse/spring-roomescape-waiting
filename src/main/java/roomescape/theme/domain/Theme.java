@@ -35,10 +35,6 @@ public class Theme {
         this(0, new Name(name), description, thumbnail);
     }
 
-    public static Theme of(long id, String name, String description, String thumbnail) {
-        return new Theme(id, new Name(name), description, thumbnail);
-    }
-
     public static Theme of(String name, String description, String thumbnail) {
         return new Theme(name, description, thumbnail);
     }

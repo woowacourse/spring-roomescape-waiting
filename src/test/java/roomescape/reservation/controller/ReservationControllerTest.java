@@ -28,11 +28,12 @@ import roomescape.time.domain.Time;
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest extends ControllerTest {
 
-    private static final LocalDate TODAY = LocalDate.now();
+    private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
-    private final Reservation reservation = Reservation.of(1L, TODAY,
-            Time.of(1L, LocalTime.of(10, 0)), Theme.of(1L, "polla", "폴라 방탈출", "이미지~"),
-            Member.of(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
+    private final Reservation reservation = Reservation.of(TOMORROW,
+            Time.from(LocalTime.of(10, 0)),
+            Theme.of("polla", "폴라 방탈출", "이미지~"),
+            Member.of("polla@gmail.com", "password99"));
     private final String expectedStartAt = "10:00:00";
 
     @Autowired
@@ -61,11 +62,11 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     @DisplayName("예약 가능한 시간을 잘 불러오는지 확인한다.")
     void findAvailableTimeList() throws Exception {
-        when(reservationService.findTimeAvailability(1, TODAY))
+        when(reservationService.findTimeAvailability(1, TOMORROW))
                 .thenReturn(
                         List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getReservationTime(), true)));
 
-        mockMvc.perform(get("/reservations/1?date=" + TODAY))
+        mockMvc.perform(get("/reservations/1?date=" + TOMORROW))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].startAt").value(expectedStartAt))

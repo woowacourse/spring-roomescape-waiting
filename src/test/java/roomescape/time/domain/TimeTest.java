@@ -15,10 +15,9 @@ public class TimeTest {
     @Test
     @DisplayName("전달 받은 데이터로 Time 객체를 정상적으로 생성한다.")
     void constructTime() {
-        Time time = Time.of(1, LocalTime.of(9, 0));
+        Time time = Time.from(LocalTime.of(9, 0));
 
         assertAll(
-                () -> assertEquals(time.getId(), 1),
                 () -> assertEquals(time.getStartAt(), LocalTime.of(9, 0))
         );
     }
