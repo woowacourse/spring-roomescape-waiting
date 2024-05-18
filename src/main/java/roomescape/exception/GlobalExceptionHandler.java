@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.exception;
 
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -10,9 +10,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.exception.AuthenticationException;
-import roomescape.exception.AuthorizationException;
-import roomescape.exception.RoomEscapeBusinessException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
