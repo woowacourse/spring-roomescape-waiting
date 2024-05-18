@@ -89,7 +89,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("create 메서드로 예약을 생성한다.")
-    void create_reservation() {
+    void createReservation() {
         LocalDateTime currentDateTime = DATE.minusDays(1).atTime(10, 0);
 
         Reservation reservation = Reservation.create(currentDateTime, DATE, MEMBER, RESERVATION_TIME, THEME, STATUS);
@@ -99,7 +99,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("create 메서드로 예약을 생성할 때 지나간 날짜/시간이면 예외가 발생한다.")
-    void create_fail_when_date_time_is_past() {
+    void createReservationWhenPastDateTime() {
         LocalDate pastDate = LocalDate.of(2020, 5, 5);
         LocalDateTime currentDateTime = LocalDateTime.of(2024, 5, 4, 10, 0);
 
