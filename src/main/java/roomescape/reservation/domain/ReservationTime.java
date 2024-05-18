@@ -5,11 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import roomescape.global.exception.ViolationException;
 
 import java.time.LocalTime;
 
 @Entity
+@Table(name = "reservation_time")
 public class ReservationTime {
     private static final int TIME_UNIT = 10;
 
