@@ -25,6 +25,7 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Member member;
 
     @Embedded
