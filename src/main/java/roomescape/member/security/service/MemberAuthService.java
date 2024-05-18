@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.AuthorizationMismatchException;
 import roomescape.exception.IllegalAuthorizationException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.crypto.PasswordEncoder;
@@ -17,6 +16,7 @@ import roomescape.member.security.crypto.TokenProvider;
 @Service
 public class MemberAuthService {
 
+    public static final String TOKEN_NAME = "token";
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
@@ -46,14 +46,6 @@ public class MemberAuthService {
                 payload.get("email"));
     }
 
-    private String extractTokenFromCookie(Cookie[] cookies) {
-        return Arrays.stream(cookies)
-                .filter(cookie -> "token".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalAuthorizationException("잘못된 쿠키 값입니다."));
-    }
-
     public String extractNameFromPayload(Cookie[] cookies) {
         String token = extractTokenFromCookie(cookies);
         Map<String, String> tokenPayload = tokenProvider.getPayload(token);
@@ -65,8 +57,16 @@ public class MemberAuthService {
         return tokenProvider.validateToken(token);
     }
 
+    private String extractTokenFromCookie(Cookie[] cookies) {
+        return Arrays.stream(cookies)
+                .filter(cookie -> TOKEN_NAME.equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new IllegalAuthorizationException("잘못된 쿠키 값입니다."));
+    }
+
     public boolean isAdmin(Member member) {
-        return member.getRole() == MemberRole.ADMIN;
+        return member.isAdmin();
     }
 
 }

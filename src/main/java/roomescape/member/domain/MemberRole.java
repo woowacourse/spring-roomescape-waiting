@@ -15,4 +15,8 @@ public enum MemberRole {
     public String getRole() {
         return role;
     }
+
+    public boolean isAdmin() {
+        return this == ADMIN;
+    }
 }

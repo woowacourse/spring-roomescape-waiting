@@ -36,6 +36,10 @@ public class Member {
         this(id, name, email, password, "USER");
     }
 
+    public boolean isAdmin() {
+        return role.isAdmin();
+    }
+
     public String getEmail() {
         return email;
     }
@@ -54,10 +58,6 @@ public class Member {
 
     public MemberRole getRole() {
         return role;
-    }
-
-    public void setRole(String role) {
-        this.role = MemberRole.valueOf(role);
     }
 
     @Override
