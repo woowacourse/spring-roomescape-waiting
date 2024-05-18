@@ -12,7 +12,7 @@ public class Password {
     @Column(nullable = false)
     private String password;
 
-    Password() {
+    protected Password() {
     }
 
     public Password(String password) {

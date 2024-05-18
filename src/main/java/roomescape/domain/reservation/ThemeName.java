@@ -11,7 +11,7 @@ public class ThemeName {
     @Column(nullable = false)
     private String name;
 
-    ThemeName() {
+    protected ThemeName() {
     }
 
     public ThemeName(String name) {

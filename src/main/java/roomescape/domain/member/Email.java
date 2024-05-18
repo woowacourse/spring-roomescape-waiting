@@ -14,7 +14,7 @@ public class Email {
     @Column(name = "email", nullable = false)
     private String address;
 
-    Email() {
+    protected Email() {
     }
 
     public Email(String address) {

@@ -11,7 +11,7 @@ public class PlayerName {
     @Column(nullable = false)
     private String name;
 
-    PlayerName() {
+    protected PlayerName() {
     }
 
     public PlayerName(String name) {

@@ -18,7 +18,7 @@ public class MemberRole {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    MemberRole() {
+    protected MemberRole() {
     }
 
     public MemberRole(Member member, Role role) {
