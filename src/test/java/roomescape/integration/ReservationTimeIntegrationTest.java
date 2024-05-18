@@ -10,7 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.service.dto.ReservationTimeAvailableListResponse;
+import roomescape.service.reservationtime.dto.ReservationTimeAvailableListResponse;
 
 class ReservationTimeIntegrationTest extends IntegrationTest {
     @Nested

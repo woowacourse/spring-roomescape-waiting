@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.service.dto.ThemeListResponse;
+import roomescape.service.theme.dto.ThemeListResponse;
 
 class ThemeIntegrationTest extends IntegrationTest {
     @Nested

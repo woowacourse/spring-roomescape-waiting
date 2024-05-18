@@ -6,16 +6,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.MemberEmail;
-import roomescape.domain.MemberName;
-import roomescape.domain.MemberPassword;
-import roomescape.domain.MemberRole;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.ThemeName;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberEmail;
+import roomescape.domain.member.MemberName;
+import roomescape.domain.member.MemberPassword;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
 
 @Component
 @Transactional

@@ -3,8 +3,8 @@ package roomescape.controller.view;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import roomescape.controller.helper.RoleAllowed;
-import roomescape.domain.MemberRole;
+import roomescape.controller.auth.RoleAllowed;
+import roomescape.domain.member.MemberRole;
 
 @RequestMapping("/admin")
 @Controller
