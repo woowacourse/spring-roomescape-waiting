@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
+import roomescape.common.dto.ResourcesResponse;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -28,26 +29,31 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> reservationResponses = reservationService.findAll();
+    public ResponseEntity<ResourcesResponse<ReservationResponse>> findAll() {
+        List<ReservationResponse> reservations = reservationService.findAll();
+        ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
 
-        return ResponseEntity.ok(reservationResponses);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(LoginMember loginMember) {
-        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
+    public ResponseEntity<ResourcesResponse<MemberReservationResponse>> findMemberReservations(
+            LoginMember loginMember
+    ) {
+        List<MemberReservationResponse> memberReservations = reservationService.findMemberReservations(loginMember);
+        ResourcesResponse<MemberReservationResponse> response = new ResourcesResponse<>(memberReservations);
 
-        return ResponseEntity.ok(memberReservationResponses);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
+    public ResponseEntity<ResourcesResponse<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchCondRequest reservationSearchCondRequest
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCond(reservationSearchCondRequest);
+        List<ReservationResponse> reservations = reservationService.findAllBySearchCond(reservationSearchCondRequest);
+        ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
 
-        return ResponseEntity.ok(reservationResponses);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping(path = {"/reservations", "/admin/reservations"})
@@ -57,7 +63,8 @@ public class ReservationApiController {
     ) {
         ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
     }
 
     @DeleteMapping("/reservations/{id}")

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.dto.ResourcesResponse;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.TimeResponse;
 import roomescape.reservation.dto.TimeSaveRequest;
@@ -27,20 +28,22 @@ public class ReservationTimeApiController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<TimeResponse>> findAll() {
+    public ResponseEntity<ResourcesResponse<TimeResponse>> findAll() {
         List<TimeResponse> times = reservationTimeService.findAll();
+        ResourcesResponse<TimeResponse> response = new ResourcesResponse<>(times);
 
-        return ResponseEntity.ok(times);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableTimes(
+    public ResponseEntity<ResourcesResponse<AvailableReservationTimeResponse>> findAvailableTimes(
             @RequestParam("date") LocalDate date,
             @RequestParam("theme-id") Long themeId
     ) {
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
+        ResourcesResponse<AvailableReservationTimeResponse> response = new ResourcesResponse<>(availableTimes);
 
-        return ResponseEntity.ok(availableTimes);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/times")

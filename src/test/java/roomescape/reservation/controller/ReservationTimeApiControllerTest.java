@@ -52,7 +52,7 @@ class ReservationTimeApiControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("$", hasSize(1));
+                .body("resources.$", hasSize(1));
     }
 
     @DisplayName("시간 정보를 저장 성공 시 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")

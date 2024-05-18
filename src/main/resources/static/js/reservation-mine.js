@@ -16,7 +16,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data.forEach(item => {
+    data.resources.forEach(item => {
         const row = tableBody.insertRow();
 
         const theme = item.theme;

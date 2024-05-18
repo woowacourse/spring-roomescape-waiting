@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderTheme(themes) {
     const themeSlots = document.getElementById('theme-slots');
     themeSlots.innerHTML = '';
-    themes.forEach(theme => {
+    themes.resources.forEach(theme => {
         const name = theme.name;
         const themeId = theme.id;
 
@@ -111,7 +111,7 @@ function renderAvailableTimes(times) {
         timeSlots.innerHTML = '<div class="no-times">선택할 수 있는 시간이 없습니다.</div>';
         return;
     }
-    times.forEach(time => {
+    times.resources.forEach(time => {
         const startAt = time.startAt;
         const timeId = time.id;
         const alreadyBooked = time.booked;

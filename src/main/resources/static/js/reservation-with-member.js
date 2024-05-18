@@ -24,7 +24,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.resources.forEach(item => {
     const row = tableBody.insertRow();
 
     row.insertCell(0).textContent = item.id;              // 예약 id
@@ -41,7 +41,7 @@ function render(data) {
 function fetchTimes() {
   requestRead(TIME_API_ENDPOINT)
       .then(data => {
-        timesOptions.push(...data);
+        timesOptions.push(...data.resources);
       })
       .catch(error => console.error('Error fetching time:', error));
 }
@@ -49,7 +49,7 @@ function fetchTimes() {
 function fetchThemes() {
   requestRead(THEME_API_ENDPOINT)
       .then(data => {
-        themesOptions.push(...data);
+        themesOptions.push(...data.resources);
         populateSelect('theme', themesOptions, 'name');
       })
       .catch(error => console.error('Error fetching theme:', error));
@@ -58,7 +58,7 @@ function fetchThemes() {
 function fetchMembers() {
   requestRead(MEMBER_API_ENDPOINT)
       .then(data => {
-        membersOptions.push(...data);
+        membersOptions.push(...data.resources);
         populateSelect('member', membersOptions, 'name');
       })
       .catch(error => console.error('Error fetching member:', error));
