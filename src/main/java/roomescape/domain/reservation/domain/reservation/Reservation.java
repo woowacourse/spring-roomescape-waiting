@@ -20,12 +20,15 @@ public class Reservation {
     private LocalDate date; //todo: reservationDate 검증
 
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
     protected Reservation() {
