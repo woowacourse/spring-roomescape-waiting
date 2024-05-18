@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import roomescape.exception.AuthorizationLoginFailException;
+import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberCreateRequest;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.repository.MemberRepository;
@@ -21,7 +23,7 @@ public class MemberService {
     public List<MemberProfileInfo> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
-                .map(member -> new MemberProfileInfo(member.getId(), member.getName(), member.getEmail()))
+                .map(MemberProfileInfo::from)
                 .toList();
     }
 
@@ -33,5 +35,17 @@ public class MemberService {
     public Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(AuthorizationLoginFailException::new);
+    }
+
+    public MemberProfileInfo createMember(MemberCreateRequest request) {
+        memberRepository.findByEmail(request.email())
+                .ifPresent(member -> {
+                    throw new ConflictException("해당 이메일을 사용하는 사용자가 존재합니다.");
+                });
+
+        Member member = request.createMember();
+        member = memberRepository.save(member);
+
+        return MemberProfileInfo.from(member);
     }
 }
