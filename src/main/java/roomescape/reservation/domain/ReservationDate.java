@@ -1,12 +1,10 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.global.exception.IllegalReservationDateException;
 
-@Embeddable
 public class ReservationDate {
 
     @Column(name = "date", nullable = false)
