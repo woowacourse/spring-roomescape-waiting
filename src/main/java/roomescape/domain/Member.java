@@ -10,15 +10,19 @@ public class Member {
     private Long id;
 
     @Embedded
+    @AttributeOverride(name = "name", column = @Column(nullable = false))
     private MemberName name;
 
     @Embedded
+    @AttributeOverride(name = "email", column = @Column(nullable = false))
     private MemberEmail email;
 
     @Embedded
+    @AttributeOverride(name = "password", column = @Column(nullable = false))
     private MemberPassword password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MemberRole role;
 
     public Member() {

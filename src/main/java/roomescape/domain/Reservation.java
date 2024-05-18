@@ -10,18 +10,23 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Member member;
 
     @Embedded
+    @AttributeOverride(name = "date", column = @Column(nullable = false))
     private ReservationDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
     public Reservation() {
