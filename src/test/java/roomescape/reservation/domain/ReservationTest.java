@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
-import roomescape.util.Fixture;
 
 class ReservationTest {
 
@@ -26,7 +25,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(LocalTime.now());
 
         assertThatThrownBy(() -> new Reservation(
-                        new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD),
+                        Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD),
                         LocalDate.now().minusDays(1),
                         theme,
                         reservationTime,

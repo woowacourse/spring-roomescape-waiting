@@ -19,7 +19,7 @@ public class Member {
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.MEMBER;
+    private Role role;
 
     @Embedded
     @Column(nullable = false)
@@ -34,7 +34,12 @@ public class Member {
     protected Member() {
     }
 
-    public Member(MemberName name, String email, String password) {
+    public static Member createMemberByUserRole(MemberName name, String email, String password) {
+        return new Member(Role.USER, name, email, password);
+    }
+
+    public Member(Role role, MemberName name, String email, String password) {
+        this.role = role;
         this.name = name;
         this.email = email;
         this.password = password;

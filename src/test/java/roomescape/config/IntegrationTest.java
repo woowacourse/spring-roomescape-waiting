@@ -44,12 +44,12 @@ public class IntegrationTest {
     }
 
     protected String getMemberToken() {
-        Member member = new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234");
+        Member member = new Member(1L, Role.USER, new MemberName("카키"), "kaki@email.com", "1234");
         return jwtTokenProvider.generateToken(member);
     }
 
     protected void saveMemberAsKaki() {
-        String sql = "insert into member (name, email, password, role) values ('카키', 'kaki@email.com', '1234', 'MEMBER')";
+        String sql = "insert into member (name, email, password, role) values ('카키', 'kaki@email.com', '1234', 'USER')";
 
         jdbcTemplate.update(sql);
     }

@@ -37,7 +37,7 @@ class MemberServiceTest {
     @DisplayName("중복된 이름 또는 이메일로 회원가입할 수 없다.")
     @Test
     void save() {
-        memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(KAKI_NAME, KAKI_EMAIL, KAKI_PASSWORD);
 

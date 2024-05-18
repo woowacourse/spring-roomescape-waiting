@@ -62,7 +62,7 @@ class ReservationServiceTest {
         themeRepository.save(
                 new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
+        LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember))
@@ -77,10 +77,10 @@ class ReservationServiceTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LocalDate localDate = LocalDate.now();
-        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
+        LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
         reservationService.save(reservationSaveRequest, loginMember);
 

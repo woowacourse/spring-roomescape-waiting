@@ -17,7 +17,7 @@ public class MemberService {
     }
 
     public MemberResponse save(MemberSignUpRequest memberSignUpRequest) {
-        Member member = memberSignUpRequest.toMember();
+        Member member = memberSignUpRequest.toMemberByUserRole();
         if (memberRepository.existsByEmail(member.getEmail())) {
             throw new IllegalArgumentException("중복된 이름 또는 이메일 입니다.");
         }

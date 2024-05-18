@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
-import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
@@ -30,7 +29,7 @@ class JwtTokenProviderTest {
 
     @BeforeEach
     void init() {
-        member = new Member(1L, Role.MEMBER, new MemberName("카키"), "kaki@email.com", "1234");
+        member = new Member(1L, Role.USER, new MemberName("카키"), "kaki@email.com", "1234");
     }
 
     @DisplayName("JWT 토큰을 생성한다.")

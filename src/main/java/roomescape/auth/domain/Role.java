@@ -4,7 +4,7 @@ import java.util.Arrays;
 import roomescape.exception.UnauthenticatedUserException;
 
 public enum Role {
-    MEMBER,
+    USER,
     ADMIN,
     ;
 

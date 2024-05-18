@@ -12,7 +12,7 @@ public record MemberSignUpRequest(
         @NotNull @NotBlank String password
 ) {
 
-    public Member toMember() {
-        return new Member(new MemberName(name), email, password);
+    public Member toMemberByUserRole() {
+        return Member.createMemberByUserRole(new MemberName(name), email, password);
     }
 }

@@ -82,7 +82,7 @@ class ThemeServiceTest {
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10, Status.SUCCESS));
 

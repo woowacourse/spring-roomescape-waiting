@@ -58,7 +58,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
@@ -80,8 +80,8 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member kaki = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-        Member jojo = memberRepository.save(new Member(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
         reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
@@ -104,7 +104,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
@@ -126,7 +126,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
@@ -150,7 +150,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
@@ -174,7 +174,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDate oneWeekLater = LocalDate.now().plusWeeks(1);
@@ -211,7 +211,7 @@ public class ReservationRepositoryTest {
                 )
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS)

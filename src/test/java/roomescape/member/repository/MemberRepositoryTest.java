@@ -24,7 +24,7 @@ class MemberRepositoryTest {
     @DisplayName("id로 회원을 찾는다.")
     @Test
     void findById() {
-        Member kaki = new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
+        Member kaki = Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member savedMember = memberRepository.save(kaki);
         Member findMember = memberRepository.findById(savedMember.getId()).get();
 
@@ -39,10 +39,10 @@ class MemberRepositoryTest {
     @ParameterizedTest
     @CsvSource({"'카키', 'test@email.com', false", "'카키', 'kaki@email.com', true"})
     void existNameOrEmail(String name, String email, boolean exist) {
-        Member kaki = new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
+        Member kaki = Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         memberRepository.save(kaki);
 
-        Member newMember = new Member(new MemberName(name), email, "1234");
+        Member newMember = Member.createMemberByUserRole(new MemberName(name), email, "1234");
         boolean existNameOrEmail = memberRepository.existsByEmail(newMember.getEmail());
 
         assertThat(existNameOrEmail).isEqualTo(exist);
@@ -51,7 +51,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일과 비밀번호가 일치하는 회원을 찾는다.")
     @Test
     void findByEmailAndPassword() {
-        Member kaki = new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
+        Member kaki = Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member savedMember = memberRepository.save(kaki);
         Member findMember = memberRepository.findByEmailAndPassword(savedMember.getEmail(), savedMember.getPassword())
                 .get();
