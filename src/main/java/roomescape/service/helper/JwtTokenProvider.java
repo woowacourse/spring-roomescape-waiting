@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberRole;
 import roomescape.exception.login.ExpiredTokenException;
 import roomescape.exception.login.InvalidTokenException;
@@ -27,9 +28,9 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String memberEmail, MemberRole memberRole) {
+    public String createToken(MemberEmail memberEmail, MemberRole memberRole) {
         return Jwts.builder()
-                .setSubject(memberEmail)
+                .setSubject(memberEmail.getAddress())
                 .claim("role", memberRole.name())
                 .setExpiration(calculateExpiredAt())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
@@ -41,8 +42,9 @@ public class JwtTokenProvider {
         return new Date(now.getTime() + validityInMilliseconds);
     }
 
-    public String getMemberEmail(String token) {
-        return getClaims(token).getSubject();
+    public MemberEmail getMemberEmail(String token) {
+        String address = getClaims(token).getSubject();
+        return new MemberEmail(address);
     }
 
     public MemberRole getMemberRole(String token) {

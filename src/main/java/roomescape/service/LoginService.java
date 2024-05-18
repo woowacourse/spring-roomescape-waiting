@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
+import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.login.InvalidTokenException;
@@ -28,9 +29,9 @@ public class LoginService {
 
     @Transactional(readOnly = true)
     public String login(LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(request.toMemberEmail())
                 .orElseThrow(UnauthorizedEmailException::new);
-        if (member.isDifferentPassword(request.getPassword())) {
+        if (member.isDifferentPassword(request.toMemberPassword())) {
             throw new UnauthorizedPasswordException();
         }
         return jwtTokenProvider.createToken(member.getEmail(), member.getRole());
@@ -48,23 +49,23 @@ public class LoginService {
 
     @Transactional(readOnly = true)
     public Member findMemberByToken(String token) {
-        String email = jwtTokenProvider.getMemberEmail(token);
+        MemberEmail email = jwtTokenProvider.getMemberEmail(token);
         return findMemberByEmail(email);
     }
 
-    private Member findMemberByEmail(String email) {
+    private Member findMemberByEmail(MemberEmail email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(InvalidTokenException::new);
     }
 
     public SignupResponse signup(SignupRequest request) {
-        validateDuplicateEmail(request.getEmail());
+        validateDuplicateEmail(request.toMemberEmail());
         Member member = request.toMember(MemberRole.USER);
         Member savedMember = memberRepository.save(member);
         return new SignupResponse(savedMember);
     }
 
-    private void validateDuplicateEmail(String email) {
+    private void validateDuplicateEmail(MemberEmail email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DuplicatedMemberEmailException();
         }

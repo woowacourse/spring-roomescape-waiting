@@ -7,7 +7,9 @@ import java.time.LocalTime;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
+import roomescape.domain.MemberEmail;
 import roomescape.domain.MemberName;
+import roomescape.domain.MemberPassword;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -29,13 +31,23 @@ public class DatabaseInitializer {
     }
 
     private Member createMember() {
-        Member member = new Member(new MemberName("사용자"), "user@gmail.com", "1234", MemberRole.USER);
+        Member member = new Member(
+                new MemberName("사용자"),
+                new MemberEmail("user@gmail.com"),
+                new MemberPassword("1234567890"),
+                MemberRole.USER
+        );
         entityManager.persist(member);
         return member;
     }
 
     private Member createAdmin() {
-        Member member = new Member(new MemberName("관리자"), "admin@gmail.com", "1234", MemberRole.ADMIN);
+        Member member = new Member(
+                new MemberName("관리자"),
+                new MemberEmail("admin@gmail.com"),
+                new MemberPassword("1234567890"),
+                MemberRole.ADMIN
+        );
         entityManager.persist(member);
         return member;
     }

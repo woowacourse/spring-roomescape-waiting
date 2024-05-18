@@ -1,12 +1,14 @@
 package roomescape.domain;
 
 import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import roomescape.exception.member.InvalidMemberNameLengthException;
 
 @Embeddable
 public class MemberName {
-    private final static int MIN_LENGTH = 2;
-    private final static int MAX_LENGTH = 5;
+    private static final int MIN_LENGTH = 2;
+    private static final int MAX_LENGTH = 5;
+
     private String name;
 
     protected MemberName() {
@@ -25,5 +27,22 @@ public class MemberName {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MemberName that = (MemberName) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

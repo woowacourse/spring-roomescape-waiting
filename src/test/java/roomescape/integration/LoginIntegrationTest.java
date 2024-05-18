@@ -23,7 +23,7 @@ class LoginIntegrationTest extends IntegrationTest {
         void 이메일과_비밀번호로_로그인할_수_있다() {
             RestAssured.given().log().all()
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .body(new LoginRequest("admin@gmail.com", "1234"))
+                    .body(new LoginRequest("admin@gmail.com", "1234567890"))
                     .when().post("/login")
                     .then().log().all()
                     .statusCode(200);
@@ -92,7 +92,7 @@ class LoginIntegrationTest extends IntegrationTest {
         void 일반유저_권한으로_회원가입을_할_수_있다() {
             Map<String, String> params = new HashMap<>();
             params.put("email", "user2@gmail.com");
-            params.put("password", "1234");
+            params.put("password", "1234567890");
             params.put("name", "사용자2");
 
             RestAssured.given().log().all()

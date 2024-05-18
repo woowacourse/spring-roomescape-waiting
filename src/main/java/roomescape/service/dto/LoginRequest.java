@@ -1,5 +1,8 @@
 package roomescape.service.dto;
 
+import roomescape.domain.MemberEmail;
+import roomescape.domain.MemberPassword;
+
 public class LoginRequest {
     private final String email;
     private final String password;
@@ -14,6 +17,14 @@ public class LoginRequest {
         if (email.isBlank() || password.isBlank()) {
             throw new IllegalArgumentException();
         }
+    }
+
+    public MemberEmail toMemberEmail() {
+        return new MemberEmail(email);
+    }
+
+    public MemberPassword toMemberPassword() {
+        return new MemberPassword(password);
     }
 
     public String getEmail() {
