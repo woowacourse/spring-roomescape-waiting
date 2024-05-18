@@ -1,19 +1,10 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
-import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
-import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
-import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
-import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSearchCondition;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberReservationResponse;
@@ -26,6 +17,17 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationResponseMapper;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
+import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
+import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
+import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
 
 @Service
 @Transactional
@@ -85,13 +87,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findByMemberAndThemeBetweenDates(
-            long memberId,
-            long themeId,
-            LocalDate start,
-            LocalDate end
-    ) {
-        return reservationRepository.findByMemberAndThemeBetweenDates(memberId, themeId, start, end)
+    public List<ReservationResponse> findByMemberAndThemeBetweenDates(ReservationSearchCondition condition) {
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
+                condition.memberId(), condition.themeId(), condition.start(), condition.end());
+        
+        return reservations
                 .stream()
                 .map(ReservationResponseMapper::toResponse)
                 .toList();

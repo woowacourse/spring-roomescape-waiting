@@ -1,20 +1,20 @@
 package roomescape.controller;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.ReservationSearchCondition;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -35,12 +35,7 @@ public class AdminController {
 
     @GetMapping("/reservations")
     @ResponseBody
-    public List<ReservationResponse> search(
-            @RequestParam long memberId,
-            @RequestParam long themeId,
-            @RequestParam LocalDate start,
-            @RequestParam LocalDate end
-    ) {
-        return reservationService.findByMemberAndThemeBetweenDates(memberId, themeId, start, end);
+    public List<ReservationResponse> search(@ModelAttribute ReservationSearchCondition condition) {
+        return reservationService.findByMemberAndThemeBetweenDates(condition);
     }
 }
