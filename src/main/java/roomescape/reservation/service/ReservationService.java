@@ -11,6 +11,7 @@ import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dao.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationConditionSearchRequest;
@@ -87,7 +88,11 @@ public class ReservationService {
         Member member = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow();
 
-        Reservation reservation = new Reservation(member, reservationRequest.date(), time, theme);
+        Reservation reservation = new ReservationBuilder()
+                .date(reservationRequest.date())
+                .time(time)
+                .theme(theme)
+                .build();
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.fromReservation(savedReservation);
     }
