@@ -44,14 +44,14 @@ public class ReservationService {
 
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
-        return reservationRepository.findByMember_IdAndTheme_IdAndDateValueBetween(memberId, themeId,
+        return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId,
                         dateFrom, dateTo).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
     public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findAllByMember_Id(memberId)
+        return reservationRepository.findByMember_Id(memberId)
                 .stream()
                 .map(MemberReservationStatusResponse::new)
                 .toList();

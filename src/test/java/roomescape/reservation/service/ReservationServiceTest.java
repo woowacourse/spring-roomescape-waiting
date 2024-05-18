@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @DisplayName("특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
     @Test
     void should_return_response_when_my_reservations_requested_all() {
-        when(reservationRepository.findAllByMember_Id(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
+        when(reservationRepository.findByMember_Id(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
 
         assertThat(reservationService.findAllByMemberWithStatus(1L))
                 .containsExactly(new MemberReservationStatusResponse(SAVED_RESERVATION_1));
