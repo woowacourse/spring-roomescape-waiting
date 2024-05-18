@@ -28,7 +28,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.presentation.BaseControllerTest;
+import roomescape.support.BaseControllerTest;
 
 class ThemeControllerTest extends BaseControllerTest {
 

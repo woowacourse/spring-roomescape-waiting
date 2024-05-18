@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.support;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.config.TestConfig;
+import roomescape.support.config.TestConfig;
 import roomescape.dto.request.LoginRequest;
 import roomescape.support.extension.DatabaseClearExtension;
 

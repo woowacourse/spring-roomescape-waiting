@@ -21,6 +21,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.support.BaseServiceTest;
 
 class ReservationServiceTest extends BaseServiceTest {
 

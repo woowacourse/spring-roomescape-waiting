@@ -10,6 +10,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
+import roomescape.support.BaseServiceTest;
 
 class MemberServiceTest extends BaseServiceTest {
 

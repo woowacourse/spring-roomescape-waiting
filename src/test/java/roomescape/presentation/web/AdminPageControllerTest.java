@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ErrorResponse;
-import roomescape.presentation.BaseControllerTest;
+import roomescape.support.BaseControllerTest;
 
 @Sql("/member.sql")
 class AdminPageControllerTest extends BaseControllerTest {

@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import roomescape.domain.member.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
-import roomescape.presentation.BaseControllerTest;
+import roomescape.support.BaseControllerTest;
 
 class MemberControllerTest extends BaseControllerTest {
 

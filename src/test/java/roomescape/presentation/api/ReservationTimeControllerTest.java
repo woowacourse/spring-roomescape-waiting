@@ -29,7 +29,7 @@ import roomescape.domain.reservation.ThemeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.presentation.BaseControllerTest;
+import roomescape.support.BaseControllerTest;
 
 class ReservationTimeControllerTest extends BaseControllerTest {
 

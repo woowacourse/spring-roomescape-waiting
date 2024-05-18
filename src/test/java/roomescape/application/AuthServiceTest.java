@@ -16,6 +16,7 @@ import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.exception.BadRequestException;
+import roomescape.support.BaseServiceTest;
 
 class AuthServiceTest extends BaseServiceTest {
 

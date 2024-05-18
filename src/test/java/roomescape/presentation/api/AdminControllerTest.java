@@ -25,7 +25,7 @@ import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.presentation.BaseControllerTest;
+import roomescape.support.BaseControllerTest;
 
 @Sql("/member.sql")
 class AdminControllerTest extends BaseControllerTest {

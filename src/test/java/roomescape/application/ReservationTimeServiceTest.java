@@ -15,6 +15,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.support.BaseServiceTest;
 
 class ReservationTimeServiceTest extends BaseServiceTest {
 

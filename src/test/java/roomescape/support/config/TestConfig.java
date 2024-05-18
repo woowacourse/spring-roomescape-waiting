@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.support.config;
 
 import java.time.Clock;
 import java.time.Instant;
