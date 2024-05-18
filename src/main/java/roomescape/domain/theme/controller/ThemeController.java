@@ -1,17 +1,14 @@
 package roomescape.domain.theme.controller;
 
-import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.service.ThemeService;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 public class ThemeController {
@@ -41,6 +38,7 @@ public class ThemeController {
 
     @GetMapping("/theme-ranking")
     public ResponseEntity<List<Theme>> getThemeRank() {
-        return ResponseEntity.ok(themeService.getThemeRanking());
+        LocalDate now = LocalDate.now();
+        return ResponseEntity.ok(themeService.getThemeRanking(now));
     }
 }

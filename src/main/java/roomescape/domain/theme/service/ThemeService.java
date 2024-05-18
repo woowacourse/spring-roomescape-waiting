@@ -6,6 +6,7 @@ import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
 import roomescape.domain.theme.repository.ThemeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -33,7 +34,7 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public List<Theme> getThemeRanking() {
-        return themeRepository.findThemeOrderByReservationCount();
+    public List<Theme> getThemeRanking(LocalDate now) {
+        return themeRepository.findThemeOrderByReservationCount(now.minusDays(6), now.minusDays(1));
     }
 }
