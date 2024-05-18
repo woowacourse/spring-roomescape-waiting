@@ -32,7 +32,7 @@ public class Reservation {
     private Member member;
 
     @NotNull
-    @Column(name = "date")
+    @Column(name = "reserved_date")
     private LocalDate date;
 
     @ManyToOne
