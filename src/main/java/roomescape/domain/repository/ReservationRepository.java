@@ -12,12 +12,13 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     Optional<Reservation> findById(Long id);
 
-    @Query(value = """
-            SELECT time_id 
-            FROM reservation 
-            WHERE date = ? AND theme_id = ?
-            """, nativeQuery = true)
-    List<Long> findTimeIdByDateAndThemeId(LocalDate date, Long themeId);
+    default List<Long> findTimeIdByDateAndThemeId(LocalDate date, Long themeId) {
+        return findByDateAndThemeId(date, themeId).stream()
+                .map(TimeIdProjection::getTimeId)
+                .toList();
+    }
+
+    List<TimeIdProjection> findByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
 
