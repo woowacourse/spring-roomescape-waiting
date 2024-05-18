@@ -32,10 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
 });
 
-function renderTheme(themes) {
+function renderTheme(data) {
     const themeSlots = document.getElementById('theme-slots');
     themeSlots.innerHTML = '';
-    themes.forEach(theme => {
+    data.themes.forEach(theme => {
         const name = theme.name
         const themeId = theme.id
         themeSlots.appendChild(createSlot('theme', name, themeId));
@@ -95,7 +95,7 @@ function fetchAvailableTimes(date, themeId) {
         .catch(error => console.error("Error fetching available times:", error));
 }
 
-function renderAvailableTimes(times) {
+function renderAvailableTimes(data) {
     const timeSection = document.getElementById("time-section");
     if (timeSection.classList.contains("disabled")) {
         timeSection.classList.remove("disabled");
@@ -103,11 +103,11 @@ function renderAvailableTimes(times) {
 
     const timeSlots = document.getElementById('time-slots');
     timeSlots.innerHTML = '';
-    if (times.length === 0) {
+    if (data.times.length === 0) {
         timeSlots.innerHTML = '<div class="no-times">선택할 수 있는 시간이 없습니다.</div>';
         return;
     }
-    times.forEach(time => {
+    data.times.forEach(time => {
         const startAt = time.startAt;
         const timeId = time.id;
         const alreadyBooked = time.alreadyBooked;
