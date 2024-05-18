@@ -14,6 +14,9 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAll();
+
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
     default Reservation fetchById(long id) {
