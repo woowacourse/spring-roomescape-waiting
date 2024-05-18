@@ -1,5 +1,7 @@
 package roomescape.handler;
 
+import java.util.stream.Collectors;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -56,8 +58,11 @@ public class GlobalExceptionHandler {
         exception.printStackTrace();
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus,
-                exception.getFieldErrors().get(0).getDefaultMessage());
+        String messages = exception.getBindingResult().getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, messages);
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
