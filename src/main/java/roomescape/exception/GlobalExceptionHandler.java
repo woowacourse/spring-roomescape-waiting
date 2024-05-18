@@ -1,76 +1,85 @@
+
 package roomescape.exception;
 
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import roomescape.exception.dto.ErrorResponse;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    //TODO ErrorResponse 객체 만들기
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> authenticationException(AuthenticationException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("인증되지 않았습니다.");
+        return makeErrorResponseEntity(ErrorCode.UNAUTHROZIED);
     }
 
     @ExceptionHandler(AuthorizationException.class)
-    public ResponseEntity<ProblemDetail> handleAuthorizationException() {
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Object> handleAuthorizationException() {
+        return makeErrorResponseEntity(ErrorCode.NOT_FOUND);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         logger.error(e.getMessage(), e);
-
-        return ResponseEntity.badRequest()
-                .body(ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST,
-                        "잘못된 형식의 Request Body 입니다."
-                ));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        logger.error(e.getMessage(), e);
-
-        String errorMessage = e.getFieldErrors().stream()
-                .map(error -> error.getField() + "는 " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-
-        return ResponseEntity.badRequest()
-                .body(ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST,
-                        errorMessage
-                ));
+        return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
     }
 
     @ExceptionHandler(RoomEscapeBusinessException.class)
-    public ResponseEntity<ProblemDetail> handleIllegalArgument(RoomEscapeBusinessException e) {
+    public ResponseEntity<Object> handleIllegalArgument(RoomEscapeBusinessException e) {
         logger.error(e.getMessage(), e);
-        return ResponseEntity.badRequest()
-                .body(ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST,
-                        e.getMessage()
-                ));
+        return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER, e.getMessage());
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            @Nullable MethodArgumentNotValidException exception,
+            @Nullable HttpHeaders headers,
+            @Nullable HttpStatusCode status,
+            @Nullable WebRequest request) {
+
+        if (exception ==null){
+            return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
+        }
+
+        return makeErrorResponseEntity(
+                ErrorCode.INVALID_PARAMETER,
+                resolveMethodArgumentNotValidMessage(exception)
+        );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemDetail> handleException(Exception e) {
+    public ResponseEntity<Object> handleException(Exception e) {
         logger.error(e.getMessage(), e);
-        return ResponseEntity.internalServerError()
-                .body(ProblemDetail.forStatusAndDetail(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "서버 오류입니다."
-                ));
+        return makeErrorResponseEntity(ErrorCode.INTERNAL_SERVER, e.getMessage());
+    }
+
+    private ResponseEntity<Object> makeErrorResponseEntity(ErrorCode code) {
+        ErrorResponse errorResponse = new ErrorResponse(code);
+        return ResponseEntity.status(errorResponse.status()).body(errorResponse);
+    }
+
+    private ResponseEntity<Object> makeErrorResponseEntity(ErrorCode code, String errorMessage) {
+        ErrorResponse errorResponse = new ErrorResponse(code, errorMessage);
+        return ResponseEntity.status(errorResponse.status()).body(errorResponse);
+    }
+
+    private String resolveMethodArgumentNotValidMessage(MethodArgumentNotValidException exception) {
+        return  exception.getFieldErrors().stream()
+                .map(error -> error.getField() + "는 " + error.getDefaultMessage())
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }
