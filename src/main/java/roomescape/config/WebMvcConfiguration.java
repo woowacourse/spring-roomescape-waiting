@@ -5,25 +5,38 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.service.AuthService;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final AuthService authService;
+    private final AuthInfoArgumentResolver authInfoArgumentResolver;
+    private final CheckAdminInterceptor checkAdminInterceptor;
+    private final CheckLoginInterceptor checkLoginInterceptor;
 
-    public WebMvcConfiguration(AuthService authService) {
-        this.authService = authService;
+    public WebMvcConfiguration(AuthInfoArgumentResolver authInfoArgumentResolver,
+                               CheckAdminInterceptor checkAdminInterceptor,
+                               CheckLoginInterceptor checkLoginInterceptor) {
+        this.authInfoArgumentResolver = authInfoArgumentResolver;
+        this.checkAdminInterceptor = checkAdminInterceptor;
+        this.checkLoginInterceptor = checkLoginInterceptor;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new CheckAdminInterceptor(authService))
+        registry.addInterceptor(checkLoginInterceptor)
+                .addPathPatterns("/admin/**")
+                .addPathPatterns("/reservation")
+                .addPathPatterns("/reservations/**")
+                .addPathPatterns("/themes/**")
+                .addPathPatterns("/times/**")
+                .excludePathPatterns("/themes/ranking");
+
+        registry.addInterceptor(checkAdminInterceptor)
                 .addPathPatterns("/admin/**");
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthInfoArgumentResolver(authService));
+        resolvers.add(authInfoArgumentResolver);
     }
 }
