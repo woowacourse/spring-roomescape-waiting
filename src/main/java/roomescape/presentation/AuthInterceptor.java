@@ -1,25 +1,32 @@
-package roomescape.security;
+package roomescape.presentation;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.exception.AccessDeniedException;
-import roomescape.exception.UnauthorizedException;
+import roomescape.application.AuthService;
+import roomescape.application.AuthorizationExtractor;
+import roomescape.application.MemberService;
 import roomescape.domain.member.Role;
 import roomescape.dto.response.MemberResponse;
-import roomescape.service.MemberService;
-import roomescape.util.CookieUtil;
+import roomescape.exception.AccessDeniedException;
+import roomescape.exception.UnauthorizedException;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
+    private final AuthService authService;
     private final MemberService memberService;
-    private final TokenProvider tokenProvider;
+    private final AuthorizationExtractor<String> authorizationExtractor;
 
-    public AuthInterceptor(MemberService memberService, TokenProvider tokenProvider) {
+    public AuthInterceptor(
+            AuthService authService,
+            MemberService memberService,
+            AuthorizationExtractor<String> authorizationExtractor
+    ) {
+        this.authService = authService;
         this.memberService = memberService;
-        this.tokenProvider = tokenProvider;
+        this.authorizationExtractor = authorizationExtractor;
     }
 
     @Override
@@ -28,10 +35,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             HttpServletResponse response,
             Object handler
     ) {
-        String token = CookieUtil.extractTokenFromCookie(request)
+        String token = authorizationExtractor.extract(request)
                 .orElseThrow(UnauthorizedException::new);
 
-        Long memberId = tokenProvider.getMemberId(token);
+        Long memberId = authService.getMemberIdByToken(token);
         MemberResponse memberResponse = memberService.getById(memberId);
 
         if (memberResponse.role() != Role.ADMIN) {
