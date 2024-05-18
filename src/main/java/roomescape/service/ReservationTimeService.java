@@ -64,7 +64,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    // TODO: 이거 삭제
     private ReservationTime findValidatedReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("아이디에 해당하는 예약 시간을 찾을 수 없습니다."));

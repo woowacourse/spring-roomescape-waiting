@@ -9,8 +9,6 @@ import roomescape.acceptance.BaseAcceptanceTest;
 import roomescape.dto.response.MultipleResponse;
 import roomescape.dto.response.ReservationResponse;
 
-import java.time.LocalDate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance.Fixture.adminToken;
 import static roomescape.acceptance.PreInsertedData.*;

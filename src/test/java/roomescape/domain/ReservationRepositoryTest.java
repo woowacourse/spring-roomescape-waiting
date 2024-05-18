@@ -1,7 +1,6 @@
 package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -64,13 +63,13 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
                                 RESERVATION_CUSTOMER1_THEME2_240501_1100,
                                 RESERVATION_CUSTOMER1_THEME2_240501_1200
                         )),
-                Arguments.of(null,  null, LocalDate.parse("2024-05-02"), null,
+                Arguments.of(null, null, LocalDate.parse("2024-05-02"), null,
                         List.of(
                                 RESERVATION_CUSTOMER1_THEME3_240502_1100,
                                 RESERVATION_CUSTOMER2_THEME3_240502_1200,
                                 RESERVATION_CUSTOMER2_THEME3_240503_1200
                         )),
-                Arguments.of(null,  null, null, LocalDate.parse("2024-05-02"),
+                Arguments.of(null, null, null, LocalDate.parse("2024-05-02"),
                         List.of(
                                 RESERVATION_CUSTOMER1_THEME2_240501_1100,
                                 RESERVATION_CUSTOMER1_THEME3_240502_1100,
