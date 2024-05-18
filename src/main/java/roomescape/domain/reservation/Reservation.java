@@ -1,12 +1,19 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 @Entity
@@ -38,19 +45,9 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
-    }
-
-    public Reservation(final Long id, final Member member, final String date,
-                       final ReservationTime time, final Theme theme) {
-        this(id, member, convertToLocalDate(date), time, theme);
-    }
-
-    public Reservation(final Long id, final Member member, final LocalDate date,
-                       final ReservationTime time, final Theme theme) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
-        this.id = id;
+        this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
@@ -58,19 +55,8 @@ public class Reservation {
         this.status = ReservationStatus.WAITING;
     }
 
-    private static LocalDate convertToLocalDate(final String date) {
-        if (date == null || date.isEmpty()) {
-            throw new IllegalArgumentException("예약 날짜가 비어있습니다.");
-        }
-        try {
-            return LocalDate.parse(date);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("유효하지 않은 예약 날짜입니다.");
-        }
-    }
-
     private void validateDate(final LocalDate date) {
-        if (date.isBefore(LocalDate.now()) || date.equals(LocalDate.now())) {
+        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
             throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
         }
     }

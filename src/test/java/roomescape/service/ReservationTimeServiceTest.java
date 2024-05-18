@@ -13,16 +13,21 @@ import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
+import static roomescape.TestFixture.RESERVATION_TIME_SIX;
+import static roomescape.TestFixture.START_AT_SEVEN;
+import static roomescape.TestFixture.START_AT_SIX;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -100,7 +105,7 @@ class ReservationTimeServiceTest {
     void findAvailableReservationTimes() {
         // given
         final ReservationTime reservedTime = RESERVATION_TIME_SIX(1L);
-        final AvailableReservationTimeSearch condition = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
+        final AvailableReservationTimeSearch condition = new AvailableReservationTimeSearch(DATE_MAY_EIGHTH, 1L);
 
         given(reservationRepository.findTimeIds(condition))
                 .willReturn(List.of(1L));

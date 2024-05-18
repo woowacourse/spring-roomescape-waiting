@@ -18,10 +18,23 @@ import roomescape.repository.ReservationRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.ADMIN;
+import static roomescape.TestFixture.ADMIN_NAME;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.DATE_MAY_NINTH;
+import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
+import static roomescape.TestFixture.RESERVATION_TIME_SIX;
+import static roomescape.TestFixture.START_AT_SEVEN;
+import static roomescape.TestFixture.START_AT_SIX;
+import static roomescape.TestFixture.THEME_DETECTIVE;
+import static roomescape.TestFixture.THEME_DETECTIVE_NAME;
+import static roomescape.TestFixture.THEME_HORROR;
+import static roomescape.TestFixture.THEME_HORROR_NAME;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -38,8 +51,7 @@ class ReservationServiceTest {
         // given
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
         given(reservationRepository.save(reservation))
-                .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
-                        reservation.getTime(), reservation.getTheme()));
+                .willReturn(new Reservation(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme()));
 
         // when
         final ReservationResponse response = reservationService.create(reservation);
@@ -54,7 +66,7 @@ class ReservationServiceTest {
         // given
         final Theme theme = THEME_HORROR(1L);
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
-        given(reservationRepository.countByDateAndTime_IdAndTheme_Id(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
+        given(reservationRepository.countByDateAndTime_IdAndTheme_Id(DATE_MAY_EIGHTH, RESERVATION_TIME_SIX().getId(), theme.getId()))
                 .willReturn(1);
 
         // when & then
@@ -80,7 +92,7 @@ class ReservationServiceTest {
                     .extracting(ReservationResponse::name)
                     .containsExactly(TestFixture.MEMBER_MIA_NAME, ADMIN_NAME);
             assertThat(reservations).extracting(ReservationResponse::date)
-                    .containsExactly(LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_EIGHTH));
+                    .containsExactly(DATE_MAY_EIGHTH, DATE_MAY_EIGHTH);
             assertThat(reservations).extracting(ReservationResponse::time)
                     .extracting(ReservationTimeResponse::startAt)
                     .containsExactly(START_AT_SIX, START_AT_SEVEN);

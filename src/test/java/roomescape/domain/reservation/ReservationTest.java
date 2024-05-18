@@ -1,19 +1,40 @@
 package roomescape.domain.reservation;
 
-import static org.assertj.core.api.Assertions.*;
-import static roomescape.TestFixture.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.DATE_MAY_NINTH;
+import static roomescape.TestFixture.MEMBER_MIA;
+import static roomescape.TestFixture.RESERVATION_TIME_SIX;
+import static roomescape.TestFixture.START_AT_SEVEN;
+import static roomescape.TestFixture.START_AT_SIX;
+import static roomescape.TestFixture.THEME_HORROR;
+
 class ReservationTest {
+
+    private static Stream<LocalDate> invalidLocalDate() {
+        return Stream.of(
+                LocalDate.now(),
+                LocalDate.now().minusDays(1L)
+        );
+    }
+
+    private static Stream<Arguments> reservationsAndExpectedResult() {
+        return Stream.of(
+                Arguments.of(DATE_MAY_EIGHTH, START_AT_SIX, true),
+                Arguments.of(DATE_MAY_NINTH, START_AT_SEVEN, false)
+        );
+    }
 
     @Test
     @DisplayName("예약이 생성된다.")
@@ -26,23 +47,6 @@ class ReservationTest {
     @MethodSource("invalidLocalDate")
     @DisplayName("예약 날짜가 현재 날짜 이후가 아닌 경우 예외가 발생한다.")
     void throwExceptionWhenInvalidDate(final LocalDate invalidDate) {
-        assertThatThrownBy(() -> new Reservation(MEMBER_MIA(), invalidDate.toString(), RESERVATION_TIME_SIX(), THEME_HORROR()))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    private static Stream<LocalDate> invalidLocalDate() {
-        return Stream.of(
-                LocalDate.now(),
-                LocalDate.now().minusDays(1L)
-        );
-    }
-
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", "22:00:00", "abc"})
-    @DisplayName("예약 날짜 입력 값이 유효하지 않으면 예외가 발생한다.")
-    void throwExceptionWhenCannotConvertToLocalDate(final String invalidDate) {
-        // when & then
         assertThatThrownBy(() -> new Reservation(MEMBER_MIA(), invalidDate, RESERVATION_TIME_SIX(), THEME_HORROR()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -59,12 +63,5 @@ class ReservationTest {
 
         // then
         assertThat(actual).isEqualTo(expectedResult);
-    }
-
-    private static Stream<Arguments> reservationsAndExpectedResult() {
-        return Stream.of(
-                Arguments.of(DATE_MAY_EIGHTH, START_AT_SIX, true),
-                Arguments.of(DATE_MAY_NINTH, START_AT_SEVEN, false)
-        );
     }
 }

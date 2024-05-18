@@ -10,11 +10,14 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.DATE_MAY_NINTH;
+import static roomescape.TestFixture.MEMBER_BROWN;
+import static roomescape.TestFixture.RESERVATION_TIME_SIX;
+import static roomescape.TestFixture.THEME_HORROR;
 
 class ReservationRepositoryTest extends RepositoryTest {
 
@@ -61,7 +64,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     void findAllByFilterParameter() {
         // when
         final List<Reservation> actual = reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
-                theme.getId(), member.getId(), LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_NINTH)
+                theme.getId(), member.getId(), DATE_MAY_EIGHTH, DATE_MAY_NINTH
         );
 
         // then
@@ -73,7 +76,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     void countByDateAndTime() {
         // when
         final int actual = reservationRepository.countByDateAndTime_IdAndTheme_Id(
-                LocalDate.parse(DATE_MAY_EIGHTH), reservationTime.getId(), theme.getId()
+                DATE_MAY_EIGHTH, reservationTime.getId(), theme.getId()
         );
 
         // then
@@ -132,7 +135,7 @@ class ReservationRepositoryTest extends RepositoryTest {
     void findAllByDateAndThemeId() {
         // given
         AvailableReservationTimeSearch condition = new AvailableReservationTimeSearch(
-                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId()
+                DATE_MAY_EIGHTH, theme.getId()
         );
 
         // when

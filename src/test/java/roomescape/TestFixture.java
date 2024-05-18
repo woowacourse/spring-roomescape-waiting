@@ -6,6 +6,8 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 
+import java.time.LocalDate;
+
 public class TestFixture {
 
     public static final String ADMIN_NAME = "냥인";
@@ -17,8 +19,8 @@ public class TestFixture {
     public static final String MEMBER_BROWN_EMAIL = "brown@email.com";
     public static final String MEMBER_PASSWORD = "1234";
 
-    public static final String DATE_MAY_EIGHTH = "2034-05-08";
-    public static final String DATE_MAY_NINTH = "2034-05-09";
+    public static final LocalDate DATE_MAY_EIGHTH = LocalDate.of(2034, 5, 8);
+    public static final LocalDate DATE_MAY_NINTH = LocalDate.of(2034, 5, 9);
 
     public static final String START_AT_SIX = "18:00";
     public static final String START_AT_SEVEN = "19:00";

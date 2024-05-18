@@ -59,11 +59,10 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 가능한 시간 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindAvailableReservationTimes() {
-        final String date = DATE_MAY_EIGHTH;
         final Long themeId = saveTheme();
 
         RestAssured.given().log().all()
-                .queryParam("date", date)
+                .queryParam("date", DATE_MAY_EIGHTH.toString())
                 .queryParam("themeId", themeId)
                 .when().get("/times/available")
                 .then().log().all()
