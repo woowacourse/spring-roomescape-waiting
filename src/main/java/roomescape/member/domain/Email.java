@@ -19,10 +19,6 @@ public class Email {
         this.email = email;
     }
 
-    public static Email from() {
-        return new Email(null);
-    }
-
     public static Email from(String email) {
         validate(email);
         return new Email(email);

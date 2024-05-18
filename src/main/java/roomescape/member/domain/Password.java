@@ -26,10 +26,6 @@ public class Password {
         return new Password(password);
     }
 
-    public static Password from() {
-        return new Password(null);
-    }
-
     public String getPassword() {
         return password;
     }
