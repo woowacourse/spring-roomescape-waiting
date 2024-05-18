@@ -29,14 +29,17 @@ public class Theme {
     }
 
     public Theme(Long id, Name name, String description, String thumbnail) {
+        validateNotNull(name, description, thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public boolean isId(Long id) {
-        return this.id == id;
+    private void validateNotNull(Name name, String description, String thumbnail) {
+        if (name == null || description == null || thumbnail == null) {
+            throw new IllegalArgumentException("Theme의 name, description, thumbnail은 null일 수 없습니다.");
+        }
     }
 
     public Long getId() {

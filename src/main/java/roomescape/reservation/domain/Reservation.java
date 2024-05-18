@@ -32,11 +32,18 @@ public class Reservation {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        validateNotNull(date, reservationTime, theme, member);
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
+    }
+
+    private void validateNotNull(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        if (date == null || reservationTime == null || theme == null || member == null) {
+            throw new IllegalArgumentException("Reservation의 date, reservationTime, theme, member는 null일 수 없습니다.");
+        }
     }
 
     public Reservation(Long id, Reservation reservation) {

@@ -37,11 +37,18 @@ public class Member {
     }
 
     public Member(Long id, Name name, Email email, Role role, Password password) {
+        validateNotNull(name, email, role, password);
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
         this.password = password;
+    }
+
+    private void validateNotNull(Name name, Email email, Role role, Password password) {
+        if (name == null || email == null || role == null || password == null) {
+            throw new IllegalArgumentException("id를 제외한 Member의 필드는 null일 수 없습니다.");
+        }
     }
 
     public Member(Name name, Email email, Role role, Password password) {
