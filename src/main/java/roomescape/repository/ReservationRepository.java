@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
@@ -48,5 +49,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 condition.dateFrom(), condition.dateTo());
     }
 
-    List<Reservation> findAllByMemberId(Long id);
+    @EntityGraph(attributePaths = {"theme", "time"})
+    List<Reservation> findAllByMemberId(long id);
 }
