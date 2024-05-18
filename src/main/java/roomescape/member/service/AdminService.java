@@ -42,16 +42,16 @@ public class AdminService {
 
     private Theme findTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
     private Member findMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
     private ReservationTime findReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 }
