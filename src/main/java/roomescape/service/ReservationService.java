@@ -15,7 +15,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationSpecification;
+import roomescape.repository.ReservationSearchSpecification;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.RoomThemeRepository;
 import roomescape.service.dto.AuthInfo;
@@ -57,10 +57,12 @@ public class ReservationService {
 
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
-        Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
-                .and(ReservationSpecification.hasMemberId(memberId))
-                .and(ReservationSpecification.fromDate(dateFrom))
-                .and(ReservationSpecification.toDate(dateTo));
+        Specification<Reservation> spec = new ReservationSearchSpecification()
+                .themeId(themeId)
+                .memberId(memberId)
+                .startFrom(dateFrom)
+                .endAt(dateTo)
+                .build();
 
         return reservationRepository.findAll(spec).stream()
                 .map(ReservationResponse::from)
