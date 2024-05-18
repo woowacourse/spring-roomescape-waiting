@@ -13,23 +13,14 @@ import roomescape.reservation.repository.ReservationRepository;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final ReservationRepository reservationRepository;
 
-    public MemberService(final MemberRepository memberRepository, final ReservationRepository reservationRepository) {
+    public MemberService(final MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public List<FindMembersResponse> getMembers() {
         return memberRepository.findAll().stream()
                 .map(FindMembersResponse::of)
-                .toList();
-    }
-
-    public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
-        return reservations.stream()
-                .map(FindReservationResponse::from)
                 .toList();
     }
 }

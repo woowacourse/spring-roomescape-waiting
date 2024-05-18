@@ -126,4 +126,11 @@ public class ReservationService {
             throw new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다.");
         }
     }
+
+    public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
+        return reservations.stream()
+                .map(roomescape.member.dto.response.FindReservationResponse::from)
+                .toList();
+    }
 }

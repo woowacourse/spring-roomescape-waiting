@@ -10,15 +10,18 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.member.dto.response.FindReservationResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.response.FindMembersResponse;
+import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/members")
 public class MemberController {
 
     private final MemberService memberService;
+    private final ReservationService reservationService;
 
-    public MemberController(final MemberService memberService) {
+    public MemberController(final MemberService memberService, final ReservationService reservationService) {
         this.memberService = memberService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping
@@ -28,6 +31,6 @@ public class MemberController {
 
     @GetMapping("/reservations")
     public ResponseEntity<List<FindReservationResponse>> getMembersWithReservations(@AuthenticationPrincipal AuthInfo authInfo) {
-        return ResponseEntity.ok(memberService.getReservationsByMember(authInfo));
+        return ResponseEntity.ok(reservationService.getReservationsByMember(authInfo));
     }
 }
