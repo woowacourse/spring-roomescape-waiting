@@ -1,6 +1,5 @@
 package roomescape.service.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import roomescape.domain.Member;
@@ -11,13 +10,14 @@ import roomescape.domain.RoomTheme;
 public record ReservationCreateRequest(
         @NotNull
         Long memberId,
-        @NotNull
-        @JsonFormat(pattern = "yyyy-MM-dd")
+        @NotNull(message = "예약 날짜를 입력해주세요.")
         LocalDate date,
         @NotNull
         Long timeId,
         @NotNull
-        Long themeId) {
+        Long themeId
+) {
+
     public static ReservationCreateRequest from(ReservationCreateMemberRequest adminRequest, Long memberId) {
         return new ReservationCreateRequest(memberId, adminRequest.date(), adminRequest.timeId(),
                 adminRequest.themeId());

@@ -1,6 +1,8 @@
 package roomescape.handler;
 
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import roomescape.handler.dto.ExceptionResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ExceptionResponse> handleException(BadRequestException exception) {
@@ -55,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleException(MethodArgumentNotValidException exception) {
-        exception.printStackTrace();
+        logger.error("요청 입력에서의 예외. 메시지 = {}", exception.getMessage());
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         String messages = exception.getBindingResult().getAllErrors().stream()
@@ -68,16 +72,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionResponse> handleException(HttpMessageNotReadableException exception) {
-        exception.printStackTrace();
+        logger.error("요청 입력에서의 예외. 메시지 = {}", exception.getMessage());
 
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "잘못된 형식의 Request Body 입니다.");
+        ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "입력값을 확인해 주세요.");
         return ResponseEntity.status(httpStatus).body(exceptionResponse);
     }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ExceptionResponse> handleException(Exception exception) {
-        exception.printStackTrace();
+        logger.error("기타 예외 발생.", exception);
 
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         ExceptionResponse exceptionResponse = new ExceptionResponse(httpStatus, "서버에서 예기치 못한 에러가 발생했습니다.");
