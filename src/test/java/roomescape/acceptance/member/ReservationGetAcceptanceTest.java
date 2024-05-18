@@ -28,9 +28,9 @@ class ReservationGetAcceptanceTest extends BaseAcceptanceTest {
                 .as(reservationListFormat);
 
         assertThat(response.items()).containsExactly(
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_1),
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_2),
-                MemberReservationResponse.from(PRE_INSERTED_RESERVATION_3)
+                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1100),
+                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME3_240502_1100),
+                MemberReservationResponse.from(RESERVATION_CUSTOMER1_THEME2_240501_1200)
         );
     }
 

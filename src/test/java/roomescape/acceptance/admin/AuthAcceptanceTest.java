@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.acceptance.Fixture.secretKey;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_ADMIN;
+import static roomescape.acceptance.PreInsertedData.ADMIN;
 
 class AuthAcceptanceTest extends BaseAcceptanceTest {
 
@@ -28,8 +28,8 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
     @TestFactory
     Stream<DynamicTest> login_andGetLoginInfo_success() {
         LogInRequest adminRequest = new LogInRequest(
-                PRE_INSERTED_ADMIN.getEmail(),
-                PRE_INSERTED_ADMIN.getPassword()
+                ADMIN.getEmail(),
+                ADMIN.getPassword()
         );
 
         return Stream.of(
@@ -38,7 +38,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
                             Claims claims = parseToken(token);
 
                             assertThat(claims.getSubject())
-                                    .isEqualTo(PRE_INSERTED_ADMIN.getId().toString());
+                                    .isEqualTo(ADMIN.getId().toString());
                         }
                 ),
                 dynamicTest("로그인 정보를 확인한다.", () -> {
@@ -46,7 +46,7 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
                             MemberPreviewResponse response = sendCheckNameRequest(token);
 
                             assertThat(response.name())
-                                    .isEqualTo(PRE_INSERTED_ADMIN.getName());
+                                    .isEqualTo(ADMIN.getName());
                         }
                 )
         );
@@ -82,8 +82,8 @@ class AuthAcceptanceTest extends BaseAcceptanceTest {
     @Test
     void logout_success() {
         LogInRequest adminRequest = new LogInRequest(
-                PRE_INSERTED_ADMIN.getEmail(),
-                PRE_INSERTED_ADMIN.getPassword()
+                ADMIN.getEmail(),
+                ADMIN.getPassword()
         );
         String token = sendLoginRequest(adminRequest);
 

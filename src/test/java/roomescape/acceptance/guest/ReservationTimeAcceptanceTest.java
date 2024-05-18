@@ -19,8 +19,8 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
     @DisplayName("날짜와 테마에 해당하는 예약 시간 목록 조회")
     @Test
     void getAvailableTimes_success() {
-        LocalDate date = PRE_INSERTED_RESERVATION_1.getDate();
-        long themeId = PRE_INSERTED_RESERVATION_1.getTheme().getId();
+        LocalDate date = RESERVATION_CUSTOMER1_THEME2_240501_1100.getDate();
+        long themeId = RESERVATION_CUSTOMER1_THEME2_240501_1100.getTheme().getId();
 
         TypeRef<MultipleResponse<AvailableReservationTimeResponse>> availableTimesFormat = new TypeRef<>() {
         };
@@ -32,9 +32,9 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
                 .extract().as(availableTimesFormat);
 
         Assertions.assertThat(availableReservationTimeResponses.items()).containsExactlyInAnyOrder(
-                AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_1, false),
-                AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_2, true),
-                AvailableReservationTimeResponse.from(PRE_INSERTED_RESERVATION_TIME_3, true)
+                AvailableReservationTimeResponse.from(TIME_10_O0, false),
+                AvailableReservationTimeResponse.from(TIME_11_00, true),
+                AvailableReservationTimeResponse.from(TIME_12_00, true)
         );
     }
 }

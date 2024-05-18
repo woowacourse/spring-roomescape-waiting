@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.customerToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_THEME_1;
+import static roomescape.acceptance.PreInsertedData.TIME_10_O0;
+import static roomescape.acceptance.PreInsertedData.THEME_1;
 
 @DisplayName("고객이 예약을 추가한다.")
 class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
@@ -83,8 +83,8 @@ class ReservationAddAcceptanceTest extends BaseAcceptanceTest {
     private MemberReservationRequest getRequestBody(LocalDate date) {
         return new MemberReservationRequest(
                 date,
-                PRE_INSERTED_RESERVATION_TIME_1.getId(),
-                PRE_INSERTED_THEME_1.getId()
+                TIME_10_O0.getId(),
+                THEME_1.getId()
         );
     }
 

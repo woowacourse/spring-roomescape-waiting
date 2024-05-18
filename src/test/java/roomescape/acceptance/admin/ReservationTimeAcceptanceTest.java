@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.acceptance.Fixture.adminToken;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_1;
-import static roomescape.acceptance.PreInsertedData.PRE_INSERTED_RESERVATION_TIME_2;
+import static roomescape.acceptance.PreInsertedData.TIME_10_O0;
+import static roomescape.acceptance.PreInsertedData.TIME_11_00;
 
 class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
 
@@ -63,7 +63,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("정상 작동")
         @Test
         void deleteReservationTime_forExist_success() {
-            long existReservationTimeId = PRE_INSERTED_RESERVATION_TIME_1.getId();
+            long existReservationTimeId = TIME_10_O0.getId();
 
             sendDeleteRequest(existReservationTimeId)
                     .statusCode(HttpStatus.NO_CONTENT.value());
@@ -87,7 +87,7 @@ class ReservationTimeAcceptanceTest extends BaseAcceptanceTest {
         @DisplayName("예외 발생 - 예약이 있는 예약 시간을 삭제한다.")
         @Test
         void deleteReservationTime_whenReservationExist_fail() {
-            long timeIdWhereReservationExist = PRE_INSERTED_RESERVATION_TIME_2.getId();
+            long timeIdWhereReservationExist = TIME_11_00.getId();
 
             CustomExceptionResponse response = sendDeleteRequest(timeIdWhereReservationExist)
                     .statusCode(HttpStatus.BAD_REQUEST.value())
