@@ -2,16 +2,15 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationNotFoundException;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -27,20 +26,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByThemeId(long themeId);
 
-    List<Reservation> findAllByDateBetween(LocalDate from, LocalDate until);
-
-    default List<Theme> findPopularThemes(LocalDate from, LocalDate until, int limit) {
-
-        final List<Reservation> allBetween = findAllByDateBetween(from, until);
-        return allBetween.stream()
-                .collect(Collectors.groupingBy(Reservation::getTheme))
-                .entrySet()
-                .stream()
-                .sorted(Comparator.comparingInt(a -> -a.getValue().size()))
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
-    }
+    @Query("""
+            SELECT r.theme FROM Reservation r
+            WHERE r.date BETWEEN :from AND :until
+            GROUP BY r.theme
+            ORDER BY COUNT(r.theme) DESC
+            LIMIT :limitCount
+            """)
+    List<Theme> findPopularThemes(@Param("from") LocalDate from,
+                                  @Param("until") LocalDate until,
+                                  @Param("limitCount") int limitCount);
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId, LocalDate from, LocalDate until);
 
