@@ -20,17 +20,13 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(final LocalTime startAt) {
         this.startAt = startAt;
     }
-    public static ReservationTime from(final String startAt){
-        return ReservationTime.from(null,startAt);
-    }
 
-    public static ReservationTime from(final Long id, final String startAt) {
+    public static ReservationTime from(final String startAt) {
         try {
-            return new ReservationTime(id, LocalTime.parse(startAt));
+            return new ReservationTime(LocalTime.parse(startAt));
         } catch (final DateTimeException exception) {
             throw new IllegalArgumentException(String.format("%s 는 유효하지 않은 값입니다.(EX: 10:00)", startAt));
         }

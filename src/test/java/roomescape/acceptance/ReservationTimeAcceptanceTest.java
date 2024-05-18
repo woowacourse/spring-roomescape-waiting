@@ -70,9 +70,9 @@ public class ReservationTimeAcceptanceTest {
             @Test
             @DisplayName("409를 반환한다.")
             void some() {
-                final ReservationTime createReservationTime = 예약_시간_생성();
+                final ReservationTimeResponse createResponse = 예약_시간_생성();
                 final ReservationTimeRequest request = new ReservationTimeRequest(
-                        createReservationTime.getStartAtAsString()
+                        createResponse.startAt()
                 );
 
                 //@formatter:off
@@ -93,15 +93,16 @@ public class ReservationTimeAcceptanceTest {
             @Test
             @DisplayName("204를 반환한다.")
             void it_returns_204() {
-                final ReservationTime createReservationTime = 예약_시간_생성();
+                final ReservationTimeResponse createResponse = 예약_시간_생성();
 
                 //@formatter:off
                 RestAssured.given().contentType(ContentType.JSON)
-                        .when().delete("/times/"+createReservationTime.getId())
+                        .when().delete("/times/"+createResponse.id())
                         .then().assertThat().statusCode(204);
                 //@formatter:on
             }
         }
+
         @Nested
         @DisplayName("존재하지 않는 식별자를 가지고 삭제하는 경우")
         class ContextWithNotExistId {

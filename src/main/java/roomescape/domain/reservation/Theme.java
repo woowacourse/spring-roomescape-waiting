@@ -18,16 +18,15 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(final Long id, final String name, final String description, final Thumbnail thumbnail) {
+    public Theme(final String name, final String description, final Thumbnail thumbnail) {
         validate(name, description);
-        this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public static Theme of(final Long id, final String name, final String description, final String thumbnail) {
-        return new Theme(id, name, description, new Thumbnail(thumbnail));
+    public static Theme of(final String name, final String description, final String thumbnail) {
+        return new Theme(name, description, new Thumbnail(thumbnail));
     }
 
     private void validate(final String name, final String description) {

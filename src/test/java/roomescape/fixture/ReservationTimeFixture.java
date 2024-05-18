@@ -15,8 +15,9 @@ public class ReservationTimeFixture {
     public ReservationTimeOutput 예약_시간_생성() {
         return reservationTimeService.createReservationTime(reservationTimeInput());
     }
+
     public static ReservationTime getDomain() {
-        return ReservationTime.from(null, "11:00");
+        return ReservationTime.from("11:00");
     }
 
     public static ReservationTimeInput reservationTimeInput() {

@@ -4,22 +4,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.user.Member;
-import roomescape.domain.user.Role;
+import roomescape.acceptance.fixture.MemberFixture;
+import roomescape.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class TokenProviderTest {
     @Autowired
+    MemberRepository memberRepository;
+    @Autowired
     private TokenProvider tokenProvider;
 
     @Test
     @DisplayName("토큰을 생성하고,추출한다")
     void some() {
-        final var token = tokenProvider.generateToken(
-                Member.from(3L, "조이썬", "joyson5582@gmail.com", "password1234", Role.ADMIN));
+        final var member = memberRepository.save(MemberFixture.getDomain());
+        final var token = tokenProvider.generateToken(member);
         final var decodeInfo = tokenProvider.decodeToken(token);
-        assertThat(decodeInfo.getId()).isEqualTo(3);
+        assertThat(decodeInfo.getId()).isEqualTo(member.getId());
     }
 }

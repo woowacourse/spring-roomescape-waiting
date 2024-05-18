@@ -11,15 +11,15 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.user.Member;
 import roomescape.exception.ExistReservationException;
 import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.dto.input.ReservationTimeInput;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.ThemeInput;
-import roomescape.service.dto.output.ReservationTimeOutput;
 import roomescape.service.dto.output.ThemeOutput;
 import roomescape.util.DatabaseCleaner;
-import roomescape.util.ReservationInserter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.*;
 class ThemeServiceTest {
 
     @Autowired
-    ThemeService themeService;
+    ThemeService sut;
     @Autowired
-    ReservationTimeService reservationTimeService;
+    ThemeRepository themeRepository;
+    @Autowired
+    ReservationTimeRepository reservationTimeRepository;
     @Autowired
     ReservationRepository reservationRepository;
-    @Autowired
-    ReservationInserter reservationInserter;
     @Autowired
     MemberRepository memberRepository;
 
@@ -56,7 +56,7 @@ class ThemeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
         );
-        assertThatCode(() -> themeService.createTheme(input))
+        assertThatCode(() -> sut.createTheme(input))
                 .doesNotThrowAnyException();
     }
 
@@ -68,7 +68,7 @@ class ThemeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
         );
-        assertThatThrownBy(() -> themeService.createTheme(input))
+        assertThatThrownBy(() -> sut.createTheme(input))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -80,77 +80,67 @@ class ThemeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
         );
-        themeService.createTheme(input);
+        sut.createTheme(input);
 
-        final var result = themeService.getAllThemes();
+        final var result = sut.getAllThemes();
         assertThat(result).hasSize(1);
     }
 
     @Test
     @DisplayName("특정 테마에 대한 예약이 존재하면 예외를 발생한다.")
     void throw_exception_when_delete_id_that_exist_reservation() {
-        final ThemeOutput themeOutput = themeService.createTheme(
-                ThemeFixture.getInput());
-
-        final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
-                new ReservationTimeInput("10:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-
         reservationRepository.save(Reservation.fromComplete(
-                 
                 "2024-04-30",
-                ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
-                Theme.of(themeOutput.id(), themeOutput.name(), themeOutput.description(), themeOutput.thumbnail()),
+                reservationTime,
+                theme,
                 member
         ));
-        final var themeId = themeOutput.id();
+        final var themeId = theme.getId();
 
-        assertThatThrownBy(() -> themeService.deleteTheme(themeId))
+        assertThatThrownBy(() -> sut.deleteTheme(themeId))
                 .isInstanceOf(ExistReservationException.class);
     }
 
     @Test
     @DisplayName("예약이 많은 테마 순으로 조회한다.")
     void get_popular_themes() {
-        final ThemeOutput themeOutput1 = themeService.createTheme(ThemeFixture.getInput());
-        final ThemeOutput themeOutput2 = themeService.createTheme(new ThemeInput(
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Theme theme1 = themeRepository.save(Theme.of(
                 "레벨3 탈출",
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
         ));
-        final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
-                new ReservationTimeInput("10:00"));
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.fromComplete(
-                 
                 "2024-06-01",
-                ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
-                Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
+                reservationTime,
+                theme,
                 member
         ));
         reservationRepository.save(Reservation.fromComplete(
-                 
                 "2024-06-02",
-                ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
-                Theme.of(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(), themeOutput1.thumbnail()),
+                reservationTime,
+                theme,
                 member
         ));
         reservationRepository.save(Reservation.fromComplete(
-                 
+
                 "2024-06-03",
-                ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
-                Theme.of(themeOutput2.id(), themeOutput2.name(), themeOutput2.description(), themeOutput2.thumbnail()),
+                reservationTime,
+                theme1,
                 member
         ));
 
-        final List<ThemeOutput> popularThemes = themeService.getPopularThemes(LocalDate.parse("2024-06-04"));
+        final List<ThemeOutput> popularThemes = sut.getPopularThemes(LocalDate.parse("2024-06-04"));
 
         assertThat(popularThemes).containsExactly(
-                new ThemeOutput(themeOutput1.id(), themeOutput1.name(), themeOutput1.description(),
-                        themeOutput1.thumbnail()),
-                new ThemeOutput(themeOutput2.id(), themeOutput2.name(), themeOutput2.description(),
-                        themeOutput2.thumbnail())
+                ThemeOutput.toOutput(theme),
+                ThemeOutput.toOutput(theme1)
         );
     }
 }

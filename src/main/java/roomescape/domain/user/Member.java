@@ -22,8 +22,7 @@ public class Member {
     protected Member() {
     }
 
-    public Member(final Long id, final Name name, final Email email, final Password password, final Role role) {
-        this.id = id;
+    public Member(final Name name, final Email email, final Password password, final Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -31,13 +30,8 @@ public class Member {
     }
 
     public static Member from(final String name, final String email, final String password, final Role role) {
-        return new Member(null, new Name(name), new Email(email), new Password(password), role);
+        return new Member(new Name(name), new Email(email), new Password(password), role);
     }
-
-    public static Member from(final Long id, final String name, final String email, final String password, final Role role) {
-        return new Member(id, new Name(name), new Email(email), new Password(password), role);
-    }
-
 
     public boolean isNotEqualPassword(final String password) {
         return !this.password.isEqual(password);

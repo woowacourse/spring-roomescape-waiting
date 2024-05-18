@@ -9,19 +9,18 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.user.Member;
-import roomescape.domain.user.Role;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
 import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.AvailableReservationTimeInput;
-import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.service.dto.output.AvailableReservationTimeOutput;
-import roomescape.service.dto.output.MemberCreateOutput;
-import roomescape.service.dto.output.ReservationTimeOutput;
-import roomescape.service.dto.output.ThemeOutput;
 import roomescape.util.DatabaseCleaner;
 
 import java.time.LocalDate;
@@ -33,18 +32,18 @@ import static org.assertj.core.api.Assertions.*;
 class ReservationTimeServiceTest {
 
     @Autowired
-    ReservationTimeService reservationTimeService;
+    ReservationTimeService sut;
     @Autowired
     ReservationRepository reservationRepository;
 
     @Autowired
-    ReservationService reservationService;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    ThemeService themeService;
+    ThemeRepository themeRepository;
 
     @Autowired
-    MemberService memberService;
+    MemberRepository memberRepository;
 
     @Autowired
     DatabaseCleaner databaseCleaner;
@@ -58,7 +57,7 @@ class ReservationTimeServiceTest {
     @DisplayName("유효한 값을 입력하면 예외를 발생하지 않는다.")
     void create_reservationTime() {
         final ReservationTimeInput input = new ReservationTimeInput("10:00");
-        assertThatCode(() -> reservationTimeService.createReservationTime(input))
+        assertThatCode(() -> sut.createReservationTime(input))
                 .doesNotThrowAnyException();
     }
 
@@ -66,56 +65,52 @@ class ReservationTimeServiceTest {
     @DisplayName("유효하지 않은 값을 입력하면 예외를 발생한다.")
     void throw_exception_when_input_is_invalid() {
         final ReservationTimeInput input = new ReservationTimeInput("");
-        assertThatThrownBy(() -> reservationTimeService.createReservationTime(input))
+        assertThatThrownBy(() -> sut.createReservationTime(input))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("특정 시간에 대한 예약이 존재하면 그 시간을 삭제하려 할 때 예외를 발생한다.")
     void throw_exception_when_delete_id_that_exist_reservation() {
-        final ReservationTimeOutput timeOutput = reservationTimeService.createReservationTime(
-                new ReservationTimeInput("10:00"));
-        final ThemeOutput themeOutput = themeService.createTheme(ThemeFixture.getInput());
-        final MemberCreateOutput memberOutput = memberService.createMember(MemberFixture.getUserCreateInput());
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain());
 
         reservationRepository.save(Reservation.fromComplete(
                 "2024-04-30",
-                ReservationTime.from(timeOutput.id(), timeOutput.startAt()),
-                Theme.of(themeOutput.id(), themeOutput.name(), themeOutput.description(), themeOutput.thumbnail()),
-                Member.from(memberOutput.id(), memberOutput.name(), memberOutput.email(), memberOutput.password(), Role.USER)
+                reservationTime,
+                theme,
+                member
         ));
 
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeOutput.id()))
+        assertThatThrownBy(() -> sut.deleteReservationTime(reservationTime.getId()))
                 .isInstanceOf(ExistReservationException.class);
     }
 
     @Test
     @DisplayName("중복 예약 시간이면 예외를 발생한다.")
     void throw_exception_when_duplicate_reservationTime() {
-        reservationTimeService.createReservationTime(new ReservationTimeInput("10:00"));
-        final var input = new ReservationTimeInput("10:00");
-        assertThatThrownBy(() -> reservationTimeService.createReservationTime(input))
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
+        final var input = new ReservationTimeInput(reservationTime.getStartAtAsString());
+        assertThatThrownBy(() -> sut.createReservationTime(input))
                 .isInstanceOf(AlreadyExistsException.class);
     }
 
     @Test
     @DisplayName("예약 가능한 시간을 조회한다.")
     void get_available_reservationTime() {
-        long timeId1 = reservationTimeService.createReservationTime(new ReservationTimeInput("10:00"))
-                .id();
-        long timeId2 = reservationTimeService.createReservationTime(new ReservationTimeInput("11:00"))
-                .id();
-        long themeId = themeService.createTheme(ThemeFixture.getInput())
-                .id();
-        long memberId = memberService.createMember(MemberFixture.getUserCreateInput()).id();
-        reservationService.createReservation(new ReservationInput("2025-01-01", timeId2, themeId,memberId));
+        final ReservationTime time1 = reservationTimeRepository.save(ReservationTime.from("10:00"));
+        final ReservationTime time2 = reservationTimeRepository.save(ReservationTime.from("11:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain());
+        reservationRepository.save(Reservation.fromComplete("2025-01-01", time1, theme, member));
 
-        List<AvailableReservationTimeOutput> actual = reservationTimeService.getAvailableTimes(
-                new AvailableReservationTimeInput(themeId, LocalDate.parse("2025-01-01")));
+        final List<AvailableReservationTimeOutput> actual = sut.getAvailableTimes(
+                new AvailableReservationTimeInput(theme.getId(), LocalDate.parse("2025-01-01")));
 
         assertThat(actual).containsExactly(
-                new AvailableReservationTimeOutput(timeId1, "10:00:00", false),
-                new AvailableReservationTimeOutput(timeId2, "11:00:00", true)
+                new AvailableReservationTimeOutput(time1.getId(), "10:00:00", true),
+                new AvailableReservationTimeOutput(time2.getId(), "11:00:00", false)
         );
     }
 }

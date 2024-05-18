@@ -32,28 +32,28 @@ class ReservationTimeRepositoryTest {
 
     @Test
     void create() {
-        final var result = sut.save(ReservationTime.from(null, "10:00"));
+        final var result = sut.save(ReservationTime.from("10:00"));
         assertThat(result).isNotNull();
     }
 
     @Test
     void isExistByStartAt() {
-        sut.save(ReservationTime.from(null, "10:00"));
+        sut.save(ReservationTime.from("10:00"));
         final var result = sut.existsByStartAt(LocalTime.parse("10:00"));
         assertThat(result).isTrue();
     }
 
     @Test
     void findById() {
-        final var id = sut.save(ReservationTime.from(null, "10:00"))
+        final var id = sut.save(ReservationTime.from("10:00"))
                 .getId();
         final var result = sut.findById(id);
-        assertThat(result).contains(ReservationTime.from(null, "10:00"));
+        assertThat(result).contains(ReservationTime.from("10:00"));
     }
 
     @Test
     void delete() {
-        final var reservationTime = sut.save(ReservationTime.from(null, "10:00"));
+        final var reservationTime = sut.save(ReservationTime.from("10:00"));
         sut.delete(reservationTime);
         final var result = sut.findById(reservationTime.getId());
         assertThat(result).isNotPresent();
@@ -61,8 +61,8 @@ class ReservationTimeRepositoryTest {
 
     @Test
     void getAll() {
-        sut.save(ReservationTime.from(null, "10:00"));
-        sut.save(ReservationTime.from(null, "11:00"));
+        sut.save(ReservationTime.from("10:00"));
+        sut.save(ReservationTime.from("11:00"));
 
         final var result = sut.findAll();
         assertThat(result).hasSize(2);
@@ -70,8 +70,8 @@ class ReservationTimeRepositoryTest {
 
     @Test
     void get_available_reservationTime_with_date_and_themeId() {
-        final var time = sut.save(ReservationTime.from(null, "12:00"));
-        sut.save(ReservationTime.from(null, "13:00"));
+        final var time = sut.save(ReservationTime.from("12:00"));
+        sut.save(ReservationTime.from("13:00"));
         final var reservation = reservationInserter.addNewReservation("2024-10-03", ThemeFixture.getDomain(), MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
         reservationInserter.addExistReservation("2024-10-03", reservation.getTheme(), reservation.getMember(), time);
 

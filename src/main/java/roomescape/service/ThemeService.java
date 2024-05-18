@@ -26,7 +26,7 @@ public class ThemeService {
     }
 
     public ThemeOutput createTheme(final ThemeInput input) {
-        final Theme theme = themeRepository.save(Theme.of(null, input.name(), input.description(), input.thumbnail()));
+        final Theme theme = themeRepository.save(Theme.of(input.name(), input.description(), input.thumbnail()));
         return ThemeOutput.toOutput(theme);
     }
 
@@ -37,7 +37,9 @@ public class ThemeService {
 
     public List<ThemeOutput> getPopularThemes(final LocalDate date) {
         final VisitDate visitDate = new VisitDate(date);
-        final List<Theme> themes = themeRepository.getPopularTheme(visitDate.beforeWeek().asString(), visitDate.beforeDay().asString(), 10);
+        final List<Theme> themes = themeRepository.getPopularTheme(visitDate.beforeWeek()
+                .asString(), visitDate.beforeDay()
+                .asString(), 10);
         return ThemeOutput.toOutputs(themes);
     }
 
