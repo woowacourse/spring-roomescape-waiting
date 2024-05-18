@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    ResponseEntity<ApiExceptionResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest()
-                .body(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    @ExceptionHandler(RoomescapeException.class)
+    ResponseEntity<ApiExceptionResponse> handleIllegalArgumentException(RoomescapeException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new ApiExceptionResponse(ex.getHttpStatus(), ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

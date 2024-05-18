@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.exception.InvalidRequestException;
 import roomescape.service.BaseServiceTest;
 
 class ThemeDeleteServiceTest extends BaseServiceTest {
@@ -26,7 +27,7 @@ class ThemeDeleteServiceTest extends BaseServiceTest {
     @DisplayName("이미 예약 중인 테마를 삭제할 시 예외가 발생한다.")
     void deleteReservedTime_Failure() {
         assertThatThrownBy(() -> themeDeleteService.deleteTheme(1L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidRequestException.class)
                 .hasMessage("이미 예약중인 테마는 삭제할 수 없습니다.");
     }
 }

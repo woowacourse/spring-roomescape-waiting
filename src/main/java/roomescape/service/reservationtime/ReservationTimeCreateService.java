@@ -2,6 +2,7 @@ package roomescape.service.reservationtime;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
@@ -16,7 +17,7 @@ public class ReservationTimeCreateService {
 
     public ReservationTime createReservationTime(ReservationTimeSaveRequest request) {
         if (reservationTimeRepository.findByStartAt(request.startAt()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 예약 시간입니다.");
+            throw new InvalidRequestException("이미 존재하는 예약 시간입니다.");
         }
 
         ReservationTime newReservationTime = request.toEntity(request);

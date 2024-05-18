@@ -12,6 +12,7 @@ import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.Role;
+import roomescape.exception.InvalidRequestException;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 
@@ -46,7 +47,7 @@ class ReservationCreateServiceTest extends BaseServiceTest {
                 new MemberPassword("1234"), Role.USER);
 
         assertThatThrownBy(() -> reservationCreateService.create(request, member))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidRequestException.class)
                 .hasMessage("해당 시간에 이미 예약된 테마입니다.");
     }
 
@@ -61,7 +62,7 @@ class ReservationCreateServiceTest extends BaseServiceTest {
                 new MemberPassword("1234"), Role.USER);
 
         assertThatThrownBy(() -> reservationCreateService.create(request, member))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidRequestException.class)
                 .hasMessage("지나간 날짜와 시간에 대한 예약 생성은 불가능합니다.");
     }
 }

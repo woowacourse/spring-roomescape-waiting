@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.exception.InvalidRequestException;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
@@ -31,7 +32,7 @@ class ReservationTimeCreateServiceTest extends BaseServiceTest {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> reservationTimeCreateService.createReservationTime(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(InvalidRequestException.class)
                 .hasMessage("이미 존재하는 예약 시간입니다.");
     }
 }

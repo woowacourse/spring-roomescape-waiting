@@ -3,6 +3,7 @@ package roomescape.domain.member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import roomescape.exception.InvalidRequestException;
 
 @Embeddable
 public class MemberName {
@@ -20,7 +21,7 @@ public class MemberName {
 
     private void validateNullOrBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("이름을 입력해주세요.");
+            throw new InvalidRequestException("이름을 입력해주세요.");
         }
     }
 
