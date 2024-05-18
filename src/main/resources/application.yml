@@ -17,4 +17,4 @@ spring:
 security:
   jwt:
     secret-key: hogihogihogihogihogihogihogihogihogihogiHOGIhogihogihogihogi
-    expiration-time: 36000000
+    expiration-time: 36000000000000

@@ -2,12 +2,14 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.domain.PageRequest;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeCreateRequest;
 import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
@@ -15,9 +17,11 @@ public class ThemeService {
 
     private static final int POPULAR_THEME_SIZE = 10;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public Long save(ThemeCreateRequest themeCreateRequest) {
@@ -45,14 +49,24 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<PopularThemeResponse> findThemesLimitTen() {
+    public List<PopularThemeResponse> findPopularThemeBetweenWeekLimitTen() {
+        List<Theme> themes = getThemeBetweenWeek();
+
+        Theme theme = new Theme();
+        List<Theme> popularTheme = theme.getPopularTheme(themes);
+
+        return popularTheme.stream()
+                .limit(10)
+                .map(PopularThemeResponse::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    private List<Theme> getThemeBetweenWeek() {
         LocalDate today = LocalDate.now();
         LocalDate sevenDaysBefore = today.minusDays(7);
 
-        List<Theme> popularTheme = themeRepository.findPopularThemesLimitTen(today, sevenDaysBefore, PageRequest.of(0,
-                POPULAR_THEME_SIZE));
-        return popularTheme.stream()
-                .map(PopularThemeResponse::toResponse)
+        return reservationRepository.findByDateBetween(sevenDaysBefore, today).stream()
+                .map(Reservation::getTheme)
                 .toList();
     }
 
