@@ -24,9 +24,9 @@ public class Reservation {
     @ManyToOne
     private Member member;
     @ManyToOne
-    private Time time;
-    @ManyToOne
     private Theme theme;
+    @ManyToOne
+    private Time time;
     private LocalDate date;
 
     public Reservation() {
@@ -105,30 +105,30 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Reservation that)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof Reservation that)) return false;
+
         if (id == null || that.id == null) {
-            return Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme,
-                    that.theme);
+            return Objects.equals(date, that.date) && Objects.equals(time, that.time)
+                   && Objects.equals(theme, that.theme);
         }
         return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        if (id == null) {
-            return Objects.hash(date, time, theme);
-        }
+        if (id == null) return Objects.hash(date, time, theme);
         return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return "Reservation{" + "date=" + date + ", id=" + id + ", member=" + member + ", time=" + time + ", theme="
-               + theme + '}';
+        return "Reservation{" +
+               "id=" + id +
+               ", member=" + member +
+               ", theme=" + theme +
+               ", time=" + time +
+               ", date=" + date +
+               '}';
     }
 }

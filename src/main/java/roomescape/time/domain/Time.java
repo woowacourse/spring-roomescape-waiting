@@ -56,18 +56,26 @@ public class Time {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        if (this == o) return true;
+        if (!(o instanceof Time time)) return false;
+
+        if (id == null || time.id == null) {
+            return Objects.equals(startAt, time.startAt);
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Time time = (Time) o;
-        return id == time.id;
+        return Objects.equals(id, time.id);
     }
 
     @Override
     public int hashCode() {
+        if (id == null) return Objects.hash(startAt);
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Time{" +
+               "id=" + id +
+               ", startAt=" + startAt +
+               '}';
     }
 }
