@@ -25,7 +25,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Reservation> reservations;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(String name, String email, String password) {

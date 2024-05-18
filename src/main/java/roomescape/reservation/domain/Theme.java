@@ -19,7 +19,7 @@ public class Theme {
     @OneToMany(mappedBy = "theme")
     private List<Reservation> reservations;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(String themeName, String description, String thumbnail) {

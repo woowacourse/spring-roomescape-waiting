@@ -18,7 +18,7 @@ public class ReservationTime {
     @OneToMany(mappedBy = "reservationTime")
     private List<Reservation> reservations;
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(LocalTime startAt) {
