@@ -5,16 +5,16 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public class PlayerName {
+public class MemberName {
     public static final int NAME_MAX_LENGTH = 20;
 
     @Column(nullable = false)
     private String name;
 
-    protected PlayerName() {
+    protected MemberName() {
     }
 
-    public PlayerName(String name) {
+    public MemberName(String name) {
         validateNonBlank(name);
         validateLength(name);
         this.name = name;
@@ -37,10 +37,10 @@ public class PlayerName {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PlayerName playerName)) {
+        if (!(o instanceof MemberName memberName)) {
             return false;
         }
-        return Objects.equals(this.name, playerName.name);
+        return Objects.equals(this.name, memberName.name);
     }
 
     @Override

@@ -12,7 +12,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    private PlayerName name;
+    private MemberName name;
     @Embedded
     private Email email;
     @Embedded
@@ -21,19 +21,19 @@ public class Member {
     protected Member() {
     }
 
-    public Member(Long id, PlayerName name, Email email, Password password) {
+    public Member(Long id, MemberName name, Email email, Password password) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
     }
 
-    public Member(PlayerName name, Email email, Password password) {
+    public Member(MemberName name, Email email, Password password) {
         this(null, name, email, password);
     }
 
     public Member(String name, String email, String password) {
-        this(null, new PlayerName(name), new Email(email), new Password(password));
+        this(null, new MemberName(name), new Email(email), new Password(password));
     }
 
     public boolean hasId(long memberId) {
