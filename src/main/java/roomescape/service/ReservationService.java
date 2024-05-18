@@ -7,19 +7,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.dto.WaitingWithRank;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.slot.ReservationSlot;
-import roomescape.domain.reservation.slot.ReservationTime;
-import roomescape.domain.reservation.slot.ReservationTimeRepository;
-import roomescape.domain.reservation.slot.Theme;
-import roomescape.domain.reservation.slot.ThemeRepository;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.dto.ReservationReadOnly;
+import roomescape.domain.reservation.dto.WaitingWithRank;
+import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationBookedResponse;
 import roomescape.service.dto.ReservationConditionRequest;
@@ -30,30 +26,27 @@ import roomescape.service.dto.UserReservationResponse;
 @Service
 public class ReservationService {
 
+    private final ReservationSlotService reservationSlotService;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
+            ReservationSlotService reservationSlotService,
             ReservationRepository reservationRepository,
             WaitingRepository waitingRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
             MemberRepository memberRepository
     ) {
+        this.reservationSlotService = reservationSlotService;
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
     @Transactional
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Member member = findMemberById(reservationSaveRequest.memberId());
-        ReservationSlot slot = getSlot(reservationSaveRequest);
+        ReservationSlot slot = reservationSlotService.findSlot(reservationSaveRequest.toSlotRequest());
 
         Optional<Reservation> reservation = reservationRepository.findBySlot(slot);
         if (reservation.isPresent()) {
@@ -69,15 +62,6 @@ public class ReservationService {
         Reservation newReservation = new Reservation(member, slot);
         reservationRepository.save(newReservation);
         return ReservationResponse.createByReservation(newReservation);
-    }
-
-    private ReservationSlot getSlot(ReservationSaveRequest reservationSaveRequest) {
-        // TODO : SlotRepository 만들기
-        LocalDate date = reservationSaveRequest.date();
-        ReservationTime time = findTimeById(reservationSaveRequest.timeId());
-        Theme theme = findThemeById(reservationSaveRequest.themeId());
-
-        return new ReservationSlot(date, time, theme);
     }
 
     private void validateDuplicateReservation(Member member, Reservation reservation) {
@@ -136,6 +120,7 @@ public class ReservationService {
         waitingRepository.delete(foundWaiting);
     }
 
+    @Transactional(readOnly = true)
     public Long findMemberIdByWaitingId(Long waitingId) {
         return waitingRepository.findMemberIdById(waitingId);
     }
@@ -143,16 +128,6 @@ public class ReservationService {
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
-    }
-
-    private ReservationTime findTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
 }
 

@@ -25,5 +25,8 @@ public record ReservationSaveRequest(
         @Positive
         Long themeId
 ) {
+        public ReservationSlotRequest toSlotRequest() {
+                return new ReservationSlotRequest(date, timeId, themeId);
+        }
 }
 

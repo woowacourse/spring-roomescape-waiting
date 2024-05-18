@@ -27,7 +27,7 @@ public record ReservationBookedResponse(
         );
     }
 
-    public LocalDateTime getDateTime() {
+    public LocalDateTime dateTime() {
         return LocalDateTime.of(date, time.startAt());
     }
 }
