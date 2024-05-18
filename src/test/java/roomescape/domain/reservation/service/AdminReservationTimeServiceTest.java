@@ -41,7 +41,7 @@ class AdminReservationTimeServiceTest extends ServiceTest {
 
     @DisplayName("중복되는 예약 시각을 추가할 경우 예외가 발생합니다.")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_reservation_time_is_duplicated() {
+    void should_throw_DataConflictException_when_reservation_time_is_duplicated() {
         ReservationTimeAddRequest reservationTimeAddRequest = new ReservationTimeAddRequest(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddRequest))
@@ -59,7 +59,7 @@ class AdminReservationTimeServiceTest extends ServiceTest {
 
     @DisplayName("없는 id의 예약시간을 삭제하면 예외를 발생합니다.")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_remove_reservation_time_with_non_exist_id() {
+    void should_throw_EntityNotFoundException_when_remove_reservation_time_with_non_exist_id() {
         assertThatThrownBy(() -> adminReservationTimeService.removeReservationTime(6L)).isInstanceOf(
                         EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 예약시간이 존재하지 않습니다.");

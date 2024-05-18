@@ -44,7 +44,7 @@ class ThemeServiceTest extends ServiceTest {
 
     @DisplayName("존재하지 않는 테마 삭제 요청시 예외가 발생합니다")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_theme_id_no_exist() {
+    void should_throw_EntityNotFoundException_when_theme_id_no_exist() {
         assertThatThrownBy(() -> themeService.removeTheme(6L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");

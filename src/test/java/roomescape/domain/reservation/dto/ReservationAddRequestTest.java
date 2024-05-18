@@ -19,7 +19,7 @@ class ReservationAddRequestTest {
 
     @DisplayName("date가 현재 날짜 보다 이전 날짜이면 ReservationAddRequest생성 시 예외가 발생한다")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_date_is_past() {
+    void should_throw_IllegalArgumentException_when_date_is_past() {
         assertThatThrownBy(() -> new ReservationAddRequest(LocalDate.of(2000, 1, 1), 1L, 1L, 1L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("예약 날짜는 현재 보다 이전일 수 없습니다");
