@@ -3,9 +3,12 @@ package roomescape.domain;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
+import java.util.Objects;
 
+@ToString
 @Getter
 @Entity
 public class Member {
@@ -45,5 +48,18 @@ public class Member {
 
     public boolean isAdmin() {
         return role.isAdmin();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return Objects.equals(id, member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
