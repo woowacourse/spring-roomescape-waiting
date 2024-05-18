@@ -3,6 +3,7 @@ package roomescape.domain.member.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
+import roomescape.domain.member.exception.InvalidEmailPasswordException;
 import roomescape.domain.member.repository.MemberRepository;
 import roomescape.global.exception.EscapeApplicationException;
 
@@ -26,6 +27,6 @@ public class MemberService {
 
     public Member findMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new EscapeApplicationException("이메일 또는 비밀번호를 잘못 입력했습니다."));
+                .orElseThrow(InvalidEmailPasswordException::new);
     }
 }
