@@ -10,8 +10,8 @@ class MemberTest {
     @Test
     @DisplayName("Default 이름을 집어넣는다.")
     void shouldUseDefaultName() {
-        Member member = Member.saveMemberOf("polla@gmail.com", "opolla09", "name");
+        Member member = Member.saveMemberOf("polla@gmail.com", "opolla09");
 
-        assertEquals(member.getName(), "어드민");
+        assertEquals("어드민", member.getName());
     }
 }

@@ -34,7 +34,6 @@ public class Member {
     private MemberRole role;
 
     public Member() {
-
     }
 
     private Member(long id, String name, Email email, Password password, MemberRole role) {
@@ -59,7 +58,7 @@ public class Member {
                 MemberRole.findMemberRole(role));
     }
 
-    public static Member saveMemberOf(String email, String password, String name) {
+    public static Member saveMemberOf(String email, String password) {
         return new Member(DEFAULT_NAME, Email.emailFrom(email), Password.passwordFrom(password), MemberRole.MEMBER);
     }
 
