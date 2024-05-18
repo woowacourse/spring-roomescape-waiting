@@ -1,8 +1,10 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -72,15 +74,19 @@ public class ReservationTimeService {
         Theme foundTheme = themeRepository.findById(reservationTimeBookedRequest.themeId())
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 테마입니다."));
 
-        List<ReservationTime> bookedTimes = reservationRepository.findTimeByDateAndTheme(
-                reservationTimeBookedRequest.date(),
-                foundTheme
-        );
+        List<ReservationTime> bookedTimes = makeBookedTimes(reservationTimeBookedRequest.date(), foundTheme);
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream()
                 .sorted(Comparator.comparing(ReservationTime::getStartAt))
                 .map(time -> ReservationTimeBookedResponse.of(time, bookedTimes.contains(time)))
+                .toList();
+    }
+
+    private List<ReservationTime> makeBookedTimes(LocalDate date, Theme foundTheme) {
+        return reservationRepository.findByDateAndTheme(date,  foundTheme)
+                .stream()
+                .map(Reservation::getTime)
                 .toList();
     }
 }
