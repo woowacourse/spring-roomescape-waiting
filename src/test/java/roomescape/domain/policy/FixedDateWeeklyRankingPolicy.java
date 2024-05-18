@@ -5,7 +5,6 @@ import static java.time.Month.FEBRUARY;
 import java.time.LocalDate;
 
 public class FixedDateWeeklyRankingPolicy implements RankingPolicy {
-
     @Override
     public LocalDate getStartDateAsString() {
         return LocalDate.of(2023, FEBRUARY, 8)

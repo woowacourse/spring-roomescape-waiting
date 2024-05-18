@@ -2,11 +2,11 @@ package roomescape.service;
 
 import static java.time.Month.DECEMBER;
 import static java.time.Month.JANUARY;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,7 @@ import roomescape.service.dto.response.reservation.ReservationResponse;
 @SpringBootTest
 @Transactional
 class ReservationServiceTest {
+
     @Autowired
     private ReservationService reservationService;
     @Autowired
@@ -83,13 +84,12 @@ class ReservationServiceTest {
                 condition);
 
         // then
-        Assertions.assertThat(findReservations)
+        assertThat(findReservations)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(
                         ReservationResponse.from(savedReservation1),
                         ReservationResponse.from(savedReservation2)
                 );
-
     }
 
     @Test
@@ -113,6 +113,8 @@ class ReservationServiceTest {
         reservationService.deleteReservation(savedReservation.getId());
 
         // then
-        Assertions.assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(savedReservation.getId()))
+                .isEmpty();
     }
+
 }

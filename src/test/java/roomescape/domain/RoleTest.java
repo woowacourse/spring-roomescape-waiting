@@ -1,6 +1,7 @@
 package roomescape.domain;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -18,7 +19,7 @@ class RoleTest {
         Role generatedRole = Role.of(value);
 
         // then
-        Assertions.assertThat(generatedRole).isSameAs(role);
+        assertThat(generatedRole).isSameAs(role);
     }
 
 }

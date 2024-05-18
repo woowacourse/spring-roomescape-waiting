@@ -1,6 +1,7 @@
 package roomescape.service.security;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 
 class JwtProviderTest {
+
     private JwtProvider jwtProvider;
 
     @BeforeEach
@@ -26,8 +28,7 @@ class JwtProviderTest {
 
         //then
         Long decode = new JwtProvider().extractId(encodedToken);
-        Assertions.assertThat(decode)
-                .isOne();
+        assertThat(decode).isOne();
     }
 
     @Test
@@ -41,7 +42,7 @@ class JwtProviderTest {
         Role role = new JwtProvider().extractRole(encoded);
 
         // then
-        Assertions.assertThat(role).isSameAs(Role.ADMIN);
+        assertThat(role).isSameAs(Role.ADMIN);
     }
 
     @Test
@@ -55,7 +56,7 @@ class JwtProviderTest {
         String name = jwtProvider.extractName(encoded);
 
         // then
-        Assertions.assertThat(name).isEqualTo(member.getName());
+        assertThat(name).isEqualTo(member.getName());
     }
 
 }
