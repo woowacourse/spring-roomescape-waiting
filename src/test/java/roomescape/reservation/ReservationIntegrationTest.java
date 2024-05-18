@@ -124,7 +124,7 @@ class ReservationIntegrationTest {
             @Test
             @DisplayName("예약을 DB에 추가할 수 있다.")
             void createReservation() {
-                ReservationRequest params = new ReservationRequest(LocalDate.MAX.minusDays(1), MEMBER, 1L, 1L);
+                ReservationRequest params = new ReservationRequest(LocalDate.now().plusDays(1), MEMBER, 1L, 1L);
 
                 RestAssured.given()
                         .contentType(ContentType.JSON)
@@ -140,9 +140,6 @@ class ReservationIntegrationTest {
 
                 assertThat(reservations).hasSize(2);
             }
-
         }
-
     }
-
 }
