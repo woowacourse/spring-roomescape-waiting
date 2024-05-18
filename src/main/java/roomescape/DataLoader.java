@@ -128,6 +128,10 @@ public class DataLoader implements ApplicationRunner {
         MemberReservation memberReservation6 = memberReservationRepository.save(new MemberReservation(member2, reservation8, ReservationStatus.APPROVED));
         MemberReservation memberReservation8 = memberReservationRepository.save(new MemberReservation(member3, reservation5, ReservationStatus.APPROVED));
         MemberReservation memberReservation9 = memberReservationRepository.save(new MemberReservation(member3, reservation6, ReservationStatus.APPROVED));
+
+        MemberReservation memberReservation10 = memberReservationRepository.save(new MemberReservation(member1, reservation4, ReservationStatus.PENDING));
+        MemberReservation memberReservation11 = memberReservationRepository.save(new MemberReservation(member2, reservation6, ReservationStatus.PENDING));
+        MemberReservation memberReservation12 = memberReservationRepository.save(new MemberReservation(member1, reservation6, ReservationStatus.PENDING));
     }
 
 }

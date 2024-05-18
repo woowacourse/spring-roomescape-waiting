@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
+import static roomescape.fixture.MemberFixture.getMemberEden;
 import static roomescape.fixture.ReservationFixture.getNextDayReservation;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
@@ -29,10 +30,10 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
 import roomescape.reservation.service.dto.WaitingCreate;
@@ -273,7 +274,7 @@ class ReservationServiceTest extends ServiceTest {
 
     }
 
-    @DisplayName("중복 예약 시 예외가 발생한다.")
+    @DisplayName("중복 예약 대기 시 예외가 발생한다.")
     @Test
     void duplicatedWaitingList() {
         //given
@@ -310,5 +311,25 @@ class ReservationServiceTest extends ServiceTest {
 
         //then
         assertThat(memberReservationRepository.findByMember(memberClover.getId())).hasSize(0);
+    }
+
+    @DisplayName("모든 예약 대기 조회에 성공한다.")
+    @Test
+    void getWaiting() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+        Member memberEden = memberRepository.save(getMemberEden());
+
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
+        memberReservationRepository.save(new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+        memberReservationRepository.save(new MemberReservation(memberEden, reservation, ReservationStatus.PENDING));
+
+        //when
+        List<ReservationResponse> waiting = reservationService.getWaiting();
+
+        //then
+        assertThat(waiting).hasSize(2);
+        assertThat(waiting).extracting("date").containsOnly(getNextDayReservation(time, theme1).getDate());
     }
 }

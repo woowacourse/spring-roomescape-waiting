@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
@@ -38,6 +39,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             """, nativeQuery = true)
     List<MyReservationProjection> findByMember(long memberId);
 
+    List<MemberReservation> findAllByReservationStatus(ReservationStatus reservationStatus);
 
     void deleteByReservationId(long reservationId);
 

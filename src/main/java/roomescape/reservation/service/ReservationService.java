@@ -103,6 +103,13 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
+    public List<ReservationResponse> getWaiting() {
+        return memberReservationRepository.findAllByReservationStatus(ReservationStatus.PENDING)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     @Transactional
     public ReservationResponse addWaiting(WaitingCreate waitingCreate) {
         ReservationTime reservationTime = getReservationTime(waitingCreate.timeId());
