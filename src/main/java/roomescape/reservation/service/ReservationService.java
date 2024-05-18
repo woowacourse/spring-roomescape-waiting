@@ -76,7 +76,9 @@ public class ReservationService {
     }
 
     public List<FindReservationResponse> getReservations() {
-        return mapToFindReservationResponse(reservationRepository.findAll());
+        return reservationRepository.findAll().stream()
+                .map(FindReservationResponse::from)
+                .toList();
     }
 
     public FindReservationResponse getReservation(final Long id) {
@@ -107,11 +109,7 @@ public class ReservationService {
 
     public List<FindReservationResponse> searchBy(final Long themeId, final Long memberId,
                                                   final LocalDate dateFrom, final LocalDate dateTo) {
-        return mapToFindReservationResponse(reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
-    }
-
-    private List<FindReservationResponse> mapToFindReservationResponse(final List<Reservation> reservations) {
-        return reservations.stream()
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo).stream()
                 .map(FindReservationResponse::from)
                 .toList();
     }
@@ -127,9 +125,9 @@ public class ReservationService {
         }
     }
 
-    public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
-        return reservations.stream()
+    public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(
+            final AuthInfo authInfo) {
+        return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
                 .map(roomescape.member.dto.response.FindReservationResponse::from)
                 .toList();
     }
