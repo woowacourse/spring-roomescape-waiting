@@ -22,6 +22,14 @@ public class TimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    public List<TimeResponse> findReservationTimes() {
+        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
+
+        return reservationTimes.stream()
+                .map(TimeResponse::toResponse)
+                .toList();
+    }
+
     public TimeResponse addReservationTime(TimeRequest timeRequest) {
         validateDuplicateTime(timeRequest.startAt());
         Time reservationTime = new Time(timeRequest.startAt());
@@ -35,14 +43,6 @@ public class TimeService {
         if (duplicateTimeCount > 0) {
             throw new ConflictException("이미 존재하는 예약 시간입니다.");
         }
-    }
-
-    public List<TimeResponse> findReservationTimes() {
-        List<Time> reservationTimes = timeRepository.findAllByOrderByStartAtAsc();
-
-        return reservationTimes.stream()
-                .map(TimeResponse::toResponse)
-                .toList();
     }
 
     public void removeReservationTime(long reservationTimeId) {
