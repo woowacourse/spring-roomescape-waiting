@@ -13,10 +13,10 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAllByOrderByDateAscTimeAsc();
 
-    List<Reservation> findAllByThemeIdAndDate_Date(long themeId, LocalDate date);
+    List<Reservation> findAllByThemeIdAndDate(long themeId, LocalDate date);
 
-    List<Reservation> findAllByMemberIdAndThemeIdAndDate_DateBetween(long memberId, long themeId, LocalDate fromDate,
-                                                                     LocalDate toDate);
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, LocalDate fromDate,
+                                                                LocalDate toDate);
 
     List<Reservation> findByTimeId(long timeId);
 
@@ -24,7 +24,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     @Query("SELECT r.theme " +
             "FROM Reservation r " +
-            "WHERE r.date.date between :startDate AND :endDate " +
+            "WHERE r.date between :startDate AND :endDate " +
             "GROUP BY r.theme.id " +
             "ORDER BY COUNT(r.theme.id) DESC " +
             "LIMIT :limitCount "

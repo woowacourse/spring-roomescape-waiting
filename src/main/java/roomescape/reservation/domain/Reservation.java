@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Embedded;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +23,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Embedded
-    private Date date;
+    @Column(nullable = false)
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
@@ -38,7 +38,9 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(long id, Date date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validateAtSave(date);
+
         this.id = id;
         this.date = date;
         this.time = time;
@@ -47,12 +49,12 @@ public class Reservation {
     }
 
     private Reservation(LocalDate date, long timeId, long themeId, long memberId) {
-        this(0, Date.saveDateFrom(date), new ReservationTime(timeId), Theme.saveThemeFrom(themeId),
+        this(0, date, new ReservationTime(timeId), Theme.saveThemeFrom(themeId),
                 Member.saveMemberFrom(memberId));
     }
 
     public static Reservation of(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        return new Reservation(id, Date.dateFrom(date), time, theme, member);
+        return new Reservation(id, date, time, theme, member);
     }
 
     public static Reservation of(LocalDate date, long timeId, long themeId, long memberId) {
@@ -61,7 +63,13 @@ public class Reservation {
 
     public static Reservation of(LocalDate date, ReservationTime time, Theme theme, Member member) {
         validateAtSaveDateAndTime(date, time);
-        return new Reservation(0, Date.dateFrom(date), time, theme, member);
+        return new Reservation(0, date, time, theme, member);
+    }
+
+    private static void validateAtSave(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
+        }
     }
 
     public long getId() {
@@ -69,7 +77,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date.getDate();
+        return date;
     }
 
     public ReservationTime getReservationTime() {
@@ -82,10 +90,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public void setIdOnSave(long id) {
-        this.id = id;
     }
 
     private static void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {

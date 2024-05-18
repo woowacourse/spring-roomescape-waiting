@@ -77,7 +77,7 @@ public class ReservationService {
 
     public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
         List<ReservationTime> allTimes = timeRepository.findAllByOrderByStartAt();
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate_Date(themeId, date);
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate(themeId, date);
         List<ReservationTime> bookedTimes = extractReservationTimes(reservations);
 
         return allTimes.stream()
@@ -88,7 +88,7 @@ public class ReservationService {
     public List<ReservationResponse> findFilteredReservations(ReservationFilterRequest reservationFilterRequest) {
         FilterInfo filterInfo = reservationFilterRequest.toFilterInfo();
 
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDate_DateBetween(filterInfo.getMemberId(),
+        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(filterInfo.getMemberId(),
                         filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate()).stream()
                 .map(ReservationResponse::fromReservation)
                 .toList();
