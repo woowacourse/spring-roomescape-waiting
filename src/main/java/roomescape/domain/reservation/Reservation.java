@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import roomescape.domain.member.Member;
@@ -21,23 +23,31 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @NotNull
+    @Column(name = "date")
     private LocalDate date;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "time_id")
     private ReservationTime time;
 
     @ManyToOne
+    @NotNull
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(name = "status")
     private ReservationStatus status;
 
     public Reservation(Member Member, String rawDate, ReservationTime time, Theme theme, ReservationStatus status) {

@@ -95,8 +95,8 @@ class UserReservationControllerTest {
     @Test
     void save_Duplication() {
         jdbcTemplate.update("""
-            INSERT INTO reservation (member_id, date, time_id, theme_id)
-            VALUES (1, '2060-01-01', 1, 1)
+            INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', 1, 1, 'RESERVED')
             """);
 
         CreateReservationRequest request = new CreateReservationRequest(
