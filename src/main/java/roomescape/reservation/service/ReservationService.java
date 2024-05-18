@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -79,22 +80,22 @@ public class ReservationService {
 
     private Member findMemberByMemberId(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadArgumentRequestException("해당 멤버가 존재하지 않습니다."));
     }
 
     private ReservationTime findTimeByTimeId(Long timeId) {
         return timeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadArgumentRequestException("해당 예약 시간이 존재하지 않습니다."));
     }
 
     private Theme findThemeByThemeId(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new BadArgumentRequestException("해당 테마가 존재하지 않습니다."));
     }
 
     private void validateIsAvailable(Reservation reservation) {
         if (reservation.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("예약은 현재 시간 이후여야 합니다.");
+            throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
         }
     }
 

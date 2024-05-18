@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import roomescape.exception.BadArgumentRequestException;
 
 class EmailTest {
     @DisplayName("이메일 형식이 일치하지 않으면, 예외를 던진다.")
@@ -13,7 +14,7 @@ class EmailTest {
     @CsvSource({"abc@acac", "acac.com", "avd@@ac.com"})
     void validateTest_whenFormatNotMatch(String email) {
         assertThatThrownBy(() -> new Email(email))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("이메일 형식이 일치하지 않습니다.");
     }
 

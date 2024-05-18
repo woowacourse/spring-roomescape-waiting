@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadArgumentRequestException;
 
 class ThemeThumbnailTest {
     @DisplayName("테마 설명이 null일 경우 예외를 던진다.")
@@ -17,7 +18,7 @@ class ThemeThumbnailTest {
     @Test
     void validateTest_whenValueIsEmpty() {
         assertThatThrownBy(() -> new ThemeThumbnail(""))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("테마 썸네일은 1글자 이상 500글자 이하이어야 합니다.");
     }
 
@@ -25,7 +26,7 @@ class ThemeThumbnailTest {
     @Test
     void validateTest_whenValueIsLong() {
         assertThatThrownBy(() -> new ThemeThumbnail("a".repeat(501)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("테마 썸네일은 1글자 이상 500글자 이하이어야 합니다.");
     }
 }

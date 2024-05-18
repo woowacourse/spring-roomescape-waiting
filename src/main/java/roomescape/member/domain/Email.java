@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import roomescape.exception.BadArgumentRequestException;
 
 @Embeddable
 public record Email(
@@ -16,11 +17,11 @@ public record Email(
     public Email {
         Objects.requireNonNull(email);
         if (email.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException("예약자 이메일은 1글자 이상 100글자 이하이어야 합니다.");
+            throw new BadArgumentRequestException("예약자 이메일은 1글자 이상 100글자 이하이어야 합니다.");
         }
 
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new IllegalArgumentException("이메일 형식이 일치하지 않습니다.");
+            throw new BadArgumentRequestException("이메일 형식이 일치하지 않습니다.");
         }
     }
 }

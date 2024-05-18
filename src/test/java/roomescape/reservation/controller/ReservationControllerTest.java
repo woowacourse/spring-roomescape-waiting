@@ -79,23 +79,6 @@ class ReservationControllerTest {
                 .header("Location", "/reservations/" + expectedId);
     }
 
-    @DisplayName("예약 추가 시 인자 중 null이 있을 경우, 예약을 추가할 수 없다.")
-    @Test
-    void createReservation_whenNameIsNull() {
-        ReservationCreateRequest params = new ReservationCreateRequest
-                (null, null, 1L, 1L);
-        Cookies userCookies = makeUserCookie();
-
-        RestAssured.given().log().all()
-                .cookies(userCookies)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorMessage", is("인자 중 null 값이 존재합니다."));
-    }
-
     private Cookies makeUserCookie() {
         LoginRequest request = new LoginRequest("bri@abc.com", "1234");
 

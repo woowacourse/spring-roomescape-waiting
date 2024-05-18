@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadArgumentRequestException;
 
 class MemberNameTest {
     @DisplayName("예약자 이름이 null일 경우 예외를 던진다.")
@@ -17,7 +18,7 @@ class MemberNameTest {
     @Test
     void validateTest_whenValueIsEmpty() {
         assertThatThrownBy(() -> new MemberName(""))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약자 이름은 1글자 이상 20글자 이하이어야 합니다.");
     }
 
@@ -25,7 +26,7 @@ class MemberNameTest {
     @Test
     void validateTest_whenValueIsLong() {
         assertThatThrownBy(() -> new MemberName("a".repeat(21)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약자 이름은 1글자 이상 20글자 이하이어야 합니다.");
     }
 }

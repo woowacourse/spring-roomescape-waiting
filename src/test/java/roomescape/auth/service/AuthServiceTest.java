@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoggedInMember;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
@@ -40,7 +41,7 @@ class AuthServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.createToken(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 멤버가 존재하지 않습니다.");
     }
 

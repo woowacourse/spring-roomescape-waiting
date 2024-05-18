@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadArgumentRequestException;
 
 class ThemeNameTest {
     @DisplayName("테마 이름이 null일 경우 예외를 던진다.")
@@ -17,7 +18,7 @@ class ThemeNameTest {
     @Test
     void validateTest_whenValueIsEmpty() {
         assertThatThrownBy(() -> new ThemeName(""))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("테마 이름은 1글자 이상 30글자 미만이어야 합니다.");
     }
 
@@ -25,7 +26,7 @@ class ThemeNameTest {
     @Test
     void validateTest_whenValueIsLong() {
         assertThatThrownBy(() -> new ThemeName("a".repeat(31)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("테마 이름은 1글자 이상 30글자 미만이어야 합니다.");
     }
 }

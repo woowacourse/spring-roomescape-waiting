@@ -3,6 +3,7 @@ package roomescape.theme.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import roomescape.exception.BadArgumentRequestException;
 
 @Embeddable
 public record ThemeThumbnail(
@@ -14,7 +15,7 @@ public record ThemeThumbnail(
     public ThemeThumbnail {
         Objects.requireNonNull(thumbnail);
         if (thumbnail.isEmpty() || thumbnail.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException("테마 썸네일은 1글자 이상 500글자 이하이어야 합니다.");
+            throw new BadArgumentRequestException("테마 썸네일은 1글자 이상 500글자 이하이어야 합니다.");
         }
     }
 }

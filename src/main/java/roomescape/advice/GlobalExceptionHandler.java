@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.advice.dto.ErrorResponse;
 import roomescape.auth.exception.AdminAuthorizationException;
 import roomescape.auth.exception.AuthenticationException;
+import roomescape.exception.BadArgumentRequestException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -15,8 +16,8 @@ public class GlobalExceptionHandler {
     private static final String DATA_INTEGRITY_VIOLATION_EXCEPTION_ERROR_MESSAGE = "잘못된 요청입니다.";
     private static final String UNEXPECTED_EXCEPTION_ERROR_MESSAGE = "예상치 못한 예외가 발생했습니다. 관리자에게 문의하세요.";
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(BadArgumentRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadArgumentRequestException(BadArgumentRequestException e) {
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(e.getMessage()));
     }

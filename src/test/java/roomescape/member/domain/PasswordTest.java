@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadArgumentRequestException;
 
 class PasswordTest {
     @DisplayName("예약자 비밀번호가 null일 경우 예외를 던진다.")
@@ -17,7 +18,7 @@ class PasswordTest {
     @Test
     void validateTest_whenValueIsEmpty() {
         assertThatThrownBy(() -> new Password(""))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약자 비밀번호는 1글자 이상 100글자 이하이어야 합니다.");
     }
 
@@ -25,7 +26,7 @@ class PasswordTest {
     @Test
     void validateTest_whenValueIsLong() {
         assertThatThrownBy(() -> new Password("a".repeat(101)))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약자 비밀번호는 1글자 이상 100글자 이하이어야 합니다.");
     }
 }

@@ -10,18 +10,19 @@ import roomescape.advice.dto.ErrorResponse;
 import roomescape.auth.exception.AdminAuthorizationException;
 import roomescape.auth.exception.AuthenticationException;
 import roomescape.auth.exception.NotLoginAuthenticationException;
+import roomescape.exception.BadArgumentRequestException;
 
 class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler globalExceptionHandler = new GlobalExceptionHandler();
 
-    @DisplayName("IllegalArgumentException가 던져지면 400 에러를 반환한다.")
+    @DisplayName("BadArgumentRequestException가 던져지면 400 에러를 반환한다.")
     @Test
-    void handleIllegalArgumentExceptionTest() {
-        IllegalArgumentException exception = new IllegalArgumentException("예외 메시지");
+    void handleBadArgumentRequestExceptionTest() {
+        BadArgumentRequestException exception = new BadArgumentRequestException("예외 메시지");
         ResponseEntity<ErrorResponse> expected = ResponseEntity.badRequest()
                 .body(new ErrorResponse("예외 메시지"));
 
-        ResponseEntity<ErrorResponse> actual = globalExceptionHandler.handleIllegalArgumentException(exception);
+        ResponseEntity<ErrorResponse> actual = globalExceptionHandler.handleBadArgumentRequestException(exception);
 
         assertThat(actual).isEqualTo(expected);
     }

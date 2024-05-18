@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
@@ -107,7 +108,7 @@ class ReservationServiceTest {
         given(memberRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 멤버가 존재하지 않습니다.");
     }
 
@@ -121,7 +122,7 @@ class ReservationServiceTest {
         given(timeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 예약 시간이 존재하지 않습니다.");
     }
 
@@ -137,7 +138,7 @@ class ReservationServiceTest {
         given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 
@@ -154,7 +155,7 @@ class ReservationServiceTest {
                 .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadArgumentRequestException.class)
                 .hasMessage("예약은 현재 시간 이후여야 합니다.");
     }
 }
