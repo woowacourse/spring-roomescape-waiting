@@ -161,6 +161,23 @@ public class ReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("기간이 사이에 있는 예약을 반환한다.")
+    void findByDateBetweenTest() {
+        Member member = memberRepository.save(new Member("hogi", "hoho@naver.com", "1234"));
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2024-12-05"), theme, time
+                ));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2025-05-05"), theme, time
+                ));
+        List<Reservation> dateBetween = reservationRepository.findByDateBetween(LocalDate.parse("2024-01-01"),
+                LocalDate.parse("2024-12-12"));
+        assertThat(dateBetween.size()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("DB 삭제 테스트")
     void deleteTest() {
         Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.now())).getId();
