@@ -14,7 +14,7 @@ import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationTimeRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,7 +48,7 @@ public class ReservationService {
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
         if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
-            throw new EscapeApplicationException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+            throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
         }
 
         ReservationTime reservationTime = getReservationTime(reservationAddRequest.timeId());

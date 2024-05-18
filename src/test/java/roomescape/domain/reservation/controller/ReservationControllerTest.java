@@ -72,12 +72,12 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
-    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 500 Internel Server Error를 응답한다.")
+    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 404 Not Found를 응답한다.")
     @Test
     void should_response_bad_request_when_nonExist_id() {
         RestAssured.given().log().all()
                 .when().delete("/reservations/6")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(404);
     }
 }

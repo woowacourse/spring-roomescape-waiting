@@ -1,12 +1,13 @@
 package roomescape.domain.reservation.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -44,7 +45,7 @@ class AdminReservationTimeServiceTest extends ServiceTest {
         ReservationTimeAddRequest reservationTimeAddRequest = new ReservationTimeAddRequest(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> adminReservationTimeService.addReservationTime(reservationTimeAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(DataConflictException.class)
                 .hasMessage("이미 존재하는 예약시간은 추가할 수 없습니다.");
     }
 
@@ -60,7 +61,7 @@ class AdminReservationTimeServiceTest extends ServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_time_with_non_exist_id() {
         assertThatThrownBy(() -> adminReservationTimeService.removeReservationTime(6L)).isInstanceOf(
-                        EscapeApplicationException.class)
+                        EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 예약시간이 존재하지 않습니다.");
     }
 }

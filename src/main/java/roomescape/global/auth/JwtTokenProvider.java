@@ -6,7 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.AuthorizationException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -43,7 +43,7 @@ public class JwtTokenProvider {
 
     public Long validateAndGetLongSubject(String token) {
         if (token == null || token.isEmpty()) {
-            throw new EscapeApplicationException("토큰이 비어있습니다.");
+            throw new AuthorizationException("토큰이 비어있습니다.");
         }
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)

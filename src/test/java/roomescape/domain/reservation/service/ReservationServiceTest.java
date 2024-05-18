@@ -1,5 +1,6 @@
 package roomescape.domain.reservation.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,7 @@ import roomescape.ServiceTest;
 import roomescape.domain.reservation.dto.BookableTimeResponse;
 import roomescape.domain.reservation.dto.BookableTimesRequest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,7 +28,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 4L);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("존재 하지 않는 멤버로 예약할 수 없습니다.");
     }
 
@@ -36,7 +37,7 @@ class ReservationServiceTest extends ServiceTest {
     void should_throw_exception_when_reserve_with_non_exist_theme() {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 6L, 1L);
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("존재 하지 않는 테마로 예약할 수 없습니다");
     }
 
@@ -46,7 +47,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 6L, 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("존재 하지 않는 예약시각으로 예약할 수 없습니다.");
     }
 
@@ -73,7 +74,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.addReservation(reservationAddRequest);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(DataConflictException.class)
                 .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
     }
 
@@ -81,7 +82,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_remove_reservation_with_non_exist_id() {
         assertThatThrownBy(() -> reservationService.removeReservation(6L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 예약이 존재하지 않습니다.");
     }
 }

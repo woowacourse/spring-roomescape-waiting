@@ -1,12 +1,12 @@
 package roomescape.domain.theme.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.dto.ThemeAddRequest;
-import roomescape.global.exception.EscapeApplicationException;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ class ThemeServiceTest extends ServiceTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_theme_id_no_exist() {
         assertThatThrownBy(() -> themeService.removeTheme(6L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 테마가 존재하지 않습니다.");
     }
 }

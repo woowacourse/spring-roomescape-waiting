@@ -1,11 +1,11 @@
 package roomescape.domain.member.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.domain.member.domain.Member;
-import roomescape.global.exception.EscapeApplicationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,7 +36,7 @@ class MemberServiceTest extends ServiceTest {
     @Test
     void should_throw_exception_when_find_by_non_exist_id() {
         assertThatThrownBy(() -> memberService.findMemberById(4L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("없는 member를 조회 했습니다.");
     }
 
@@ -52,7 +52,7 @@ class MemberServiceTest extends ServiceTest {
     @Test
     void should_throw_exception_when_find_member_by_non_exist_email() {
         assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword(WRONG_EMAIL, ADMIN_MEMBER.getPassword()))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("이메일 또는 비밀번호를 잘못 입력했습니다.");
     }
 
@@ -60,7 +60,7 @@ class MemberServiceTest extends ServiceTest {
     @Test
     void should_throw_exception_when_find_member_by_wrong_password() {
         assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword(ADMIN_MEMBER.getEmail(), WRONG_PASSWORD))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("이메일 또는 비밀번호를 잘못 입력했습니다.");
     }
 }

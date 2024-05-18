@@ -1,7 +1,5 @@
 package roomescape.domain.member.domain;
 
-import roomescape.global.exception.EscapeApplicationException;
-
 import java.util.Arrays;
 
 public enum Role {
@@ -17,7 +15,7 @@ public enum Role {
         return Arrays.stream(values())
                 .filter(role -> role.value.equalsIgnoreCase(value))
                 .findFirst()
-                .orElseThrow(() -> new EscapeApplicationException("존재하지 않는 역할입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 역할입니다."));
     }
 
     public boolean isAdmin() {

@@ -2,7 +2,6 @@ package roomescape.domain.reservation.dto;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.EscapeApplicationException;
 
 import java.time.LocalDate;
 
@@ -22,7 +21,7 @@ class ReservationAddRequestTest {
     @Test
     void should_throw_ClientIllegalArgumentException_when_date_is_past() {
         assertThatThrownBy(() -> new ReservationAddRequest(LocalDate.of(2000, 1, 1), 1L, 1L, 1L))
-                .isInstanceOf(EscapeApplicationException.class)
+                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("예약 날짜는 현재 보다 이전일 수 없습니다");
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.service.MemberService;
 import roomescape.global.exception.AuthorizationException;
-import roomescape.global.exception.ForBiddenException;
 
 @Component
 public class CheckAdminPermissionInterceptor implements HandlerInterceptor {
@@ -31,7 +30,7 @@ public class CheckAdminPermissionInterceptor implements HandlerInterceptor {
         Long memberId = jwtTokenProvider.validateAndGetLongSubject(token);
         Member member = memberService.findMemberById(memberId);
         if (member == null || !member.isAdmin()) {
-            throw new ForBiddenException("허가되지않은 접근입니다.");
+            throw new AuthorizationException("허가되지않은 접근입니다.");
         }
         return true;
     }

@@ -1,11 +1,12 @@
 package roomescape.domain.reservation.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
 import roomescape.domain.reservation.repository.ReservationTimeRepository;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.DataConflictException;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class AdminReservationTimeService {
 
     public ReservationTime addReservationTime(ReservationTimeAddRequest reservationTimeAddRequest) {
         if (reservationTimeRepository.existsByStartAt(reservationTimeAddRequest.startAt())) {
-            throw new EscapeApplicationException("이미 존재하는 예약시간은 추가할 수 없습니다.");
+            throw new DataConflictException("이미 존재하는 예약시간은 추가할 수 없습니다.");
         }
 
         return reservationTimeRepository.save(reservationTimeAddRequest.toEntity());

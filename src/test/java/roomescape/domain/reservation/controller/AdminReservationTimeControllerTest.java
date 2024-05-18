@@ -45,12 +45,12 @@ class AdminReservationTimeControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
-    @DisplayName("delete 요청 시 id값이 존재하지 않으면 500 Internel Server Error로 응답한다.")
+    @DisplayName("delete 요청 시 id값이 존재하지 않으면 404 Not found로 응답한다.")
     @Test
     void should_response_bad_request_when_nonExist_id() {
         RestAssured.given().log().all()
                 .when().delete("/times/6")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(404);
     }
 }
