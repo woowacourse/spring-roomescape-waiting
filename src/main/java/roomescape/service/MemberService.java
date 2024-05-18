@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.service.dto.response.MemberResponse;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.MemberJoinRequest;
 

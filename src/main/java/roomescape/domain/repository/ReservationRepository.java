@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -8,12 +8,18 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 
+    // TODO repository 응답값 추상화 준위 맞추기
+    //  TODO Eager loading을 하는데 Lazy로 설정할 필요?
     @Query("select r.time from Reservation r where r.date = :date and r.theme = :theme")
     List<ReservationTime> findTimeByDateAndTheme(LocalDate date, Theme theme);
 
@@ -26,6 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Limit limit);
 
+    // TODO nullable 사용보다 더 좋은 방법 고민해보기
     @Query("""
             select r
             from Reservation r
