@@ -23,15 +23,10 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(Long id, ThemeName name, Description description, Thumbnail thumbnail) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
     public Theme(String name, String description, String thumbnail) {
-        this(null, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
+        this.name = new ThemeName(name);
+        this.description = new Description(description);
+        this.thumbnail = new Thumbnail(thumbnail);
     }
 
     public Long getId() {

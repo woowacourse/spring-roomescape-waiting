@@ -31,16 +31,11 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, Schedule schedule, Theme theme, ReservationStatus status) {
-        this.id = id;
+    public Reservation(Member member, Schedule schedule, Theme theme, ReservationStatus status) {
         this.member = member;
         this.schedule = schedule;
         this.theme = theme;
         this.status = status;
-    }
-
-    public Reservation(Member member, Schedule schedule, Theme theme, ReservationStatus status) {
-        this(null, member, schedule, theme, status);
     }
 
     public boolean isReservationOf(Long memberId) {

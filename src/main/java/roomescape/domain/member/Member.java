@@ -26,16 +26,11 @@ public class Member {
     protected Member() {
     }
 
-    public Member(Long id, MemberName memberName, Email email, Password password, Role role) {
-        this.id = id;
-        this.memberName = memberName;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
-
     public Member(String name, String email, String password, Role role) {
-        this(null, new MemberName(name), Email.of(email), Password.of(password), role);
+        this.memberName = new MemberName(name);
+        this.email = Email.of(email);
+        this.password = Password.of(password);
+        this.role = role;
     }
 
     public boolean isPasswordMatches(Password other) {
