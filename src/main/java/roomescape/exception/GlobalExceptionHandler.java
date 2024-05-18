@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import roomescape.exception.customexception.AuthenticationException;
-import roomescape.exception.customexception.AuthorizationException;
-import roomescape.exception.customexception.RoomEscapeBusinessException;
+import roomescape.exception.customexception.*;
 import roomescape.exception.dto.ErrorResponse;
 
 import java.util.stream.Collectors;
@@ -55,6 +53,16 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
                 ErrorCode.INVALID_PARAMETER,
                 resolveMethodArgumentNotValidMessage(exception)
         );
+    }
+
+    @ExceptionHandler(AbstractBusinessException.class)
+    public ResponseEntity<Object> handleBusinessException(AbstractBusinessException e){
+        return makeErrorResponseEntity(ErrorCode.INTERNAL_SERVER);
+    }
+
+    @ExceptionHandler(AbstractSecurityException.class)
+    public ResponseEntity<Object> handleBusinessException(AbstractSecurityException e){
+        return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
     }
 
     @ExceptionHandler(RuntimeException.class)
