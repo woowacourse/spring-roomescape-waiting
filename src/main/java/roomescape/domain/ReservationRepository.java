@@ -20,14 +20,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
-            SELECT r
+            SELECT r.theme.id
             FROM Reservation r
-            INNER JOIN r.theme t
             WHERE r.date >= :from AND r.date < :to
-            GROUP BY r
-            ORDER BY COUNT(t) DESC
+            GROUP BY r.theme
+            ORDER BY COUNT(r.id) DESC, r.theme.id ASC
             """)
-    List<Reservation> findMostReserved(
+    List<Long> findMostReservedThemesId(
             @Param("from") LocalDate from,
             @Param("to") LocalDate to
     );

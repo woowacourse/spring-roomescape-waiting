@@ -63,11 +63,11 @@ public class ThemeService {
     public List<ThemeResponse> getMostReservedThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(ANALYSIS_PERIOD);
-        List<Reservation> mostReserved = reservationRepository.findMostReserved(from, to);
+        List<Long> mostReservedThemesId = reservationRepository.findMostReservedThemesId(from, to);
+        List<Theme> mostReserved = themeRepository.findAllById(mostReservedThemesId);
 
         return mostReserved.stream()
                 .limit(ANALYSIS_COUNT_LIMIT)
-                .map(Reservation::getTheme)
                 .map(ThemeResponse::from)
                 .toList();
     }
