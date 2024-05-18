@@ -138,4 +138,17 @@ class ReservationRepositoryTest extends RepositoryTest {
         // then
         assertThat(actual).hasSize(1);
     }
+
+    @Test
+    @DisplayName("특정 사용자의 예약 목록을 조회한다.")
+    void findByMemberId() {
+        // given
+        final Long memberId = member.getId();
+
+        // when
+        final List<Reservation> actual = reservationRepository.findByMember_Id(memberId);
+
+        // then
+        assertThat(actual).hasSize(1);
+    }
 }
