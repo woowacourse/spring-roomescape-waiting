@@ -4,11 +4,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 public class MemberFixture {
-    /**
-     * INSERT INTO member(name, email, password, role) VALUES ('안돌', 'andole@test.com', '123', 'MEMBER'), ('파랑',
-     * 'parang@test.com', '123', 'MEMBER'), ('리비', 'libienz@test.com', '123', 'MEMBER'), ('메이슨', 'mason@test.com',
-     * '123', 'MEMBER'), ('어드민', 'admin@test.com', '123', 'ADMIN');
-     */
+
     public static final Member MEMBER_ID_1 = new Member(1L, "안돌", "andole@test.com", "123", Role.MEMBER);
     public static final Member MEMBER_ID_2 = new Member(2L, "파랑", "parang@test.com", "123", Role.MEMBER);
     public static final Member MEMBER_ID_3 = new Member(3L, "리비", "libienz@test.com", "123", Role.MEMBER);
