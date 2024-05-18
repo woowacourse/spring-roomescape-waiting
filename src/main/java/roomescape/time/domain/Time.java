@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
-import roomescape.exception.IllegalReservationDateTimeRequestException;
+import roomescape.exception.BadRequestException;
 
 @Entity
 public class Time {
@@ -38,7 +38,7 @@ public class Time {
             throw new BadRequestException("시간 값이 정의되지 않은 요청입니다.");
         }
         if (OPEN_TIME.isAfter(startAt) || CLOSE_TIME.isBefore(startAt)) {
-            throw new IllegalReservationDateTimeRequestException("운영 시간 외의 예약 시간 요청입니다.");
+            throw new BadRequestException("운영 시간 외의 예약 시간 요청입니다.");
         }
     }
 

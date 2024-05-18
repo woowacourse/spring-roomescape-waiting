@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ConflictException;
-import roomescape.exception.IllegalReservationDateTimeRequestException;
+import roomescape.exception.BadRequestException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
@@ -85,7 +85,7 @@ class ReservationServiceTest {
                 reservation.getTimeId(), reservation.getThemeId());
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
-                IllegalReservationDateTimeRequestException.class);
+                BadRequestException.class);
 
     }
 

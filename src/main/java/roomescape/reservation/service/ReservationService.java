@@ -2,10 +2,12 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import roomescape.exception.BadRequestException;
-import roomescape.exception.IllegalReservationDateTimeRequestException;
-import roomescape.exception.SaveDuplicateContentException;
+import roomescape.exception.ConflictException;
+import roomescape.exception.BadRequestException;
 import roomescape.member.dao.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dao.ReservationRepository;
@@ -30,8 +32,8 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository) {
+                              ThemeRepository themeRepository,
+                              MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -40,7 +42,7 @@ public class ReservationService {
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest) {
         Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new IllegalReservationDateTimeRequestException("해당 예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException("해당 예약 시간이 존재하지 않습니다."));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new BadRequestException("선택하신 테마가 존재하지 않습니다."));
         validateReservationRequest(reservationRequest, time);
@@ -52,7 +54,7 @@ public class ReservationService {
     private void validateReservationRequest(ReservationRequest reservationRequest, Time time) {
         if (reservationRequest.date()
                 .isBefore(LocalDate.now())) {
-            throw new IllegalReservationDateTimeRequestException("지난 날짜의 예약을 시도하였습니다.");
+            throw new BadRequestException("지난 날짜의 예약을 시도하였습니다.");
         }
         validateDuplicateReservation(reservationRequest, time);
     }
@@ -60,7 +62,7 @@ public class ReservationService {
     private void validateDuplicateReservation(ReservationRequest reservationRequest, Time time) {
         List<Time> bookedTimes = getBookedTimesOfThemeAtDate(reservationRequest.themeId(), reservationRequest.date());
         if (isTimeBooked(time, bookedTimes)) {
-            throw new SaveDuplicateContentException("해당 시간에 예약이 존재합니다.");
+            throw new ConflictException("해당 시간에 예약이 존재합니다.");
         }
     }
 
@@ -81,7 +83,7 @@ public class ReservationService {
 
     public ReservationResponse addReservation(AdminReservationRequest reservationRequest) {
         Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new IllegalReservationDateTimeRequestException("해당 예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new BadRequestException("해당 예약 시간이 존재하지 않습니다."));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new BadRequestException("선택한 테마가 존재하지 않습니다."));
         Member member = memberRepository.findById(reservationRequest.memberId())
