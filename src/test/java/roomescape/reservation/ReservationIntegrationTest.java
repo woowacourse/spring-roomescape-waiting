@@ -118,7 +118,7 @@ class ReservationIntegrationTest {
                         .jsonPath()
                         .getInt("size()");
 
-                assertThat(size).isEqualTo(1);
+                assertThat(size).isEqualTo(2);
             }
 
             @Test
