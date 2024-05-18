@@ -5,7 +5,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.controller.LoginMemberArgumentResolver;
-import roomescape.controller.api.dto.request.TokenContextRequest;
 import roomescape.service.MemberService;
 import roomescape.util.TokenProvider;
 
@@ -15,29 +14,27 @@ import java.util.List;
 public class WebMvcConfiguration implements WebMvcConfigurer {
     private final MemberService memberService;
     private final TokenProvider tokenProvider;
-    private final TokenContextRequest tokenContextRequest;
 
-    public WebMvcConfiguration(final MemberService memberService, final TokenProvider tokenProvider, final TokenContextRequest tokenContextRequest) {
+    public WebMvcConfiguration(final MemberService memberService, final TokenProvider tokenProvider) {
         this.memberService = memberService;
         this.tokenProvider = tokenProvider;
-        this.tokenContextRequest = tokenContextRequest;
     }
 
 
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(new CheckLoginInterceptor(memberService, tokenProvider, tokenContextRequest))
+        registry.addInterceptor(new CheckLoginInterceptor(memberService, tokenProvider))
                 .addPathPatterns("/login/check")
                 .addPathPatterns("/reservations/**")
                 .addPathPatterns("/admin/**")
                 .order(1);
-        registry.addInterceptor(new CheckAdminInterceptor(tokenContextRequest))
+        registry.addInterceptor(new CheckAdminInterceptor())
                 .addPathPatterns("/admin/**")
                 .order(2);
     }
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginMemberArgumentResolver(tokenContextRequest));
+        resolvers.add(new LoginMemberArgumentResolver());
     }
 }

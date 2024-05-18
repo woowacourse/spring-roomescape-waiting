@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import roomescape.config.CheckLoginInterceptor;
-import roomescape.controller.api.dto.request.TokenContextRequest;
 import roomescape.domain.user.Role;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.MemberService;
@@ -33,7 +32,7 @@ class CheckLoginInterceptorTest {
 
     @BeforeEach
     void setUp() {
-        sut = new CheckLoginInterceptor(memberService, tokenProvider, new TokenContextRequest());
+        sut = new CheckLoginInterceptor(memberService, tokenProvider);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
 
