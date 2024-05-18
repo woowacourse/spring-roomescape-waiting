@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.domain.repository.MemberQueryRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
-import roomescape.domain.repository.TimeCommandRepository;
-import roomescape.domain.repository.TimeQueryRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
 import roomescape.domain.repository.ThemeQueryRepository;
+import roomescape.domain.repository.TimeCommandRepository;
+import roomescape.domain.repository.TimeQueryRepository;
 
 @ServiceTest
 class PopularThemeFinderTest {

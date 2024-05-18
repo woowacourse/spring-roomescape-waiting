@@ -32,6 +32,12 @@ public class ReservationController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/admin/reservations")
+    public ResponseEntity<List<ReservationResponse>> findAllForAdmin(ReservationCriteria reservationCriteria) {
+        List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteria);
+        return ResponseEntity.ok(responses);
+    }
+
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
             @AuthenticationPrincipal LoginMember loginMember,
@@ -46,13 +52,7 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/admin/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllForAdmin(ReservationCriteria reservationCriteria) {
-        List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteria);
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/my")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(
             @AuthenticationPrincipal LoginMember loginMember) {
         List<MyReservationResponse> responses = reservationService.findMyReservations(loginMember.id());

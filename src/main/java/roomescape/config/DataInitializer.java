@@ -16,8 +16,8 @@ import roomescape.domain.ThemeName;
 import roomescape.domain.Time;
 import roomescape.domain.repository.MemberCommandRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
-import roomescape.domain.repository.TimeCommandRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
+import roomescape.domain.repository.TimeCommandRepository;
 
 @Component
 @Profile("prod")

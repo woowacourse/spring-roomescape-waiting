@@ -9,11 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class ClientController {
 
-    @GetMapping("/reservation")
-    public String reservationPage() {
-        return "reservation";
-    }
-
     @GetMapping("/login")
     public String loginPage() {
         return "login";
@@ -24,7 +19,12 @@ public class ClientController {
         response.addCookie(new Cookie("token", ""));
     }
 
-    @GetMapping("/reservation-mine")
+    @GetMapping("/reservation")
+    public String reservationPage() {
+        return "reservation";
+    }
+
+    @GetMapping("/reservation/my")
     public String reservationMinePage() {
         return "reservation-mine";
     }
