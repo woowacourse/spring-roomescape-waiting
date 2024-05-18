@@ -42,7 +42,9 @@ public class Theme {
         for (Theme theme : themes) {
             countTheme.put(theme, countTheme.getOrDefault(theme, 0) + 1);
         }
-        return sortThemes(countTheme);
+        return sortThemes(countTheme).stream()
+                .limit(10)
+                .toList();
     }
 
     private List<Theme> sortThemes(Map<Theme, Integer> countTheme) {

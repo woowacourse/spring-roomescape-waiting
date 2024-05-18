@@ -51,12 +51,9 @@ public class ThemeService {
 
     public List<PopularThemeResponse> findPopularThemeBetweenWeekLimitTen() {
         List<Theme> themes = getThemeBetweenWeek();
-
         Theme theme = new Theme();
-        List<Theme> popularTheme = theme.getPopularTheme(themes);
 
-        return popularTheme.stream()
-                .limit(10)
+        return theme.getPopularTheme(themes).stream()
                 .map(PopularThemeResponse::toResponse)
                 .collect(Collectors.toList());
     }
