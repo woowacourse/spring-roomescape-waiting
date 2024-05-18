@@ -9,22 +9,29 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateTimeRequest;
 import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationTimeControllerTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private String adminToken;
 
     @BeforeEach
-    void login() {
+    void setUpToken() {
+        jdbcTemplate.update(
+            "INSERT INTO member(name, email, password, role) VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN');");
+
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
 
         adminToken = RestAssured.given()
@@ -44,13 +51,20 @@ class AdminReservationTimeControllerTest {
             .when().post("/admin/times")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(3))
+            .body("id", is(1))
             .body("startAt", is("00:00"));
     }
 
     @DisplayName("성공: 예약 시간 삭제 -> 204")
     @Test
     void delete() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at)
+            VALUES ('10:00'),
+                   ('23:00'),
+                   ('23:30');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .contentType(ContentType.JSON)
@@ -64,12 +78,18 @@ class AdminReservationTimeControllerTest {
             .when().get("/admin/times")
             .then().log().all()
             .statusCode(200)
-            .body("id", contains(1));
+            .body("id", contains(1, 3));
     }
 
     @DisplayName("성공: 예약 시간 조회 -> 200")
     @Test
     void findAll() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at)
+            VALUES ('10:00'),
+                   ('23:00');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .contentType(ContentType.JSON)
@@ -98,6 +118,13 @@ class AdminReservationTimeControllerTest {
     @DisplayName("예약이 존재하는 시간 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at) VALUES ('10:00');
+            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
+            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', 1, 1, 'RESERVED');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .contentType(ContentType.JSON)
@@ -110,12 +137,12 @@ class AdminReservationTimeControllerTest {
     @DisplayName("실패: 이미 존재하는 시간을 저장 -> 400")
     @Test
     void save_Duplicate() {
-        CreateTimeRequest request = new CreateTimeRequest("10:00");
+        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES ('10:00')");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .contentType(ContentType.JSON)
-            .body(request)
+            .body(new CreateTimeRequest("10:00"))
             .when().post("/admin/times")
             .then().log().all()
             .statusCode(400)

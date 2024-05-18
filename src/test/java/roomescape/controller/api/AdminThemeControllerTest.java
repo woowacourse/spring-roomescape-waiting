@@ -9,22 +9,29 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.CreateThemeRequest;
 import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminThemeControllerTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private String adminToken;
 
     @BeforeEach
-    void login() {
+    void setUpToken() {
+        jdbcTemplate.update(
+            "INSERT INTO member(name, email, password, role) VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN');");
+
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
 
         adminToken = RestAssured.given()
@@ -37,7 +44,7 @@ class AdminThemeControllerTest {
     @DisplayName("성공: 테마 생성 -> 201")
     @Test
     void save() {
-        CreateThemeRequest request = new CreateThemeRequest("theme4", "desc4", "https://url4");
+        CreateThemeRequest request = new CreateThemeRequest("t1", "d1", "https://test.com/test.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -46,15 +53,22 @@ class AdminThemeControllerTest {
             .when().post("/admin/themes")
             .then().log().all()
             .statusCode(201)
-            .body("id", is(4))
-            .body("name", is("theme4"))
-            .body("description", is("desc4"))
-            .body("thumbnail", is("https://url4"));
+            .body("id", is(1))
+            .body("name", is("t1"))
+            .body("description", is("d1"))
+            .body("thumbnail", is("https://test.com/test.jpg"));
     }
 
     @DisplayName("성공: 테마 삭제 -> 204")
     @Test
     void delete() {
+        jdbcTemplate.update("""
+            INSERT INTO theme(name, description, thumbnail)
+            VALUES ('t1', 'd1', 'https://test.com/test1.jpg'),
+            ('t2', 'd2', 'https://test.com/test2.jpg'),
+            ('t3', 'd3', 'https://test.com/test3.jpg');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .when().delete("/admin/themes/2")
@@ -87,7 +101,10 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 중복 테마 추가 -> 400")
     @Test
     void save_Duplicate() {
-        CreateThemeRequest request = new CreateThemeRequest("theme1", "It's so fun", "https://url1");
+        jdbcTemplate.update(
+            "INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg')");
+
+        CreateThemeRequest request = new CreateThemeRequest("t1", "d2", "https://test2.com/test.jpg");
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
@@ -102,6 +119,13 @@ class AdminThemeControllerTest {
     @DisplayName("실패: 예약에서 사용되는 테마 삭제 -> 400")
     @Test
     void delete_ReservationExists() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at) VALUES ('10:00');
+            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
+            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', 1, 1, 'RESERVED');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .when().delete("/admin/themes/1")

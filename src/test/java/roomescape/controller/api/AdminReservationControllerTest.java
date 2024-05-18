@@ -7,22 +7,32 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationControllerTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private String adminToken;
     private String userToken;
 
     @BeforeEach
-    void login() {
+    void setUpTokens() {
+        jdbcTemplate.update("""
+            INSERT INTO member(name, email, password, role)
+            VALUES ('관리자', 'admin@a.com', '123a!', 'ADMIN'),
+                   ('사용자', 'user@a.com', '123a!', 'USER');
+            """);
+
         LoginRequest admin = new LoginRequest("admin@a.com", "123a!");
         LoginRequest user = new LoginRequest("user@a.com", "123a!");
 
@@ -42,9 +52,18 @@ class AdminReservationControllerTest {
     @DisplayName("성공: 예약 삭제 -> 204")
     @Test
     void delete() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at) VALUES ('10:00');
+            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
+            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', 1, 1, 'RESERVED'),
+                   (2, '2060-01-02', 1, 1, 'RESERVED'),
+                   (1, '2060-01-03', 1, 1, 'RESERVED');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
-            .when().delete("/admin/reservations/3")
+            .when().delete("/admin/reservations/2")
             .then().log().all()
             .statusCode(204);
 
@@ -52,7 +71,7 @@ class AdminReservationControllerTest {
             .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
-            .body("id", contains(1, 2, 4));
+            .body("id", contains(1, 3));
     }
 
     @DisplayName("실패: 일반 유저가 예약 삭제 -> 401")
@@ -68,12 +87,21 @@ class AdminReservationControllerTest {
     @DisplayName("성공: 전체 예약 조회 -> 200")
     @Test
     void findAll() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at) VALUES ('10:00');
+            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
+            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', 1, 1, 'RESERVED'),
+                   (2, '2060-01-02', 1, 1, 'RESERVED'),
+                   (1, '2060-01-03', 1, 1, 'RESERVED');
+            """);
+
         RestAssured.given().log().all()
             .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(200)
-            .body("id", contains(1, 2, 3, 4));
+            .body("id", contains(1, 2, 3));
     }
 
     @DisplayName("실패: 일반 유저가 전체 예약 조회 -> 401")
