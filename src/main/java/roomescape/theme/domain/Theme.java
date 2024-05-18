@@ -22,7 +22,7 @@ public class Theme {
     @NotBlank
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {

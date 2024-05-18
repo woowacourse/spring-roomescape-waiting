@@ -37,7 +37,7 @@ public class Reservation {
     @ColumnDefault(value = "'CONFIRMATION'")
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
