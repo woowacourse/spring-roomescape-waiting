@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RoomescapeException.class)
-    ResponseEntity<ApiExceptionResponse> handleIllegalArgumentException(RoomescapeException ex) {
+    ResponseEntity<ApiExceptionResponse<String>> handleIllegalArgumentException(RoomescapeException ex) {
         return ResponseEntity.status(ex.getHttpStatus())
-                .body(new ApiExceptionResponse(ex.getHttpStatus(), ex.getMessage()));
+                .body(new ApiExceptionResponse<>(ex.getHttpStatus(), ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiExceptionResponse<Map<String, String>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors()
                 .forEach((error) -> {
@@ -30,30 +30,30 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return ResponseEntity.badRequest()
-                .body(errors);
+                .body(new ApiExceptionResponse<>(HttpStatus.BAD_REQUEST, errors));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiExceptionResponse> handleMethodConstraintViolationException(ConstraintViolationException ex) {
+    public ResponseEntity<ApiExceptionResponse<String>> handleMethodConstraintViolationException(ConstraintViolationException ex) {
         return ResponseEntity.badRequest()
-                .body(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, ex.getMessage()));
+                .body(new ApiExceptionResponse<>(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ApiExceptionResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         return ResponseEntity.badRequest()
-                .body(new ApiExceptionResponse(HttpStatus.BAD_REQUEST, ex.getMessage()));
+                .body(new ApiExceptionResponse<>(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiExceptionResponse> handleAuthenticationException(AuthenticationException ex) {
+    public ResponseEntity<ApiExceptionResponse<String>> handleAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(ex.getHttpStatus())
-                .body(new ApiExceptionResponse(ex.getHttpStatus(), ex.getMessage()));
+                .body(new ApiExceptionResponse<>(ex.getHttpStatus(), ex.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    ResponseEntity<String> handleRuntimeException() {
+    ResponseEntity<ApiExceptionResponse<String>> handleRuntimeException() {
         return ResponseEntity.internalServerError()
-                .body("서버에서 예기치 못한 오류가 발생했습니다. 문제가 지속되는 경우 관리자에게 문의해주세요.");
+                .body(new ApiExceptionResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 예기치 못한 오류가 발생했습니다. 문제가 지속되는 경우 관리자에게 문의해주세요."));
     }
 }

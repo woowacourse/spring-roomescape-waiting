@@ -2,5 +2,5 @@ package roomescape.exception;
 
 import org.springframework.http.HttpStatus;
 
-public record ApiExceptionResponse(HttpStatus status, String message) {
+public record ApiExceptionResponse<T>(HttpStatus status, T message) {
 }
