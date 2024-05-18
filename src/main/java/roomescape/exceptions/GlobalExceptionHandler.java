@@ -14,14 +14,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleValidationException(ValidationException e) {
-        e.printStackTrace();
         return e.getMessage();
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        e.printStackTrace();
         if (e.getCause() instanceof DateTimeParseException) {
             return handleDateTimeParseException();
         } else {
@@ -36,14 +34,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String handleException(AuthenticationException e) {
-        e.printStackTrace();
         return e.getMessage();
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleException(Exception e) {
-        e.printStackTrace();
+    public String handleException() {
         return "서버에서 예기치 않은 오류가 발생했습니다.";
     }
 }
