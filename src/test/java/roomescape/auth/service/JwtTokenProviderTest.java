@@ -23,7 +23,7 @@ class JwtTokenProviderTest {
         String token = tokenProvider.createToken(member);
 
         assertThat(tokenProvider.extractAuthInfo(token))
-                .isEqualTo(new AuthInfo(member.getId(), member.getName(), member.getMemberRole()));
+                .isEqualTo(new AuthInfo(member.getId(), member.getName(), member.getRole()));
     }
 
     @Test

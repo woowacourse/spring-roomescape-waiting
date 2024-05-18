@@ -79,10 +79,6 @@ public class Member {
         return name;
     }
 
-    public Role getMemberRole() {
-        return role;
-    }
-
     public Email getEmail() {
         return email;
     }

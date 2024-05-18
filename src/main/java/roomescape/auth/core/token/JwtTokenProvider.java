@@ -32,7 +32,7 @@ public class JwtTokenProvider implements TokenProvider {
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .claim(MEMBER_ID_CLAIM, member.getName())
-                .claim(MEMBER_ROLE_CLAIM, member.getMemberRole())
+                .claim(MEMBER_ROLE_CLAIM, member.getRole())
                 .signWith(SignatureAlgorithm.HS256, tokenProperties.getSecretKey())
                 .compact();
     }

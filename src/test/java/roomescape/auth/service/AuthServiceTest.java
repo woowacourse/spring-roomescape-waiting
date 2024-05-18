@@ -69,7 +69,7 @@ class AuthServiceTest {
     void getMemberAuthInfo() {
         // given
         Member member = memberRepository.save(MemberFixture.getOne());
-        AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getMemberRole());
+        AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
 
         // when & then
         assertThat(authService.getMemberAuthInfo(authInfo))
@@ -81,7 +81,7 @@ class AuthServiceTest {
     void getMemberAuthInfo_WhenMemberNotExist() {
         // given
         Member member = MemberFixture.getOneWithId(1L);
-        AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getMemberRole());
+        AuthInfo authInfo = new AuthInfo(member.getId(), member.getName(), member.getRole());
 
         // when & then
         assertThatThrownBy(() -> authService.getMemberAuthInfo(authInfo))
