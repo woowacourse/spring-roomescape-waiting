@@ -33,15 +33,10 @@ class MemberControllerTest {
         // given
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
-        Member member1 = memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
-        Member member2 = memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
-        Member member3 = memberRepository.save(new Member("이름3", "test@test.com", "password", Role.MEMBER));
-        Member member4 = memberRepository.save(new Member("이름4", "test@test.com", "password", Role.MEMBER));
-
-        System.out.println(member1);
-        System.out.println(member2);
-        System.out.println(member3);
-        System.out.println(member4);
+        memberRepository.save(new Member("이름1", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름2", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름3", "test@test.com", "password", Role.MEMBER));
+        memberRepository.save(new Member("이름4", "test@test.com", "password", Role.MEMBER));
 
         // when & then
         RestAssured.given().log().all()
