@@ -3,6 +3,7 @@ package roomescape.controller.exception;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.config.ForbiddenAccessException;
@@ -20,7 +21,7 @@ public class GlobalExceptionHandler {
                 .body(new CustomExceptionResponse(e.getTitle(), e.getDetail()));
     }
 
-    @ExceptionHandler(InputNotAllowedException.class)
+    @ExceptionHandler({HttpMessageNotReadableException.class, InputNotAllowedException.class})
     public ResponseEntity<CustomExceptionResponse> handleInputNotAllowed(InputNotAllowedException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new CustomExceptionResponse(e.getTitle(), e.getDetail()));
