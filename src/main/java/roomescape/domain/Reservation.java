@@ -19,9 +19,9 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
     private LocalDate date;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private TimeSlot time;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
