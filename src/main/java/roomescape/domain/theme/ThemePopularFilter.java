@@ -18,7 +18,7 @@ public class ThemePopularFilter {
         this.limit = limit;
     }
 
-    public static ThemePopularFilter getThemePopularFilter(final LocalDate nowDate) {
+    public static ThemePopularFilter toThemePopularFilter(final LocalDate nowDate) {
         final LocalDate startDate = nowDate.minusDays(POPULARITY_AGGREGATION_PERIOD);
         return new ThemePopularFilter(startDate, nowDate, POPULARITY_AGGREGATION_LIMIT);
     }

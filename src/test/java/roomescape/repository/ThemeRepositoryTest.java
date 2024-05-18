@@ -81,7 +81,7 @@ class ThemeRepositoryTest extends RepositoryTest {
     void findPopularThemes() {
         // given
         final ThemePopularFilter filter
-                = ThemePopularFilter.getThemePopularFilter(LocalDate.parse("2034-05-12"));
+                = ThemePopularFilter.toThemePopularFilter(LocalDate.parse("2034-05-12"));
 
         // when
         final int limit = filter.getLimit();
