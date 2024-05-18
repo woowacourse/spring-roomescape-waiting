@@ -1,15 +1,18 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ThemeRequest;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -64,9 +67,9 @@ class ThemeRepositoryTest {
         //given
         LocalDate startDate = LocalDate.parse("2024-04-30");
         LocalDate endDate = LocalDate.parse("2024-05-02");
-        Long count = 10L;
+        Pageable pageable = PageRequest.of(0, 10);
         //when
-        final List<Theme> popularThemeByDate = themeRepository.findPopularThemeByDate(startDate, endDate, count);
+        final List<Theme> popularThemeByDate = themeRepository.findPopularThemeByDate(startDate, endDate, pageable);
         assertThat(popularThemeByDate.get(0).getId()).isEqualTo(2);
     }
 }

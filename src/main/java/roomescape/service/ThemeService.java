@@ -1,7 +1,6 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ThemeRequest;
@@ -10,6 +9,9 @@ import roomescape.domain.dto.ThemeResponses;
 import roomescape.exception.DeleteNotAllowException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ThemeService {
@@ -40,7 +42,7 @@ public class ThemeService {
     }
 
     public ThemeResponses getPopularThemeList(final LocalDate startDate, final LocalDate endDate, final Long count) {
-        final List<Theme> themes = themeRepository.findPopularThemeByDate(startDate, endDate, count);
+        final List<Theme> themes = themeRepository.findPopularThemeByDate(startDate, endDate, PageRequest.of(0, count.intValue()));
         final List<ThemeResponse> themeResponses = themes.stream().map(ThemeResponse::from).toList();
         return new ThemeResponses(themeResponses);
     }
