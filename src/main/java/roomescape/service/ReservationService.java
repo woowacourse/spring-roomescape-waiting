@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,16 +70,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
                 .orElseThrow(
                         () -> new NotFoundException("예약시간을 찾을 수 없습니다. timeId = " + reservationCreateRequest.timeId()));
-        validateOutdatedDateTime(
-                reservationCreateRequest.date(),
-                reservationTime.getStartAt());
-        validateDuplicatedDateTime(
-                reservationCreateRequest.date(),
-                reservationCreateRequest.timeId(),
+        validateOutdatedDateTime(reservationCreateRequest.date(), reservationTime.getStartAt());
+        validateDuplicatedDateTime(reservationCreateRequest.date(), reservationCreateRequest.timeId(),
                 reservationCreateRequest.themeId());
 
         Member member = memberRepository.findById(reservationCreateRequest.memberId())

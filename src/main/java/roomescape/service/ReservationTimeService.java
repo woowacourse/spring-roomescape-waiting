@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
 

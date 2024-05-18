@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class RoomThemeService {
                 .toList();
     }
 
+    @Transactional
     public RoomThemeResponse save(RoomThemeCreateRequest roomThemeCreateRequest) {
         RoomTheme roomTheme = roomThemeCreateRequest.toRoomTheme();
         RoomTheme savedRoomTheme = roomThemeRepository.save(roomTheme);
