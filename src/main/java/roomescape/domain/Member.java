@@ -28,7 +28,7 @@ public class Member {
     @Column(nullable = false)
     private Role role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Reservation> reservations;
 
     public Member() {
