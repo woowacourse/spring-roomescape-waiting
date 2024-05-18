@@ -1,8 +1,7 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.BookResponses;
@@ -13,6 +12,9 @@ import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.DuplicateNotAllowException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ReservationTimeService {
@@ -57,8 +59,9 @@ public class ReservationTimeService {
     }
 
     public BookResponses findAvailableBookList(final LocalDate date, final Long themeId) {
-        List<ReservationTime> reservedReservationTimes = reservationTimeRepository
-                .findByDateAndThemeId(date, themeId);
+        List<ReservationTime> reservedReservationTimes = reservationRepository
+                .findByDateAndThemeId(date, themeId)
+                .stream().map(Reservation::getTime).toList();
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         final List<BookResponse> bookResponses = reservationTimes.stream()

@@ -1,10 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +10,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -104,4 +105,13 @@ class ReservationRepositoryTest {
         //when, then
         assertThat(reservationRepository.findByMember(member)).hasSize(7);
     }
+
+    @DisplayName("예약 날짜와 테마Id에 대한 예약을 조호할 수 있다.")
+    @Test
+    void given_dateAndThemeId_When_findByDateAndThemeId_then_Reservations() {
+        //given, when, then
+        assertThat(reservationRepository.findByDateAndThemeId(LocalDate.parse("2024-05-01"), 2L))
+                .hasSize(2);
+    }
+
 }

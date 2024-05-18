@@ -1,15 +1,15 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.dto.ReservationTimeRequest;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ReservationTimeRepositoryTest {
@@ -63,13 +63,5 @@ class ReservationTimeRepositoryTest {
     void given_when_findById_then_returnOptionalReservationTime() {
         //given, when, then
         assertThat(reservationTimeRepository.findById(1L).get().getId()).isEqualTo(1);
-    }
-
-    @DisplayName("특정 날짜와 테마Id를 통해 예약된 시간들을 반환할 수 있다.")
-    @Test
-    void given_when_exist_then_returnReservedReservationTimes() {
-        //given, when, then
-        assertThat(reservationTimeRepository.findByDateAndThemeId(LocalDate.parse("2024-05-01"), 2L).size()).isEqualTo(
-                2);
     }
 }
