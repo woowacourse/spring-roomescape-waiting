@@ -22,7 +22,7 @@ public interface ReservationRepository {
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findByMember(Member member);
+    List<Reservation> findAllByMember(Member member);
 
     boolean existsByTimeId(Long id);
 

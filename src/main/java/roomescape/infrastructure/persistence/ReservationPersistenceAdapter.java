@@ -87,8 +87,8 @@ class ReservationPersistenceAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMember(Member member) {
-        return repository.findByMember(member);
+    public List<Reservation> findAllByMember(Member member) {
+        return repository.findAllByMember(member);
     }
 
     @Override
