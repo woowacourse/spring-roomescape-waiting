@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.application.dto.MemberResponse;
 import roomescape.domain.Member;
-import roomescape.domain.MemberQueryRepository;
+import roomescape.domain.repository.MemberQueryRepository;
 
 @Service
 public class MemberService {

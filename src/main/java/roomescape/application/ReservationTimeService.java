@@ -8,22 +8,26 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.AvailableTimeResponse;
 import roomescape.application.dto.ReservationTimeRequest;
 import roomescape.application.dto.ReservationTimeResponse;
-import roomescape.domain.ReservationQueryRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.repository.ReservationQueryRepository;
+import roomescape.domain.repository.ReservationTimeCommandRepository;
+import roomescape.domain.repository.ReservationTimeQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimesRepository;
+    private final ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private final ReservationTimeQueryRepository reservationTimeQueryRepository;
     private final ReservationQueryRepository reservationQueryRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimesRepository,
-                                  ReservationQueryRepository reservationQueryRepository) {
-        this.reservationTimesRepository = reservationTimesRepository;
+    public ReservationTimeService(ReservationTimeCommandRepository reservationTimeCommandRepository,
+                                  ReservationQueryRepository reservationQueryRepository,
+                                  ReservationTimeQueryRepository reservationTimeQueryRepository) {
+        this.reservationTimeCommandRepository = reservationTimeCommandRepository;
         this.reservationQueryRepository = reservationQueryRepository;
+        this.reservationTimeQueryRepository = reservationTimeQueryRepository;
     }
 
     @Transactional
@@ -34,27 +38,27 @@ public class ReservationTimeService {
                     String.format("중복된 예약 시간입니다. 요청 예약 시간:%s", startAt));
         }
 
-        ReservationTime reservationTime = reservationTimesRepository.save(request.toReservationTime());
+        ReservationTime reservationTime = reservationTimeCommandRepository.save(request.toReservationTime());
         return ReservationTimeResponse.from(reservationTime);
     }
 
     private boolean existsByStartAt(LocalTime startAt) {
-        return reservationTimesRepository.existsByStartAt(startAt);
+        return reservationTimeQueryRepository.existsByStartAt(startAt);
     }
 
     @Transactional
     public void deleteById(Long id) {
-        ReservationTime findReservationTime = reservationTimesRepository.getById(id);
+        ReservationTime findReservationTime = reservationTimeQueryRepository.getById(id);
         long reservedCount = reservationQueryRepository.countByTimeId(id);
         if (reservedCount > 0) {
             throw new RoomescapeException(RoomescapeErrorCode.ALREADY_RESERVED,
                     String.format("해당 예약 시간에 연관된 예약이 존재하여 삭제할 수 없습니다. 삭제 요청한 시간:%s", findReservationTime.getStartAt()));
         }
-        reservationTimesRepository.deleteById(id);
+        reservationTimeCommandRepository.deleteById(id);
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimesRepository.findAll()
+        return reservationTimeQueryRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();

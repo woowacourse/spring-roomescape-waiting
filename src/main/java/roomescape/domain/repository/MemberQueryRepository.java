@@ -1,8 +1,10 @@
-package roomescape.domain;
+package roomescape.domain.repository;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
+import roomescape.domain.Email;
+import roomescape.domain.Member;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 

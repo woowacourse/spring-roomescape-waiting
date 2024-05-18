@@ -14,7 +14,7 @@ import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
 import roomescape.application.dto.TokenRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationQueryRepository;
+import roomescape.domain.repository.ReservationQueryRepository;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
 

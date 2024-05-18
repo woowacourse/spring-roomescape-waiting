@@ -7,28 +7,29 @@ import roomescape.application.dto.ThemeRequest;
 import roomescape.application.dto.ThemeResponse;
 import roomescape.domain.PopularThemeFinder;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeRepository;
-import roomescape.exception.RoomescapeErrorCode;
-import roomescape.exception.RoomescapeException;
+import roomescape.domain.repository.ThemeCommandRepository;
+import roomescape.domain.repository.ThemeQueryRepository;
 
 @Service
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
+    private final ThemeCommandRepository themeCommandRepository;
+    private final ThemeQueryRepository themeQueryRepository;
     private final PopularThemeFinder popularThemeFinder;
 
-    public ThemeService(ThemeRepository themeRepository, PopularThemeFinder popularThemeFinder) {
-        this.themeRepository = themeRepository;
+    public ThemeService(ThemeCommandRepository themeCommandRepository, ThemeQueryRepository themeQueryRepository, PopularThemeFinder popularThemeFinder) {
+        this.themeCommandRepository = themeCommandRepository;
+        this.themeQueryRepository = themeQueryRepository;
         this.popularThemeFinder = popularThemeFinder;
     }
 
     public ThemeResponse create(ThemeRequest request) {
-        Theme savedTheme = themeRepository.save(request.toTheme());
+        Theme savedTheme = themeCommandRepository.save(request.toTheme());
         return ThemeResponse.from(savedTheme);
     }
 
     public List<ThemeResponse> findAll() {
-        return themeRepository.findAll()
+        return themeQueryRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -36,8 +37,8 @@ public class ThemeService {
 
     @Transactional
     public void deleteById(Long id) {
-        Theme theme = themeRepository.getById(id);
-        themeRepository.deleteById(theme.getId());
+        Theme theme = themeQueryRepository.getById(id);
+        themeCommandRepository.deleteById(theme.getId());
     }
 
 

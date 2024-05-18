@@ -1,4 +1,4 @@
-package roomescape.infrastructure.auth;
+package roomescape.infrastructure.authentication;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

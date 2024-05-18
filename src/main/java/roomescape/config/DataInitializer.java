@@ -7,17 +7,17 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Email;
 import roomescape.domain.Member;
-import roomescape.domain.MemberCommandRepository;
 import roomescape.domain.Password;
 import roomescape.domain.PlayerName;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationCommandRepository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeName;
-import roomescape.domain.ThemeRepository;
+import roomescape.domain.repository.MemberCommandRepository;
+import roomescape.domain.repository.ReservationCommandRepository;
+import roomescape.domain.repository.ReservationTimeCommandRepository;
+import roomescape.domain.repository.ThemeCommandRepository;
 
 @Component
 @Profile("prod")
@@ -25,17 +25,17 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ReservationCommandRepository reservationCommandRepository;
     private final MemberCommandRepository memberCommandRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private final ThemeCommandRepository themeCommandRepository;
 
     public DataInitializer(ReservationCommandRepository reservationCommandRepository,
                            MemberCommandRepository memberCommandRepository,
-                           ReservationTimeRepository reservationTimeRepository,
-                           ThemeRepository themeRepository) {
+                           ReservationTimeCommandRepository reservationTimeCommandRepository,
+                           ThemeCommandRepository themeCommandRepository) {
         this.reservationCommandRepository = reservationCommandRepository;
         this.memberCommandRepository = memberCommandRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
+        this.reservationTimeCommandRepository = reservationTimeCommandRepository;
+        this.themeCommandRepository = themeCommandRepository;
     }
 
     @Override
@@ -74,11 +74,11 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private ReservationTime createReservationTime(String time) {
-        return reservationTimeRepository.save(new ReservationTime(LocalTime.parse(time)));
+        return reservationTimeCommandRepository.save(new ReservationTime(LocalTime.parse(time)));
     }
 
     private Theme createTheme(String name, String description) {
-        return themeRepository.save(new Theme(new ThemeName(name), description, "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png"));
+        return themeCommandRepository.save(new Theme(new ThemeName(name), description, "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/440px-SpongeBob_SquarePants_character.svg.png"));
     }
 
     private Reservation createReservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {

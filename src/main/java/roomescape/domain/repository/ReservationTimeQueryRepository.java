@@ -1,23 +1,20 @@
-package roomescape.domain;
+package roomescape.domain.repository;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
+import roomescape.domain.ReservationTime;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
-public interface ReservationTimeRepository extends Repository<ReservationTime, Long> {
-
-    ReservationTime save(ReservationTime reservationTime);
+public interface ReservationTimeQueryRepository extends Repository<ReservationTime, Long> {
 
     Optional<ReservationTime> findById(Long id);
 
     List<ReservationTime> findAll();
 
     boolean existsByStartAt(LocalTime time);
-
-    void deleteById(Long id);
 
     default ReservationTime getById(Long id) {
         return findById(id).orElseThrow(

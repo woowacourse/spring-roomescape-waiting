@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ReservationTimeRequest;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.repository.ReservationTimeCommandRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -18,12 +18,12 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeCommandRepository reservationTimeCommandRepository;
 
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")
     @Test
     void shouldThrowsIllegalStateExceptionWhenCreateExistStartAtTime() {
-        ReservationTime reservationTime = reservationTimeRepository.findAll().get(0);
+        ReservationTime reservationTime = reservationTimeCommandRepository.findAll().get(0);
         ReservationTimeRequest request = new ReservationTimeRequest(reservationTime.getStartAt());
 
         assertThatCode(() -> reservationTimeService.create(request))
@@ -35,7 +35,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")
     @Test
     void shouldThrowsExceptionReservationWhenReservedInTime() {
-        ReservationTime reservationTime = reservationTimeRepository.findAll().get(0);
+        ReservationTime reservationTime = reservationTimeCommandRepository.findAll().get(0);
 
         assertThatCode(() -> reservationTimeService.deleteById(reservationTime.getId()))
                 .isInstanceOf(RoomescapeException.class)

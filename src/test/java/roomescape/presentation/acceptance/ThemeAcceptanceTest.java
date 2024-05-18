@@ -13,12 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.ThemeRequest;
 import roomescape.application.dto.ThemeResponse;
 import roomescape.application.dto.TokenRequest;
-import roomescape.domain.ThemeRepository;
+import roomescape.domain.repository.ThemeCommandRepository;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeCommandRepository themeCommandRepository;
 
     private String adminToken;
 
@@ -69,7 +69,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("테마가 존재해도 완료된 예약이 없으면 인기 테마도 없다.")
     @Test
     void notFoundPopularThemes() {
-        themeRepository.save(ThemeFixture.defaultValue());
+        themeCommandRepository.save(ThemeFixture.defaultValue());
 
         RestAssured.given().log().all()
                 .cookie("token", adminToken)

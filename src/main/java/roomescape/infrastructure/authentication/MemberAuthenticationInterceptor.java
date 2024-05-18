@@ -1,10 +1,10 @@
-package roomescape.infrastructure.auth;
+package roomescape.infrastructure.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.application.AuthService;
+import roomescape.application.AuthenticationService;
 import roomescape.application.dto.MemberResponse;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -12,16 +12,16 @@ import roomescape.exception.RoomescapeException;
 @Component
 public class MemberAuthenticationInterceptor implements HandlerInterceptor {
 
-    private final AuthService authService;
+    private final AuthenticationService authenticationService;
 
-    public MemberAuthenticationInterceptor(AuthService authService) {
-        this.authService = authService;
+    public MemberAuthenticationInterceptor(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = authService.extractToken(request.getCookies());
-        MemberResponse memberResponse = authService.findMemberByToken(token);
+        String token = authenticationService.extractToken(request.getCookies());
+        MemberResponse memberResponse = authenticationService.findMemberByToken(token);
         if (memberResponse.role().isMember()) {
             return true;
         }

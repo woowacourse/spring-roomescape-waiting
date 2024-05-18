@@ -1,10 +1,12 @@
-package roomescape.domain;
+package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
 import roomescape.domain.dto.AvailableTimeDto;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;

@@ -9,19 +9,19 @@ import roomescape.application.dto.TokenRequest;
 import roomescape.application.dto.TokenResponse;
 import roomescape.domain.Email;
 import roomescape.domain.Member;
-import roomescape.domain.MemberQueryRepository;
+import roomescape.domain.repository.MemberQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
-public class AuthService {
+public class AuthenticationService {
 
     private final TokenProvider tokenProvider;
     private final TokenManager tokenManager;
     private final MemberQueryRepository memberQueryRepository;
 
-    public AuthService(TokenProvider tokenProvider, TokenManager tokenManager,
-                       MemberQueryRepository memberQueryRepository) {
+    public AuthenticationService(TokenProvider tokenProvider, TokenManager tokenManager,
+                                 MemberQueryRepository memberQueryRepository) {
         this.tokenProvider = tokenProvider;
         this.tokenManager = tokenManager;
         this.memberQueryRepository = memberQueryRepository;

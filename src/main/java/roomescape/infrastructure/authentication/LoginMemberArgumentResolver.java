@@ -1,4 +1,4 @@
-package roomescape.infrastructure.auth;
+package roomescape.infrastructure.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.application.AuthService;
+import roomescape.application.AuthenticationService;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.MemberResponse;
 import roomescape.exception.RoomescapeErrorCode;
@@ -16,10 +16,10 @@ import roomescape.exception.RoomescapeException;
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final AuthService authService;
+    private final AuthenticationService authenticationService;
 
-    public LoginMemberArgumentResolver(AuthService authService) {
-        this.authService = authService;
+    public LoginMemberArgumentResolver(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @Override
@@ -34,8 +34,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         if (request == null) {
             throw new RoomescapeException(RoomescapeErrorCode.UNAUTHORIZED);
         }
-        String token = authService.extractToken(request.getCookies());
-        MemberResponse response = authService.findMemberByToken(token);
+        String token = authenticationService.extractToken(request.getCookies());
+        MemberResponse response = authenticationService.findMemberByToken(token);
         return new LoginMember(response.id(), response.name(), response.email(), response.role().name());
     }
 

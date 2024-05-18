@@ -15,7 +15,7 @@ import roomescape.application.dto.MyReservationResponse;
 import roomescape.application.dto.ReservationCriteria;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.application.dto.ReservationResponse;
-import roomescape.infrastructure.auth.AuthenticationPrincipal;
+import roomescape.infrastructure.authentication.AuthenticationPrincipal;
 
 @RestController
 public class ReservationController {

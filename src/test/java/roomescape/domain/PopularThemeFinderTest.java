@@ -9,6 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
+import roomescape.domain.repository.MemberQueryRepository;
+import roomescape.domain.repository.ReservationCommandRepository;
+import roomescape.domain.repository.ReservationTimeCommandRepository;
+import roomescape.domain.repository.ThemeCommandRepository;
 
 @ServiceTest
 class PopularThemeFinderTest {
@@ -20,10 +24,10 @@ class PopularThemeFinderTest {
     private ReservationCommandRepository reservationCommandRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeCommandRepository reservationTimeCommandRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeCommandRepository themeCommandRepository;
 
     @Autowired
     private MemberQueryRepository memberQueryRepository;
@@ -34,8 +38,8 @@ class PopularThemeFinderTest {
     @DisplayName("현재 날짜 이전 1주일 동안 가장 예약이 많이 된 테마 10개를 내림차순 정렬하여 조회한다.")
     @Test
     void shouldReturnThemesWhenFindPopularThemes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Theme> themes = themeRepository.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeCommandRepository.findAll();
+        List<Theme> themes = themeCommandRepository.findAll();
         Member member = memberQueryRepository.findAll().get(0);
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(0), themes.get(0)));
         reservationCommandRepository.save(createReservation(member, reservationTimes.get(1), themes.get(1)));
