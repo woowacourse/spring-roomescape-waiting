@@ -12,8 +12,8 @@ public class Member {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Embedded
-    private Name name; //todo: 네임 검증 추가
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -31,18 +31,19 @@ public class Member {
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
-        this.name = new Name(name);
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
+
 
     public Long getId() {
         return id;
     }
 
     public String getName() {
-        return name.getName();
+        return name;
     }
 
     public String getEmail() {
@@ -78,7 +79,7 @@ public class Member {
     public String toString() {
         return "Member{" +
                 "id=" + id +
-                ", name=" + name +
+                ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", role=" + role +
