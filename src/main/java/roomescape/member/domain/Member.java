@@ -24,6 +24,10 @@ public class Member {
         this(null, name, email, password, "USER");
     }
 
+    public Member(Long id, String name, String email, String password) {
+        this(id, name, email, password, "USER");
+    }
+
     public Member(Long id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
@@ -32,16 +36,8 @@ public class Member {
         this.role = MemberRole.valueOf(role);
     }
 
-    public Member(Long id, String name, String email, String password) {
-        this(id, name, email, password, "USER");
-    }
-
     public boolean isAdmin() {
         return role.isAdmin();
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public Long getId() {
@@ -50,6 +46,10 @@ public class Member {
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {
@@ -62,24 +62,27 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+        if (this == o) return true;
+        if (!(o instanceof Member member)) return false;
+
+        if(id == null || member.id == null) {
+            return Objects.equals(email, member.email);
         }
-        if (!(o instanceof Member member)) {
-            return false;
-        }
-        return Objects.equals(id, member.id) && Objects.equals(email, member.email) && Objects.equals(password,
-                member.password)
-               && Objects.equals(name, member.name);
+        return Objects.equals(id, member.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, password, name);
+        if(id == null) return Objects.hash(email);
+        return Objects.hash(id);
     }
 
     @Override
     public String toString() {
-        return "Member{" + "email='" + email + '\'' + ", id=" + id + ", name='" + name + '\'' + '}';
+        return "Member{" +
+               "id=" + id +
+               ", name='" + name + '\'' +
+               ", email='" + email + '\'' +
+               '}';
     }
 }
