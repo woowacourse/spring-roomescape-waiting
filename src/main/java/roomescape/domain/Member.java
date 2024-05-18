@@ -1,9 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.domain.converter.RoleConverter;
 
 @Entity(name = "members")
 @Getter
@@ -32,8 +32,8 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Convert(converter = RoleConverter.class)
+    @Column(nullable = false, length = 6)
     private Role role;
 
     public Member(Long id, String name, String email, String password) {
