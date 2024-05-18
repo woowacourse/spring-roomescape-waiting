@@ -15,7 +15,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Embedded
-    private Name name; //todo: 네임 검증 추가
+    private Name name;
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)

@@ -2,6 +2,7 @@ package roomescape.domain.reservation.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.dto.MemberResponse;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
@@ -13,11 +14,12 @@ public record ReservationResponse(Long id,
                                   Theme theme,
                                   MemberResponse memberResponse) {
     public static ReservationResponse from(Reservation reservation) {
+        Member member = reservation.getMember();
         MemberResponse memberResponse = new MemberResponse(
-                reservation.getMemberId(),
-                reservation.getMemberName(),
-                reservation.getMemberEmail(),
-                reservation.getMemberRole()
+                member.getId(),
+                member.getName(),
+                member.getEmail(),
+                member.getRole()
         );
         return new ReservationResponse(reservation.getId(),
                 reservation.getDate(),

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -21,6 +22,7 @@ public class Reservation {
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
     @ManyToOne
     private Member member;
@@ -39,22 +41,6 @@ public class Reservation {
 
     public Long getId() {
         return id;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public String getMemberName() {
-        return member.getName();
     }
 
     public LocalDate getDate() {

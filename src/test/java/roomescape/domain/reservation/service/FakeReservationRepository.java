@@ -43,8 +43,8 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.values()
                 .stream()
                 .filter(reservation ->
-                        reservation.getThemeId().equals(themeId) &&
-                                reservation.getMemberId().equals(memberId) &&
+                        reservation.getTheme().getId().equals(themeId) &&
+                                reservation.getMember().getId().equals(memberId) &&
                                 (reservation.getDate().isAfter(dateFrom) || reservation.getDate().isEqual(dateFrom)) &&
                                 (reservation.getDate().isBefore(dateTo) || reservation.getDate().isEqual(dateTo)))
                 .toList();
@@ -84,8 +84,9 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservations.values().stream()
-                .anyMatch(reservation -> reservation.getTimeId().equals(timeId) && reservation.getDate().equals(date)
-                        && reservation.getThemeId().equals(themeId));
+                .anyMatch(reservation -> reservation.getTime().getId().equals(timeId) && reservation.getDate()
+                        .equals(date)
+                        && reservation.getTheme().getId().equals(themeId));
     }
 
     @Override
@@ -98,7 +99,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.values()
                 .stream()
                 .filter(reservation ->
-                        reservation.getDate().isEqual(date) && reservation.getThemeId().equals(themeId))
+                        reservation.getDate().isEqual(date) && reservation.getTheme().getId().equals(themeId))
                 .toList();
     }
 
@@ -106,7 +107,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findByMemberId(Long memberId) {
         return reservations.values()
                 .stream()
-                .filter(reservation -> reservation.getMemberId().equals(memberId))
+                .filter(reservation -> reservation.getMember().getId().equals(memberId))
                 .toList();
     }
 }
