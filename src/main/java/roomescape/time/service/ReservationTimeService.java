@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DuplicateSaveException;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.dto.AvailableTimeResponse;
@@ -14,12 +13,9 @@ import roomescape.time.dto.ReservationTimeResponse;
 @Service
 public class ReservationTimeService {
 
-    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationTimeService(ReservationRepository reservationRepository,
-                                  ReservationTimeRepository reservationTimeRepository) {
-        this.reservationRepository = reservationRepository;
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
