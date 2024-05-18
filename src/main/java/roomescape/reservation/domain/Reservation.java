@@ -5,8 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+
+import roomescape.exception.custom.BadRequestException;
 
 @Entity
 public class Reservation {
@@ -45,7 +45,7 @@ public class Reservation {
 
     private void validate(LocalDate date, ReservationTime time) {
         if (date == null || time == null) {
-            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+            throw new BadRequestException("필수 요청값이 누락되었습니다.");
         }
     }
 

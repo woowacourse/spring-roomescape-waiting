@@ -1,7 +1,6 @@
 package roomescape.member.domain;
 
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.InternalServerException;
 
 public enum Role {
     USER,
@@ -14,6 +13,6 @@ public enum Role {
                 return role;
             }
         }
-        throw new BusinessException(ErrorType.UNEXPECTED_SERVER_ERROR);
+        throw new InternalServerException("서버 관리자에게 문의하세요.");
     }
 }

@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
+import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
@@ -89,11 +89,11 @@ public class ReservationService {
         Reservation reservation = getReservation(date, reservationTime, theme);
 
         if (reservation.isPast()) {
-            throw new BusinessException(ErrorType.INVALID_REQUEST_ERROR);
+            throw new BadRequestException("올바르지 않는 데이터 요청입니다.");
         }
 
         if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
-            throw new BusinessException(ErrorType.DUPLICATED_RESERVATION_ERROR);
+            throw new ForbiddenException("중복된 예약입니다.");
         }
 
         MemberReservation memberReservation = memberReservationRepository.save(
@@ -105,7 +105,7 @@ public class ReservationService {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         Member member = getMember(authInfo.getId());
         if (!member.isAdmin() && !memberReservation.isMember(member)) {
-            throw new BusinessException(ErrorType.NOT_A_RESERVATION_MEMBER);
+            throw new ForbiddenException("예약자가 아닙니다.");
         }
         memberReservationRepository.deleteById(memberReservationId);
     }
@@ -118,17 +118,17 @@ public class ReservationService {
 
     private ReservationTime getReservationTime(long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new BusinessException(ErrorType.RESERVATION_TIME_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 예약 시간이 없습니다."));
     }
 
     private Theme getTheme(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new BusinessException(ErrorType.THEME_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 테마가 없습니다."));
     }
 
     private Member getMember(long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
     }
 
     private Reservation getReservation(LocalDate date, ReservationTime time, Theme theme) {
@@ -138,6 +138,6 @@ public class ReservationService {
 
     private MemberReservation getMemberReservation(long memberReservationId) {
         return memberReservationRepository.findById(memberReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 사용자 예약이 없습니다."));
     }
 }

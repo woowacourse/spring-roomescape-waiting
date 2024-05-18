@@ -4,10 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import roomescape.exception.custom.BadRequestException;
+
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
 
 @Entity
 public class ReservationTime {
@@ -32,7 +32,7 @@ public class ReservationTime {
 
     public void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+            throw new BadRequestException("필수 요청값이 누락되었습니다.");
         }
     }
 

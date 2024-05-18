@@ -15,4 +15,8 @@ public class MemberFixture {
     public static Member getMemberAdmin() {
         return new Member(2L, "관리자", "admin@roomescape.com", "password", Role.ADMIN);
     }
+
+    public static Member getMemberTacan() {
+        return new Member( "타칸", "dev.tacan@gmail.com","1234", Role.USER);
+    }
 }

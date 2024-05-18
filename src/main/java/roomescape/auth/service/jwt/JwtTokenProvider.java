@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.Payload;
 import roomescape.auth.service.TokenProvider;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.UnauthorizedException;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -46,8 +45,8 @@ public class JwtTokenProvider implements TokenProvider {
                     () -> isToken(token)
             );
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn(ErrorType.INVALID_TOKEN.getMessage());
-            throw new BusinessException(ErrorType.SECURITY_EXCEPTION);
+            log.warn("유효하지 않는 토큰입니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
     }
@@ -58,7 +57,7 @@ public class JwtTokenProvider implements TokenProvider {
             Jws<Claims> claims = Jwts.parser().setSigningKey(jwtProperties.getSecretKey()).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            log.warn(ErrorType.INVALID_TOKEN.getMessage());
+            log.warn("유효하지 않는 토큰입니다.");
             return false;
         }
     }

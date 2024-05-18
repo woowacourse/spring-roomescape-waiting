@@ -5,8 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+
+import roomescape.exception.custom.BadRequestException;
 
 @Entity
 public class Theme {
@@ -41,7 +41,7 @@ public class Theme {
 
     private void validateString(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+            throw new BadRequestException("필수 요청값이 누락되었습니다.");
         }
     }
 

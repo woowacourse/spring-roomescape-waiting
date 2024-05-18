@@ -14,8 +14,8 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
+import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
@@ -97,8 +97,7 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.delete(reservation.getId()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.RESERVATION_NOT_DELETED.getMessage());
+                .isInstanceOf(BadRequestException.class);
     }
 
     @DisplayName("예약 시간이 증복일 경우, 예외가 발생한다.")
@@ -111,8 +110,7 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.create(reservationTimeRequest))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.DUPLICATED_RESERVATION_TIME_ERROR.getMessage());
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @DisplayName("예약 가능한 시간 조회에 성공한다.")

@@ -4,8 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+
+import roomescape.exception.custom.BadRequestException;
 
 @Embeddable
 public class Name {
@@ -26,7 +26,7 @@ public class Name {
 
     private void validate(String name) {
         if (name.isEmpty() || name.length() > MAX_NAME_LENGTH || !PATTERN.matcher(name).matches()) {
-            throw new BusinessException(ErrorType.NAME_FORMAT_ERROR);
+            throw new BadRequestException("올바르지 않은 이름 입력 양식입니다.");
         }
     }
 

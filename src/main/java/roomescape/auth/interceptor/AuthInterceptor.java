@@ -6,8 +6,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.handler.RequestHandler;
 import roomescape.auth.service.AuthService;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.UnauthorizedException;
 
 public abstract class AuthInterceptor implements HandlerInterceptor {
     private final RequestHandler requestHandler;
@@ -23,19 +22,14 @@ public abstract class AuthInterceptor implements HandlerInterceptor {
         try {
             AuthInfo authInfo = authService.fetchByToken(requestHandler.extract(request));
             if (!isAuthorized(authInfo)) {
-                throw new BusinessException(getUnauthorizedErrorType());
+                throw new UnauthorizedException("유효하지 않는 토큰입니다.");
             }
-        } catch (BusinessException | NullPointerException e) {
-            throw new BusinessException(getSecurityErrorType());
+        } catch (NullPointerException e) {
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         return true;
     }
 
     protected abstract boolean isAuthorized(AuthInfo authInfo);
 
-    protected abstract ErrorType getUnauthorizedErrorType();
-
-    protected ErrorType getSecurityErrorType() {
-        return ErrorType.SECURITY_EXCEPTION;
-    }
 }

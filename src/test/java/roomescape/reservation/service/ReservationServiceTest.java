@@ -16,8 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.MyReservationResponse;
@@ -207,8 +206,8 @@ class ReservationServiceTest extends ServiceTest {
                 theme.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(member), reservationRequest)).isInstanceOf(
-                BusinessException.class).hasMessage(ErrorType.DUPLICATED_RESERVATION_ERROR.getMessage());
+        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(member), reservationRequest))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @DisplayName("예약 삭제 시, 사용자 예약도 함께 삭제된다.")

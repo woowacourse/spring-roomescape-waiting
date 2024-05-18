@@ -7,8 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
 
 @DisplayName("사용자 도메인 테스트")
 class MemberTest {
@@ -37,7 +36,6 @@ class MemberTest {
 
         //when & then
         assertThatThrownBy(() -> new Member(1L, invalidName, "notUse", "notUse", Role.USER))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.NAME_FORMAT_ERROR.getMessage());
+                .isInstanceOf(BadRequestException.class);
     }
 }

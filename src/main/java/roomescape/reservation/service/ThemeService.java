@@ -3,8 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
 import roomescape.reservation.controller.dto.ThemeRequest;
 import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Theme;
@@ -35,7 +34,7 @@ public class ThemeService {
 
     public void delete(long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new BusinessException(ErrorType.RESERVATION_NOT_DELETED);
+            throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }
 
         themeRepository.deleteById(themeId);
@@ -43,7 +42,7 @@ public class ThemeService {
 
     public List<ThemeResponse> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
         if (startDate.isAfter(endDate)) {
-            throw new BusinessException(ErrorType.INVALID_REQUEST_ERROR);
+            throw new BadRequestException("올바르지 않는 데이터 요청입니다.");
         }
         return themeRepository.findPopularThemes(startDate, endDate, limit).stream()
                 .map(ThemeResponse::from)

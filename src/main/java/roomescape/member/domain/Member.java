@@ -1,8 +1,7 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.*;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
 
 import java.util.Objects;
 
@@ -38,13 +37,13 @@ public class Member {
 
     private void validate(Long id, String name, String email, String password, Role role) {
         if (name == null || name.isBlank()) {
-            throw new BusinessException(ErrorType.NAME_FORMAT_ERROR);
+            throw new BadRequestException("올바르지 않은 이름 입력 양식입니다.");
         }
         if (email == null || email.isBlank()) {
-            throw new BusinessException(ErrorType.EMAIL_FORMAT_ERROR);
+            throw new BadRequestException("올바르지 않은 이메일 입력 양식입니다.");
         }
-        if (password == null || password.isBlank()) {
-            throw new BusinessException(ErrorType.MISSING_REQUIRED_VALUE_ERROR);
+        if (password == null || password.isBlank()) {// 필수 요청값이 누락되었습니다.
+            throw new BadRequestException("필수 요청값이 누락되었습니다.");
         }
     }
 

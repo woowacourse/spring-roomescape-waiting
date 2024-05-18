@@ -5,8 +5,9 @@ import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.BadRequestException;
+import roomescape.exception.custom.ConflictException;
+import roomescape.exception.custom.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -26,9 +27,9 @@ public class AuthService {
 
     public void authenticate(LoginRequest loginRequest) {
         Member findMember = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new BusinessException(ErrorType.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
         if (!passwordEncoder.matches(loginRequest.password(), findMember.getPassword())) {
-            throw new BusinessException(ErrorType.MEMBER_NOT_FOUND);
+            throw new BadRequestException("해당 유저를 찾을 수 없습니다.");
         }
     }
 
@@ -38,13 +39,13 @@ public class AuthService {
 
     public AuthInfo fetchByToken(String token) {
         Member member = memberRepository.findByEmail(tokenProvider.getPayload(token).getValue())
-                .orElseThrow(() -> new BusinessException(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE));
+                .orElseThrow(() -> new UnauthorizedException("토큰이 유효하지 않습니다."));
         return AuthInfo.of(member);
     }
 
     public void signUp(SignUpRequest signUpRequest) {
         if (memberRepository.existsByEmail(signUpRequest.email())) {
-            throw new BusinessException(ErrorType.DUPLICATED_EMAIL_ERROR);
+            throw new ConflictException("중복된 이메일입니다.");
         }
         memberRepository.save(
                 new Member(signUpRequest.name(), signUpRequest.email(), passwordEncoder.encode(signUpRequest.password()), Role.USER));

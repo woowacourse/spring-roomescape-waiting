@@ -1,12 +1,11 @@
 package roomescape.auth.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.UnauthorizedException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("페이로드 테스트")
 class PayloadTest {
@@ -37,8 +36,7 @@ class PayloadTest {
         //then
         assertThat(payload1.getValue()).isEqualTo(name1);
         assertThatThrownBy(payload2::getValue)
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.SECURITY_EXCEPTION.getMessage());
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     private boolean isSameName(String name1, String name2) {

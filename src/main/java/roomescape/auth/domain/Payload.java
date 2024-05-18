@@ -1,8 +1,8 @@
 package roomescape.auth.domain;
 
 import java.util.function.Supplier;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+
+import roomescape.exception.custom.UnauthorizedException;
 
 public class Payload<T> {
     private final T body;
@@ -15,7 +15,7 @@ public class Payload<T> {
 
     public T getValue() {
         if (!validator.get()) {
-            throw new BusinessException(ErrorType.SECURITY_EXCEPTION);
+            throw new UnauthorizedException("토큰 페이로드 추출에 실패했습니다");
         }
         return body;
     }

@@ -14,8 +14,8 @@ import roomescape.auth.controller.dto.LoginRequest;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.controller.dto.TokenResponse;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.BusinessException;
-import roomescape.exception.ErrorType;
+import roomescape.exception.custom.ConflictException;
+import roomescape.exception.custom.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.util.ServiceTest;
@@ -67,8 +67,7 @@ class AuthServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> authService.fetchByToken(invalidToken))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.SECURITY_EXCEPTION.getMessage());
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @DisplayName("사용자 회원가입에 성공한다.")
@@ -102,8 +101,7 @@ class AuthServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> authService.signUp(signUpRequest))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.DUPLICATED_EMAIL_ERROR.getMessage());
+                .isInstanceOf(ConflictException.class);
     }
 
     @DisplayName("존재하지 않는 사용자 정보 조회에 실패한다.")
@@ -115,7 +113,6 @@ class AuthServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(() -> authService.fetchByToken(accessToken))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorType.TOKEN_PAYLOAD_EXTRACTION_FAILURE.getMessage());
+                .isInstanceOf(UnauthorizedException.class);
     }
 }
