@@ -10,8 +10,8 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
-import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
@@ -50,10 +50,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
+    public List<MemberReservation> findAllByMemberWithStatus(Long memberId) {
         return reservationRepository.findByMember_Id(memberId)
                 .stream()
-                .map(MemberReservationStatusResponse::new)
+                .map(MemberReservation::new)
                 .toList();
     }
 
