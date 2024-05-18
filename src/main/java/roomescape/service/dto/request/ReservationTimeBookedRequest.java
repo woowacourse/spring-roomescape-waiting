@@ -9,7 +9,6 @@ import java.time.LocalDate;
 
 public record ReservationTimeBookedRequest(
         @NotNull
-        @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         LocalDate date,
 
         @NotNull

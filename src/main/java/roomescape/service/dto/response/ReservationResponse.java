@@ -8,7 +8,6 @@ import roomescape.domain.Reservation;
 public record ReservationResponse(
         Long id,
         MemberResponse member,
-        @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme

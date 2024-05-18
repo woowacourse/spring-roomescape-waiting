@@ -8,7 +8,6 @@ import roomescape.domain.ReservationTime;
 
 public record ReservationTimeSaveRequest(
         @NotNull
-        @JsonFormat(shape = Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul")
         LocalTime startAt
 ) {
 

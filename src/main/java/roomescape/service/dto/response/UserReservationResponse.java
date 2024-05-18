@@ -10,7 +10,6 @@ public record UserReservationResponse(
         long reservationId,
         String theme,
         LocalDate date,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul")
         LocalTime time,
         String status
 ) {
