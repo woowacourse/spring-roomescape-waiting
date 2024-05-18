@@ -25,23 +25,23 @@ public class TimeController {
         this.timeService = timeService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<TimeResponse>> findTimes() {
+        List<TimeResponse> reservationReadResponse = timeService.findReservationTimes();
+        return ResponseEntity.ok(reservationReadResponse);
+    }
+
     @PostMapping
-    public ResponseEntity<TimeResponse> createReservationTime(@RequestBody TimeRequest timeRequest) {
-        TimeResponse timeCreateResponse = timeService.addReservationTime(timeRequest);
+    public ResponseEntity<TimeResponse> createTime(@RequestBody TimeRequest request) {
+        TimeResponse timeCreateResponse = timeService.addReservationTime(request);
         URI uri = URI.create("/times/" + timeCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(timeCreateResponse);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TimeResponse>> reservationTimesList() {
-        List<TimeResponse> reservationReadResponse = timeService.findReservationTimes();
-        return ResponseEntity.ok(reservationReadResponse);
-    }
-
-    @DeleteMapping("/{reservationTimeId}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable long reservationTimeId) {
-        timeService.removeReservationTime(reservationTimeId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTime(@PathVariable long id) {
+        timeService.removeReservationTime(id);
         return ResponseEntity.noContent()
                 .build();
     }

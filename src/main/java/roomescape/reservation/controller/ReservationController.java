@@ -31,35 +31,36 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @GetMapping
+    public List<ReservationResponse> findReservations() {
+        return reservationService.findReservations();
+    }
+
+    @GetMapping("/mine")
+    public List<MyReservationResponse> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
+        return reservationService.findReservationByMemberId(memberProfileInfo.id());
+    }
+
+    @GetMapping("/times/{themeId}")
+    public ResponseEntity<List<ReservationTimeAvailabilityResponse>> findReservationTimes(
+            @PathVariable long themeId,
+            @RequestParam LocalDate date) {
+        List<ReservationTimeAvailabilityResponse> timeAvailabilityReadResponse
+                = reservationService.findTimeAvailability(themeId, date);
+        return ResponseEntity.ok(timeAvailabilityReadResponse);
+    }
+
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid ReservationRequest reservationRequest) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(reservationRequest);
+    public ResponseEntity<ReservationResponse> createReservation(@Valid ReservationRequest request) {
+        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
         URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
         return ResponseEntity.created(uri)
                 .body(reservationCreateResponse);
     }
 
-    @GetMapping
-    public List<ReservationResponse> reservaionList() {
-        return reservationService.findReservations();
-    }
-
-    @GetMapping("/mine")
-    public List<MyReservationResponse> myReservationList(MemberProfileInfo memberProfileInfo) {
-        return reservationService.findReservationByMemberId(memberProfileInfo.id());
-    }
-
-    @GetMapping("/times/{themeId}")
-    public ResponseEntity<List<ReservationTimeAvailabilityResponse>> reservationTimeList(@PathVariable long themeId,
-                                                                                         @RequestParam LocalDate date) {
-        List<ReservationTimeAvailabilityResponse> timeAvailabilityReadResponse = reservationService.findTimeAvailability(
-                themeId, date);
-        return ResponseEntity.ok(timeAvailabilityReadResponse);
-    }
-
-    @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable long reservationId) {
-        reservationService.removeReservations(reservationId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
+        reservationService.removeReservations(id);
         return ResponseEntity.noContent()
                 .build();
     }

@@ -26,24 +26,23 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody AdminReservationRequest adminReservationRequest) {
-        ReservationResponse reservationCreateResponse = reservationService.addReservation(adminReservationRequest);
-        URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
-        return ResponseEntity.created(uri)
-                .body(reservationCreateResponse);
-    }
-
     @GetMapping("/search")
-    public List<ReservationResponse> reservationListInCondition(
+    public List<ReservationResponse> findReservationsInCondition(
             @RequestParam("themeId") long themeId,
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo
     ) {
-        ReservationConditionSearchRequest request = new ReservationConditionSearchRequest(memberId, themeId, dateFrom,
-                dateTo);
+        ReservationConditionSearchRequest request
+                = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
         return reservationService.findReservationsByConditions(request);
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request) {
+        ReservationResponse reservationCreateResponse = reservationService.addReservation(request);
+        URI uri = URI.create("/reservations/" + reservationCreateResponse.id());
+        return ResponseEntity.created(uri)
+                .body(reservationCreateResponse);
     }
 }

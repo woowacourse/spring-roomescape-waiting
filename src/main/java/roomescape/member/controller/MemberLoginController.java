@@ -28,6 +28,14 @@ public class MemberLoginController {
         this.memberService = memberService;
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<MemberLoginResponse> loginCheck(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        String memberName = memberAuthService.extractNameFromPayload(cookies);
+
+        return ResponseEntity.ok(new MemberLoginResponse(memberName));
+    }
+
     @PostMapping
     public ResponseEntity<Void> login(@RequestBody MemberLoginRequest memberRequest, HttpServletResponse response) {
         Member member = memberService.findMember(memberRequest);
@@ -42,13 +50,5 @@ public class MemberLoginController {
 
         return ResponseEntity.ok()
                 .build();
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<MemberLoginResponse> loginCheck(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        String memberName = memberAuthService.extractNameFromPayload(cookies);
-
-        return ResponseEntity.ok(new MemberLoginResponse(memberName));
     }
 }

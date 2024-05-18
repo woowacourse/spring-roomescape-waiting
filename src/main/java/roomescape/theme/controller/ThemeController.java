@@ -26,26 +26,26 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @PostMapping
-    public ResponseEntity<ThemeResponse> createTheme(@RequestBody ThemeRequest themeRequest) {
-        ThemeResponse themeCreateRequestResult = themeService.addTheme(themeRequest);
-        URI uri = URI.create("/themes/" + themeCreateRequestResult.id());
-        return ResponseEntity.created(uri)
-                .body(themeCreateRequestResult);
-    }
-
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> themeList() {
+    public ResponseEntity<List<ThemeResponse>> findThemes() {
         List<ThemeResponse> themeListRequestResult = themeService.findThemes();
         return ResponseEntity.ok()
                 .body(themeListRequestResult);
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<List<ThemeRankResponse>> themeRankList() {
+    public ResponseEntity<List<ThemeRankResponse>> findThemeRanking() {
         List<ThemeRankResponse> rankedThemesListRequestResult = themeService.findRankedThemes();
         return ResponseEntity.ok()
                 .body(rankedThemesListRequestResult);
+    }
+
+    @PostMapping
+    public ResponseEntity<ThemeResponse> createTheme(@RequestBody ThemeRequest request) {
+        ThemeResponse themeCreateRequestResult = themeService.addTheme(request);
+        URI uri = URI.create("/themes/" + themeCreateRequestResult.id());
+        return ResponseEntity.created(uri)
+                .body(themeCreateRequestResult);
     }
 
     @DeleteMapping("/{id}")

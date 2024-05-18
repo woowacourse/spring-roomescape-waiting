@@ -19,7 +19,7 @@ public class MemberController {
     }
 
     @GetMapping
-    public List<MemberProfileInfo> findMemberList() {
+    public List<MemberProfileInfo> findMembers() {
         return memberService.findAllMembers();
     }
 }
