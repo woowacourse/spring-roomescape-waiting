@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
 import io.restassured.RestAssured;
@@ -14,8 +13,7 @@ import roomescape.controller.request.ReservationTimeRequest;
 import roomescape.model.ReservationTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql("/controller-test-data.sql")
+@Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
 class ReservationTimeControllerTest {
     @DisplayName("모든 예약 시간을 조회한다")
     @Test

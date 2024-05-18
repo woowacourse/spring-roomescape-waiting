@@ -15,8 +15,7 @@ import roomescape.controller.request.MemberLoginRequest;
 import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql("/controller-test-data.sql")
+@Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
 class MemberControllerTest {
 
     @DisplayName("로그인 요청시 쿠키를 응답한다.")
