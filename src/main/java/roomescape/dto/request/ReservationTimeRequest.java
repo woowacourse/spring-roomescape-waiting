@@ -4,7 +4,7 @@ import roomescape.domain.ReservationTime;
 
 import java.time.LocalTime;
 
-import static roomescape.dto.InputValidator.validateNotNull;
+import static roomescape.dto.request.exception.InputValidator.validateNotNull;
 
 public record ReservationTimeRequest(LocalTime startAt) {
 

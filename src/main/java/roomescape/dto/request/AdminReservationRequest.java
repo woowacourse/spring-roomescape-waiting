@@ -2,7 +2,7 @@ package roomescape.dto.request;
 
 import java.time.LocalDate;
 
-import static roomescape.dto.InputValidator.validateNotNull;
+import static roomescape.dto.request.exception.InputValidator.validateNotNull;
 
 public record AdminReservationRequest(Long memberId, LocalDate date, Long timeId, Long themeId) {
 

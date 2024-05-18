@@ -1,6 +1,4 @@
-package roomescape.dto;
-
-import roomescape.dto.request.exception.InputNotAllowedException;
+package roomescape.dto.request.exception;
 
 public class InputValidator {
 
