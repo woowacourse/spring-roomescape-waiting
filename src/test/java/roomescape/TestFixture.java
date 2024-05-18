@@ -19,6 +19,7 @@ public class TestFixture {
     public static final String MEMBER_BROWN_EMAIL = "brown@email.com";
     public static final String MEMBER_PASSWORD = "1234";
 
+    public static final LocalDate DATE_MAY_ONE = LocalDate.of(2034, 5, 1);
     public static final LocalDate DATE_MAY_EIGHTH = LocalDate.of(2034, 5, 8);
     public static final LocalDate DATE_MAY_NINTH = LocalDate.of(2034, 5, 9);
 
