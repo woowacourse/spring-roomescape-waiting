@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.service.MemberService;
 
@@ -19,14 +20,16 @@ public class LoginController {
 
     private static final String TOKEN = "token";
     private final MemberService memberService;
+    private final LoginService loginService;
 
-    public LoginController(MemberService memberService) {
+    public LoginController(MemberService memberService, LoginService loginService) {
         this.memberService = memberService;
+        this.loginService = loginService;
     }
 
     @PostMapping
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) throws AuthenticationException {
-        String token = memberService.createMemberToken(loginRequest);
+        String token = loginService.createMemberToken(loginRequest);
         ResponseCookie responseCookie = ResponseCookie.from(TOKEN, token)
                 .httpOnly(true)
                 .path("/")

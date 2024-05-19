@@ -7,7 +7,6 @@ import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
 import static roomescape.InitialMemberFixture.MEMBER_4;
-import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 
@@ -28,6 +27,8 @@ class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private LoginService loginService;
 
     @Test
     @DisplayName("모든 Member들의 id와 name을 조회한다.")
@@ -44,40 +45,6 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 회원 email로 로그인을 시도할 경우 예외가 발생한다.")
-    void throwExceptionIfNotExistEmail() {
-        LoginRequest loginRequest = new LoginRequest(
-                COMMON_PASSWORD.password(),
-                NOT_SAVED_MEMBER.getEmail().email()
-        );
-
-        assertThatThrownBy(() -> memberService.createMemberToken(loginRequest))
-                .isInstanceOf(NotFoundException.class);
-    }
-
-    @Test
-    @DisplayName("존재하는 회원 email이지만 틀린 비밀번호로 로그인을 시도할 경우 예외가 발생한다.")
-    void throwExceptionIfInvalidPassword() {
-        LoginRequest loginRequest = new LoginRequest(
-                COMMON_PASSWORD.password() + "123",
-                MEMBER_1.getEmail().email()
-        );
-
-        assertThatThrownBy(() -> memberService.createMemberToken(loginRequest))
-                .isInstanceOf(AuthenticationException.class);
-    }
-
-    @Test
-    @DisplayName("로그인에 성공하면 토큰을 발행한다.")
-    void getTokenIfLoginSucceeds() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
-
-        String token = memberService.createMemberToken(loginRequest);
-
-        assertThat(token).isNotNull();
-    }
-
-    @Test
     @DisplayName("유효하지 않은 형식의 토큰으로 로그인 시도 시 예외가 발생한다.")
     void throwExceptionIfInvalidTokenFormat() {
         assertThatThrownBy(() -> memberService.getMemberNameResponseByToken("invalid token"))
@@ -88,7 +55,7 @@ class MemberServiceTest {
     @DisplayName("토큰에 대응하는 멤버 정보를 가져온다.")
     void getMemberMember() throws AuthenticationException {
         LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
-        String token = memberService.createMemberToken(loginRequest);
+        String token = loginService.createMemberToken(loginRequest);
 
         MemberNameResponse memberNameResponse = memberService.getMemberNameResponseByToken(token);
 
