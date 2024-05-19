@@ -1,14 +1,14 @@
 package roomescape.domain;
 
-import static roomescape.exception.ExceptionType.EMPTY_TIME;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalTime;
-import java.util.Objects;
 import roomescape.exception.RoomescapeException;
+
+import java.time.LocalTime;
+
+import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
 @Entity
 public class ReservationTime {
@@ -43,26 +43,5 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (startAt != null ? startAt.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ReservationTime that = (ReservationTime) o;
-
-        return Objects.equals(id, that.id);
     }
 }

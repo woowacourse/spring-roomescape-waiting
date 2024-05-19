@@ -1,30 +1,39 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.LOGIN_FAIL;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-
-import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
-import roomescape.fixture.MemberFixture;
-import roomescape.repository.CollectionMemberRepository;
 import roomescape.repository.MemberRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.exception.ExceptionType.LOGIN_FAIL;
+
+@SpringBootTest
+@Transactional
 class MemberServiceTest {
 
     public static final Sha256Encryptor SHA_256_ENCRYPTOR = new Sha256Encryptor();
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private MemberService memberService;
+
     @Test
     @DisplayName("잘못된 이메일이나 비밀번호로 로그인 시도할 경우 예외 발생하는지 확인")
     void loginWithInvalidRequest() {
-        MemberRepository memberRepository = new CollectionMemberRepository();
-        MemberService memberService = new MemberService(memberRepository, SHA_256_ENCRYPTOR);
-        Assertions.assertThatThrownBy(() -> memberService.login(new LoginRequest("email@email.com", "123456")))
+        memberRepository.save(new Member("member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password")));
+
+        assertThatThrownBy(() -> memberService.login(new LoginRequest("invalid@email.com", "invalid")))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(LOGIN_FAIL.getMessage());
     }
@@ -32,12 +41,11 @@ class MemberServiceTest {
     @Test
     @DisplayName("사용자 아이디로 사용자 정보를 잘 조회하는지 확인")
     void findByMemberId() {
-        MemberRepository memberRepository = new CollectionMemberRepository(List.of(DEFAULT_MEMBER));
-        MemberService memberService = new MemberService(memberRepository, SHA_256_ENCRYPTOR);
+        Member member = memberRepository.save(
+                new Member("member", "email@email.com", SHA_256_ENCRYPTOR.encrypt("password")));
 
-        Long memberId = DEFAULT_MEMBER.getId();
-        MemberInfo memberInfo = memberService.findByMemberId(memberId);
-        Assertions.assertThat(memberInfo)
-                .isEqualTo(MemberFixture.DEFAULT_MEMBER_INFO);
+        MemberInfo memberInfo = memberService.findByMemberId(member.getId());
+
+        assertThat(memberInfo.id()).isEqualTo(member.getId());
     }
 }

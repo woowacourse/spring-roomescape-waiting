@@ -1,26 +1,29 @@
 package roomescape.repository;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
 import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
 import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-
 @SpringBootTest
+@Transactional
 class JpaReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
@@ -32,127 +35,122 @@ class JpaReservationRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MemberRepository memberRepository;
+
+    private Member member;
+    private ReservationTime time;
+    private Theme theme;
 
     @BeforeEach
     void init() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-
-        reservationTimeRepository.save(DEFAULT_TIME);
-        themeRepository.save(DEFAULT_THEME);
+        member = memberRepository.save(DEFAULT_MEMBER);
+        time = reservationTimeRepository.save(DEFAULT_TIME);
+        theme = themeRepository.save(DEFAULT_THEME);
     }
 
     @Test
     @DisplayName("Reservation 을 잘 저장하는지 확인한다.")
     void save() {
-        List<Reservation> beforeSave = reservationRepository.findAll();
-        Reservation saved = reservationRepository.save(DEFAULT_RESERVATION);
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now().plusDays(1), time, theme));
         List<Reservation> afterSave = reservationRepository.findAll();
 
-        Assertions.assertThat(afterSave)
-                .containsAll(beforeSave)
-                .contains(saved);
+        assertThat(afterSave)
+                .extracting(Reservation::getId)
+                .contains(reservation.getId());
     }
 
     @Test
     @DisplayName("Reservation 을 잘 조회하는지 확인한다.")
     void findAll() {
         List<Reservation> beforeSave = reservationRepository.findAll();
-        reservationRepository.save(DEFAULT_RESERVATION);
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
         List<Reservation> afterSave = reservationRepository.findAll();
 
-        Assertions.assertThat(afterSave.size())
-                .isEqualTo(beforeSave.size() + 1);
+        assertThat(afterSave.size()).isEqualTo(beforeSave.size() + 1);
     }
 
     @Test
     @DisplayName("Reservation 을 잘 지우는지 확인한다.")
     void delete() {
         List<Reservation> beforeSaveAndDelete = reservationRepository.findAll();
-        Reservation saved = reservationRepository.save(DEFAULT_RESERVATION);
+        Reservation saved = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
         reservationRepository.delete(saved.getId());
 
         List<Reservation> afterSaveAndDelete = reservationRepository.findAll();
 
-        Assertions.assertThat(beforeSaveAndDelete)
-                .containsExactlyElementsOf(afterSaveAndDelete);
+        assertThat(beforeSaveAndDelete).containsExactlyElementsOf(afterSaveAndDelete);
     }
 
     @Test
     @DisplayName("특정 테마에 특정 날짜 특정 시간에 예약 여부를 잘 반환하는지 확인한다.")
     void existsByThemeAndDateAndTime() {
-        LocalDate date1 = DEFAULT_RESERVATION.getDate();
-        LocalDate date2 = date1.plusDays(1);
-        reservationRepository.save(DEFAULT_RESERVATION);
+        LocalDate reservedDate = DEFAULT_RESERVATION.getDate();
+        LocalDate notReservedDate = reservedDate.plusDays(1);
+        reservationRepository.save(new Reservation(member, reservedDate, time, theme));
 
         assertAll(
-                () -> Assertions.assertThat(
-                                reservationRepository.existsByThemeAndDateAndTime(DEFAULT_THEME, date1, DEFAULT_TIME))
-                        .isTrue(),
-                () -> Assertions.assertThat(
-                                reservationRepository.existsByThemeAndDateAndTime(DEFAULT_THEME, date2, DEFAULT_TIME))
-                        .isFalse()
+                () -> assertThat(
+                        reservationRepository.existsByThemeAndDateAndTime(theme, reservedDate, time)).isTrue(),
+                () -> assertThat(
+                        reservationRepository.existsByThemeAndDateAndTime(theme, notReservedDate, time)).isFalse()
         );
     }
 
     @Test
     @DisplayName("특정 시간에 예약이 있는지 확인한다.")
     void existsByTime() {
-        reservationRepository.save(DEFAULT_RESERVATION);
+        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        ReservationTime randomTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 56)));
 
         assertAll(
-                () -> Assertions.assertThat(reservationRepository.existsByTime(DEFAULT_TIME))
-                        .isTrue(),
-                () -> Assertions.assertThat(
-                                reservationRepository.existsByTime(new ReservationTime(2L, LocalTime.of(12, 56))))
-                        .isFalse()
+                () -> assertThat(reservationRepository.existsByTime(reservation.getReservationTime())).isTrue(),
+                () -> assertThat(reservationRepository.existsByTime(randomTime)).isFalse()
         );
     }
 
     @Test
     @DisplayName("특정 테마에 예약이 있는지 확인한다.")
     void existsByTheme() {
-        reservationRepository.save(DEFAULT_RESERVATION);
+        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+        Theme randomTheme = new Theme(2L, DEFAULT_THEME);
 
         assertAll(
-                () -> Assertions.assertThat(reservationRepository.existsByTheme(DEFAULT_THEME))
-                        .isTrue(),
-                () -> Assertions.assertThat(reservationRepository.existsByTheme(new Theme(2L, DEFAULT_THEME)))
-                        .isFalse()
+                () -> assertThat(reservationRepository.existsByTheme(reservation.getTheme())).isTrue(),
+                () -> assertThat(reservationRepository.existsByTheme(randomTheme)).isFalse()
         );
     }
 
     @Test
     @DisplayName("특정 회원의 예약을 잘 조회하는지 확인한다.")
     void findByMemberId() {
-        reservationRepository.save(DEFAULT_RESERVATION);
+        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<Reservation> reservations = reservationRepository.findByMemberId(DEFAULT_MEMBER.getId());
+        List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
 
-        Assertions.assertThat(reservations).containsExactly(DEFAULT_RESERVATION);
+        assertThat(reservations)
+                .extracting(Reservation::getId)
+                .containsExactly(reservation.getId());
     }
 
     @Test
     @DisplayName("특정 회원의 특정 기간 내의 예약을 잘 조회하는지 확인한다.")
     void findByMemberAndThemeBetweenDates() {
-        LocalDate startDate = DEFAULT_RESERVATION.getDate();
+        LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(1);
-        LocalDate notOnPeriodDate = startDate.plusDays(2);
-        Reservation notOnPeriodreservation = new Reservation(DEFAULT_MEMBER, notOnPeriodDate, DEFAULT_TIME, DEFAULT_THEME);
 
-        reservationRepository.save(DEFAULT_RESERVATION);
-        reservationRepository.save(notOnPeriodreservation);
+        LocalDate onPeriodDate = startDate;
+        LocalDate notOnPeriodDate = startDate.plusDays(2);
+
+        Reservation onPeriodreservation = reservationRepository.save(new Reservation(member, onPeriodDate, time, theme));
+        Reservation notOnPeriodreservation = reservationRepository.save(new Reservation(member, notOnPeriodDate, time, theme));
 
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
-                DEFAULT_MEMBER.getId(), DEFAULT_THEME.getId(), startDate, endDate);
+                member.getId(), theme.getId(), startDate, endDate);
 
-        Assertions.assertThat(reservations)
-                .containsExactly(DEFAULT_RESERVATION);
+        assertThat(reservations)
+                .extracting(Reservation::getId)
+                .containsExactly(onPeriodreservation.getId());
     }
 }

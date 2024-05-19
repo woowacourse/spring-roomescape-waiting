@@ -1,18 +1,18 @@
 package roomescape.domain;
 
-import static roomescape.exception.ExceptionType.EMPTY_DESCRIPTION;
-import static roomescape.exception.ExceptionType.EMPTY_NAME;
-import static roomescape.exception.ExceptionType.EMPTY_THUMBNAIL;
-import static roomescape.exception.ExceptionType.NOT_URL_BASE_THUMBNAIL;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.util.List;
-import java.util.Objects;
 import roomescape.exception.RoomescapeException;
+
+import java.util.List;
+
+import static roomescape.exception.ExceptionType.EMPTY_DESCRIPTION;
+import static roomescape.exception.ExceptionType.EMPTY_NAME;
+import static roomescape.exception.ExceptionType.EMPTY_THUMBNAIL;
+import static roomescape.exception.ExceptionType.NOT_URL_BASE_THUMBNAIL;
 
 @Entity
 public class Theme {
@@ -94,24 +94,5 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Theme theme = (Theme) o;
-
-        return Objects.equals(id, theme.id);
     }
 }

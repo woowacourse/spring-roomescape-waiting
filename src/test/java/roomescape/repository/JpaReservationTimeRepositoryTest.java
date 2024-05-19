@@ -1,24 +1,27 @@
 package roomescape.repository;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
 @SpringBootTest
+@Transactional
 class JpaReservationTimeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -30,27 +33,21 @@ class JpaReservationTimeRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void init() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-    }
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("ReservationTime 을 잘 저장하는지 확인한다.")
     void save() {
-        List<Long> beforeSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
+        List<Long> reservationTimeIdsBeforeSave = reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTime::getId)
+                .toList();
         ReservationTime saved = reservationTimeRepository.save(DEFAULT_TIME);
-        List<Long> afterSave = reservationTimeRepository.findAll().stream().map(ReservationTime::getId).toList();
+        List<ReservationTime> afterSave = reservationTimeRepository.findAll();
 
         Assertions.assertThat(afterSave)
-                .containsAll(beforeSave)
+                .extracting(ReservationTime::getId)
+                .containsAll(reservationTimeIdsBeforeSave)
                 .contains(saved.getId());
     }
 
@@ -67,12 +64,12 @@ class JpaReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("ReservationTime 을 잘 지우하는지 확인한다.")
+    @DisplayName("ReservationTime 을 잘 지우는지 확인한다.")
     void delete() {
         List<ReservationTime> beforeSaveAndDelete = reservationTimeRepository.findAll();
-        reservationTimeRepository.save(DEFAULT_TIME);
+        ReservationTime savedTime = reservationTimeRepository.save(DEFAULT_TIME);
 
-        reservationTimeRepository.delete(1L);
+        reservationTimeRepository.delete(savedTime.getId());
 
         List<ReservationTime> afterSaveAndDelete = reservationTimeRepository.findAll();
 
@@ -97,14 +94,17 @@ class JpaReservationTimeRepositoryTest {
     @Test
     @DisplayName("특정 날짜와 테마에 예약이 있는 예약 시간의 목록을 잘 반환하는지 확인한다.")
     void findUsedTimeByDateAndTheme() {
-        LocalDate date = DEFAULT_RESERVATION.getDate();
-        Theme theme = themeRepository.save(DEFAULT_THEME);
+        Member member = memberRepository.save(DEFAULT_MEMBER);
         ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
-        reservationRepository.save(DEFAULT_RESERVATION);
+        Theme theme = themeRepository.save(DEFAULT_THEME);
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<ReservationTime> response = reservationTimeRepository.findUsedTimeByDateAndTheme(date, theme);
+        List<ReservationTime> response = reservationTimeRepository.findUsedTimeByDateAndTheme(
+                reservation.getDate(), reservation.getTheme());
 
         Assertions.assertThat(response)
-                .containsExactly(time);
+                .extracting(ReservationTime::getId)
+                .containsExactly(time.getId());
     }
 }

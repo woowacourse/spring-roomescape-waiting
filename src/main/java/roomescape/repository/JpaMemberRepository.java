@@ -1,12 +1,13 @@
 package roomescape.repository;
 
-import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.repository.jpa.JpaMemberDao;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JpaMemberRepository implements MemberRepository {
@@ -29,5 +30,9 @@ public class JpaMemberRepository implements MemberRepository {
     @Override
     public List<Member> findAll() {
         return jpaMemberDao.findAll();
+    }
+
+    public Member save(Member member) {
+        return jpaMemberDao.save(member);
     }
 }

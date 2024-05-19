@@ -1,37 +1,55 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
-import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.exception.RoomescapeException;
-import roomescape.fixture.ReservationTimeFixture;
-import roomescape.repository.CollectionReservationRepository;
-import roomescape.repository.CollectionReservationTimeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_REQUEST;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+@SpringBootTest
+@Transactional
 class ReservationTimeServiceTest {
-    private CollectionReservationRepository reservationRepository;
-    private ReservationTimeService reservationTimeService;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
-    @BeforeEach
-    void initService() {
-        reservationRepository = new CollectionReservationRepository();
-        CollectionReservationTimeRepository reservationTimeRepository = new CollectionReservationTimeRepository();
-        reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository);
-    }
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ReservationTimeService reservationTimeService;
 
     @Test
     @DisplayName("중복된 예약 시간을 생성할 수 없는지 확인")
     void saveFailWhenDuplicate() {
-        reservationTimeService.save(ReservationTimeFixture.DEFAULT_REQUEST);
+        reservationTimeService.save(DEFAULT_REQUEST);
 
-        Assertions.assertThatThrownBy(() -> reservationTimeService.save(ReservationTimeFixture.DEFAULT_REQUEST))
+        assertThatThrownBy(() -> reservationTimeService.save(DEFAULT_REQUEST))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(DUPLICATE_RESERVATION_TIME.getMessage());
     }
@@ -39,10 +57,13 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 시간을 사용하는 예약이 있으면 예약을 삭제할 수 없다.")
     void deleteFailWhenUsed() {
-        reservationTimeService.save(ReservationTimeFixture.DEFAULT_REQUEST);
-        reservationRepository.save(DEFAULT_RESERVATION);
+        Member member = memberRepository.save(DEFAULT_MEMBER);
+        ReservationTime time = reservationTimeRepository.save(DEFAULT_TIME);
+        Theme theme = themeRepository.save(DEFAULT_THEME);
 
-        assertThatCode(() -> reservationTimeService.delete(DEFAULT_TIME.getId()))
+        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
+
+        assertThatCode(() -> reservationTimeService.delete(time.getId()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(DELETE_USED_TIME.getMessage());
     }

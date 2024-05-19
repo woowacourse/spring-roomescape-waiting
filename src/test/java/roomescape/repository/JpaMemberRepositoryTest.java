@@ -1,63 +1,56 @@
 package roomescape.repository;
 
-import static roomescape.fixture.MemberFixture.DEFAULT_ADMIN;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-
-import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 
+import java.util.List;
+
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+
 @SpringBootTest
+@Transactional
 class JpaMemberRepositoryTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private MemberRepository memberRepository;
 
-    @BeforeEach
-    void init() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.update("DELETE FROM theme");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
-    }
-
     @Test
     @DisplayName("이메일과 암호화된 비밀번호로 회원을 잘 조회하는지 확인")
     void findByEmailAndEncryptedPassword() {
-        String email = DEFAULT_MEMBER.getEmail();
-        String encryptedPassword = DEFAULT_MEMBER.getEncryptedPassword();
-        Member member = memberRepository.findByEmailAndEncryptedPassword(email, encryptedPassword)
+        Member savedMember = memberRepository.save(DEFAULT_MEMBER);
+        String email = savedMember.getEmail();
+        String encryptedPassword = savedMember.getEncryptedPassword();
+        Member foundMember = memberRepository.findByEmailAndEncryptedPassword(email, encryptedPassword)
                 .orElseThrow();
 
-        Assertions.assertThat(member)
-                .isEqualTo(DEFAULT_MEMBER);
+        Assertions.assertThat(foundMember.getId()).isEqualTo(DEFAULT_MEMBER.getId());
     }
 
     @Test
     @DisplayName("회원 아이디로 회원을 잘 조회하는지 확인")
     void findById() {
-        Member member = memberRepository.findById(DEFAULT_MEMBER.getId()).orElseThrow();
+        Member savedMember = memberRepository.save(DEFAULT_MEMBER);
+        Member foundMember = memberRepository.findById(savedMember.getId())
+                .orElseThrow();
 
-        Assertions.assertThat(member)
-                .isEqualTo(DEFAULT_MEMBER);
+        Assertions.assertThat(foundMember.getId()).isEqualTo(savedMember.getId());
     }
 
     @Test
     @DisplayName("전체 회원을 잘 조회하는지 확인")
     void findAll() {
+        Member savedMember = memberRepository.save(DEFAULT_MEMBER);
         List<Member> all = memberRepository.findAll();
 
+        System.out.println(all.size());
+
         Assertions.assertThat(all)
-                .containsExactlyInAnyOrder(DEFAULT_MEMBER, DEFAULT_ADMIN);
+                .extracting(Member::getId)
+                .containsExactlyInAnyOrder(savedMember.getId());
     }
 }

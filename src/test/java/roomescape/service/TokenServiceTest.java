@@ -1,13 +1,13 @@
 package roomescape.service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class TokenServiceTest {
+import java.time.Duration;
+import java.time.LocalDateTime;
 
+class TokenServiceTest {
     @Test
     @DisplayName("Jwt 토큰을 잘 생성하는지 확인")
     void createToken() {

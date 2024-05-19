@@ -1,10 +1,5 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
-import static roomescape.service.mapper.ReservationTimeResponseMapper.toResponse;
-
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -14,6 +9,12 @@ import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.mapper.ReservationTimeResponseMapper;
+
+import java.util.List;
+
+import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
+import static roomescape.service.mapper.ReservationTimeResponseMapper.toResponse;
 
 @Service
 @Transactional
@@ -51,7 +52,8 @@ public class ReservationTimeService {
     }
 
     private void validateUsedTime(long id) {
-        reservationTimeRepository.findById(id).ifPresent(this::validateUsedTime);
+        reservationTimeRepository.findById(id)
+                .ifPresent(this::validateUsedTime);
     }
 
     private void validateUsedTime(ReservationTime reservationTime) {

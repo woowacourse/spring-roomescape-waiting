@@ -1,8 +1,5 @@
 package roomescape.domain;
 
-import static roomescape.domain.Role.MEMBER;
-import static roomescape.exception.ExceptionType.EMPTY_NAME;
-
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,8 +7,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
 import roomescape.exception.RoomescapeException;
+
+import static roomescape.domain.Role.MEMBER;
+import static roomescape.exception.ExceptionType.EMPTY_NAME;
 
 @Entity
 public class Member {
@@ -74,25 +73,5 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Member member = (Member) o;
-
-        return Objects.equals(id, member.id);
     }
 }

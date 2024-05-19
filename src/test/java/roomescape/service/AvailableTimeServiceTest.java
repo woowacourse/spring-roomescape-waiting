@@ -1,64 +1,71 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
-import roomescape.repository.CollectionReservationRepository;
-import roomescape.repository.CollectionReservationTimeRepository;
-import roomescape.repository.CollectionThemeRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+@SpringBootTest
+@Transactional
 class AvailableTimeServiceTest {
 
+    @Autowired
     private AvailableTimeService availableTimeService;
+
+    @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
     private ThemeRepository themeRepository;
 
-    @BeforeEach
-    void init() {
-        reservationRepository = new CollectionReservationRepository();
-        reservationTimeRepository = new CollectionReservationTimeRepository(reservationRepository);
-        themeRepository = new CollectionThemeRepository();
-        availableTimeService = new AvailableTimeService(reservationTimeRepository, themeRepository);
-    }
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("날짜와 테마, 시간에 대한 예약 내역을 확인할 수 있다.")
     void findAvailableTimeTest() {
         //given
-        themeRepository.save(DEFAULT_THEME);
-        ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        ReservationTime reservationTime3 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        ReservationTime reservationTime4 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
+        Member member = memberRepository.save(DEFAULT_MEMBER);
+        Theme theme = themeRepository.save(DEFAULT_THEME);
+        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time3 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        ReservationTime time4 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
 
-        LocalDate selectedDate = LocalDate.of(2024, 1, 1);
-        reservationRepository.save(new Reservation(DEFAULT_MEMBER, selectedDate, reservationTime1, DEFAULT_THEME));
-        reservationRepository.save(new Reservation(DEFAULT_MEMBER, selectedDate, reservationTime3, DEFAULT_THEME));
+        LocalDate selectedDate = LocalDate.now().plusDays(1);
+        reservationRepository.save(new Reservation(member, selectedDate, time1, theme));
+        reservationRepository.save(new Reservation(member, selectedDate, time3, theme));
 
         //when
-        List<AvailableTimeResponse> availableTimeResponses = availableTimeService.findByThemeAndDate(selectedDate,
-                DEFAULT_THEME.getId());
+        List<AvailableTimeResponse> availableTimeResponses = availableTimeService.findByThemeAndDate(selectedDate, theme.getId());
 
         //then
         assertThat(availableTimeResponses).containsExactlyInAnyOrder(
-                new AvailableTimeResponse(1L, reservationTime1.getStartAt(), true),
-                new AvailableTimeResponse(2L, reservationTime2.getStartAt(), false),
-                new AvailableTimeResponse(3L, reservationTime3.getStartAt(), true),
-                new AvailableTimeResponse(4L, reservationTime4.getStartAt(), false)
+                new AvailableTimeResponse(time1.getId(), time1.getStartAt(), true),
+                new AvailableTimeResponse(time2.getId(), time2.getStartAt(), false),
+                new AvailableTimeResponse(time3.getId(), time3.getStartAt(), true),
+                new AvailableTimeResponse(time4.getId(), time4.getStartAt(), false)
         );
     }
 }
