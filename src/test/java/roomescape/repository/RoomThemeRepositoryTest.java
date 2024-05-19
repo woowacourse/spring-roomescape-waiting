@@ -21,10 +21,8 @@ class RoomThemeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
+        roomThemeRepository.findAll()
+                .forEach(roomTheme -> roomThemeRepository.deleteById(roomTheme.getId()));
     }
 
     @DisplayName("테마를 저장한다.")

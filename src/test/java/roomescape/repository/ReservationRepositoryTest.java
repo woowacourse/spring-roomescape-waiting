@@ -1,13 +1,12 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DATE_AFTER_1DAY;
 import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 
-import java.util.List;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,22 +31,7 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        clearTable();
     }
 
     @DisplayName("존재하는 모든 예약을 보여준다.")
@@ -61,22 +45,22 @@ class ReservationRepositoryTest {
     @Test
     void duplicatedReservationTest() {
         // given
+        LocalDate date = DATE_AFTER_1DAY;
+
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        boolean existsFalse
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedRoomTheme.getId());
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+        Reservation reservation = new Reservation(member, date, savedReservationTime, savedRoomTheme);
+        reservationRepository.save(reservation);
+
         // when
-        boolean existsTrue
-                = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
+        boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                date,
+                savedReservationTime.getId(),
                 savedRoomTheme.getId());
+
         // then
-        assertAll(
-                () -> assertThat(existsFalse).isFalse(),
-                () -> assertThat(existsTrue).isTrue()
-        );
+        assertThat(result).isTrue();
     }
 
     @DisplayName("예약을 저장한다.")
@@ -105,5 +89,16 @@ class ReservationRepositoryTest {
         reservationRepository.deleteById(savedReservation.getId());
         // then
         assertThat(reservationRepository.findAll()).isEmpty();
+    }
+
+    private void clearTable() {
+        reservationRepository.findAll()
+                .forEach(reservation -> reservationRepository.deleteById(reservation.getId()));
+        reservationTimeRepository.findAll()
+                .forEach(reservationTime -> reservationTimeRepository.deleteById(reservationTime.getId()));
+        roomThemeRepository.findAll()
+                .forEach(roomTheme -> roomThemeRepository.deleteById(roomTheme.getId()));
+        memberRepository.findAll()
+                .forEach(member -> memberRepository.deleteById(member.getId()));
     }
 }

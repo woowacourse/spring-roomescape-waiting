@@ -5,16 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.TIME;
 
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
 import roomescape.exception.NotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -31,22 +27,7 @@ class ReservationTimeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        clearTable();
     }
 
     @DisplayName("모든 예약 시간을 보여준다")
@@ -69,10 +50,10 @@ class ReservationTimeRepositoryTest {
     void findById() {
         // given & when
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        Long id = savedReservationTime.getId();
-        // then
-        ReservationTime reservationTime = reservationTimeRepository.findById(id)
+        ReservationTime reservationTime = reservationTimeRepository.findById(savedReservationTime.getId())
                 .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다."));
+
+        // then
         assertThat(reservationTime.getStartAt()).isEqualTo(TIME);
     }
 
@@ -80,15 +61,12 @@ class ReservationTimeRepositoryTest {
     @Test
     void existsByStartAt() {
         // given
-        boolean existsFalse = reservationTimeRepository.existsByStartAt(TIME);
-        reservationTimeRepository.save(RESERVATION_TIME_10AM);
+        ReservationTime reservationTime = RESERVATION_TIME_10AM;
+        reservationTimeRepository.save(reservationTime);
         // when
-        boolean existsTrue = reservationTimeRepository.existsByStartAt(TIME);
+        boolean result = reservationTimeRepository.existsByStartAt(reservationTime.getStartAt());
         // then
-        assertAll(
-                () -> assertThat(existsFalse).isFalse(),
-                () -> assertThat(existsTrue).isTrue()
-        );
+        assertThat(result).isTrue();
     }
 
     @DisplayName("해당 id의 예약 시간을 삭제한다.")
@@ -100,5 +78,16 @@ class ReservationTimeRepositoryTest {
         reservationTimeRepository.deleteById(reservationTime.getId());
         // then
         assertThat(reservationTimeRepository.findAll()).isEmpty();
+    }
+
+    private void clearTable() {
+        reservationRepository.findAll()
+                .forEach(reservation -> reservationRepository.deleteById(reservation.getId()));
+        reservationTimeRepository.findAll()
+                .forEach(reservationTime -> reservationTimeRepository.deleteById(reservationTime.getId()));
+        roomThemeRepository.findAll()
+                .forEach(roomTheme -> roomThemeRepository.deleteById(roomTheme.getId()));
+        memberRepository.findAll()
+                .forEach(member -> memberRepository.deleteById(member.getId()));
     }
 }

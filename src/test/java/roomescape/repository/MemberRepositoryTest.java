@@ -3,7 +3,6 @@ package roomescape.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.MEMBER_BROWN;
 
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +18,8 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        memberRepository.findAll()
+                .forEach(member -> memberRepository.deleteById(member.getId()));
     }
 
     @DisplayName("존재하는 모든 사용자를 보여준다.")
@@ -41,5 +38,4 @@ class MemberRepositoryTest {
         // then
         assertThat(memberRepository.findAll()).isEmpty();
     }
-
 }
