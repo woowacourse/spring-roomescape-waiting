@@ -426,3 +426,33 @@
   }
 ]
 ```
+
+---
+
+## 예약 대기 승인(자동)
+1. 기존 예약을 취소(삭제)한다. 
+2. 취소하려는 예약의 Date, Time, Theme 와 일치하는 Waiting 중 대기 번호가 가장 빠른 예약 대기를 1개 가져온다. 
+2. 예약 대기 정보로 예약을 저장한다.
+3. 저장되어있던 예약 대기를 삭제한다.
+
+### Request
+
+- PUT /waitings/{id}
+
+### Response
+
+- 204 No Content
+
+---
+
+## 예약 대기 거절
+
+### Request
+
+- DELETE /waitings/{id}
+
+### Response
+
+- 204 No Content
+
+---

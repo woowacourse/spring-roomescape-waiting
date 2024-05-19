@@ -14,10 +14,12 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeName;
 import roomescape.domain.Time;
+import roomescape.domain.Waiting;
 import roomescape.domain.repository.MemberCommandRepository;
 import roomescape.domain.repository.ReservationCommandRepository;
 import roomescape.domain.repository.ThemeCommandRepository;
 import roomescape.domain.repository.TimeCommandRepository;
+import roomescape.domain.repository.WaitingCommandRepository;
 
 @Component
 @Profile("test")
@@ -27,15 +29,18 @@ public class TestDataInitializer implements CommandLineRunner {
     private final MemberCommandRepository memberCommandRepository;
     private final TimeCommandRepository timeCommandRepository;
     private final ThemeCommandRepository themeCommandRepository;
+    private final WaitingCommandRepository waitingCommandRepository;
 
     public TestDataInitializer(ReservationCommandRepository reservationCommandRepository,
                                MemberCommandRepository memberCommandRepository,
                                TimeCommandRepository timeCommandRepository,
-                               ThemeCommandRepository themeCommandRepository) {
+                               ThemeCommandRepository themeCommandRepository,
+                               WaitingCommandRepository waitingCommandRepository) {
         this.reservationCommandRepository = reservationCommandRepository;
         this.memberCommandRepository = memberCommandRepository;
         this.timeCommandRepository = timeCommandRepository;
         this.themeCommandRepository = themeCommandRepository;
+        this.waitingCommandRepository = waitingCommandRepository;
     }
 
     @Override
@@ -66,6 +71,14 @@ public class TestDataInitializer implements CommandLineRunner {
         createReservation(member4, LocalDate.now().minusDays(4), time1, theme3);
         createReservation(member4, LocalDate.now().minusDays(4), time2, theme3);
         createReservation(member4, LocalDate.now().minusDays(4), time3, theme3);
+
+        createReservation(member1, LocalDate.now(), time1, theme1);
+        createReservation(member2, LocalDate.now(), time1, theme2);
+        createReservation(member3, LocalDate.now(), time1, theme3);
+
+        createWaiting(member3, LocalDate.now(), time1, theme1);
+        createWaiting(member1, LocalDate.now(), time1, theme2);
+        createWaiting(member2, LocalDate.now(), time1, theme3);
     }
 
     private Member createMember(String name, String email, String password, Role role) {
@@ -83,5 +96,9 @@ public class TestDataInitializer implements CommandLineRunner {
 
     private Reservation createReservation(Member member, LocalDate date, Time time, Theme theme) {
         return reservationCommandRepository.save(new Reservation(member, date, time, theme));
+    }
+
+    private Waiting createWaiting(Member member, LocalDate date, Time time, Theme theme) {
+        return waitingCommandRepository.save(new Waiting(member, date, time, theme));
     }
 }

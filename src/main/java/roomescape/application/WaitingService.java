@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
 import roomescape.application.dto.WaitingWithRankResponse;
+import roomescape.application.dto.WaitingResponse;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingFactory;
 import roomescape.domain.dto.WaitingWithRank;
@@ -54,5 +55,11 @@ public class WaitingService {
                     String.format("존재하지 않는 예약 대기입니다. 요청 예약 대기 id:%d", waitingId));
         }
         waitingCommandRepository.deleteById(waitingId);
+    }
+
+    public List<WaitingResponse> findAll() {
+        return waitingQueryRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }

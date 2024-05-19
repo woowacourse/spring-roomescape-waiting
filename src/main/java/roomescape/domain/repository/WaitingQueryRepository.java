@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import roomescape.application.dto.WaitingResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
@@ -29,4 +30,6 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
     boolean existsById(Long id);
 
     boolean existsByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, Time time, Theme theme);
+
+    List<Waiting> findAll();
 }
