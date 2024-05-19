@@ -59,6 +59,16 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
+    private Theme findThemeById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(NotFoundThemeException::new);
+    }
+
+    private ReservationTime findReservationTimeById(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(NotFoundTimeException::new);
+    }
+
     private Reservation verifyReservation(ReservationRequest request, ReservationTime time, Theme theme,
                                           Member member) {
         Reservation reservation = request.toReservation(time, theme, member);
@@ -78,15 +88,5 @@ public class ReservationService {
     private Reservation findReservationById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(NotFoundReservationException::new);
-    }
-
-    private ReservationTime findReservationTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(NotFoundTimeException::new);
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
     }
 }

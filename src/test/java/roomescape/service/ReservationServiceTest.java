@@ -22,6 +22,9 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.exception.reservation.DuplicatedReservationException;
+import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.web.dto.request.reservation.ReservationRequest;
 import roomescape.web.dto.request.reservation.ReservationSearchCond;
 import roomescape.web.dto.response.reservation.ReservationResponse;
 
@@ -38,6 +41,87 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Test
+    @DisplayName("모든 예약에 대한 조회를 할 수 있다")
+    void findAll_ShouldGetAllReservation() {
+        // given
+        LocalDate date = LocalDate.of(2023, 12, 11);
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(1, 0));
+        Theme theme = new Theme("name", "desc", "thum");
+        Member member = new Member("name", "aa@aa.aa", "aa");
+        reservationTimeRepository.save(reservationTime);
+        themeRepository.save(theme);
+        memberRepository.save(member);
+        reservationRepository.save(new Reservation(date, reservationTime, theme, member));
+        reservationRepository.save(new Reservation(date, reservationTime, theme, member));
+        reservationRepository.save(new Reservation(date, reservationTime, theme, member));
+
+        // when
+        List<ReservationResponse> reservations = reservationService.findAllReservation();
+
+        // then
+        Assertions.assertThat(reservations).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("예약을 저장할 수 있다")
+    void saveReservation_ShouldStoreReservationInfo() {
+        // given
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Member member = new Member("name", "email", "password");
+        Theme theme = new Theme("a", "n", "t");
+
+        reservationTimeRepository.save(time);
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        ReservationRequest request = new ReservationRequest(LocalDate.now().plusDays(1), member.getId(), time.getId(),
+                theme.getId());
+        // when
+        reservationService.saveReservation(request);
+
+        // when & then
+        Assertions.assertThat(reservationRepository.findAll())
+                .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("예약은 정책에 따라 저장 중 예외를 발생시킨다 - 과거에 대한 예약")
+    void saveReservation_ShouldThrowException_WhenTryToBookPastTimeReservation() {
+        // given
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Member member = new Member("name", "email", "password");
+        Theme theme = new Theme("a", "n", "t");
+
+        reservationTimeRepository.save(time);
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        ReservationRequest request = new ReservationRequest(LocalDate.of(1998, 12, 11), member.getId(), time.getId(),
+                theme.getId());
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.saveReservation(request))
+                .isInstanceOf(InvalidDateTimeReservationException.class);
+    }
+
+    @Test
+    @DisplayName("예약은 정책에 따라 저장 중 예외를 발생시킨다 - 중복된 예약 요청")
+    void saveReservation_ShouldThrowException_WhenViolatePolicy() {
+        // given
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Member member = new Member("name", "email", "password");
+        Theme theme = new Theme("a", "n", "t");
+
+        reservationTimeRepository.save(time);
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        ReservationRequest request = new ReservationRequest(LocalDate.now().plusDays(1), member.getId(), time.getId(),
+                theme.getId());
+        reservationService.saveReservation(request);
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.saveReservation(request))
+                .isInstanceOf(DuplicatedReservationException.class);
+    }
 
     @Test
     @DisplayName("검색 조건에 맞는 예약을 조회할 수 있다")
@@ -91,7 +175,26 @@ class ReservationServiceTest {
                         ReservationResponse.from(savedReservation1),
                         ReservationResponse.from(savedReservation2)
                 );
-
     }
 
+    @Test
+    @DisplayName("에약을 삭제할 수 있다")
+    void deleteReservation_ShouldRemoveReservationInfo() {
+        // given
+        Theme theme = new Theme("name", "desc", "thumbnail");
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        Reservation reservation = new Reservation(LocalDate.now().plusDays(1), time, theme, member);
+        themeRepository.save(theme);
+        reservationTimeRepository.save(time);
+        memberRepository.save(member);
+        reservationRepository.save(reservation);
+
+        // when
+        reservationService.deleteReservation(reservation.getId());
+
+        // then
+        Assertions.assertThat(reservationRepository.findAll())
+                .isEmpty();
+    }
 }
