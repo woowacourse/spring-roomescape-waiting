@@ -19,6 +19,7 @@ public class Member {
 
     private static final String DEFAULT_NAME = "어드민";
     private static final Pattern EMAIL_FORM = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$");
+    private static final Pattern PASSWORD_FORM = Pattern.compile("^(?=.*\\d)(?=.*[a-z])[a-z0-9]*$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +31,8 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
-    @Embedded
-    private Password password;
+    @Column(nullable = false)
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,8 +41,9 @@ public class Member {
     public Member() {
     }
 
-    public Member(long id, Name name, String email, Password password, MemberRole role) {
+    public Member(long id, Name name, String email, String password, MemberRole role) {
         validateEmailFormat(email);
+        validatePassword(password);
 
         this.id = id;
         this.name = name;
@@ -50,22 +52,27 @@ public class Member {
         this.role = role;
     }
 
-    private Member(String name, String email, Password password, MemberRole role) {
+    private Member(String name, String email, String password, MemberRole role) {
         this(0, new Name(name), email, password, role);
     }
 
     public static Member memberOf(long id, String name, String email, String password, String role) {
-        return new Member(id, new Name(name), email, Password.passwordFrom(password),
-                MemberRole.findMemberRole(role));
+        return new Member(id, new Name(name), email, password, MemberRole.findMemberRole(role));
     }
 
     public static Member saveMemberOf(String email, String password) {
-        return new Member(DEFAULT_NAME, email, Password.passwordFrom(password), MemberRole.MEMBER);
+        return new Member(DEFAULT_NAME, email, password, MemberRole.MEMBER);
     }
 
     private static void validateEmailFormat(String email) {
         if (!EMAIL_FORM.matcher(email).matches()) {
             throw new RoomEscapeException(MemberExceptionCode.ILLEGAL_EMAIL_FORM_EXCEPTION);
+        }
+    }
+
+    private static void validatePassword(String password) {
+        if (!PASSWORD_FORM.matcher(password).matches()) {
+            throw new RoomEscapeException(MemberExceptionCode.ILLEGAL_PASSWORD_FORM_EXCEPTION);
         }
     }
 
@@ -82,7 +89,7 @@ public class Member {
     }
 
     public String getPassword() {
-        return password.getPassword();
+        return password;
     }
 
     public MemberRole getRole() {

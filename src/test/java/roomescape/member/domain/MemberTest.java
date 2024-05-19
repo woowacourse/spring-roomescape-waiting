@@ -36,4 +36,23 @@ class MemberTest {
     void saveEmail(String email) {
         assertDoesNotThrow(() -> Member.saveMemberOf(email, "password1234"));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "Polla99", "polla"})
+    @DisplayName("잘못된 형식의 비밀번호인 경우 예외를 던진다.")
+    void validation_ShouldThrowException_WhenIllegalPassword(String password) {
+        String validEmail = "lemone@gmail.com";
+        Throwable illegalPassword = assertThrows(RoomEscapeException.class, () -> Member.saveMemberOf(validEmail, password));
+
+        assertEquals(illegalPassword.getMessage(), MemberExceptionCode.ILLEGAL_PASSWORD_FORM_EXCEPTION.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"polla99", "0polla"})
+    @DisplayName("정상적인 형식의 비밀번호일 경우 생성한다.")
+    void makePassword(String password) {
+        String validEmail = "lemone@gmail.com";
+
+        assertDoesNotThrow(() -> Member.saveMemberOf(validEmail, password));
+    }
 }
