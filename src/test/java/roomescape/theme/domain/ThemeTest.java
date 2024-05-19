@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.Fixtures;
+import roomescape.exception.BadRequestException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -39,5 +41,18 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(() -> new Theme("name", "description", thumbnail));
+    }
+
+    @DisplayName("테마는 중복된 이름이 들어올 경우 예외가 발생한다.")
+    @Test
+    void validateDuplicatedName() {
+        // given
+        Theme theme = Fixtures.themeFixture;
+        Theme other = new Theme(1L, theme.getName(), "겹치는 테마", theme.getThumbnail());
+
+        // when & then
+        assertThatThrownBy(() -> theme.validateDuplicatedName(other))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("중복된 테마 이름입니다.");
     }
 }

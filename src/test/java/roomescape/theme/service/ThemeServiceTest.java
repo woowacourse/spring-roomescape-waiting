@@ -64,8 +64,8 @@ class ThemeServiceTest {
     @Test
     void validateDuplicated() {
         // given
-        Mockito.when(themeRepository.existsByName("공포"))
-                .thenReturn(Boolean.TRUE);
+        Mockito.when(themeRepository.findByName("공포"))
+                .thenReturn(Optional.of(themeFixture));
         ThemeCreateRequest request = new ThemeCreateRequest(
                 "공포", "공포스러운 테마", "http://example.org"
         );

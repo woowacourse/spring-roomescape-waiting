@@ -36,10 +36,8 @@ public class ThemeService {
     }
 
     private void validateDuplicated(Theme theme) {
-        boolean isExists = themeRepository.existsByName(theme.getName());
-        if (isExists) {
-            throw new BadRequestException("중복된 테마 이름입니다.");
-        }
+        themeRepository.findByName(theme.getName())
+                .ifPresent(theme::validateDuplicatedName);
     }
 
     public List<ThemeResponse> readThemes() {

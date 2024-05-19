@@ -1,6 +1,7 @@
 package roomescape.theme.domain;
 
 import jakarta.persistence.*;
+import roomescape.exception.BadRequestException;
 
 @Entity
 public class Theme {
@@ -43,6 +44,12 @@ public class Theme {
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
+    }
+
+    public void validateDuplicatedName(Theme theme) {
+        if (name.equals(theme.name)) {
+            throw new BadRequestException("중복된 테마 이름입니다.");
+        }
     }
 
     public Long getId() {
