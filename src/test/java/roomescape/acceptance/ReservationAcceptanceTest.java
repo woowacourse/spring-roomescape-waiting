@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.util.List;
@@ -62,7 +63,8 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
                 dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
                 dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 2L, 2L, 201)),
                 dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 3L, 3L, 201)),
-                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationCRD.getReservations(200, 6))
+                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationCRD.getReservations(200, 6)),
+                dynamicTest("자신의 예약을 조회한다 (총 3개)", () -> getMyReservations(clientToken, 200, 3))
         );
     }
 
@@ -108,6 +110,20 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         Response response = RestAssured.given().log().all()
                 .cookies("token", token)
                 .when().get("/admin/reservations/search?themeId=" + themeId + "&memberId=" + memberId + "&dateFrom=" + dateFrom + "&dateTo=" + dateTo)
+                .then().log().all()
+                .statusCode(expectedHttpCode)
+                .extract().response();
+
+        List<?> reservationResponses = response.as(List.class);
+
+        assertThat(reservationResponses).hasSize(expectedReservationResponsesSize);
+    }
+
+    private void getMyReservations(String token, int expectedHttpCode, int expectedReservationResponsesSize) {
+        Response response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(expectedHttpCode)
                 .extract().response();
