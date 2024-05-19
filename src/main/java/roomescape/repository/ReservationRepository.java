@@ -15,7 +15,9 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     Reservation save(Reservation reservation);
 
-    List<Reservation> findByThemeAndMemberAndDateBetween(Theme theme, Member member, LocalDate dateFrom,
+    List<Reservation> findByThemeAndMemberAndDateBetween(Theme theme,
+                                                         Member member,
+                                                         LocalDate dateFrom,
                                                          LocalDate dateTo);
 
     void deleteById(long id);
