@@ -32,8 +32,7 @@ public class ThemeService {
         LocalDate endDate = rankingPolicy.getEndDateAsString();
         int limit = rankingPolicy.exposureSize();
 
-        List<Theme> themes = themeRepository.findThemesByPeriodWithLimit(startDate.toString(), endDate.toString(),
-                limit);
+        List<Theme> themes = themeRepository.findThemeByPeriodWithLimit(startDate, endDate, limit);
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
