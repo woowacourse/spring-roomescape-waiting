@@ -55,7 +55,7 @@ public class CollectionReservationTimeRepository implements ReservationTimeRepos
     @Override
     public Optional<ReservationTime> findById(long id) {
         return reservationTimes.stream()
-                .filter(reservationTime -> reservationTime.isIdOf(id))
+                .filter(reservationTime -> reservationTime.hasIdOf(id))
                 .findFirst();
     }
 
@@ -79,7 +79,7 @@ public class CollectionReservationTimeRepository implements ReservationTimeRepos
     @Override
     public void delete(long id) {
         reservationTimes.stream()
-                .filter(reservationTime -> reservationTime.isIdOf(id))
+                .filter(reservationTime -> reservationTime.hasIdOf(id))
                 .findAny()
                 .ifPresent(reservationTimes::remove);
     }

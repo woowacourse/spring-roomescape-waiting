@@ -68,11 +68,11 @@ public class Theme {
         this(null, name, description, thumbnail);
     }
 
-    public boolean isIdOf(long id) {
+    public boolean hasIdOf(long id) {
         return this.id == id;
     }
 
-    public boolean isNameOf(String name) {
+    public boolean hasNameOf(String name) {
         return this.name.equals(name);
     }
 

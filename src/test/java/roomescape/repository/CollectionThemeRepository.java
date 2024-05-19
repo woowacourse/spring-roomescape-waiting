@@ -67,7 +67,7 @@ public class CollectionThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(long id) {
         return themes.stream()
-                .filter(theme -> theme.isIdOf(id))
+                .filter(theme -> theme.hasIdOf(id))
                 .findFirst();
     }
 
@@ -80,6 +80,6 @@ public class CollectionThemeRepository implements ThemeRepository {
 
     @Override
     public void delete(long id) {
-        themes.removeIf(theme -> theme.isIdOf(id));
+        themes.removeIf(theme -> theme.hasIdOf(id));
     }
 }

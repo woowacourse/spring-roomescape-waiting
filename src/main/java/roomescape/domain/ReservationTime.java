@@ -32,7 +32,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public boolean isIdOf(long id) {
+    public boolean hasIdOf(long id) {
         return this.id == id;
     }
 

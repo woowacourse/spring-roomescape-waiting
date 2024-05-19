@@ -92,7 +92,7 @@ public class Reservation implements Comparable<Reservation> {
         return time.getStartAt();
     }
 
-    public boolean hasSameId(long id) {
+    public boolean hasIdOf(long id) {
         return this.id == id;
     }
 

@@ -30,7 +30,7 @@ public class ThemeService {
 
     public ThemeResponse save(ThemeRequest themeRequest) {
         boolean hasDuplicateTheme = themeRepository.findAll().stream()
-                .anyMatch(theme -> theme.isNameOf(themeRequest.name()));
+                .anyMatch(theme -> theme.hasNameOf(themeRequest.name()));
         if (hasDuplicateTheme) {
             throw new RoomescapeException(DUPLICATE_THEME);
         }

@@ -28,7 +28,7 @@ public class CollectionMemberRepository implements MemberRepository {
     @Override
     public Optional<Member> findById(long id) {
         return members.stream()
-                .filter(member -> member.getId() == id)
+                .filter(member -> member.hasIdOf(id))
                 .findAny();
     }
 

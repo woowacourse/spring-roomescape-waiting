@@ -52,6 +52,10 @@ public class Member {
         this(id, name, email, encryptedPassword, MEMBER);
     }
 
+    public boolean hasIdOf(long id) {
+        return this.id == id;
+    }
+
     public Long getId() {
         return id;
     }

@@ -79,7 +79,7 @@ public class CollectionReservationRepository implements ReservationRepository {
     @Override
     public void delete(long id) {
         reservations.stream()
-                .filter(reservation -> reservation.hasSameId(id))
+                .filter(reservation -> reservation.hasIdOf(id))
                 .findAny()
                 .ifPresent(reservations::remove);
     }
