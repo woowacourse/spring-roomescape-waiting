@@ -20,10 +20,13 @@ public class Reservation {
 
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Theme theme;
+
     @ManyToOne
     private Member member;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
