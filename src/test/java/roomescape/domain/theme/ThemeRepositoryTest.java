@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.domain.theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 import roomescape.support.fixture.ThemeFixture;
 
 @DataJpaTest

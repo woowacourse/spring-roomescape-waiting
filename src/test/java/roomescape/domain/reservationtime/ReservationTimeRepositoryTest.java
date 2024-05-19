@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.domain.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.reservationtime.AvailableReservationTimeDto;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.support.fixture.ReservationTimeFixture;
 
 @DataJpaTest
