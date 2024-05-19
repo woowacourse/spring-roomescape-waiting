@@ -6,7 +6,8 @@ import roomescape.global.exception.model.ExceptionCode;
 public enum ThemeExceptionCode implements ExceptionCode {
 
     USING_THEME_RESERVATION_EXIST(HttpStatus.BAD_REQUEST, "삭제하려는 테마의 예약이 아직 존재합니다."),
-    FOUND_THEME_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "존재하는 테마가 없습니다.");
+    FOUND_THEME_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "테마를 찾을 수 없습니다."),
+    FOUND_MEMBER_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
