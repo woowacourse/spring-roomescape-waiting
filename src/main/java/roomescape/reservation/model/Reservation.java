@@ -121,7 +121,7 @@ public class Reservation {
         }
     }
 
-    public boolean isSameTime(final ReservationTime reservationTime) {
+    public boolean hasSameTime(final ReservationTime reservationTime) {
         return this.reservationTime.isSameTo(reservationTime.getId());
     }
 

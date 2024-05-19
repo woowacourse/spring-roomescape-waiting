@@ -102,7 +102,7 @@ public class ReservationService {
         return FindAvailableTimesResponse.from(
                 reservationTime,
                 reservations.stream()
-                        .anyMatch(reservation -> reservation.isSameTime(reservationTime)));
+                        .anyMatch(reservation -> reservation.hasSameTime(reservationTime)));
     }
 
     public List<FindReservationResponse> searchBy(final Long themeId, final Long memberId,
