@@ -22,4 +22,7 @@ VALUES ('polla', '폴라 방탈출', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461
 INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2024-04-30', 1, 1, 1),
        ('2024-04-30', 1, 1, 1),
-       ('2025-05-01', 2, 1, 2);
+       ('2024-05-01', 2, 1, 2),
+       ('2024-05-02', 2, 2, 2),
+       ('2024-05-03', 2, 2, 1);
+
