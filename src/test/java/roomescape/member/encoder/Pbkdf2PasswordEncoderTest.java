@@ -2,16 +2,12 @@ package roomescape.member.encoder;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
 class Pbkdf2PasswordEncoderTest {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder = setPasswordEncoder();
 
     @DisplayName("평문 암호를 인코딩한다.")
     @Test
@@ -38,5 +34,13 @@ class Pbkdf2PasswordEncoderTest {
 
         // Then
         assertThat(isMatch).isTrue();
+    }
+
+    private PasswordEncoder setPasswordEncoder() {
+        return new Pbkdf2PasswordEncoder(
+                new byte[]{-45, -5, -13, 125, 108, -103, -122, -41, 107, -10, -60, 1, 73, -94, -118, 85},
+                65536,
+                256
+        );
     }
 }
