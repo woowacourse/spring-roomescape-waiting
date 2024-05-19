@@ -87,10 +87,14 @@ public class ReservationService {
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         Member member = getMember(authInfo.getId());
+        delete(member, memberReservation);
+    }
+
+    private void delete(Member member, MemberReservation memberReservation) {
         if (!canDelete(member, memberReservation)) {
             throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
-        memberReservationRepository.deleteById(memberReservationId);
+        memberReservationRepository.deleteById(memberReservation.getId());
     }
 
     private boolean canDelete(Member member, MemberReservation memberReservation) {
@@ -129,6 +133,20 @@ public class ReservationService {
     private void validatePastReservation(Reservation reservation) {
         if (reservation.isPast()) {
             throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
+        }
+    }
+
+    @Transactional
+    public void deleteWaiting(AuthInfo authInfo, long memberReservationId) {
+        MemberReservation memberReservation = getMemberReservation(memberReservationId);
+        Member member = getMember(authInfo.getId());
+        validateWaitingReservation(memberReservation);
+        delete(member, memberReservation);
+    }
+
+    private void validateWaitingReservation(MemberReservation memberReservation) {
+        if (memberReservationRepository.isFirstReservation(memberReservation.getId())) {
+            throw new BadRequestException(ErrorType.NOT_A_WAITING_RESERVATION);
         }
     }
 

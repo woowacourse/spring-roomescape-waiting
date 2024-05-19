@@ -252,7 +252,7 @@ class ReservationServiceTest extends ServiceTest {
     void addWaitingList() {
         //given
         Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -278,7 +278,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void duplicatedWaitingList() {
         //given
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
         reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -296,7 +296,7 @@ class ReservationServiceTest extends ServiceTest {
     void deleteWaiting() {
         //given
         Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = LocalDate.now();
+        LocalDate date = LocalDate.now().plusDays(1);
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -331,5 +331,20 @@ class ReservationServiceTest extends ServiceTest {
         //then
         assertThat(waiting).hasSize(2);
         assertThat(waiting).extracting("date").containsOnly(getNextDayReservation(time, theme1).getDate());
+    }
+
+    @DisplayName("대기 예약이 아닌 예약 삭제 시, 예외가 발생한다.")
+    @Test
+    void deleteNotWaitingReservation() {
+        //given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+
+        //when & then
+        assertThatThrownBy(() -> reservationService.deleteWaiting(AuthInfo.from(memberChoco),
+                reservationResponse.memberReservationId()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }
 }

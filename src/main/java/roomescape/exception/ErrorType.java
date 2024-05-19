@@ -22,6 +22,7 @@ public enum ErrorType {
     MEMBER_RESERVATION_NOT_FOUND("RESERVATION-003", "해당 ID에 대응되는 사용자 예약이 없습니다."),
     RESERVATION_NOT_DELETED("RESERVATION-004", "예약이 존재하여 삭제할 수 없습니다."),
     NOT_A_RESERVATION_MEMBER("RESERVATION-005", "예약자가 아닙니다."),
+    NOT_A_WAITING_RESERVATION("RESERVATION-006", "대기 예약이 아닙니다."),
 
     THEME_NOT_FOUND("THEME-001", "해당 ID에 대응되는 테마가 없습니다."),
 
