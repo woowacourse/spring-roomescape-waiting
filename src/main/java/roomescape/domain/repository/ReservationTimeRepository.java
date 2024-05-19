@@ -4,18 +4,20 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.repository.Repository;
+
 import roomescape.domain.ReservationTime;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeRepository extends Repository<ReservationTime, Long> {
+    ReservationTime save(ReservationTime reservationTime);
+
     List<ReservationTime> findAll();
 
     Optional<ReservationTime> findById(Long id);
 
     boolean existsByStartAt(LocalTime startAt);
 
-    ReservationTime save(ReservationTime time);
-
-    void delete(ReservationTime time);
+    void delete(ReservationTime reservationTime);
 
     void deleteAll();
 }
