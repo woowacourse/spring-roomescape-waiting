@@ -137,9 +137,10 @@
   }
   ```
   
-### 예약 추가 - 사용자
+### 예약 및 예약 대기 추가 - 사용자
 - http method: POST
 - uri: /reservations
+- description: 예약이 이미 존재한다면, 자동으로 예약 대기로 추가된다.
 - request
   ```
   POST /reservations HTTP/1.1
@@ -178,7 +179,8 @@
           "id": 1,
           "name": "lini",
           "email": "lini@email.com"
-        }
+        },
+        "status": "예약"
     }
     ```
   - 추가 실패: 중복 예약 불가능 오류
@@ -222,6 +224,14 @@
 
     {
     "message": "더이상 존재하지 않는 테마입니다."
+    }
+    ```
+  - 추가 실패 : 이미 예약 혹은 예약 대기가 존재 오류
+    ```
+    HTTP/1.1 400
+
+    {
+    "message": "이미 예약(대기) 상태입니다."
     }
     ```
 
