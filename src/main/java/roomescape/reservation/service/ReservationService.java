@@ -132,17 +132,29 @@ public class ReservationService {
     }
 
     @Transactional
-    public void approveWaiting(long memberReservationId) {
+    public void approveWaiting(AuthInfo authInfo, long memberReservationId) {
+        Member member = getMember(authInfo.getId());
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
+
+        validateAdminPermission(member);
         validateWaitingReservation(memberReservation);
         memberReservation.approve();
     }
 
     @Transactional
-    public void denyWaiting(long memberReservationId) {
+    public void denyWaiting(AuthInfo authInfo, long memberReservationId) {
+        Member member = getMember(authInfo.getId());
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
+
+        validateAdminPermission(member);
         validateWaitingReservation(memberReservation);
         memberReservation.deny();
+    }
+
+    private static void validateAdminPermission(Member member) {
+        if (!member.isAdmin()) {
+            throw new AuthorizationException(ErrorType.NOT_ALLOWED_PERMISSION_ERROR);
+        }
     }
 
     private void delete(Member member, MemberReservation memberReservation) {

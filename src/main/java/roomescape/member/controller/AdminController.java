@@ -56,7 +56,7 @@ public class AdminController {
     @PostMapping("/waiting/approve/{id}")
     public ResponseEntity<Void> approve(@LoginUser AuthInfo authInfo,
                                         @PathVariable("id") @Min(1) long memberReservationId) {
-        reservationService.approveWaiting(memberReservationId);
+        reservationService.approveWaiting(authInfo, memberReservationId);
         return ResponseEntity.ok().build();
     }
 
@@ -64,7 +64,7 @@ public class AdminController {
     @PostMapping("/waiting/deny/{id}")
     public ResponseEntity<Void> deny(@LoginUser AuthInfo authInfo,
                                      @PathVariable("id") @Min(1) long memberReservationId) {
-        reservationService.denyWaiting(memberReservationId);
+        reservationService.denyWaiting(authInfo, memberReservationId);
         return ResponseEntity.ok().build();
     }
 }

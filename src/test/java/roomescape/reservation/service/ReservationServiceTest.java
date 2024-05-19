@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.DateFixture.getNextDay;
+import static roomescape.fixture.MemberFixture.getMemberAdmin;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
 import static roomescape.fixture.MemberFixture.getMemberEden;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
@@ -360,9 +362,10 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         MemberReservation waitingReservation = memberReservationRepository.save(
                 new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+        Member admin = memberRepository.save(getMemberAdmin());
 
         //when
-        reservationService.approveWaiting(waitingReservation.getId());
+        reservationService.approveWaiting(AuthInfo.from(admin), waitingReservation.getId());
 
         //then
         MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
@@ -377,9 +380,11 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+        Member admin = memberRepository.save(getMemberAdmin());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.approveWaiting(reservationResponse.memberReservationId()))
+        assertThatThrownBy(() -> reservationService.approveWaiting(AuthInfo.from(admin),
+                reservationResponse.memberReservationId()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }
@@ -394,9 +399,10 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         MemberReservation waitingReservation = memberReservationRepository.save(
                 new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+        Member admin = memberRepository.save(getMemberAdmin());
 
         //when
-        reservationService.denyWaiting(waitingReservation.getId());
+        reservationService.denyWaiting(AuthInfo.from(admin), waitingReservation.getId());
 
         //then
         MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
@@ -411,10 +417,33 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+        Member admin = memberRepository.save(getMemberAdmin());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.denyWaiting(reservationResponse.memberReservationId()))
+        assertThatThrownBy(
+                () -> reservationService.denyWaiting(AuthInfo.from(admin), reservationResponse.memberReservationId()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
+    }
+
+    @DisplayName("관리자가 아닌 사용자가 승인 및 거절 시, 예외가 발생한다.")
+    @Test
+    void approveAndDenyPermissionException() {
+        //given
+        LocalDate date = getNextDay();
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+
+        //when & then
+        assertAll(
+                () -> assertThatThrownBy(() -> reservationService.approveWaiting(AuthInfo.from(memberChoco),
+                        reservationResponse.memberReservationId()))
+                        .isInstanceOf(AuthorizationException.class)
+                        .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage()),
+                () -> assertThatThrownBy(() -> reservationService.denyWaiting(AuthInfo.from(memberChoco),
+                        reservationResponse.memberReservationId()))
+                        .isInstanceOf(AuthorizationException.class)
+                        .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage())
+        );
     }
 }
