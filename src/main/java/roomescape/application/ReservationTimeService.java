@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.dto.request.ReservationTimeRequest;
+import roomescape.application.dto.response.AvailableReservationTimeResponse;
+import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
-import roomescape.application.dto.request.ReservationTimeRequest;
-import roomescape.application.dto.response.AvailableReservationTimeResponse;
-import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -29,14 +29,6 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public List<ReservationTimeResponse> getAllReservationTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-
-        return reservationTimes.stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
-    }
-
     @Transactional
     public ReservationTimeResponse addReservationTime(ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
@@ -50,6 +42,23 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    public List<ReservationTimeResponse> getAllReservationTimes() {
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+
+        return reservationTimes.stream()
+                .map(ReservationTimeResponse::from)
+                .toList();
+    }
+
+    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(LocalDate date, Long themeId) {
+        List<AvailableReservationTimeDto> availableReservationTimeDtos = reservationTimeRepository
+                .findAvailableReservationTimes(date, themeId);
+
+        return availableReservationTimeDtos.stream()
+                .map(AvailableReservationTimeResponse::from)
+                .toList();
+    }
+
     @Transactional
     public void deleteReservationTimeById(Long id) {
         if (!reservationTimeRepository.existsById(id)) {
@@ -61,14 +70,5 @@ public class ReservationTimeService {
         }
 
         reservationTimeRepository.deleteById(id);
-    }
-
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(LocalDate date, Long themeId) {
-        List<AvailableReservationTimeDto> availableReservationTimeDtos = reservationTimeRepository
-                .findAvailableReservationTimes(date, themeId);
-
-        return availableReservationTimeDtos.stream()
-                .map(AvailableReservationTimeResponse::from)
-                .toList();
     }
 }

@@ -29,7 +29,7 @@ public class ThemeService {
         Theme theme = themeRequest.toTheme();
 
         if (themeRepository.existsByName(theme.getName())) {
-            throw new BadRequestException("이미 존재하는 테마 이름입니다.");
+            throw new BadRequestException("해당 이름의 테마는 이미 존재합니다.");
         }
 
         Theme savedTheme = themeRepository.save(theme);
