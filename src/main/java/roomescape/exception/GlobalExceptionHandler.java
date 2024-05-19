@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RoomescapeException.class)
-    ResponseEntity<ApiExceptionResponse<String>> handleIllegalArgumentException(RoomescapeException ex) {
+    ResponseEntity<ApiExceptionResponse<String>> handleRoomescapeException(RoomescapeException ex) {
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new ApiExceptionResponse<>(ex.getHttpStatus(), ex.getMessage()));
     }
