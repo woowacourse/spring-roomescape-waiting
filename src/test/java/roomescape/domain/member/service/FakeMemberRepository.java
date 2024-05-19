@@ -17,7 +17,8 @@ public class FakeMemberRepository implements MemberRepository {
     public Member save(Member member) {
         Long id = atomicLong.incrementAndGet();
 
-        Member addMember = new Member(id, member.getName(), member.getEmail(), member.getPassword(), member.getRole());
+        Member addMember = new Member(id, member.getName(), member.getEmail(), member.getPassword(),
+                member.getRole());
         members.put(id, addMember);
         return addMember;
     }
