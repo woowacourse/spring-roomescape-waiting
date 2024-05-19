@@ -52,10 +52,14 @@ public class ReservationService {
         Theme theme = findTheme(themeId);
         Reservation reservation = new Reservation(member, rawDate, time, theme, status);
 
+        validatePastReservation(reservation.getDate(), time);
+
         if (status == RESERVED) {
             validateDuplication(reservation.getDate(), timeId, themeId);
         }
-        validatePastReservation(reservation.getDate(), time);
+        if (status == STANDBY) {
+            validateAlreadyBookedByMember(reservation);
+        }
 
         return reservationRepository.save(reservation);
     }
@@ -96,6 +100,19 @@ public class ReservationService {
     private void validateDuplication(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new RoomescapeException("해당 시간에 예약이 이미 존재합니다.");
+        }
+    }
+
+    private void validateAlreadyBookedByMember(Reservation reservation) {
+        Boolean exists = reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+            reservation.getMember().getId(),
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
+        );
+
+        if (exists) {
+            throw new RoomescapeException("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
         }
     }
 
