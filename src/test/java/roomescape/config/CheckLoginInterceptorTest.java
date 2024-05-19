@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.config;
 
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import roomescape.config.CheckLoginInterceptor;
 import roomescape.domain.user.Role;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.MemberService;

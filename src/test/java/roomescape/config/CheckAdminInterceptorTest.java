@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import roomescape.config.CheckAdminInterceptor;
 import roomescape.domain.user.Role;
 import roomescape.exception.ForbiddenException;
 import roomescape.service.dto.output.TokenLoginOutput;
