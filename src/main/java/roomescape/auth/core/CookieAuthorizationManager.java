@@ -3,6 +3,7 @@ package roomescape.auth.core;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -38,11 +39,9 @@ public class CookieAuthorizationManager implements AuthorizationManager {
     }
 
     private Optional<Cookie> extractTokenCookie(final Cookie[] cookies) {
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(TOKEN_COOKIE_NAME)) {
-                return Optional.of(cookie);
-            }
-        }
-        return Optional.empty();
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(TOKEN_COOKIE_NAME))
+                .findFirst()
+                .or(Optional::empty);
     }
 }
