@@ -64,7 +64,7 @@ public class ReservationService {
         Long memberId = reservationCriteria.memberId();
         LocalDate dateFrom = reservationCriteria.dateFrom();
         LocalDate dateTo = reservationCriteria.dateTo();
-        return reservationQueryRepository.findByCriteria(themeId, memberId, dateFrom, dateTo).stream()
+        return reservationQueryRepository.findByCriteria(memberId, dateFrom, dateTo, themeId).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }

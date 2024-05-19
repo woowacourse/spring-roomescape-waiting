@@ -52,14 +52,15 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
     @Query("""
             select r
             from Reservation r
-            join fetch r.theme t
             join fetch r.member m
-            where t.id = :themeId
-            and m.id = :memberId
-            and :dateFrom <= r.date
-            and r.date <= :dateTo
+            join fetch r.time t
+            join fetch r.theme th
+            where (:memberId is null or r.member.id = :memberId)
+            and (:dateFrom is null or r.date >= :dateFrom)
+            and (:dateTo is null or r.date <= :dateTo)
+            and (:themeId is null or r.theme.id = :themeId)
             """)
-    List<Reservation> findByCriteria(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByCriteria(Long memberId, LocalDate dateFrom, LocalDate dateTo, Long themeId);
 
     Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, Time time, Theme theme);
 
