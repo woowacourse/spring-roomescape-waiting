@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.DateFixture.getNextDay;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
 import static roomescape.fixture.MemberFixture.getMemberEden;
@@ -252,7 +253,7 @@ class ReservationServiceTest extends ServiceTest {
     void addWaitingList() {
         //given
         Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -278,7 +279,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void duplicatedWaitingList() {
         //given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = getNextDay();
         reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -296,7 +297,7 @@ class ReservationServiceTest extends ServiceTest {
     void deleteWaiting() {
         //given
         Member memberClover = memberRepository.save(getMemberClover());
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId())
         );
@@ -337,7 +338,7 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void deleteNotWaitingReservation() {
         //given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
 
