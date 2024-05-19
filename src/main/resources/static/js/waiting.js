@@ -16,6 +16,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
+    let idx = 1;
     data.forEach(item => {
         const row = tableBody.insertRow();
 
@@ -23,7 +24,7 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = item.id;
+        const id = idx++;
         const name = item.member.name;
         const theme = item.theme.name;
         const date = item.date;
