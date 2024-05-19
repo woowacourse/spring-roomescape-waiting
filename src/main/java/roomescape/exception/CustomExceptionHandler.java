@@ -20,42 +20,42 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleIllegalArgumentException(final IllegalArgumentException e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleNoSuchElementException(final NoSuchElementException e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleAccessUnauthorizedException(final UnauthorizedException e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(UNAUTHORIZED)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleAccessDeniedException(final AccessDeniedException e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(FORBIDDEN)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleInternalServerError(final InternalServerError e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("예기치 못한 서버 에러가 발생하였습니다."));
     }
 
     @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleException(final Exception e) {
-        log.error(e.getMessage());
+        log.error(String.valueOf(e), e);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("예기치 못한 에러가 발생하였습니다."));
     }
