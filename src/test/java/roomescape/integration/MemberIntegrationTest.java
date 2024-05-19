@@ -1,7 +1,8 @@
 package roomescape.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.test.context.jdbc.Sql;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.controller.request.MemberLoginRequest;
-import roomescape.model.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/init-data.sql", "/controller-test-data.sql"})
@@ -22,18 +22,16 @@ class MemberIntegrationTest {
     void should_response_cookie_when_login() {
         MemberLoginRequest request = new MemberLoginRequest("1234", "sun@email.com");
 
-        String cookie = RestAssured
+        RestAssured
                 .given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/login")
-                .then().statusCode(200)
-                .extract().header("Set-Cookie");
-
-        assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(cookie).isNotBlank();
-            assertSoftly.assertThat(cookie).containsPattern("^token=");
-        });
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .header("Set-Cookie", matchesPattern("^token=.*"));
     }
 
     @DisplayName("요청시 쿠키를 제공하면 이름을 반환한다.")
@@ -49,15 +47,16 @@ class MemberIntegrationTest {
                 .then().statusCode(200)
                 .extract().header("Set-Cookie");
 
-        String name = RestAssured
+        RestAssured
                 .given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .when().get("/login/check")
-                .then().statusCode(200)
-                .extract().jsonPath().get("name");
-
-        assertThat(name).isEqualTo("썬");
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .body("name", is("썬"));
     }
 
     @DisplayName("모든 사용자들을 반환한다.")
@@ -67,7 +66,10 @@ class MemberIntegrationTest {
                 .given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/members")
-                .then().statusCode(200)
-                .extract().jsonPath().getList(".", Member.class);
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .body("size()", equalTo(3));
     }
 }
