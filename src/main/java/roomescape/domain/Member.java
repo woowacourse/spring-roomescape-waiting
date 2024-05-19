@@ -91,4 +91,25 @@ public class Member {
     public MemberRole getRole() {
         return role;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        if (id == null || member.id == null) {
+            throw new IllegalArgumentException("ID가 비어 있을 경우 equals()를 호출할 수 없습니다.");
+        }
+
+        return id.equals(member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id == null) {
+            throw new IllegalArgumentException("ID가 비어 있을 경우 hasCode()를 호출할 수 없습니다.");
+        }
+
+        return id.hashCode();
+    }
 }
