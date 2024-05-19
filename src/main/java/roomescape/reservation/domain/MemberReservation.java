@@ -46,6 +46,10 @@ public class MemberReservation extends BaseEntity {
         return this.member.equals(member);
     }
 
+    public boolean isPending() {
+        return this.reservationStatus.equals(ReservationStatus.PENDING);
+    }
+
     public void approve() {
         this.reservationStatus = ReservationStatus.APPROVED;
     }

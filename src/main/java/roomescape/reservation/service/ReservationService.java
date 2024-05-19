@@ -175,7 +175,7 @@ public class ReservationService {
     }
 
     private void validateWaitingReservation(MemberReservation memberReservation) {
-        if (memberReservationRepository.isFirstReservation(memberReservation.getId())) {
+        if (!memberReservation.isPending()) {
             throw new BadRequestException(ErrorType.NOT_A_WAITING_RESERVATION);
         }
     }

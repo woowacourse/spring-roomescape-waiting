@@ -60,7 +60,6 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    // TODO: Admin 검증 로직
     @PostMapping("/waiting/deny/{id}")
     public ResponseEntity<Void> deny(@LoginUser AuthInfo authInfo,
                                      @PathVariable("id") @Min(1) long memberReservationId) {
