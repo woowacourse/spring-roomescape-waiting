@@ -58,7 +58,9 @@ public class ReservationService {
     }
 
     private void updateReservation(Reservation reservation) {
-        if (reservation.getStatus() == Status.RESERVATION) {
+        if (reservation.getStatus() == Status.RESERVATION && reservationRepository.existsByDateAndTimeIdAndThemeId(
+                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+        ) {
             Reservation nextReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).orElseThrow();
