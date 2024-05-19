@@ -44,22 +44,7 @@ class ReservationTimeControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        List<Reservation> reservations = reservationRepository.findAll();
-        for (Reservation reservation : reservations) {
-            reservationRepository.deleteById(reservation.getId());
-        }
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        for (ReservationTime reservationTime : reservationTimes) {
-            reservationTimeRepository.deleteById(reservationTime.getId());
-        }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
-        }
-        List<Member> members = memberRepository.findAll();
-        for (Member member : members) {
-            memberRepository.deleteById(member.getId());
-        }
+        clearTable();
     }
 
     @DisplayName("모든 예약 시간 조회 테스트")
@@ -95,11 +80,12 @@ class ReservationTimeControllerTest {
     @Test
     void duplicateReservationTime() {
         // given
-        createReservationTime();
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeRequest(TIME))
+                .body(new ReservationTimeRequest(reservationTime.getStartAt()))
                 .when().post("/times")
                 .then().log().all().assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
@@ -109,8 +95,9 @@ class ReservationTimeControllerTest {
     void deleteReservationTImeSuccess() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        Long id = reservationTime.getId();
+
         // when & then
+        Long id = reservationTime.getId();
         RestAssured.given().log().all()
                 .when().delete("/times/" + id)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
@@ -121,9 +108,21 @@ class ReservationTimeControllerTest {
     void deleteReservationTimeFail() {
         // given
         long invalidId = 0;
+
         // when & then
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + invalidId)
                 .then().log().all().assertThat().statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    private void clearTable() {
+        reservationRepository.findAll()
+                .forEach(reservation -> reservationRepository.deleteById(reservation.getId()));
+        reservationTimeRepository.findAll()
+                .forEach(reservationTime -> reservationTimeRepository.deleteById(reservationTime.getId()));
+        roomThemeRepository.findAll()
+                .forEach(roomTheme -> roomThemeRepository.deleteById(roomTheme.getId()));
+        memberRepository.findAll()
+                .forEach(member -> memberRepository.deleteById(member.getId()));
     }
 }

@@ -90,6 +90,10 @@ public class Member {
         return role;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
