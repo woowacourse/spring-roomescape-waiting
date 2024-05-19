@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -16,7 +17,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.*;
 
-class ReservationRepositoryTest extends RepositoryTest {
+@DataJpaTest
+class ReservationRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;

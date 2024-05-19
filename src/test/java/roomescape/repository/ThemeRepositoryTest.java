@@ -3,6 +3,7 @@ package roomescape.repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
@@ -18,7 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.*;
 
 
-class ThemeRepositoryTest extends RepositoryTest {
+@DataJpaTest
+class ThemeRepositoryTest {
 
     @Autowired
     private TestEntityManager testEntityManager;
