@@ -65,6 +65,10 @@ public class Reservation {
         }
     }
 
+    public boolean isSameMember(Member other) {
+        return this.member.equals(other);
+    }
+
     public Long getId() {
         return id;
     }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
 import roomescape.application.dto.WaitingWithRankResponse;
+import roomescape.domain.Waiting;
 import roomescape.domain.WaitingFactory;
 import roomescape.domain.dto.WaitingWithRank;
 import roomescape.domain.repository.WaitingCommandRepository;
@@ -28,7 +29,8 @@ public class WaitingService {
     }
 
     public List<WaitingWithRankResponse> reserveWaiting(LoginMember loginMember, WaitingRequest request) {
-        waitingCommandRepository.save(waitingFactory.create(loginMember.id(), request.date(), request.timeId(), request.themeId()));
+        Waiting waiting = waitingFactory.create(loginMember.id(), request.date(), request.timeId(), request.themeId());
+        waitingCommandRepository.save(waiting);
         List<WaitingWithRank> waitingWithRanks = waitingQueryRepository.findWaitingWithRankByMemberId(loginMember.id());
         return convertToWaitWithRankResponses(waitingWithRanks);
         //TODO: ReservationFactory, WaitingFactory 다시 생각해봐야될듯
