@@ -36,7 +36,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     @Query(value = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?", nativeQuery = true)
     List<Long> findTimeIdByDateAndThemeId(LocalDate date, Long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     void delete(Reservation reservation);
 
