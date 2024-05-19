@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import roomescape.exception.ErrorType;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
@@ -86,19 +86,30 @@ public class Member {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public final boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+        if (o == null) {
+            return false;
+        }
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {
             return false;
         }
         final Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return getId() != null && Objects.equals(getId(), member.getId());
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                .hashCode() : getClass().hashCode();
     }
 }

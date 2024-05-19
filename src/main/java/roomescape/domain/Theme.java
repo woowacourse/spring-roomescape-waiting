@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 @Entity
@@ -62,19 +62,30 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public final boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+        if (o == null) {
+            return false;
+        }
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) {
             return false;
         }
         final Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return getId() != null && Objects.equals(getId(), theme.getId());
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                .hashCode() : getClass().hashCode();
     }
 }
