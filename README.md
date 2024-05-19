@@ -4,53 +4,21 @@
 - http method: GET
 - uri: /admin
 - file path: templates/admin/index.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 예약 페이지 접근
 - http method: GET
 - uri: /admin/reservation
 - file path: templates/admin/reservation-new.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 시간 페이지 접근
 - http method: GET
 - uri: /admin/time
 - file path: templates/admin/time.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 어드민 테마 페이지 접근
 - http method: GET
 - uri: /admin/theme
 - file path: templates/admin/theme.html
-- 사용자는 권한 없음
-  ```
-    HTTP/1.1 403
-
-    {
-    "message": "권한이 없는 접근입니다."
-    }
-  ```
 
 ### 사용자 예약 페이지 접근
 - http method: GET
@@ -72,37 +40,50 @@
 - uri: /member/reservation
 - file path: templates/reservation-mine.html
 
+### 권한 없는 페이지 접근 시도
+- 회원이 아닌 사용자: 로그인 페이지, 회원가입 페이지 접근 가능
+- 일반 회원: 어드민 권한 페이지 외 접근 가능
+- 어드민: 모든 페이지 접근 가능
+- 사용자는 권한 없음
+  ```
+    HTTP/1.1 403
+
+    {
+    "message": "권한이 없는 접근입니다."
+    }
+  ```
 
 ### 모든 예약 조회
 - http method: GET
 - uri: /reservations
-- response
-  ```
-  HTTP/1.1 200 
-  Content-Type: application/json
+  - response
+    ```
+    HTTP/1.1 200 
+    Content-Type: application/json
   
-  [
-      {
-          "id": 1,
-          "date": "2023-01-01",
-          "time": {
-            "id": 1.
-            "startAt": "10:00"
-          },
-          "theme": {
+    [
+        {
             "id": 1,
-            "name": "레벨2 탈출",
-            "description": "우테코 레벨2를 탈출하는 내용입니다.",
-            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-          },
-          "member": {
-            "id": 1,
-            "name": "lini",
-            "email": "lini@email.com"
-          }
-      }
-  ]
-  ```
+            "date": "2023-01-01",
+            "time": {
+              "id": 1.
+              "startAt": "10:00"
+            },
+            "theme": {
+              "id": 1,
+              "name": "레벨2 탈출",
+              "description": "우테코 레벨2를 탈출하는 내용입니다.",
+              "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+            },
+            "member": {
+              "id": 1,
+              "name": "lini",
+              "email": "lini@email.com",
+              "role": "GUEST"
+            }
+        }
+    ]
+    ```
 
 ### 조건별 예약 조회 - 어드민
 - http method: GET
@@ -133,7 +114,8 @@
           "member": {
             "id": 1,
             "name": "lini",
-            "email": "lini@email.com"
+            "email": "lini@email.com",
+            "role": "GUEST"
           }
       }
   ]
@@ -181,10 +163,11 @@
     {
         "id": 1,
         "date": "2023-08-05",
+        "status": "예약",
         "time" : {
             "id": 1.
             "startAt": "10:00"
-        }
+        },
         "theme": {
             "id": 1,
             "name": "레벨2 탈출",

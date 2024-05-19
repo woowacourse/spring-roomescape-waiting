@@ -12,14 +12,16 @@ public record ReservationResponse(
         String name,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul") LocalDate date,
         ReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        String status
 ) {
     public ReservationResponse(Reservation reservation) {
         this(reservation.getId(),
                 reservation.getMember().getMemberName().getValue(),
                 reservation.getDate(),
                 new ReservationTimeResponse(reservation.getReservationTime()),
-                new ThemeResponse(reservation.getTheme())
+                new ThemeResponse(reservation.getTheme()),
+                reservation.getStatus().getDescription()
         );
     }
 }
