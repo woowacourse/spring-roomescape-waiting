@@ -26,7 +26,7 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
+    public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
         LocalTime startAt = reservationTimeRequest.startAt();
         if (existsByStartAt(startAt)) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_TIME,

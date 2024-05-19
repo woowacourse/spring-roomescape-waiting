@@ -30,8 +30,23 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse create(LoginMember member, ReservationRequest reservationRequest) {
-        Reservation reservation = reservationFactory.create(member.id(), reservationRequest);
+    public ReservationResponse saveByClient(LoginMember loginMember, ReservationRequest reservationRequest) {
+        Reservation reservation = reservationFactory.create(
+                loginMember.id(),
+                reservationRequest.date(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId()
+        );
+        return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    public ReservationResponse saveByAdmin(AdminReservationRequest adminReservationRequest) {
+        Reservation reservation = reservationFactory.create(
+                adminReservationRequest.memberId(),
+                adminReservationRequest.date(),
+                adminReservationRequest.timeId(),
+                adminReservationRequest.themeId()
+        );
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
@@ -69,14 +84,5 @@ public class ReservationService {
                 .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
                         reservation.getDate(), reservation.getTime().getStartAt(), BOOKED))
                 .toList();
-    }
-
-    public ReservationResponse saveByAdmin(AdminReservationRequest adminReservationRequest) {
-        Reservation reservation = reservationFactory.create(
-                adminReservationRequest.memberId(),
-                new ReservationRequest(adminReservationRequest.date(), adminReservationRequest.timeId(),
-                        adminReservationRequest.themeId())
-        );
-        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 }

@@ -21,7 +21,7 @@ public class ThemeService {
         this.popularThemeFinder = popularThemeFinder;
     }
 
-    public ThemeResponse create(ThemeRequest themeRequest) {
+    public ThemeResponse save(ThemeRequest themeRequest) {
         Theme savedTheme = themeRepository.save(themeRequest.toTheme());
         return ThemeResponse.from(savedTheme);
     }

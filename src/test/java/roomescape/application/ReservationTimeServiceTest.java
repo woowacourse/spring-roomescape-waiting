@@ -25,7 +25,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.findAll().get(0);
         ReservationTimeRequest request = new ReservationTimeRequest(reservationTime.getStartAt());
 
-        assertThatCode(() -> reservationTimeService.create(request))
+        assertThatCode(() -> reservationTimeService.save(request))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.DUPLICATED_TIME);

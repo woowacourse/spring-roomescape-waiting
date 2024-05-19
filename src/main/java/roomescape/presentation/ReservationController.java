@@ -34,7 +34,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> saveReservation(
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.create(loginMember, reservationRequest);
+        ReservationResponse response = reservationService.saveByClient(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
@@ -42,7 +42,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> saveWaiting(
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.create(loginMember, reservationRequest);
+        ReservationResponse response = reservationService.saveByClient(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 

@@ -1,8 +1,8 @@
 package roomescape.domain.reservation;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.dto.ReservationRequest;
 import roomescape.domain.DomainService;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -19,10 +19,13 @@ public class ReservationFactory {
     private final MemberRepository memberRepository;
     private final Clock clock;
 
-    public ReservationFactory(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository, MemberRepository memberRepository,
-                              Clock clock) {
+    public ReservationFactory(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository,
+            Clock clock
+    ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -30,17 +33,17 @@ public class ReservationFactory {
         this.clock = clock;
     }
 
-    public Reservation create(long memberId, ReservationRequest reservationRequest) {
+    public Reservation create(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
+        Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_THEME));
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationRequest.timeId())
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
-        LocalDateTime dateTime = LocalDateTime.of(reservationRequest.date(), reservationTime.getStartAt());
+        LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
-        validateUniqueReservation(reservationRequest);
-        return reservationRequest.toReservation(member, reservationTime, theme);
+        validateUniqueReservation(date, timeId, themeId);
+        return new Reservation(member, date, reservationTime, theme);
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDateTime dateTime) {
@@ -50,10 +53,8 @@ public class ReservationFactory {
         }
     }
 
-    private void validateUniqueReservation(ReservationRequest reservationRequest) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())
-        ) {
+    private void validateUniqueReservation(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");
         }
     }
