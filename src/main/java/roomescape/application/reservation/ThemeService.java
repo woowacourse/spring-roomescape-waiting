@@ -13,6 +13,10 @@ import roomescape.domain.reservation.ThemeRepository;
 
 @Service
 public class ThemeService {
+    private static final int SEVEN_DAYS = 7;
+    private static final int ONE_DAY = 1;
+    private static final int TEN_COUNT = 10;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final Clock clock;
@@ -48,9 +52,9 @@ public class ThemeService {
     public List<ThemeResponse> findPopularThemes() {
         LocalDate today = LocalDate.now(clock);
         return themeRepository.findPopularThemesDateBetween(
-                        today.minusDays(7),
-                        today.minusDays(1),
-                        10)
+                        today.minusDays(SEVEN_DAYS),
+                        today.minusDays(ONE_DAY),
+                        TEN_COUNT)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
