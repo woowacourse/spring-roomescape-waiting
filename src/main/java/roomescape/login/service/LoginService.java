@@ -1,5 +1,7 @@
 package roomescape.login.service;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
@@ -12,6 +14,7 @@ import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -27,7 +30,6 @@ public class LoginService {
     public LoginService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
-    // email, password 보고 존재하는 회원인지 확인, 존재하는 회원이면 토큰 발급해주는 기능
 
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
         Member member = memberRepository.findByEmail(new Email(loginRequest.email()))
@@ -55,7 +57,35 @@ public class LoginService {
                 .compact();
     }
 
-    // 토큰을 보고 회원 정보로 변환해서 반환해주는 기능 -> MemberRequest로 반환해서 컨트롤러가 이를 받고, MemberService에게 전달해주는 방식?
+    public MemberRequest getMemberRequestByToken(String token) throws AuthenticationException {
+        Member member = parseTokenToMember(token);
 
+        return new MemberRequest(member);
+    }
 
+    private Member parseTokenToMember(String token) throws AuthenticationException {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return new Member(
+                    Long.valueOf(claims.getSubject()),
+                    (String) claims.get("name"),
+                    (String) claims.get("email"),
+                    (String) claims.get("role"),
+                    (String) claims.get("password")
+            );
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new AuthenticationException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    public boolean isAdminToken(String token) throws AuthenticationException {
+        Member member = parseTokenToMember(token);
+
+        return member.isAdmin();
+    }
 }

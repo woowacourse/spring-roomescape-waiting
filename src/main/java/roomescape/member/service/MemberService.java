@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
-import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -20,8 +19,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
-    @Value("${security.jwt.token.expire-length}")
-    private long validityInMilliseconds;
 
     public MemberService(MemberRepository MemberRepository) {
         this.memberRepository = MemberRepository;
@@ -37,12 +34,6 @@ public class MemberService {
     public MemberNameResponse getMemberNameResponseByToken(String token) throws AuthenticationException {
         Member member = parseTokenToMember(token);
         return new MemberNameResponse(member);
-    }
-
-    public boolean isAdminToken(String token) throws AuthenticationException {
-        Member member = parseTokenToMember(token);
-
-        return member.isAdmin();
     }
 
     private Member parseTokenToMember(String token) throws AuthenticationException {
@@ -63,11 +54,5 @@ public class MemberService {
         } catch (JwtException | IllegalArgumentException e) {
             throw new AuthenticationException("유효하지 않은 토큰입니다.");
         }
-    }
-
-    public MemberRequest getMemberRequestByToken(String token) throws AuthenticationException {
-        Member member = parseTokenToMember(token);
-
-        return new MemberRequest(member);
     }
 }
