@@ -28,10 +28,6 @@ public class CollectionThemeRepository implements ThemeRepository {
         this.reservationRepository = reservationRepository;
     }
 
-    public CollectionThemeRepository(CollectionReservationRepository reservationRepository) {
-        this(new ArrayList<>(), new AtomicLong(0), reservationRepository);
-    }
-
     @Override
     public List<Theme> findAll() {
         return new ArrayList<>(themes);
