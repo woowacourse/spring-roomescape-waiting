@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import static java.time.Month.FEBRUARY;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,7 +15,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.policy.FixedDateWeeklyRankingPolicy;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -58,7 +55,7 @@ class ThemeServiceTest {
         creatReservation(1, savedReservationTime, savedTheme3);
 
         // when
-        List<ThemeResponse> popularTheme = themeService.findAllPopularTheme(new FixedDateWeeklyRankingPolicy());
+        List<ThemeResponse> popularTheme = themeService.findAllPopularTheme();
 
         // then
         Assertions.assertThat(popularTheme)
@@ -98,7 +95,7 @@ class ThemeServiceTest {
         creatReservation(1, savedReservationTime, savedTheme11);
 
         // when
-        List<ThemeResponse> popularTheme = themeService.findAllPopularTheme(new FixedDateWeeklyRankingPolicy());
+        List<ThemeResponse> popularTheme = themeService.findAllPopularTheme();
 
         // then
         Assertions.assertThat(popularTheme)
@@ -108,6 +105,6 @@ class ThemeServiceTest {
     private void creatReservation(int day, ReservationTime reservationTime, Theme theme) {
         Member savedMember = memberRepository.save(new Member("a", "b", "C"));
         reservationRepository.save(
-                new Reservation(LocalDate.of(2023, FEBRUARY, day), reservationTime, theme, savedMember));
+                new Reservation(LocalDate.now().minusDays(day), reservationTime, theme, savedMember));
     }
 }
