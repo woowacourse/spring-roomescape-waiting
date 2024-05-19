@@ -2,9 +2,8 @@ package roomescape.domain;
 
 import static roomescape.exception.ExceptionType.EMPTY_DESCRIPTION;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
-import static roomescape.exception.ExceptionType.EMPTY_THUMBNAIL;
-import static roomescape.exception.ExceptionType.NOT_URL_BASE_THUMBNAIL;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +20,8 @@ public class Theme {
     private Long id;
     private String name;
     private String description;
-    private String thumbnail;
+    @Embedded
+    private Thumbnail thumbnail;
     @OneToMany(mappedBy = "theme")
     private List<Reservation> reservations;
 
@@ -29,17 +29,16 @@ public class Theme {
     }
 
     public Theme(long id, Theme theme) {
-        this(id, theme.name, theme.description, theme.thumbnail);
+        this(id, theme.name, theme.description, theme.getThumbnail());
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
-        validateThumbnail(thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
-        this.thumbnail = thumbnail;
+        this.thumbnail = new Thumbnail(thumbnail);
     }
 
     private void validateName(String name) {
@@ -54,14 +53,8 @@ public class Theme {
         }
     }
 
-    private void validateThumbnail(String thumbnail) {
-        if (thumbnail == null || thumbnail.isBlank()) {
-            throw new RoomescapeException(EMPTY_THUMBNAIL);
-        }
-
-        if (!thumbnail.startsWith("http://") && !thumbnail.startsWith("https://")) {
-            throw new RoomescapeException(NOT_URL_BASE_THUMBNAIL);
-        }
+    public String getThumbnail() {
+        return thumbnail.getUrl();
     }
 
     public Theme(String name, String description, String thumbnail) {
@@ -86,10 +79,6 @@ public class Theme {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
     }
 
     @Override
