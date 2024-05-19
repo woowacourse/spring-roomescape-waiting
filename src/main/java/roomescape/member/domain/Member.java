@@ -8,6 +8,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.regex.Pattern;
+import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.role.MemberRole;
 import roomescape.name.domain.Name;
 
@@ -15,6 +18,7 @@ import roomescape.name.domain.Name;
 public class Member {
 
     private static final String DEFAULT_NAME = "어드민";
+    private static final Pattern EMAIL_FORM = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,8 +27,8 @@ public class Member {
     @Embedded
     private Name name;
 
-    @Embedded
-    private Email email;
+    @Column(nullable = false)
+    private String email;
 
     @Embedded
     private Password password;
@@ -36,30 +40,33 @@ public class Member {
     public Member() {
     }
 
-    private Member(long id, String name, Email email, Password password, MemberRole role) {
+    public Member(long id, Name name, String email, Password password, MemberRole role) {
+        validateEmailFormat(email);
+
         this.id = id;
-        this.name = new Name(name);
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    private Member(String name, Email email, Password password, MemberRole role) {
-        this(0, name, email, password, role);
-    }
-
-    public static Member saveMemberFrom(long id) {
-        return new Member(id, DEFAULT_NAME, Email.saveEmailFrom(), Password.savePasswordFrom(),
-                MemberRole.MEMBER);
+    private Member(String name, String email, Password password, MemberRole role) {
+        this(0, new Name(name), email, password, role);
     }
 
     public static Member memberOf(long id, String name, String email, String password, String role) {
-        return new Member(id, name, Email.emailFrom(email), Password.passwordFrom(password),
+        return new Member(id, new Name(name), email, Password.passwordFrom(password),
                 MemberRole.findMemberRole(role));
     }
 
     public static Member saveMemberOf(String email, String password) {
-        return new Member(DEFAULT_NAME, Email.emailFrom(email), Password.passwordFrom(password), MemberRole.MEMBER);
+        return new Member(DEFAULT_NAME, email, Password.passwordFrom(password), MemberRole.MEMBER);
+    }
+
+    private static void validateEmailFormat(String email) {
+        if (!EMAIL_FORM.matcher(email).matches()) {
+            throw new RoomEscapeException(MemberExceptionCode.ILLEGAL_EMAIL_FORM_EXCEPTION);
+        }
     }
 
     public long getId() {
@@ -71,7 +78,7 @@ public class Member {
     }
 
     public String getEmail() {
-        return email.getEmail();
+        return email;
     }
 
     public String getPassword() {
