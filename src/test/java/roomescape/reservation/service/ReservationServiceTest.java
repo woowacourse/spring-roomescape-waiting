@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @DisplayName("특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
     @Test
     void should_return_response_when_my_reservations_requested_all() {
-        when(reservationRepository.findAllByMember_Id(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
+        when(reservationRepository.findAllByMemberId(1L)).thenReturn(List.of(SAVED_RESERVATION_1));
 
         assertThat(reservationService.findAllByMemberWithStatus(1L))
                 .containsExactly(new MemberReservationStatusResponse(SAVED_RESERVATION_1));
@@ -114,7 +114,7 @@ class ReservationServiceTest {
     @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 미리 존재하는 경우 예외가 발생한다")
     @Test
     void should_throw_exception_when_reserve_date_and_time_and_theme_duplicated() {
-        when(reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(TOMORROW, 1L, 1L)).thenReturn(true);
+        when(reservationRepository.existsByDateValueAndTimeIdAndThemeId(TOMORROW, 1L, 1L)).thenReturn(true);
 
         assertThatThrownBy(
                 () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1, RESERVATION_REQUEST_1))

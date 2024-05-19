@@ -44,14 +44,14 @@ public class ReservationService {
 
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
-        return reservationRepository.findByMember_IdAndTheme_IdAndDateValueBetween(memberId, themeId,
+        return reservationRepository.findByMemberIdAndThemeIdAndDateValueBetween(memberId, themeId,
                         dateFrom, dateTo).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
     public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findAllByMember_Id(memberId)
+        return reservationRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(MemberReservationStatusResponse::new)
                 .toList();
@@ -65,7 +65,7 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        if (reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(request.date(), request.timeId(),
+        if (reservationRepository.existsByDateValueAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId())) {
             throw new DuplicateSaveException("중복되는 예약이 존재합니다");
         }

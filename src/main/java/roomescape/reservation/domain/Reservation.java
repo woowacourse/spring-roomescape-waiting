@@ -74,18 +74,6 @@ public class Reservation {
         return id;
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public Member getMember() {
         return member;
     }
