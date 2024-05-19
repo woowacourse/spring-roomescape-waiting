@@ -7,7 +7,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
-import roomescape.domain.WaitingRank;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,12 +25,12 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         final List<Reservation> expected = List.of(
-                new Reservation(1L, null, null, null, null, WaitingRank.createFirst()),
-                new Reservation(2L, null, null, null, null, WaitingRank.createFirst()),
-                new Reservation(3L, null, null, null, null, WaitingRank.createFirst()),
-                new Reservation(4L, null, null, null, null, WaitingRank.createFirst()),
-                new Reservation(5L, null, null, null, null, WaitingRank.createFirst()),
-                new Reservation(6L, null, null, null, null, WaitingRank.createFirst())
+                new Reservation(1L, null, null, null, null),
+                new Reservation(2L, null, null, null, null),
+                new Reservation(3L, null, null, null, null),
+                new Reservation(4L, null, null, null, null),
+                new Reservation(5L, null, null, null, null),
+                new Reservation(6L, null, null, null, null)
         );
 
         assertThat(reservationRepository.findAll()).isEqualTo(expected);
@@ -88,7 +87,7 @@ class ReservationRepositoryTest {
         final LocalDate now = LocalDate.now();
         final ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L,
                 now.minusDays(7), now.minusDays(1));
-        final List<Reservation> expected = List.of(new Reservation(1L, null, null, null, null, WaitingRank.createFirst()));
+        final List<Reservation> expected = List.of(new Reservation(1L, null, null, null, null));
         //when
         final List<Reservation> reservations = reservationRepository.findReservationsByCondition(condition.dateFrom(), condition.dateTo(),
                 condition.themeId(), condition.memberId());

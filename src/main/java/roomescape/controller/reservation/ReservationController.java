@@ -44,7 +44,8 @@ public class ReservationController {
     public List<MyReservationResponse> getMineReservation(final LoginMember member) {
         final List<Reservation> reservations = reservationService.getReservationsByMember(member);
         return reservations.stream()
-                .map(MyReservationResponse::from)
+                .map(reservation ->
+                        MyReservationResponse.of(reservation, reservationService.indexOfReservation(reservation)))
                 .toList();
     }
 

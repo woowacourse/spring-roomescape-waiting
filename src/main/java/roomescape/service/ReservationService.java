@@ -8,7 +8,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.WaitingRank;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -56,11 +55,12 @@ public class ReservationService {
         final ReservationTime time = reservationTimeRepository.fetchById(request.timeId());
         final Theme theme = themeRepository.fetchById(request.themeId());
         final Member member = memberRepository.fetchById(request.memberId());
-        final long count = reservationRepository.countByThemeIdAndTimeIdAndDate(theme.getId(),
-                time.getId(), request.date());
-        final WaitingRank rank = new WaitingRank(count);
+        //TODO count 없어도 될듯
+//        final long count = reservationRepository.countByThemeIdAndTimeIdAndDate(theme.getId(),
+//                time.getId(), request.date());
+//        final WaitingRank rank = new WaitingRank(count);
 
-        final Reservation reservation = new Reservation(null, member, request.date(), time, theme, rank);
+        final Reservation reservation = new Reservation(null, member, request.date(), time, theme);
 
         final LocalDateTime reservationDateTime = reservation.getDate().atTime(time.getStartAt());
         validateBeforeDay(reservationDateTime);
@@ -71,6 +71,13 @@ public class ReservationService {
     public void deleteReservation(final long id) {
         final Reservation fetchReservation = reservationRepository.fetchById(id);
         reservationRepository.deleteById(fetchReservation.getId());
+    }
+
+    public int indexOfReservation(final Reservation reservation) {
+        //TODO 최적화 하기
+        final List<Reservation> reservations = reservationRepository.findAllByThemeIdAndTimeIdAndDate(
+                reservation.getTheme().getId(), reservation.getTime().getId(), reservation.getDate());
+        return reservations.indexOf(reservation);
     }
 
     private void validateBeforeDay(final LocalDateTime reservationDateTime) {

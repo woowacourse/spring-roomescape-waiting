@@ -13,6 +13,16 @@ public record MyReservationResponse(
         LocalTime time,
         String status) {
 
+    public static MyReservationResponse of(final Reservation reservation, final long count) {
+        return new MyReservationResponse(
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                Status.getStatusValue(count)
+        );
+    }
+
     public static MyReservationResponse from(final Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
