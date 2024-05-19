@@ -56,11 +56,10 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme other)) {
             return false;
         }
-        Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return Objects.equals(id, other.getId());
     }
 
     @Override

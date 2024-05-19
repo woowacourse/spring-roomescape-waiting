@@ -62,10 +62,10 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation that)) {
+        if (!(o instanceof Reservation other)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+        return Objects.equals(id, other.getId());
     }
 
     @Override

@@ -36,10 +36,10 @@ public class ReservationTime {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReservationTime that)) {
+        if (!(o instanceof ReservationTime other)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+        return Objects.equals(id, other.getId());
     }
 
     @Override

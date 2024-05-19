@@ -37,10 +37,10 @@ public class PlayerName {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PlayerName playerName)) {
+        if (!(o instanceof PlayerName other)) {
             return false;
         }
-        return Objects.equals(this.name, playerName.name);
+        return Objects.equals(name, other.getName());
     }
 
     @Override

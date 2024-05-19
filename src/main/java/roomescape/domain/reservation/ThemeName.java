@@ -37,11 +37,10 @@ public class ThemeName {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ThemeName other)) {
             return false;
         }
-        ThemeName themeName = (ThemeName) o;
-        return name.equals(themeName.name);
+        return Objects.equals(name, other.getName());
     }
 
     @Override
