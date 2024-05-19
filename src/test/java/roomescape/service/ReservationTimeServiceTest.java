@@ -15,6 +15,7 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.support.fixture.ReservationTimeFixture;
 
 class ReservationTimeServiceTest extends BaseServiceTest {
 
@@ -27,7 +28,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("모든 예약 시간들을 조회한다.")
     void getAllReservationTimes() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 30));
+        ReservationTime reservationTime = ReservationTimeFixture.startAt("10:30");
         reservationTimeRepository.save(reservationTime);
 
         List<ReservationTimeResponse> responses = reservationTimeService.getAllReservationTimes();
@@ -50,7 +51,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("id로 예약 시간을 삭제한다.")
     void deleteReservationTimeById() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 30));
+        ReservationTime reservationTime = ReservationTimeFixture.startAt("10:30");
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         reservationTimeService.deleteReservationTimeById(savedReservationTime.getId());

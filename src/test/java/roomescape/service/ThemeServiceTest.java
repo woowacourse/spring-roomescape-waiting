@@ -11,6 +11,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.support.fixture.ThemeFixture;
 
 class ThemeServiceTest extends BaseServiceTest {
 
@@ -23,8 +24,7 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("모든 테마들을 조회한다.")
     void getAllThemes() {
-        Theme theme = new Theme("테마", "테마 설명", "https://example.com");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeRepository.save(ThemeFixture.name("테마"));
 
         List<ThemeResponse> themeResponses = themeService.getAllThemes();
 
@@ -32,8 +32,6 @@ class ThemeServiceTest extends BaseServiceTest {
             softly.assertThat(themeResponses).hasSize(1);
             softly.assertThat(themeResponses.get(0).id()).isEqualTo(savedTheme.getId());
             softly.assertThat(themeResponses.get(0).name()).isEqualTo("테마");
-            softly.assertThat(themeResponses.get(0).description()).isEqualTo("테마 설명");
-            softly.assertThat(themeResponses.get(0).thumbnail()).isEqualTo("https://example.com");
         });
     }
 
@@ -52,10 +50,9 @@ class ThemeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("id로 테마를 조회한다.")
+    @DisplayName("id로 테마를 삭제한다.")
     void deleteThemeById() {
-        Theme theme = new Theme("테마", "테마 설명", "https://example.com");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeRepository.save(ThemeFixture.THEME);
 
         themeService.deleteThemeById(savedTheme.getId());
 

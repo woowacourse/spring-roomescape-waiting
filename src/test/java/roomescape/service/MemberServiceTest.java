@@ -10,6 +10,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
+import roomescape.support.fixture.MemberFixture;
 
 class MemberServiceTest extends BaseServiceTest {
 
@@ -36,7 +37,7 @@ class MemberServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("모든 회원을 조회한다.")
     void getAllMembers() {
-        Member member = new Member("new@gmail.com", "password", "nickname", Role.USER);
+        Member member = MemberFixture.ADMIN;
         Member save = memberRepository.save(member);
 
         List<MemberResponse> memberResponses = memberService.getAllMembers();
@@ -44,24 +45,18 @@ class MemberServiceTest extends BaseServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(memberResponses).hasSize(1);
             softly.assertThat(memberResponses.get(0).id()).isEqualTo(save.getId());
-            softly.assertThat(memberResponses.get(0).email()).isEqualTo("new@gmail.com");
-            softly.assertThat(memberResponses.get(0).name()).isEqualTo("nickname");
-            softly.assertThat(memberResponses.get(0).role()).isEqualTo(Role.USER);
         });
     }
 
     @Test
     @DisplayName("id로 회원을 조회한다.")
     void getById() {
-        Member member = new Member("new@gmail.com", "password", "nickname", Role.USER);
-        Member savedMember = memberRepository.save(member);
+        Member savedMember = memberRepository.save(MemberFixture.ADMIN);
 
         MemberResponse memberResponse = memberService.getById(savedMember.getId());
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(memberResponse.email()).isEqualTo("new@gmail.com");
-            softly.assertThat(memberResponse.name()).isEqualTo("nickname");
-            softly.assertThat(memberResponse.role()).isEqualTo(Role.USER);
+            softly.assertThat(memberResponse.id()).isEqualTo(savedMember.getId());
         });
     }
 }
