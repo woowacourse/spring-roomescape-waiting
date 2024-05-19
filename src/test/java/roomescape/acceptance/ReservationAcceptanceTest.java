@@ -78,17 +78,22 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         );
     }
 
-    /*@TestFactory
-    @DisplayName("이미 예약된 테마와 시간을 예약을 하면, 예외가 발생한다")
+    @TestFactory
+    @DisplayName("이미 다른 사람이 예약한 테마와 시간을 예약을 하면, 예외 대기로 등록한다")
     Stream<DynamicTest> duplicateReservationTest() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         return Stream.of(
                 dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
-                dynamicTest("동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 400)),
-                dynamicTest("다른 테마를 예약한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 2L, 201))
+                dynamicTest("내가 등록한 예약과 동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 409)),
+                dynamicTest("다른 사람이 등록한 예약과 동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, "2099-04-29", 1L, 1L, 201)),
+                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
+                dynamicTest("예약 대기를 조회한다 (총 1개)", () -> getWaitings(adminToken, 200, 1)),
+                dynamicTest("예약을 삭제한다", () -> ReservationCRD.deleteReservation(1L, 204)),
+                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
+                dynamicTest("예약 대기를 조회한다 (총 0개)", () -> getWaitings(adminToken, 200, 0))
         );
-    }*/
+    }
 
     @TestFactory
     @DisplayName("예약을 추가하고 삭제한다")
@@ -124,6 +129,20 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(expectedHttpCode)
+                .extract().response();
+
+        List<?> reservationResponses = response.as(List.class);
+
+        assertThat(reservationResponses).hasSize(expectedReservationResponsesSize);
+    }
+
+    private void getWaitings(String token, int expectedHttpCode, int expectedReservationResponsesSize) {
+        Response response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(expectedHttpCode)
                 .extract().response();
