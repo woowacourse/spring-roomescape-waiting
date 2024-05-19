@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.dto.request.ThemeRequest;
+import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.application.dto.request.ThemeRequest;
-import roomescape.application.dto.response.ThemeResponse;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -24,6 +24,19 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
+    public ThemeResponse addTheme(ThemeRequest themeRequest) {
+        Theme theme = themeRequest.toTheme();
+
+        if (themeRepository.existsByName(theme.getName())) {
+            throw new BadRequestException("이미 존재하는 테마 이름입니다.");
+        }
+
+        Theme savedTheme = themeRepository.save(theme);
+
+        return ThemeResponse.from(savedTheme);
+    }
+
     public List<ThemeResponse> getAllThemes() {
         List<Theme> themes = themeRepository.findAll();
 
@@ -32,17 +45,12 @@ public class ThemeService {
                 .toList();
     }
 
-    @Transactional
-    public ThemeResponse addTheme(ThemeRequest themeRequest) {
-        Theme theme = themeRequest.toTheme();
+    public List<ThemeResponse> getPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
+        List<Theme> themes = themeRepository.findPopularThemes(startDate, endDate, limit);
 
-        if (themeRepository.existsByName(theme.getName())) {
-            throw new BadRequestException("해당 이름의 테마는 이미 존재합니다.");
-        }
-
-        Theme savedTheme = themeRepository.save(theme);
-
-        return ThemeResponse.from(savedTheme);
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @Transactional
@@ -56,13 +64,5 @@ public class ThemeService {
         }
 
         themeRepository.deleteById(id);
-    }
-
-    public List<ThemeResponse> getPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
-        List<Theme> themes = themeRepository.findPopularThemes(startDate, endDate, limit);
-
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 }
