@@ -1,0 +1,54 @@
+### 회원 가입 API
+POST http://localhost:8080/members/signup
+Content-Type: application/json
+
+
+{
+  "email": "1234@1234.com",
+  "password": "1234",
+  "name": "재즈재즈"
+}
+
+### 로그인 API (멤버)
+POST http://localhost:8080/members/login
+Content-Type: application/json
+host: localhost:8080
+
+{
+  "email": "t1@t1.com",
+  "password": "t1"
+}
+
+### 로그인 API (어드민)
+POST http://localhost:8080/members/login
+Content-Type: application/json
+host: localhost:8080
+
+{
+  "email": "tt@tt.com",
+  "password": "tt"
+}
+
+### 인증 정보 조회 API (멤버 토큰)
+GET http://localhost:8080/members/login/check
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDAxIiwibmFtZSI6IuyerOymiCIsInJvbGUiOiJNRU1CRVIifQ.rPCGV4wukOyeBy59Ks_VlanyyUStDDjj6gs89sLzE_FeAcXYqD2iuNWFWSaETFb7S58w6bD7njhQpzJhwOydJw;
+host: localhost:8080
+
+### 인증 정보 조회 API (어드민 토큰)
+GET http://localhost:8080/members/login/check
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDA4IiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.QBXPFjmHn0iteRzHlr0Pml3EJLOOW8QKYcT8FY9sTszJluHU0hC3frCUNIEc5A5h0hmJFZD1e4j2y3aj5u8uDg;
+host: localhost:8080
+
+### 로그아웃 API (멤버 토큰)
+POST http://localhost:8080/members/logout
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDAxIiwibmFtZSI6IuyerOymiCIsInJvbGUiOiJNRU1CRVIifQ.rPCGV4wukOyeBy59Ks_VlanyyUStDDjj6gs89sLzE_FeAcXYqD2iuNWFWSaETFb7S58w6bD7njhQpzJhwOydJw;
+
+### 로그아웃 API (어드민 토큰)
+POST http://localhost:8080/members/logout
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDA4IiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.QBXPFjmHn0iteRzHlr0Pml3EJLOOW8QKYcT8FY9sTszJluHU0hC3frCUNIEc5A5h0hmJFZD1e4j2y3aj5u8uDg;
+host: localhost:8080
+
+### 유저 이름 목록 반환 API (어드민 토큰)
+GET http://localhost:8080/admin/members
+cookie: token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDA4IiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.QBXPFjmHn0iteRzHlr0Pml3EJLOOW8QKYcT8FY9sTszJluHU0hC3frCUNIEc5A5h0hmJFZD1e4j2y3aj5u8uDg;
+host: localhost:8080
