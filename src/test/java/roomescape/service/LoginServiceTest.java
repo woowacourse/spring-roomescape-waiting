@@ -47,15 +47,15 @@ class LoginServiceTest {
         void createTokenTest() {
             //when
             String createdToken = loginService.getLoginToken(new LoginRequest(
-                    defaultUser.getEmail(),
-                    defaultUser.getPassword()
+                    defaultUser.getEmail().getValue(),
+                    defaultUser.getPassword().getValue()
             ));
 
             //then
             Claims payload = JWT_GENERATOR.getClaims(createdToken);
             assertAll(
                     () -> assertThat(payload.get("id", Long.class)).isEqualTo(defaultUser.getId()),
-                    () -> assertThat(payload.get("name")).isEqualTo(defaultUser.getName())
+                    () -> assertThat(payload.get("name")).isEqualTo(defaultUser.getName().getValue())
             );
         }
 
@@ -63,8 +63,8 @@ class LoginServiceTest {
         @Test
         void notFoundEmailGetTokenTest() {
             assertThatThrownBy(() -> loginService.getLoginToken(new LoginRequest(
-                    defaultUser.getEmail() + "wrong",
-                    defaultUser.getPassword()
+                    "wrongEmail@email.com",
+                    defaultUser.getPassword().getValue()
             )))
                     .isInstanceOf(RoomescapeException.class)
                     .hasMessage(NOT_FOUND_MEMBER.getMessage());
@@ -74,7 +74,7 @@ class LoginServiceTest {
         @Test
         void illegalPasswordGetTokenTest() {
             assertThatThrownBy(() -> loginService.getLoginToken(new LoginRequest(
-                    defaultUser.getEmail(),
+                    defaultUser.getEmail().getValue(),
                     defaultUser.getPassword() + " wrong"
             )))
                     .isInstanceOf(RoomescapeException.class)
@@ -87,7 +87,7 @@ class LoginServiceTest {
             //given
             String token = JWT_GENERATOR.generateWith(Map.of(
                     "id", defaultUser.getId(),
-                    "name", defaultUser.getName(),
+                    "name", defaultUser.getName().getValue(),
                     "role", defaultUser.getRole().getTokenValue()
             ));
 

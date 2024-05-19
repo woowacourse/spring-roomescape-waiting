@@ -44,8 +44,8 @@ class LoginControllerTest {
     void loginTest() {
         RestAssured.given().log().all()
                 .when().body(Map.of(
-                        "email", defaultUser.getEmail(),
-                        "password", defaultUser.getPassword()
+                        "email", defaultUser.getEmail().getValue(),
+                        "password", defaultUser.getPassword().getValue()
                 ))
                 .contentType(ContentType.JSON)
                 .post("/login")
@@ -61,8 +61,8 @@ class LoginControllerTest {
                 .when()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
-                        "email", "wrongEmail",
-                        "password", defaultUser.getPassword()
+                        "email", "wrongEmail@email.com",
+                        "password", defaultUser.getPassword().getValue()
                 )).post("/login")
                 .then().log().all()
                 .statusCode(400)
@@ -76,7 +76,7 @@ class LoginControllerTest {
                 .when()
                 .contentType(ContentType.JSON
                 ).body(Map.of(
-                        "email", defaultUser.getEmail(),
+                        "email", defaultUser.getEmail().getValue(),
                         "password", "wrongPassword"
                 )).post("/login")
                 .then().log().all()
@@ -93,8 +93,8 @@ class LoginControllerTest {
         void getToken() {
             token = RestAssured.given().log().all()
                     .when().body(Map.of(
-                            "email", defaultUser.getEmail(),
-                            "password", defaultUser.getPassword()
+                            "email", defaultUser.getEmail().getValue(),
+                            "password", defaultUser.getPassword().getValue()
                     ))
                     .contentType(ContentType.JSON)
                     .post("/login")
@@ -112,7 +112,7 @@ class LoginControllerTest {
                     .get("/login/check")
                     .then().log().all()
                     .statusCode(200)
-                    .body("name", is(defaultUser.getName()));
+                    .body("name", is(defaultUser.getName().getValue()));
         }
     }
 }

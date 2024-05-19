@@ -1,6 +1,8 @@
 package roomescape.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,15 +15,18 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private String name;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
+    private Name name;
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Role role;
-    @Column(nullable = false)
-    private String email;
-    @Column(nullable = false)
-    private String password;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    private Email email;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+    private Password password;
 
     public Member() {
     }
@@ -30,11 +35,11 @@ public class Member {
         this(id, member.getName(), member.getRole(), member.email, member.password);
     }
 
-    public Member(Long id, String name, Role role, String email, String password) {
+    public Member(Long id, Name name, Role role, Email email, Password password) {
         this(new LoginMember(id, name, role), email, password);
     }
 
-    public Member(LoginMember loginMember, String email, String password) {
+    public Member(LoginMember loginMember, Email email, Password password) {
         this.id = loginMember.getId();
         this.name = loginMember.getName();
         this.role = loginMember.getRole();
@@ -54,15 +59,15 @@ public class Member {
         return id;
     }
 
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getPassword() {
+    public Password getPassword() {
         return password;
     }
 
@@ -72,7 +77,7 @@ public class Member {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", role=" + role +
-                ", email='" + email + '\'' +
+                ", email=" + email +
                 ", password='" + password + '\'' +
                 '}';
     }

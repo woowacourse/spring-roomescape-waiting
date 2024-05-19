@@ -8,6 +8,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Email;
 import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
@@ -27,15 +28,15 @@ public class LoginService {
     }
 
     public String getLoginToken(LoginRequest loginRequest) {
-        Member findMember = memberRepository.findByEmail(loginRequest.email())
+        Member findMember = memberRepository.findByEmail(new Email(loginRequest.email()))
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        if (!findMember.getPassword().equals(loginRequest.password())) {
+        if (!findMember.getPassword().getValue().equals(loginRequest.password())) {
             throw new RoomescapeException(WRONG_PASSWORD);
         }
 
         return jwtGenerator.generateWith(Map.of(
                 "id", findMember.getId(),
-                "name", findMember.getName(),
+                "name", findMember.getName().getValue(),
                 "role", findMember.getRole().getTokenValue()
         ));
     }

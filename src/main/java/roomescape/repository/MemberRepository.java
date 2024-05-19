@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.domain.Members;
 
@@ -25,7 +26,7 @@ public class MemberRepository {
         return memberDao.findById(id);
     }
 
-    public Optional<Member> findByEmail(String email) {
+    public Optional<Member> findByEmail(Email email) {
         return memberDao.findByEmail(email);
     }
 

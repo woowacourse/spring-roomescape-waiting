@@ -63,7 +63,7 @@ public class ReservationControllerTest {
         token = JWT_GENERATOR.generateWith(
                 Map.of(
                         "id", defaultMember.getId(),
-                        "name", defaultMember.getName(),
+                        "name", defaultMember.getName().getValue(),
                         "role", defaultMember.getRole().getTokenValue()
                 )
         );
@@ -160,7 +160,7 @@ public class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(11),
-                            "member.name", is(defaultMember.getName()),
+                            "member.name", is(defaultMember.getName().getValue()),
                             "date", is(reservationParam.get("date")),
                             "time.startAt", is(defaultTime.getStartAt().toString()),
                             "theme.name", is(defaultTheme1.getName()));

@@ -6,7 +6,7 @@ public record LoginMemberResponse(long id, String name) {
     public static LoginMemberResponse from(LoginMember loginMember) {
         return new LoginMemberResponse(
                 loginMember.getId(),
-                loginMember.getName()
+                loginMember.getName().getValue()
         );
     }
 }
