@@ -20,4 +20,4 @@ spring:
 
 jwt:
   secret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno
-  expired-period: 3600000
+  expired-period: 3600000 # 1000 * 60 * 60 = 1시간
