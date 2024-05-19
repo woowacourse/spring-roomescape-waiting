@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.view;
 
 import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
 
@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AdminPageControllerTest {
+class AdminControllerTest {
 
     @LocalServerPort
     private int port;

@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.reservation;
 
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.TIME;

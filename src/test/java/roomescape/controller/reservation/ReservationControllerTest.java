@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.reservation;
 
 import static roomescape.TestFixture.ADMIN_LOGIN_REQUEST;
 import static roomescape.TestFixture.ADMIN_ZEZE;
