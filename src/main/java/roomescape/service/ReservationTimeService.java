@@ -1,10 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeStatuses;
 import roomescape.exception.reservation.TimeDuplicatedException;
 import roomescape.exception.reservation.TimeUsingException;
 import roomescape.repository.ReservationRepository;
@@ -12,6 +13,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.time.AvailableTimeRequest;
+import roomescape.service.dto.time.AvailableTimeResponse;
 import roomescape.service.dto.time.AvailableTimeResponses;
 
 @Service
@@ -37,12 +39,20 @@ public class ReservationTimeService {
 
     @Transactional(readOnly = true)
     public AvailableTimeResponses findAvailableReservationTimes(AvailableTimeRequest request) {
+        LocalDate date = LocalDate.parse(request.getDate());
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-        List<ReservationTime> bookedTimes = reservationTimeRepository.findReservedTimeByDateAndTheme(
-                request.getDate(), request.getThemeId());
+        Set<ReservationTime> bookedTimes = reservationTimeRepository
+                .findReservedTimeByDateAndTheme(date, request.getThemeId());
 
-        ReservationTimeStatuses reservationStatuses = new ReservationTimeStatuses(allTimes, bookedTimes);
-        return new AvailableTimeResponses(reservationStatuses);
+        return new AvailableTimeResponses(allTimes.stream()
+                .map(time -> parseAvailableTime(time, bookedTimes))
+                .toList());
+    }
+
+    private AvailableTimeResponse parseAvailableTime(ReservationTime time, Set<ReservationTime> bookedTimes) {
+        return new AvailableTimeResponse(
+                new ReservationTimeResponse(time),
+                bookedTimes.contains(time));
     }
 
     public ReservationTimeResponse createReservationTime(ReservationTimeRequest request) {
