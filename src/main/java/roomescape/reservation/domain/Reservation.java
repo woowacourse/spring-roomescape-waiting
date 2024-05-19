@@ -2,11 +2,13 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Reservation {
@@ -68,6 +70,13 @@ public class Reservation {
 
     public boolean isSameMember(Reservation other) {
         return member.isSameMember(other.member);
+    }
+
+    public void validateIsBeforeNow() {
+        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        if (dateTime.isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("이미 지난 날짜는 예약할 수 없습니다.");
+        }
     }
 
     public Long getId() {

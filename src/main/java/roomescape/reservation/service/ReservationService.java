@@ -18,7 +18,6 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,8 +68,8 @@ public class ReservationService {
 
         Reservation reservation = request.toReservation(member, time, theme);
 
+        reservation.validateIsBeforeNow();
         validateDuplicated(reservation);
-        validateRequestedTime(reservation, time);
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
@@ -89,13 +88,6 @@ public class ReservationService {
             }
             throw new BadRequestException("이미 예약된 테마입니다.");
         });
-    }
-
-    private void validateRequestedTime(Reservation reservation, ReservationTime reservationTime) {
-        LocalDateTime requestedDateTime = LocalDateTime.of(reservation.getDate(), reservationTime.getStartAt());
-        if (requestedDateTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("이미 지난 날짜는 예약할 수 없습니다.");
-        }
     }
 
     public List<ReservationResponse> readReservations() {
