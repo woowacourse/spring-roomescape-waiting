@@ -2,8 +2,13 @@ package roomescape.member.domain;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import roomescape.Fixtures;
+import roomescape.exception.BadRequestException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("사용자")
 class MemberTest {
@@ -23,5 +28,18 @@ class MemberTest {
                 .isInstanceOf(IllegalArgumentException.class);
 
         softAssertions.assertAll();
+    }
+
+    @DisplayName("사용자는 잘못된 비밀번호가 들어오는 경우 예외가 발생한다.")
+    @Test
+    void validatePassword() {
+        // given
+        Member member = Fixtures.memberFixture;
+        String wrongPassword = "wrongPassword";
+
+        // when & then
+        assertThatThrownBy(() -> member.validatePassword(wrongPassword))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("잘못된 사용자 인증 정보입니다.");
     }
 }
