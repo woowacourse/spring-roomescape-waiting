@@ -1,94 +1,78 @@
 package roomescape.domain.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
+import roomescape.domain.exception.DomainNotFoundException;
 
 @DataJpaTest
 class MemberRepositoryTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("회원을 추가한다.")
-    void save() {
-        Member member = new Member("example@gmail.com", "password", "구름", Role.USER);
-        Member savedMember = memberRepository.save(member);
+    @DisplayName("이메일로 회원을 찾는다.")
+    void findByEmail() {
+        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(savedMember.getId()).isNotNull();
-            softly.assertThat(savedMember.getEmail()).isEqualTo("example@gmail.com");
-            softly.assertThat(savedMember.getPassword()).isEqualTo("password");
-            softly.assertThat(savedMember.getName()).isEqualTo("구름");
-            softly.assertThat(savedMember.getRole()).isEqualTo(Role.USER);
-        });
-    }
-
-    @Test
-    @DisplayName("모든 회원들을 조회한다.")
-    void findAll() {
-        jdbcTemplate.update("INSERT INTO member (email, password, name, role) "
-                + "VALUES ('example@gmail.com', 'password', '구름', 'USER')");
-
-        List<Member> members = memberRepository.findAll();
-        Member member = members.get(0);
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(members).hasSize(1);
-            softly.assertThat(member.getId()).isNotNull();
-            softly.assertThat(member.getEmail()).isEqualTo("example@gmail.com");
-            softly.assertThat(member.getPassword()).isEqualTo("password");
-            softly.assertThat(member.getName()).isEqualTo("구름");
-            softly.assertThat(member.getRole()).isEqualTo(Role.USER);
-        });
-    }
-
-    @Test
-    @DisplayName("회원을 조회한다.")
-    void findById() {
-        jdbcTemplate.update("INSERT INTO member (id, email, password, name, role) "
-                + "VALUES (1L, 'example@gmail.com', 'password', '구름', 'USER')");
-
-        Optional<Member> memberOptional = memberRepository.findById(1L);
+        Optional<Member> memberOptional = memberRepository.findByEmail("ex@gmail.com");
 
         assertThat(memberOptional).isPresent();
-        Member member = memberOptional.get();
+    }
+
+    @Test
+    @DisplayName("이메일로 회원이 존재하는지 확인한다.")
+    void existsByEmail() {
+        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
+
+        boolean exists = memberRepository.existsByEmail("ex@gmail.com");
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("아이디로 회원을 조회한다.")
+    void getById() {
+        Member savedMember = memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
+
+        Member member = memberRepository.getById(savedMember.getId());
+
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(member.getId()).isEqualTo(1L);
-            softly.assertThat(member.getEmail()).isEqualTo("example@gmail.com");
+            softly.assertThat(member.getId()).isNotNull();
+            softly.assertThat(member.getEmail()).isEqualTo("ex@gmail.com");
             softly.assertThat(member.getPassword()).isEqualTo("password");
             softly.assertThat(member.getName()).isEqualTo("구름");
             softly.assertThat(member.getRole()).isEqualTo(Role.USER);
         });
+    }
+
+    @Test
+    @DisplayName("아이디로 회원을 조회하고, 없을 경우 예외를 발생시킨다.")
+    void getByIdWhenNotExist() {
+        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
+
+        assertThatThrownBy(() -> memberRepository.getById(-1L))
+                .isInstanceOf(DomainNotFoundException.class)
+                .hasMessage("해당 id의 회원이 존재하지 않습니다.");
     }
 
     @Test
     @DisplayName("이메일로 회원을 조회한다.")
-    void findByEmail() {
-        jdbcTemplate.update("INSERT INTO member (email, password, name, role) "
-                + "VALUES ('example@gmail.com', 'password', '구름', 'USER')");
+    void getByEmail() {
+        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
 
-        Optional<Member> memberOptional = memberRepository.findByEmail("example@gmail.com");
+        Member member = memberRepository.getByEmail("ex@gmail.com");
 
-        assertThat(memberOptional).isPresent();
-        Member member = memberOptional.get();
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(member.getId()).isNotNull();
-            softly.assertThat(member.getEmail()).isEqualTo("example@gmail.com");
+            softly.assertThat(member.getEmail()).isEqualTo("ex@gmail.com");
             softly.assertThat(member.getPassword()).isEqualTo("password");
             softly.assertThat(member.getName()).isEqualTo("구름");
             softly.assertThat(member.getRole()).isEqualTo(Role.USER);
@@ -96,12 +80,12 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("이메일에 해당하는 회원이 존재하는지 확인한다.")
-    void existsByEmail() {
-        jdbcTemplate.update("INSERT INTO member (email, password, name, role) "
-                + "VALUES ('example@gmail.com', 'password', '구름', 'USER')");
+    @DisplayName("이메일로 회원을 조회하고, 없을 경우 예외를 발생시킨다.")
+    void getByEmailWhenNotExist() {
+        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
 
-        assertThat(memberRepository.existsByEmail("example@gmail.com")).isTrue();
-        assertThat(memberRepository.existsByEmail("nothing@gmail.com")).isFalse();
+        assertThatThrownBy(() -> memberRepository.getByEmail("not-exists"))
+                .isInstanceOf(DomainNotFoundException.class)
+                .hasMessage("해당 이메일의 회원이 존재하지 않습니다.");
     }
 }
