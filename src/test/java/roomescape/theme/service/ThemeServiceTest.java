@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,12 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.role.MemberRole;
-import roomescape.name.domain.Name;
+import roomescape.global.domain.Name;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {

@@ -1,4 +1,4 @@
-package roomescape.time.domain;
+package roomescape.reservationtime.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.time.exception.TimeExceptionCode;
+import roomescape.reservationtime.exception.TimeExceptionCode;
 
 @Entity
 public class ReservationTime {

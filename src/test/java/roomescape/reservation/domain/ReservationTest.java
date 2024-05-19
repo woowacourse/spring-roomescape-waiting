@@ -12,7 +12,7 @@ import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservationtime.domain.ReservationTime;
 
 class ReservationTest {
 

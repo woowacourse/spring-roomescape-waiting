@@ -1,4 +1,4 @@
-package roomescape.time.domain;
+package roomescape.reservationtime.domain;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.time.exception.TimeExceptionCode;
+import roomescape.reservationtime.exception.TimeExceptionCode;
 
 public class ReservationTimeTest {
 
@@ -18,8 +18,8 @@ public class ReservationTimeTest {
         ReservationTime time = new ReservationTime(1, LocalTime.of(9, 0));
 
         assertAll(
-                () -> assertEquals(time.getId(), 1),
-                () -> assertEquals(time.getStartAt(), LocalTime.of(9, 0))
+                () -> assertEquals(1, time.getId()),
+                () -> assertEquals(LocalTime.of(9, 0), time.getStartAt())
         );
     }
 

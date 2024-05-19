@@ -1,4 +1,4 @@
-package roomescape.time.service;
+package roomescape.reservationtime.service;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.dto.TimeRequest;
-import roomescape.time.dto.TimeResponse;
-import roomescape.time.exception.TimeExceptionCode;
-import roomescape.time.repository.TimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.dto.TimeRequest;
+import roomescape.reservationtime.dto.TimeResponse;
+import roomescape.reservationtime.exception.TimeExceptionCode;
+import roomescape.reservationtime.repository.TimeRepository;
 
 @Service
 public class TimeService {

@@ -1,4 +1,4 @@
-package roomescape.time.exception;
+package roomescape.reservationtime.exception;
 
 import org.springframework.http.HttpStatus;
 import roomescape.global.exception.model.ExceptionCode;

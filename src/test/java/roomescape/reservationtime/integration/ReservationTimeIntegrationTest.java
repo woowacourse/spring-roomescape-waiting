@@ -1,4 +1,4 @@
-package roomescape.time.integration;
+package roomescape.reservationtime.integration;
 
 import static org.hamcrest.Matchers.is;
 
@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.model.IntegrationTest;
-import roomescape.time.dto.TimeRequest;
+import roomescape.reservationtime.dto.TimeRequest;
 
 public class ReservationTimeIntegrationTest extends IntegrationTest {
 

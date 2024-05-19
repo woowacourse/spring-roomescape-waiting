@@ -19,9 +19,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.TimeExceptionCode;
-import roomescape.time.repository.TimeRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.exception.TimeExceptionCode;
+import roomescape.reservationtime.repository.TimeRepository;
 
 @Service
 public class ReservationService {

@@ -1,4 +1,4 @@
-package roomescape.time.controller;
+package roomescape.reservationtime.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -21,10 +21,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.model.ControllerTest;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.dto.TimeRequest;
-import roomescape.time.dto.TimeResponse;
-import roomescape.time.service.TimeService;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.dto.TimeRequest;
+import roomescape.reservationtime.dto.TimeResponse;
+import roomescape.reservationtime.service.TimeService;
 
 @WebMvcTest(TimeController.class)
 class ReservationTimeControllerTest extends ControllerTest {
