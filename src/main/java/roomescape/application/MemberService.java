@@ -32,7 +32,7 @@ public class MemberService {
         );
 
         if (memberRepository.existsByEmail(member.getEmail())) {
-            throw new BadRequestException("이미 가입된 이메일입니다.");
+            throw new BadRequestException("해당 이메일은 이미 존재합니다.");
         }
 
         Member savedMember = memberRepository.save(member);
