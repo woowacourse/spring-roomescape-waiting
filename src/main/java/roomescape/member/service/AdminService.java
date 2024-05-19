@@ -31,26 +31,26 @@ public class AdminService {
     }
 
     public CreateReservationResponse createReservation(final CreateReservationRequest createReservationRequest) {
-        Member member = findMember(createReservationRequest.memberId());
-        Theme theme = findTheme(createReservationRequest.themeId());
-        ReservationTime reservationTime = findReservationTime(createReservationRequest.timeId());
+        Member member = getMember(createReservationRequest.memberId());
+        Theme theme = getTheme(createReservationRequest.themeId());
+        ReservationTime reservationTime = getReservationTime(createReservationRequest.timeId());
 
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, createReservationRequest.date(), reservationTime, theme));
         return CreateReservationResponse.from(reservation);
     }
 
-    private Theme findTheme(Long id) {
+    private Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private Member findMember(Long id) {
+    private Member getMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-    private ReservationTime findReservationTime(Long id) {
+    private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
