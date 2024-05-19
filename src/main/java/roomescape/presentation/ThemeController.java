@@ -30,8 +30,8 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> create(@RequestBody ThemeRequest request) {
-        ThemeResponse response = themeService.create(request);
+    public ResponseEntity<ThemeResponse> create(@RequestBody ThemeRequest themeRequest) {
+        ThemeResponse response = themeService.create(themeRequest);
         URI location = URI.create("/themes/" + response.id());
         return ResponseEntity.created(location).body(response);
     }

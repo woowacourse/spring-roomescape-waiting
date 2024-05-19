@@ -29,8 +29,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse create(LoginMember member, ReservationRequest request) {
-        Reservation reservation = reservationFactory.create(member.id(), request);
+    public ReservationResponse create(LoginMember member, ReservationRequest reservationRequest) {
+        Reservation reservation = reservationFactory.create(member.id(), reservationRequest);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 

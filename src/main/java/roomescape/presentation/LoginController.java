@@ -23,8 +23,8 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody TokenRequest request, HttpServletResponse response) {
-        TokenResponse token = authService.createToken(request);
+    public ResponseEntity<Void> login(@Valid @RequestBody TokenRequest tokenRequest, HttpServletResponse response) {
+        TokenResponse token = authService.createToken(tokenRequest);
         authService.setToken(response, token.accessToken());
         return ResponseEntity.ok().build();
     }

@@ -27,8 +27,8 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> create(@RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.create(request);
+    public ResponseEntity<ReservationTimeResponse> create(@RequestBody ReservationTimeRequest reservationTimeRequest) {
+        ReservationTimeResponse response = reservationTimeService.create(reservationTimeRequest);
         URI location = URI.create("/times/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
@@ -46,8 +46,10 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableTimeResponse>> findAvailableTimes(@RequestParam LocalDate date,
-                                                                          @RequestParam long themeId) {
+    public ResponseEntity<List<AvailableTimeResponse>> findAvailableTimes(
+            @RequestParam LocalDate date,
+            @RequestParam long themeId
+    ) {
         List<AvailableTimeResponse> responses = reservationTimeService.findAvailableTimes(date, themeId);
         return ResponseEntity.ok(responses);
     }

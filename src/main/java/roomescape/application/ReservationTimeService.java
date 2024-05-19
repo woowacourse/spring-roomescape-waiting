@@ -26,14 +26,14 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTimeResponse create(ReservationTimeRequest request) {
-        LocalTime startAt = request.startAt();
+    public ReservationTimeResponse create(ReservationTimeRequest reservationTimeRequest) {
+        LocalTime startAt = reservationTimeRequest.startAt();
         if (existsByStartAt(startAt)) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_TIME,
                     String.format("중복된 예약 시간입니다. 요청 예약 시간:%s", startAt));
         }
 
-        ReservationTime reservationTime = reservationTimesRepository.save(request.toReservationTime());
+        ReservationTime reservationTime = reservationTimesRepository.save(reservationTimeRequest.toReservationTime());
         return ReservationTimeResponse.from(reservationTime);
     }
 

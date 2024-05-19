@@ -34,16 +34,16 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(
             @AuthenticationPrincipal LoginMember loginMember,
-            @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.create(loginMember, request);
+            @RequestBody ReservationRequest reservationRequest) {
+        ReservationResponse response = reservationService.create(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @PostMapping("/reservations/waiting")
     public ResponseEntity<ReservationResponse> saveWaiting(
             @AuthenticationPrincipal LoginMember loginMember,
-            @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.create(loginMember, request);
+            @RequestBody ReservationRequest reservationRequest) {
+        ReservationResponse response = reservationService.create(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 

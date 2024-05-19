@@ -30,17 +30,17 @@ public class ReservationFactory {
         this.clock = clock;
     }
 
-    public Reservation create(long memberId, ReservationRequest request) {
+    public Reservation create(long memberId, ReservationRequest reservationRequest) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
-        Theme theme = themeRepository.findById(request.themeId())
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_THEME));
-        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
+        ReservationTime reservationTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
-        LocalDateTime dateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
+        LocalDateTime dateTime = LocalDateTime.of(reservationRequest.date(), reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
-        validateUniqueReservation(request);
-        return request.toReservation(member, reservationTime, theme);
+        validateUniqueReservation(reservationRequest);
+        return reservationRequest.toReservation(member, reservationTime, theme);
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDateTime dateTime) {
@@ -50,9 +50,9 @@ public class ReservationFactory {
         }
     }
 
-    private void validateUniqueReservation(ReservationRequest request) {
+    private void validateUniqueReservation(ReservationRequest reservationRequest) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())
+                reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())
         ) {
             throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");
         }
