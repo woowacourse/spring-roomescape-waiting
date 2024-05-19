@@ -32,6 +32,7 @@ public class MemberService {
 
     public MemberNameResponse getMemberName(MemberRequest memberRequest) {
         Member member = memberRequest.toMember();
+
         return new MemberNameResponse(member);
     }
 }

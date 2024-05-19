@@ -9,7 +9,6 @@ import java.util.Date;
 import javax.naming.AuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -32,8 +31,7 @@ public class LoginService {
     }
 
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
-        Member member = memberRepository.findByEmail(new Email(loginRequest.email()))
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
+        Member member = memberRepository.getByEmail(new Email(loginRequest.email()));
 
         if (member.isPassword(new Password(loginRequest.password()))) {
             return parseToToken(member);

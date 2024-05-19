@@ -10,6 +10,12 @@ public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
     Optional<Member> findByEmail(Email email);
 
+    default Member getByEmail(Email email) {
+        return findByEmail(email).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 회원입니다. email = " + email.email())
+        );
+    }
+
     default Member getById(Long id) {
         return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다. memberId = " + id));
     }

@@ -22,7 +22,8 @@ CREATE TABLE member
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT email_unique UNIQUE (email)
 );
 
 CREATE TABLE reservation
