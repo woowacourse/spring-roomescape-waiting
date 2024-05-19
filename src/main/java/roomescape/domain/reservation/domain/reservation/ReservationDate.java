@@ -1,30 +1,34 @@
 package roomescape.domain.reservation.domain.reservation;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.global.exception.EscapeApplicationException;
+import roomescape.global.exception.ValueNullOrEmptyException;
 
+@Embeddable
 public class ReservationDate {
 
-    private final LocalDate date;
+    public ReservationDate() {
 
-    public ReservationDate(LocalDate date) {
-        validate(date);
-        this.date = date;
     }
 
-    private void validate(LocalDate date) {
-        validateNonNull(date);
+    @Column(name = "date", nullable = false)
+    private LocalDate value;
+
+    public ReservationDate(LocalDate value) {
+        validateNullAndBlank(value);
+        this.value = value;
     }
 
-    private void validateNonNull(LocalDate date) {
-        if (date == null) {
-            throw new EscapeApplicationException("날짜는 null일 수 없습니다");
+    private void validateNullAndBlank(LocalDate value) {
+        if (value == null) {
+            throw new ValueNullOrEmptyException("예약 날짜는 비어있을 수 없습니다.");
         }
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getValue() {
+        return value;
     }
 
     @Override
@@ -36,11 +40,11 @@ public class ReservationDate {
             return false;
         }
         ReservationDate that = (ReservationDate) o;
-        return Objects.equals(date, that.date);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date);
+        return Objects.hash(value);
     }
 }

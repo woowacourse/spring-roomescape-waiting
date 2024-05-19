@@ -1,5 +1,6 @@
 package roomescape.domain.reservation.domain.reservation;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,7 +10,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.domain.member.domain.Member;
-import roomescape.domain.member.domain.Role;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
 
@@ -18,13 +18,16 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date; //todo: reservationDate 검증
+    @Embedded
+    private ReservationDate date;
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
     @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
     public Reservation() {
@@ -34,7 +37,7 @@ public class Reservation {
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.member = member;
-        this.date = date;
+        this.date = new ReservationDate(date);
         this.time = time;
         this.theme = theme;
     }
@@ -44,7 +47,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return date.getValue();
     }
 
     public ReservationTime getTime() {
@@ -57,14 +60,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    public String getMemberEmail() {
-        return member.getEmail();
-    }
-
-    public Role getMemberRole() {
-        return member.getRole();
     }
 
     @Override
