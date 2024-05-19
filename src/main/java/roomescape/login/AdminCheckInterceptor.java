@@ -11,12 +11,12 @@ import roomescape.member.service.MemberService;
 import roomescape.util.TokenExtractor;
 
 @Component
-public class LoginCheckInterceptor implements HandlerInterceptor {
+public class AdminCheckInterceptor implements HandlerInterceptor {
 
     private final LoginService loginService;
     private final MemberService memberService;
 
-    public LoginCheckInterceptor(LoginService loginService, MemberService memberService) {
+    public AdminCheckInterceptor(LoginService loginService, MemberService memberService) {
         this.loginService = loginService;
         this.memberService = memberService;
     }

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.login.LoginCheckInterceptor;
+import roomescape.login.AdminCheckInterceptor;
 import roomescape.login.service.LoginService;
 import roomescape.member.MemberRequestArgumentResolver;
 import roomescape.member.service.MemberService;
@@ -28,6 +28,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginCheckInterceptor(loginService, memberService)).addPathPatterns("/admin/**");
+        registry.addInterceptor(new AdminCheckInterceptor(loginService, memberService)).addPathPatterns("/admin/**");
     }
 }
