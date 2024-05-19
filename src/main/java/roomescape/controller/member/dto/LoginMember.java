@@ -11,10 +11,10 @@ public record LoginMember(
         @NotBlank
         String name,
 
-        @NotBlank
-        String role) {
+        @NotNull
+        Role role) {
 
     public boolean isAdmin() {
-        return Role.ADMIN.name().equals(role);
+        return Role.ADMIN == role;
     }
 }

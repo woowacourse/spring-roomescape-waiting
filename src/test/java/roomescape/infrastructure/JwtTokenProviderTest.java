@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -18,7 +20,13 @@ class JwtTokenProviderTest {
     @DisplayName("토큰 검증")
     void validateToken() {
         //given
-        final String token = jwtTokenProvider.generateToken("redddy");
+        final Map<String, Object> payload = Map.of(
+                "sub", 1L,
+                "name", "redddy",
+                "role", "ADMIN"
+        );
+
+        final String token = jwtTokenProvider.generateToken(payload);
 
         assertAll(
                 () -> assertThat(jwtTokenProvider.validateToken(token)).isTrue(),

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
+import roomescape.domain.Role;
 import roomescape.service.exception.InvalidSearchDateException;
 
 import java.time.LocalDate;
@@ -43,7 +44,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("자신의 예약 목록을 조회한다.")
     void getReservationsByMember() {
-        final LoginMember member = new LoginMember(3L, "제제", "USER");
+        final LoginMember member = new LoginMember(3L, "제제", Role.USER);
         final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(member);
 
         final List<Reservation> expected = List.of(
