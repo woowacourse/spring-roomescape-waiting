@@ -89,8 +89,8 @@ public class ReservationService {
         if (reservation.getStatus() == Status.RESERVATION) {
             return reservation.getStatus().getValue();
         }
-        return (reservationRepository.countByOrder(
+        return reservationRepository.countByOrder(
                 reservation.getId(), reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        ) - 1) + "번째 " + reservation.getStatus().getValue();
+        ) + "번째 " + reservation.getStatus().getValue();
     }
 }

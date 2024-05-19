@@ -11,12 +11,14 @@ import roomescape.domain.theme.Theme;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     long countByTimeId(long timeId);
 
-    @Query("SELECT COUNT(r) " +
-            "     FROM Reservation r " +
-            "     WHERE r.theme.id = :themeId " +
-            "       AND r.date = :date " +
-            "       AND r.time.id = :timeId " +
-            "       AND r.id < :id ")
+    @Query("""
+            SELECT COUNT(r)
+            FROM Reservation r
+            WHERE r.theme.id = :themeId
+            AND r.date = :date
+            AND r.time.id = :timeId
+            AND r.id < :id
+            """)
     long countByOrder(Long id, LocalDate date, long timeId, long themeId);
 
     @EntityGraph(attributePaths = {"member", "time", "theme"})
