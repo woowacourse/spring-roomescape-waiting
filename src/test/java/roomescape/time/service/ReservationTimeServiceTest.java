@@ -1,5 +1,6 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,8 +22,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
+import roomescape.member.role.MemberRole;
+import roomescape.name.domain.Name;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
@@ -64,8 +70,7 @@ class ReservationTimeServiceTest {
 
         List<TimeResponse> timeResponses = timeService.findReservationTimes();
 
-        Assertions.assertThat(timeResponses.size())
-                .isEqualTo(1);
+        Assertions.assertThat(timeResponses).hasSize(1);
     }
 
     @Test
@@ -74,13 +79,10 @@ class ReservationTimeServiceTest {
         when(timeRepository.findByStartAt(any()))
                 .thenReturn(Optional.of(time));
 
-        assertAll(() -> {
-                    Throwable duplicateStartAt = assertThrows(
-                            RoomEscapeException.class,
-                            () -> timeService.addReservationTime(new TimeRequest(CURRENT_TIME)));
-                    assertEquals("이미 존재하는 예약 시간입니다.", duplicateStartAt.getMessage());
-                }
-        );
+        TimeRequest timeRequest = new TimeRequest(CURRENT_TIME);
+        assertThatThrownBy(() -> timeService.addReservationTime(timeRequest))
+                .isExactlyInstanceOf(RoomEscapeException.class)
+                .hasMessageContaining("이미 존재하는 예약 시간입니다.");
     }
 
     @Test
@@ -96,8 +98,12 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        List<Reservation> reservations = new ArrayList<>();
-        reservations.add(Reservation.of(LocalDate.now(), 1, 1, 1));
+        List<Reservation> reservations = List.of(Reservation.of(
+                LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.now()),
+                new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),
+                new Member(1L, new Name("레모네"), "lemone@gmail.com", new Password("lemon12"), MemberRole.MEMBER))
+        );
 
         when(reservationRepository.findByTimeId(1L))
                 .thenReturn(reservations);

@@ -48,17 +48,8 @@ public class Reservation {
         this.member = member;
     }
 
-    private Reservation(LocalDate date, long timeId, long themeId, long memberId) {
-        this(0, date, new ReservationTime(timeId), Theme.saveThemeFrom(themeId),
-                Member.saveMemberFrom(memberId));
-    }
-
     public static Reservation of(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         return new Reservation(id, date, time, theme, member);
-    }
-
-    public static Reservation of(LocalDate date, long timeId, long themeId, long memberId) {
-        return new Reservation(date, timeId, themeId, memberId);
     }
 
     public static Reservation of(LocalDate date, ReservationTime time, Theme theme, Member member) {

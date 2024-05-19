@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.name.domain.Name;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
@@ -30,9 +31,13 @@ import roomescape.time.repository.TimeRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    private final Reservation reservation = Reservation.of(1L, LocalDate.now().plusDays(1),
-            new ReservationTime(1L, LocalTime.now()), Theme.themeOf(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
-            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
+    private final Reservation reservation = Reservation.of(
+            1L,
+            LocalDate.now().plusDays(1),
+            new ReservationTime(1L, LocalTime.now()),
+            Theme.themeOf(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
+            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN")
+    );
 
     @InjectMocks
     private ReservationService reservationService;
@@ -46,6 +51,9 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
     private Name name;
 
     @Test
@@ -55,10 +63,13 @@ class ReservationServiceTest {
                 .thenReturn(reservation);
 
         when(timeRepository.findById(1L))
-                .thenReturn(Optional.of(new ReservationTime(1)));
+                .thenReturn(Optional.of(new ReservationTime()));
 
         when(themeRepository.findById(1L))
                 .thenReturn(Optional.of(new Theme()));
+
+        when(memberRepository.findMemberById(1L))
+                .thenReturn(Optional.of(new Member()));
 
         ReservationRequest reservationRequest = new ReservationRequest(reservation.getDate(),
                 reservation.getReservationTime().getId(), reservation.getTheme().getId());

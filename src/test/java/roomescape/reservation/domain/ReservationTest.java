@@ -29,19 +29,23 @@ class ReservationTest {
         Reservation reservation = Reservation.of(1L, TOMORROW, time, theme, member);
 
         assertAll(
-                () -> assertEquals(reservation.getTheme(), theme),
-                () -> assertEquals(reservation.getReservationTime(), time),
-                () -> assertEquals(reservation.getId(), 1),
-                () -> assertEquals(reservation.getMember().getName(), "polla"),
-                () -> assertEquals(reservation.getDate(), TOMORROW)
+                () -> assertEquals(theme, reservation.getTheme()),
+                () -> assertEquals(time, reservation.getReservationTime()),
+                () -> assertEquals(1, reservation.getId()),
+                () -> assertEquals("polla", reservation.getMember().getName()),
+                () -> assertEquals(TOMORROW, reservation.getDate())
         );
     }
 
     @Test
     @DisplayName("과거의 날짜를 예약하려고 시도하는 경우 에러를 발생한다.")
     void validation_ShouldThrowException_WhenReservationDateIsPast() {
+        ReservationTime time = new ReservationTime(1, TIME);
+        Theme theme = Theme.themeOf(1, "미르", "미르 방탈출", "썸네일 Url");
+        Member member = Member.memberOf(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
+
         Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
-                () -> Reservation.of(BEFORE, 1L, 1L, 1L));
+                () -> Reservation.of(BEFORE, time, theme, member));
 
         assertEquals(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION.getMessage(),
                 pastDateReservation.getMessage());
