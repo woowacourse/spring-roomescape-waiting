@@ -192,7 +192,8 @@ class ReservationServiceTest extends ServiceTest {
 
         //then
         assertThat(
-                memberReservationRepository.findBy(null, null, LocalDate.now(), LocalDate.now().plusDays(1))).hasSize(
+                memberReservationRepository.findBy(null, null, ReservationStatus.APPROVED, LocalDate.now(),
+                        LocalDate.now().plusDays(1))).hasSize(
                 0);
     }
 
@@ -345,6 +346,74 @@ class ReservationServiceTest extends ServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationService.deleteWaiting(AuthInfo.from(memberChoco),
                 reservationResponse.memberReservationId()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
+    }
+
+    @DisplayName("대기 예약을 승인한다.")
+    @Test
+    void approve() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
+        MemberReservation waitingReservation = memberReservationRepository.save(
+                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+
+        //when
+        reservationService.approveWaiting(waitingReservation.getId());
+
+        //then
+        MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
+                .orElseThrow(IllegalStateException::new);
+        assertThat(memberReservation.getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);
+    }
+
+    @DisplayName("대기 예약이 아닌 예약 승인 시, 예외가 발생한다.")
+    @Test
+    void approveNotWaitingReservation() {
+        //given
+        LocalDate date = getNextDay();
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+
+        //when & then
+        assertThatThrownBy(() -> reservationService.approveWaiting(reservationResponse.memberReservationId()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
+    }
+
+    @DisplayName("대기 예약을 거절한다.")
+    @Test
+    void deny() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
+        MemberReservation waitingReservation = memberReservationRepository.save(
+                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+
+        //when
+        reservationService.denyWaiting(waitingReservation.getId());
+
+        //then
+        MemberReservation memberReservation = memberReservationRepository.findById(waitingReservation.getId())
+                .orElseThrow(IllegalStateException::new);
+        assertThat(memberReservation.getReservationStatus()).isEqualTo(ReservationStatus.DENY);
+    }
+
+    @DisplayName("대기 예약이 아닌 예약 거절 시, 예외가 발생한다.")
+    @Test
+    void denyNotWaitingReservation() {
+        //given
+        LocalDate date = getNextDay();
+        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+                new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
+
+        //when & then
+        assertThatThrownBy(() -> reservationService.denyWaiting(reservationResponse.memberReservationId()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }

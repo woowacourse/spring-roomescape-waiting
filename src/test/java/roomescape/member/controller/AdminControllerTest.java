@@ -2,8 +2,10 @@ package roomescape.member.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.fixture.DateFixture.getNextDay;
 import static roomescape.fixture.MemberFixture.getMemberAdmin;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -30,8 +32,10 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.reservation.service.dto.ThemeCreate;
+import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ControllerTest;
 
 @DisplayName("관리자 페이지 테스트")
@@ -118,5 +122,87 @@ class AdminControllerTest extends ControllerTest {
                             .statusCode(204);
                 })
         );
+    }
+
+    @DisplayName("대기 예약을 승인할 경우, 200을 반환한다.")
+    @Test
+    void approveWaiting() {
+        //given
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(
+                new ThemeCreate("name", "description", "thumbnail"));
+        MemberResponse memberChoco = authService.signUp(new SignUpCommand(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
+
+        MemberResponse memberClover = authService.signUp(new SignUpCommand(
+                getMemberClover().getName(),
+                getMemberClover().getEmail(),
+                getMemberClover().getPassword()
+        ));
+
+        reservationService.createMemberReservation(
+                new MemberReservationCreate(
+                        memberChoco.id(),
+                        getNextDay(),
+                        reservationTimeResponse.id(),
+                        themeResponse.id()
+                )
+        );
+
+        ReservationResponse waiting = reservationService.addWaiting(
+                new WaitingCreate(memberClover.id(), getNextDay(), reservationTimeResponse.id(), themeResponse.id()));
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .when().post("/admin/waiting/approve/" + waiting.memberReservationId())
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("대기 예약을 거절할 경우, 200을 반환한다.")
+    @Test
+    void deleteWaiting() {
+        //given
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
+                new ReservationTimeCreate(LocalTime.NOON));
+        ThemeResponse themeResponse = themeService.create(
+                new ThemeCreate("name", "description", "thumbnail"));
+        MemberResponse memberChoco = authService.signUp(new SignUpCommand(
+                getMemberChoco().getName(),
+                getMemberChoco().getEmail(),
+                getMemberChoco().getPassword()
+        ));
+
+        MemberResponse memberClover = authService.signUp(new SignUpCommand(
+                getMemberClover().getName(),
+                getMemberClover().getEmail(),
+                getMemberClover().getPassword()
+        ));
+
+        reservationService.createMemberReservation(
+                new MemberReservationCreate(
+                        memberChoco.id(),
+                        getNextDay(),
+                        reservationTimeResponse.id(),
+                        themeResponse.id()
+                )
+        );
+
+        ReservationResponse waiting = reservationService.addWaiting(
+                new WaitingCreate(memberClover.id(), getNextDay(), reservationTimeResponse.id(), themeResponse.id()));
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .when().post("/admin/waiting/deny/" + waiting.memberReservationId())
+                .then().log().all()
+                .statusCode(200);
     }
 }

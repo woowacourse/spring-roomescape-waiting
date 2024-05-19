@@ -46,6 +46,14 @@ public class MemberReservation extends BaseEntity {
         return this.member.equals(member);
     }
 
+    public void approve() {
+        this.reservationStatus = ReservationStatus.APPROVED;
+    }
+
+    public void deny() {
+        this.reservationStatus = ReservationStatus.DENY;
+    }
+
     public Long getId() {
         return id;
     }

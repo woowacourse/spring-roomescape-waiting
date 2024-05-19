@@ -23,13 +23,15 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
                     AND (:themeId IS NULL OR th.id = :themeId) 
                     AND :startDate <= r.date 
                     AND r.date <= :endDate
+                    AND mr.reservationStatus = :status
             """)
-    List<MemberReservation> findBy(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
+    List<MemberReservation> findBy(Long memberId, Long themeId, ReservationStatus status, LocalDate startDate,
+                                   LocalDate endDate);
 
     @Query(value = """
-            SELECT RN_TABLE.ID AS id, TH.name as themeName, RE.date as date, T.START_AT as time, RN_TABLE.RN as waitingNumber
+            SELECT RN_TABLE.ID AS id, TH.name as themeName, RE.date as date, T.START_AT as time, RN_TABLE.RN as waitingNumber, RESERVATION_STATUS as status
             FROM
-            (SELECT ID, MEMBER_ID, RESERVATION_ID, ROW_NUMBER() OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN
+            (SELECT ID, MEMBER_ID, RESERVATION_ID, ROW_NUMBER() OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN, RESERVATION_STATUS
             FROM MEMBER_RESERVATION) AS RN_TABLE
             LEFT JOIN MEMBER AS M ON RN_TABLE.MEMBER_ID = M.ID
             LEFT JOIN RESERVATION AS RE ON RN_TABLE.RESERVATION_ID = RE.ID
@@ -45,6 +47,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     boolean existsByReservationAndMember(Reservation reservation, Member member);
 
+    // TODO: Refactor query
     @Query(value = """
                 SELECT RN_TABLE.RN = 1 as waitingNumber
                 FROM

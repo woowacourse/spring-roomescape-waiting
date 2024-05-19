@@ -16,7 +16,7 @@ public record MyReservationInfo(long id,
                 projectionInterface.getThemeName(),
                 projectionInterface.getDate(),
                 projectionInterface.getTime(),
-                new WaitingResponse(projectionInterface.getWaitingNumber())
+                new WaitingResponse(projectionInterface.getStatus(), projectionInterface.getWaitingNumber())
         );
     }
 }

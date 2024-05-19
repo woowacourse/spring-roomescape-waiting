@@ -47,7 +47,11 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
-        return memberReservationRepository.findBy(request.getMemberId(), request.getThemeId(), request.getStartDate(),
+        return memberReservationRepository.findBy(
+                        request.getMemberId(),
+                        request.getThemeId(),
+                        ReservationStatus.APPROVED,
+                        request.getStartDate(),
                         request.getEndDate())
                 .stream()
                 .map(ReservationResponse::from)
@@ -90,17 +94,6 @@ public class ReservationService {
         delete(member, memberReservation);
     }
 
-    private void delete(Member member, MemberReservation memberReservation) {
-        if (!canDelete(member, memberReservation)) {
-            throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
-        }
-        memberReservationRepository.deleteById(memberReservation.getId());
-    }
-
-    private boolean canDelete(Member member, MemberReservation memberReservation) {
-        return member.isAdmin() || memberReservation.isRegisteredMember(member);
-    }
-
     @Transactional
     public void delete(long reservationId) {
         memberReservationRepository.deleteByReservationId(reservationId);
@@ -130,18 +123,43 @@ public class ReservationService {
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 
-    private void validatePastReservation(Reservation reservation) {
-        if (reservation.isPast()) {
-            throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
-        }
-    }
-
     @Transactional
     public void deleteWaiting(AuthInfo authInfo, long memberReservationId) {
         MemberReservation memberReservation = getMemberReservation(memberReservationId);
         Member member = getMember(authInfo.getId());
         validateWaitingReservation(memberReservation);
         delete(member, memberReservation);
+    }
+
+    @Transactional
+    public void approveWaiting(long memberReservationId) {
+        MemberReservation memberReservation = getMemberReservation(memberReservationId);
+        validateWaitingReservation(memberReservation);
+        memberReservation.approve();
+    }
+
+    @Transactional
+    public void denyWaiting(long memberReservationId) {
+        MemberReservation memberReservation = getMemberReservation(memberReservationId);
+        validateWaitingReservation(memberReservation);
+        memberReservation.deny();
+    }
+
+    private void delete(Member member, MemberReservation memberReservation) {
+        if (!canDelete(member, memberReservation)) {
+            throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
+        }
+        memberReservationRepository.deleteById(memberReservation.getId());
+    }
+
+    private boolean canDelete(Member member, MemberReservation memberReservation) {
+        return member.isAdmin() || memberReservation.isRegisteredMember(member);
+    }
+
+    private void validatePastReservation(Reservation reservation) {
+        if (reservation.isPast()) {
+            throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
+        }
     }
 
     private void validateWaitingReservation(MemberReservation memberReservation) {

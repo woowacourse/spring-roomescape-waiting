@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.controller.dto.MemberResponse;
+import roomescape.auth.domain.AuthInfo;
+import roomescape.global.annotation.LoginUser;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -49,5 +51,20 @@ public class AdminController {
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> findAll() {
         return ResponseEntity.ok().body(memberService.findAll());
+    }
+
+    @PostMapping("/waiting/approve/{id}")
+    public ResponseEntity<Void> approve(@LoginUser AuthInfo authInfo,
+                                        @PathVariable("id") @Min(1) long memberReservationId) {
+        reservationService.approveWaiting(memberReservationId);
+        return ResponseEntity.ok().build();
+    }
+
+    // TODO: Admin 검증 로직
+    @PostMapping("/waiting/deny/{id}")
+    public ResponseEntity<Void> deny(@LoginUser AuthInfo authInfo,
+                                     @PathVariable("id") @Min(1) long memberReservationId) {
+        reservationService.denyWaiting(memberReservationId);
+        return ResponseEntity.ok().build();
     }
 }

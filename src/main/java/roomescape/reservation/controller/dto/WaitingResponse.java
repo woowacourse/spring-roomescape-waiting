@@ -1,16 +1,20 @@
 package roomescape.reservation.controller.dto;
 
+import roomescape.reservation.controller.status.ReservationStatusStrategy;
+import roomescape.reservation.controller.status.ReservationStatusStrategyFactory;
+import roomescape.reservation.domain.ReservationStatus;
+
 public class WaitingResponse {
+    private final ReservationStatus status;
     private final int waitingNumber;
 
-    public WaitingResponse(int waitingNumber) {
+    public WaitingResponse(ReservationStatus status, int waitingNumber) {
+        this.status = status;
         this.waitingNumber = waitingNumber;
     }
 
     public String getStatus() {
-        if (waitingNumber > 1) {
-            return waitingNumber + "번째 예약대기";
-        }
-        return "예약";
+        ReservationStatusStrategy strategy = ReservationStatusStrategyFactory.getStrategy(status);
+        return strategy.getStatus(waitingNumber);
     }
 }
