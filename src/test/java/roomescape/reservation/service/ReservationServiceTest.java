@@ -35,7 +35,7 @@ class ReservationServiceTest {
             1L,
             LocalDate.now().plusDays(1),
             new ReservationTime(1L, LocalTime.now()),
-            Theme.themeOf(1L, "pollaBang", "폴라 방탈출", "thumbnail"),
+            new Theme(1L, new Name("pollaBang"), "폴라 방탈출", "thumbnail"),
             Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN")
     );
 

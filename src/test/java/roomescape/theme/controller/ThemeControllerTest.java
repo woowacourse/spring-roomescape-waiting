@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.global.domain.Name;
 import roomescape.model.ControllerTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;
@@ -30,7 +31,7 @@ import roomescape.theme.service.ThemeService;
 public class ThemeControllerTest extends ControllerTest {
 
     public static final LocalDate TODAY = LocalDate.now();
-    private final Theme theme = Theme.themeOf(1L, "포레스트", "공포 테마",
+    private final Theme theme = new Theme(1L, new Name("포레스트"), "공포 테마",
             "https://zerogangnam.com/storage/AVISPw8N2JfMThKvnk3VJzeY9qywIaYd8pTy46Xx.jpg");
 
     @Autowired

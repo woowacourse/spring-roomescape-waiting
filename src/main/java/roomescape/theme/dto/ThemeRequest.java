@@ -1,5 +1,6 @@
 package roomescape.theme.dto;
 
+import roomescape.global.domain.Name;
 import roomescape.theme.domain.Theme;
 
 public record ThemeRequest(
@@ -8,6 +9,6 @@ public record ThemeRequest(
         String thumbnail
 ) {
     public Theme toTheme() {
-        return Theme.saveThemeOf(name, description, thumbnail);
+        return new Theme(new Name(name), description, thumbnail);
     }
 }

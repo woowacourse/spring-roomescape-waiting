@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.global.domain.Name;
 import roomescape.member.domain.Member;
 import roomescape.model.ControllerTest;
 import roomescape.reservation.domain.Reservation;
@@ -28,11 +29,13 @@ import roomescape.reservationtime.domain.ReservationTime;
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest extends ControllerTest {
 
-    private static final LocalDate TOMOROW = LocalDate.now().plusDays(1);
+    private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
-    private final Reservation reservation = new Reservation(1L, TOMOROW,
-            new ReservationTime(1L, LocalTime.of(10, 0)), Theme.themeOf(1L, "polla", "폴라 방탈출", "이미지~"),
-            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN"));
+    private final Reservation reservation = new Reservation(1L, TOMORROW,
+            new ReservationTime(1L, LocalTime.of(10, 0)),
+            new Theme(1L, new Name("polla"), "폴라 방탈출", "이미지~"),
+            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN")
+    );
     private final String expectedStartAt = "10:00:00";
 
     @Autowired
@@ -61,11 +64,11 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     @DisplayName("예약 가능한 시간을 잘 불러오는지 확인한다.")
     void findAvailableTimeList() throws Exception {
-        when(reservationService.findTimeAvailability(1, TOMOROW))
+        when(reservationService.findTimeAvailability(1, TOMORROW))
                 .thenReturn(
                         List.of(ReservationTimeAvailabilityResponse.fromTime(reservation.getReservationTime(), true)));
 
-        mockMvc.perform(get("/reservations/1?date=" + TOMOROW))
+        mockMvc.perform(get("/reservations/1?date=" + TOMORROW))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].startAt").value(expectedStartAt))

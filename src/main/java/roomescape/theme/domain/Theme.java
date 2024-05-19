@@ -11,6 +11,8 @@ import roomescape.global.domain.Name;
 @Entity
 public class Theme {
 
+    private static final int NULL_ID = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -33,16 +35,8 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    private Theme(String name, String description, String thumbnail) {
-        this(0, new Name(name), description, thumbnail);
-    }
-
-    public static Theme themeOf(long id, String name, String description, String thumbnail) {
-        return new Theme(id, new Name(name), description, thumbnail);
-    }
-
-    public static Theme saveThemeOf(String name, String description, String thumbnail) {
-        return new Theme(name, description, thumbnail);
+    public Theme(Name name, String description, String thumbnail) {
+        this(NULL_ID, name, description, thumbnail);
     }
 
     public long getId() {
