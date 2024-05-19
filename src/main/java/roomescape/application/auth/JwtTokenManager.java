@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.application.auth.dto.JwtProperties;
 import roomescape.application.auth.dto.TokenPayload;
 import roomescape.domain.role.Role;
 import roomescape.exception.ExpiredTokenException;
@@ -22,11 +23,9 @@ public class JwtTokenManager implements TokenManager {
     private final long tokenExpirationMills;
     private final Clock clock;
 
-    public JwtTokenManager(@Value("${jwt.secret}") String secret,
-                           @Value("${jwt.expire-in-millis}") long tokenExpirationMills,
-                           Clock clock) {
-        this.secretAlgorithm = Algorithm.HMAC512(secret);
-        this.tokenExpirationMills = tokenExpirationMills;
+    public JwtTokenManager(JwtProperties jwtProperties, Clock clock) {
+        this.secretAlgorithm = Algorithm.HMAC512(jwtProperties.getSecret());
+        this.tokenExpirationMills = jwtProperties.getExpireInMillis();
         this.clock = clock;
     }
 

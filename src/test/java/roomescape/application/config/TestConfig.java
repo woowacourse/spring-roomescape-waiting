@@ -3,21 +3,20 @@ package roomescape.application.config;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import roomescape.application.auth.JwtTokenManager;
 import roomescape.application.auth.TokenManager;
+import roomescape.application.auth.dto.JwtProperties;
 
 @TestConfiguration
 public class TestConfig {
 
-    @Value("${jwt.secret}")
-    private String secret;
-
-    @Value("${jwt.expire-in-millis}")
-    private long expireInMillis;
+    @Autowired
+    private JwtProperties jwtProperties;
 
     @Bean
     @Primary
@@ -28,6 +27,6 @@ public class TestConfig {
     @Bean
     @Primary
     public TokenManager testTokenManager() {
-        return new JwtTokenManager(secret, expireInMillis, testClock());
+        return new JwtTokenManager(jwtProperties, testClock());
     }
 }
