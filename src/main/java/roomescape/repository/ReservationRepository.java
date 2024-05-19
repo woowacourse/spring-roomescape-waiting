@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -16,4 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> getReservationByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, ReservationDate start, ReservationDate end);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    List<Reservation> getReservationByThemeIdAndDateValue(Long themeId, LocalDate date);
 }

@@ -84,7 +84,7 @@ public class Reservation {
     }
 
     public LocalDateTime parseLocalDateTime() {
-        return LocalDateTime.of(date.date(), this.time.getStartAt());
+        return LocalDateTime.of(date.value(), this.time.getStartAt());
     }
 
     @Override
@@ -102,5 +102,17 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", value=" + date +
+                ", time=" + time +
+                ", theme=" + theme +
+                ", member=" + member +
+                ", reservationStatus=" + reservationStatus +
+                '}';
     }
 }

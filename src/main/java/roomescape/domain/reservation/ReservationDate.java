@@ -1,12 +1,14 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
 @Embeddable
-public record ReservationDate(LocalDate date) {
+public record ReservationDate(
+        @Column(name = "date") LocalDate value) {
 
     public static ReservationDate from(final String date) {
         try {
@@ -17,7 +19,7 @@ public record ReservationDate(LocalDate date) {
     }
 
     public String asString() {
-        return date.toString();
+        return value.toString();
     }
 
 }
