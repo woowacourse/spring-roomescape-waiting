@@ -179,4 +179,32 @@ class ReservationServiceTest extends IntegrationTestSupport {
                         tuple("어드민", "이름2", LocalDate.parse("2024-05-30"), LocalTime.parse("11:00"))
                 );
     }
+
+    @DisplayName("예약을 삭제했을 때 자동으로 첫번째 예약 대기자가 예약된다.")
+    @Test
+    void cancelReservation() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("01:00")));
+        Theme theme = themeRepository.save(new Theme("이름", "설명", "썸네일"));
+        Member member1 = memberRepository.save(Member.createUser("고구마1", "email1@email.com", "1234"));
+        Member member3 = memberRepository.save(Member.createUser("고구마3", "email3@email.com", "1234"));
+        Member member2 = memberRepository.save(Member.createUser("고구마2", "email2@email.com", "1234"));
+
+        ReservationSaveRequest reservationSaveRequest1 = new ReservationSaveRequest(member1.getId(),
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
+        ReservationSaveRequest reservationSaveRequest2 = new ReservationSaveRequest(member2.getId(),
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
+        ReservationSaveRequest reservationSaveRequest3 = new ReservationSaveRequest(member3.getId(),
+                LocalDate.parse("2025-11-11"), time.getId(), theme.getId());
+
+        Long reservationId = reservationService.saveReservation(reservationSaveRequest1).id();
+        reservationService.saveReservation(reservationSaveRequest2);
+        reservationService.saveReservation(reservationSaveRequest3);
+
+        // when
+        reservationService.cancelReservation(reservationId);
+
+        // then
+        assertThat(reservationRepository.findById(reservationId).get().getMember()).isEqualTo(member2);
+    }
 }

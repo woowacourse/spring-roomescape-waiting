@@ -36,6 +36,10 @@ public class Reservation {
     protected Reservation() {
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+    }
+
     public Long getId() {
         return id;
     }
