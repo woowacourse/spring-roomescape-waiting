@@ -8,13 +8,14 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.domain.reservation.dto.WaitingWithRank;
 
-
+@Transactional
 class WaitingRepositoryTest extends IntegrationTestSupport {
 
     @Autowired

@@ -20,6 +20,10 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 where w2.reservation = w.reservation and w2.id <= w.id)
             )
             from Waiting w
+            join fetch w.reservation r
+            join fetch r.slot s
+            join fetch s.time
+            join fetch s.theme
             where w.member = :member and w.reservation.slot.date >= :date
             """)
     List<WaitingWithRank> findWaitingRankByMemberAndDateAfter(Member member, LocalDate date);

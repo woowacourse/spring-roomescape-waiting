@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Limit;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
@@ -18,7 +17,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findBySlot(ReservationSlot slot);
 
-    @EntityGraph(attributePaths = {"slot"})
+    @Query("""
+            select r
+            from Reservation r
+            join fetch r.slot.time
+            join fetch r.slot.theme
+            where r.member = :member and r.slot.date >= :date
+            """)
     List<Reservation> findByMemberAndSlot_DateGreaterThanEqual(Member member, LocalDate date);
 
     @Query("""
