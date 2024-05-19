@@ -9,15 +9,17 @@ public record FindMyReservationResponse(Long id,
                                         String theme,
                                         LocalDate date,
                                         @JsonFormat(pattern = "HH:mm") LocalTime time,
-                                        String status) {
+                                        String status,
+                                        Long rank) {
 
-    public static FindMyReservationResponse from(Reservation reservation) {
+    public static FindMyReservationResponse from(Reservation reservation, Long rank) {
         return new FindMyReservationResponse(
             reservation.getId(),
             reservation.getTheme().getName(),
             reservation.getDate(),
             reservation.getTime().getStartAt(),
-            reservation.getStatus().toString()
+            reservation.getStatus().toString(),
+            rank
         );
     }
 }

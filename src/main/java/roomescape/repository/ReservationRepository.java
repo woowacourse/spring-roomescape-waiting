@@ -3,8 +3,10 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.repository.dto.ReservationWithRank;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -20,5 +22,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetween(
         Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findAllByMemberId(Long memberId);
+    @Query("""
+        SELECT new roomescape.repository.dto.ReservationWithRank(
+            r, (
+                SELECT COUNT(r2)
+                FROM Reservation r2
+                WHERE r2.theme = r.theme
+                AND r2.date = r.date
+                AND r2.time = r.time
+                AND r2.id < r.id
+            )
+        )
+        FROM Reservation r
+        WHERE r.member.id = :memberId
+        """)
+    List<ReservationWithRank> findReservationsWithRankByMemberId(Long memberId);
 }

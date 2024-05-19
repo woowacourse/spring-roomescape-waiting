@@ -16,6 +16,8 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.dto.ReservationWithRank;
+import roomescape.service.dto.FindReservationWithRankDto;
 
 @Service
 public class ReservationService {
@@ -123,7 +125,12 @@ public class ReservationService {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId, dateFrom, dateTo);
     }
 
-    public List<Reservation> findMyReservations(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
+    public List<FindReservationWithRankDto> findAllWithRankByMemberId(Long memberId) {
+        List<ReservationWithRank> reservations =
+            reservationRepository.findReservationsWithRankByMemberId(memberId);
+
+        return reservations.stream()
+            .map(data -> new FindReservationWithRankDto(data.reservation(), data.rank()))
+            .toList();
     }
 }

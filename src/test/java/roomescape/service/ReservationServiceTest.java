@@ -21,6 +21,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.dto.FindReservationWithRankDto;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
@@ -133,7 +134,7 @@ class ReservationServiceTest {
         reservationService.reserve(memberId, "2060-01-02", timeId, themeId);
         reservationService.reserve(memberId, "2060-01-03", timeId, themeId);
 
-        List<Reservation> reservations = reservationService.findMyReservations(1L);
+        List<FindReservationWithRankDto> reservations = reservationService.findAllWithRankByMemberId(1L);
         assertThat(reservations).hasSize(3);
     }
 }

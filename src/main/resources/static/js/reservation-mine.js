@@ -18,16 +18,14 @@ function render(data) {
     const theme = item.theme;
     const date = item.date;
     const time = item.time;
-    const status = item.status === 'RESERVED' ? '예약' : '대기';
+    const rank = item.rank;
+    const status = item.status === 'RESERVED' ? '예약' : rank + '번째 예약대기';
 
     row.insertCell(0).textContent = theme;
     row.insertCell(1).textContent = date;
     row.insertCell(2).textContent = time;
     row.insertCell(3).textContent = status;
 
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-     */
     if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
       const cancelCell = row.insertCell(4);
       const cancelButton = document.createElement('button');
@@ -44,9 +42,6 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-  /*
-  TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-   */
   const endpoint = '/reservations/standby/' + id;
   return fetch(endpoint, {
     method: 'DELETE'
