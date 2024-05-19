@@ -21,7 +21,7 @@ class MemberRepositoryTest {
     @Test
     @DisplayName("일치하는 멤버를 가져온다.")
     void shouldThrowException_WhenIdNotFound() {
-        Optional<Member> member = memberRepository.findMemberByEmail_EmailAndPassword_Password("polla@gmail.com",
+        Optional<Member> member = memberRepository.findMemberByEmailAndPassword_Password("polla@gmail.com",
                 "pollari99");
 
         assertTrue(member.isPresent());
