@@ -58,7 +58,7 @@ public class ReservationController {
     @DeleteMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> cancelWaiting(@Login LoginMember member, @PathVariable Long id) {
         Long memberId = reservationService.findMemberIdByWaitingId(id);
-        if (member.isNotSameId(memberId)) {
+        if (member.isUser() && member.isNotSameId(memberId)) {
             throw new AuthorizationException();
         }
 
