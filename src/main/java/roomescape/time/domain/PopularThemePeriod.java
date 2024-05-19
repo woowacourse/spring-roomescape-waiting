@@ -23,4 +23,12 @@ public class PopularThemePeriod {
     public LocalDate getEndDate() {
         return endDate;
     }
+
+    @Override
+    public String toString() {
+        return "PopularThemePeriod{" +
+               "startDate=" + startDate +
+               ", endDate=" + endDate +
+               '}';
+    }
 }

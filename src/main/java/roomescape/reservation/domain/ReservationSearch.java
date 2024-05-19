@@ -34,4 +34,14 @@ public class ReservationSearch {
     public LocalDate getEndDate() {
         return endDate;
     }
+
+    @Override
+    public String toString() {
+        return "ReservationSearch{" +
+               "themeId=" + themeId +
+               ", memberId=" + memberId +
+               ", startDate=" + startDate +
+               ", endDate=" + endDate +
+               '}';
+    }
 }

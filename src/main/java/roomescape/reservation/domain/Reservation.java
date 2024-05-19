@@ -111,4 +111,15 @@ public class Reservation {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+               "id=" + id +
+               ", member=" + member +
+               ", date=" + date +
+               ", time=" + time +
+               ", theme=" + theme +
+               '}';
+    }
 }

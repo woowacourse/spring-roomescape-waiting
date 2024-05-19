@@ -80,4 +80,15 @@ public class Member {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+               "id=" + id +
+               ", name=" + name +
+               ", email=" + email +
+               ", password=" + password +
+               ", role=" + role +
+               '}';
+    }
 }
