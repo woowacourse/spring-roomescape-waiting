@@ -77,6 +77,10 @@ public class Reservation {
     protected Reservation() {
     }
 
+    public boolean isNotReservedBy(Member member) {
+        return !this.member.getId().equals(member.getId());
+    }
+
     public Long getId() {
         return id;
     }

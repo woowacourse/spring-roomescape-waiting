@@ -1,12 +1,14 @@
 package roomescape.service;
 
 import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.STANDBY;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
@@ -34,14 +36,24 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation save(Long memberId, String rawDate, Long timeId, Long themeId) {
+    public Reservation reserve(Long memberId, String rawDate, Long timeId, Long themeId) {
+        return save(memberId, rawDate, timeId, themeId, RESERVED);
+    }
+
+    public Reservation standby(Long memberId, String rawDate, Long timeId, Long themeId) {
+        return save(memberId, rawDate, timeId, themeId, STANDBY);
+    }
+
+    private Reservation save(Long memberId, String rawDate, Long timeId, Long themeId, ReservationStatus status) {
         Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
-        Reservation reservation = new Reservation(member, rawDate, time, theme, RESERVED);
+        Reservation reservation = new Reservation(member, rawDate, time, theme, status);
 
+        if (status == RESERVED) {
+            validateDuplication(reservation.getDate(), timeId, themeId);
+        }
         validatePastReservation(reservation.getDate(), time);
-        validateDuplication(reservation.getDate(), timeId, themeId);
 
         return reservationRepository.save(reservation);
     }
@@ -87,6 +99,17 @@ public class ReservationService {
 
     public void delete(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    public void deleteStandby(Long reservationId, Member member) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
+
+        if (reservation.isNotReservedBy(member)) {
+            throw new RoomescapeException("자신의 예약만 삭제할 수 있습니다.");
+        }
+
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<Reservation> findAll() {

@@ -163,9 +163,9 @@ class UserReservationControllerTest {
         RestAssured.given().log().all()
             .cookie("token", userToken)
             .contentType(ContentType.JSON)
-            .when().get("/reservations-mine")
+            .when().get("/reservations/mine")
             .then().log().all()
             .statusCode(200)
-            .body("reservationId", contains(1, 2));
+            .body("id", contains(1, 2));
     }
 }

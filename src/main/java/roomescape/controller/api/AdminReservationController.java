@@ -31,7 +31,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<CreateReservationResponse> save(@Valid @RequestBody CreateReservationRequest request) {
-        Reservation reservation = reservationService.save(
+        Reservation reservation = reservationService.reserve(
             request.memberId(),
             request.date(),
             request.timeId(),

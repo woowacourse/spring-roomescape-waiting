@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
 
-public record FindMyReservationResponse(Long reservationId,
+public record FindMyReservationResponse(Long id,
                                         String theme,
                                         LocalDate date,
                                         @JsonFormat(pattern = "HH:mm") LocalTime time,

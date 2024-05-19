@@ -58,7 +58,7 @@ class ReservationServiceTest {
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
     @Test
     void save() {
-        Reservation saved = reservationService.save(memberId, rawDate, timeId, themeId);
+        Reservation saved = reservationService.reserve(memberId, rawDate, timeId, themeId);
         assertThat(saved.getId()).isEqualTo(1L);
     }
 
@@ -66,7 +66,7 @@ class ReservationServiceTest {
     @Test
     void save_MemberIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.save(2L, rawDate, timeId, themeId)
+            () -> reservationService.reserve(2L, rawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
@@ -76,7 +76,7 @@ class ReservationServiceTest {
     @ValueSource(strings = {"2030-13-01", "2030-12-32"})
     void save_IllegalDate(String invalidRawDate) {
         assertThatThrownBy(
-            () -> reservationService.save(memberId, invalidRawDate, timeId, themeId)
+            () -> reservationService.reserve(memberId, invalidRawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("잘못된 날짜 형식입니다.");
     }
@@ -85,7 +85,7 @@ class ReservationServiceTest {
     @Test
     void save_TimeIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.save(memberId, rawDate, 2L, themeId)
+            () -> reservationService.reserve(memberId, rawDate, 2L, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
@@ -93,10 +93,10 @@ class ReservationServiceTest {
     @DisplayName("실패: 중복 예약을 생성하면 예외가 발생한다.")
     @Test
     void save_Duplication() {
-        reservationService.save(memberId, rawDate, timeId, themeId);
+        reservationService.reserve(memberId, rawDate, timeId, themeId);
 
         assertThatThrownBy(
-            () -> reservationService.save(memberId, rawDate, timeId, themeId)
+            () -> reservationService.reserve(memberId, rawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 시간에 예약이 이미 존재합니다.");
     }
@@ -107,7 +107,7 @@ class ReservationServiceTest {
         String yesterday = LocalDate.now().minusDays(1).toString();
 
         assertThatThrownBy(
-            () -> reservationService.save(memberId, yesterday, timeId, themeId)
+            () -> reservationService.reserve(memberId, yesterday, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
@@ -121,7 +121,7 @@ class ReservationServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(oneMinuteAgo));
 
         assertThatThrownBy(
-            () -> reservationService.save(memberId, today, savedTime.getId(), themeId)
+            () -> reservationService.reserve(memberId, today, savedTime.getId(), themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
@@ -129,9 +129,9 @@ class ReservationServiceTest {
     @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
     @Test
     void findMyReservations() {
-        reservationService.save(memberId, "2060-01-01", timeId, themeId);
-        reservationService.save(memberId, "2060-01-02", timeId, themeId);
-        reservationService.save(memberId, "2060-01-03", timeId, themeId);
+        reservationService.reserve(memberId, "2060-01-01", timeId, themeId);
+        reservationService.reserve(memberId, "2060-01-02", timeId, themeId);
+        reservationService.reserve(memberId, "2060-01-03", timeId, themeId);
 
         List<Reservation> reservations = reservationService.findMyReservations(1L);
         assertThat(reservations).hasSize(3);
