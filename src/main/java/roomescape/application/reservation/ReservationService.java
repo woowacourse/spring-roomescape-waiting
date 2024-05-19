@@ -45,14 +45,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(ReservationRequest request) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+                request.date(), request.timeId(), request.themeId())) {
+            throw new IllegalArgumentException("이미 존재하는 예약입니다.");
+        }
         Member member = memberRepository.getById(request.memberId());
         Theme theme = themeRepository.getById(request.themeId());
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
-
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), time.getId(), theme.getId())) {
-            throw new IllegalArgumentException("이미 존재하는 예약입니다.");
-        }
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
