@@ -37,7 +37,7 @@ public class ThemeService {
     public List<ThemeRankResponse> findRankedThemes(LocalDate today) {
         LocalDate beforeOneWeek = today.minusDays(NUMBER_OF_ONE_WEEK);
 
-        List<Theme> rankedThemes = reservationRepository.findAllByDateOrderByThemeIdCountLimit(beforeOneWeek, today,
+        List<Theme> rankedThemes = themeRepository.findLimitedAllByDateOrderByThemeIdCount(beforeOneWeek, today,
                 TOP_THEMES_LIMIT);
 
         return rankedThemes.stream()
