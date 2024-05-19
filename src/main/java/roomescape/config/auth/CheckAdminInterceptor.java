@@ -9,6 +9,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Role;
 import roomescape.service.dto.request.LoginMember;
 
+import java.util.Objects;
+
 public class CheckAdminInterceptor implements HandlerInterceptor {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -16,13 +18,18 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         logger.trace("admin request = {}", request.getRequestURI());
+        LoginMember member = getLoginMember(request);
 
-        LoginMember member = (LoginMember) request.getAttribute(CheckLoginInterceptor.LOGIN_MEMBER_REQUEST);
         if (Role.ADMIN != member.role()) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
             return false;
         }
 
         return true;
+    }
+
+    private LoginMember getLoginMember(HttpServletRequest request) {
+        return (LoginMember) Objects.requireNonNull(request)
+                .getAttribute(CheckLoginInterceptor.LOGIN_MEMBER_REQUEST);
     }
 }

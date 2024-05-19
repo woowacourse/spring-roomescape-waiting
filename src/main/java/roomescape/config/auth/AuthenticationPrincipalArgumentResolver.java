@@ -6,8 +6,11 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.exception.customexception.AuthenticationException;
 import roomescape.infrastructure.Login;
 import roomescape.service.dto.request.LoginMember;
+
+import java.util.Objects;
 
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -18,8 +21,14 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     }
 
     @Override
-    public LoginMember resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public LoginMember resolveArgument(
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
+    ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        return (LoginMember) request.getAttribute(CheckLoginInterceptor.LOGIN_MEMBER_REQUEST);
+        return (LoginMember) Objects.requireNonNull(request)
+                .getAttribute(CheckLoginInterceptor.LOGIN_MEMBER_REQUEST);
     }
 }
