@@ -39,22 +39,8 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
-    @PostMapping("/reservations/waiting")
-    public ResponseEntity<ReservationResponse> saveWaiting(
-            @AuthenticationPrincipal LoginMember loginMember,
-            @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.saveByClient(loginMember, reservationRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
-    }
-
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteByReservation(@PathVariable long id) {
-        reservationService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/reservations/waiting/{id}")
-    public ResponseEntity<Void> deleteByWaiting(@PathVariable long id) {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

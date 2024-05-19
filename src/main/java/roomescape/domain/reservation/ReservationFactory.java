@@ -33,7 +33,7 @@ public class ReservationFactory {
         this.clock = clock;
     }
 
-    public Reservation create(Long memberId, LocalDate date, Long timeId, Long themeId, Status status) {
+    public Reservation create(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
         Theme theme = themeRepository.findById(themeId)
@@ -42,8 +42,13 @@ public class ReservationFactory {
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_TIME));
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
-        validateUniqueReservation(date, timeId, themeId);
-        return new Reservation(member, date, reservationTime, theme, status);
+        if (checkUniqueReservation(date, timeId, themeId)) {
+            if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
+                throw new RoomescapeException(RoomescapeErrorCode.EXIST_RESERVATION, "이미 예약을 했습니다.");
+            }
+            return new Reservation(member, date, reservationTime, theme, Status.WAITING);
+        }
+        return new Reservation(member, date, reservationTime, theme, Status.RESERVATION);
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDateTime dateTime) {
@@ -53,9 +58,7 @@ public class ReservationFactory {
         }
     }
 
-    private void validateUniqueReservation(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new RoomescapeException(RoomescapeErrorCode.DUPLICATED_RESERVATION, "이미 존재하는 예약입니다.");
-        }
+    private boolean checkUniqueReservation(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 }

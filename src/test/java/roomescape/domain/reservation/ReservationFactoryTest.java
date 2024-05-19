@@ -24,7 +24,7 @@ class ReservationFactoryTest {
     void shouldReturnIllegalArgumentExceptionWhenNotFoundReservationTime() {
         ReservationRequest request = ReservationRequestFixture.of(99L, 1L);
 
-        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId(), Status.RESERVATION))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_TIME);
@@ -35,7 +35,7 @@ class ReservationFactoryTest {
     void shouldThrowIllegalArgumentExceptionWhenNotFoundTheme() {
         ReservationRequest request = ReservationRequestFixture.of(1L, 99L);
 
-        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId(), Status.RESERVATION))
+        assertThatCode(() -> reservationFactory.create(1L, request.date(), request.timeId(), request.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_THEME);
@@ -49,7 +49,7 @@ class ReservationFactoryTest {
                 existReservation.getTime().getId(),
                 existReservation.getTheme().getId());
 
-        assertThatCode(() -> reservationFactory.create(1L, reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId(), Status.RESERVATION))
+        assertThatCode(() -> reservationFactory.create(1L, reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.DUPLICATED_RESERVATION);
@@ -60,7 +60,7 @@ class ReservationFactoryTest {
     void shouldThrowsIllegalArgumentExceptionWhenReservationDateIsBeforeCurrentDate() {
         ReservationRequest reservationRequest = ReservationRequestFixture.of(LocalDate.of(1999, 1, 1), 1L, 1L);
 
-        assertThatCode(() -> reservationFactory.create(1L, reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId(), Status.RESERVATION))
+        assertThatCode(() -> reservationFactory.create(1L, reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId()))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);

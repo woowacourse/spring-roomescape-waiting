@@ -19,8 +19,6 @@ import roomescape.exception.RoomescapeException;
 
 @Service
 public class ReservationService {
-    private static final String BOOKED = "예약";
-
     private final ReservationFactory reservationFactory;
     private final ReservationRepository reservationRepository;
 
@@ -36,8 +34,7 @@ public class ReservationService {
                 loginMember.id(),
                 reservationRequest.date(),
                 reservationRequest.timeId(),
-                reservationRequest.themeId(),
-                Status.RESERVATION
+                reservationRequest.themeId()
         );
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -47,8 +44,7 @@ public class ReservationService {
                 adminReservationRequest.memberId(),
                 adminReservationRequest.date(),
                 adminReservationRequest.timeId(),
-                adminReservationRequest.themeId(),
-                Status.RESERVATION
+                adminReservationRequest.themeId()
         );
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
