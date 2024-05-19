@@ -16,6 +16,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeService {
 
     private final TimeCommandRepository timeCommandRepository;
@@ -42,10 +43,6 @@ public class TimeService {
         return TimeResponse.from(time);
     }
 
-    private boolean existsByStartAt(LocalTime startAt) {
-        return timeQueryRepository.existsByStartAt(startAt);
-    }
-
     @Transactional
     public void deleteById(Long id) {
         Time time = timeQueryRepository.getById(id);
@@ -68,5 +65,9 @@ public class TimeService {
                 .stream()
                 .map(AvailableTimeResponse::from)
                 .toList();
+    }
+
+    private boolean existsByStartAt(LocalTime startAt) {
+        return timeQueryRepository.existsByStartAt(startAt);
     }
 }

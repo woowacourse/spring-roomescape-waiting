@@ -14,6 +14,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeCommandRepository themeCommandRepository;
@@ -29,16 +30,10 @@ public class ThemeService {
         this.popularThemeFinder = popularThemeFinder;
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         Theme savedTheme = themeCommandRepository.save(request.toTheme());
         return ThemeResponse.from(savedTheme);
-    }
-
-    public List<ThemeResponse> findAll() {
-        return themeQueryRepository.findAll()
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 
     @Transactional
@@ -49,6 +44,13 @@ public class ThemeService {
                     String.format("해당 테마에 연관된 예약이 존재하여 삭제할 수 없습니다. 삭제 요청한 테마:%s", theme.getName()));
         }
         themeCommandRepository.delete(theme);
+    }
+
+    public List<ThemeResponse> findAll() {
+        return themeQueryRepository.findAll()
+                .stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
 

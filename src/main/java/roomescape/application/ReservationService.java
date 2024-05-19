@@ -18,6 +18,7 @@ import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.WaitingQueryRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationFactory reservationFactory;

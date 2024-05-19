@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.TimeRequest;
 import roomescape.domain.Time;
-import roomescape.domain.repository.TimeCommandRepository;
 import roomescape.domain.repository.TimeQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;

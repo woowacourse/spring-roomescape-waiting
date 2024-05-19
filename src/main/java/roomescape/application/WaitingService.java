@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
 import roomescape.application.dto.WaitingWithRankResponse;
@@ -14,6 +15,7 @@ import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingFactory waitingFactory;
@@ -28,6 +30,7 @@ public class WaitingService {
         this.waitingQueryRepository = waitingQueryRepository;
     }
 
+    @Transactional
     public List<WaitingWithRankResponse> reserveWaiting(LoginMember loginMember, WaitingRequest request) {
         Waiting waiting = waitingFactory.create(loginMember.id(), request.date(), request.timeId(), request.themeId());
         waitingCommandRepository.save(waiting);
@@ -44,6 +47,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long waitingId) {
         if (!waitingQueryRepository.existsById(waitingId)) {
             throw new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,
