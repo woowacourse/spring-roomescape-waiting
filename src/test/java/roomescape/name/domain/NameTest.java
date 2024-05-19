@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.global.domain.Name;
 import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.name.exception.NameExceptionCode;
+import roomescape.global.exception.global.NameExceptionCode;
 
 class NameTest {
 

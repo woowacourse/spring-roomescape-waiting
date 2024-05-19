@@ -1,4 +1,4 @@
-package roomescape.name.exception;
+package roomescape.global.exception.global;
 
 import org.springframework.http.HttpStatus;
 import roomescape.global.exception.model.ExceptionCode;

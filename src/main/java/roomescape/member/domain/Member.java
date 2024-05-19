@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.role.MemberRole;
-import roomescape.name.domain.Name;
+import roomescape.global.domain.Name;
 
 @Entity
 public class Member {

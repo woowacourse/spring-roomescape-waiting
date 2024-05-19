@@ -1,10 +1,10 @@
-package roomescape.name.domain;
+package roomescape.global.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 import roomescape.global.exception.model.RoomEscapeException;
-import roomescape.name.exception.NameExceptionCode;
+import roomescape.global.exception.global.NameExceptionCode;
 
 @Embeddable
 public class Name {
