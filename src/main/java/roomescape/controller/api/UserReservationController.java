@@ -71,12 +71,6 @@ public class UserReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<FindMyReservationResponse>> findMyReservations(@AuthenticationPrincipal Member member) {
-//        List<Reservation> reservations = reservationService.findMyReservations(member.getId());
-//        List<FindMyReservationResponse> response = reservations.stream()
-//            .map(FindMyReservationResponse::from)
-//            .toList();
-//        return ResponseEntity.ok(response);
-
         List<FindReservationWithRankDto> reservations = reservationService.findAllWithRankByMemberId(member.getId());
         List<FindMyReservationResponse> response = reservations.stream()
             .map(data -> FindMyReservationResponse.from(data.reservation(), data.rank()))
