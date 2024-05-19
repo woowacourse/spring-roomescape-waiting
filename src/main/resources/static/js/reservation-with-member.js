@@ -204,7 +204,7 @@ function applyFilter(event) {
     dateTo: dateTo
   }).toString();
 
-  fetch(`/admin/reservations?${queryParams}`, { // 예약 검색 API 호출
+  fetch(`/admin/reservations/search?${queryParams}`, { // 예약 검색 API 호출
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

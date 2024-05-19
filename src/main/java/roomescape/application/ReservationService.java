@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.LoginMember;
 import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationCriteria;
@@ -68,5 +69,14 @@ public class ReservationService {
                 .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
                         reservation.getDate(), reservation.getTime().getStartAt(), BOOKED))
                 .toList();
+    }
+
+    public ReservationResponse saveByAdmin(AdminReservationRequest adminReservationRequest) {
+        Reservation reservation = reservationFactory.create(
+                adminReservationRequest.memberId(),
+                new ReservationRequest(adminReservationRequest.date(), adminReservationRequest.timeId(),
+                        adminReservationRequest.themeId())
+        );
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 }
