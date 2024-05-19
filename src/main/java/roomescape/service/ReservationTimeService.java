@@ -1,13 +1,13 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
 import roomescape.exception.NotExistException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.dto.AvailableReservationTimeResult;
 import roomescape.service.dto.input.AvailableReservationTimeInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.service.dto.output.AvailableReservationTimeOutput;
@@ -46,16 +46,21 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeOutput> getAvailableTimes(final AvailableReservationTimeInput input) {
-        final List<AvailableReservationTimeResult> availableReservationTimeResults =
-                reservationTimeRepository.getAvailableReservationTimeByThemeIdAndDate(input.date(), input.themeId());
-        return AvailableReservationTimeOutput.toOutputs(availableReservationTimeResults);
+        final List<ReservationTime> alreadyBookedReservationTimes =
+                reservationRepository.getReservationByThemeIdAndDateDate(input.themeId(), input.date())
+                        .stream()
+                        .map(Reservation::getTime)
+                        .toList();
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+
+        return AvailableReservationTimeOutput.toOutputs(reservationTimes, alreadyBookedReservationTimes);
     }
 
     public void deleteReservationTime(final long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ExistReservationException(RESERVATION_TIME, id);
         }
-        if(reservationTimeRepository.deleteReservationTimeById(id)==0){
+        if (reservationTimeRepository.deleteReservationTimeById(id) == 0) {
             throw new NotExistException(RESERVATION_TIME, id);
         }
     }

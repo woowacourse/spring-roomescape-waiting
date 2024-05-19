@@ -1,19 +1,21 @@
 package roomescape.service.dto.output;
 
-import roomescape.repository.dto.AvailableReservationTimeResult;
+import roomescape.domain.reservation.ReservationTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record AvailableReservationTimeOutput(long timeId, String startAt, boolean alreadyBooked) {
 
-    public static AvailableReservationTimeOutput toOutput(final AvailableReservationTimeResult availableReservationTimeResult) {
-
-        return new AvailableReservationTimeOutput(availableReservationTimeResult.getTimeId(), availableReservationTimeResult.getStartAt(), availableReservationTimeResult.getIsBooked());
-    }
-
-    public static List<AvailableReservationTimeOutput> toOutputs(final List<AvailableReservationTimeResult> availableReservationTimeResult) {
-        return availableReservationTimeResult.stream()
-                .map(AvailableReservationTimeOutput::toOutput)
-                .toList();
+    public static List<AvailableReservationTimeOutput> toOutputs(final List<ReservationTime> reservationTimes, final List<ReservationTime> bookedTimes) {
+        final List<AvailableReservationTimeOutput> outputs = new ArrayList<>();
+        for (final ReservationTime reservationTime : reservationTimes) {
+            if (bookedTimes.contains(reservationTime)) {
+                outputs.add(new AvailableReservationTimeOutput(reservationTime.getId(), reservationTime.getStartAtAsString(), true));
+                continue;
+            }
+            outputs.add(new AvailableReservationTimeOutput(reservationTime.getId(), reservationTime.getStartAtAsString(), false));
+        }
+        return outputs;
     }
 }

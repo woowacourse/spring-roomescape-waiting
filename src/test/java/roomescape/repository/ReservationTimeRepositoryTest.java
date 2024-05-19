@@ -5,13 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.fixture.MemberFixture;
-import roomescape.fixture.ReservationTimeFixture;
-import roomescape.fixture.ThemeFixture;
 import roomescape.util.DatabaseCleaner;
 import roomescape.util.ReservationInserter;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +20,10 @@ class ReservationTimeRepositoryTest {
     ReservationInserter reservationInserter;
     @Autowired
     DatabaseCleaner databaseCleaner;
+    @Autowired
+    ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @BeforeEach
     void setup() {
@@ -66,22 +66,5 @@ class ReservationTimeRepositoryTest {
 
         final var result = sut.findAll();
         assertThat(result).hasSize(2);
-    }
-
-    @Test
-    void get_available_reservationTime_with_date_and_themeId() {
-        final var time = sut.save(ReservationTime.from("12:00"));
-        sut.save(ReservationTime.from("13:00"));
-        final var reservation = reservationInserter.addNewReservation("2024-10-03", ThemeFixture.getDomain(), MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addExistReservation("2024-10-03", reservation.getTheme(), reservation.getMember(), time);
-
-        final var result =
-                sut.getAvailableReservationTimeByThemeIdAndDate(LocalDate.parse("2024-10-03"), reservation.getTheme()
-                        .getId());
-
-        result.stream()
-                .filter(avail -> avail.getStartAt()
-                        .equals("13:00"))
-                .forEach(avail -> assertThat(avail.getIsBooked()).isFalse());
     }
 }

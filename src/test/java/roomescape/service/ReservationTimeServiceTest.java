@@ -105,12 +105,13 @@ class ReservationTimeServiceTest {
         final Member member = memberRepository.save(MemberFixture.getDomain());
         reservationRepository.save(Reservation.fromComplete("2025-01-01", time1, theme, member));
 
+
         final List<AvailableReservationTimeOutput> actual = sut.getAvailableTimes(
                 new AvailableReservationTimeInput(theme.getId(), LocalDate.parse("2025-01-01")));
 
         assertThat(actual).containsExactly(
-                new AvailableReservationTimeOutput(time1.getId(), "10:00:00", true),
-                new AvailableReservationTimeOutput(time2.getId(), "11:00:00", false)
+                new AvailableReservationTimeOutput(time1.getId(), "10:00", true),
+                new AvailableReservationTimeOutput(time2.getId(), "11:00", false)
         );
     }
 }
