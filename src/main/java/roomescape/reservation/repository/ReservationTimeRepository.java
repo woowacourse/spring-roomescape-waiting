@@ -5,7 +5,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import roomescape.exceptions.NotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 
-public interface ReservationTimeJpaRepository extends ListCrudRepository<ReservationTime, Long> {
+public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
     boolean existsByStartAt(LocalTime localTime);
 

@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.repository.ReservationJpaRepository;
+import roomescape.reservation.repository.ReservationRepository;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminPageController {
 
-    private final ReservationJpaRepository reservationJpaRepository;
+    private final ReservationRepository reservationRepository;
 
-    public AdminPageController(ReservationJpaRepository ReservationJpaRepository) {
-        this.reservationJpaRepository = ReservationJpaRepository;
+    public AdminPageController(ReservationRepository ReservationRepository) {
+        this.reservationRepository = ReservationRepository;
     }
 
     @GetMapping
@@ -38,7 +38,7 @@ public class AdminPageController {
     @GetMapping("/reservation")
     public String getReservationPage(Model model) {
         List<ReservationResponse> reservationResponses = new ArrayList<>();
-        for (Reservation reservation : reservationJpaRepository.findAll()) {
+        for (Reservation reservation : reservationRepository.findAll()) {
             reservationResponses.add(new ReservationResponse(reservation));
         }
         model.addAttribute("reservationResponses", reservationResponses);

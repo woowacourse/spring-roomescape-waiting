@@ -18,30 +18,30 @@ import roomescape.member.domain.Password;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.repository.MemberJpaRepository;
+import roomescape.member.repository.MemberRepository;
 
 @Service
 public class MemberService {
 
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    public MemberService(MemberJpaRepository MemberJpaRepository) {
-        this.memberJpaRepository = MemberJpaRepository;
+    public MemberService(MemberRepository MemberRepository) {
+        this.memberRepository = MemberRepository;
     }
 
     public List<MemberIdNameResponse> findMembersIdAndName() {
-        return memberJpaRepository.findAll()
+        return memberRepository.findAll()
                 .stream()
                 .map(MemberIdNameResponse::new)
                 .toList();
     }
 
     public String createMemberToken(LoginRequest loginRequest) throws AuthenticationException {
-        Member member = memberJpaRepository.findByEmail(new Email(loginRequest.email()))
+        Member member = memberRepository.findByEmail(new Email(loginRequest.email()))
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
         if (member.isPassword(new Password(loginRequest.password()))) {

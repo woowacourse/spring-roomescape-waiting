@@ -10,7 +10,7 @@ import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;
 
-public interface ThemeJpaRepository extends ListCrudRepository<Theme, Long> {
+public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
     boolean existsByName(Name name);
 

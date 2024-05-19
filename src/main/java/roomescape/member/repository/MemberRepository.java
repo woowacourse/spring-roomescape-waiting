@@ -6,7 +6,7 @@ import roomescape.exceptions.NotFoundException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 
-public interface MemberJpaRepository extends ListCrudRepository<Member, Long> {
+public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
     Optional<Member> findByEmail(Email email);
 

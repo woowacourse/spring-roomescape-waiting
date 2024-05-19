@@ -19,15 +19,15 @@ import roomescape.member.domain.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
-class MemberJpaRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
-    private MemberJpaRepository memberJpaRepository;
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("모든 Member를 찾는다.")
     void findAll() {
-        Iterable<Member> found = memberJpaRepository.findAll();
+        Iterable<Member> found = memberRepository.findAll();
 
         assertThat(found).containsExactly(MEMBER_1, MEMBER_2, MEMBER_3, MEMBER_4);
     }
@@ -35,7 +35,7 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 Member를 찾는다.")
     void findById() {
-        Member found = memberJpaRepository.findById(MEMBER_1.getId()).get();
+        Member found = memberRepository.findById(MEMBER_1.getId()).get();
 
         assertThat(found).isEqualTo(MEMBER_1);
     }
@@ -43,7 +43,7 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 빈 Optional 객체를 반환한다.")
     void emptyIfNotExistId() {
-        Optional<Member> member = memberJpaRepository.findById(-1L);
+        Optional<Member> member = memberRepository.findById(-1L);
 
         assertThat(member.isEmpty()).isTrue();
     }
@@ -51,7 +51,7 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 Member를 찾는다.")
     void getById() {
-        Member found = memberJpaRepository.getById(MEMBER_1.getId());
+        Member found = memberRepository.getById(MEMBER_1.getId());
 
         assertThat(found).isEqualTo(MEMBER_1);
     }
@@ -59,14 +59,14 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 예외가 발생한다.")
     void throwExceptionIfNotExistId() {
-        assertThatThrownBy(() -> memberJpaRepository.getById(-1L))
+        assertThatThrownBy(() -> memberRepository.getById(-1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     @DisplayName("email에 맞는 Member를 찾는다.")
     void findByEmail() {
-        Member found = memberJpaRepository.findByEmail(MEMBER_1.getEmail()).get();
+        Member found = memberRepository.findByEmail(MEMBER_1.getEmail()).get();
 
         assertThat(found).isEqualTo(MEMBER_1);
     }
@@ -74,7 +74,7 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 email이 들어오면 빈 Optional 객체를 반환한다.")
     void emptyIfNotExistEmail() {
-        Optional<Member> member = memberJpaRepository.findByEmail(NOT_SAVED_MEMBER.getEmail());
+        Optional<Member> member = memberRepository.findByEmail(NOT_SAVED_MEMBER.getEmail());
 
         assertThat(member.isEmpty()).isTrue();
     }
@@ -82,8 +82,8 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 Member를 제거한다.")
     void delete() {
-        memberJpaRepository.deleteById(MEMBER_3.getId());
+        memberRepository.deleteById(MEMBER_3.getId());
 
-        assertThat(memberJpaRepository.findById(MEMBER_3.getId()).isEmpty()).isTrue();
+        assertThat(memberRepository.findById(MEMBER_3.getId()).isEmpty()).isTrue();
     }
 }

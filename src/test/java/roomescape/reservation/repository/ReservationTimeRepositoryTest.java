@@ -21,10 +21,10 @@ import roomescape.reservation.domain.ReservationTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
-class ReservationTimeJpaRepositoryTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
-    private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -33,7 +33,7 @@ class ReservationTimeJpaRepositoryTest {
     void save() {
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 0));
 
-        ReservationTime saved = reservationTimeJpaRepository.save(reservationTime);
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
         assertThat(saved.getId()).isNotNull();
     }
@@ -41,7 +41,7 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 ReservationTime을 제거한다.")
     void delete() {
-        reservationTimeJpaRepository.deleteById(NOT_RESERVATED_TIME.getId());
+        reservationTimeRepository.deleteById(NOT_RESERVATED_TIME.getId());
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_time", Integer.class);
 
@@ -51,14 +51,14 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("참조되어 있는 시간을 삭제하는 경우 예외가 발생한다.")
     void deleteReferencedGetTime() {
-        assertThatThrownBy(() -> reservationTimeJpaRepository.deleteById(RESERVATION_TIME_1.getId()))
+        assertThatThrownBy(() -> reservationTimeRepository.deleteById(RESERVATION_TIME_1.getId()))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
     @DisplayName("모든 ReservationTime을 찾는다.")
     void findAll() {
-        Iterable<ReservationTime> found = reservationTimeJpaRepository.findAll();
+        Iterable<ReservationTime> found = reservationTimeRepository.findAll();
 
         assertThat(found).hasSize(INITIAL_RESERVATION_TIME_COUNT);
     }
@@ -66,7 +66,7 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 ReservationTime을 찾는다.")
     void findById() {
-        ReservationTime found = reservationTimeJpaRepository.findById(RESERVATION_TIME_1.getId()).get();
+        ReservationTime found = reservationTimeRepository.findById(RESERVATION_TIME_1.getId()).get();
 
         assertThat(found).isEqualTo(RESERVATION_TIME_1);
     }
@@ -74,7 +74,7 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 빈 Optional 객체를 반환한다.")
     void EmptyIfNotExistId() {
-        Optional<ReservationTime> reservationTime = reservationTimeJpaRepository.findById(-1L);
+        Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(-1L);
 
         assertThat(reservationTime.isEmpty()).isTrue();
     }
@@ -82,7 +82,7 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 ReservationTime을 찾는다.")
     void getById() {
-        ReservationTime found = reservationTimeJpaRepository.getById(RESERVATION_TIME_1.getId());
+        ReservationTime found = reservationTimeRepository.getById(RESERVATION_TIME_1.getId());
 
         assertThat(found).isEqualTo(RESERVATION_TIME_1);
     }
@@ -90,14 +90,14 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 id가 들어오면 예외를 발생시킨다.")
     void throwExceptionIfIdNotExists() {
-        assertThatThrownBy(() -> reservationTimeJpaRepository.getById(-1L))
+        assertThatThrownBy(() -> reservationTimeRepository.getById(-1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     @DisplayName("특정 예약시간이 존재하면 true를 반환한다.")
     void trueIfStartAtExists() {
-        boolean isExist = reservationTimeJpaRepository.existsByStartAt(RESERVATION_TIME_1.getStartAt());
+        boolean isExist = reservationTimeRepository.existsByStartAt(RESERVATION_TIME_1.getStartAt());
 
         assertThat(isExist).isTrue();
     }
@@ -105,7 +105,7 @@ class ReservationTimeJpaRepositoryTest {
     @Test
     @DisplayName("특정 예약시간이 존재하지 않으면 false를 반환한다.")
     void falseIfStartAtNotExists() {
-        boolean isExist = reservationTimeJpaRepository.existsByStartAt(NOT_SAVED_TIME.getStartAt());
+        boolean isExist = reservationTimeRepository.existsByStartAt(NOT_SAVED_TIME.getStartAt());
 
         assertThat(isExist).isFalse();
     }
