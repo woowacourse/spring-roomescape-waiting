@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import roomescape.service.dto.response.MemberResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class MemberControllerTest {
+class MemberViewControllerTest {
 
     @LocalServerPort
     private int port;
