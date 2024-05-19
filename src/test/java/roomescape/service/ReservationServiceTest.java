@@ -74,8 +74,8 @@ class ReservationServiceTest {
         ReservationAppResponse expected = new ReservationAppResponse(
                 reservationId,
                 reservation.getMember().getName().getName(),
-                reservation.getReservationDate(),
-                ReservationTimeAppResponse.from(reservation.getReservationTime()),
+                reservation.getDate(),
+                ReservationTimeAppResponse.from(reservation.getTime()),
                 ThemeAppResponse.from(reservation.getTheme()));
 
         assertThat(actual).isEqualTo(expected);
