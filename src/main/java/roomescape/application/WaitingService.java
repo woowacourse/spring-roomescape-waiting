@@ -1,21 +1,12 @@
 package roomescape.application;
 
-import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
 import roomescape.application.dto.WaitingWithRankResponse;
-import roomescape.domain.Member;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
 import roomescape.domain.WaitingFactory;
 import roomescape.domain.dto.WaitingWithRank;
-import roomescape.domain.repository.MemberQueryRepository;
-import roomescape.domain.repository.ReservationQueryRepository;
-import roomescape.domain.repository.ThemeQueryRepository;
-import roomescape.domain.repository.TimeQueryRepository;
 import roomescape.domain.repository.WaitingCommandRepository;
 import roomescape.domain.repository.WaitingQueryRepository;
 import roomescape.exception.RoomescapeErrorCode;
@@ -25,43 +16,24 @@ import roomescape.exception.RoomescapeException;
 public class WaitingService {
 
     private final WaitingFactory waitingFactory;
-    private final ReservationQueryRepository reservationQueryRepository;
-    private final TimeQueryRepository timeQueryRepository;
-    private final ThemeQueryRepository themeQueryRepository;
-    private final MemberQueryRepository memberQueryRepository;
     private final WaitingCommandRepository waitingCommandRepository;
     private final WaitingQueryRepository waitingQueryRepository;
-    private final Clock clock;
 
     public WaitingService(WaitingFactory waitingFactory,
-                          ReservationQueryRepository reservationQueryRepository,
-                          TimeQueryRepository timeQueryRepository,
-                          ThemeQueryRepository themeQueryRepository,
-                          MemberQueryRepository memberQueryRepository,
                           WaitingCommandRepository waitingCommandRepository,
-                          WaitingQueryRepository waitingQueryRepository,
-                          Clock clock) {
+                          WaitingQueryRepository waitingQueryRepository) {
         this.waitingFactory = waitingFactory;
-        this.reservationQueryRepository = reservationQueryRepository;
-        this.timeQueryRepository = timeQueryRepository;
-        this.themeQueryRepository = themeQueryRepository;
-        this.memberQueryRepository = memberQueryRepository;
         this.waitingCommandRepository = waitingCommandRepository;
         this.waitingQueryRepository = waitingQueryRepository;
-        this.clock = clock;
     }
 
     public List<WaitingWithRankResponse> reserveWaiting(LoginMember loginMember, WaitingRequest request) {
-        LocalDate date = request.date();
-        Time time = timeQueryRepository.getById(request.timeId());
-        Theme theme = themeQueryRepository.getById(request.themeId());
-        if (!reservationQueryRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
-            throw new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION);
-        }
-        Member member = memberQueryRepository.getById(loginMember.id());
-        waitingCommandRepository.save(waitingFactory.create(member, date, time, theme, clock));
-        List<WaitingWithRank> waitingWithRanks = waitingQueryRepository.findWaitingWithRankByMemberId(member.getId());
+        waitingCommandRepository.save(waitingFactory.create(loginMember.id(), request.date(), request.timeId(), request.themeId()));
+        List<WaitingWithRank> waitingWithRanks = waitingQueryRepository.findWaitingWithRankByMemberId(loginMember.id());
         return convertToWaitWithRankResponses(waitingWithRanks);
+        //TODO: ReservationFactory, WaitingFactory 다시 생각해봐야될듯
+        // 그래야 서비스 우발적 중복 + waitingFactory 에서 중복 예약 대기 튕겨내는 로직
+        // factory 내에서 수행할 수 있음(비즈니스 로직이 service 에 나와있지 않도록)
     }
 
     private List<WaitingWithRankResponse> convertToWaitWithRankResponses(List<WaitingWithRank> waitingWithRanks) {

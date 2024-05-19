@@ -2,7 +2,6 @@ package roomescape.application.dto;
 
 import java.time.LocalDate;
 import roomescape.domain.Waiting;
-import roomescape.domain.dto.WaitingWithRank;
 
 public record WaitingResponse(
         Long id,

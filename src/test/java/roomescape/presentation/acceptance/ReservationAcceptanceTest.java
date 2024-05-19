@@ -39,7 +39,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약을 추가한다.")
     @Test
     void createReservationTest() {
-        ReservationRequest request = ReservationRequestFixture.of(1L, 1L);
+        ReservationRequest request = ReservationRequestFixture.of(LocalDate.of(2024,12,1), 1L, 1L);
 
         ReservationResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -52,7 +52,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 .as(ReservationResponse.class);
 
         assertThat(response.member().name()).isEqualTo("회원");
-        assertThat(response.date()).isEqualTo(LocalDate.of(2024, 1, 1));
+        assertThat(response.date()).isEqualTo(LocalDate.of(2024, 12, 1));
     }
 
     @DisplayName("존재하지 않는 테마로 예약을 추가 요청하면 에러가 발생한다.")
