@@ -1,125 +1,85 @@
 package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
 
 @DataJpaTest
 class ReservationTimeRepositoryTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Test
-    @DisplayName("예약 시간을 추가한다.")
-    void save() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-
-        assertThat(savedReservationTime.getId()).isEqualTo(1L);
-        assertThat(savedReservationTime.getStartAt()).isEqualTo("10:00");
-    }
-
-    @Test
-    @DisplayName("모든 예약 시간들을 조회한다.")
-    void findAll() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-
-        assertThat(reservationTimeRepository.findAll()).hasSize(1);
-        assertThat(reservationTimeRepository.findAll().get(0).getStartAt()).isEqualTo("10:00");
-    }
-
-    @Test
-    @DisplayName("예약 시간을 조회한다.")
-    void findById() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-
-        Optional<ReservationTime> foundReservationTime = reservationTimeRepository.findById(1L);
-        assertThat(foundReservationTime).isPresent();
-        assertThat(foundReservationTime.get().getStartAt()).isEqualTo("10:00");
-    }
-
-    @Test
-    @DisplayName("예약 가능한 시간들을 조회한다.")
-    void findAvailableReservationTimes() {
-        String insertMemberSQL = """
-                INSERT INTO member (id, email, password, name, role)
-                VALUES ('1', 'example@gmail.com', 'password', 'name1', 'USER');
-                """;
-
-        String insertTimeSQL = """
-                INSERT INTO reservation_time (id, start_at)
-                VALUES (1, '10:00'), 
-                       (2, '11:00'), 
-                       (3, '12:00');
-                """;
-
-        String insertThemeSQL = """
-                INSERT INTO theme (id, name, description, thumbnail)
-                VALUES (1, '테마1', '테마1 설명', 'https://example1.com');
-                """;
-
-        String insertReservationSQL = """
-                INSERT INTO reservation (id, date, member_id, time_id, theme_id, status)
-                VALUES (1, '2024-05-04', 1, 1, 1, 'RESERVED'),
-                       (2, '2024-05-04', 1, 3, 1, 'RESERVED');
-                """;
-
-        jdbcTemplate.update(insertMemberSQL);
-        jdbcTemplate.update(insertTimeSQL);
-        jdbcTemplate.update(insertThemeSQL);
-        jdbcTemplate.update(insertReservationSQL);
-
-        LocalDate date = LocalDate.of(2024, 5, 4);
-        List<AvailableReservationTimeDto> availableReservationTimes = reservationTimeRepository
-                .findAvailableReservationTimes(date, 1L);
-
-        assertThat(availableReservationTimes).containsExactly(
-                new AvailableReservationTimeDto(1L, LocalTime.of(10, 0), true),
-                new AvailableReservationTimeDto(2L, LocalTime.of(11, 0), false),
-                new AvailableReservationTimeDto(3L, LocalTime.of(12, 0), true)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 시간을 삭제한다.")
-    void deleteById() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-
-        reservationTimeRepository.deleteById(1L);
-
-        assertThat(reservationTimeRepository.existsById(1L)).isFalse();
-    }
-
-    @Test
-    @DisplayName("id에 해당하는 예약 시간이 존재하는지 확인한다.")
-    void existsById() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-
-        assertThat(reservationTimeRepository.existsById(1L)).isTrue();
-        assertThat(reservationTimeRepository.existsById(2L)).isFalse();
-    }
-
-    @Test
-    @DisplayName("startAt에 해당하는 예약 시간이 존재하는지 확인한다.")
+    @DisplayName("시작 시간으로 예약 시간이 존재하는지 확인한다.")
     void existsByStartAt() {
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
+        ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
-        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).isTrue();
-        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0))).isFalse();
+        boolean exists = reservationTimeRepository.existsByStartAt(savedReservationTime.getStartAt());
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @Sql("/available-reservation-times.sql")
+    @DisplayName("이용 가능한 시간들을 조회한다.")
+    void findAvailableReservationTimes() {
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        Long themeId = 1L;
+
+        List<AvailableReservationTimeDto> response = reservationTimeRepository
+                .findAvailableReservationTimes(date, themeId);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response).hasSize(4);
+
+            softly.assertThat(response.get(0).id()).isEqualTo(1L);
+            softly.assertThat(response.get(0).startAt()).isEqualTo("09:00");
+            softly.assertThat(response.get(0).alreadyBooked()).isFalse();
+
+            softly.assertThat(response.get(1).id()).isEqualTo(2L);
+            softly.assertThat(response.get(1).startAt()).isEqualTo("12:00");
+            softly.assertThat(response.get(1).alreadyBooked()).isTrue();
+
+            softly.assertThat(response.get(2).id()).isEqualTo(3L);
+            softly.assertThat(response.get(2).startAt()).isEqualTo("17:00");
+            softly.assertThat(response.get(2).alreadyBooked()).isFalse();
+
+            softly.assertThat(response.get(3).id()).isEqualTo(4L);
+            softly.assertThat(response.get(3).startAt()).isEqualTo("21:00");
+            softly.assertThat(response.get(3).alreadyBooked()).isTrue();
+        });
+    }
+
+    @Test
+    @DisplayName("아이디로 예약 시간을 조회한다.")
+    void getById() {
+        ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+
+        ReservationTime reservationTime = reservationTimeRepository.getById(savedReservationTime.getId());
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservationTime.getId()).isNotNull();
+            softly.assertThat(reservationTime.getStartAt()).isEqualTo("10:00");
+        });
+    }
+
+    @Test
+    @DisplayName("아이디로 예약 시간을 조회하고, 없을 경우 예외를 발생시킨다.")
+    void getByIdWhenNotExist() {
+        assertThatThrownBy(() -> reservationTimeRepository.getById(-1L))
+                .isInstanceOf(DomainNotFoundException.class)
+                .hasMessage("해당 id의 예약 시간이 존재하지 않습니다.");
     }
 }
