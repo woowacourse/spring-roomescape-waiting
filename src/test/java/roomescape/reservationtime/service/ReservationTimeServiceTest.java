@@ -96,7 +96,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간 삭제 요청시 예외를 던진다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExistAtTime() {
-        List<Reservation> reservations = List.of(Reservation.of(
+        List<Reservation> reservations = List.of(new Reservation(
                 LocalDate.now().plusDays(1),
                 new ReservationTime(1L, LocalTime.now()),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),

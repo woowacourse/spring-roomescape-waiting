@@ -13,6 +13,7 @@ import roomescape.reservationtime.exception.TimeExceptionCode;
 @Entity
 public class ReservationTime {
 
+    private static final int NULL_ID = 0;
     private static final LocalTime OPEN_TIME = LocalTime.of(8, 0);
     private static final LocalTime CLOSE_TIME = LocalTime.of(23, 0);
 
@@ -26,18 +27,15 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
-    public ReservationTime(LocalTime startAt) {
-        this(0, startAt);
-        validation();
-    }
-
     public ReservationTime(long id, LocalTime startAt) {
+        validateTime(startAt);
+
         this.id = id;
         this.startAt = startAt;
     }
 
-    public ReservationTime(long id) {
-        this(id, null);
+    public ReservationTime(LocalTime startAt) {
+        this(NULL_ID, startAt);
     }
 
     public long getId() {
@@ -48,11 +46,7 @@ public class ReservationTime {
         return startAt;
     }
 
-    public void setIdOnSave(long id) {
-        this.id = id;
-    }
-
-    public void validation() {
+    public void validateTime(LocalTime startAt) {
         if (startAt == null) {
             throw new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
         }

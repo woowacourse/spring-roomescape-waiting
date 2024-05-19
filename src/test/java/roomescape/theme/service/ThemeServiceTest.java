@@ -34,7 +34,7 @@ public class ThemeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 테마는 삭제하지 못한다.")
     void validateReservationExistence_ShouldThrowException_WhenReservationExist() {
-        List<Reservation> reservations = List.of(Reservation.of(
+        List<Reservation> reservations = List.of(new Reservation(
                 LocalDate.now().plusDays(1),
                 new ReservationTime(1L, LocalTime.now()),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),

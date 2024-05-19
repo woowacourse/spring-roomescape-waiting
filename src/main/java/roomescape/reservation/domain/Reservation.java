@@ -19,6 +19,8 @@ import roomescape.reservationtime.domain.ReservationTime;
 @Entity
 public class Reservation {
 
+    private static final int NULL_ID = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -40,6 +42,7 @@ public class Reservation {
 
     public Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         validateAtSave(date);
+        validateAtSaveDateAndTime(date, time);
 
         this.id = id;
         this.date = date;
@@ -48,18 +51,25 @@ public class Reservation {
         this.member = member;
     }
 
-    public static Reservation of(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        return new Reservation(id, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(NULL_ID, date, time, theme, member);
     }
 
-    public static Reservation of(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validateAtSaveDateAndTime(date, time);
-        return new Reservation(0, date, time, theme, member);
-    }
-
-    private static void validateAtSave(LocalDate date) {
+    private void validateAtSave(LocalDate date) {
         if (date.isBefore(LocalDate.now())) {
             throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION);
+        }
+    }
+
+    private void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {
+        if (date.equals(LocalDate.now())) {
+            validateTime(time);
+        }
+    }
+
+    private void validateTime(ReservationTime time) {
+        if (time.isBeforeTime(LocalTime.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
         }
     }
 
@@ -81,18 +91,6 @@ public class Reservation {
 
     public Member getMember() {
         return member;
-    }
-
-    private static void validateAtSaveDateAndTime(LocalDate date, ReservationTime time) {
-        if (date.equals(LocalDate.now())) {
-            validateTime(time);
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time.isBeforeTime(LocalTime.now())) {
-            throw new RoomEscapeException(ReservationExceptionCode.RESERVATION_TIME_IS_PAST_EXCEPTION);
-        }
     }
 
     @Override

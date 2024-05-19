@@ -26,7 +26,7 @@ class ReservationTest {
         Theme theme = Theme.themeOf(1, "미르", "미르 방탈출", "썸네일 Url");
         ReservationTime time = new ReservationTime(1, TIME);
         Member member = Member.memberOf(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
-        Reservation reservation = Reservation.of(1L, TOMORROW, time, theme, member);
+        Reservation reservation = new Reservation(1L, TOMORROW, time, theme, member);
 
         assertAll(
                 () -> assertEquals(theme, reservation.getTheme()),
@@ -45,7 +45,7 @@ class ReservationTest {
         Member member = Member.memberOf(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
 
         Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
-                () -> Reservation.of(BEFORE, time, theme, member));
+                () -> new Reservation(BEFORE, time, theme, member));
 
         assertEquals(ReservationExceptionCode.RESERVATION_DATE_IS_PAST_EXCEPTION.getMessage(),
                 pastDateReservation.getMessage());

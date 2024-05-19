@@ -31,7 +31,7 @@ import roomescape.reservationtime.repository.TimeRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    private final Reservation reservation = Reservation.of(
+    private final Reservation reservation = new Reservation(
             1L,
             LocalDate.now().plusDays(1),
             new ReservationTime(1L, LocalTime.now()),

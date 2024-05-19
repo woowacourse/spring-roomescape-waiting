@@ -47,7 +47,7 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_MEMBER_IS_NULL_EXCEPTION));
 
-        Reservation saveReservation = Reservation.of(reservationRequest.date(), time, theme, member);
+        Reservation saveReservation = new Reservation(reservationRequest.date(), time, theme, member);
 
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
@@ -60,7 +60,7 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
-        Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member);
+        Reservation saveReservation = new Reservation(adminReservationRequest.date(), time, theme, member);
         ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
 
