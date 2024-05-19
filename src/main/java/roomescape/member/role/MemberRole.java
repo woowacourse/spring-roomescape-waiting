@@ -1,13 +1,11 @@
 package roomescape.member.role;
 
-import jakarta.persistence.Embeddable;
 import java.util.Arrays;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 
 public enum MemberRole {
 
-    NON_MEMBER,
     MEMBER,
     ADMIN;
 
