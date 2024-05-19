@@ -1,6 +1,7 @@
 package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationRepository;
 
@@ -13,6 +14,7 @@ public class ReservationDeleteService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public void deleteReservation(long id) {
         reservationRepository.findById(id)
                 .orElseThrow(() -> new InvalidRequestException("존재하지 않는 예약 아이디 입니다."));

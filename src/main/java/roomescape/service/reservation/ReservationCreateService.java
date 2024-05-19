@@ -3,6 +3,7 @@ package roomescape.service.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -33,6 +34,7 @@ public class ReservationCreateService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Reservation create(ReservationAdminSaveRequest request) {
         Reservation reservation = request.toEntity(
                 request,
@@ -42,6 +44,7 @@ public class ReservationCreateService {
         return saveReservation(reservation);
     }
 
+    @Transactional
     public Reservation create(ReservationSaveRequest request, Member member) {
         Reservation reservation = request.toEntity(
                 request,
