@@ -11,11 +11,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginUserArgumentResolver loginUserArgumentResolver;
     private final CheckAdminInterceptor checkAdminInterceptor;
+    private final MemberLoginInterceptor memberLoginInterceptor;
 
     public WebMvcConfig(LoginUserArgumentResolver loginUserArgumentResolver,
-                        CheckAdminInterceptor checkAdminInterceptor) {
+                        CheckAdminInterceptor checkAdminInterceptor,
+                        final MemberLoginInterceptor memberLoginInterceptor) {
         this.loginUserArgumentResolver = loginUserArgumentResolver;
         this.checkAdminInterceptor = checkAdminInterceptor;
+        this.memberLoginInterceptor = memberLoginInterceptor;
     }
 
     @Override
@@ -27,5 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(checkAdminInterceptor)
                 .addPathPatterns("/admin/**");
+        registry.addInterceptor(memberLoginInterceptor)
+                .addPathPatterns("/reservation");
     }
 }
