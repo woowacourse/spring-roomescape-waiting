@@ -23,12 +23,11 @@ public interface ThemeRepository extends CrudRepository<Theme, Long> {
     @Query("""
             SELECT r.theme
             FROM Reservation r
-            INNER JOIN Theme th on r.theme.id = th.id
+            INNER JOIN Theme th ON r.theme.id = th.id
             WHERE r.date BETWEEN :before AND :after
             GROUP BY th
             ORDER BY COUNT(th) DESC
-            limit 10
             """)
-    List<Theme> findFirst10ByDateBetweenOrderByTheme(@Param("before") LocalDate before,
-                                                     @Param("after") LocalDate after);
+    List<Theme> findByDateBetweenOrderByTheme(@Param("before") LocalDate before,
+                                              @Param("after") LocalDate after);
 }

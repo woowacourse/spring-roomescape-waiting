@@ -99,10 +99,10 @@ class ThemeRepositoryTest {
         entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme10, member));
         entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
         entityManager.persist(new Reservation(LocalDate.now(), reservationTime, theme9, member));
-
+//
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().plusDays(1);
-        List<Theme> themes = themeRepository.findFirst10ByDateBetweenOrderByTheme(before, after);
+        List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);
 
         assertSoftly(softly -> {
             softly.assertThat(themes).hasSize(10);

@@ -45,6 +45,7 @@ public class ThemeController {
 
     @GetMapping("/themes/top10")
     public ResponseEntity<List<Theme>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.findPopularThemes());
+        List<Theme> popularThemes = themeService.findPopularThemes(10);
+        return ResponseEntity.ok(popularThemes);
     }
 }

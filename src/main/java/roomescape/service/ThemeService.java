@@ -31,10 +31,14 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public List<Theme> findPopularThemes() {
+    public List<Theme> findPopularThemes(int count) {
         LocalDate before = LocalDate.now().minusDays(8);
         LocalDate after = LocalDate.now().minusDays(1);
-        return themeRepository.findFirst10ByDateBetweenOrderByTheme(before, after);
+        List<Theme> themes = themeRepository.findByDateBetweenOrderByTheme(before, after);
+        if (themes.size() < count) {
+            count = themes.size();
+        }
+        return themes.subList(0, count);
     }
 
 }
