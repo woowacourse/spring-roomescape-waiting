@@ -133,8 +133,6 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        // reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/times/1")
@@ -160,8 +158,6 @@ class ReservationTimeIntegrationTest {
     @Test
     @DisplayName("방탈출 시간 조회 시, 조회하려는 시간이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeNotExist() {
-        // reservationTimeRepository.save(new ReservationTime(LocalTime.of(20, 0)));
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/times/1")

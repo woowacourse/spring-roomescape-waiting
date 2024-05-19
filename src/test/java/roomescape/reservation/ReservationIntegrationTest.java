@@ -235,7 +235,6 @@ class ReservationIntegrationTest {
     @DisplayName("예약 생성 시 해당하는 테마가 없는 경우 예외를 반환한다.")
     void createReservation_WhenThemeNotExist() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
-        // themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", "2024-11-30");
@@ -256,7 +255,6 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 생성 시 해당하는 시간이 없는 경우 예외를 반환한다.")
     void createReservation_WhenTimeNotExist() {
-        // reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
 
         Map<String, Object> params = new HashMap<>();
@@ -343,7 +341,6 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void getReservationTime_WhenTimeNotExist() {
-        // reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/1")
@@ -422,7 +419,6 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
     void deleteReservationTime_WhenTimeNotExist() {
-        // reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"), reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")

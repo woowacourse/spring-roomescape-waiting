@@ -234,8 +234,6 @@ class ThemeIntegrationTest {
     @Test
     @DisplayName("방탈출 테마 삭제 시, 해당 테마가 존재하지 않는다면 예외를 반환한다.")
     void deleteTheme_WhenAlreadyNotExist() {
-        // themeRepository.save(new Theme( "테마이름", "설명", "썸네일"));
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/themes/1")
