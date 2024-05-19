@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.theme.repository;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,21 +15,22 @@ import roomescape.theme.domain.Theme;
 
 @DataJpaTest
 @Sql(scripts = "/data-test.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class ReservationRepositoryTest {
+class ThemeRepositoryTest {
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ThemeRepository themeRepository;
 
     @Test
     @DisplayName("제한된 개수에 맞게 인기 많은 테마를 조회해 온다.")
     void findAllByDateOrderByThemeIdCountLimit() {
+        int limitCount = 2;
         LocalDate from = LocalDate.of(2024, 4, 28);
         LocalDate to = LocalDate.of(2024, 5, 28);
-        List<Theme> themes = reservationRepository.findAllByDateOrderByThemeIdCountLimit(from, to, 1);
+        List<Theme> themes = themeRepository.findLimitedAllByDateOrderByThemeIdCount(from, to, limitCount);
 
         assertAll(
-                () -> assertEquals(themes.size(), 1),
-                () -> assertEquals(themes.get(0).getId(), 1)
+                () -> assertEquals(limitCount, themes.size()),
+                () -> assertEquals(1, themes.get(0).getId())
         );
     }
 }

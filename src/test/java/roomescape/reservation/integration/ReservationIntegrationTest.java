@@ -34,7 +34,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(6));
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/3")
@@ -45,7 +45,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(5));
     }
 
     @Test
