@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -74,6 +75,7 @@ class ReservationTimeServiceTest {
 
     @DisplayName("선택한 테마에 대한 예약시간이 존재하는 경우 예약 가능한 시간을 반환한다.")
     @Test
+    @Transactional
     void findReservationAvailabilityTimesWhenReservationTimeExist() {
         // given
         // 시간 저장

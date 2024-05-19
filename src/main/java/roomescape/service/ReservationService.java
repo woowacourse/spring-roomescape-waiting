@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -41,6 +42,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll()
                 .stream()
@@ -48,6 +50,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
         return reservationRepository.findByMemberId(authInfo.id())
                 .stream()
@@ -55,6 +58,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
@@ -67,6 +71,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
                 .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다."));

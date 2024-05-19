@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -69,6 +70,7 @@ class ReservationServiceTest {
 
     @DisplayName("현재 로그인된 멤버의 예약을 전부 조회한다.")
     @Test
+    @Transactional
     void findMyReservations() {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
@@ -97,6 +99,7 @@ class ReservationServiceTest {
 
     @DisplayName("모든 예약 검색")
     @Test
+    @Transactional
     void findAll() {
         assertThat(reservationService.findAll()).isEmpty();
     }
@@ -111,6 +114,7 @@ class ReservationServiceTest {
 
     @DisplayName("예약 저장")
     @Test
+    @Transactional
     void save() {
         // given
         ReservationCreateRequest reservationCreateRequest = createReservationRequest(MEMBER_BROWN,
