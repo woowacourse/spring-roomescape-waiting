@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.dto.WaitingReadOnly;
 import roomescape.domain.reservation.dto.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
@@ -23,6 +24,15 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("select w.member.id from Waiting w where w.id = :id")
     Long findMemberIdById(Long id);
+
+    @Query("""
+            select new roomescape.domain.reservation.dto.WaitingReadOnly(
+            w.id,
+            w.member,
+            w.reservation.slot
+            )
+            from Waiting w""")
+    List<WaitingReadOnly> findAllReadOnly();
 
     boolean existsByReservationAndMember(Reservation reservation, Member member);
 }

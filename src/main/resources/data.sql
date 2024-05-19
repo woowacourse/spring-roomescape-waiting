@@ -46,6 +46,6 @@ VALUES (1, '2024-05-04', 1, 1),
        (2, '2024-05-30', 7, 2)
 ;
 INSERT INTO waiting (member_id, reservation_id)
-VALUES (3, 14),
-       (1, 14),
-       (1, 15);
+VALUES (3, 15),
+       (1, 15),
+       (1, 16);

@@ -22,6 +22,7 @@ import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
 import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.WaitingResponse;
 
 @Service
 public class ReservationService {
@@ -128,6 +129,13 @@ public class ReservationService {
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingResponse> findAllWaiting() {
+        return waitingRepository.findAllReadOnly().stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }
 

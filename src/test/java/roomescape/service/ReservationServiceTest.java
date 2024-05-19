@@ -25,6 +25,7 @@ import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
 import roomescape.service.dto.UserReservationResponse;
+import roomescape.service.dto.WaitingResponse;
 
 @Transactional
 class ReservationServiceTest extends IntegrationTestSupport {
@@ -160,6 +161,22 @@ class ReservationServiceTest extends IntegrationTestSupport {
                         tuple(14L, "예약"),
                         tuple(2L, "2번째 예약대기"),
                         tuple(3L, "1번째 예약대기")
+                );
+    }
+
+    @DisplayName("예약 대기 목록을 조회한다.")
+    @Test
+    void findAllWaiting() {
+        // given // when
+        List<WaitingResponse> allWaiting = reservationService.findAllWaiting();
+
+        // then
+        assertThat(allWaiting).hasSize(3)
+                .extracting("name", "theme", "date", "startAt")
+                .containsExactlyInAnyOrder(
+                        tuple("유저2", "이름2", LocalDate.parse("2024-05-30"), LocalTime.parse("10:00")),
+                        tuple("어드민", "이름2", LocalDate.parse("2024-05-30"), LocalTime.parse("10:00")),
+                        tuple("어드민", "이름2", LocalDate.parse("2024-05-30"), LocalTime.parse("11:00"))
                 );
     }
 }
