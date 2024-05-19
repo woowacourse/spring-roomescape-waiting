@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import io.jsonwebtoken.JwtException;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -16,11 +18,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     private static final String EXCEPTION_PREFIX = "[ERROR] ";
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchInternalServerException(Exception ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.error(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
@@ -31,7 +35,7 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("\n"));
 
-        System.out.println(exceptionMessages);
+        logger.error(exceptionMessages);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exceptionMessages));
     }
@@ -56,7 +60,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchBadRequestException(IllegalArgumentException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
@@ -66,21 +69,18 @@ public class GlobalExceptionHandler {
             JwtException.class
     })
     public ResponseEntity<ProblemDetail> catchUnauthorizedException(Exception ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage()));
     }
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchNotFoundException(NoSuchElementException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchConflictException(IllegalStateException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage()));
     }
