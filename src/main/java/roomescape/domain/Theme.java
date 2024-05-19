@@ -19,7 +19,7 @@ public class Theme {
     @OneToMany(mappedBy = "theme")
     private Set<Reservation> reservations;
 
-    public Theme() {
+    protected Theme() {
 
     }
 

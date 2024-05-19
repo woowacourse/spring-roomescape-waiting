@@ -14,7 +14,7 @@ public class TimeSlot {
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot() {
+    protected TimeSlot() {
 
     }
 
