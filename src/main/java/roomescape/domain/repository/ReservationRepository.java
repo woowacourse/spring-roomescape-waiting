@@ -22,14 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("select r from Reservation r where r.date = :date and r.theme = :theme")
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
-    @Query("""
-            select r.theme
-            from Reservation r
-            where r.date between :startDate and :endDate
-            group by r.theme
-            order by count(r) desc
-            """)
-    List<Theme> findTopThemesDurationOrderByCount(LocalDate startDate, LocalDate endDate, Limit limit);
+    List<Reservation> findAllByDateBetween(LocalDate startDate, LocalDate endDate);
 
     // TODO nullable 사용보다 더 좋은 방법 고민해보기
     @Query("""

@@ -1,8 +1,12 @@
 package roomescape.service;
 
+import java.util.Collections;
 import java.util.List;
-import org.springframework.data.domain.Limit;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
@@ -11,8 +15,12 @@ import roomescape.service.dto.request.PopularThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 import roomescape.service.dto.request.ThemeSaveRequest;
 
+import static java.util.stream.Collectors.groupingBy;
+
 @Service
 public class ThemeService {
+
+    private static final int POPULAR_THEME_RANK_COUNT = 10;
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -35,14 +43,27 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
-        List<Theme> popularThemes = reservationRepository.findTopThemesDurationOrderByCount(
+        List<Reservation> reservations = reservationRepository.findAllByDateBetween(
                 popularThemeRequest.startDate(),
-                popularThemeRequest.endDate(),
-                Limit.of(popularThemeRequest.limit())
+                popularThemeRequest.endDate()
         );
+
+        List<Theme> popularThemes = makePopularThemeRanking(reservations);
 
         return popularThemes.stream()
                 .map(ThemeResponse::new)
+                .toList();
+    }
+
+    private List<Theme> makePopularThemeRanking(List<Reservation> reservations) {
+        Map<Theme, Long> reservationCounting = reservations.stream()
+                .collect(groupingBy(Reservation::getTheme, Collectors.counting()));
+
+        return reservationCounting.entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .limit(POPULAR_THEME_RANK_COUNT)
+                .map(Map.Entry::getKey)
                 .toList();
     }
 
