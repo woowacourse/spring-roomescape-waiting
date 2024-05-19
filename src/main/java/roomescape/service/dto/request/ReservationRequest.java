@@ -6,6 +6,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 public record ReservationRequest(
         @NotNull(message = "날짜를 입력해주세요.")
@@ -19,5 +20,9 @@ public record ReservationRequest(
 
     public Reservation toEntity(Member member, ReservationTime reservationTime, Theme theme) {
         return new Reservation(member, date, reservationTime, theme);
+    }
+
+    public Waiting toWaiting(Member member, ReservationTime reservationTime, Theme theme) {
+        return new Waiting(member, date, reservationTime, theme);
     }
 }

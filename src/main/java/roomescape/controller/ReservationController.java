@@ -20,6 +20,7 @@ import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.WaitingResponse;
 
 
 @RestController
@@ -48,13 +49,29 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<WaitingResponse> postReservationWaiting(
+            @RequestBody @Valid UserReservationRequest userReservationRequest,
+            @MemberId Long id
+    ) {
+        ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(id);
+        WaitingResponse waitingResponse = reservationService.createWaiting(reservationRequest, id);
+        URI location = UriComponentsBuilder.newInstance()
+                .path("/reservations/waiting/{id}")
+                .buildAndExpand(waitingResponse.id())
+                .toUri();
+
+        return ResponseEntity.created(location)
+                .body(waitingResponse);
+    }
+
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservationsByCondition() {
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
         return ResponseEntity.ok(reservationService.findAllReservations());
     }
 
     @GetMapping(params = {"themeId", "memberId", "dateFrom", "dateTo"})
-    public ResponseEntity<List<ReservationResponse>> getReservationsByCondition(
+    public ResponseEntity<List<ReservationResponse>> getReservations(
             @ModelAttribute ReservationConditionRequest request
     ) {
         return ResponseEntity.ok(reservationService.findAllReservationsByCondition(request));
