@@ -15,14 +15,6 @@ import roomescape.member.role.MemberRole;
 
 class MemberTest {
 
-//    @Test
-//    @DisplayName("Default 이름을 집어넣는다.")
-//    void shouldUseDefaultName() {
-//        Member member = new Member("어드민", "polla@gmail.com", "opolla09", );
-//
-//        assertEquals("어드민", member.getName());
-//    }
-
     @ParameterizedTest
     @ValueSource(strings = {" ", "vhffk@gmail", "vhffkgmail.com"})
     @DisplayName("잘못된 Email 형식일 경우 예외를 던진다.")
