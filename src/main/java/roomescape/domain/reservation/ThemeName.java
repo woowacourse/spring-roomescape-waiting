@@ -8,7 +8,7 @@ import java.util.Objects;
 public class ThemeName {
     private static final int NAME_MAX_LENGTH = 20;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     protected ThemeName() {

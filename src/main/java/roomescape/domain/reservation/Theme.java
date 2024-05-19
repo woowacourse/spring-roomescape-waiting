@@ -6,9 +6,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 
 @Entity
+@Table(name = "theme")
 public class Theme {
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final int MAX_THUMBNAIL_URL_LENGTH = 200;

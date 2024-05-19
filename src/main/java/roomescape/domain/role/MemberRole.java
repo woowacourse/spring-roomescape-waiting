@@ -4,17 +4,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 
 @Entity
+@Table(name = "role")
 public class MemberRole {
     @Id
     private Long id;
     @MapsId
-    @OneToOne(optional = false)
+    @OneToOne
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @Enumerated(EnumType.STRING)
     private Role role;
