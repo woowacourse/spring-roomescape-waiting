@@ -1,0 +1,15 @@
+### 모든 사용자 조회
+GET localhost:8080/members
+
+### 회원가입 요청
+POST localhost:8080/members
+Content-Type: application/json
+
+{
+  "name": "name",
+  "email": "email2@email.com",
+  "password": "password"
+}
+
+### 회원 삭제
+DELETE localhost:8080/members/1

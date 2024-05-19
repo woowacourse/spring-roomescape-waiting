@@ -2,6 +2,9 @@ package roomescape.domain;
 
 import java.util.Arrays;
 
+import lombok.Getter;
+
+@Getter
 public enum Role {
     NORMAL("normal"),
     ADMIN("admin");
@@ -17,13 +20,5 @@ public enum Role {
                 .filter(role -> role.getValue().equals(value))
                 .findAny()
                 .orElseThrow(IllegalArgumentException::new);
-    }
-
-    public boolean isAdmin() {
-        return this == Role.ADMIN;
-    }
-
-    public String getValue() {
-        return value;
     }
 }

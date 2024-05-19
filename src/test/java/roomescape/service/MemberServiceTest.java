@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,6 @@ class MemberServiceTest {
     private AuthService authService;
     @Autowired
     private JwtProvider jwtProvider;
-    private Member dummyMember;
-
-    @BeforeEach
-    void setUp() {
-        dummyMember = new Member("name", "email", "password");
-    }
 
     @AfterEach
     void tearDown() {
@@ -84,9 +77,13 @@ class MemberServiceTest {
     @DisplayName("모든 사용자들을 반환한다")
     void findAllMember_ShouldReturnAllMembers() {
         // given
-        memberRepository.save(dummyMember);
-        memberRepository.save(dummyMember);
-        memberRepository.save(dummyMember);
+        Member member1 = new Member("name", "email", "password");
+        Member member2 = new Member("name", "email", "password");
+        Member member3 = new Member("name", "email", "password");
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+        memberRepository.save(member3);
 
         // when
         List<MemberResponse> responses = memberService.findAllMember();
@@ -125,7 +122,8 @@ class MemberServiceTest {
     @DisplayName("회원정보를 삭제할 수 있다")
     void withdrawal_ShouldRemovePersistence() {
         // given
-        Member savedMember = memberRepository.save(dummyMember);
+        Member member = new Member("name", "email", "password");
+        Member savedMember = memberRepository.save(member);
 
         // when
         memberService.withdrawal(savedMember.getId());
