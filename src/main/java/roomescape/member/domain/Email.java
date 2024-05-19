@@ -7,19 +7,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Embeddable
-public class Email {
+public record Email (
+        @Column(nullable = false, unique = true)
+        String email
+) {
     private static final Pattern emailPattern = Pattern.compile(
             "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    public Email(final String email) {
+    public Email {
         validateEmail(email);
-        this.email = email;
-    }
-
-    protected Email() {
     }
 
     private void validateEmail(final String email) {
@@ -38,22 +34,5 @@ public class Email {
         if (!matcher.matches()) {
             throw new IllegalArgumentException(email + "은 이메일 형식이 아닙니다.");
         }
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Email email1 = (Email) o;
-        return Objects.equals(email, email1.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(email);
     }
 }
