@@ -17,7 +17,7 @@ import roomescape.global.domain.Name;
 @Entity
 public class Member {
 
-    private static final String DEFAULT_NAME = "어드민";
+    private static final int NULL_ID = 0;
     private static final Pattern EMAIL_FORM = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$");
     private static final Pattern PASSWORD_FORM = Pattern.compile("^(?=.*\\d)(?=.*[a-z])[a-z0-9]*$");
 
@@ -52,16 +52,8 @@ public class Member {
         this.role = role;
     }
 
-    private Member(String name, String email, String password, MemberRole role) {
-        this(0, new Name(name), email, password, role);
-    }
-
-    public static Member memberOf(long id, String name, String email, String password, String role) {
-        return new Member(id, new Name(name), email, password, MemberRole.findMemberRole(role));
-    }
-
-    public static Member saveMemberOf(String email, String password) {
-        return new Member(DEFAULT_NAME, email, password, MemberRole.MEMBER);
+    public Member(Name name, String email, String password, MemberRole role) {
+        this(NULL_ID, name, email, password, role);
     }
 
     private static void validateEmailFormat(String email) {

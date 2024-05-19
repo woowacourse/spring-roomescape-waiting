@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.global.domain.Name;
 import roomescape.member.domain.Member;
+import roomescape.member.role.MemberRole;
 import roomescape.model.ControllerTest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
@@ -31,10 +32,12 @@ class ReservationControllerTest extends ControllerTest {
 
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
-    private final Reservation reservation = new Reservation(1L, TOMORROW,
+    private final Reservation reservation = new Reservation(
+            1L,
+            TOMORROW,
             new ReservationTime(1L, LocalTime.of(10, 0)),
             new Theme(1L, new Name("polla"), "폴라 방탈출", "이미지~"),
-            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN")
+            new Member(1L, new Name("polla"), "kyunellroll@gmail.com", "polla99", MemberRole.MEMBER)
     );
     private final String expectedStartAt = "10:00:00";
 

@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.global.domain.Name;
+import roomescape.member.role.MemberRole;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -36,7 +37,7 @@ class ReservationServiceTest {
             LocalDate.now().plusDays(1),
             new ReservationTime(1L, LocalTime.now()),
             new Theme(1L, new Name("pollaBang"), "폴라 방탈출", "thumbnail"),
-            Member.memberOf(1L, "polla", "kyunellroll@gmail.com", "polla99", "ADMIN")
+            new Member(1L, new Name("polla"), "kyunellroll@gmail.com", "polla99", MemberRole.MEMBER)
     );
 
     @InjectMocks

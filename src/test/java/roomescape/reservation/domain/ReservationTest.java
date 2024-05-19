@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.global.domain.Name;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
+import roomescape.member.role.MemberRole;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -26,7 +27,12 @@ class ReservationTest {
     void constructReservation() {
         Theme theme = new Theme(1, new Name("미르"), "미르 방탈출", "썸네일 Url");
         ReservationTime time = new ReservationTime(1, TIME);
-        Member member = Member.memberOf(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
+        Member member = new Member(
+                1,
+                new Name("polla"),
+                "polla@gmail.com",
+                "polla99",
+                MemberRole.ADMIN);
         Reservation reservation = new Reservation(1L, TOMORROW, time, theme, member);
 
         assertAll(
@@ -43,7 +49,13 @@ class ReservationTest {
     void validation_ShouldThrowException_WhenReservationDateIsPast() {
         ReservationTime time = new ReservationTime(1, TIME);
         Theme theme = new Theme(1, new Name("미르"), "미르 방탈출", "썸네일 Url");
-        Member member = Member.memberOf(1, "polla", "polla@gmail.com", "polla99", "ADMIN");
+        Member member = new Member(
+                1,
+                new Name("polla"),
+                "polla@gmail.com",
+                "polla99",
+                MemberRole.ADMIN
+        );
 
         Throwable pastDateReservation = assertThrows(RoomEscapeException.class,
                 () -> new Reservation(BEFORE, time, theme, member));
