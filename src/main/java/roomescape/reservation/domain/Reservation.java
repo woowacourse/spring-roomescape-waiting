@@ -99,22 +99,16 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id)
-               && Objects.equals(member, that.member)
-               && Objects.equals(date, that.date)
-               && Objects.equals(time, that.time)
-               && Objects.equals(theme, that.theme);
+
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return id != null ? id.hashCode() : 0;
     }
 }

@@ -67,21 +67,17 @@ public class Member {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        Member member = (Member) object;
-        return Objects.equals(id, member.id)
-               && Objects.equals(name, member.name)
-               && Objects.equals(email, member.email);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Member member = (Member) o;
+
+        return Objects.equals(id, member.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email);
+        return id != null ? id.hashCode() : 0;
     }
 }
