@@ -7,29 +7,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.CookieProvider;
-import roomescape.domain.member.Role;
-import roomescape.dto.MemberResponse;
-import roomescape.service.MemberService;
+import roomescape.auth.JwtTokenProvider;
+import roomescape.dto.auth.LoginMember;
 
 @Component
 public class CheckRoleInterceptor implements HandlerInterceptor {
 
-    private final MemberService memberService;
     private final CookieProvider cookieProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public CheckRoleInterceptor(final MemberService memberService,
-                                final CookieProvider cookieProvider) {
-        this.memberService = memberService;
+    public CheckRoleInterceptor(final CookieProvider cookieProvider, final JwtTokenProvider jwtTokenProvider) {
         this.cookieProvider = cookieProvider;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
         final String accessToken = cookieProvider.extractToken(request.getCookies());
-        final MemberResponse memberResponse = memberService.findMemberByToken(accessToken);
+        final LoginMember loginMember = jwtTokenProvider.parse(accessToken);
 
-        if (Role.isNotAdmin(memberResponse.role())) {
+        if (loginMember.isNotAdmin()) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return false;
         }

@@ -49,7 +49,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(@AuthenticationPrincipal final LoginMember loginMember,
                                                                  @RequestBody final MemberReservationSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(loginMember.id());
-        ReservationSaveRequest saveRequest = request.generateReservationSaveRequest(memberResponse);
+        final ReservationSaveRequest saveRequest = request.generateReservationSaveRequest(memberResponse);
 
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());

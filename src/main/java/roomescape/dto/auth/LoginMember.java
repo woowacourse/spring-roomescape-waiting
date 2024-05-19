@@ -5,7 +5,10 @@ import roomescape.domain.member.Role;
 public record LoginMember(
         Long id,
         String name,
-        String email,
         Role role
 ) {
+
+    public boolean isNotAdmin() {
+        return role != Role.ADMIN;
+    }
 }

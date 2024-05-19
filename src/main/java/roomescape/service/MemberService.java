@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.domain.member.Member;
 import roomescape.dto.MemberResponse;
+import roomescape.dto.auth.LoginMember;
 import roomescape.dto.auth.TokenRequest;
 import roomescape.dto.auth.TokenResponse;
 import roomescape.repository.MemberRepository;
@@ -36,8 +37,8 @@ public class MemberService {
     }
 
     public MemberResponse findMemberByToken(final String accessToken) {
-        final Long memberId = jwtTokenProvider.getMemberIdByToken(accessToken);
-        return findById(memberId);
+        final LoginMember loginMember = jwtTokenProvider.parse(accessToken);
+        return findById(loginMember.id());
     }
 
     public List<MemberResponse> findAll() {

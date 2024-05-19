@@ -1,7 +1,6 @@
 package roomescape.controller.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -9,21 +8,18 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.CookieProvider;
-import roomescape.dto.MemberResponse;
+import roomescape.auth.JwtTokenProvider;
 import roomescape.dto.auth.LoginMember;
-import roomescape.service.MemberService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberService memberService;
     private final CookieProvider cookieProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    public LoginMemberArgumentResolver(final MemberService memberService,
-                                       final CookieProvider cookieProvider) {
-        this.memberService = memberService;
+    public LoginMemberArgumentResolver(final CookieProvider cookieProvider, final JwtTokenProvider jwtTokenProvider) {
         this.cookieProvider = cookieProvider;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -34,12 +30,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public LoginMember resolveArgument(final MethodParameter parameter,
-                                  final ModelAndViewContainer mavContainer,
-                                  final NativeWebRequest webRequest,
-                                  final WebDataBinderFactory binderFactory) throws Exception {
+                                       final ModelAndViewContainer mavContainer,
+                                       final NativeWebRequest webRequest,
+                                       final WebDataBinderFactory binderFactory) throws Exception {
         final HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         final String accessToken = cookieProvider.extractToken(request.getCookies());
-        final MemberResponse memberResponse = memberService.findMemberByToken(accessToken);
-        return new LoginMember(memberResponse.id(), memberResponse.name(), memberResponse.email(), memberResponse.role());
+        return jwtTokenProvider.parse(accessToken);
     }
 }
