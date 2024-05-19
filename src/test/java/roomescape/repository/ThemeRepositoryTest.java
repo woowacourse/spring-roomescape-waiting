@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
@@ -84,14 +85,13 @@ class ThemeRepositoryTest {
     @DisplayName("인기 테마 목록을 조회한다.")
     void findPopularThemes() {
         // given
-        final ThemePopularFilter filter
-                = ThemePopularFilter.toThemePopularFilter(LocalDate.parse("2034-05-12"));
+        final ThemePopularFilter filter = ThemePopularFilter.from(LocalDate.parse("2034-05-12"));
 
         // when
-        final int limit = filter.getLimit();
-        final List<Theme> actual = themeRepository.findPopularThemesBy(filter);
+        Pageable size = filter.ofSize();
+        final List<Theme> actual = themeRepository.findPopularThemesBy(filter, size);
 
         // then
-        assertThat(actual).hasSize(limit);
+        assertThat(actual).hasSize(filter.getLimit());
     }
 }

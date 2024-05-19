@@ -13,7 +13,7 @@ class ThemePopularFilterTest {
     @Test
     @DisplayName("필터링 종료 날짜로 필터링 시작 날짜를 계산한다.")
     void toThemePopularFilter() {
-        ThemePopularFilter themePopularFilter = ThemePopularFilter.toThemePopularFilter(DATE_MAY_EIGHTH);
+        ThemePopularFilter themePopularFilter = ThemePopularFilter.from(DATE_MAY_EIGHTH);
 
         assertAll(
                 () -> assertThat(themePopularFilter.getStartDate()).isEqualTo(DATE_MAY_ONE),

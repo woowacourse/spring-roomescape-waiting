@@ -1,5 +1,8 @@
 package roomescape.domain.theme;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,9 +21,13 @@ public class ThemePopularFilter {
         this.limit = limit;
     }
 
-    public static ThemePopularFilter toThemePopularFilter(final LocalDate nowDate) {
+    public static ThemePopularFilter from(final LocalDate nowDate) {
         final LocalDate startDate = nowDate.minusDays(POPULARITY_AGGREGATION_PERIOD);
         return new ThemePopularFilter(startDate, nowDate, POPULARITY_AGGREGATION_LIMIT);
+    }
+
+    public Pageable ofSize() {
+        return PageRequest.ofSize(limit);
     }
 
     public LocalDate getStartDate() {

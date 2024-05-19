@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
@@ -47,8 +48,10 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
-        final ThemePopularFilter filter = ThemePopularFilter.toThemePopularFilter(LocalDate.now());
-        final List<Theme> popularThemes = themeRepository.findPopularThemesBy(filter);
+        final ThemePopularFilter filter = ThemePopularFilter.from(LocalDate.now());
+        Pageable size = filter.ofSize();
+
+        final List<Theme> popularThemes = themeRepository.findPopularThemesBy(filter, size);
         return popularThemes.stream()
                 .map(ThemeResponse::from)
                 .toList();
