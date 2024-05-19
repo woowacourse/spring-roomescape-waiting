@@ -27,4 +27,15 @@ class AdminReservationControllerTest extends IntegrationTestSupport {
                 .statusCode(200)
                 .body("size()", is(2));
     }
+
+    @DisplayName("예약 대기 목록을 조회한다.")
+    @Test
+    void findAllWaiting() {
+        RestAssured.given().log().all()
+                .cookies("token", ADMIN_TOKEN)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3));
+    }
 }

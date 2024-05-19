@@ -18,6 +18,7 @@ import roomescape.service.dto.ReservationBookedResponse;
 import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
+import roomescape.service.dto.WaitingResponse;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -55,5 +56,13 @@ public class AdminReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
         reservationService.cancelReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
+         List<WaitingResponse> waitingResponses = reservationService.findAllWaiting();
+
+         return ResponseEntity.ok()
+                 .body(waitingResponses);
     }
 }
