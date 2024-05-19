@@ -1,5 +1,11 @@
 package roomescape.theme.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,15 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -69,5 +70,17 @@ class ThemeServiceTest {
         ThemeResponse actual = themeService.createTheme(request);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("테마 생성 시, 이름이 중복된다면 예외를 던진다.")
+    @Test
+    void createThemeTest_whenExistsName() {
+        ThemeCreateRequest request = new ThemeCreateRequest("레벨2 탈출", "레벨2 탈출하기", "https://img.jpg");
+        given(themeRepository.existsByName(new ThemeName(request.name())))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> themeService.createTheme(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("테마 이름은 중복될 수 없습니다.");
     }
 }

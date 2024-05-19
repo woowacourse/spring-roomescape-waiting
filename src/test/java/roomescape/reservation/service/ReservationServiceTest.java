@@ -157,4 +157,24 @@ class ReservationServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약은 현재 시간 이후여야 합니다.");
     }
+
+
+    @DisplayName("예약 생성 시, 해당 예약 날짜와 시간에 이미 예약된 테마라면 예외를 던진다.")
+    @Test
+    void createReservationTest_whenExistsDateAndTimeAndTheme() {
+        LocalDate date = LocalDate.now().plusDays(7);
+        ReservationCreateRequest request = new ReservationCreateRequest(1L, date, 1L, 1L);
+        given(memberRepository.findById(1L))
+                .willReturn(Optional.of(new Member(1L, "브라운", "brown@abc.com")));
+        given(timeRepository.findById(1L))
+                .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(19, 0))));
+        given(themeRepository.findById(1L))
+                .willReturn(Optional.of(new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg")));
+        given(reservationRepository.existsByDateAndTime_idAndTheme_id(date, 1L, 1L))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.createReservation(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("해당 날짜와 시간에 이미 예약된 테마입니다.");
+    }
 }

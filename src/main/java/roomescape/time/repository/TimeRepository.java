@@ -1,6 +1,7 @@
 package roomescape.time.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
@@ -17,4 +18,6 @@ public interface TimeRepository extends ListCrudRepository<ReservationTime, Long
             AND r.theme.id = :themeId
             """)
     List<ReservationTime> findTimesExistsReservationDateAndThemeId(LocalDate date, Long themeId);
+
+    boolean existsByStartAt(LocalTime startAt);
 }

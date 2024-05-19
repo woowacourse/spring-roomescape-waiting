@@ -73,4 +73,22 @@ class ReservationRepositoryTest extends RepositoryTest {
         Optional<Reservation> savedReservation = reservationRepository.findById(4L);
         assertThat(savedReservation).isEmpty();
     }
+
+    @DisplayName("날짜, 시간, 테마가 일치하는 예약이 존재하는 것을 확인할 수 있다.")
+    @Test
+    void existsByDateAndTimeIdAndThemeIdTrueTest() {
+        boolean actual =
+                reservationRepository.existsByDateAndTime_idAndTheme_id(LocalDate.now().minusDays(1), 1L, 1L);
+
+        assertThat(actual).isTrue();
+    }
+
+    @DisplayName("날짜, 시간, 테마가 일치하는 예약이 존재하지 않는 것을 확인할 수 있다.")
+    @Test
+    void existsByDateAndTimeIdAndThemeIdFalseTest() {
+        boolean actual =
+                reservationRepository.existsByDateAndTime_idAndTheme_id(LocalDate.now().minusDays(7), 1L, 1L);
+
+        assertThat(actual).isFalse();
+    }
 }

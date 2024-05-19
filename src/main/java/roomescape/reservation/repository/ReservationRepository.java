@@ -19,4 +19,6 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     List<Reservation> findAllByCondition(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findByMember_id(Long memberId);
+
+    boolean existsByDateAndTime_idAndTheme_id(LocalDate date, Long timeId, Long themeId);
 }

@@ -1,5 +1,12 @@
 package roomescape.time.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,13 +18,6 @@ import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.TimeCreateRequest;
 import roomescape.time.dto.TimeResponse;
 import roomescape.time.repository.TimeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class TimeServiceTest {
@@ -71,5 +71,17 @@ class TimeServiceTest {
         TimeResponse actual = timeService.createTime(request);
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @DisplayName("예약 시간 생성 시, 시간이 중복된다면 예외를 던진다.")
+    @Test
+    void createTimeTest_whenExistsStartAt() {
+        TimeCreateRequest request = new TimeCreateRequest(LocalTime.of(19, 0));
+        given(timeRepository.existsByStartAt(request.startAt()))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> timeService.createTime(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 시간은 중복될 수 없습니다.");
     }
 }

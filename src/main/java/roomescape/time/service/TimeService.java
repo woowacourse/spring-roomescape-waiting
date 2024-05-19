@@ -34,8 +34,15 @@ public class TimeService {
     }
 
     public TimeResponse createTime(TimeCreateRequest request) {
-        ReservationTime createdTime = timeRepository.save(request.createReservationTime());
-        return TimeResponse.from(createdTime);
+        ReservationTime time = request.createReservationTime();
+        validateExists(time);
+        return TimeResponse.from(timeRepository.save(time));
+    }
+
+    private void validateExists(ReservationTime time) {
+        if (timeRepository.existsByStartAt(time.getStartAt())) {
+            throw new IllegalArgumentException("예약 시간은 중복될 수 없습니다.");
+        }
     }
 
     public void deleteTime(Long id) {

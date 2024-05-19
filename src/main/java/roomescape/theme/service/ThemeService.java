@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
@@ -38,8 +39,15 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(ThemeCreateRequest request) {
-        Theme createdTheme = themeRepository.save(request.createTheme());
-        return ThemeResponse.from(createdTheme);
+        Theme theme = request.createTheme();
+        validateExists(theme);
+        return ThemeResponse.from(themeRepository.save(theme));
+    }
+
+    private void validateExists(Theme theme) {
+        if (themeRepository.existsByName(new ThemeName(theme.getName()))) {
+            throw new IllegalArgumentException("테마 이름은 중복될 수 없습니다.");
+        }
     }
 
     public void deleteTheme(Long id) {

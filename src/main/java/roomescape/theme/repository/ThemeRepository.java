@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
 
 @Repository
 public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
@@ -19,4 +20,6 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
             LIMIT :count
              """)
     List<Theme> findThemesSortedByCountOfReservation(LocalDate startDate, LocalDate endDate, int count);
+
+    boolean existsByName(ThemeName name);
 }

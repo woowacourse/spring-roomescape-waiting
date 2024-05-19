@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.test.RepositoryTest;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
 
 class ThemeRepositoryTest extends RepositoryTest {
     private static final int COUNT_OF_THEME = 3;
@@ -66,5 +67,21 @@ class ThemeRepositoryTest extends RepositoryTest {
 
         Optional<Theme> savedTheme = themeRepository.findById(3L);
         assertThat(savedTheme).isEmpty();
+    }
+
+    @DisplayName("이름이 일치하는 테마 존재하는 것을 확인할 수 있다.")
+    @Test
+    void existsByNameTrueTest() {
+        boolean actual = themeRepository.existsByName(new ThemeName("레벨2 탈출"));
+
+        assertThat(actual).isTrue();
+    }
+
+    @DisplayName("이름이 일치하는 테마 존재하지 않는 것을 확인할 수 있다.")
+    @Test
+    void existsByNameFalseTest() {
+        boolean actual = themeRepository.existsByName(new ThemeName("없는 테마"));
+
+        assertThat(actual).isFalse();
     }
 }

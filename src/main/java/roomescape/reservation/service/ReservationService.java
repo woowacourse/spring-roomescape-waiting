@@ -75,6 +75,7 @@ public class ReservationService {
 
     private ReservationResponse createReservation(Reservation reservation) {
         validateIsAvailable(reservation);
+        validateExists(reservation);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -97,6 +98,13 @@ public class ReservationService {
     private void validateIsAvailable(Reservation reservation) {
         if (reservation.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("예약은 현재 시간 이후여야 합니다.");
+        }
+    }
+
+    private void validateExists(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTime_idAndTheme_id(
+                reservation.getDate(), reservation.getTimeId(), reservation.getThemeId())) {
+            throw new IllegalArgumentException("해당 날짜와 시간에 이미 예약된 테마입니다.");
         }
     }
 

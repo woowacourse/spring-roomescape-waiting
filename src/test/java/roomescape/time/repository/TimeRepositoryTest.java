@@ -63,4 +63,20 @@ class TimeRepositoryTest extends RepositoryTest {
         Optional<ReservationTime> savedTime = timeRepository.findById(3L);
         assertThat(savedTime).isEmpty();
     }
+
+    @DisplayName("시간이 일치하는 예약 시간이 존재하는 것을 확인할 수 있다.")
+    @Test
+    void existsByStartAtTrueTest() {
+        boolean actual = timeRepository.existsByStartAt(LocalTime.of(10, 0));
+
+        assertThat(actual).isTrue();
+    }
+
+    @DisplayName("시간이 일치하는 예약 시간이 존재하지 않는 것을 확인할 수 있다.")
+    @Test
+    void existsByStartAtFalseTest() {
+        boolean actual = timeRepository.existsByStartAt(LocalTime.of(1, 0));
+
+        assertThat(actual).isFalse();
+    }
 }
