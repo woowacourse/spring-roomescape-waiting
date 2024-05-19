@@ -45,18 +45,11 @@ public class Reservation {
 
     private void validate(Member member, LocalDate date, ReservationTime time, Theme theme) {
         validateNullField(member, date, time, theme);
-        validateName(member.getName());
     }
 
     private void validateNullField(Member member, LocalDate date, ReservationTime time, Theme theme) {
         if (member == null || date == null || time == null || theme == null) {
             throw new IllegalArgumentException("예약 필드에는 빈 값이 들어올 수 없습니다.");
-        }
-    }
-
-    private void validateName(String name) {
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("이름은 공백일 수 없습니다.");
         }
     }
 
@@ -69,7 +62,7 @@ public class Reservation {
     }
 
     public boolean isSameMember(Reservation other) {
-        return member.isSameMember(other.member);
+        return member.equals(other.member);
     }
 
     public void validateIsBeforeNow() {

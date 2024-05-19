@@ -50,10 +50,6 @@ public class Member {
         this(null, name, email, password);
     }
 
-    public boolean isSameMember(Member other) {
-        return id.equals(other.id);
-    }
-
     public void validatePassword(String password) {
         if (!this.password.equals(password)) {
             throw new BadRequestException("잘못된 사용자 인증 정보입니다.");

@@ -1,9 +1,6 @@
 package roomescape.theme.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Theme {
@@ -13,7 +10,8 @@ public class Theme {
     private Long id;
     private String name;
     private String description;
-    private String thumbnail;
+    @Embedded
+    private ThemeThumbnail thumbnail;
 
     protected Theme() {
     }
@@ -23,13 +21,12 @@ public class Theme {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.thumbnail = thumbnail;
+        this.thumbnail = new ThemeThumbnail(thumbnail);
     }
 
     private void validate(String name, String description, String thumbnail) {
         validateNullField(name, description, thumbnail);
         validateNotBlank(name, description, thumbnail);
-        validateThumbnailFormat(thumbnail);
     }
 
     private void validateNullField(String name, String description, String thumbnail) {
@@ -41,12 +38,6 @@ public class Theme {
     private void validateNotBlank(String name, String description, String thumbnail) {
         if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
             throw new IllegalArgumentException("테마의 정보는 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validateThumbnailFormat(String thumbnail) {
-        if (!thumbnail.matches("(http|https).*")) {
-            throw new IllegalArgumentException("썸네일은 url 링크여야합니다.");
         }
     }
 
@@ -67,7 +58,7 @@ public class Theme {
     }
 
     public String getThumbnail() {
-        return thumbnail;
+        return thumbnail.getThumbnail();
     }
 
     @Override
