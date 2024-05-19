@@ -31,7 +31,7 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> saveReservation(
+    public ResponseEntity<ReservationResponse> saveReservationByClient(
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody ReservationRequest reservationRequest) {
         ReservationResponse response = reservationService.saveByClient(loginMember, reservationRequest);
