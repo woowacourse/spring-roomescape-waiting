@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
@@ -23,6 +24,7 @@ import roomescape.web.dto.request.reservation.ReservationSearchCond;
 import roomescape.web.dto.response.reservation.ReservationResponse;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
@@ -45,6 +47,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse saveReservation(ReservationRequest request) {
         ReservationTime time = findReservationTimeById(request.timeId());
         Theme theme = findThemeById(request.themeId());
@@ -66,6 +69,7 @@ public class ReservationService {
         return reservation;
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = findReservationById(id);
         reservationRepository.delete(reservation);

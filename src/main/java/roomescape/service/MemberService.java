@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
@@ -12,6 +13,7 @@ import roomescape.web.dto.request.member.SignupRequest;
 import roomescape.web.dto.response.member.MemberResponse;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
@@ -23,6 +25,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional
     public long signup(SignupRequest signupRequest) {
         checkDuplicateEmail(signupRequest.email());
         Member savedMember = memberRepository.save(signupRequest.toMember());
@@ -35,6 +38,7 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public void withdrawal(Long memberId) {
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(IllegalArgumentException::new);

@@ -7,11 +7,11 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -24,6 +24,7 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.web.dto.response.theme.ThemeResponse;
 
+@Transactional
 @SpringBootTest
 class ThemeServiceTest {
     @Autowired
@@ -36,13 +37,6 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        themeRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("랭킹 순으로 조회할 수 있다")

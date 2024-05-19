@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
@@ -13,6 +14,7 @@ import roomescape.service.security.JwtProvider;
 import roomescape.web.dto.request.member.LoginRequest;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthService {
     private final MemberRepository memberRepository;

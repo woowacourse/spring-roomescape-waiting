@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -17,14 +19,20 @@ import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
 import roomescape.web.dto.response.time.ReservationTimeResponse;
 
 @Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+    @Transactional
+    public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
+            throw new DuplicatedTimeException();
+        }
+        ReservationTime reservationTime = request.toReservationTime();
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResponse.from(savedReservationTime);
     }
 
     public List<ReservationTimeResponse> findAllReservationTime() {
@@ -52,15 +60,7 @@ public class ReservationTimeService {
         return unavailableTimeIds.contains(targetTimeId);
     }
 
-    public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
-        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
-            throw new DuplicatedTimeException();
-        }
-        ReservationTime reservationTime = request.toReservationTime();
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.from(savedReservationTime);
-    }
-
+    @Transactional
     public void deleteReservationTime(Long id) {
         ReservationTime reservationTime = findReservationTimeById(id);
         try {

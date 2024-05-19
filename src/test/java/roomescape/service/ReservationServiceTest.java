@@ -8,11 +8,11 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -25,6 +25,7 @@ import roomescape.domain.repository.ThemeRepository;
 import roomescape.web.dto.request.reservation.ReservationSearchCond;
 import roomescape.web.dto.response.reservation.ReservationResponse;
 
+@Transactional
 @SpringBootTest
 class ReservationServiceTest {
     @Autowired
@@ -37,14 +38,6 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-        themeRepository.deleteAll();
-        memberRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("검색 조건에 맞는 예약을 조회할 수 있다")
