@@ -18,7 +18,7 @@ public class CheckAuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         try {
-            authenticationExtractor.validateTokenRole(request);
+            authenticationExtractor.validateRole(request);
         } catch (SecurityException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;

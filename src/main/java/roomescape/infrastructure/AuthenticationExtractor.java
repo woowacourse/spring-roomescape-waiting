@@ -24,7 +24,7 @@ public class AuthenticationExtractor {
         return memberService.findLoginMemberByToken(token);
     }
 
-    public void validateTokenRole(HttpServletRequest request) {
+    public void validateRole(HttpServletRequest request) {
         String token = getTokenFromCookie(request);
         if (!memberService.hasAdminRole(token)) {
             throw new SecurityException(UNAUTHORIZED_MESSAGE);
