@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum ReservationStatus {
     PENDING("대기"),
     RESERVATION("예약"),
-    END("완료");
+    END("완료"),
+    ;
 
     private final String description;
 
