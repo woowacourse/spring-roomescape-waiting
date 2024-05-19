@@ -17,6 +17,7 @@ import roomescape.service.dto.response.ReservationResponse;
 
 @RestController
 public class ReservationController {
+
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
@@ -29,9 +30,10 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation
+    public ResponseEntity<ReservationResponse> create
             (@Valid @RequestBody ReservationCreateMemberRequest memberRequest,
-             AuthInfo authInfo) {
+             AuthInfo authInfo)
+    {
         ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(
                 memberRequest,
                 authInfo.id());

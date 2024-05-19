@@ -26,29 +26,30 @@ public class AdminReservationController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllReservations() {
+    public ResponseEntity<List<ReservationResponse>> findAll() {
         return ResponseEntity.ok(reservationService.findAll());
-    }
-
-    @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-     @Valid @RequestBody ReservationCreateRequest reservationCreateRequest) {
-        ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
-        return ResponseEntity.created(URI.create("/admin/reservation")).body(reservationResponse);
     }
 
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findBy(
-    @RequestParam(required = false, value = "themeId") Long themeId,
-    @RequestParam(required = false, value = "memberId") Long memberId,
-    @RequestParam(required = false, value = "dateFrom") LocalDate dateFrom,
-    @RequestParam(required = false, value = "dateTo") LocalDate dateTo
-    ) {
+            @RequestParam(required = false, value = "themeId") Long themeId,
+            @RequestParam(required = false, value = "memberId") Long memberId,
+            @RequestParam(required = false, value = "dateFrom") LocalDate dateFrom,
+            @RequestParam(required = false, value = "dateTo") LocalDate dateTo)
+    {
         return ResponseEntity.ok().body(reservationService.findBy(themeId, memberId, dateFrom, dateTo));
     }
 
+    @PostMapping("/admin/reservations")
+    public ResponseEntity<ReservationResponse> create(
+     @Valid @RequestBody ReservationCreateRequest reservationCreateRequest)
+    {
+        ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
+        return ResponseEntity.created(URI.create("/admin/reservation")).body(reservationResponse);
+    }
+
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
