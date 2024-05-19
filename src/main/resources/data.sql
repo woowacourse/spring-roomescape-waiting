@@ -8,7 +8,7 @@ insert into member(name, email, password, role)
 values ('미르', 'mir@gmail.com', '123456', 'MEMBER');
 
 insert into theme(name, description, thumbnail)
-values ('테마1', '테마1입니당 ^0^', 'https://file.miricanvas.com/template_thumb/2021/07/02/13/20/k4t92g5ntu46etia/thumb.jpg');
+values ('테마1', '테마1입니당 ^0^', null);
 
 insert into theme(name, description, thumbnail)
 values ('테마2', '테마2입니당 ^0^', 'https://file.miricanvas.com/template_thumb/2021/07/02/13/20/k4t92g5ntu46etia/thumb.jpg');
