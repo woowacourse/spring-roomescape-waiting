@@ -22,13 +22,14 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 1L, 1L);
 
-        RestAssured.given().log().all()
+        int id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(cookie.toString())
                 .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract().path("id");
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -37,7 +38,7 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .body("size()", is(6));
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/3")
+                .when().delete("/reservations/" + id)
                 .then().log().all()
                 .statusCode(204);
 
