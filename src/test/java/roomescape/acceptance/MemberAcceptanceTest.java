@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.is;
 
 @Sql("/truncate-with-admin-and-guest.sql")
-class MemberControllerTest extends ControllerTest {
+class MemberAcceptanceTest extends AcceptanceTest {
     private String adminToken;
 
     @DisplayName("모든 사용자 조회 성공 테스트 - 사용자 총 2명")

@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.is;
 
 @Sql("/truncate-with-time-and-theme.sql")
-class AuthControllerTest extends ControllerTest {
+class AuthAcceptanceTest extends AcceptanceTest {
     private String token;
 
     @DisplayName("로그인 성공 테스트")

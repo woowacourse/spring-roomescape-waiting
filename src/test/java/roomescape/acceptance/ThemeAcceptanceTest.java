@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-guests.sql")
-class ThemeControllerTest extends ControllerTest {
+class ThemeAcceptanceTest extends AcceptanceTest {
     private long themeId;
 
     @DisplayName("테마 추가 성공 테스트")

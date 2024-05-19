@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 @Sql("/truncate-with-time-and-theme.sql")
-class ReservationControllerTest extends ControllerTest {
+class ReservationAcceptanceTest extends AcceptanceTest {
     private LocalDate date;
     private long timeId;
     private long themeId;

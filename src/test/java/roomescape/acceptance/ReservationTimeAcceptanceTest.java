@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-guests.sql")
-class ReservationTimeControllerTest extends ControllerTest {
+class ReservationTimeAcceptanceTest extends AcceptanceTest {
     private long timeId;
 
     @DisplayName("시간 정보를 추가한다.")
