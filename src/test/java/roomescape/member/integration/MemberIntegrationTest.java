@@ -1,5 +1,8 @@
 package roomescape.member.integration;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
@@ -30,8 +33,16 @@ class MemberIntegrationTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .cookie(cookie.toString())
                 .contentType(ContentType.JSON)
-                .when().get("/member/reservation")
-                .then().log().all()
-                .statusCode(200);
+                .when().get("/members/reservations")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("$", hasSize(3))
+                .body("[0].id", equalTo(1))
+                .body("[0].themeName", equalTo("polla"))
+                .body("[0].date", equalTo("2024-04-30"))
+                .body("[0].time", equalTo("15:40"))
+                .body("[0].status", equalTo("예약"));
+
     }
 }
