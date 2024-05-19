@@ -20,6 +20,7 @@ import roomescape.member.service.MemberService;
 public class LoginController {
 
     private static final String TOKEN = "token";
+
     private final MemberService memberService;
     private final LoginService loginService;
 
