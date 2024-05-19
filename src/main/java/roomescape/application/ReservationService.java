@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationFactory;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Status;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.LoginMember;
@@ -11,9 +14,6 @@ import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationCriteria;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationFactory;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -22,8 +22,7 @@ public class ReservationService {
     private final ReservationFactory reservationFactory;
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationFactory reservationFactory,
-                              ReservationRepository reservationRepository) {
+    public ReservationService(ReservationFactory reservationFactory, ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationFactory = reservationFactory;
     }
@@ -55,6 +54,16 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION,
                         String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
         reservationRepository.deleteById(reservation.getId());
+        updateReservation(reservation);
+    }
+
+    private void updateReservation(Reservation reservation) {
+        if (reservation.getStatus() == Status.RESERVATION) {
+            Reservation nextReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+            ).orElseThrow();
+            nextReservation.setStatus(Status.RESERVATION);
+        }
     }
 
     public List<ReservationResponse> findAllByStatus(Status status) {

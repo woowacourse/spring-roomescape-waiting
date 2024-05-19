@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +24,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @EntityGraph(attributePaths = {"member", "time", "theme"})
     List<Reservation> findAllByStatus(Status status);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
