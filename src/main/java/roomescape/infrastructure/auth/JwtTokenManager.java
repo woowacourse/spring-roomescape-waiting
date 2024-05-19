@@ -35,7 +35,7 @@ public class JwtTokenManager implements TokenManager {
         Cookie cookie = new Cookie(TOKEN_KEY, accessToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        cookie.setMaxAge(ONE_MINUTE * 5);
+        cookie.setMaxAge(ONE_MINUTE * 5000000);
         response.addCookie(cookie);
     }
 }
