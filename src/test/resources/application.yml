@@ -1,12 +1,4 @@
 spring:
-  profiles:
-    active: local
-
----
-spring:
-  config:
-    activate:
-      on-profile: local
   h2:
     console:
       enabled: true
@@ -17,7 +9,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         format_sql: true
@@ -33,5 +25,6 @@ security:
     token:
       secret-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno
       expire-length: 3600000
+
 dataloader:
-  enable: true
+  enable: false

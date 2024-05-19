@@ -46,6 +46,12 @@ public class ReservationService {
         this.memberReservationRepository = memberReservationRepository;
     }
 
+    private static void validateAdminPermission(Member member) {
+        if (!member.isAdmin()) {
+            throw new AuthorizationException(ErrorType.NOT_ALLOWED_PERMISSION_ERROR);
+        }
+    }
+
     public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
         return memberReservationRepository.findBy(
                         request.getMemberId(),
@@ -149,12 +155,6 @@ public class ReservationService {
         validateAdminPermission(member);
         validateWaitingReservation(memberReservation);
         memberReservation.deny();
-    }
-
-    private static void validateAdminPermission(Member member) {
-        if (!member.isAdmin()) {
-            throw new AuthorizationException(ErrorType.NOT_ALLOWED_PERMISSION_ERROR);
-        }
     }
 
     private void delete(Member member, MemberReservation memberReservation) {

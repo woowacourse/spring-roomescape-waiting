@@ -6,9 +6,14 @@ import roomescape.reservation.domain.ReservationStatus;
 
 public interface MyReservationProjection {
     Long getId();
+
     String getThemeName();
+
     LocalDate getDate();
+
     LocalTime getTime();
+
     ReservationStatus getStatus();
+
     int getWaitingNumber();
 }

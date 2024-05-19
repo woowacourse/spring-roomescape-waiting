@@ -3,6 +3,7 @@ package roomescape;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,15 @@ import roomescape.reservation.domain.repository.ThemeRepository;
 @Transactional
 @Component
 public class DataLoader implements ApplicationRunner {
+
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final MemberReservationRepository memberReservationRepository;
+
+    @Value("${dataloader.enable}")
+    private boolean enableDataloader;
 
     public DataLoader(ThemeRepository themeRepository,
                       ReservationTimeRepository timeRepository,
@@ -41,11 +46,13 @@ public class DataLoader implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws InterruptedException {
-        runDataLoader();
+    public void run(ApplicationArguments args) {
+        if (enableDataloader) {
+            runDataLoader();
+        }
     }
 
-    private void runDataLoader() throws InterruptedException {
+    private void runDataLoader() {
         Theme theme1 = themeRepository.save(new Theme("파라오의 비밀(이집트덕후모험/중급)", """
                 새로운 피라미드유적을 탐사하던 우리 일행은 마침내 파라오의 무덤을 발견하였고 잠입에 성공하여 그의 비밀을 파헤치던 중 실수로 부비트랩을 건드려 파라오의 방이 무너지기 시작하고 60분뒤면 파라오와 함께 생매장 당하게 될 위기에 처해졌다! 
                 상형문자를 해독하여 분노한 파라오에게 제사를 지내고 아누비스의 저주를 풀어서 안전하게 피라미드 밖으로 탈출하자!!
@@ -120,18 +127,29 @@ public class DataLoader implements ApplicationRunner {
                 new Member("관리자", "admin@roomescape.com",
                         "$2a$10$5xUHgA2/scLa/9YzqkCrXuAoIwLYiZTif8F8QrjuFfSFRgsUdJYhC", Role.ADMIN));
 
-        MemberReservation memberReservation1 = memberReservationRepository.save(new MemberReservation(member1, reservation1, ReservationStatus.APPROVED));
-        MemberReservation memberReservation2 = memberReservationRepository.save(new MemberReservation(member1, reservation3, ReservationStatus.APPROVED));
-        MemberReservation memberReservation3 = memberReservationRepository.save(new MemberReservation(member1, reservation7, ReservationStatus.APPROVED));
-        MemberReservation memberReservation4 = memberReservationRepository.save(new MemberReservation(member2, reservation2, ReservationStatus.APPROVED));
-        MemberReservation memberReservation5 = memberReservationRepository.save(new MemberReservation(member2, reservation4, ReservationStatus.APPROVED));
-        MemberReservation memberReservation6 = memberReservationRepository.save(new MemberReservation(member2, reservation8, ReservationStatus.APPROVED));
-        MemberReservation memberReservation8 = memberReservationRepository.save(new MemberReservation(member3, reservation5, ReservationStatus.APPROVED));
-        MemberReservation memberReservation9 = memberReservationRepository.save(new MemberReservation(member3, reservation6, ReservationStatus.APPROVED));
+        MemberReservation memberReservation1 = memberReservationRepository.save(
+                new MemberReservation(member1, reservation1, ReservationStatus.APPROVED));
+        MemberReservation memberReservation2 = memberReservationRepository.save(
+                new MemberReservation(member1, reservation3, ReservationStatus.APPROVED));
+        MemberReservation memberReservation3 = memberReservationRepository.save(
+                new MemberReservation(member1, reservation7, ReservationStatus.APPROVED));
+        MemberReservation memberReservation4 = memberReservationRepository.save(
+                new MemberReservation(member2, reservation2, ReservationStatus.APPROVED));
+        MemberReservation memberReservation5 = memberReservationRepository.save(
+                new MemberReservation(member2, reservation4, ReservationStatus.APPROVED));
+        MemberReservation memberReservation6 = memberReservationRepository.save(
+                new MemberReservation(member2, reservation8, ReservationStatus.APPROVED));
+        MemberReservation memberReservation8 = memberReservationRepository.save(
+                new MemberReservation(member3, reservation5, ReservationStatus.APPROVED));
+        MemberReservation memberReservation9 = memberReservationRepository.save(
+                new MemberReservation(member3, reservation6, ReservationStatus.APPROVED));
 
-        MemberReservation memberReservation10 = memberReservationRepository.save(new MemberReservation(member1, reservation4, ReservationStatus.PENDING));
-        MemberReservation memberReservation11 = memberReservationRepository.save(new MemberReservation(member2, reservation6, ReservationStatus.PENDING));
-        MemberReservation memberReservation12 = memberReservationRepository.save(new MemberReservation(member1, reservation6, ReservationStatus.PENDING));
+        MemberReservation memberReservation10 = memberReservationRepository.save(
+                new MemberReservation(member1, reservation4, ReservationStatus.PENDING));
+        MemberReservation memberReservation11 = memberReservationRepository.save(
+                new MemberReservation(member2, reservation6, ReservationStatus.PENDING));
+        MemberReservation memberReservation12 = memberReservationRepository.save(
+                new MemberReservation(member1, reservation6, ReservationStatus.PENDING));
     }
 
 }

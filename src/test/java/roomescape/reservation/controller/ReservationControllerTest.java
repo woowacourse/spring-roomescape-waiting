@@ -29,7 +29,6 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.controller.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
@@ -238,7 +237,8 @@ class ReservationControllerTest extends ControllerTest {
                     //given & when & then
                     RestAssured.given().log().all()
                             .cookie("token", cloverToken)
-                            .when().delete("/reservations/" + waitingResponses.get(0).memberReservationId() + "/waiting")
+                            .when()
+                            .delete("/reservations/" + waitingResponses.get(0).memberReservationId() + "/waiting")
                             .then().log().all()
                             .statusCode(204);
                 })

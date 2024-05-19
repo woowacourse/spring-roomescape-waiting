@@ -362,7 +362,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         MemberReservation waitingReservation = memberReservationRepository.save(
                 new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
-        Member admin = memberRepository.save(getMemberAdmin());
+        Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when
         reservationService.approveWaiting(AuthInfo.from(admin), waitingReservation.getId());
@@ -380,7 +380,7 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
-        Member admin = memberRepository.save(getMemberAdmin());
+        Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when & then
         assertThatThrownBy(() -> reservationService.approveWaiting(AuthInfo.from(admin),
@@ -399,7 +399,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
         MemberReservation waitingReservation = memberReservationRepository.save(
                 new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
-        Member admin = memberRepository.save(getMemberAdmin());
+        Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when
         reservationService.denyWaiting(AuthInfo.from(admin), waitingReservation.getId());
@@ -417,7 +417,7 @@ class ReservationServiceTest extends ServiceTest {
         LocalDate date = getNextDay();
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
                 new MemberReservationCreate(memberChoco.getId(), date, time.getId(), theme1.getId()));
-        Member admin = memberRepository.save(getMemberAdmin());
+        Member admin = memberRepository.findMemberByEmailAddress(getMemberAdmin().getEmail()).orElseThrow();
 
         //when & then
         assertThatThrownBy(
