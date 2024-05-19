@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Password;
 import roomescape.member.role.MemberRole;
 import roomescape.name.domain.Name;
 import roomescape.reservation.domain.Reservation;
@@ -102,7 +101,7 @@ class ReservationTimeServiceTest {
                 LocalDate.now().plusDays(1),
                 new ReservationTime(1L, LocalTime.now()),
                 new Theme(1L, new Name("테스트 테마"), "테마 설명", "썸네일"),
-                new Member(1L, new Name("레모네"), "lemone@gmail.com", new Password("lemon12"), MemberRole.MEMBER))
+                new Member(1L, new Name("레모네"), "lemone@gmail.com", "lemon12", MemberRole.MEMBER))
         );
 
         when(reservationRepository.findByTimeId(1L))
