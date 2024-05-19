@@ -1,6 +1,7 @@
 package roomescape.model.member;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.Reservation;
 
@@ -14,12 +15,15 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NotNull
+    @Valid
     @Embedded
     private Name name;
     @NotNull
+    @Valid
     @Embedded
     private Email email;
     @NotNull
+    @Valid
     @Embedded
     private Password password;
     @NotNull

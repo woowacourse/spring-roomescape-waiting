@@ -1,6 +1,7 @@
 package roomescape.model.theme;
 
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import roomescape.model.Reservation;
 import roomescape.service.dto.ThemeDto;
@@ -15,12 +16,15 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NotNull
+    @Valid
     @Embedded
     private Name name;
     @NotNull
+    @Valid
     @Embedded
     private Description description;
     @NotNull
+    @Valid
     @Embedded
     private Thumbnail thumbnail;
     @OneToMany(mappedBy = "theme")
