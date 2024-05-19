@@ -1,13 +1,10 @@
 package roomescape.domain.member;
 
-import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.exception.DomainNotFoundException;
 
-public interface MemberRepository extends CrudRepository<Member, Long> {
-
-    List<Member> findAll();
+public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
