@@ -80,11 +80,11 @@ public class Reservation {
         return member;
     }
 
-    public ReservationDate getReservationDate() {
+    public ReservationDate getDate() {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
+    public ReservationTime getTime() {
         return time;
     }
 

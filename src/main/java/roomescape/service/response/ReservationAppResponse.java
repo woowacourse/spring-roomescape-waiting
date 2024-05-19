@@ -14,10 +14,10 @@ public record ReservationAppResponse(
         this(
                 reservation.getId(),
                 reservation.getMember().getName().getName(),
-                reservation.getReservationDate(),
+                reservation.getDate(),
                 new ReservationTimeAppResponse(
-                        reservation.getReservationTime().getId(),
-                        reservation.getReservationTime().getStartAt()),
+                        reservation.getTime().getId(),
+                        reservation.getTime().getStartAt()),
                 new ThemeAppResponse(reservation.getTheme().getId(),
                         reservation.getTheme().getName(),
                         reservation.getTheme().getDescription(),
