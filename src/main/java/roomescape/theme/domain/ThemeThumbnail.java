@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Embeddable
 public record ThemeThumbnail(
-        @Column(length = 500, nullable = false)
+        @Column(name = "thumbnail", length = 500, nullable = false)
         String thumbnail) {
     private static final int MAX_LENGTH = 500;
 

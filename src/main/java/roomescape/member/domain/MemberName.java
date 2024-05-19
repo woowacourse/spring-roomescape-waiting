@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Embeddable
 public record MemberName(
-        @Column(length = 20, nullable = false, unique = true)
+        @Column(name = "name", length = 20, nullable = false, unique = true)
         String name) {
     private static final int MAX_LENGTH = 20;
 

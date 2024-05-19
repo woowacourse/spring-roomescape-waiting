@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Embeddable
 public record ThemeDescription(
-        @Column(length = 255, nullable = false)
+        @Column(name = "description", length = 255, nullable = false)
         String description) {
     private static final int MAX_LENGTH = 255;
 

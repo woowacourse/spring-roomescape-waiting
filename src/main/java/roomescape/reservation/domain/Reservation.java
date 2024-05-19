@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -20,14 +21,18 @@ import roomescape.time.domain.ReservationTime;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     @ManyToOne(optional = false)
+    @JoinColumn(name = "member_id")
     private Member member;
-    @Column(nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDate date;
     @ManyToOne(optional = false)
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
     @ManyToOne(optional = false)
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
