@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch(`/reservations-mine?date=${new Date()}`) // 내 예약 목록 조회 API 호출
+    const toDay = new Date();
+    const date = createDate(toDay);
+    fetch(`/reservations-mine?date=${date}`) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -11,6 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 });
+
+function createDate(input) {
+    var dd = new Date(input);
+
+    const year = dd.getFullYear();
+    const month = ('0' + (dd.getMonth() + 1)).slice(-2);
+    const day = ('0' + dd.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+}
 
 function render(data) {
     const tableBody = document.getElementById('table-body');
