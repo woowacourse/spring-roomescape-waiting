@@ -25,7 +25,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<AvailableTimeResponse> findAllWithBookStatus(LocalDate date, Long themeId) {
+    public List<AvailableTimeResponse> findAllWithReservationStatus(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<ReservationTime> reservedTime = reservationTimeRepository.findReservedTime(date, themeId);
 

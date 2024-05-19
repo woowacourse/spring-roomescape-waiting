@@ -40,10 +40,10 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<List<AvailableTimeResponse>> readTimesStatus(
+    public ResponseEntity<List<AvailableTimeResponse>> readTimesWithReservationStatus(
             @RequestParam(name = "date") LocalDate date,
             @RequestParam(name = "themeId") Long themeId) {
-        return ResponseEntity.ok(reservationTimeService.findAllWithBookStatus(date, themeId));
+        return ResponseEntity.ok(reservationTimeService.findAllWithReservationStatus(date, themeId));
     }
 
     @DeleteMapping("/times/{id}")

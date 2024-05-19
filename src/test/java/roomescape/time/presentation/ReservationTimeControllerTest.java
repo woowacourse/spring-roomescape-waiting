@@ -73,7 +73,8 @@ class ReservationTimeControllerTest {
     @DisplayName("날짜와 테마를 기반으로 예약 상태를 담은 전체 시간 요청을 처리할 수 있다")
     @Test
     void should_handle_get_times_with_book_status_when_requested() throws Exception {
-        when(reservationTimeService.findAllWithBookStatus(DAY_AFTER_TOMORROW, 1L)).thenReturn(Collections.emptyList());
+        when(reservationTimeService.findAllWithReservationStatus(DAY_AFTER_TOMORROW, 1L)).thenReturn(
+                Collections.emptyList());
 
         mockMvc.perform(get("/times/available")
                         .param("date", DAY_AFTER_TOMORROW.toString())
