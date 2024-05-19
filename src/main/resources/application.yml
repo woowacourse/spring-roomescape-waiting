@@ -1,0 +1,38 @@
+spring:
+  profiles:
+    active: local
+
+  datasource:
+    url: jdbc:h2:mem:database
+
+  jpa:
+    defer-datasource-initialization: true
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        storage_engine: innodb
+        format_sql: true
+        use_sql_comments: true
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show_sql: true
+
+  sql:
+    init:
+      mode: always
+
+  h2:
+    console:
+      enabled: true
+
+custom:
+  security:
+    password-encode:
+      hash-salt: -45,-5,-13,125,108,-103,-122,-41,107,-10,-60,1,73,-94,-118,85
+      iteration-count: 65536
+      key-length: 256
+    jwt:
+      token-secret-key: "YWNjZXNzLXRva2VuLXBhY2staXQtaXMtc28tYmVhdXRpZnVsLXByb2plY3Qtc3ByaW5nLWJvb3QtcmVhY3QtaXMtcGFjay1pdC10ZWNoLXN0YWNrLXRoaXMtYWNjZXNzLXRva2VuLWdlbmVyYXRlLWJ5LWVkZ2FyNmJmCg=="
+      token-expiration-period: 604800000  # 7 DAY
