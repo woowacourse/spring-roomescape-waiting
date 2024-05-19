@@ -252,7 +252,7 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(2L, now(), reservationTime, theme1, member));
 
         List<Reservation> reservations = reservationService
-                .findMemberReservations(member.getId());
+                .findMemberReservations(member);
 
         assertThat(reservations).hasSize(2);
     }

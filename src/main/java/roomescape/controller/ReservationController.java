@@ -3,8 +3,6 @@ package roomescape.controller;
 import java.net.URI;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,18 +17,15 @@ import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
-import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 
 @RestController
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final AuthService authService;
 
-    public ReservationController(ReservationService reservationService, AuthService authService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.authService = authService;
     }
 
     @GetMapping("/reservations")
@@ -43,9 +38,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(HttpServletRequest request) {
-        Long memberId = authService.findMemberIdByCookie(request.getCookies());
-        List<Reservation> memberReservations = reservationService.findMemberReservations(memberId);
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticationPrincipal Member member) {
+        List<Reservation> memberReservations = reservationService.findMemberReservations(member);
         List<MemberReservationResponse> responses =
                 memberReservations.stream()
                         .map(MemberReservationResponse::new)
