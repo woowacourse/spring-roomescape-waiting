@@ -42,7 +42,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<MyReservationResponse> getMineReservation(final LoginMember member) {
-        List<Reservation> reservations = reservationService.getReservationsByMember(member);
+        final List<Reservation> reservations = reservationService.getReservationsByMember(member);
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -66,8 +66,7 @@ public class ReservationController {
     }
 
     @GetMapping(value = "/search", params = {"themeId", "memberId", "dateFrom", "dateTo"})
-    public List<ReservationResponse> searchReservations(
-            final ReservationSearchCondition request) {
+    public List<ReservationResponse> searchReservations(final ReservationSearchCondition request) {
         final List<Reservation> filter = reservationService.searchReservations(request);
         return filter.stream()
                 .map(ReservationResponse::from)

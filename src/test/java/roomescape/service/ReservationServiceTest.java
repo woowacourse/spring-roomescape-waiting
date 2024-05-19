@@ -9,7 +9,7 @@ import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
-import roomescape.service.exception.DuplicateReservationException;
+import roomescape.domain.WaitingRank;
 import roomescape.service.exception.InvalidSearchDateException;
 
 import java.time.LocalDate;
@@ -36,15 +36,16 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약을 시도하면 예외가 발생한다.")
+    @DisplayName("같은 시간으로 예약하면 예약 대기가 된다.")
     void addDuplicatedReservationThrowsException() {
         final LocalDate now = LocalDate.now();
         CreateReservationRequest request = new CreateReservationRequest(1L, 2L, now.plusDays(1), 3L);
 
-        reservationService.addReservation(request);
+        final Reservation reserved = reservationService.addReservation(request);
+        final Reservation waited = reservationService.addReservation(request);
 
-        assertThatThrownBy(() -> reservationService.addReservation(request))
-                .isInstanceOf(DuplicateReservationException.class);
+        assertThat(reserved.getRank()).isEqualTo(new WaitingRank(0L));
+        assertThat(waited.getRank()).isEqualTo(new WaitingRank(1L));
     }
 
     @Test
@@ -61,8 +62,8 @@ class ReservationServiceTest {
         final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(member);
 
         final List<Reservation> expected = List.of(
-                new Reservation(5L, null, null, null, null),
-                new Reservation(6L, null, null, null, null)
+                new Reservation(5L, null, null, null, null, WaitingRank.createFirst()),
+                new Reservation(6L, null, null, null, null, WaitingRank.createFirst())
         );
 
         assertThat(reservationsByMember).isEqualTo(expected);
