@@ -6,10 +6,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.config.auth.AuthenticationPrincipalArgumentResolver;
-import roomescape.config.auth.CheckAdminInterceptor;
-import roomescape.config.auth.CheckLoginInterceptor;
-import roomescape.infrastructure.AuthenticationExtractor;
+import roomescape.auth.AuthenticationPrincipalArgumentResolver;
+import roomescape.auth.CheckAdminInterceptor;
+import roomescape.auth.CheckLoginInterceptor;
+import roomescape.auth.AuthenticationExtractor;
 import roomescape.service.AuthService;
 
 @Configuration

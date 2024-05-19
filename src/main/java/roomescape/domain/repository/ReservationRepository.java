@@ -18,7 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findByMemberAndDateGreaterThanEqual(Member member, LocalDate date, Sort sort);
 
-    //  TODO Eager loading을 하는데 Lazy로 설정할 필요?
     @Query("select r from Reservation r where r.date = :date and r.theme = :theme")
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
