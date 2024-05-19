@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSearch;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -25,7 +24,10 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
 
-    public ReservationService(ReservationRepository reservationRepository, MemberRepository memberRepository, TimeRepository timeRepository, ThemeRepository themeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              MemberRepository memberRepository,
+                              TimeRepository timeRepository,
+                              ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
@@ -40,7 +42,6 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservations(ReservationSearchRequest request) {
-        ReservationSearch reservationSearch = request.createReservationSearch();
         return reservationRepository.findAllByCondition(request.memberId(), request.themeId(), request.startDate(), request.endDate())
                 .stream()
                 .map(ReservationResponse::from)
