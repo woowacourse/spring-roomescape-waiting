@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.repository.dto.ReservationWithRank;
 
 @Repository
@@ -21,6 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetween(
         Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+
+    List<Reservation> findAllByStatus(ReservationStatus status);
 
     @Query("""
         SELECT new roomescape.repository.dto.ReservationWithRank(

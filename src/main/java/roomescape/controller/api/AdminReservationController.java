@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
+import roomescape.controller.dto.FindReservationStandbyResponse;
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.ReservationService;
 
@@ -56,6 +57,15 @@ public class AdminReservationController {
             .toList();
 
         return ResponseEntity.ok(createReservationResponse);
+    }
+
+    @GetMapping("/standby")
+    public ResponseEntity<List<FindReservationStandbyResponse>> findAllStandby() {
+        List<Reservation> reservations = reservationService.findAllStandby();
+        List<FindReservationStandbyResponse> response = reservations.stream()
+            .map(FindReservationStandbyResponse::from)
+            .toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search")

@@ -133,4 +133,8 @@ public class ReservationService {
             .map(data -> new FindReservationWithRankDto(data.reservation(), data.rank()))
             .toList();
     }
+
+    public List<Reservation> findAllStandby() {
+        return reservationRepository.findAllByStatus(STANDBY);
+    }
 }
