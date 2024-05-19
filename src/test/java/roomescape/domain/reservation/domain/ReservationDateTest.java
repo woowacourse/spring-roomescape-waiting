@@ -23,6 +23,6 @@ class ReservationDateTest {
     void should_throw_ClientIllegalArgumentException_when_date_is_null() {
         assertThatThrownBy(() -> new ReservationDate(null))
                 .isInstanceOf(EscapeApplicationException.class)
-                .hasMessage("날짜는 null일 수 없습니다");
+                .hasMessage("예약 날짜는 비어있을 수 없습니다.");
     }
 }
