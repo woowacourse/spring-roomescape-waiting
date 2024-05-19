@@ -9,7 +9,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.service.MemberAuthService;
 import roomescape.service.response.MemberAppResponse;
-import roomescape.web.controller.request.LoginMemberInformation;
+import roomescape.web.controller.request.LoginMember;
 
 @Component
 public class MemberHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -42,6 +42,6 @@ public class MemberHandlerMethodArgumentResolver implements HandlerMethodArgumen
         String email = jwtProvider.getPayload(token);
         MemberAppResponse appResponse = memberAuthService.findMemberByEmail(email);
 
-        return new LoginMemberInformation(appResponse.id(), appResponse.name(), appResponse.role());
+        return new LoginMember(appResponse.id(), appResponse.name(), appResponse.role());
     }
 }

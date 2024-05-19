@@ -7,7 +7,7 @@ import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
 import roomescape.web.auth.Auth;
-import roomescape.web.controller.request.LoginMemberInformation;
+import roomescape.web.controller.request.LoginMember;
 import roomescape.web.controller.request.MemberReservationWebRequest;
 import roomescape.web.controller.response.MemberReservationWebResponse;
 import roomescape.web.controller.response.ReservationMineWebResponse;
@@ -28,10 +28,10 @@ public class MemberReservationController {
     @PostMapping
     public ResponseEntity<MemberReservationWebResponse> reserve(@Valid @RequestBody MemberReservationWebRequest request,
                                                                 @Valid @Auth
-                                                                LoginMemberInformation loginMemberInformation) {
+                                                                LoginMember loginMember) {
         ReservationAppResponse appResponse = reservationService.save(
                 new ReservationAppRequest(request.date(), request.timeId(),
-                        request.themeId(), loginMemberInformation.id()));
+                        request.themeId(), loginMember.id()));
 
         Long id = appResponse.id();
         MemberReservationWebResponse memberReservationWebResponse = MemberReservationWebResponse.from(appResponse);
@@ -58,7 +58,7 @@ public class MemberReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineWebResponse>> getMyReservations(@Auth LoginMemberInformation loginMember) {
+    public ResponseEntity<List<ReservationMineWebResponse>> getMyReservations(@Auth LoginMember loginMember) {
         List<ReservationMineWebResponse> reservationMineWebResponses = reservationService.findByMemberId(loginMember.id())
                 .stream()
                 .map(ReservationMineWebResponse::new)
