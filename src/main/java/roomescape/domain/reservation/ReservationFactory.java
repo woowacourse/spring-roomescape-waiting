@@ -43,9 +43,7 @@ public class ReservationFactory {
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
         if (checkUniqueReservation(date, timeId, themeId)) {
-            if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
-                throw new RoomescapeException(RoomescapeErrorCode.EXIST_RESERVATION, "이미 예약을 했습니다.");
-            }
+            validateIsExistMyReservation(date, timeId, themeId, memberId);
             return new Reservation(member, date, reservationTime, theme, Status.WAITING);
         }
         return new Reservation(member, date, reservationTime, theme, Status.RESERVATION);
@@ -60,5 +58,11 @@ public class ReservationFactory {
 
     private boolean checkUniqueReservation(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    private void validateIsExistMyReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
+            throw new RoomescapeException(RoomescapeErrorCode.EXIST_RESERVATION, "이미 예약을 했습니다.");
+        }
     }
 }
