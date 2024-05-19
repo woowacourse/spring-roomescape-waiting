@@ -18,6 +18,7 @@ public abstract class IntegrationTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
     protected TokenProvider tokenProvider;
 
