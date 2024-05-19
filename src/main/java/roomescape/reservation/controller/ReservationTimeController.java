@@ -30,7 +30,7 @@ public class ReservationTimeController {
     @GetMapping("/available-reservation-times")
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             @RequestParam("date") final LocalDate date,
-            @RequestParam("theme-id") final Long themeId
+            @RequestParam("themeId") final Long themeId
     ) {
         return reservationTimeService.getAvailableReservationTimes(date, themeId)
                 .values()

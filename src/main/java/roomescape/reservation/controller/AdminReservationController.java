@@ -57,8 +57,8 @@ public class AdminReservationController {
                 .body(ReservationResponse.from(savedReservation));
     }
 
-    @DeleteMapping("/admin/reservations/{reservation-id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("reservation-id") final Long reservationId) {
+    @DeleteMapping("/admin/reservations/{reservationId}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") final Long reservationId) {
         reservationService.deleteReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
@@ -71,8 +71,8 @@ public class AdminReservationController {
                 .body(ReservationTimeResponse.from(savedReservationTime));
     }
 
-    @DeleteMapping("/admin/times/{reservation-time-id}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable("reservation-time-id") final Long reservationTimeId) {
+    @DeleteMapping("/admin/times/{reservationTimeId}")
+    public ResponseEntity<Void> deleteReservationTime(@PathVariable("reservationTimeId") final Long reservationTimeId) {
         reservationTimeService.deleteReservationTime(reservationTimeId);
         return ResponseEntity.noContent().build();
     }
