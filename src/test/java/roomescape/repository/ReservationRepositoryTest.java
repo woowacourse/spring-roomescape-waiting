@@ -148,4 +148,20 @@ class ReservationRepositoryTest {
         // then
         assertThat(actual).hasSize(1);
     }
+
+    @Test
+    @DisplayName("멤버 Id에 해당하는 예약을 조회한다.")
+    void findByMember_Id() {
+        List<Reservation> reservations = reservationRepository.findByMember_Id(member.getId());
+
+        assertThat(reservations).contains(reservation);
+    }
+
+    @Test
+    @DisplayName("모든 예약을 조회한다.")
+    void findAll() {
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        assertThat(reservations).contains(reservation);
+    }
 }

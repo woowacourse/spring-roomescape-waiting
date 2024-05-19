@@ -12,7 +12,14 @@ import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
 import roomescape.dto.theme.ThemeSaveRequest;
 
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.ADMIN_EMAIL;
+import static roomescape.TestFixture.DATE_MAY_EIGHTH;
+import static roomescape.TestFixture.MEMBER_MIA_EMAIL;
+import static roomescape.TestFixture.MEMBER_PASSWORD;
+import static roomescape.TestFixture.START_AT_SIX;
+import static roomescape.TestFixture.THEME_HORROR_DESCRIPTION;
+import static roomescape.TestFixture.THEME_HORROR_NAME;
+import static roomescape.TestFixture.THEME_HORROR_THUMBNAIL;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class AcceptanceTest {
@@ -108,6 +115,17 @@ abstract class AcceptanceTest {
 
     protected void assertGetResponse(final String path, final int statusCode) {
         RestAssured.given().log().all()
+                .when().get(path)
+                .then().log().all()
+                .statusCode(statusCode);
+    }
+
+    protected void assertGetResponseWithLoginMember(final String path, final int statusCode) {
+        final String accessToken = getAccessToken(ADMIN_EMAIL);
+
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().get(path)
                 .then().log().all()
                 .statusCode(statusCode);
