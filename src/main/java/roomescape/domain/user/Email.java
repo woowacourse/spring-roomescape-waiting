@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 @Embeddable
 public record Email(
-        @Column(name = "email") String address) {
+        @Column(name = "email", unique = true) String address) {
     private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
 
     public Email {

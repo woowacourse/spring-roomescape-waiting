@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
@@ -25,6 +27,10 @@ class ThemeRepositoryTest {
     DatabaseCleaner databaseCleaner;
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @BeforeEach
     void setup() {
@@ -68,12 +74,16 @@ class ThemeRepositoryTest {
         final Theme theme2 = Theme.of("감동", "실화", "b.jpg");
         final Theme theme3 = Theme.of("충격", "충충실화", "c.jpg");
 
-        reservationInserter.addNewReservation("2024-10-03", theme1, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addNewReservation("2024-10-02", theme1, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addNewReservation("2024-10-02", theme2, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addNewReservation("2024-10-05", theme2, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addNewReservation("2024-10-03", theme3, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
-        reservationInserter.addNewReservation("2024-10-02", theme3, MemberFixture.getDomain(), ReservationTimeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain());
+        final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
+
+
+        reservationInserter.addNewReservation("2024-10-03", theme1, member, reservationTime);
+        reservationInserter.addNewReservation("2024-10-02", theme1, member, reservationTime);
+        reservationInserter.addNewReservation("2024-10-02", theme2, member, reservationTime);
+        reservationInserter.addNewReservation("2024-10-05", theme2, member, reservationTime);
+        reservationInserter.addNewReservation("2024-10-03", theme3, member, reservationTime);
+        reservationInserter.addNewReservation("2024-10-02", theme3, member, reservationTime);
 
         final List<Theme> themes = themeRepository.getPopularTheme("2024-10-02", "2024-10-04", 3);
         assertThat(themes).containsExactly(theme1, theme3, theme2);

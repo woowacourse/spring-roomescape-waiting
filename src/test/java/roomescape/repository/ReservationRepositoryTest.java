@@ -12,11 +12,14 @@ import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.util.DatabaseCleaner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class ReservationRepositoryTest {
+    @Autowired
+    DatabaseCleaner databaseCleaner;
     @Autowired
     ReservationRepository sut;
     @Autowired
@@ -32,7 +35,7 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        sut.deleteAll();
+        databaseCleaner.initialize();
         theme = themeRepository.save(ThemeFixture.getDomain());
         member = memberRepository.save(MemberFixture.getDomain());
         time = timeRepository.save(ReservationTimeFixture.getDomain());

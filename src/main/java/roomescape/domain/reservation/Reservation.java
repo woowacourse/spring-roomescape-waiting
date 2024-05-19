@@ -9,6 +9,9 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
+@Table(name = "reservation", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"date", "time_id","theme_id"})
+})
 public class Reservation {
 
     @Id
@@ -17,10 +20,11 @@ public class Reservation {
 
     @Embedded
     private ReservationDate date;
-
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
     @ManyToOne
     private Member member;
