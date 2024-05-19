@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.dto.LoginRequest;
 import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberNameResponse;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 
 @RestController
@@ -41,7 +42,7 @@ public class LoginController {
     }
 
     @GetMapping("/check")
-    public MemberNameResponse getLoginMemberName(MemberNameResponse memberNameResponse) {
-        return memberNameResponse;
+    public MemberNameResponse getLoginMemberName(MemberRequest memberRequest) {
+        return memberService.getMemberName(memberRequest);
     }
 }
