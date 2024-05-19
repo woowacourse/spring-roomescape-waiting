@@ -34,6 +34,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     private String extractCookie(Cookie[] cookies, String targetCookie) {
+        if (cookies == null || cookies.length == 0) {
+            return "";
+        }
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(targetCookie))
                 .findAny()

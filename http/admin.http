@@ -1,0 +1,10 @@
+### 관리자 페이지 예약
+POST http://localhost:8080/admin/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-12-11",
+  "themeId": "1",
+  "timeId": "1",
+  "memberId": "1"
+}
