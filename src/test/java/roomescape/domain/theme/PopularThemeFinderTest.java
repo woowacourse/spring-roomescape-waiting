@@ -15,9 +15,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.theme.PopularThemeFinder;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.reservation.Status;
 
 @ServiceTest
 class PopularThemeFinderTest {
@@ -59,7 +57,8 @@ class PopularThemeFinderTest {
                 member,
                 LocalDate.now(clock).minusDays(1),
                 reservationTime,
-                theme
+                theme,
+                Status.RESERVATION
         );
     }
 }

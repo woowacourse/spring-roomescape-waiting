@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.config.AuthenticationPrincipal;
+import roomescape.domain.reservation.Status;
 import roomescape.dto.LoginMember;
 import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationRequest;
@@ -25,8 +26,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> responses = reservationService.findAll();
+    public ResponseEntity<List<ReservationResponse>> findAllByReservation() {
+        List<ReservationResponse> responses = reservationService.findAllByStatus(Status.RESERVATION);
         return ResponseEntity.ok(responses);
     }
 
@@ -47,7 +48,13 @@ public class ReservationController {
     }
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id) {
+    public ResponseEntity<Void> deleteByReservation(@PathVariable long id) {
+        reservationService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> deleteByWaiting(@PathVariable long id) {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

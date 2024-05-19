@@ -11,6 +11,9 @@ import roomescape.domain.theme.Theme;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     long countByTimeId(long timeId);
 
+    @EntityGraph(attributePaths = {"member", "time", "theme"})
+    List<Reservation> findAllByStatus(Status status);
+
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     @EntityGraph(attributePaths = {"time", "theme"})
@@ -28,11 +31,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             + "order by count(r.id) desc")
     List<Theme> findPopularThemesDateBetween(LocalDate startDate, LocalDate endDate);
 
-
     @Query(value = "select r from Reservation r "
             + "where r.theme.id = :themeId and "
             + "r.member.id = :memberId and "
             + ":dateFrom <= r.date and "
-            + "r.date <= :dateTo")
+            + "r.date <= :dateTo and "
+            + "r.status = 'RESERVATION'")
     List<Reservation> findByCriteria(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 }

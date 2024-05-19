@@ -2,6 +2,8 @@ package roomescape.domain.reservation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,15 +32,17 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Theme theme;
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
 
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
+        this(null, member, date, time, theme, status);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
         if (date == null) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
         }
@@ -47,6 +51,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public Long getId() {
@@ -69,8 +74,8 @@ public class Reservation {
         return theme;
     }
 
-    public Reservation withId(long id) {
-        return new Reservation(id, member, date, time, theme);
+    public Status getStatus() {
+        return status;
     }
 
     @Override

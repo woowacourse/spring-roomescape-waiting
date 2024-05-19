@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")

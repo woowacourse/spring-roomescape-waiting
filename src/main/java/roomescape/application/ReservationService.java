@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Status;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.LoginMember;
 import roomescape.dto.MyReservationResponse;
@@ -35,7 +36,8 @@ public class ReservationService {
                 loginMember.id(),
                 reservationRequest.date(),
                 reservationRequest.timeId(),
-                reservationRequest.themeId()
+                reservationRequest.themeId(),
+                Status.RESERVATION
         );
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -45,7 +47,8 @@ public class ReservationService {
                 adminReservationRequest.memberId(),
                 adminReservationRequest.date(),
                 adminReservationRequest.timeId(),
-                adminReservationRequest.themeId()
+                adminReservationRequest.themeId(),
+                Status.RESERVATION
         );
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -58,8 +61,8 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
-    public List<ReservationResponse> findAll() {
-        List<Reservation> reservations = reservationRepository.findAll();
+    public List<ReservationResponse> findAllByStatus(Status status) {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(status);
         return convertToReservationResponses(reservations);
     }
 
@@ -82,7 +85,7 @@ public class ReservationService {
     public List<MyReservationResponse> findMyReservations(Long memberId) {
         return reservationRepository.findAllByMemberIdOrderByDateAsc(memberId).stream()
                 .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                        reservation.getDate(), reservation.getTime().getStartAt(), BOOKED))
+                        reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus().getValue()))
                 .toList();
     }
 }

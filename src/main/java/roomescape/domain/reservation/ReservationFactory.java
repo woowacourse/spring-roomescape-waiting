@@ -33,7 +33,7 @@ public class ReservationFactory {
         this.clock = clock;
     }
 
-    public Reservation create(Long memberId, LocalDate date, Long timeId, Long themeId) {
+    public Reservation create(Long memberId, LocalDate date, Long timeId, Long themeId, Status status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER));
         Theme theme = themeRepository.findById(themeId)
@@ -43,7 +43,7 @@ public class ReservationFactory {
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateRequestDateAfterCurrentTime(dateTime);
         validateUniqueReservation(date, timeId, themeId);
-        return new Reservation(member, date, reservationTime, theme);
+        return new Reservation(member, date, reservationTime, theme, status);
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDateTime dateTime) {
