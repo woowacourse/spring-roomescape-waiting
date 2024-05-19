@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.dto.reservation.AvailableReservationTimeResponse;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
@@ -96,16 +97,16 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("선택한 날짜와 테마로 예약 가능한 시간 목록을 조회한다.")
+    @DisplayName("예약 시간들의 예약 가능 여부 목록을 조회한다.")
     void findAvailableReservationTimes() {
         // given
         final ReservationTime reservedTime = RESERVATION_TIME_SIX(1L);
         final AvailableReservationTimeSearch availableReservationTimeSearch
                 = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), 1L);
-        given(reservationRepository.findTimeIds(availableReservationTimeSearch))
-                .willReturn(List.of(1L));
-        given(reservationTimeRepository.findAll())
-                .willReturn(List.of(reservedTime, RESERVATION_TIME_SEVEN(2L)));
+        final Reservation reservation = new Reservation(MEMBER_MIA(1L), DATE_MAY_EIGHTH, reservedTime, THEME_HORROR(1L));
+        given(reservationRepository.findByDateAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH), 1L))
+                .willReturn(List.of(reservation));
+        given(reservationTimeRepository.findAll()).willReturn(List.of(reservedTime, RESERVATION_TIME_SEVEN(2L)));
 
         // when
         final List<AvailableReservationTimeResponse> availableReservationTimes

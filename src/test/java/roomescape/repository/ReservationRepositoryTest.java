@@ -9,7 +9,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservation.AvailableReservationTimeSearch;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -130,12 +129,11 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 가능한 시간 목록을 조회한다.")
+    @DisplayName("날짜와 테마 Id에 해당하는 예약 목록을 조회한다.")
     void findAllByDateAndThemeId() {
         // when
-        AvailableReservationTimeSearch availableReservationTimeSearch
-                = new AvailableReservationTimeSearch(LocalDate.parse(DATE_MAY_EIGHTH), theme.getId());
-        final List<Long> actual = reservationRepository.findTimeIds(availableReservationTimeSearch);
+        final List<Reservation> actual = reservationRepository.findByDateAndThemeId(
+                LocalDate.parse(DATE_MAY_EIGHTH), theme.getId());
 
         // then
         assertThat(actual).hasSize(1);

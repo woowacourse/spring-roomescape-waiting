@@ -25,7 +25,7 @@ public class ReservationService {
 
     public ReservationResponse create(final Reservation reservation) {
         final int count = reservationRepository.countByDateAndTime_IdAndTheme_Id(
-                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId()
+                reservation.getDate(), reservation.getReservationTimeId(), reservation.getTheme().getId()
         );
         validateDuplicatedReservation(count);
         reservation.toReserved();

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.dto.reservation.AvailableReservationTimeResponse;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
@@ -9,7 +10,6 @@ import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,11 +64,13 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             final AvailableReservationTimeSearch condition
     ) {
-        final List<Long> reservations = reservationRepository.findTimeIds(condition);
-        final Set<Long> reservedTimeIds = new HashSet<>(reservations);
-        final List<ReservationTime> times = reservationTimeRepository.findAll();
-
-        return times.stream()
+        final Set<Long> reservedTimeIds = reservationRepository.findByDateAndThemeId(condition.date(), condition.themeId())
+                .stream()
+                .map(Reservation::getTime)
+                .map(ReservationTime::getId)
+                .collect(Collectors.toUnmodifiableSet());
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        return reservationTimes.stream()
                 .map(reservationTime -> {
                     boolean isReserved = reservedTimeIds.contains(reservationTime.getId());
                     return AvailableReservationTimeResponse.of(reservationTime, isReserved);
