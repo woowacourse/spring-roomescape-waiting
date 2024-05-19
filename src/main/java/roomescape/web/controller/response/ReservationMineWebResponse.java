@@ -5,13 +5,12 @@ import roomescape.service.response.ReservationAppResponse;
 import java.time.LocalDate;
 
 public record ReservationMineWebResponse(Long reservationId, ThemeWebResponse theme, LocalDate date,
-                                         ReservationTimeWebResponse time, String status) {
+                                         ReservationTimeWebResponse time) {
 
     public ReservationMineWebResponse(ReservationAppResponse reservation) {
         this(reservation.id(),
                 ThemeWebResponse.from(reservation.themeAppResponse()),
                 reservation.date().getDate(),
-                ReservationTimeWebResponse.from(reservation.reservationTimeAppResponse()),
-                reservation.reservationStatus());
+                ReservationTimeWebResponse.from(reservation.reservationTimeAppResponse()));
     }
 }

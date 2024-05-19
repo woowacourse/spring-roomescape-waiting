@@ -25,10 +25,6 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus status;
-
     public Reservation() {
     }
 
@@ -46,7 +42,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.RESERVATION;
     }
 
     private void validateMember(Member member) {
@@ -95,9 +90,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }

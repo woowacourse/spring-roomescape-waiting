@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
+
     boolean existsByName(String name);
 
     @Query(value = """
@@ -20,7 +21,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                         th,
                         COUNT(r.theme.id) AS count
                     FROM Theme AS th
-                    LEFT JOIN Reservation AS r ON th.id = r.theme.id AND r.date.date BETWEEN :from AND :to
+                    LEFT JOIN Reservation AS r
+                    ON th.id = r.theme.id
+                    AND r.date.date BETWEEN :from AND :to
                     GROUP BY th.id
                     ORDER BY count DESC
             """)

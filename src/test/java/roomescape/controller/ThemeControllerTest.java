@@ -106,8 +106,8 @@ class ThemeControllerTest extends ControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "12:00");
         jdbcTemplate.update("INSERT INTO member(name,email,password,role) VALUES (?,?,?,?)", "wiib", "asd@naver.com",
             "123asd", "ADMIN");
-        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id, status) VALUES (?,?,?,?, ?)",
-            "2026-02-01", 1L, 1L, 1L, ReservationStatus.RESERVATION.name());
+        jdbcTemplate.update("INSERT INTO reservation(date,time_id,theme_id,member_id) VALUES (?,?,?,?)",
+            "2026-02-01", 1L, 1L, 1L);
 
         RestAssured.given().log().all()
             .when().delete("/themes/1")

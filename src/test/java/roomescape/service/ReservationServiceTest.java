@@ -76,8 +76,7 @@ class ReservationServiceTest {
                 reservation.getMember().getName().getName(),
                 reservation.getReservationDate(),
                 ReservationTimeAppResponse.from(reservation.getReservationTime()),
-                ThemeAppResponse.from(reservation.getTheme()),
-                ReservationStatus.RESERVATION.getStatus());
+                ThemeAppResponse.from(reservation.getTheme()));
 
         assertThat(actual).isEqualTo(expected);
     }

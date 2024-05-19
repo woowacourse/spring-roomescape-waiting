@@ -42,11 +42,11 @@ public class ReservationService {
         Theme theme = findTheme(request.themeId());
         Reservation reservation = new Reservation(member, date, time, theme);
         validatePastReservation(reservation);
-        validateDuplication(date, request.timeId(), request.themeId());
+        validateDuplication(date, request.timeId(), request.themeId(), ReservationStatus.RESERVATION);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        return ReservationAppResponse.from(savedReservation);
+        return new ReservationAppResponse(savedReservation);
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -70,7 +70,7 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplication(ReservationDate date, Long timeId, Long themeId) {
+    private void validateDuplication(ReservationDate date, Long timeId, Long themeId, ReservationStatus status) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalArgumentException("이미 존재하는 예약 정보 입니다.");
         }
@@ -82,7 +82,7 @@ public class ReservationService {
 
     public List<ReservationAppResponse> findAll() {
         return reservationRepository.findAll().stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationAppResponse::new)
                 .toList();
     }
 
@@ -91,7 +91,7 @@ public class ReservationService {
         List<Reservation> searchedReservations = reservationRepository.findAll(reservationSpecification);
 
         return searchedReservations.stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationAppResponse::new)
                 .toList();
     }
 
@@ -99,7 +99,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-                .map(ReservationAppResponse::from)
+                .map(ReservationAppResponse::new)
                 .toList();
     }
 }
