@@ -17,7 +17,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+    // JWT 라이브러리. https://github.com/jwtk/jjwt
     implementation 'io.jsonwebtoken:jjwt:0.12.5'
 
     runtimeOnly 'com.h2database:h2'
