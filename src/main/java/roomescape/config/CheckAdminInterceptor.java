@@ -25,7 +25,7 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
 
         AuthInfo authInfo = authService.getAuthInfo(request.getCookies());
 
-        if (!authInfo.isAdmin()) {
+        if (authInfo.isNotAdmin()) {
             throw new AuthorizationException("접근권한이 없습니다.");
         }
 
