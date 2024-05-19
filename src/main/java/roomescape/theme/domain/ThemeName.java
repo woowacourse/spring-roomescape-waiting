@@ -2,7 +2,7 @@ package roomescape.theme.domain;
 
 import jakarta.persistence.Column;
 import java.util.Objects;
-import roomescape.global.exception.theme.InvalidThemeNameException;
+import roomescape.global.exception.DomainValidationException;
 
 public class ThemeName {
 
@@ -28,20 +28,20 @@ public class ThemeName {
 
     private void validateNotNull(String value) {
         if (value == null) {
-            throw new InvalidThemeNameException("테마 이름은 비어있을 수 없습니다");
+            throw new DomainValidationException("테마 이름은 비어있을 수 없습니다");
         }
     }
 
     private void validateNotBlank(String value) {
         if (value.isBlank()) {
-            throw new InvalidThemeNameException("테마 이름은 공백문자로만 이루어질 수 없습니다");
+            throw new DomainValidationException("테마 이름은 공백문자로만 이루어질 수 없습니다");
         }
     }
 
     private void validateLength(String value) {
         int nameLength = value.length();
         if (nameLength < MIN_LENGTH || nameLength > MAX_LENGTH) {
-            throw new InvalidThemeNameException("테마 이름의 길이는 " + MIN_LENGTH + "자 이상, " + MAX_LENGTH + "자 이하여야 합니다");
+            throw new DomainValidationException("테마 이름의 길이는 " + MIN_LENGTH + "자 이상, " + MAX_LENGTH + "자 이하여야 합니다");
         }
     }
 

@@ -2,7 +2,7 @@ package roomescape.theme.domain;
 
 import jakarta.persistence.Column;
 import java.util.Objects;
-import roomescape.global.exception.theme.InvalidDescriptionException;
+import roomescape.global.exception.DomainValidationException;
 
 public class Description {
 
@@ -24,13 +24,13 @@ public class Description {
 
     private void validateNotNull(String value) {
         if (value == null) {
-            throw new InvalidDescriptionException("테마 설명은 비어있을 수 없습니다");
+            throw new DomainValidationException("테마 설명은 비어있을 수 없습니다");
         }
     }
 
     private void validateNotBlank(String value) {
         if (value.isBlank()) {
-            throw new InvalidDescriptionException("테마 설명은 공백문자로만 이루어질 수 없습니다");
+            throw new DomainValidationException("테마 설명은 공백문자로만 이루어질 수 없습니다");
         }
     }
 

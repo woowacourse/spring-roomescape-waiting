@@ -20,8 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.DuplicateSaveException;
-import roomescape.global.exception.IllegalReservationDateException;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
@@ -108,7 +108,7 @@ class ReservationServiceTest {
         assertThatThrownBy(
                 () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1,
                         PAST_DATE_RESERVATION_REQUEST))
-                .isInstanceOf(IllegalReservationDateException.class);
+                .isInstanceOf(DomainValidationException.class);
     }
 
     @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 미리 존재하는 경우 예외가 발생한다")

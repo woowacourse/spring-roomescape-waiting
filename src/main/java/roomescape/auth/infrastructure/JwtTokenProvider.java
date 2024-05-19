@@ -7,8 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.exception.auth.AuthenticationExpiredException;
-import roomescape.global.exception.auth.InvalidAuthenticationException;
+import roomescape.global.exception.auth.AuthenticationException;
 import roomescape.member.domain.Member;
 
 @Component
@@ -43,9 +42,9 @@ public class JwtTokenProvider {
                     .getBody()
                     .getSubject());
         } catch (ExpiredJwtException e) {
-            throw new AuthenticationExpiredException("로그인 기한이 만료되었습니다", e);
+            throw new AuthenticationException("로그인 기한이 만료되었습니다", e);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new InvalidAuthenticationException("유효하지 않은 로그인 정보입니다", e);
+            throw new AuthenticationException("유효하지 않은 로그인 정보입니다", e);
         }
     }
 }

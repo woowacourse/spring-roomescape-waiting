@@ -2,7 +2,7 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import java.util.Objects;
-import roomescape.global.exception.member.InvalidMemberNameException;
+import roomescape.global.exception.DomainValidationException;
 
 public class MemberName {
 
@@ -28,20 +28,20 @@ public class MemberName {
 
     private void validateNotNull(String value) {
         if (value == null) {
-            throw new InvalidMemberNameException("멤버 이름은 비어있을 수 없습니다");
+            throw new DomainValidationException("멤버 이름은 비어있을 수 없습니다");
         }
     }
 
     private void validateNotBlank(String value) {
         if (value.isBlank()) {
-            throw new InvalidMemberNameException("멤버 이름은 공백문자로만 이루어질 수 없습니다");
+            throw new DomainValidationException("멤버 이름은 공백문자로만 이루어질 수 없습니다");
         }
     }
 
     private void validateLength(String value) {
         int nameLength = value.length();
         if (nameLength < MIN_LENGTH || nameLength > MAX_LENGTH) {
-            throw new InvalidMemberNameException("이름의 길이는 " + MIN_LENGTH + "자 이상, " + MAX_LENGTH + "자 이하여야 합니다");
+            throw new DomainValidationException("이름의 길이는 " + MIN_LENGTH + "자 이상, " + MAX_LENGTH + "자 이하여야 합니다");
         }
     }
 

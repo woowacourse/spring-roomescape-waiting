@@ -3,8 +3,8 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.DuplicateSaveException;
-import roomescape.global.exception.IllegalReservationDateException;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -75,7 +75,7 @@ public class ReservationService {
 
         Reservation reservation = request.toReservation(member, reservationTime, theme);
         if (reservation.isPast()) {
-            throw new IllegalReservationDateException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
+            throw new DomainValidationException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
         }
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);

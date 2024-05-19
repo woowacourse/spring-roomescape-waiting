@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.global.exception.ReservationTimeNotHourlyUnitException;
+import roomescape.global.exception.DomainValidationException;
 
 @Entity
 public class ReservationTime {
@@ -20,7 +20,7 @@ public class ReservationTime {
     private LocalTime startAt;
 
     public ReservationTime(Long id, LocalTime startAt) {
-        validateHourlyUnit(startAt);
+        validate(startAt);
         this.id = id;
         this.startAt = startAt;
     }
@@ -28,9 +28,20 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
+    private void validate(LocalTime startAt) {
+        validateNotNull(startAt);
+        validateHourlyUnit(startAt);
+    }
+
+    private void validateNotNull(LocalTime startAt) {
+        if (startAt == null) {
+            throw new DomainValidationException("예약 가능 시각은 필수 입니다");
+        }
+    }
+
     private void validateHourlyUnit(LocalTime startAt) {
         if (startAt.getMinute() != 0) {
-            throw new ReservationTimeNotHourlyUnitException("예약 시각은 정각 단위여야 합니다");
+            throw new DomainValidationException("예약 시각은 정각 단위여야 합니다");
         }
     }
 

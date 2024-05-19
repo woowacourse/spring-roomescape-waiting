@@ -16,8 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.Accessor;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.infrastructure.JwtTokenProvider;
-import roomescape.global.exception.NoSuchRecordException;
-import roomescape.global.exception.auth.WrongPasswordException;
+import roomescape.global.exception.auth.AuthenticationException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -53,7 +52,7 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("noSignedUp@gmail.com", "123");
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(NoSuchRecordException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @DisplayName("로그인 요청 시 비밀번호가 틀리다면 예외가 발생한다")
@@ -63,7 +62,7 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest("aa@gmail.com", "1234");
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(WrongPasswordException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 
     @DisplayName("로그인 체크 시 인증 정보에 해당하는 이름을 반환한다")
@@ -80,6 +79,6 @@ class AuthServiceTest {
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.checkLogin(new Accessor(1L)))
-                .isInstanceOf(NoSuchRecordException.class);
+                .isInstanceOf(AuthenticationException.class);
     }
 }
