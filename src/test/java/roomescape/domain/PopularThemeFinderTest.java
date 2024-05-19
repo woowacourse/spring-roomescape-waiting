@@ -26,13 +26,7 @@ class PopularThemeFinderTest {
     private ReservationCommandRepository reservationCommandRepository;
 
     @Autowired
-    private TimeCommandRepository timeCommandRepository;
-
-    @Autowired
     private TimeQueryRepository timeQueryRepository;
-
-    @Autowired
-    private ThemeCommandRepository themeCommandRepository;
 
     @Autowired
     private ThemeQueryRepository themeQueryRepository;

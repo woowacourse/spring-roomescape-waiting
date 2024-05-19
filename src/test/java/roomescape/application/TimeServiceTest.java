@@ -19,9 +19,6 @@ class TimeServiceTest {
     private TimeService timeService;
 
     @Autowired
-    private TimeCommandRepository timeCommandRepository;
-
-    @Autowired
     private TimeQueryRepository timeQueryRepository;
 
     @DisplayName("이미 존재하는 예약 시간을 생성 요청하면 예외가 발생한다.")

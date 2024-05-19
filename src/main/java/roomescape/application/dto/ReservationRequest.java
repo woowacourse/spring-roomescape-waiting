@@ -12,8 +12,4 @@ public record ReservationRequest(
         Long timeId,
         Long themeId
 ) {
-
-    public Reservation toReservation(Member member, Time time, Theme theme) {
-        return new Reservation(member, date, time, theme);
-    }
 }
