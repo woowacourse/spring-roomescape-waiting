@@ -68,7 +68,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         );
     }
 
-    @DisplayName("예약 대기를 하면 몇 번째 대기인지 알 수 있다.")
+    @DisplayName("예약이 이미 존재하면 예약 대기 상태가 된다.")
     @Test
     void saveWaitReservation() {
         // given
@@ -148,7 +148,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
                 .isInstanceOf(RoomEscapeBusinessException.class);
     }
 
-    @DisplayName("내 예약을 조회한다.")
+    @DisplayName("내 예약을 조회하면 예약 대기 순번도 함께 표시한다.")
     @Test
     void findAllMyReservations() {
         // given // when
