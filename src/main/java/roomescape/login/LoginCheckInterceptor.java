@@ -6,22 +6,28 @@ import javax.naming.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.login.service.LoginService;
+import roomescape.member.dto.MemberRequest;
+import roomescape.member.service.MemberService;
 import roomescape.util.TokenExtractor;
 
 @Component
 public class LoginCheckInterceptor implements HandlerInterceptor {
 
     private final LoginService loginService;
+    private final MemberService memberService;
 
-    public LoginCheckInterceptor(LoginService loginService) {
+    public LoginCheckInterceptor(LoginService loginService, MemberService memberService) {
         this.loginService = loginService;
+        this.memberService = memberService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws AuthenticationException {
         String token = TokenExtractor.extractTokenFromCookie(request.getCookies());
-        if (loginService.isAdminToken(token)) {
+        MemberRequest memberRequest = loginService.getMemberRequestByToken(token);
+
+        if (memberService.isAdmin(memberRequest)) {
             return true;
         }
         throw new AuthenticationException("접근 권한이 없습니다.");

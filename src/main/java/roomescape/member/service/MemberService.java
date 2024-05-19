@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -29,6 +30,12 @@ public class MemberService {
                 .stream()
                 .map(MemberIdNameResponse::new)
                 .toList();
+    }
+
+    public boolean isAdmin(MemberRequest memberRequest) {
+        Member member = memberRequest.toMember();
+
+        return member.isAdmin();
     }
 
     public MemberNameResponse getMemberNameResponseByToken(String token) throws AuthenticationException {
