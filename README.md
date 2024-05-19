@@ -135,7 +135,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### request
 
-> POST /times HTTP/1.1
+> POST /admin/times HTTP/1.1
 > content-type: application/json
 
 ```JSON
@@ -181,7 +181,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### request
 
-> DELETE /times/1 HTTP/1.1
+> DELETE /admin/times/1 HTTP/1.1
 
 ### response
 
@@ -213,7 +213,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### request
 
-> POST /themes HTTP/1.1
+> POST /admin/themes HTTP/1.1
 > content-type: application/json
 
 ```json
@@ -243,7 +243,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### request
 
-> DELETE /themes/1 HTTP/1.1
+> DELETE /admin/themes/{id} HTTP/1.1
 
 ### response
 
@@ -253,7 +253,7 @@ token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOI
 
 ### Request
 
-> GET /times/book-able?date=${date}&themeId=${themeId}
+> GET /times?date=${date}&themeId=${themeId}
 
 ### response
 
