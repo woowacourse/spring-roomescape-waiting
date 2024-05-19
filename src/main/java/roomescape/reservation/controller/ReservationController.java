@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.ReservationOfMemberResponse;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -43,7 +43,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
+    public List<MemberReservationResponse> findReservationsByMember(MemberRequest memberRequest) {
         return reservationService.findReservationsByMember(memberRequest.toMember());
     }
 

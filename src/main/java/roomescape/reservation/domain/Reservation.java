@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,13 +20,13 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime reservationTime;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Member member;
 
     protected Reservation() {
@@ -40,18 +41,18 @@ public class Reservation {
         this.member = member;
     }
 
-    private void validateNotNull(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
-        if (date == null || reservationTime == null || theme == null || member == null) {
-            throw new IllegalArgumentException("Reservation의 date, reservationTime, theme, member는 null일 수 없습니다.");
-        }
-    }
-
     public Reservation(Long id, Reservation reservation) {
         this(id, reservation.date, reservation.reservationTime, reservation.theme, reservation.member);
     }
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         this(null, date, reservationTime, theme, member);
+    }
+
+    private void validateNotNull(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        if (date == null || reservationTime == null || theme == null || member == null) {
+            throw new IllegalArgumentException("Reservation의 date, reservationTime, theme, member는 null일 수 없습니다.");
+        }
     }
 
     public boolean isBeforeNow() {

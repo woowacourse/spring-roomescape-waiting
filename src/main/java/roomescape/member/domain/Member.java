@@ -45,18 +45,18 @@ public class Member {
         this.password = password;
     }
 
-    private void validateNotNull(Name name, Email email, Role role, Password password) {
-        if (name == null || email == null || role == null || password == null) {
-            throw new IllegalArgumentException("id를 제외한 Member의 필드는 null일 수 없습니다.");
-        }
-    }
-
     public Member(Name name, Email email, Role role, Password password) {
         this(null, name, email, role, password);
     }
 
     public Member(Long id, String name, String email, String role, String password) {
         this(id, new Name(name), new Email(email), Role.valueOf(role), new Password(password));
+    }
+
+    private void validateNotNull(Name name, Email email, Role role, Password password) {
+        if (name == null || email == null || role == null || password == null) {
+            throw new IllegalArgumentException("id를 제외한 Member의 필드는 null일 수 없습니다.");
+        }
     }
 
     public boolean isAdmin() {

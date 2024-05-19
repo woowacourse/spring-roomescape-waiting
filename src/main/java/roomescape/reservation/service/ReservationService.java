@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
@@ -11,7 +12,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.ReservationOfMemberResponse;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -88,6 +89,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -110,10 +112,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationOfMemberResponse> findReservationsByMember(Member member) {
+    public List<MemberReservationResponse> findReservationsByMember(Member member) {
         return reservationRepository.findByMember(member)
                 .stream()
-                .map(ReservationOfMemberResponse::new)
+                .map(MemberReservationResponse::new)
                 .toList();
     }
 
