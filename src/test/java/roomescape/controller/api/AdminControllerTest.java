@@ -85,7 +85,7 @@ class AdminControllerTest extends BaseControllerTest {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 6, 22));
             softly.assertThat(memberResponse)
-                    .isEqualTo(new MemberResponse(1L, "admin@gmail.com", "어드민", Role.ADMIN));
+                    .isEqualTo(new MemberResponse(1L, "어드민", Role.ADMIN));
             softly.assertThat(timeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
             softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명",
                     "https://example.com"));

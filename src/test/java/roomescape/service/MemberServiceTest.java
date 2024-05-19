@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.dto.request.SignupRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.support.fixture.MemberFixture;
@@ -28,9 +27,8 @@ class MemberServiceTest extends BaseServiceTest {
         MemberResponse memberResponse = memberService.createMember(request);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(memberResponse.email()).isEqualTo("new@gmail.com");
+            softly.assertThat(memberResponse.id()).isNotNull();
             softly.assertThat(memberResponse.name()).isEqualTo("nickname");
-            softly.assertThat(memberResponse.role()).isEqualTo(Role.USER);
         });
     }
 

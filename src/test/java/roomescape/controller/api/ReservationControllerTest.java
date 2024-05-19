@@ -154,7 +154,7 @@ class ReservationControllerTest extends BaseControllerTest {
             softly.assertThat(response.header("Location")).isEqualTo("/reservations/1");
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "user@gmail.com", "유저", Role.USER));
+            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
             softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
             softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
         });
@@ -180,7 +180,7 @@ class ReservationControllerTest extends BaseControllerTest {
             softly.assertThat(reservationResponses).hasSize(1);
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
-            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "user@gmail.com", "유저", Role.USER));
+            softly.assertThat(memberResponse).isEqualTo(new MemberResponse(2L, "유저", Role.USER));
             softly.assertThat(reservationTimeResponse).isEqualTo(new ReservationTimeResponse(1L, LocalTime.of(11, 0)));
             softly.assertThat(themeResponse).isEqualTo(new ThemeResponse(1L, "테마 이름", "테마 설명", "https://example.com"));
         });

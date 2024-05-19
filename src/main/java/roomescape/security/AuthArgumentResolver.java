@@ -28,12 +28,8 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     @Override
-    public Accessor resolveArgument(
-            MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory
-    ) {
+    public Accessor resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                    NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String token = CookieUtil.extractTokenFromCookie(webRequest)
                 .orElseThrow(UnauthorizedException::new);
 
@@ -43,7 +39,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         return new Accessor(
                 memberResponse.id(),
                 memberResponse.name(),
-                memberResponse.email(),
                 memberResponse.role()
         );
     }

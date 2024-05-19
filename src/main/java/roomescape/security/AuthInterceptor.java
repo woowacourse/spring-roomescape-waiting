@@ -23,11 +23,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler
-    ) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = CookieUtil.extractTokenFromCookie(request)
                 .orElseThrow(UnauthorizedException::new);
 

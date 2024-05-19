@@ -45,7 +45,6 @@ class MemberControllerTest extends BaseControllerTest {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
             softly.assertThat(response.header("Location")).isEqualTo("/members/" + memberResponse.id());
             softly.assertThat(memberResponse.id()).isNotNull();
-            softly.assertThat(memberResponse.email()).isEqualTo("new@gmail.com");
             softly.assertThat(memberResponse.name()).isEqualTo("new");
             softly.assertThat(memberResponse.role()).isEqualTo(Role.USER);
         });
@@ -64,7 +63,7 @@ class MemberControllerTest extends BaseControllerTest {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(memberResponses).hasSize(1);
             softly.assertThat(memberResponses.get(0))
-                    .isEqualTo(new MemberResponse(1L, "new@gmail.com", "new", Role.USER));
+                    .isEqualTo(new MemberResponse(1L, "new", Role.USER));
         });
     }
 }

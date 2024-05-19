@@ -58,7 +58,6 @@ class AuthServiceTest extends BaseServiceTest {
         MemberResponse response = authService.validatePassword(request);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.email()).isEqualTo(EMAIL);
             softly.assertThat(response.name()).isEqualTo(NICKNAME);
             softly.assertThat(response.role()).isEqualTo(Role.USER);
         });
