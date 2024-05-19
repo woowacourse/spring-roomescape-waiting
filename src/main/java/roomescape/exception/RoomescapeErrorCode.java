@@ -7,6 +7,7 @@ public enum RoomescapeErrorCode {
     DUPLICATED_RESERVATION(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
     DUPLICATED_TIME(HttpStatus.CONFLICT, "이미 존재하는 예약 시간입니다."),
     DUPLICATED_THEME(HttpStatus.CONFLICT, "이미 존재하는 테마입니다."),
+    DUPLICATED_MEMBER(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
     NOT_FOUND_RESERVATION(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
     NOT_FOUND_TIME(HttpStatus.NOT_FOUND, "존재하지 않는 예약 시간입니다."),
     NOT_FOUND_THEME(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."),
