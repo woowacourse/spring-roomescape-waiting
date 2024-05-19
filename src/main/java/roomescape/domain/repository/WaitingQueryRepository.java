@@ -2,14 +2,16 @@ package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import roomescape.application.dto.WaitingResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.Waiting;
 import roomescape.domain.dto.WaitingWithRank;
+import roomescape.exception.RoomescapeErrorCode;
+import roomescape.exception.RoomescapeException;
 
 public interface WaitingQueryRepository extends Repository<Waiting, Long> {
 
@@ -27,9 +29,27 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
-    boolean existsById(Long id);
-
     boolean existsByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, Time time, Theme theme);
 
+    boolean existsByMemberAndDateAndTime(Member member, LocalDate date, Time time);
+
+    Optional<Waiting> findById(Long id);
+
     List<Waiting> findAll();
+
+    default Waiting getById(Long id) {
+        return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,
+                String.format("존재하지 않는 예약 대기입니다. 요청 예약 대기 id:%d", id)));
+    }
+
+    @Query("""
+            select w
+            from Waiting w
+            where w.date = :date
+            and w.time = :time
+            and w.theme = :theme
+            order by w.id
+            limit 1
+            """)
+    Optional<Waiting> findCandidateWaiting(LocalDate date, Time time, Theme theme);
 }

@@ -8,7 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -67,6 +69,11 @@ public class Reservation {
 
     public boolean isSameMember(Member other) {
         return this.member.equals(other);
+    }
+
+    public boolean isPast(Clock clock) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        return reservationDateTime.isBefore(LocalDateTime.now(clock));
     }
 
     public Long getId() {

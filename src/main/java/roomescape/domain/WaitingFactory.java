@@ -52,6 +52,14 @@ public class WaitingFactory {
         if (waitingQueryRepository.existsByMemberAndDateAndTimeAndTheme(member, date, time, theme)) {
             throw new RoomescapeException(RoomescapeErrorCode.ALREADY_WAITING);
         }
+        if (waitingQueryRepository.existsByMemberAndDateAndTime(member, date, time)) {
+            throw new RoomescapeException(RoomescapeErrorCode.ALREADY_WAITING,
+                    "이미 동일한 날짜와 시간에 예약 대기가 존재하여 예약 대기할 수 없습니다.");
+        }
+        if (reservationQueryRepository.existsByMemberAndDateAndTime(member, date, time)) {
+            throw new RoomescapeException(RoomescapeErrorCode.ALREADY_WAITING,
+                    "이미 동일한 날짜와 시간에 예약이 존재하여 예약 대기할 수 없습니다.");
+        }
     }
 
     private void validateRequestDateAfterCurrentTime(LocalDate date, LocalTime time) {

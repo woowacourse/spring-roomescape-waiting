@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
@@ -69,6 +70,8 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
     boolean existsByTheme(Theme theme);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, Time time, Theme theme);
+
+    boolean existsByMemberAndDateAndTime(Member member, LocalDate date, Time time);
 
     List<Reservation> findAllByMemberIdOrderByDateDesc(Long memberId);
 

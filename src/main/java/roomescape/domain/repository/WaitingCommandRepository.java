@@ -6,5 +6,5 @@ import roomescape.domain.Waiting;
 public interface WaitingCommandRepository extends Repository<Waiting, Long> {
     Waiting save(Waiting waiting);
 
-    void deleteById(Long waitingId);
+    void delete(Waiting waiting);
 }

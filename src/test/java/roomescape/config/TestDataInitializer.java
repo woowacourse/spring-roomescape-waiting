@@ -72,13 +72,10 @@ public class TestDataInitializer implements CommandLineRunner {
         createReservation(member4, LocalDate.now().minusDays(4), time2, theme3);
         createReservation(member4, LocalDate.now().minusDays(4), time3, theme3);
 
-        createReservation(member1, LocalDate.now(), time1, theme1);
-        createReservation(member2, LocalDate.now(), time1, theme2);
-        createReservation(member3, LocalDate.now(), time1, theme3);
-
-        createWaiting(member3, LocalDate.now(), time1, theme1);
-        createWaiting(member1, LocalDate.now(), time1, theme2);
-        createWaiting(member2, LocalDate.now(), time1, theme3);
+        LocalDate date = LocalDate.now().plusDays(1);
+        createReservation(member1, date, time1, theme1);
+        createReservation(member2, date, time1, theme2);
+        createReservation(member3, date, time1, theme3);
     }
 
     private Member createMember(String name, String email, String password, Role role) {

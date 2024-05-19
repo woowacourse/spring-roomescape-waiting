@@ -8,7 +8,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -45,6 +47,15 @@ public class Waiting {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public Reservation toReservation() {
+        return new Reservation(member, date, time, theme);
+    }
+
+    public boolean isPast(Clock clock) {
+        LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
+        return waitingDateTime.isBefore(LocalDateTime.now(clock));
     }
 
     public Long getId() {

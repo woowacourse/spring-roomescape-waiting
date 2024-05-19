@@ -18,7 +18,8 @@ public enum RoomescapeErrorCode {
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "인증 유효기간이 만료되었습니다."),
     TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "토큰이 존재하지 않습니다. 다시 로그인 해주세요."),
     NOT_FOUND_WAITING(HttpStatus.NOT_FOUND, "존재하지 않는 예약 대기입니다."),
-    ALREADY_WAITING(HttpStatus.CONFLICT, "이미 예약 대기가 되어있습니다.")
+    ALREADY_WAITING(HttpStatus.CONFLICT, "이미 예약 대기가 되어있습니다."),
+    DATE_EXPIRED(HttpStatus.CONFLICT, "이미 지난 과거의 요청은 처리할 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

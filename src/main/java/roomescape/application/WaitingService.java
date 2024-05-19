@@ -1,12 +1,13 @@
 package roomescape.application;
 
+import java.time.Clock;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
-import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.application.dto.WaitingResponse;
+import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingFactory;
 import roomescape.domain.dto.WaitingWithRank;
@@ -22,13 +23,16 @@ public class WaitingService {
     private final WaitingFactory waitingFactory;
     private final WaitingCommandRepository waitingCommandRepository;
     private final WaitingQueryRepository waitingQueryRepository;
+    private final Clock clock;
 
     public WaitingService(WaitingFactory waitingFactory,
                           WaitingCommandRepository waitingCommandRepository,
-                          WaitingQueryRepository waitingQueryRepository) {
+                          WaitingQueryRepository waitingQueryRepository,
+                          Clock clock) {
         this.waitingFactory = waitingFactory;
         this.waitingCommandRepository = waitingCommandRepository;
         this.waitingQueryRepository = waitingQueryRepository;
+        this.clock = clock;
     }
 
     @Transactional
@@ -37,9 +41,6 @@ public class WaitingService {
         waitingCommandRepository.save(waiting);
         List<WaitingWithRank> waitingWithRanks = waitingQueryRepository.findWaitingWithRankByMemberId(loginMember.id());
         return convertToWaitWithRankResponses(waitingWithRanks);
-        //TODO: ReservationFactory, WaitingFactory 다시 생각해봐야될듯
-        // 그래야 서비스 우발적 중복 + waitingFactory 에서 중복 예약 대기 튕겨내는 로직
-        // factory 내에서 수행할 수 있음(비즈니스 로직이 service 에 나와있지 않도록)
     }
 
     private List<WaitingWithRankResponse> convertToWaitWithRankResponses(List<WaitingWithRank> waitingWithRanks) {
@@ -49,12 +50,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteById(Long waitingId) {
-        if (!waitingQueryRepository.existsById(waitingId)) {
-            throw new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,
-                    String.format("존재하지 않는 예약 대기입니다. 요청 예약 대기 id:%d", waitingId));
+    public void cancel(Long waitingId) {
+        Waiting waiting = waitingQueryRepository.getById(waitingId);
+        if (waiting.isPast(clock)) {
+            throw new RoomescapeException(RoomescapeErrorCode.DATE_EXPIRED);
         }
-        waitingCommandRepository.deleteById(waitingId);
+        waitingCommandRepository.delete(waiting);
     }
 
     public List<WaitingResponse> findAll() {

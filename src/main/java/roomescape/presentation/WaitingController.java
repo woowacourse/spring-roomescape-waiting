@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.WaitingService;
 import roomescape.application.dto.LoginMember;
 import roomescape.application.dto.WaitingRequest;
-import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.application.dto.WaitingResponse;
+import roomescape.application.dto.WaitingWithRankResponse;
 import roomescape.infrastructure.authentication.AuthenticationPrincipal;
 
 @RestController
@@ -37,7 +37,7 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        waitingService.deleteById(id);
+        waitingService.cancel(id);
         return ResponseEntity.noContent().build();
     }
 

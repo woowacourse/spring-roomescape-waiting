@@ -17,7 +17,7 @@ class ReservationServiceTest {
     @DisplayName("예약 삭제 요청시 예약이 존재하지 않으면 예외를 반환한다.")
     @Test
     void shouldThrowsIllegalArgumentExceptionWhenReservationDoesNotExist() {
-        assertThatCode(() -> reservationService.deleteById(99L))
+        assertThatCode(() -> reservationService.cancel(99L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.NOT_FOUND_RESERVATION);
