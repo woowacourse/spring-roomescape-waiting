@@ -1,13 +1,12 @@
 package roomescape.service.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalTime;
 import roomescape.domain.ReservationTime;
 
+import java.time.LocalTime;
+
 public record ReservationTimeSaveRequest(
-        @NotNull
+        @NotNull(message = "추가할 예약시간이 존재하지 않습니다.")
         LocalTime startAt
 ) {
 

@@ -1,18 +1,16 @@
 package roomescape.service.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 
 public record ReservationTimeBookedRequest(
-        @NotNull
+        @NotNull(message = "예약 날짜가 존재하지 않습니다")
         LocalDate date,
 
-        @NotNull
-        @Positive
+        @NotNull(message = "테마 아이디가 존재하지 않습니다")
+        @Positive(message = "테마 아이디는 1이상의 양수여야 해요")
         Long themeId
 ) {
 }
