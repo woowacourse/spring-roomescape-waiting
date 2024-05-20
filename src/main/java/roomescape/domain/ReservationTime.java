@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
+import java.util.Optional;
 import roomescape.exception.BadRequestException;
 
 @Entity
@@ -41,6 +42,12 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public void validateDuplicatedTime(ReservationTime reservationTime) {
+        if (this.startAt.equals(reservationTime.startAt)) {
+            throw new BadRequestException("중복된 시간을 생성할 수 없습니다.");
+        }
     }
 
     @Override

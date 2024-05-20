@@ -1,12 +1,10 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.BadRequestException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationAvailabilityTimeRequest;
@@ -35,21 +33,19 @@ public class ReservationTimeService {
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
 
-        validateDuplicatedTime(reservationTime.getStartAt());
+        validateDuplication(reservationTime);
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
-    public void deleteById(long id) {
-        reservationTimeRepository.deleteById(id);
+    private void validateDuplication(ReservationTime reservationTime) {
+        reservationTimeRepository.findByStartAt(reservationTime.getStartAt())
+                .ifPresent(reservationTime::validateDuplicatedTime);
     }
 
-    private void validateDuplicatedTime(LocalTime startAt) {
-        boolean exists = reservationTimeRepository.existsByStartAt(startAt);
-        if (exists) {
-            throw new BadRequestException("중복된 시간을 생성할 수 없습니다.");
-        }
+    public void deleteById(long id) {
+        reservationTimeRepository.deleteById(id);
     }
 
     public List<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
