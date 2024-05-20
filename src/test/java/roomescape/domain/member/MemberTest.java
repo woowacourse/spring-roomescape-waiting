@@ -19,26 +19,6 @@ class MemberTest {
     }
 
     @ParameterizedTest
-    @DisplayName("비밀번호가 공백이면 예외가 발생한다.")
-    @NullAndEmptySource
-    @ValueSource(strings = {" "})
-    void validatePassword(String password) {
-        assertThatThrownBy(() -> new Member("example@gmail.com", password, "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호는 필수 값입니다.");
-    }
-
-    @Test
-    @DisplayName("비밀번호가 255자를 넘으면 예외가 발생한다.")
-    void validatePasswordLength() {
-        String password = "a".repeat(256);
-
-        assertThatThrownBy(() -> new Member("example@gmail.com", password, "구름", Role.USER))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호는 255자를 넘을 수 없습니다.");
-    }
-
-    @ParameterizedTest
     @DisplayName("이름이 공백이면 예외가 발생한다.")
     @NullAndEmptySource
     @ValueSource(strings = {" "})

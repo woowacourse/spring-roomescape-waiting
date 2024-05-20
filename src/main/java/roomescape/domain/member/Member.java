@@ -13,7 +13,6 @@ import java.util.Objects;
 @Entity
 public class Member {
 
-    private static final int PASSWORD_MAX_LENGTH = 255;
     private static final int NAME_MAX_LENGTH = 30;
 
     @Id
@@ -23,8 +22,8 @@ public class Member {
     @Embedded
     private Email email;
 
-    @Column(nullable = false)
-    private String password;
+    @Embedded
+    private Password password;
 
     @Column(nullable = false, length = NAME_MAX_LENGTH)
     private String name;
@@ -41,29 +40,18 @@ public class Member {
     }
 
     private Member(Long id, String email, String password, String name, Role role) {
-        validate(password, name, role);
+        validate(name, role);
 
         this.id = id;
         this.email = new Email(email);
-        this.password = password;
+        this.password = new Password(password);
         this.name = name;
         this.role = role;
     }
 
-    private void validate(String password, String name, Role role) {
-        validatePassword(password);
+    private void validate(String name, Role role) {
         validateName(name);
         validateRole(role);
-    }
-
-    private void validatePassword(String password) {
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 필수 값입니다.");
-        }
-
-        if (password.length() > PASSWORD_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("비밀번호는 %d자를 넘을 수 없습니다.", PASSWORD_MAX_LENGTH));
-        }
     }
 
     private void validateName(String name) {
@@ -108,7 +96,7 @@ public class Member {
     }
 
     public String getPassword() {
-        return password;
+        return password.getValue();
     }
 
     public String getName() {
