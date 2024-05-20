@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
@@ -101,7 +103,20 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
 
-        return reservations.stream()
+        List<Waiting> waitings = waitingRepository.findAllByMember(member);
+        List<WaitingWithRank> waitingWithRanks =  waitings.stream()
+                .map(waiting -> {
+                    Long rank = waitingRepository.countAllByDateAndTimeAndThemeAndIdLessThanEqual(
+                            waiting.getDate(),
+                            waiting.getTime(),
+                            waiting.getTheme(),
+                            waiting.getId());
+                    return new WaitingWithRank(waiting, rank);
+                })
+                .toList();
+
+        List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations, waitingWithRanks);
+        return reservationWithWaitings.stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }
