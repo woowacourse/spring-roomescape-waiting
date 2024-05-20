@@ -74,7 +74,7 @@ class ReservationServiceTest {
     @Test
     void save_MemberIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.reserve(2L, rawDate, timeId, themeId)
+            () -> reservationService.reserve(3L, rawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다.");
     }

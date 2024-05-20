@@ -49,7 +49,7 @@ class AdminReservationControllerTest {
             .then().extract().cookie("token");
     }
 
-    @DisplayName("성공: 예약 삭제 -> 204")
+    @DisplayName("성공: 예약 삭제 가능, 다음 순위 예약대기는 자동 예약")
     @Test
     void delete() {
         jdbcTemplate.update("""
@@ -57,13 +57,14 @@ class AdminReservationControllerTest {
             INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
             INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
             VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED'),
-                   (2, '2060-01-02', '2024-01-01', 1, 1, 'RESERVED'),
-                   (1, '2060-01-03', '2024-01-01', 1, 1, 'RESERVED');
+                   (2, '2060-01-01', '2024-01-02', 1, 1, 'STANDBY'),
+                   (1, '2060-01-02', '2024-01-03', 1, 1, 'RESERVED'),
+                   (2, '2060-01-02', '2024-01-04', 1, 1, 'STANDBY');
             """);
 
         RestAssured.given().log().all()
             .cookie("token", adminToken)
-            .when().delete("/admin/reservations/2")
+            .when().delete("/admin/reservations/1")
             .then().log().all()
             .statusCode(204);
 
@@ -71,7 +72,15 @@ class AdminReservationControllerTest {
             .cookie("token", adminToken)
             .when().get("/admin/reservations")
             .then().log().all()
-            .body("id", contains(1, 3));
+            .statusCode(200)
+            .body("id", contains(2, 3));
+
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/reservations/standby")
+            .then().log().all()
+            .statusCode(200)
+            .body("id", contains(4));
     }
 
     @DisplayName("실패: 일반 유저가 예약 삭제 -> 401")
@@ -112,5 +121,26 @@ class AdminReservationControllerTest {
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(401);
+    }
+
+    @DisplayName("성공: 전체 대기목록 조회 -> 200")
+    @Test
+    void findAllStandby() {
+        jdbcTemplate.update("""
+            INSERT INTO reservation_time(start_at) VALUES ('10:00');
+            INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
+            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED'),
+                   (2, '2060-01-01', '2024-01-02', 1, 1, 'STANDBY'),
+                   (1, '2060-01-03', '2024-01-01', 1, 1, 'RESERVED'),
+                   (2, '2060-01-03', '2024-01-01', 1, 1, 'STANDBY');
+            """);
+
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .when().get("/admin/reservations/standby")
+            .then().log().all()
+            .statusCode(200)
+            .body("id", contains(2, 4));
     }
 }
