@@ -34,6 +34,11 @@ public class ThemeService {
         return StreamSupport.stream(themeRepository.findAll().spliterator(), false).toList();
     }
 
+    public Theme getById(long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
+    }
+
     public List<Theme> findPopularThemes() {
         List<Reservation> reservations = reservationRepository.findByDateBetween(
                 LocalDate.now().minusDays(8),
@@ -42,7 +47,7 @@ public class ThemeService {
         List<Long> popularThemeIds = getPopularThemeIds(reservations);
 
         return popularThemeIds.stream()
-                .map(themeRepository::getById)
+                .map(this::getById)
                 .toList();
     }
 
