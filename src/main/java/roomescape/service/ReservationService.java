@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -100,16 +99,12 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약입니다."));
 
-        Optional<Waiting> firstWaiting = waitingRepository.findFirstByReservation(reservation, Sort.by("id"));
-
-        if (firstWaiting.isPresent()) {
-            Waiting waiting = firstWaiting.get();
-            reservation.updateMember(waiting.getMember());
-            waitingRepository.delete(waiting);
+        if (reservation.hasNotWaiting()) {
+            reservationRepository.delete(reservation);
             return;
         }
 
-        reservationRepository.delete(reservation);
+        reservation.approveWaiting();
     }
 
     @Transactional

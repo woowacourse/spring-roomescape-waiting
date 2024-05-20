@@ -34,7 +34,7 @@ public class Reservation {
     @Embedded
     private ReservationSlot slot;
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Waiting> waitings = new ArrayList<>();
 
     public Reservation(Member member, ReservationSlot slot) {
@@ -68,8 +68,17 @@ public class Reservation {
         }
     }
 
-    public void updateMember(Member member) {
-        this.member = member;
+    public void approveWaiting() {
+        if (hasNotWaiting()) {
+            throw new RoomEscapeBusinessException("예약 대기자가 없습니다.");
+        }
+
+        Waiting waiting = waitings.remove(0);
+        this.member = waiting.getMember();
+    }
+
+    public boolean hasNotWaiting() {
+        return waitings.isEmpty();
     }
 
     public Long getId() {

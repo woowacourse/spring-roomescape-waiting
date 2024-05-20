@@ -2,8 +2,6 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -39,6 +37,4 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             )
             from Waiting w""")
     List<WaitingReadOnly> findAllReadOnly();
-
-    Optional<Waiting> findFirstByReservation(Reservation reservation, Sort sort);
 }

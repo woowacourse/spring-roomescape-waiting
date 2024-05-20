@@ -83,4 +83,51 @@ class ReservationTest {
                 () -> assertThat(waiting2.getReservation()).isEqualTo(reservation)
         );
     }
+
+    @DisplayName("예약 대기자가 없으면 예약 대기를 승인할 수 없다.")
+    @Test
+    void approveEmptyWaiting() {
+        // given
+        Member member = new Member(1L, "비밥", "uu@naver.com", "1234", Role.USER);
+        LocalDate date = LocalDate.parse("2024-06-01");
+        ReservationTime time = new ReservationTime(LocalTime.parse("10:00"));
+        Theme theme = new Theme("테마이름", "테마 상세", "테마 섬네일");
+        ReservationSlot reservationSlot = new ReservationSlot(date, time, theme);
+
+        Reservation reservation = new Reservation(1L, member, reservationSlot);
+
+        // when // then
+        assertThatThrownBy(reservation::approveWaiting)
+                .isInstanceOf(RoomEscapeBusinessException.class)
+                .hasMessage("예약 대기자가 없습니다.");
+    }
+
+    @DisplayName("예약 대기를 승인하면 첫 번째 예약 대기자가 예약된다.")
+    @Test
+    void approveWaiting() {
+        // given
+        Member member = new Member(1L, "비밥", "uu@naver.com", "1234", Role.USER);
+        Member member1 = new Member(2L, "비밥1", "uu1@naver.com", "1234", Role.USER);
+        Member member2 = new Member(3L, "비밥3", "uu3@naver.com", "1234", Role.USER);
+
+        LocalDate date = LocalDate.parse("2024-06-01");
+        ReservationTime time = new ReservationTime(LocalTime.parse("10:00"));
+        Theme theme = new Theme("테마이름", "테마 상세", "테마 섬네일");
+        ReservationSlot reservationSlot = new ReservationSlot(date, time, theme);
+
+        Reservation reservation = new Reservation(1L, member, reservationSlot);
+        reservation.addWaiting(member1);
+        reservation.addWaiting(member2);
+
+        // when
+        reservation.approveWaiting();
+
+        // then
+        assertAll(
+                () -> assertThat(reservation.getMember()).isEqualTo(member1),
+                () -> assertThat(reservation).extracting("waitings").asList()
+                        .hasSize(1).extracting("member")
+                        .containsExactly(member2)
+        );
+    }
 }
