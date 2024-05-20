@@ -20,10 +20,10 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private ReservationTime reservationTime;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Theme theme;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
