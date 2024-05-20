@@ -26,6 +26,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Integer countByMemberAndDateAndTimeAndTheme(final Member member, final LocalDate date, final ReservationTime time,
                                                 final Theme theme);
-
-    void deleteById(final long id);
 }
