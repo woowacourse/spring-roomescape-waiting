@@ -25,7 +25,7 @@ public class MemberController {
         return memberService.findMembersId();
     }
 
-    @GetMapping("/members/reservations")
+    @GetMapping("/member/reservations")
     public List<ReservationWaitingResponse> memberReservationList(@LoginMemberId long id) {
         return reservationService.findMemberReservations(id);
     }
