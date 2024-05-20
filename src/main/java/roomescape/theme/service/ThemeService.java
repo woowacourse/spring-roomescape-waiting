@@ -2,6 +2,7 @@ package roomescape.theme.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
+import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeCreateRequest;
@@ -19,10 +20,15 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberReservationRepository memberReservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository,
+                        MemberReservationRepository memberReservationRepository
+    ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.memberReservationRepository = memberReservationRepository;
     }
 
     public ThemeResponse createTheme(ThemeCreateRequest request) {
@@ -47,9 +53,9 @@ public class ThemeService {
         LocalDate end = LocalDate.now().minusDays(1L);
         LocalDate start = end.minusDays(Theme.POPULAR_THEME_PERIOD);
 
-        Map<Long, Long> reservationCountByTheme = collectReservationByTheme(start, end);
+        Map<Long, Long> memberReservationCountByTheme = collectReservationByTheme(start, end);
 
-        return reservationCountByTheme.entrySet().stream()
+        return memberReservationCountByTheme.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .limit(Theme.POPULAR_THEME_COUNT)
                 .map(e -> readTheme(e.getKey()))
@@ -57,8 +63,10 @@ public class ThemeService {
     }
 
     private Map<Long, Long> collectReservationByTheme(LocalDate start, LocalDate end) {
-        return reservationRepository.findByDateBetween(start, end).stream()
-                .collect(Collectors.groupingBy(reservation -> reservation.getTheme().getId(), Collectors.counting()));
+        return memberReservationRepository.findByReservationDateBetween(start, end).stream()
+                .collect(Collectors.groupingBy(
+                        memberReservation -> memberReservation.getReservation().getTheme().getId(), Collectors.counting()
+                ));
     }
 
     public ThemeResponse readTheme(Long id) {

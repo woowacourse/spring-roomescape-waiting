@@ -7,6 +7,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,4 +19,6 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     @Query("select mr from MemberReservation mr where mr.member.id = :memberId AND mr.reservation in :reservations")
     List<MemberReservation> findByMemberIdAndReservations(@Param("memberId") Long memberId, @Param("reservations") List<Reservation> reservations);
+
+    List<MemberReservation> findByReservationDateBetween(LocalDate start, LocalDate end);
 }

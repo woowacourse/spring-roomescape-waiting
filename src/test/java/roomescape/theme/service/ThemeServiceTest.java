@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.Fixtures;
 import roomescape.exception.BadRequestException;
+import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
@@ -31,10 +32,12 @@ class ThemeServiceTest {
     private ThemeRepository themeRepository;
     @Mock
     private ReservationRepository reservationRepository;
+    @Mock
+    private MemberReservationRepository memberReservationRepository;
 
     @BeforeEach
     void setUp() {
-        this.themeService = new ThemeService(themeRepository, reservationRepository);
+        this.themeService = new ThemeService(themeRepository, reservationRepository, memberReservationRepository);
     }
 
     @DisplayName("테마 서비스는 테마를 생성한다.")
@@ -100,8 +103,8 @@ class ThemeServiceTest {
             Mockito.when(themeRepository.findById(id))
                     .thenReturn(Optional.ofNullable(Fixtures.themeFixtures.get(index)));
         }
-        Mockito.when(reservationRepository.findByDateBetween(any(), any()))
-                .thenReturn(Fixtures.reservationFixturesForPopularTheme);
+        Mockito.when(memberReservationRepository.findByReservationDateBetween(any(), any()))
+                .thenReturn(Fixtures.memberReservationForPopularTheme);
 
         // when
         List<ThemeResponse> popularThemes = themeService.readPopularThemes();
