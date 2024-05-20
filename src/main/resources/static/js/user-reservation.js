@@ -160,8 +160,8 @@ function onReservationButtonClick() {
     })
         .then(response => {
           if (!response.ok) {
-            return response.text().then(err => {
-              throw new Error(err);
+            return response.json().then(err => {
+              throw new Error(err.detail);
             });
           }
           return response.json();
@@ -202,7 +202,11 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) {
+            return response.json().then(err => {
+              throw new Error(err.detail);
+            });
+          }
           return response.json();
         })
         .then(data => {
@@ -210,7 +214,7 @@ function onWaitButtonClick() {
           window.location.href = "/";
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
+          alert("An error occurred while making the reservation waiting.\n" + error.message);
           console.error(error);
         });
   } else {
