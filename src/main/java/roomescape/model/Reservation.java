@@ -42,10 +42,10 @@ public class Reservation {
     public Reservation() {
     }
 
-    public static Reservation of(ReservationDto reservationDto, ReservationTime time, long themeId, long memberId) {
+    public static Reservation of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {
         return new Reservation(reservationDto.getDate(), time,
-                new Theme(themeId, null, null, null),
-                new Member(memberId, null, null, null, null));
+                new Theme(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail()),
+                new Member(member.getId(), member.getName(), member.getEmail(), member.getPassword(), member.getRole()));
     }
 
     public long getId() {

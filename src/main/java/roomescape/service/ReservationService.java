@@ -7,8 +7,12 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.LoginMember;
+import roomescape.model.member.Member;
+import roomescape.model.theme.Theme;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
@@ -24,10 +28,17 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              MemberRepository memberRepository,
+                              ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -36,12 +47,15 @@ public class ReservationService {
 
     public Reservation saveReservation(ReservationDto reservationDto) {
         ReservationTime time = findReservationTime(reservationDto);
+        Theme theme = findTheme(reservationDto);
+        Member member = findMember(reservationDto);
 
         LocalDate date = reservationDto.getDate();
         validateIsFuture(date, time.getStartAt());
         validateDuplication(date, time.getId(), reservationDto.getThemeId());
 
-        Reservation reservation = Reservation.of(reservationDto, time, reservationDto.getThemeId(), reservationDto.getMemberId());
+        // TODO: 이렇게 모든 객체를 다 찾아서 Reservation 객체를 만드는 게 맞을까?
+        Reservation reservation = Reservation.of(reservationDto, time, theme, member);
         return reservationRepository.save(reservation);
     }
 
@@ -49,6 +63,18 @@ public class ReservationService {
         long timeId = reservationDto.getTimeId();
         Optional<ReservationTime> time = reservationTimeRepository.findById(timeId);
         return time.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+    }
+
+    private Theme findTheme(ReservationDto reservationDto) {
+        long themeId = reservationDto.getThemeId();
+        Optional<Theme> theme = themeRepository.findById(themeId);
+        return theme.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+    }
+
+    private Member findMember(ReservationDto reservationDto) {
+        long memberId = reservationDto.getMemberId();
+        Optional<Member> member = memberRepository.findById(memberId);
+        return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
     public void deleteReservation(long id) {

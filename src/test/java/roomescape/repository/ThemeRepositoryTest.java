@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
+import roomescape.model.member.Role;
 import roomescape.model.theme.Name;
 import roomescape.model.theme.Theme;
 
@@ -18,14 +18,12 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ThemeRepositoryTest {
 
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -33,20 +31,17 @@ class ThemeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(1, 0)),
-                new ReservationTime(LocalTime.of(2, 0))));
-
         reservationRepository.saveAll(List.of(
                 new Reservation(
-                        LocalDate.of(2000,1,1),
-                        new ReservationTime(1, null),
-                        new Theme(1, null, null, null),
-                        new Member(1, null, null, null, null)),
-                new Reservation(LocalDate. of(2000, 1, 2),
-                        new ReservationTime(2, null),
-                        new Theme(2, null, null, null),
-                        new Member(2, null, null, null, null))        ));
+                        LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1, LocalTime.of(1, 0)),
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                new Reservation(
+                        LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2, LocalTime.of(2, 0)),
+                        new Theme(2, "n2", "d2", "t2"),
+                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("두 날짜 사이의 예약을 테마의 개수로 내림차순 정렬하여, 특정 개수의 테마를 조회한다.")

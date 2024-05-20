@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
+import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -25,7 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -44,23 +44,24 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(1, 0)),
-                new ReservationTime(LocalTime.of(2, 0)),
                 new ReservationTime(LocalTime.now())));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(1L, null, null, null, null)),
-                new Reservation(LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2L, null),
-                        new Theme(2L, null, null, null),
-                        new Member(2L, null, null, null, null)),
-                new Reservation(LocalDate.of(9999, 9, 9),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(2L, null, null, null, null))));
+                new Reservation(
+                        LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1, LocalTime.of(1, 0)),
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                new Reservation(
+                        LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2, LocalTime.of(2, 0)),
+                        new Theme(2, "n2", "d2", "t2"),
+                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN)),
+                new Reservation(
+                        LocalDate.of(9999, 9, 9),
+                        new ReservationTime(1, LocalTime.of(1, 0)),
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("모든 예약을 반환한다.")

@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
+import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
 
 import java.time.LocalDate;
@@ -28,20 +29,17 @@ public class ReservationTimeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(1, 0)),
-                new ReservationTime(LocalTime.of(2, 0))));
-
         reservationRepository.saveAll(List.of(
                 new Reservation(
-                        LocalDate.of(2000,1,1),
-                        new ReservationTime(1, null),
-                        new Theme(1, null, null, null),
-                        new Member(1, null, null, null, null)),
-                new Reservation(LocalDate. of(2000, 1, 2),
-                        new ReservationTime(2, null),
-                        new Theme(2, null, null, null),
-                        new Member(2, null, null, null, null))));
+                        LocalDate.of(2000, 1, 1),
+                        new ReservationTime(1, LocalTime.of(1, 0)),
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                new Reservation(
+                        LocalDate.of(2000, 1, 2),
+                        new ReservationTime(2, LocalTime.of(2, 0)),
+                        new Theme(2, "n2", "d2", "t2"),
+                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("특정 startAt을 가진 예약 시간이 존재하는 경우 참을 반환한다.")

@@ -12,6 +12,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
+import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -40,19 +41,19 @@ class ThemeServiceTest {
     @BeforeEach
     void setUp() {
         reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(1, 0)),
-                new ReservationTime(LocalTime.of(2, 0)),
                 new ReservationTime(LocalTime.of(3, 0))));
 
         reservationRepository.saveAll(List.of(
-                new Reservation(LocalDate.now().minusDays(1),
-                        new ReservationTime(1L, null),
-                        new Theme(1L, null, null, null),
-                        new Member(1L, null, null, null, null)),
-                new Reservation(LocalDate.now().minusDays(8),
-                        new ReservationTime(2L, null),
-                        new Theme(2L, null, null, null),
-                        new Member(2L, null, null, null, null))));
+                new Reservation(
+                        LocalDate.now().minusDays(1),
+                        new ReservationTime(1, LocalTime.of(1, 0)),
+                        new Theme(1, "n1", "d1", "t1"),
+                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                new Reservation(
+                        LocalDate.now().minusDays(8),
+                        new ReservationTime(2, LocalTime.of(2, 0)),
+                        new Theme(2, "n2", "d2", "t2"),
+                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("모든 테마를 조회한다.")
