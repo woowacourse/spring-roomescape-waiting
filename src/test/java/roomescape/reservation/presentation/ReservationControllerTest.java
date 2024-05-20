@@ -183,7 +183,11 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("올바르지 않은 예약 날짜 형식으로 예약 POST 요청 시 상태코드 400을 반환한다.")
     void createReservationWithInvalidDateFormat() throws Exception {
         // given
-        String invalidDateFormatRequest = "{\"date\": \"dfdf\"}";
+        String invalidDateFormatRequest = """
+                {
+                    "date": "invalid"
+                }
+                """;
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -196,7 +200,30 @@ class ReservationControllerTest extends ControllerTest {
     }
 
     @Test
-    @DisplayName("서비스 정책에 맞지 않는 예약 POST 요청 시 상태코드 401을 반환한다.")
+    @DisplayName("유효하지 않은 예약 상태 값으로 예약 POST 요청 시 상태코드 400을 반환한다.")
+    void createReservationWithInvalidReservationStatus() throws  Exception {
+        // given
+        String invalidDateFormatRequest = """
+        {
+            "status": "invalid",
+            "date": "2023-03-08",
+            "timeId": 1,
+            "themeId": 1
+        }
+        """;
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(COOKIE)
+                        .content(invalidDateFormatRequest))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    @DisplayName("서비스 정책에 맞지 않는 예약 POST 요청 시 상태코드 400을 반환한다.")
     void createDuplicatedReservation() throws Exception {
         // given
         Long themeId = 1L;
