@@ -2,6 +2,7 @@ package roomescape.core.service;
 
 import io.jsonwebtoken.MalformedJwtException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import roomescape.core.repository.MemberRepository;
 import roomescape.core.repository.ReservationRepository;
 import roomescape.core.repository.ReservationTimeRepository;
 import roomescape.core.repository.ThemeRepository;
+import roomescape.core.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -24,15 +26,18 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+                              final MemberRepository memberRepository,
+                              final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -79,9 +84,25 @@ public class ReservationService {
     public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
         final Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> new MalformedJwtException("올바르지 않은 접근입니다."));
-        return reservationRepository.findAllByMember(member)
+
+        final List<MyReservationResponse> waitings = getResponsesByWaiting(member);
+        final List<MyReservationResponse> reservations = getResponsesByReservation(member);
+        reservations.addAll(waitings);
+
+        return reservations;
+    }
+
+    private List<MyReservationResponse> getResponsesByReservation(final Member member) {
+        return new ArrayList<>(reservationRepository.findAllByMember(member)
                 .stream()
-                .map(MyReservationResponse::new)
+                .map(MyReservationResponse::from)
+                .toList());
+    }
+
+    private List<MyReservationResponse> getResponsesByWaiting(final Member member) {
+        return waitingRepository.findAllWithRankByMember(member)
+                .stream()
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
