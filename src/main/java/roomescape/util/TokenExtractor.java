@@ -16,13 +16,13 @@ public class TokenExtractor {
         return Arrays.stream(cookies)
                 .filter(cookie -> Objects.equals(cookie.getName(), "token"))
                 .findFirst()
-                .orElseThrow(() -> new AuthenticationException("접근 권한 확인을 위한 쿠키가 없습니다."))
+                .orElseThrow(() -> new AuthenticationException("토큰이 없습니다."))
                 .getValue();
     }
 
     private static void validateNull(Cookie[] cookies) throws AuthenticationException {
         if (cookies == null) {
-            throw new AuthenticationException("접근 권한 확인을 위한 쿠키가 없습니다.");
+            throw new AuthenticationException("쿠키가 없습니다.");
         }
     }
 }
