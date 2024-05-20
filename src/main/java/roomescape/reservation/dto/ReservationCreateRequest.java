@@ -3,9 +3,8 @@ package roomescape.reservation.dto;
 import jakarta.validation.constraints.NotNull;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
-import roomescape.time.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 
@@ -20,7 +19,7 @@ public record ReservationCreateRequest(
         return new ReservationCreateRequest(loginMember.id(), request.date(), request.timeId(), request.themeId());
     }
 
-    public Reservation toReservation(Member member, ReservationTime time, Theme theme) {
-        return new Reservation(member, date, time, theme);
+    public MemberReservation toMemberReservation(Member member, Reservation reservation) {
+        return new MemberReservation(member, reservation);
     }
 }

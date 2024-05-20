@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
-import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -29,7 +29,7 @@ public class MemberReservationController {
     }
 
     @GetMapping("/mine")
-    public List<MemberReservationResponse> readMemberReservations(LoginMember loginMember) {
+    public List<MyReservationResponse> readMemberReservations(LoginMember loginMember) {
         return reservationService.readMemberReservations(loginMember);
     }
 }

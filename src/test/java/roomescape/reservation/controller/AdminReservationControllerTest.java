@@ -56,7 +56,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(10));
     }
 
     @DisplayName("어드민 예약 컨트롤러는 기간, 사용자, 테마로 예약 조회 시 200을 응답한다.")
@@ -89,7 +89,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(10));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -105,7 +105,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(10));
+                .body("size()", is(11));
     }
 
     @DisplayName("어드민 예약 컨트롤러는 사용자 id 없이 예약을 생성할 경우 400을 응답한다.")
@@ -140,7 +140,7 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(10));
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
@@ -153,6 +153,6 @@ class AdminReservationControllerTest {
                 .when().get("/admin/reservations")
                 .then()
                 .statusCode(200)
-                .body("size()", is(8));
+                .body("size()", is(9));
     }
 }

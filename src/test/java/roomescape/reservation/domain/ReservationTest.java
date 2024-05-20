@@ -18,7 +18,6 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(
                 1L,
-                Fixtures.memberFixture,
                 LocalDate.now().minusDays(6),
                 Fixtures.reservationTimeFixture,
                 Fixtures.themeFixture
