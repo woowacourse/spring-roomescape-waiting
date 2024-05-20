@@ -16,7 +16,7 @@ public class Email {
     protected Email() {
     }
 
-    protected Email(String email) {
+    public Email(String email) {
         validateBlank(email);
         validateLength(email);
         validatePattern(email);

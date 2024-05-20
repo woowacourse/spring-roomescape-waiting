@@ -69,8 +69,8 @@ class AuthServiceTest extends BaseServiceTest {
         LoginRequest request = new LoginRequest(EMAIL, "wrong_password");
 
         assertThatThrownBy(() -> authService.validatePassword(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호가 일치하지 않습니다.");
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("등록되지 않은 이메일이거나 비밀번호가 틀렸습니다.");
     }
 
     @Test

@@ -78,7 +78,7 @@ class ReservationRepositoryTest {
         LocalDate existsDate = LocalDate.of(2024, 4, 8);
         LocalDate notExistsDate = LocalDate.of(2024, 5, 5);
 
-        assertThat(reservationRepository.existsByReservation(existsDate, 1L, 1L)).isTrue();
-        assertThat(reservationRepository.existsByReservation(notExistsDate, 1L, 1L)).isFalse();
+        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(existsDate, 1L, 1L)).isTrue();
+        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(notExistsDate, 1L, 1L)).isFalse();
     }
 }

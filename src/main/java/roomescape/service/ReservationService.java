@@ -57,24 +57,34 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse addReservation(
-            LocalDate date,
-            Long timeId,
-            Long themeId,
-            Long memberId
-    ) {
-        Member member = memberRepository.getByIdentifier(memberId);
-        ReservationTime reservationTime = reservationTimeRepository.getByIdentifier(timeId);
-        Theme theme = themeRepository.getByIdentifier(themeId);
-
-        Reservation reservation = new Reservation(date, member, reservationTime, theme);
-
+    public ReservationResponse addReservation(LocalDate date, long timeId, long themeId, long memberId) {
+        Reservation reservation = createReservation(date, timeId, themeId, memberId);
         validateDuplicatedReservation(reservation);
         validateDateTimeNotPassed(reservation);
-
         Reservation savedReservation = reservationRepository.save(reservation);
-
         return ReservationResponse.from(savedReservation);
+    }
+
+    private Reservation createReservation(LocalDate date, long timeId, long themeId, long memberId) {
+        Member member = getMember(memberId);
+        ReservationTime reservationTime = getTime(timeId);
+        Theme theme = getTheme(themeId);
+        return new Reservation(date, member, reservationTime, theme);
+    }
+
+    private Member getMember(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
+
+    private ReservationTime getTime(long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme getTheme(long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
     }
 
     private void validateDateTimeNotPassed(Reservation reservation) {
@@ -84,7 +94,7 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(Reservation reservation) {
-        if (reservationRepository.existsByReservation(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()
