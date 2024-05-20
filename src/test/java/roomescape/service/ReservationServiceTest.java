@@ -28,6 +28,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
+import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
@@ -139,6 +140,26 @@ class ReservationServiceTest {
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.findAll();
+
+        //then
+        assertThat(reservationResponses).hasSize(4);
+    }
+
+    @DisplayName("특정 사용자의 예약이 여러 개 존재하는 경우 모든 예약을 조회할 수 있다.")
+    @Test
+    void findAllByMemberId() {
+        //given
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
+                member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
+                member));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
+                member));
+
+        //when
+        List<ReservationDetailResponse> reservationResponses = reservationService.findAllByMemberId(member.getId());
 
         //then
         assertThat(reservationResponses).hasSize(4);
