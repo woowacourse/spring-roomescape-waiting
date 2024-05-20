@@ -1,7 +1,9 @@
 package roomescape.exception;
 
-public class DuplicateNotAllowException extends IllegalArgumentException {
+import org.springframework.http.HttpStatus;
+
+public class DuplicateNotAllowException extends CustomException {
     public DuplicateNotAllowException(final String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }

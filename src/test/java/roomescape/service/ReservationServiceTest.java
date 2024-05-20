@@ -17,8 +17,8 @@ import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
-import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
+import roomescape.exception.clienterror.InvalidClientFieldWithValueException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ExtendWith(TestDataInitExtension.class)

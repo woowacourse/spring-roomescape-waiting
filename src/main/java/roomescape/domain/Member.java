@@ -14,8 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.hibernate.proxy.HibernateProxy;
 import roomescape.exception.ErrorType;
-import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
+import roomescape.exception.clienterror.InvalidClientFieldWithValueException;
 
 @Entity
 @Table(name = "member")

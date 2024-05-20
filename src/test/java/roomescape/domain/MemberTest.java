@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
+import roomescape.exception.clienterror.InvalidClientFieldWithValueException;
 
 class MemberTest {
 

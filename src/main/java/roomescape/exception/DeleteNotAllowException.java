@@ -1,7 +1,9 @@
 package roomescape.exception;
 
-public class DeleteNotAllowException extends IllegalArgumentException {
+import org.springframework.http.HttpStatus;
+
+public class DeleteNotAllowException extends CustomException {
     public DeleteNotAllowException(final String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }

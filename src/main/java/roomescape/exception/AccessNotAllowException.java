@@ -1,8 +1,10 @@
 package roomescape.exception;
 
-public class AccessNotAllowException extends IllegalArgumentException {
+import org.springframework.http.HttpStatus;
+
+public class AccessNotAllowException extends CustomException {
     public AccessNotAllowException(final String message) {
-        super(message);
+        super(HttpStatus.UNAUTHORIZED, message);
     }
 }
 

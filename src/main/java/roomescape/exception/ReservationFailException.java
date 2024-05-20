@@ -1,7 +1,9 @@
 package roomescape.exception;
 
-public class ReservationFailException extends IllegalArgumentException {
+import org.springframework.http.HttpStatus;
+
+public class ReservationFailException extends CustomException {
     public ReservationFailException(final String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }
