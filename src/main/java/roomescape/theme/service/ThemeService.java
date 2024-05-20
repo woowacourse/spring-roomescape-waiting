@@ -17,9 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class ThemeService {
 
-    private static final long POPULAR_THEME_PERIOD = 7L;
-    private static final long POPULAR_THEME_COUNT = 10L;
-
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -48,13 +45,13 @@ public class ThemeService {
 
     public List<ThemeResponse> readPopularThemes() {
         LocalDate end = LocalDate.now().minusDays(1L);
-        LocalDate start = end.minusDays(POPULAR_THEME_PERIOD);
+        LocalDate start = end.minusDays(Theme.POPULAR_THEME_PERIOD);
 
         Map<Long, Long> reservationCountByTheme = collectReservationByTheme(start, end);
 
         return reservationCountByTheme.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(POPULAR_THEME_COUNT)
+                .limit(Theme.POPULAR_THEME_COUNT)
                 .map(e -> readTheme(e.getKey()))
                 .toList();
     }
