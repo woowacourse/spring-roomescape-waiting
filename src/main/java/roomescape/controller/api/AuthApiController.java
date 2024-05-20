@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.api.dto.request.LoginMemberRequest;
 import roomescape.controller.api.dto.request.MemberCreateRequest;
 import roomescape.controller.api.dto.request.MemberLoginRequest;
+import roomescape.controller.api.dto.response.MemberCreateResponse;
 import roomescape.controller.api.dto.response.TokenLoginResponse;
 import roomescape.service.MemberService;
 import roomescape.service.dto.output.MemberCreateOutput;
@@ -27,10 +28,10 @@ public class AuthApiController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> createMember(@RequestBody final MemberCreateRequest request) {
+    public ResponseEntity<MemberCreateResponse> createMember(@RequestBody final MemberCreateRequest request) {
         final MemberCreateOutput output = memberService.createMember(request.toInput());
         return ResponseEntity.created(URI.create("/reservations/" + output.id()))
-                .build();
+                .body(MemberCreateResponse.toResponse(output));
     }
 
     @PostMapping("/login")

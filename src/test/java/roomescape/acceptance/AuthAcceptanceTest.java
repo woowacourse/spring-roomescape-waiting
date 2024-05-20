@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import roomescape.acceptance.config.AcceptanceTest;
 import roomescape.controller.api.dto.request.MemberCreateRequest;
 import roomescape.controller.api.dto.request.MemberLoginRequest;
+import roomescape.controller.api.dto.response.MemberCreateResponse;
 import roomescape.controller.api.dto.response.TokenLoginResponse;
 import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
@@ -84,9 +85,9 @@ public class AuthAcceptanceTest {
             @Test
             @DisplayName("409를 반환한다.")
             void it_return_409() {
-                final Member createdMember = 멤버_생성();
+                final roomescape.controller.api.dto.response.MemberCreateResponse createdMember = 멤버_생성();
                 final MemberCreateRequest request = new MemberCreateRequest(
-                        createdMember.getEmail(),
+                        member.getEmail(),
                         member.getPassword(),
                         member.getName()
                 );
@@ -126,11 +127,11 @@ public class AuthAcceptanceTest {
             @Test
             @DisplayName("401을 반환한다.")
             void it_returns_401() {
-                final Member createdMember = 멤버_생성();
+                final MemberCreateResponse createdMember = 멤버_생성();
 
                 final var request = new MemberLoginRequest(
-                        createdMember.getEmail(),
-                        createdMember.getPassword() + "1"
+                        createdMember.email(),
+                        createdMember.password() + "1"
                 );
                 //@formatter:off
                 RestAssured.given().body(request).contentType(ContentType.JSON)
@@ -149,8 +150,8 @@ public class AuthAcceptanceTest {
 
                 final var newMember = 멤버_생성();
                 final MemberLoginRequest loginRequest = new MemberLoginRequest(
-                        newMember.getEmail(),
-                        newMember.getPassword()
+                        newMember.email(),
+                        newMember.password()
                 );
 
                 //@formatter:off
@@ -174,7 +175,7 @@ public class AuthAcceptanceTest {
             @Test
             @DisplayName("200과 사용자의 이름을 반환한다.")
             void it_returns_200_with_name() {
-                final Member createMember = 멤버_생성();
+                final MemberCreateResponse createMember = 멤버_생성();
                 final String token = 로그인(createMember);
 
                 //@formatter:off
@@ -183,7 +184,7 @@ public class AuthAcceptanceTest {
                         .then().assertThat().statusCode(200).extract().as(TokenLoginResponse.class);
                 //@formatter:on
 
-                assertThat(response.name()).isEqualTo(createMember.getName());
+                assertThat(response.name()).isEqualTo(createMember.name());
             }
         }
 
@@ -199,9 +200,10 @@ public class AuthAcceptanceTest {
                         .then().assertThat().statusCode(401);
                 //@formatter:on
             }
+
             @Test
             @DisplayName("유효하지 않은 토큰을 넣을시 401을 반환한다.")
-            void it_returns_401_with_invalid_token(){
+            void it_returns_401_with_invalid_token() {
                 final String token = "invalidToken";
 
                 //@formatter:off

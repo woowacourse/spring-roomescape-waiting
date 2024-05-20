@@ -5,26 +5,26 @@ import io.restassured.http.ContentType;
 import org.springframework.http.HttpHeaders;
 import roomescape.controller.api.dto.request.MemberCreateRequest;
 import roomescape.controller.api.dto.request.MemberLoginRequest;
+import roomescape.controller.api.dto.response.MemberCreateResponse;
 import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 
 public class MemberStep {
-    public static Member 멤버_생성(){
+    public static MemberCreateResponse 멤버_생성(){
         final Member member = MemberFixture.getDomain();
         final MemberCreateRequest request = new MemberCreateRequest(
                 member.getEmail(),
                 member.getPassword(),
                 member.getName()
         );
-        RestAssured.given().body(request).contentType(ContentType.JSON)
+        return RestAssured.given().body(request).contentType(ContentType.JSON)
                 .when().post("/signup")
-                .then().assertThat().statusCode(201);
-        return MemberFixture.getDomain();
+                .then().assertThat().statusCode(201).extract().as(MemberCreateResponse.class);
     }
-    public static String 로그인(final Member member){
+    public static String 로그인(final MemberCreateResponse response){
         final MemberLoginRequest request = new MemberLoginRequest(
-                member.getEmail(),
-                member.getPassword()
+                response.email(),
+                response.password()
         );
         return RestAssured.given().body(request).contentType(ContentType.JSON)
                 .when().post("/login")
