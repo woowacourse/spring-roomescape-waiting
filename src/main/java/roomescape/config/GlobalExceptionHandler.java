@@ -22,17 +22,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ExceptionTemplate(exception.getMessage()));
     }
 
-    @ExceptionHandler(value = {UnauthorizedException.class})
+    @ExceptionHandler(value = UnauthorizedException.class)
     public ResponseEntity<ExceptionTemplate> handleUnauthorizedException(UnauthorizedException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ExceptionTemplate(exception.getMessage()));
     }
 
-    @ExceptionHandler(value = {ForbiddenException.class})
+    @ExceptionHandler(value = ForbiddenException.class)
     public ResponseEntity<ExceptionTemplate> handlerForbiddenException(ForbiddenException exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ExceptionTemplate(exception.getMessage()));
     }
 
-    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionTemplate> handleValidationException(MethodArgumentNotValidException exception) {
         String message = Optional.ofNullable(exception.getBindingResult().getFieldError())
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ExceptionTemplate(message));
     }
 
-    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionTemplate> handleValidationException(HttpMessageNotReadableException exception) {
         if (exception.getRootCause() instanceof DateTimeParseException) {
             return ResponseEntity.badRequest().body(new ExceptionTemplate("시간/날짜 형식이 잘못되었습니다."));
