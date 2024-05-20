@@ -4,9 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum RoomescapeErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부에서 에러가 발생했습니다."),
-    DUPLICATED_RESERVATION(HttpStatus.CONFLICT, "이미 존재하는 예약입니다."),
     DUPLICATED_TIME(HttpStatus.CONFLICT, "이미 존재하는 예약 시간입니다."),
-    DUPLICATED_THEME(HttpStatus.CONFLICT, "이미 존재하는 테마입니다."),
     DUPLICATED_MEMBER(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다."),
     NOT_FOUND_RESERVATION(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
     NOT_FOUND_TIME(HttpStatus.NOT_FOUND, "존재하지 않는 예약 시간입니다."),
