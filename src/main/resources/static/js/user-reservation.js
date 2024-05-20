@@ -1,7 +1,5 @@
-const THEME_API_ENDPOINT = '/themes';
-
 document.addEventListener('DOMContentLoaded', () => {
-  requestRead(THEME_API_ENDPOINT)
+  requestRead('/themes')
       .then(renderTheme)
       .catch(error => console.error('Error fetching times:', error));
 
@@ -62,7 +60,7 @@ function checkDate() {
     const timeSlots = document.getElementById('time-slots');
     timeSlots.innerHTML = '';
 
-    requestRead(THEME_API_ENDPOINT)
+    requestRead('/themes')
         .then(renderTheme)
         .catch(error => console.error('Error fetching times:', error));
   }

@@ -1,5 +1,4 @@
 let isEditing = false;
-const API_ENDPOINT = '/themes';
 const cellFields = ['id', 'name', 'description', 'thumbnail'];
 const createCellFields = ['', createInput(), createInput(), createInput()];
 function createBody(inputs) {
@@ -108,7 +107,7 @@ function requestCreate(data) {
     body: JSON.stringify(data)
   };
 
-  return fetch(API_ENDPOINT, requestOptions)
+  return fetch('/admin/themes', requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
         throw new Error('Create failed');
@@ -116,7 +115,7 @@ function requestCreate(data) {
 }
 
 function requestRead() {
-  return fetch(API_ENDPOINT)
+  return fetch('/themes')
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -128,7 +127,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`/admin/themes/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });

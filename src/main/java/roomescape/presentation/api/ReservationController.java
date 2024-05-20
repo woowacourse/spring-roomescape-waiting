@@ -33,19 +33,6 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservationsByConditions(
-            @RequestParam(required = false) Long memberId,
-            @RequestParam(required = false) Long themeId,
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo
-    ) {
-        List<ReservationResponse> reservationResponses = reservationService
-                .getReservationsByConditions(memberId, themeId, dateFrom, dateTo);
-
-        return ResponseEntity.ok(reservationResponses);
-    }
-
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservationWithRanks(@Auth Accessor accessor) {
         List<MyReservationResponse> myReservationResponses = reservationService
@@ -64,34 +51,5 @@ public class ReservationController {
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationById(@PathVariable Long id) {
-        reservationService.deleteReservationById(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> addReservationWaiting(
-            @RequestBody @Valid ReservationWaitingWebRequest request,
-            @Auth Accessor accessor
-    ) {
-        ReservationWaitingRequest reservationWaitingRequest = request.toReservationWaitingRequest(accessor.id());
-        ReservationResponse reservationResponse = reservationService.addReservationWaiting(reservationWaitingRequest);
-
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id() + "/waiting"))
-                .body(reservationResponse);
-    }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteReservationWaiting(
-            @PathVariable Long id,
-            @Auth Accessor accessor
-    ) {
-        reservationService.deleteReservationWaitingById(id, accessor.id());
-
-        return ResponseEntity.noContent().build();
     }
 }

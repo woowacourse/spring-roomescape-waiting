@@ -43,21 +43,6 @@ public class ThemeController {
         return ResponseEntity.ok(themeResponses);
     }
 
-    @PostMapping
-    public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid ThemeRequest request) {
-        ThemeResponse themeResponse = themeService.addTheme(request);
-
-        return ResponseEntity.created(URI.create("/themes/" + themeResponse.id()))
-                .body(themeResponse);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteThemeById(@PathVariable Long id) {
-        themeService.deleteThemeById(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes(
             @RequestParam(required = false) LocalDate startDate,

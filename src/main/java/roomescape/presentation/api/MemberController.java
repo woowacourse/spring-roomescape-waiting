@@ -30,11 +30,4 @@ public class MemberController {
         return ResponseEntity.created(URI.create("/members/" + memberResponse.id()))
                 .body(memberResponse);
     }
-
-    @GetMapping
-    public ResponseEntity<List<MemberResponse>> getAllMembers() {
-        List<MemberResponse> memberResponses = memberService.getAllMembers();
-
-        return ResponseEntity.ok(memberResponses);
-    }
 }

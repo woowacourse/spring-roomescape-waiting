@@ -35,24 +35,6 @@ public class ReservationTimeController {
         return ResponseEntity.ok(reservationTimeResponses);
     }
 
-    @PostMapping
-    public ResponseEntity<ReservationTimeResponse> addReservationTime(
-            @RequestBody @Valid ReservationTimeRequest reservationTimeRequest
-    ) {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeService.addReservationTime(
-                reservationTimeRequest);
-
-        return ResponseEntity.created(URI.create("/times/" + reservationTimeResponse.id()))
-                .body(reservationTimeResponse);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTimeById(@PathVariable Long id) {
-        reservationTimeService.deleteReservationTimeById(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/available")
     public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
             @RequestParam LocalDate date,

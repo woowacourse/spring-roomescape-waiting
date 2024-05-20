@@ -42,15 +42,6 @@ public class AuthController {
         return ResponseEntity.ok(memberResponse);
     }
 
-    private void setTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
-        cookie.setMaxAge(COOKIE_MAX_AGE_ONE_HOUR);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
-    }
-
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponse> checkLogin(@Auth Accessor accessor) {
         MemberResponse memberResponse = memberService.getById(accessor.id());
@@ -63,6 +54,15 @@ public class AuthController {
         clearTokenCookie(response);
 
         return ResponseEntity.ok().build();
+    }
+
+    private void setTokenCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie(TOKEN_COOKIE_NAME, token);
+        cookie.setMaxAge(COOKIE_MAX_AGE_ONE_HOUR);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+
+        response.addCookie(cookie);
     }
 
     private void clearTokenCookie(HttpServletResponse response) {

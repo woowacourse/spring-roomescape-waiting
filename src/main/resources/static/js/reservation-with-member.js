@@ -1,8 +1,4 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
-const TIME_API_ENDPOINT = '/times';
-const THEME_API_ENDPOINT = '/themes';
-const MEMBER_API_ENDPOINT = '/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -11,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead('/admin/reservations')
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -39,7 +35,7 @@ function render(data) {
 }
 
 function fetchTimes() {
-  requestRead(TIME_API_ENDPOINT)
+  requestRead('/times')
       .then(data => {
         timesOptions.push(...data);
       })
@@ -47,7 +43,7 @@ function fetchTimes() {
 }
 
 function fetchThemes() {
-  requestRead(THEME_API_ENDPOINT)
+  requestRead('/themes')
       .then(data => {
         themesOptions.push(...data);
         populateSelect('theme', themesOptions, 'name');
@@ -56,7 +52,7 @@ function fetchThemes() {
 }
 
 function fetchMembers() {
-  requestRead(MEMBER_API_ENDPOINT)
+  requestRead('/admin/members')
       .then(data => {
         membersOptions.push(...data);
         populateSelect('member', membersOptions, 'name');
@@ -199,7 +195,7 @@ function applyFilter(event) {
   if (dateFrom) params.append('dateFrom', dateFrom);
   if (dateTo) params.append('dateTo', dateTo);
 
-  let url = `/reservations`;
+  let url = `/admin/reservations`;
   if (params.toString()) {
     url += `?${params.toString()}`;
   }
@@ -235,7 +231,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`/admin/reservations/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });
