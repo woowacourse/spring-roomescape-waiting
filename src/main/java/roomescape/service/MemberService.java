@@ -9,7 +9,7 @@ import roomescape.exception.member.NotFoundMemberException;
 import roomescape.service.dto.MemberResponse;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
 
@@ -17,7 +17,6 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<MemberResponse> findAllMember() {
         List<Member> members = memberRepository.findAll();
         return members.stream()
@@ -25,7 +24,6 @@ public class MemberService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(NotFoundMemberException::new);

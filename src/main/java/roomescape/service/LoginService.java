@@ -15,7 +15,7 @@ import roomescape.service.dto.SignupResponse;
 import roomescape.service.helper.JwtTokenProvider;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class LoginService {
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
@@ -25,7 +25,6 @@ public class LoginService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @Transactional(readOnly = true)
     public String login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(UnauthorizedEmailException::new);
@@ -35,17 +34,14 @@ public class LoginService {
         return jwtTokenProvider.createToken(member.getEmail(), member.getRole());
     }
 
-    @Transactional(readOnly = true)
     public LoginCheckResponse loginCheck(Member member) {
         return new LoginCheckResponse(member);
     }
 
-    @Transactional(readOnly = true)
     public MemberRole findMemberRoleByToken(String token) {
         return jwtTokenProvider.getMemberRole(token);
     }
 
-    @Transactional(readOnly = true)
     public Member findMemberByToken(String token) {
         String email = jwtTokenProvider.getMemberEmail(token);
         return findMemberByEmail(email);
@@ -56,6 +52,7 @@ public class LoginService {
                 .orElseThrow(InvalidTokenException::new);
     }
 
+    @Transactional
     public SignupResponse signup(SignupRequest request) {
         Member member = request.toMember(MemberRole.USER);
         Member savedMember = memberRepository.save(member);

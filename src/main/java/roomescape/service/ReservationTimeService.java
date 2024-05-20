@@ -15,7 +15,7 @@ import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -26,7 +26,6 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAllReservationTime() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
@@ -34,7 +33,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAllAvailableReservationTime(LocalDate date, long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -49,6 +47,7 @@ public class ReservationTimeService {
         return new AvailableReservationTimeResponse(time, alreadyBooked);
     }
 
+    @Transactional
     public ReservationTimeResponse saveReservationTime(ReservationTimeRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.getStartAt())) {
             throw new DuplicatedTimeException();
@@ -58,6 +57,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(savedReservationTime);
     }
 
+    @Transactional
     public void deleteReservationTime(long id) {
         ReservationTime reservationTime = findReservationTimeById(id);
         if (reservationRepository.existsByTimeId(reservationTime.getId())) {

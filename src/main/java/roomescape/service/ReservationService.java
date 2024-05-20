@@ -17,7 +17,7 @@ import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -34,7 +34,6 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservation(
             Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
@@ -43,7 +42,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationMineResponse> findMyReservation(Member member) {
         List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
         return reservations.stream()
@@ -51,6 +49,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse saveReservation(ReservationRequest request, Member member) {
         ReservationTime time = findReservationTimeById(request.getTimeId());
         Theme theme = findThemeById(request.getThemeId());
@@ -77,6 +76,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(long id) {
         Reservation reservation = findReservationById(id);
         reservationRepository.delete(reservation);

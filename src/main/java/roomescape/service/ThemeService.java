@@ -14,7 +14,7 @@ import roomescape.service.dto.ThemeRequest;
 import roomescape.service.dto.ThemeResponse;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -26,7 +26,6 @@ public class ThemeService {
         this.clock = clock;
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllTheme() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -34,7 +33,6 @@ public class ThemeService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllPopularTheme() {
         LocalDate startDate = LocalDate.now(clock).minusDays(7L);
         LocalDate endDate = LocalDate.now(clock);
@@ -44,12 +42,14 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse saveTheme(ThemeRequest request) {
         Theme theme = request.toTheme();
         Theme savedTheme = themeRepository.save(theme);
         return new ThemeResponse(savedTheme);
     }
 
+    @Transactional
     public void deleteTheme(long id) {
         Theme theme = findThemeById(id);
         if (reservationRepository.existsByThemeId(theme.getId())) {
