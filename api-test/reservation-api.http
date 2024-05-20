@@ -1,0 +1,38 @@
+### 예약 조회 API
+
+GET http://localhost:8080/reservations
+
+### 테마 아이디, 회원 아이디, 기간 조건 별 조회 API (dateFrom과 dateTo 파라미터 값 설정 필요)
+
+GET http://localhost:8080/reservations/search?themeId=1&memberId=1&dateFrom=?&dateTo=?
+
+### 사용자 별 예약 조회 API
+
+GET http://localhost:8080/reservations/mine
+
+### 사용자 예약 추가 API
+
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-05-11",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 관리자 예약 추가 API
+
+POST http://localhost:8080/admin/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-05-12",
+  "themeId": 1,
+  "timeId": 1,
+  "memberId": 1
+}
+
+### 예약 삭제 API
+
+DELETE http://localhost:8080/reservations/1
