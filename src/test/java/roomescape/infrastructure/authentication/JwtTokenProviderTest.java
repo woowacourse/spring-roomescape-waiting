@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.Null;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -46,6 +49,18 @@ class JwtTokenProviderTest {
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode")
                 .isEqualTo(RoomescapeErrorCode.TOKEN_EXPIRED);
+    }
+
+    @DisplayName("토큰이 존재하지 않을 경우 예외가 발생한다.")
+    @NullAndEmptySource
+    @ParameterizedTest
+    void getPayloadTokenEmptyExceptionTest(String token) {
+        JwtTokenProvider jwtTokenProvider = createJwtTokenProvider(10000);
+
+        assertThatCode(() -> jwtTokenProvider.getPayload(token))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode")
+                .isEqualTo(RoomescapeErrorCode.TOKEN_NOT_FOUND);
     }
 
     private JwtTokenProvider createJwtTokenProvider(int validityInMilliseconds) {
