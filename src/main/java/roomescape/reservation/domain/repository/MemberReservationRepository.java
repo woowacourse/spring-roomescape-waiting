@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -29,4 +30,6 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             ORDER BY mr.id ASC
             """)
     List<MemberReservation> findByReservationTimeAndDateAndThemeOrderByIdAsc(ReservationTime time, LocalDate date, Theme theme);
+
+    Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
 }

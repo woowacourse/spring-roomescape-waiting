@@ -96,14 +96,23 @@ public class ReservationService {
     public void removeReservationById(final Long reservationId, final Long requestMemberId) {
         Member member = memberService.findMemberById(requestMemberId);
         Reservation reservation = findReservationById(reservationId);
+        MemberReservation memberReservation = findMemberReservationByReservationAndMember(reservation, member);
+
         Long reservationMemberId = reservation.getMember().getId();
 
         if (member.isRole(Role.ADMIN) || reservationMemberId.equals(requestMemberId)) {
+            memberReservationRepository.deleteById(memberReservation.getId());
             reservationRepository.deleteById(reservation.getId());
         } else {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
                     "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다.");
         }
+    }
+
+    private MemberReservation findMemberReservationByReservationAndMember(final Reservation reservation, final Member member) {
+        return memberReservationRepository.findByReservationAndMember(reservation, member)
+                .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_RESERVATION_NOT_FOUND,
+                        ErrorType.MEMBER_RESERVATION_NOT_FOUND.getDescription()));
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
