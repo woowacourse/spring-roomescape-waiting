@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.config.AcceptanceTest;
 import roomescape.controller.api.dto.request.ReservationRequest;
+import roomescape.controller.api.dto.response.MemberReservationsResponse;
 import roomescape.controller.api.dto.response.ReservationResponse;
 import roomescape.controller.api.dto.response.ReservationTimeResponse;
 import roomescape.controller.api.dto.response.ThemeResponse;
@@ -28,6 +29,7 @@ public class ReservationAcceptanceTest {
         class ContextWithValidRequest {
             // 토큰을 빼는게 맞을까??
             private final String token = 멤버_로그인();
+
             @Test
             @DisplayName("201과 결과를 반환한다.")
             void it_returns_201_and_response() {
@@ -52,12 +54,13 @@ public class ReservationAcceptanceTest {
                     assertThat(response.theme()).isEqualTo(themeResponse);
                 });
             }
+
             @Test
             @DisplayName("날짜,시간,테마가 똑같은 예약이 있다면 409를 반환한다.")
-            void it_returns_409_with_duplicate_reservation_reservationTime_date_theme(){
+            void it_returns_409_with_duplicate_reservation_reservationTime_date_theme() {
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
-                예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
+                예약_생성("2024-10-03", themeResponse.id(), reservationTimeResponse.id(), token);
 
                 final ReservationRequest request = new ReservationRequest(
                         "2024-10-03",
@@ -94,22 +97,26 @@ public class ReservationAcceptanceTest {
                 //@formatter:on
             }
         }
+
         @Nested
         @DisplayName("예약 정보 및 Id에 대한 값이 타당하지 않은 경우")
-        class ContextWithInvalidRequest{
+        class ContextWithInvalidRequest {
             private final String token = 멤버_로그인();
+
             @Test
             @DisplayName("존재하지 않는 id를 통한 생성은 404를 반환한다.")
-            void it_returns_404_with_not_exist_id(){
+            void it_returns_404_with_not_exist_id() {
                 final ReservationRequest request = new ReservationRequest(
                         "2024-05-20",
                         -1L,
                         -1L
                 );
 
+                //@formatter:off
                 RestAssured.given().body(request).cookie(token).contentType(ContentType.JSON)
                         .when().post("/reservations")
                         .then().assertThat().statusCode(404);
+                //@formatter:on
             }
 
             /**
@@ -118,7 +125,7 @@ public class ReservationAcceptanceTest {
              */
             @Test
             @DisplayName("현재보다 이전 날짜&시간 에 대한 생성은 400을 반환한다.")
-            void it_returns_400_with_past_date_and_time(){
+            void it_returns_400_with_past_date_and_time() {
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
                 final ReservationRequest request = new ReservationRequest(
@@ -127,9 +134,50 @@ public class ReservationAcceptanceTest {
                         themeResponse.id()
                 );
 
+                //@formatter:off
                 RestAssured.given().body(request).cookie(token).contentType(ContentType.JSON)
                         .when().post("/reservations")
                         .then().assertThat().statusCode(400);
+                //@formatter:on
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("내가 한 예약을 확인할떄")
+    class DescribeGetMyReservation {
+        @Nested
+        @DisplayName("쿠키에 로그인 후 발급 받은 토큰을 담은 경우")
+        class ContextWithToken{
+            @Test
+            @DisplayName("200과 응답을 반환한다.")
+            void it_returns_200_and_response() {
+                final ThemeResponse themeResponse = 테마_생성();
+                final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
+                final String token = 멤버_로그인();
+                예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
+                예약_생성("2024-10-04",themeResponse.id(),reservationTimeResponse.id(),token);
+
+                //@formatter:off
+                final MemberReservationsResponse response = RestAssured.given().cookie(token).contentType(ContentType.JSON)
+                        .when().get("/reservations/mine")
+                        .then().assertThat().statusCode(200).extract().as(MemberReservationsResponse.class);
+                //@formatter:on
+
+                assertThat(response.data()).hasSize(2);
+            }
+        }
+        @Nested
+        @DisplayName("쿠키에 로그인한 토큰을 담지 않은 경우")
+        class ContextWithoutToken {
+            @Test
+            @DisplayName("401을 반환한다.")
+            void it_returns_401() {
+                //@formatter:off
+                RestAssured.given().contentType(ContentType.JSON)
+                        .when().get("/reservations/mine")
+                        .then().assertThat().statusCode(401);
+                //@formatter:on
             }
         }
     }
