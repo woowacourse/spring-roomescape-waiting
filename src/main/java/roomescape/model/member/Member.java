@@ -13,7 +13,7 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @NotNull
     @Valid
     @Embedded
@@ -32,7 +32,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private Set<Reservation> reservations;
 
-    public Member(long id, String name, String email, String password, Role role) {
+    public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
         this.name = new MemberName(name);
         this.email = new MemberEmail(email);
@@ -43,7 +43,7 @@ public class Member {
     public Member() {
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -63,6 +63,10 @@ public class Member {
         return role;
     }
 
+    public Set<Reservation> getReservations() {
+        return reservations;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -72,7 +76,7 @@ public class Member {
             return false;
         }
         Member member = (Member) o;
-        return id == member.id;
+        return id.equals(member.id);
     }
 
     @Override

@@ -34,14 +34,14 @@ class ThemeRepositoryTest {
         reservationRepository.saveAll(List.of(
                 new Reservation(
                         LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1, LocalTime.of(1, 0)),
-                        new Theme(1, "n1", "d1", "t1"),
-                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                        new ReservationTime(1L, LocalTime.of(1, 0)),
+                        new Theme(1L, "n1", "d1", "t1"),
+                        new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
                 new Reservation(
                         LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2, LocalTime.of(2, 0)),
-                        new Theme(2, "n2", "d2", "t2"),
-                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
+                        new ReservationTime(2L, LocalTime.of(2, 0)),
+                        new Theme(2L, "n2", "d2", "t2"),
+                        new Member(2L, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("두 날짜 사이의 예약을 테마의 개수로 내림차순 정렬하여, 특정 개수의 테마를 조회한다.")
@@ -52,8 +52,8 @@ class ThemeRepositoryTest {
         assertAll(
                 () -> assertThat(themes).hasSizeLessThanOrEqualTo(10),
                 () -> assertThat(themes).containsExactly(
-                        new Theme(1, "n1", "d1", "t1"),
-                        new Theme(2, "n2", "d2", "t2")));
+                        new Theme(1L, "n1", "d1", "t1"),
+                        new Theme(2L, "n2", "d2", "t2")));
     }
 
     @DisplayName("특정 이름을 가진 테마가 존재할 경우 참을 반환한다.")

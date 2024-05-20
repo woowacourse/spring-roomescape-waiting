@@ -14,7 +14,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @NotNull
     private LocalDate date;
     @NotNull
@@ -27,7 +27,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    private Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -36,7 +36,7 @@ public class Reservation {
     }
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(0, date, time, theme, member);
+        this(0L, date, time, theme, member);
     }
 
     public Reservation() {
@@ -48,7 +48,7 @@ public class Reservation {
                 new Member(member.getId(), member.getName(), member.getEmail(), member.getPassword(), member.getRole()));
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -77,7 +77,7 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) o;
-        return id == that.id;
+        return id.equals(that.id);
     }
 
     @Override

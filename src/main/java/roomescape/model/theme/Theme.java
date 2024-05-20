@@ -14,7 +14,7 @@ public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @NotNull
     @Valid
     @Embedded
@@ -30,14 +30,14 @@ public class Theme {
     @OneToMany(mappedBy = "theme")
     private Set<Reservation> reservations;
 
-    private Theme(long id, Name name, Description description, Thumbnail thumbnail) {
+    private Theme(Long id, Name name, Description description, Thumbnail thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public Theme(long id, String name, String description, String thumbnail) {
+    public Theme(Long id, String name, String description, String thumbnail) {
         this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
@@ -45,10 +45,10 @@ public class Theme {
     }
 
     public static Theme from(ThemeDto themeDto) {
-        return new Theme(0, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
+        return new Theme(0L, themeDto.getName(), themeDto.getDescription(), themeDto.getThumbnail());
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -73,7 +73,7 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) o;
-        return id == theme.id;
+        return id.equals(theme.id);
     }
 
     @Override

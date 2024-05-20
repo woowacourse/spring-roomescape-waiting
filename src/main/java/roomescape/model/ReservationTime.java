@@ -13,19 +13,19 @@ public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @NotNull
     private LocalTime startAt;
     @OneToMany(mappedBy = "time")
     private Set<Reservation> reservations;
 
-    public ReservationTime(long id, LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
     public ReservationTime(LocalTime startAt) {
-        this(0, startAt);
+        this(0L, startAt);
     }
 
     public ReservationTime() {
@@ -35,7 +35,7 @@ public class ReservationTime {
         return new ReservationTime(reservationTimeDto.getStartAt());
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -52,7 +52,7 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) o;
-        return id == that.id;
+        return id.equals(that.id);
     }
 
     @Override

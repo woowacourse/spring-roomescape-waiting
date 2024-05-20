@@ -32,14 +32,14 @@ public class ReservationTimeRepositoryTest {
         reservationRepository.saveAll(List.of(
                 new Reservation(
                         LocalDate.of(2000, 1, 1),
-                        new ReservationTime(1, LocalTime.of(1, 0)),
-                        new Theme(1, "n1", "d1", "t1"),
-                        new Member(1, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
+                        new ReservationTime(1L, LocalTime.of(1, 0)),
+                        new Theme(1L, "n1", "d1", "t1"),
+                        new Member(1L, "에버", "treeboss@gmail.com", "treeboss123!", Role.USER)),
                 new Reservation(
                         LocalDate.of(2000, 1, 2),
-                        new ReservationTime(2, LocalTime.of(2, 0)),
-                        new Theme(2, "n2", "d2", "t2"),
-                        new Member(2, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
+                        new ReservationTime(2L, LocalTime.of(2, 0)),
+                        new Theme(2L, "n2", "d2", "t2"),
+                        new Member(2L, "우테코", "wtc@gmail.com", "wtc123!", Role.ADMIN))));
     }
 
     @DisplayName("특정 startAt을 가진 예약 시간이 존재하는 경우 참을 반환한다.")
