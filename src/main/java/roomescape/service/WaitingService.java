@@ -96,10 +96,23 @@ public class WaitingService {
 
     public void deleteMemberWaiting(Long memberId, Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 삭제 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("사용자 예약 대기 삭제 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
         if (!waiting.hasMemberId(memberId)) {
             throw new AuthorizationException(String.format("예약 대기 삭제 권한이 없는 사용자입니다. (id: %d)", memberId));
         }
+        waitingRepository.deleteById(waitingId);
+    }
+
+    public List<WaitingAppResponse> findAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingAppResponse::new)
+                .toList();
+    }
+
+    public void deleteWaiting(Long waitingId) {
+        waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 삭제 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
         waitingRepository.deleteById(waitingId);
     }
 }
