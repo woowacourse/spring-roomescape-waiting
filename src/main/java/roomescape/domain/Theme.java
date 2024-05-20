@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,12 +14,13 @@ public class Theme {
     private Long id;
     private String name;
     private String description;
-    private String thumbnail;
+    @Embedded
+    private Thumbnail thumbnail;
 
     protected Theme() {
     }
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    public Theme(Long id, String name, String description, Thumbnail thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -37,7 +39,7 @@ public class Theme {
         return description;
     }
 
-    public String getThumbnail() {
+    public Thumbnail getThumbnail() {
         return thumbnail;
     }
 }

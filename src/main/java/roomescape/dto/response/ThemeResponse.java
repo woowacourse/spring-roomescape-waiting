@@ -9,7 +9,7 @@ public record ThemeResponse(Long id, String name, String description, String thu
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnail()
+                theme.getThumbnail().getValue()
         );
     }
 }
