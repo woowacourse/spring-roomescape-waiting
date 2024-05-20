@@ -3,7 +3,8 @@
 ## Admin PAGE
 
 - [X] `/admin` `GET` 요청 시 어드민 메인 페이지를 응답한다.
-- [X] `/admin/reservation` `GET` 요청 시 예약 관리 페이지를 응답한다.
+- [X] `/admin/reservation/reserved` `GET` 요청 시 예약 관리 페이지를 응답한다.
+- [X] `/admin/reservation/waiting` `GET` 요청 시 예약 대기 관리 페이지를 응답한다.
 - [X] `/admin/time` `GET` 요청 시 시간 관리 페이지를 응답한다.
 - [X] `/admin/theme` `GET` 요청 시 테마 관리 페이지를 응답한다.
 
