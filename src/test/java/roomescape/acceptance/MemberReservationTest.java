@@ -56,8 +56,7 @@ class MemberReservationTest {
             .body(requestBody)
         .when()
             .post("/reservations")
-        .then()
-            .log().all()
+        .then().log().all()
             .statusCode(201)
             .and()
             .body("status", equalTo("RESERVED"));
@@ -69,31 +68,33 @@ class MemberReservationTest {
     void when_reservationExists_then_addWaitingReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Long anotherMemberId = 2L;
-        String requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}",
-                tomorrow, anotherMemberId);
+        Long themeId = 1L;
+        Long timeId = 1L;
+        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
+                themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
+        RestAssured
+        .given().log().all()
+            .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(201)
+            .body("status", equalTo("RESERVED"));
 
-        // when
-        requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}",
-                tomorrow);
-
-        Response response = RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201)
-                .extract().response();
-
-        // then
-        // 예약 대기 상태인지 확인하는 로직이 필요하다
+        // when, then
+        RestAssured
+        .given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(201)
+            .body("status", equalTo("WAITING"));
     }
 
     @Test
@@ -131,19 +132,15 @@ class MemberReservationTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         Long themeId = 1L;
         Long timeId = 1L;
-        Long anotherMemberId = 2L;
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
-                themeId, tomorrow, timeId, anotherMemberId);
+                themeId, tomorrow, timeId);
 
         RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
                 .then().log().all().statusCode(201);
-
-        requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
-                themeId, tomorrow, timeId);
 
         RestAssured.given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
