@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,23 +8,32 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import jakarta.persistence.Table;
 import roomescape.exception.ErrorType;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Entity
+@Table(name = "member")
 public class Member {
     private static Pattern EMAIL_REGEX = Pattern.compile("^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
     @Embedded
     private Password password;
+
+    @Column(nullable = false, length = 50)
     private String name;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
