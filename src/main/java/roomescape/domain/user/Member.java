@@ -1,8 +1,12 @@
 package roomescape.domain.user;
 
-import jakarta.persistence.*;
-
-import java.util.Objects;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class Member {
@@ -42,25 +46,14 @@ public class Member {
         return new Member(id, new Name(name), new Email(email), new Password(password), Role.ADMIN);
     }
 
-    public static Member from(final Long id, final String name, final String email, final String password, final String role) {
+    public static Member from(final Long id, final String name, final String email, final String password,
+                              final String role) {
         return new Member(id, new Name(name), new Email(email), new Password(password), Role.from(role));
     }
 
 
     public boolean isNotEqualPassword(final String password) {
         return !this.password.isEqual(password);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final Member member)) return false;
-        return Objects.equals(email, member.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(email);
     }
 
     public String getName() {

@@ -31,7 +31,8 @@ class MemberRepositoryTest {
         final var id = sut.save(MemberFixture.getDomain())
                 .getId();
         final var result = sut.findById(id);
-        assertThat(result).contains(MemberFixture.getDomain());
+        assertThat(result.get().getEmail())
+                .isEqualTo(MemberFixture.getDomain().getEmail());
     }
     @Test
     void delete(){
@@ -53,7 +54,8 @@ class MemberRepositoryTest {
         sut.save(MemberFixture.getDomain("alphaka@gmail.com"));
 
         final var result = sut.findByEmail(new Email("alphaka@gmail.com"));
-        assertThat(result).contains(MemberFixture.getDomain("alphaka@gmail.com"));
+        assertThat(result.get().getEmail())
+                .isEqualTo(MemberFixture.getDomain("alphaka@gmail.com").getEmail());
     }
     @Test
     void existsByEmail(){
