@@ -31,15 +31,14 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(Long id, ThemeName name, Description description, Thumbnail thumbnail) {
-        this.id = id;
+    public Theme(ThemeName name, Description description, Thumbnail thumbnail) {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
     public Theme(String name, String description, String thumbnail) {
-        this(null, new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
+        this(new ThemeName(name), new Description(description), new Thumbnail(thumbnail));
     }
 
     public Long getId() {

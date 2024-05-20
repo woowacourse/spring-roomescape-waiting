@@ -18,13 +18,8 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
-    }
-
-    public ReservationTime(LocalTime time) {
-        this(null, time);
     }
 
     public boolean isSame(ReservationTime other) {

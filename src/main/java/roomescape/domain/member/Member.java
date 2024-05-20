@@ -31,8 +31,7 @@ public class Member {
     protected Member() {
     }
 
-    public Member(Long id, MemberName memberName, Email email, Password password, Role role) {
-        this.id = id;
+    public Member(MemberName memberName, Email email, Password password, Role role) {
         this.memberName = memberName;
         this.email = email;
         this.password = password;
@@ -40,7 +39,7 @@ public class Member {
     }
 
     public Member(String name, String email, String password, Role role) {
-        this(null, new MemberName(name), Email.of(email), Password.of(password), role);
+        this(new MemberName(name), Email.of(email), Password.of(password), role);
     }
 
     public boolean isPasswordMatches(Password other) {
