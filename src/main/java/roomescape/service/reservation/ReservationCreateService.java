@@ -37,7 +37,6 @@ public class ReservationCreateService {
     @Transactional
     public Reservation create(ReservationAdminSaveRequest request) {
         Reservation reservation = request.toEntity(
-                request,
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 getMember(request.memberId()));
@@ -47,7 +46,6 @@ public class ReservationCreateService {
     @Transactional
     public Reservation create(ReservationSaveRequest request, Member member) {
         Reservation reservation = request.toEntity(
-                request,
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()),
                 member);
