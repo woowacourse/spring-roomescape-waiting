@@ -12,6 +12,7 @@ import roomescape.controller.api.dto.request.ReservationTimeRequest;
 import roomescape.controller.api.dto.response.AvailReservationTimeResponse;
 import roomescape.controller.api.dto.response.AvailableReservationTimesResponse;
 import roomescape.controller.api.dto.response.ReservationTimeResponse;
+import roomescape.controller.api.dto.response.ThemeResponse;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.fixture.ReservationTimeFixture;
 
@@ -121,6 +122,24 @@ public class ReservationTimeAcceptanceTest {
                 RestAssured.given().contentType(ContentType.JSON)
                         .when().delete("/times/"+"-1")
                         .then().assertThat().statusCode(404);
+                //@formatter:on
+            }
+        }
+        @Nested
+        @DisplayName("식별자에 대한 예약이 존재하는 경우")
+        class ContextWithExistReservation{
+            @Test
+            @DisplayName("400을 반환한다.")
+            void it_returns_(){
+                final ThemeResponse themeResponse = 테마_생성();
+                final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
+                final String token = 멤버_로그인();
+                예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
+
+                //@formatter:off
+                RestAssured.given().contentType(ContentType.JSON)
+                        .when().delete("/times/"+reservationTimeResponse.id())
+                        .then().assertThat().statusCode(400);
                 //@formatter:on
             }
         }
