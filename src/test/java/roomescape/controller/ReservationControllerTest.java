@@ -165,15 +165,6 @@ class ReservationControllerTest {
                 .statusCode(400);
     }
 
-    @DisplayName("예약 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
-    @Test
-    void should_throw_exception_when_delete_by_id_null() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/")
-                .then().log().all()
-                .statusCode(404);
-    }
-
     @DisplayName("특정 날짜와 테마에 따른 모든 시간의 예약 가능 여부를 확인 - 테마 id가 null 또는 1 미만일 경우 예외를 반환한다.")
     @ParameterizedTest
     @NullSource
