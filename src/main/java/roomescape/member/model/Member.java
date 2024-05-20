@@ -25,13 +25,16 @@ public class Member {
     @Embedded
     private MemberPassword password;
 
-    public static Member createMemberWithoutId(
+    protected Member() {
+    }
+
+    public Member(
             final MemberRole role,
             final String password,
             final String name,
             final String email
     ) {
-        return new Member(
+        this(
                 null,
                 role,
                 new MemberPassword(password),
@@ -40,23 +43,20 @@ public class Member {
         );
     }
 
-    public static Member createMemberWithId(
+    public Member(
             final Long id,
             final MemberRole role,
             final String password,
             final String name,
             final String email
     ) {
-        return new Member(
+        this(
                 id,
                 role,
                 new MemberPassword(password),
                 new MemberName(name),
                 new MemberEmail(email)
         );
-    }
-
-    protected Member() {
     }
 
     private Member(

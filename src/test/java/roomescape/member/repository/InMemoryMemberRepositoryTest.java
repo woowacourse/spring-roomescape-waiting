@@ -54,7 +54,7 @@ class InMemoryMemberRepositoryTest {
         final String password = "kellyPw1234";
         final String email = "kelly6bf@gmail.com";
         final String name = "kelly";
-        final Member member = Member.createMemberWithId(memberId, role, password, name, email);
+        final Member member = new Member(memberId, role, password, name, email);
 
         // When
         final Member savedMember = memberRepository.save(member);

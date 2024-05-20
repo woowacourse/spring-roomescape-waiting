@@ -30,24 +30,59 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public static Reservation of(
+    protected Reservation() {
+    }
+
+    public Reservation(
             final ReservationStatus status,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
             final Member member
     ) {
-        checkRequiredData(status, time, theme, member);
-
-        final ReservationDate reservationDate = new ReservationDate(date);
-        return new Reservation(
+        this(
                 null,
                 status,
-                reservationDate,
+                new ReservationDate(date),
                 time,
                 theme,
                 member
         );
+    }
+
+    public Reservation(
+            final Long id,
+            final ReservationStatus status,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member
+    ) {
+        this(
+                id,
+                status,
+                new ReservationDate(date),
+                time,
+                theme,
+                member
+        );
+    }
+
+    private Reservation(
+            final Long id,
+            final ReservationStatus status,
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member
+    ) {
+        checkRequiredData(status, time, theme, member);
+        this.id = id;
+        this.status = status;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.member = member;
     }
 
     private static void checkRequiredData(
@@ -59,45 +94,6 @@ public class Reservation {
         if (status == null || reservationTime == null || theme == null || member == null) {
             throw new IllegalArgumentException("예약 상태, 시간, 테마, 회원 정보는 Null을 입력할 수 없습니다.");
         }
-    }
-
-    public static Reservation of(
-            final Long id,
-            final ReservationStatus status,
-            final LocalDate date,
-            final ReservationTime time,
-            final Theme theme,
-            final Member member
-    ) {
-        checkRequiredData(status, time, theme, member);
-
-        return new Reservation(
-                id,
-                status,
-                new ReservationDate(date),
-                time,
-                theme,
-                member
-        );
-    }
-
-    protected Reservation() {
-    }
-
-    private Reservation(
-            final Long id,
-            final ReservationStatus status,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme,
-            final Member member
-    ) {
-        this.id = id;
-        this.status = status;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.member = member;
     }
 
     public Long getId() {

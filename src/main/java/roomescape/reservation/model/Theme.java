@@ -19,12 +19,15 @@ public class Theme {
     @Embedded
     private ThemeThumbnail thumbnail;
 
-    public static Theme of(
+    protected Theme() {
+    }
+
+    public Theme(
             final String name,
             final String description,
             final String thumbnail
     ) {
-        return new Theme(
+        this(
                 null,
                 new ThemeName(name),
                 new ThemeDescription(description),
@@ -32,21 +35,18 @@ public class Theme {
         );
     }
 
-    public static Theme of(
+    public Theme (
             final Long id,
             final String name,
             final String description,
             final String thumbnail
     ) {
-        return new Theme(
+        this(
                 id,
                 new ThemeName(name),
                 new ThemeDescription(description),
                 new ThemeThumbnail(thumbnail)
         );
-    }
-
-    protected Theme() {
     }
 
     private Theme(

@@ -45,7 +45,7 @@ class ThemeRepositoryTest {
     @Test
     void saveTest() {
         // Given
-        final Theme theme = Theme.of(
+        final Theme theme = new Theme(
                 "테바의 비밀친구",
                 "테바의 은밀한 비밀친구",
                 "대충 테바 사진 링크");
