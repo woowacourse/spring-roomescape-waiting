@@ -22,7 +22,7 @@ class MemberAcceptanceTest extends BasicAcceptanceTest {
                 dynamicTest("멤버를 추가한다", () -> postMember("name1", "member1@wooteco.com", "wootecoCrew6!", 201)),
                 dynamicTest("멤버를 추가한다", () -> postMember("name2", "member2@wooteco.com", "wootecoCrew6!", 201)),
                 dynamicTest("멤버를 추가한다", () -> postMember("name3", "member3@wooteco.com", "wootecoCrew6!", 201)),
-                dynamicTest("모든 멤버를 조회한다 (총 3명)", () -> getMembers(200, 7))
+                dynamicTest("모든 멤버를 조회한다 (총 7명)", () -> getMembers(200, 7))
         );
     }
 
