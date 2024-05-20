@@ -21,6 +21,13 @@ import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.utils.e2eTest;
 
+/**
+ * 로그인 정보 (어드민) { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+ * <p>
+ * 테마 정보 { "id": 1, "name": '테마1' } { "id": 2, "name": '테마2' } { "id": 3, "name": '테마3' } { "id": 4, "name": '테마4' } {
+ * "id": 5, "name": '테마5' }
+ **/
+
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})

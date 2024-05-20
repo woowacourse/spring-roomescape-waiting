@@ -19,6 +19,12 @@ import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.dto.theme.ThemeRequest;
 import roomescape.core.utils.e2eTest;
 
+/**
+ * 로그인 정보 (어드민) { "id": 1 "name": 어드민 "email": test@email.com "password": password "role": ADMIN }
+ * <p>
+ * 예약 정보 { "date": '2024-05-07', "member_id": 1, "time_id": 1, "theme_id": 1, "status": 'BOOKED' }
+ **/
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
