@@ -38,24 +38,25 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(final Member member, final String date, final ReservationTime time,
+                       final Theme theme, final ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     public Reservation(final Long id, final Member member, final String date,
-                       final ReservationTime time, final Theme theme) {
-        this(id, member, convertToLocalDate(date), time, theme);
+                       final ReservationTime time, final Theme theme, final ReservationStatus status) {
+        this(id, member, convertToLocalDate(date), time, theme, status);
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date,
-                       final ReservationTime time, final Theme theme) {
+                       final ReservationTime time, final Theme theme, final ReservationStatus status) {
         validateDate(date);
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.WAITING;
+        this.status = status;
     }
 
     private static LocalDate convertToLocalDate(final String date) {

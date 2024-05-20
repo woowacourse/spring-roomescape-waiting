@@ -15,7 +15,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondCreatedWhenCreateReservation() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
+        final MemberReservationSaveRequest request
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
 
         assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 201);
     }
@@ -35,7 +36,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondBadRequestWhenNotExistingReservationTime() {
         saveReservationTime();
         final Long themeId = saveTheme();
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, 0L, themeId);
+        final MemberReservationSaveRequest request
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, 0L, themeId, "RESERVED");
 
         assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
     }
@@ -45,7 +47,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void respondBadRequestWhenNotExistingTheme() {
         saveTheme();
         final Long timeId = saveReservationTime();
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 0L);
+        final MemberReservationSaveRequest request
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 0L, "RESERVED");
 
         assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
     }

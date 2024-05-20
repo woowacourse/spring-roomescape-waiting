@@ -60,7 +60,8 @@ abstract class AcceptanceTest {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
-        final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
+        final MemberReservationSaveRequest request
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
@@ -85,7 +86,8 @@ abstract class AcceptanceTest {
                 .extract().as(TokenResponse.class).accessToken();
     }
 
-    protected void assertCreateResponseWithToken(final Object request, final String email, final String path, final int statusCode) {
+    protected void assertCreateResponseWithToken(final Object request, final String email,
+                                                 final String path, final int statusCode) {
         final String accessToken = getAccessToken(email);
 
         RestAssured.given().log().all()

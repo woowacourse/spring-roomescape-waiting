@@ -24,18 +24,7 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
-        final int count = reservationRepository.countByDateAndTimeIdAndThemeId(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
-        );
-        validateDuplicatedReservation(count);
-        reservation.toReserved();
         return ReservationResponse.from(reservationRepository.save(reservation));
-    }
-
-    private void validateDuplicatedReservation(final int count) {
-        if (count >= MAX_RESERVATIONS_PER_TIME) {
-            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
-        }
     }
 
     @Transactional(readOnly = true)
