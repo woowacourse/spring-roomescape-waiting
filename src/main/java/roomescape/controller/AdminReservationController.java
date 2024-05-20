@@ -19,7 +19,6 @@ import roomescape.service.ReservationService;
 @RequestMapping("/admin")
 public class AdminReservationController {
 
-
     private final ReservationService reservationService;
 
     public AdminReservationController(ReservationService reservationService) {
