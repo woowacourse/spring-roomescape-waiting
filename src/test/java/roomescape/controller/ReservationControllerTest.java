@@ -18,7 +18,6 @@ import roomescape.dto.request.MemberReservationRequest;
 import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(value = "classpath:test-db-clean.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
 

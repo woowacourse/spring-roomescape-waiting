@@ -15,7 +15,6 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.dto.response.TimeSlotResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(value = "classpath:test-db-clean.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class BookingControllerTest {
 

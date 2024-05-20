@@ -1,3 +1,27 @@
+DELETE
+FROM reservation;
+
+DELETE
+FROM member;
+
+DELETE
+FROM time_slot;
+
+DELETE
+FROM theme;
+
+ALTER TABLE reservation
+    ALTER COLUMN id RESTART WITH 1;
+
+ALTER TABLE member
+    ALTER COLUMN id RESTART WITH 1;
+
+ALTER TABLE time_slot
+    ALTER COLUMN id RESTART WITH 1;
+
+ALTER TABLE theme
+    ALTER COLUMN id RESTART WITH 1;
+
 INSERT INTO time_slot(start_at)
 VALUES ('10:00'),
        ('11:00'),
@@ -48,5 +72,3 @@ VALUES (1, CURRENT_DATE - 1, 1, 5, 'BOOKING'),
        (2, CURRENT_DATE - 7, 2, 11, 'BOOKING'),
        (2, CURRENT_DATE - 10, 3, 4, 'BOOKING'),
        (2, CURRENT_DATE - 10, 1, 4, 'BOOKING');
-
-
