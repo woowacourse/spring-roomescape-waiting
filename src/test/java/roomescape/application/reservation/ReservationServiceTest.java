@@ -105,25 +105,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약을 하는 경우 예외를 반환한다.")
-    void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
-        ReservationRequest request = new ReservationRequest(
-                member.getId(),
-                LocalDate.of(2024, 1, 1),
-                time.getId(),
-                theme.getId()
-        );
-        reservationRepository.save(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
-
-        assertThatCode(() -> reservationService.create(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 예약입니다.");
-    }
-
-    @Test
     @DisplayName("과거 시간을 예약하는 경우 예외를 반환한다.")
     void shouldThrowsIllegalArgumentExceptionWhenReservationDateIsBeforeCurrentDate() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
