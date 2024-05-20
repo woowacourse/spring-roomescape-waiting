@@ -132,7 +132,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAllByStatus(RESERVED);
     }
 
     public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
