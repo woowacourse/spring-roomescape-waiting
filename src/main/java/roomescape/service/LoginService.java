@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Email;
 import roomescape.domain.Member;
+import roomescape.domain.Password;
 import roomescape.repository.MemberRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
@@ -24,13 +25,13 @@ public class LoginService {
     }
 
     public TokenResponse login(TokenRequest tokenRequest) {
-        Member member = findMemberBy(tokenRequest.email());
+        Member member = findMemberBy(tokenRequest.email(), tokenRequest.password());
         String token = tokenProvider.generateTokenOf(member);
         return TokenResponse.from(token);
     }
 
-    private Member findMemberBy(String email) {
-        return memberRepository.findMemberByEmail(new Email(email))
+    private Member findMemberBy(String email, String password) {
+        return memberRepository.findMemberByEmailAndPassword(new Email(email), new Password(password))
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
     }
 
