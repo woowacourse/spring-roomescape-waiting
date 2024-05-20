@@ -1,7 +1,6 @@
 package roomescape.controller;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +13,6 @@ import roomescape.service.RankService;
 @RequestMapping("/ranks")
 public class RankingController {
 
-    private static final ZoneId KST_ZONE = ZoneId.of("Asia/Seoul");
-
     private final RankService rankService;
 
     public RankingController(RankService rankService) {
@@ -24,7 +21,7 @@ public class RankingController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> read() {
-        LocalDate now = LocalDate.now(KST_ZONE);
+        LocalDate now = LocalDate.now();
         LocalDate dateFrom = now.minusWeeks(1);
         LocalDate dateTo = now.minusDays(1);
         return ResponseEntity.ok(rankService.getPopularThemeList(dateFrom, dateTo));

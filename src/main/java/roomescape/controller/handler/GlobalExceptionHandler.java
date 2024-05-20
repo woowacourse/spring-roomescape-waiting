@@ -1,6 +1,8 @@
 package roomescape.controller.handler;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonMappingException.Reference;
+import java.util.List;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +28,21 @@ public class GlobalExceptionHandler {
                 .get(0)
                 .getDefaultMessage();
 
-        return ResponseEntity.badRequest().body(MESSAGE_HEADER + defaultMessage);
+        return ResponseEntity.badRequest()
+                .body(MESSAGE_HEADER + defaultMessage);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> httpMessageNotReadableException(HttpMessageNotReadableException e) {
         if (e.getCause() instanceof JsonMappingException jsonMappingException) {
-            String errorMessage = jsonMappingException.getPath().get(0).getFieldName() + "필드 내용이 잘못되었습니다.";
+            List<Reference> path = jsonMappingException.getPath();
+            Reference reference = path.get(0);
+            String errorMessage = reference.getFieldName() + "필드 내용이 잘못되었습니다.";
             return ResponseEntity.badRequest().body(MESSAGE_HEADER + errorMessage);
         }
         String errorMessage = MESSAGE_HEADER + "적절하지 않은 입력값 입니다";
-        return ResponseEntity.badRequest().body(errorMessage);
+        return ResponseEntity.badRequest()
+                .body(errorMessage);
     }
 
     @ExceptionHandler(SecurityException.class)
@@ -47,6 +53,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> unPredictableException(RuntimeException e) {
-        return ResponseEntity.badRequest().body(MESSAGE_HEADER + e.getMessage());
+        return ResponseEntity.badRequest()
+                .body(MESSAGE_HEADER + e.getMessage());
     }
 }
