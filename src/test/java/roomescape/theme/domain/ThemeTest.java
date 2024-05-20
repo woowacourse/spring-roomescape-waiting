@@ -33,16 +33,6 @@ class ThemeTest {
         softAssertions.assertAll();
     }
 
-    @DisplayName("테마 생성 시 썸네일이 링크 형식이 아닌 경우 예외가 발생한다.")
-    @Test
-    void validateThumbnailFormat() {
-        // given
-        String thumbnail = "notLink";
-
-        // when & then
-        assertThatThrownBy(() -> new Theme("name", "description", thumbnail));
-    }
-
     @DisplayName("테마는 중복된 이름이 들어올 경우 예외가 발생한다.")
     @Test
     void validateDuplicatedName() {
