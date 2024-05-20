@@ -18,13 +18,13 @@ public class Reservation {
     @NotNull
     private LocalDate date;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
