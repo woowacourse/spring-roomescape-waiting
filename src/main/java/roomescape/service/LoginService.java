@@ -3,10 +3,10 @@ package roomescape.service;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.repository.MemberRepository;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.infrastructure.TokenProvider;
+import roomescape.repository.MemberRepository;
 import roomescape.service.dto.request.TokenRequest;
 import roomescape.service.dto.response.AuthenticationInfoResponse;
 import roomescape.service.dto.response.TokenResponse;
@@ -23,14 +23,10 @@ public class LoginService {
     }
 
     public TokenResponse login(TokenRequest tokenRequest) {
-        Member member = findMemberBy(tokenRequest.email());
+        Member member = memberRepository.findByEmailAndPassword(tokenRequest.email(), tokenRequest.password())
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
         String token = tokenProvider.generateTokenOf(member);
         return TokenResponse.from(token);
-    }
-
-    private Member findMemberBy(String email) {
-        return memberRepository.findMemberByEmail(email)
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_USER));
     }
 
     public AuthenticationInfoResponse loginCheck(HttpServletRequest request) {
