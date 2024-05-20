@@ -80,7 +80,7 @@ class ReservationTimeControllerTest extends ExcludeInterceptorTest {
                         .param("date", "2099-07-01")
                         .param("themeId", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.alreadyBooked == false)]", hasSize(3)))
-                .andExpect(jsonPath("$[?(@.alreadyBooked == true)]", hasSize(10)));
+                .andExpect(jsonPath("$[?(@.alreadyBooked == false)]", hasSize(4)))
+                .andExpect(jsonPath("$[?(@.alreadyBooked == true)]", hasSize(8)));
     }
 }

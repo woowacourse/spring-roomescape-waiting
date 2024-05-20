@@ -7,7 +7,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
@@ -21,7 +20,6 @@ import roomescape.service.dto.response.time.ReservationTimeResponse;
 @Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDetailRepository reservationDetailRepository;
 
     public List<ReservationTimeResponse> findAllReservationTime() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -31,21 +29,13 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAllAvailableReservationTime(LocalDate date, Long themeId) {
-        List<Long> unavailableTimeIds = reservationDetailRepository.findTimeIdByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
-                .map(time -> toAvailableReservationTimeResponse(time, unavailableTimeIds))
+        List<ReservationTime> totalTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> reservedTimes = reservationTimeRepository.findAllReservedTimeByDateAndThemeId(
+                date, themeId);
+
+        return totalTimes.stream()
+                .map(time -> AvailableReservationTimeResponse.of(time, reservedTimes))
                 .toList();
-    }
-
-    private AvailableReservationTimeResponse toAvailableReservationTimeResponse(
-            ReservationTime time, List<Long> unavailableTimeIds) {
-        boolean alreadyBooked = isAlreadyBooked(time.getId(), unavailableTimeIds);
-        return AvailableReservationTimeResponse.of(time, alreadyBooked);
-    }
-
-    private boolean isAlreadyBooked(Long targetTimeId, List<Long> unavailableTimeIds) {
-        return unavailableTimeIds.contains(targetTimeId);
     }
 
     @Transactional

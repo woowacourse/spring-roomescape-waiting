@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -27,5 +28,9 @@ public class ReservationTime {
 
     public ReservationTime(LocalTime startAt) {
         this(null, startAt);
+    }
+
+    public boolean isAlreadyBooked(List<ReservationTime> reservedTimes) {
+        return reservedTimes.contains(this);
     }
 }
