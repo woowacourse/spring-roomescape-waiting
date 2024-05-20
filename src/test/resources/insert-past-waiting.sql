@@ -5,9 +5,5 @@ INSERT INTO theme(name, description, thumbnail) VALUES ('테마3', '설명3', 'h
 INSERT INTO reservation_time(start_at) VALUES ('10:00');
 
 INSERT INTO member(name, email, password, role) VALUES('리니', 'lini@email.com', 'lini123', 'GUEST');
-INSERT INTO member(name, email, password, role) VALUES('릴리', 'lily@email.com', 'lily123', 'GUEST');
-INSERT INTO member(name, email, password, role) VALUES('토미', 'tomi@email.com', 'tomi123', 'GUEST');
 
-INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, 'RESERVED');
-INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 2, 2, 'RESERVED');
-INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -8, CURRENT_DATE), 1, 3, 3, 'RESERVED');
+INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, `WAITING`);
