@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
+import roomescape.domain.ReservationRepository;
 import roomescape.dto.request.LogInRequest;
 import roomescape.dto.response.MemberPreviewResponse;
 import roomescape.dto.response.MemberReservationResponse;
@@ -15,10 +16,12 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
     private final JwtProvider jwtProvider;
 
-    public MemberService(MemberRepository memberRepository, JwtProvider jwtProvider) {
+    public MemberService(MemberRepository memberRepository, ReservationRepository reservationRepository, JwtProvider jwtProvider) {
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
         this.jwtProvider = jwtProvider;
     }
 
@@ -48,7 +51,7 @@ public class MemberService {
     }
 
     public List<MemberReservationResponse> getMyReservations(Member member) {
-        return member.getReservations().stream()
+        return reservationRepository.findByMemberId(member.getId()).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }

@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.List;
 import java.util.Objects;
 
 @ToString
@@ -30,9 +29,6 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<Reservation> reservations;
 
     public Member() {
     }
