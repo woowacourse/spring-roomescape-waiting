@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class Scheduler {
-    public static final int SINGLE_POOL_SIZE = 1;
+    private static final int POOL_SIZE = 1;
 
     private final ScheduledExecutorService scheduler;
 
     public Scheduler() {
-        this.scheduler = Executors.newScheduledThreadPool(SINGLE_POOL_SIZE);
+        this.scheduler = Executors.newScheduledThreadPool(POOL_SIZE);
     }
 
     public void executeAfterDelay(Runnable command, long delay, TimeUnit timeUnit) {
