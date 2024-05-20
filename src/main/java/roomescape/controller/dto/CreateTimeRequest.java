@@ -1,5 +1,7 @@
 package roomescape.controller.dto;
 
+import roomescape.global.exception.RoomescapeException;
+
 public record CreateTimeRequest(String startAt) {
 
     public CreateTimeRequest {
@@ -8,7 +10,7 @@ public record CreateTimeRequest(String startAt) {
 
     private void validate(String startAt) {
         if (startAt.isBlank()) {
-            throw new IllegalArgumentException("요청 필드는 비어있을 수 없습니다.");
+            throw new RoomescapeException("요청 필드는 비어있을 수 없습니다.");
         }
     }
 }

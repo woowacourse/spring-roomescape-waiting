@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.dto.CreateReservationRequest;
 import roomescape.controller.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -37,6 +38,21 @@ class AdminReservationControllerTest {
             .body(user)
             .when().post("/login")
             .then().extract().cookie("token");
+    }
+
+    @DisplayName("성공: 예약 추가 -> 201")
+    @Test
+    void save() {
+        CreateReservationRequest request = new CreateReservationRequest(1L,
+            "2026-06-06", 1L, 1L);
+
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when().post("/admin/reservations")
+            .then().log().all()
+            .statusCode(201);
     }
 
     @DisplayName("성공: 예약 삭제 -> 204")
