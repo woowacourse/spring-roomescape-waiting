@@ -1,11 +1,16 @@
 package roomescape.service;
 
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.controller.theme.dto.CreateThemeRequest;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.InvalidRequestException;
 import roomescape.repository.ReservationRepository;
@@ -44,15 +49,21 @@ public class ThemeService {
         themeRepository.deleteById(findTheme.getId());
     }
 
-    public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until,
-                                                       final int limit) {
+    public List<PopularThemeResponse> findMostBookedThemesBetweenLimited(final LocalDate from,
+                                                                         final LocalDate until,
+                                                                         final int limit) {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
         }
-        final List<Theme> reservations = reservationRepository
-                .findMostBookedThemesBetweenLimited(from, until, limit);
-        return reservations.stream()
-                .map(PopularThemeResponse::from)
+        final List<Reservation> reservations = reservationRepository.findAllByDateBetween(from,
+                until);
+        final Map<Theme, Long> themeBookedAmount = reservations.stream()
+                .collect(groupingBy(Reservation::getTheme, counting()));
+        return themeBookedAmount.entrySet()
+                .stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .limit(limit)
+                .map(entry -> PopularThemeResponse.from(entry.getKey()))
                 .toList();
     }
 }

@@ -1,6 +1,8 @@
 package roomescape.controller.time;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +17,6 @@ import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
 import roomescape.service.TimeService;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/times")
@@ -37,7 +36,7 @@ public class TimeController {
     @GetMapping(value = "/availability", params = {"date", "themeId"})
     public List<AvailabilityTimeResponse> getAvailableTimes(
             @Valid final AvailabilityTimeRequest availabilityTimeRequest) {
-        return timeService.getAvailableTimes(availabilityTimeRequest);
+        return timeService.getAvailabilityTimes(availabilityTimeRequest);
     }
 
     @PostMapping

@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -36,20 +38,25 @@ public class TimeService {
                 .toList();
     }
 
-    public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
+    public List<AvailabilityTimeResponse> getAvailabilityTimes(
+            final AvailabilityTimeRequest request) {
         final LocalDate today = LocalDate.now();
-        if (request.date().isBefore(today)) {
+        final LocalDate reservationDate = request.date();
+        if (reservationDate.isBefore(today)) {
             return List.of();
         }
-        final Set<ReservationTime> bookedTimes
-                = reservationRepository.findBookedTimes(request.date(), request.themeId());
-        if (request.date().isEqual(today)) {
+        final List<Reservation> reservations = reservationRepository
+                .findAllByDateAndThemeId(reservationDate, request.themeId());
+        final Set<ReservationTime> bookedTimes = reservations.stream()
+                .map(Reservation::getTime)
+                .collect(Collectors.toSet());
+        if (reservationDate.isEqual(today)) {
             return getAvailabilityTimesToday(bookedTimes);
         }
-        return getAvailabilityTimes(bookedTimes);
+        return getAvailabilityTimesFuture(bookedTimes);
     }
 
-    private List<AvailabilityTimeResponse> getAvailabilityTimes(
+    private List<AvailabilityTimeResponse> getAvailabilityTimesFuture(
             final Set<ReservationTime> bookedTimes) {
         return timeRepository.findAll()
                 .stream()

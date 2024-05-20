@@ -47,7 +47,9 @@ public class ReservationService {
 
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
         validateDateRange(condition);
-        return reservationRepository.searchReservations(condition);
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+                condition.themeId(), condition.memberId(),
+                condition.dateFrom(), condition.dateTo());
     }
 
     public Reservation addReservation(final CreateReservationRequest reservationRequest) {

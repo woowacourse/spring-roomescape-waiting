@@ -31,6 +31,18 @@ class ReservationControllerTest {
 
     String accessToken;
 
+    static Stream<Arguments> invalidRequestParameterProvider() {
+        final String date = LocalDate.now().plusDays(5).format(DateTimeFormatter.ISO_DATE);
+        final String timeId = "1";
+        final String themeId = "1";
+
+        return Stream.of(
+                Arguments.of(date, "dk", themeId),
+                Arguments.of(date, timeId, "al"),
+                Arguments.of("2023", timeId, themeId)
+        );
+    }
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
@@ -72,17 +84,5 @@ class ReservationControllerTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
-    }
-
-    static Stream<Arguments> invalidRequestParameterProvider() {
-        final String date = LocalDate.now().plusDays(5).format(DateTimeFormatter.ISO_DATE);
-        final String timeId = "1";
-        final String themeId = "1";
-
-        return Stream.of(
-                Arguments.of(date, "dk", themeId),
-                Arguments.of(date, timeId, "al"),
-                Arguments.of("2023", timeId, themeId)
-        );
     }
 }

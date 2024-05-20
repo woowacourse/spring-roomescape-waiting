@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
@@ -42,6 +44,35 @@ class TimeServiceTest {
 
         // then
         assertThat(actual).containsExactlyElementsOf(expected);
+    }
+
+    @Test
+    @DisplayName("예약 가능한 여부를 포함한 시간을 응답한다.")
+    void getAvailabilityTimes() {
+        //given
+        List<AvailabilityTimeResponse> expected = List.of(
+                new AvailabilityTimeResponse(1L, "15:00", false),
+                new AvailabilityTimeResponse(2L, "16:00", false),
+                new AvailabilityTimeResponse(3L, "17:00", false),
+                new AvailabilityTimeResponse(4L, "18:00", true),
+                new AvailabilityTimeResponse(5L, "19:00", false)
+        );
+
+        //when
+        List<AvailabilityTimeResponse> actual = timeService.getAvailabilityTimes(
+                new AvailabilityTimeRequest(LocalDate.now().plusDays(3), 3L));
+
+        //then
+        assertThat(actual).containsExactlyElementsOf(expected);
+    }
+
+    @Test
+    @DisplayName("이미 지난 시간의 경우 포함하지 않는다.")
+    void getAvailabilityTimesBefore() {
+        List<AvailabilityTimeResponse> actual = timeService.getAvailabilityTimes(
+                new AvailabilityTimeRequest(LocalDate.now().minusDays(1), 3L));
+
+        assertThat(actual).isEmpty();
     }
 
     @Test

@@ -55,6 +55,18 @@ class TimeControllerTest {
                 .body("size()", is(5));
     }
 
+    static Stream<Arguments> invalidRequestParameterProvider() {
+        return Stream.of(
+                Arguments.of("20202020"),
+                Arguments.of("1234"),
+                Arguments.of("2026-"),
+                Arguments.of("2026-13-01"),
+                Arguments.of("2026-12-32"),
+                Arguments.of("2026-11"),
+                Arguments.of("2026-1")
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("invalidRequestParameterProvider")
     @DisplayName("유효하지 않은 요청인 경우 400을 반환한다.")
@@ -118,17 +130,5 @@ class TimeControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5));
-    }
-
-    static Stream<Arguments> invalidRequestParameterProvider() {
-        return Stream.of(
-                Arguments.of("20202020"),
-                Arguments.of("1234"),
-                Arguments.of("2026-"),
-                Arguments.of("2026-13-01"),
-                Arguments.of("2026-12-32"),
-                Arguments.of("2026-11"),
-                Arguments.of("2026-1")
-        );
     }
 }
