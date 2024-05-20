@@ -47,7 +47,7 @@ public class ReservationTimeService {
 
     public List<AvailableReservationTimeOutput> getAvailableTimes(final AvailableReservationTimeInput input) {
         final List<ReservationTime> alreadyBookedReservationTimes =
-                reservationRepository.getReservationByThemeIdAndDateDate(input.themeId(), input.date())
+                reservationRepository.getReservationByThemeIdAndDateValue(input.themeId(), input.date())
                         .stream()
                         .map(Reservation::getTime)
                         .toList();
