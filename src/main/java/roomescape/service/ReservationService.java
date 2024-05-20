@@ -11,7 +11,6 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.helper.LoginMember;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -65,12 +64,11 @@ public class ReservationService {
         return reservationRepository.findReservationRankByMember(member);
     }
 
-    public ReservationResponse createReservation(ReservationCreate reservationInfo) {
-        LocalDate date = reservationInfo.getDate();
-        Member member = memberRepository.findByEmail(reservationInfo.getEmail())
-                .orElseThrow(MemberNotFoundException::new);
-        Theme theme = themeRepository.fetchById(reservationInfo.getThemeId());
-        ReservationTime time = reservationTimeRepository.fetchById(reservationInfo.getTimeId());
+    public ReservationResponse createReservation(ReservationCreate createInfo) {
+        LocalDate date = createInfo.getDate();
+        Member member = memberRepository.findByEmail(createInfo.getEmail()).orElseThrow(MemberNotFoundException::new);
+        Theme theme = themeRepository.fetchById(createInfo.getThemeId());
+        ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
 
         validatePreviousDate(date, time);
         validateDuplicatedReservation(member, theme, date, time);
@@ -86,8 +84,8 @@ public class ReservationService {
         return new Reservation(member, theme, date, time, RESERVED);
     }
 
-    public void deleteReservationWaiting(LoginMember loginMember, long id) {
-        if (!memberRepository.existsByEmail(loginMember.getEmail())) {
+    public void deleteReservationWaiting(String email, long id) {
+        if (!memberRepository.existsByEmail(email)) {
             throw new MemberNotFoundException();
         }
         if (!reservationRepository.existsByIdAndReservationStatus(id, WAITING)) {

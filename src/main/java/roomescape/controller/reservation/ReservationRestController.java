@@ -40,21 +40,33 @@ public class ReservationRestController {
     @PostMapping("/reservations")
     public ReservationResponse createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
                                                        @Valid @RequestBody MemberReservationRequest request) {
-        return reservationService.createReservation(new ReservationCreate(loginMember, request));
+        ReservationCreate create = new ReservationCreate(
+                loginMember.getEmail(),
+                request.getThemeId(),
+                request.getDate(),
+                request.getTimeId()
+        );
+        return reservationService.createReservation(create);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations/waiting")
     public ReservationResponse createReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
                                                         @Valid @RequestBody MemberReservationRequest request) {
-        return reservationService.createReservation(new ReservationCreate(loginMember, request));
+        ReservationCreate create = new ReservationCreate(
+                loginMember.getEmail(),
+                request.getThemeId(),
+                request.getDate(),
+                request.getTimeId()
+        );
+        return reservationService.createReservation(create);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/reservations/waiting/{id}")
     public void deleteReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
                                          @PathVariable long id) {
-        reservationService.deleteReservationWaiting(loginMember, id);
+        reservationService.deleteReservationWaiting(loginMember.getEmail(), id);
     }
 
     @GetMapping("/admin/reservations")

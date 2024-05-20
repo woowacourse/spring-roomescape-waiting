@@ -1,8 +1,6 @@
 package roomescape.service.dto.reservation;
 
 import java.time.LocalDate;
-import roomescape.controller.dto.MemberReservationRequest;
-import roomescape.controller.helper.LoginMember;
 
 public class ReservationCreate {
 
@@ -16,10 +14,6 @@ public class ReservationCreate {
         this.themeId = themeId;
         this.date = LocalDate.parse(date);
         this.timeId = timeId;
-    }
-
-    public ReservationCreate(LoginMember loginMember, MemberReservationRequest requestDto) {
-        this(loginMember.getEmail(), requestDto.getThemeId(), requestDto.getDate(), requestDto.getTimeId());
     }
 
     public String getEmail() {
