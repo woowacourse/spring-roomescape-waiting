@@ -28,7 +28,8 @@ class ReservationRepositoryTest {
                 new Reservation(3L, null, null, null, null, null),
                 new Reservation(4L, null, null, null, null, null),
                 new Reservation(5L, null, null, null, null, null),
-                new Reservation(6L, null, null, null, null, null)
+                new Reservation(6L, null, null, null, null, null),
+                new Reservation(7L, null, null, null, null, null)
         );
 
         assertThat(reservationRepository.findAll()).isEqualTo(expected);

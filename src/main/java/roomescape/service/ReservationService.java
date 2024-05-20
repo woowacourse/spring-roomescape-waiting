@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationDto;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
@@ -19,6 +20,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
+import roomescape.service.exception.ReservationNotFoundException;
 
 @Service
 public class ReservationService {
@@ -38,7 +40,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<Reservation> getReservations() {
+    public List<Reservation> getReservedReservations() {
         return reservationRepository.findAllByStatus(Status.RESERVED);
     }
 
@@ -70,6 +72,22 @@ public class ReservationService {
         final Reservation reservation = new Reservation(null, member, date, time, theme,
                 reservationDto.status());
         return reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public Reservation setWaitingReservationReserved(final long id) {
+        final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
+        if (waitingReservation.isReserved()) {
+            throw new ReservationNotFoundException("해당 시간에 예약이 존재합니다.");
+        }
+        Reservation reservation = addReservation(new CreateReservationDto(
+                waitingReservation.getMember().getId(),
+                waitingReservation.getTheme().getId(),
+                waitingReservation.getDate(),
+                waitingReservation.getTime().getId(),
+                Status.RESERVED));
+        reservationRepository.deleteById(waitingReservation.getId());
+        return reservation;
     }
 
     public void deleteReservation(final long id) {

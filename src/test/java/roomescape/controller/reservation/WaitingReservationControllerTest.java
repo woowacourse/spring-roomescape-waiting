@@ -4,27 +4,23 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ReservationControllerTest {
+@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+public class WaitingReservationControllerTest {
 
     @Autowired
-    ReservationController reservationController;
+    WaitingReservationController waitingReservationController;
 
     @LocalServerPort
     int port;
@@ -45,44 +41,40 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 조회")
-    void getReservations() {
+    @DisplayName("모든 예약 대기를 반환한다.")
+    void getWaitingReservations() {
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
-                .when().get("/reservations")
+                .when().get("/waiting")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(1));
     }
 
-    static Stream<Arguments> invalidRequestParameterProvider() {
-        final String date = LocalDate.now().plusDays(5).format(DateTimeFormatter.ISO_DATE);
-        final String timeId = "1";
-        final String themeId = "1";
-
-        return Stream.of(
-                Arguments.of(date, "dk", themeId),
-                Arguments.of(date, timeId, "al"),
-                Arguments.of("2023", timeId, themeId)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidRequestParameterProvider")
-    @DisplayName("유효하지 않은 요청인 경우 400을 반환한다.")
-    void invalidRequest(final String date, final String timeId, final String themeId) {
-        final Map<String, String> params = Map.of(
-                "date", date,
-                "timeId", timeId,
-                "themeId", themeId);
+    @Test
+    @DisplayName("예약 대기를 예약으로 전환한다.")
+    void changeWaitingReservationToReserved() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .when().delete("/reservations/6")
+                .then().log().all().statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+                .when().post("/waiting/7")
+                .then().log().all().statusCode(201);
+    }
+
+    @Test
+    @DisplayName("해당 시간대에 예약이 존재하면 전환되지 않는다.")
+    void changeReservedWaitingReservationToReserved() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .when().post("/waiting/7")
+                .then().log().all().statusCode(400);
     }
 }

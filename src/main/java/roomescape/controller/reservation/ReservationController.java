@@ -34,15 +34,7 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> getReservations() {
-        return reservationService.getReservations()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    @GetMapping("/waiting")
-    public List<ReservationResponse> getWaitingReservations() {
-        return reservationService.getWaitingReservations()
+        return reservationService.getReservedReservations()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -63,16 +55,6 @@ public class ReservationController {
         final CreateReservationDto reservationDto = new CreateReservationDto(
                 loginMember.id(), userRequest.themeId(), userRequest.date(),
                 userRequest.timeId(), Status.RESERVED);
-        return createReservation(reservationDto);
-    }
-
-    @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> addReservationWaiting(
-            @RequestBody @Valid final UserCreateReservationRequest userRequest,
-            @Valid final LoginMember loginMember) {
-        final CreateReservationDto reservationDto = new CreateReservationDto(
-                loginMember.id(), userRequest.themeId(), userRequest.date(),
-                userRequest.timeId(), Status.WAITING);
         return createReservation(reservationDto);
     }
 

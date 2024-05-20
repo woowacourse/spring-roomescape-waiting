@@ -29,6 +29,22 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Test
+    @DisplayName("자신의 예약 목록을 조회한다.")
+    void getReservationsByMember() {
+        final LoginMember member = new LoginMember(3L);
+        final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(
+                member);
+
+        final List<Reservation> expected = List.of(
+                new Reservation(5L, null, null, null, null, null),
+                new Reservation(6L, null, null, null, null, null),
+                new Reservation(7L, null, null, null, null, null)
+        );
+
+        assertThat(reservationsByMember).isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("from, to 날짜가 역순이면 예외가 발생한다.")
     void searchReservationsByReversedFromToThrowsException() {
         LocalDate now = LocalDate.now();
@@ -78,24 +94,25 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약대기 상태를 예약으로 바꾼다.")
+    void setWaitingReservationReserved() {
+        final LocalDate now = LocalDate.now();
+        CreateReservationDto reservationDto = new CreateReservationDto(
+                1L, 2L, now.plusDays(1), 3L, Status.WAITING);
+        Reservation reserved = reservationService.addReservation(new CreateReservationDto(
+                1L, 2L, now.plusDays(1), 3L, Status.RESERVED));
+        Reservation waiting = reservationService.addReservation(reservationDto);
+        reservationService.deleteReservation(reserved.getId());
+
+        Reservation reservation = reservationService.setWaitingReservationReserved(waiting.getId());
+        
+        assertThat(reservationService.getReservedReservations()).contains(reservation);
+    }
+
+    @Test
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         assertThatCode(() -> reservationService.deleteReservation(1L))
                 .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("자신의 예약 목록을 조회한다.")
-    void getReservationsByMember() {
-        final LoginMember member = new LoginMember(3L);
-        final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(
-                member);
-
-        final List<Reservation> expected = List.of(
-                new Reservation(5L, null, null, null, null, null),
-                new Reservation(6L, null, null, null, null, null)
-        );
-
-        assertThat(reservationsByMember).isEqualTo(expected);
     }
 }

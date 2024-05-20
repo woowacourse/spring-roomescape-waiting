@@ -35,10 +35,11 @@ VALUES ('레디', 'redddy@gmail.com',
        ('제제', 'jinwuo0925@gmail.com',
         '4e5ef62cc65465fbd14118b6e894aa0fa3fbe72c31fcdb6829a3ea21163b3e3a', 'USER');
 
-INSERT INTO RESERVATION(MEMBER_ID, DATE, TIME_ID, THEME_ID)
-VALUES (1, CURRENT_DATE - 3, 1, 1),
-       (2, CURRENT_DATE - 2, 3, 2),
-       (1, CURRENT_DATE - 1, 2, 2),
-       (2, CURRENT_DATE - 1, 1, 2),
-       (3, CURRENT_DATE - 7, 1, 3),
-       (3, CURRENT_DATE + 3, 4, 3);
+INSERT INTO RESERVATION(MEMBER_ID, DATE, TIME_ID, THEME_ID, STATUS)
+VALUES (1, CURRENT_DATE - 3, 1, 1, 'RESERVED'),
+       (2, CURRENT_DATE - 2, 3, 2, 'RESERVED'),
+       (1, CURRENT_DATE - 1, 2, 2, 'RESERVED'),
+       (2, CURRENT_DATE - 1, 1, 2, 'RESERVED'),
+       (3, CURRENT_DATE - 7, 1, 3, 'RESERVED'),
+       (3, CURRENT_DATE + 3, 4, 3, 'RESERVED'),
+       (3, CURRENT_DATE + 3, 4, 3, 'WAITING');

@@ -40,6 +40,10 @@ public class Reservation {
         this.status = status;
     }
 
+    public boolean isReserved() {
+        return Status.RESERVED == status;
+    }
+
     public Long getId() {
         return id;
     }
