@@ -89,7 +89,7 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
                 dynamicTest("다른 사람이 등록한 예약과 동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, "2099-04-29", 1L, 1L, 201)),
                 dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
                 dynamicTest("예약 대기를 조회한다 (총 1개)", () -> getWaitings(adminToken, 200, 1)),
-                dynamicTest("예약을 삭제한다", () -> ReservationCRD.deleteReservation(1L, 204)),
+                dynamicTest("예약 대기와 동일한 예약을 삭제한다", () -> ReservationCRD.deleteReservation(1L, 204)),
                 dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
                 dynamicTest("예약 대기를 조회한다 (총 0개)", () -> getWaitings(adminToken, 200, 0))
         );
