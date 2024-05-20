@@ -11,9 +11,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: none
-    defer-datasource-initialization: true
-    generate-ddl: false
+      ddl-auto: validate
 
 security:
   jwt:
