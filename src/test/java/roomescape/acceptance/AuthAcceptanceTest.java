@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import roomescape.acceptance.config.AcceptanceTest;
-import roomescape.acceptance.fixture.MemberFixture;
 import roomescape.controller.api.dto.request.MemberCreateRequest;
 import roomescape.controller.api.dto.request.MemberLoginRequest;
 import roomescape.controller.api.dto.response.TokenLoginResponse;
 import roomescape.domain.user.Member;
+import roomescape.fixture.MemberFixture;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static roomescape.acceptance.step.MemberStep.로그인;
