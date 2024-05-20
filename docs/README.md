@@ -333,3 +333,54 @@ Content-Type: application/json
     }
 ]
 ```
+
+### 예약 대기 추가 API
+
+**request**
+
+```http request
+POST /waiting HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+
+{
+    "date": "2024-12-12",
+    "themeId": 1,
+    "timeId": 1
+}
+```
+
+**response**
+
+```
+HTTP/1.1 201
+{
+    "id": 1,
+    "theme": "테마1",
+    "date": "2024-12-12",
+    "time": "15:00",
+    "status": "1번쩨 예약 대기"
+}
+```
+
+### 예약 대기 삭제 API
+
+**request**
+
+```http request
+DELETE /waiting/{id} HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+```
+
+**response**
+
+```
+HTTP/1.1 204
+{
+    "id": 1,
+    "theme": "테마1",
+    "date": "2024-12-12",
+    "time": "15:00",
+    "status": "1번쩨 예약 대기"
+}
+```
