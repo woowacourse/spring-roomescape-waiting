@@ -21,17 +21,21 @@ public class MemberService {
     @Transactional
     public MemberResponse save(MemberSignUpRequest memberSignUpRequest) {
         Member member = memberSignUpRequest.toMember();
-        if (memberRepository.existsByEmail(member.getEmail())) {
-            throw new IllegalArgumentException("중복된 이름 또는 이메일 입니다.");
-        }
+        validateUniqueEmail(member.getEmail());
         Member savedMember = memberRepository.save(member);
 
         return MemberResponse.toResponse(savedMember);
     }
 
+    private void validateUniqueEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("중복된 이메일이 존재합니다.");
+        }
+    }
+
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
-                .map(MemberResponse::toResponse)
-                .toList();
+            .map(MemberResponse::toResponse)
+            .toList();
     }
 }

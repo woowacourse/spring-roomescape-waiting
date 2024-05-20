@@ -22,13 +22,17 @@ public class ThemeService {
 
     @Transactional
     public ThemeResponse save(ThemeSaveRequest themeSaveRequest) {
-        themeRepository.findByThemeNameName(themeSaveRequest.name()).ifPresent(empty -> {
-            throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
-        });
+        validateUniqueThemeName(themeSaveRequest);
         Theme theme = themeSaveRequest.toTheme();
         Theme savedTheme = themeRepository.save(theme);
 
         return ThemeResponse.toResponse(savedTheme);
+    }
+
+    private void validateUniqueThemeName(ThemeSaveRequest themeSaveRequest) {
+        themeRepository.findByThemeNameName(themeSaveRequest.name()).ifPresent(empty -> {
+            throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
+        });
     }
 
     public ThemeResponse findById(Long id) {
