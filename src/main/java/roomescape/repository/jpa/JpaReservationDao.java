@@ -16,9 +16,20 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Long> {
             LocalDate end
     );
 
-    @Query("SELECT r FROM Reservation r JOIN FETCH r.time JOIN FETCH r.theme")
+    @Query("""
+            SELECT r FROM Reservation r 
+            JOIN FETCH r.time 
+            JOIN FETCH r.theme 
+            WHERE r.reservationMember.id = :memberId
+            """)
     List<Reservation> findAllByReservationMember_Id(long memberId);
 
+    @Query("""
+            SELECT r FROM Reservation r 
+            JOIN FETCH r.time 
+            JOIN FETCH r.theme
+            WHERE r.date = :date AND r.theme.id = :themeId
+            """)
     List<Reservation> findAllByDateAndTheme_Id(LocalDate date, long themeId);
 
     boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
