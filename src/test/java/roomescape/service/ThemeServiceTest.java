@@ -15,7 +15,6 @@ import roomescape.model.member.Member;
 import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ThemeDto;
 
 import java.time.LocalDate;
