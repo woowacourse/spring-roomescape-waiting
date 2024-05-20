@@ -14,7 +14,7 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Theme {
+public class Theme extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

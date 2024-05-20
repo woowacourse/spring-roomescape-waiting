@@ -17,7 +17,7 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Reservation implements Comparable<Reservation> {
+public class Reservation extends BaseEntity implements Comparable<Reservation> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -14,7 +14,7 @@ import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
 @Entity
-public class Member {
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
