@@ -27,6 +27,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByStatus(ReservationStatus status);
 
+    List<Reservation> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId);
+
     @Query("""
         SELECT new roomescape.repository.dto.ReservationWithRank(
             r, (

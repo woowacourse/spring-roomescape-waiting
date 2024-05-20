@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
@@ -21,6 +22,7 @@ import roomescape.repository.dto.ReservationWithRank;
 import roomescape.service.dto.FindReservationWithRankDto;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -56,6 +58,7 @@ public class ReservationService {
 
         validatePastReservation(reservation.getDate(), time);
 
+        // TODO: 코드 구조 개선 필요
         if (status == RESERVED) {
             validateDuplication(reservation.getDate(), timeId, themeId);
         }
@@ -118,8 +121,10 @@ public class ReservationService {
         }
     }
 
-    public void delete(Long id) {
-        reservationRepository.deleteById(id);
+    public void deleteById(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
+        delete(reservation);
     }
 
     public void deleteStandby(Long reservationId, Member member) {
@@ -131,6 +136,13 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(reservationId);
+    }
+
+    private void delete(Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+        List<Reservation> firstWaiting = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(
+            reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        firstWaiting.forEach(Reservation::reserve);
     }
 
     public List<Reservation> findAll() {
