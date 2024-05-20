@@ -47,20 +47,20 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     @Modifying
     @Query(value = """
-            UPDATE MEMBER_RESERVATION MR
-            SET MR.RESERVATION_STATUS = ?
-            WHERE MR.RESERVATION_ID = ?
-            AND MR.RESERVATION_STATUS = ?
-            AND MR.ID IN (
-                SELECT ID
-                FROM (
-                    SELECT ID, ROW_NUMBER() OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN
-                    FROM MEMBER_RESERVATION
-                ) RN_TABLE
-                WHERE RN = ?
-            )
-            """, nativeQuery = true)
-    void updateStatusByReservationIdAndWaitingNumber(String toSetStatus, long reservationId, String toChangeStatus, int waitingNumber);
+        UPDATE MemberReservation mr
+        SET mr.reservationStatus = :toSetStatus
+        WHERE mr.reservation = :reservation
+        AND mr.reservationStatus = :toChangeStatus
+        AND mr.id IN (
+            SELECT rn_table.id
+            FROM (
+                SELECT mr2.id as id, COUNT(*) OVER(PARTITION BY mr2.reservation.id ORDER BY mr2.createdAt) AS rn
+                FROM MemberReservation mr2
+            ) rn_table
+            WHERE rn_table.rn = :waitingNumber
+        )
+        """)
+    void updateStatusByReservationIdAndWaitingNumber(ReservationStatus toSetStatus, Reservation reservation, ReservationStatus toChangeStatus, int waitingNumber);
 
     void deleteByReservationId(long reservationId);
 
