@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.model.ReservationTime;
 import roomescape.model.theme.Theme;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
