@@ -10,8 +10,7 @@ public record AvailableReservationTimeResponse(
         boolean booked
 ) {
 
-    public static AvailableReservationTimeResponse toResponse(ReservationTime reservationTime, boolean alreadyBooked) {
-        return new AvailableReservationTimeResponse(reservationTime.getId(), reservationTime.getStartAt(),
-                alreadyBooked);
+    public AvailableReservationTimeResponse(ReservationTime reservationTime, boolean alreadyBooked) {
+        this(reservationTime.getId(), reservationTime.getStartAt(), alreadyBooked);
     }
 }

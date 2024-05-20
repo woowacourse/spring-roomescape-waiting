@@ -35,13 +35,13 @@ public class ThemeService {
         Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        return ThemeResponse.toResponse(theme);
+        return new ThemeResponse(theme);
     }
 
     public List<ThemeResponse> findAll() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
-                .map(ThemeResponse::toResponse)
+                .map(ThemeResponse::new)
                 .toList();
     }
 
@@ -52,7 +52,7 @@ public class ThemeService {
         List<Theme> popularTheme = themeRepository.findPopularThemesLimitTen(today, sevenDaysBefore, PageRequest.of(0,
                 POPULAR_THEME_SIZE));
         return popularTheme.stream()
-                .map(PopularThemeResponse::toResponse)
+                .map(PopularThemeResponse::new)
                 .toList();
     }
 

@@ -12,8 +12,8 @@ public record MyReservationResponse(
         String status
 ) {
 
-    public static MyReservationResponse toResponse(Reservation reservation) {
-        return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(),
+    public MyReservationResponse(Reservation reservation) {
+        this(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(),
                 reservation.getTime().getStartAt(), "예약");
     }
 }

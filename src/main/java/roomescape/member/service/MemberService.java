@@ -32,7 +32,7 @@ public class MemberService {
 
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
-                .map(MemberResponse::toResponse)
+                .map(MemberResponse::new)
                 .toList();
     }
 
@@ -51,6 +51,6 @@ public class MemberService {
         Member member = memberRepository.findById(loginMemberInToken.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return MemberResponse.toResponse(member);
+        return new MemberResponse(member);
     }
 }

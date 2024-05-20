@@ -9,7 +9,7 @@ public record TimeResponse(
         @JsonFormat(pattern = "HH:mm") LocalTime startAt
 ) {
 
-    public static TimeResponse toResponse(ReservationTime reservationTime) {
-        return new TimeResponse(reservationTime.getId(), reservationTime.getStartAt());
+    public TimeResponse(ReservationTime reservationTime) {
+        this(reservationTime.getId(), reservationTime.getStartAt());
     }
 }

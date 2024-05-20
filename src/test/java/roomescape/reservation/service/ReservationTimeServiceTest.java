@@ -87,8 +87,8 @@ class ReservationTimeServiceTest {
                 reservation.getDate(), themeId);
 
         assertThat(availableTimes).containsExactly(
-                AvailableReservationTimeResponse.toResponse(reservationTime1, true),
-                AvailableReservationTimeResponse.toResponse(reservationTime2, false)
+                new AvailableReservationTimeResponse(reservationTime1, true),
+                new AvailableReservationTimeResponse(reservationTime2, false)
         );
     }
 

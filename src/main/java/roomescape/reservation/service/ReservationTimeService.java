@@ -34,23 +34,23 @@ public class ReservationTimeService {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다"));
 
-        return TimeResponse.toResponse(reservationTime);
+        return new TimeResponse(reservationTime);
     }
 
     public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findIdByReservationsDateAndThemeId(date, themeId);
 
         return reservationTimeRepository.findAll().stream()
-                .map(reservationTime -> AvailableReservationTimeResponse.toResponse(
+                .map(reservationTime -> new AvailableReservationTimeResponse(
                                 reservationTime,
                                 bookedTimeIds.contains(reservationTime.getId())
-                        )
-                ).toList();
+                        ))
+                .toList();
     }
 
     public List<TimeResponse> findAll() {
         return reservationTimeRepository.findAll().stream()
-                .map(TimeResponse::toResponse)
+                .map(TimeResponse::new)
                 .toList();
     }
 

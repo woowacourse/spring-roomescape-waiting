@@ -51,13 +51,12 @@ public class ReservationService {
         Theme theme = themeRepository.findById(reservationCreateRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = getValidatedMemberByRole(reservationCreateRequest, loginMemberInToken);
+        Member member = getValidatedMemberByRole(loginMemberInToken);
 
         return reservationCreateRequest.toReservation(member, theme, reservationTime);
     }
 
-    private Member getValidatedMemberByRole(ReservationCreateRequest reservationCreateRequest,
-                                            LoginMemberInToken loginMemberInToken) {
+    private Member getValidatedMemberByRole(LoginMemberInToken loginMemberInToken) {
         return memberRepository.findById(loginMemberInToken.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
@@ -73,12 +72,12 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
 
-        return ReservationResponse.toResponse(reservation);
+        return new ReservationResponse(reservation);
     }
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
-                .map(ReservationResponse::toResponse)
+                .map(ReservationResponse::new)
                 .toList();
     }
 
@@ -89,13 +88,13 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member,
                         theme,
                         reservationSearchRequest.dateFrom(), reservationSearchRequest.dateTo()).stream()
-                .map(ReservationResponse::toResponse)
+                .map(ReservationResponse::new)
                 .toList();
     }
 
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MyReservationResponse::toResponse)
+                .map(MyReservationResponse::new)
                 .toList();
     }
 

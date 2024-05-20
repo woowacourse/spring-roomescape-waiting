@@ -12,13 +12,13 @@ public record ReservationResponse(
         TimeResponse time
 ) {
 
-    public static ReservationResponse toResponse(Reservation reservation) {
-        return new ReservationResponse(
+    public ReservationResponse(Reservation reservation) {
+        this(
                 reservation.getId(),
-                MemberResponse.toResponse(reservation.getMember()),
+                new MemberResponse(reservation.getMember()),
                 reservation.getDate(),
-                ThemeResponse.toResponse(reservation.getTheme()),
-                TimeResponse.toResponse(reservation.getTime())
+                new ThemeResponse(reservation.getTheme()),
+                new TimeResponse(reservation.getTime())
         );
     }
 }
