@@ -1,10 +1,9 @@
 package roomescape.repository;
 
+import java.time.LocalTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.model.ReservationTime;
-
-import java.time.LocalTime;
 
 @Repository
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {

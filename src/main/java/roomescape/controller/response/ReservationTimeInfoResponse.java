@@ -1,13 +1,12 @@
 package roomescape.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.model.ReservationTime;
-import roomescape.service.dto.ReservationTimeInfoDto;
-
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Stream;
+import roomescape.model.ReservationTime;
+import roomescape.service.dto.ReservationTimeInfoDto;
 
 public class ReservationTimeInfoResponse {
 

@@ -3,6 +3,8 @@ package roomescape.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Arrays;
+import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,6 @@ import roomescape.exception.AuthorizationException;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 @Controller
 public class AuthController {

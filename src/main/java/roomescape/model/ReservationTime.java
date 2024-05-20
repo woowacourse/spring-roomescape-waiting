@@ -1,12 +1,15 @@
 package roomescape.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
-import roomescape.service.dto.ReservationTimeDto;
-
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Set;
+import roomescape.service.dto.ReservationTimeDto;
 
 @Entity
 public class ReservationTime {
@@ -45,8 +48,12 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ReservationTime that = (ReservationTime) o;
         return id == that.id && Objects.equals(startAt, that.startAt);
     }

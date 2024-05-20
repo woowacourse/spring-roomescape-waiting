@@ -1,5 +1,11 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicatedException;
@@ -12,20 +18,14 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
@@ -41,7 +41,8 @@ public class ReservationService {
         validateIsFuture(date, time.getStartAt());
         validateDuplication(date, time.getId(), reservationDto.getThemeId());
 
-        Reservation reservation = Reservation.of(reservationDto, time, reservationDto.getThemeId(), reservationDto.getMemberId());
+        Reservation reservation = Reservation
+                .of(reservationDto, time, reservationDto.getThemeId(), reservationDto.getMemberId());
         return reservationRepository.save(reservation);
     }
 

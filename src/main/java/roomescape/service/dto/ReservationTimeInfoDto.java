@@ -1,8 +1,7 @@
 package roomescape.service.dto;
 
-import roomescape.model.ReservationTime;
-
 import java.util.List;
+import roomescape.model.ReservationTime;
 
 public class ReservationTimeInfoDto {
 

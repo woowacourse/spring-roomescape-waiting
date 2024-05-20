@@ -2,7 +2,6 @@ package roomescape.model.theme;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
-
 import java.util.Objects;
 
 @Embeddable
@@ -24,8 +23,12 @@ public class Name {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Name name = (Name) o;
         return Objects.equals(name, name.name);
     }

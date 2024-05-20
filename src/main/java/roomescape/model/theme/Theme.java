@@ -1,12 +1,16 @@
 package roomescape.model.theme;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
-import roomescape.model.Reservation;
-import roomescape.service.dto.ThemeDto;
-
 import java.util.Objects;
 import java.util.Set;
+import roomescape.model.Reservation;
+import roomescape.service.dto.ThemeDto;
 
 @Entity
 public class Theme {
@@ -62,8 +66,12 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Theme theme = (Theme) o;
         return id == theme.id
                 && Objects.equals(name.getName(), theme.name.getName())

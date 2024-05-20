@@ -1,10 +1,9 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.model.member.Member;
 import roomescape.repository.MemberRepository;
-
-import java.util.List;
 
 @Service
 public class MemberService {

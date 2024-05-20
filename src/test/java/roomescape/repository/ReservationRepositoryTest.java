@@ -1,6 +1,11 @@
 package roomescape.repository;
 
-import org.junit.jupiter.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,13 +16,6 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -36,11 +34,11 @@ class ReservationRepositoryTest {
 
         reservationRepository.saveAll(List.of(
                 new Reservation(
-                        LocalDate.of(2000,1,1),
+                        LocalDate.of(2000, 1, 1),
                         new ReservationTime(1, null),
                         new Theme(1, null, null, null),
                         new Member(1, null, null, null, null)),
-                new Reservation(LocalDate. of(2000, 1, 2),
+                new Reservation(LocalDate.of(2000, 1, 2),
                         new ReservationTime(2, null),
                         new Theme(2, null, null, null),
                         new Member(2, null, null, null, null))));
@@ -63,14 +61,16 @@ class ReservationRepositoryTest {
     @DisplayName("특정 날짜와 테마의 예약된 시간을 조회한다.")
     @Test
     void should_find_booked_reservation_time() {
-        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeBooked(LocalDate.of(2000, 1, 1), 1L);
+        List<ReservationTime> bookedTimes = reservationRepository.findReservationTimeBooked(LocalDate.of(2000, 1, 1),
+                1L);
         assertThat(bookedTimes).containsExactly(new ReservationTime(1L, LocalTime.of(1, 0)));
     }
 
     @DisplayName("특정 멤버와 날짜와 테마의 예약을 조회한다.")
     @Test
     void should_find_reservation_by_memberId_and_themeId_and_date() {
-        List<Reservation> reservations = reservationRepository.findByMemberIdAndThemeIdAndDate(1L, 1L, LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
+        List<Reservation> reservations = reservationRepository.findByMemberIdAndThemeIdAndDate(1L, 1L,
+                LocalDate.of(999, 1, 1), LocalDate.of(3000, 1, 1));
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(reservations.get(0).getId()).isEqualTo(1L));

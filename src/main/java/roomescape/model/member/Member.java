@@ -1,11 +1,17 @@
 package roomescape.model.member;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
-import roomescape.model.Reservation;
-
 import java.util.Objects;
 import java.util.Set;
+import roomescape.model.Reservation;
 
 @Entity
 public class Member {
@@ -61,8 +67,12 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Member member = (Member) o;
         return id == member.id
                 && Objects.equals(name.getName(), member.name.getName())

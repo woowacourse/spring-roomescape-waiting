@@ -3,14 +3,13 @@ package roomescape.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
-
-import java.util.NoSuchElementException;
 
 @Service
 public class AuthService {

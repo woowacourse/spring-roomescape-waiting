@@ -1,5 +1,10 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,12 +15,6 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql("/init.sql")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -34,11 +33,11 @@ public class ReservationTimeRepositoryTest {
 
         reservationRepository.saveAll(List.of(
                 new Reservation(
-                        LocalDate.of(2000,1,1),
+                        LocalDate.of(2000, 1, 1),
                         new ReservationTime(1, null),
                         new Theme(1, null, null, null),
                         new Member(1, null, null, null, null)),
-                new Reservation(LocalDate. of(2000, 1, 2),
+                new Reservation(LocalDate.of(2000, 1, 2),
                         new ReservationTime(2, null),
                         new Theme(2, null, null, null),
                         new Member(2, null, null, null, null))));

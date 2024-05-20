@@ -1,8 +1,7 @@
 package roomescape.service.dto;
 
-import roomescape.model.member.Role;
-
 import java.util.Objects;
+import roomescape.model.member.Role;
 
 public class MemberInfo {
 
@@ -40,10 +39,15 @@ public class MemberInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MemberInfo that = (MemberInfo) o;
-        return id == that.id && Objects.equals(name, that.name) && Objects.equals(email, that.email) && role == that.role;
+        return id == that.id && Objects.equals(name, that.name) && Objects.equals(email, that.email)
+                && role == that.role;
     }
 
     @Override
