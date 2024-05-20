@@ -24,12 +24,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(checkLoginInterceptor)
-                .addPathPatterns("/admin/**")
-                .addPathPatterns("/reservation")
-                .addPathPatterns("/reservations/**")
-                .addPathPatterns("/themes/**")
-                .addPathPatterns("/times/**")
-                .excludePathPatterns("/themes/ranking");
+                .addPathPatterns("/**")
+                .excludePathPatterns("/", "/themes/ranking", "/login")
+                .excludePathPatterns("/css/**", "/js/**", "/image/**", "/favicon.ico");
 
         registry.addInterceptor(checkAdminInterceptor)
                 .addPathPatterns("/admin/**");
