@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret: testtesttesttesttesttesttesttesttesttesttest
+  expire-in-millis: 1800000
