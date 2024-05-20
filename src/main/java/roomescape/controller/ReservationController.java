@@ -5,12 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.ReservationRequest;
-import roomescape.controller.request.WaitingRequest;
 import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
-import roomescape.model.Waiting;
 import roomescape.model.WaitingWithRank;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
@@ -67,19 +65,6 @@ public class ReservationController {
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long id) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/waiting")
-    public ResponseEntity<Waiting> createWaiting(@RequestBody WaitingRequest request,
-                                                 @AuthenticationPrincipal Member member) {
-        Waiting waiting = waitingService.addWaiting(request, member);
-        return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(waiting);
-    }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") long id) {
-        waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }
