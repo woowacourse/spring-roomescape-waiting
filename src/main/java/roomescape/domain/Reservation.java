@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.domain.policy.ReservationDueTimePolicy;
@@ -19,7 +20,7 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
