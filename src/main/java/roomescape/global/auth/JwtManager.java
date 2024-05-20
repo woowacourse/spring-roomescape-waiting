@@ -35,16 +35,14 @@ public class JwtManager {
     }
 
     public Long parseToken(HttpServletRequest request) {
-        Long defaultId = -1L;
-
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return defaultId;
+            throw new AuthorizationException("요청 토큰이 존재하지 않습니다.");
         }
 
         String token = extractTokenFromCookies(cookies);
-        if (token == null) {
-            return defaultId;
+        if (token.isBlank()) {
+            throw new AuthorizationException("요청 토큰이 존재하지 않습니다.");
         }
 
         return parse(token);
