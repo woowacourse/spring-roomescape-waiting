@@ -9,16 +9,13 @@ import roomescape.domain.Theme;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """
-            SELECT
-                th.id AS theme_id,
-                th.name AS theme_name,
-                th.description AS theme_description,
-                th.thumbnail AS theme_thumbnail
-            FROM reservation r, theme th
-            WHERE r.theme_id = th.id AND r.`date` BETWEEN ?1 AND ?2
-            GROUP BY theme_id
-            ORDER BY COUNT(theme_id) DESC, theme_id
-            LIMIT 10;
-            """, nativeQuery = true)
+            SELECT t
+            FROM Theme t
+            JOIN Reservation r ON t.id = r.theme.id
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY t.id
+            ORDER BY COUNT(r.id) DESC, t.id
+            LIMIT 10
+            """)
     List<Theme> findThemesWithReservationsBetweenDates(LocalDate startDate, LocalDate endDate);
 }
