@@ -32,8 +32,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(exception.getMessage());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleRunTimeException(Exception exception) {
-        return ResponseEntity.internalServerError().body("예상치 못한 오류가 발생했습니다.");
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<String> handleRunTimeException(Exception exception) {
+//        return ResponseEntity.internalServerError().body("예상치 못한 오류가 발생했습니다.");
+//    }
 }

@@ -203,4 +203,35 @@ class ReservationControllerTest {
                 .statusCode(201)
                 .header("Location", "/waiting/1");
     }
+
+    @DisplayName("존재하는 예약 대기라면 예약 대기를 삭제할 수 있다.")
+    @Test
+    void should_delete_waiting_when_waiting_exist() {
+        MemberLoginRequest loginRequest = new MemberLoginRequest("1234", "sun@email.com");
+
+        String cookie = RestAssured
+                .given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().header("Set-Cookie");
+
+        WaitingRequest request = new WaitingRequest(
+                LocalDate.of(2030, 8, 5), 6L, 10L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .cookie(cookie)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(201)
+                .header("Location", "/waiting/1");
+
+        RestAssured.given().log().all()
+                .when().delete("/waiting/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
