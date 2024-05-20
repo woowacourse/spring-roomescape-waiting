@@ -80,7 +80,7 @@ class ReservationServiceTest {
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getEmail(), member.getRole());
 
         // when
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(authInfo);
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(authInfo).responses();
 
         // then
         MyReservationResponse myReservationResponse = myReservations.get(0);
@@ -98,7 +98,7 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 검색")
     @Test
     void findAll() {
-        assertThat(reservationService.findAll()).isEmpty();
+        assertThat(reservationService.findAll().responses()).isEmpty();
     }
 
     @DisplayName("dateFrom이 dateTo보다 이후 시간이면 예외를 발생시킨다.")
@@ -119,7 +119,7 @@ class ReservationServiceTest {
         ReservationResponse response = reservationService.save(reservationCreateRequest);
         // then
         assertAll(
-                () -> assertThat(reservationService.findAll()).hasSize(1),
+                () -> assertThat(reservationService.findAll().responses()).hasSize(1),
                 () -> assertThat(response.member().name()).isEqualTo(MEMBER_NAME),
                 () -> assertThat(response.theme().name()).isEqualTo(ROOM_THEME1.getName()),
                 () -> assertThat(response.date()).isEqualTo(VALID_STRING_DATE),
@@ -147,7 +147,7 @@ class ReservationServiceTest {
         // when
         reservationService.deleteById(1L);
         // then
-        assertThat(reservationService.findAll()).isEmpty();
+        assertThat(reservationService.findAll().responses()).isEmpty();
     }
 
     private ReservationCreateRequest createReservationRequest(Member member, ReservationTime reservationTime,

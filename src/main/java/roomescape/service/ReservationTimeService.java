@@ -12,12 +12,14 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationAvailabilityTimeRequest;
 import roomescape.service.dto.request.ReservationTimeRequest;
+import roomescape.service.dto.response.ListResponse;
 import roomescape.service.dto.response.ReservationAvailabilityTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 
 @Service
 @Transactional
 public class ReservationTimeService {
+
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -27,11 +29,13 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepository.findAll()
+    public ListResponse<ReservationTimeResponse> findAll() {
+        List<ReservationTimeResponse> responses = reservationTimeRepository.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
@@ -54,17 +58,19 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
+    public ListResponse<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
             ReservationAvailabilityTimeRequest timeRequest) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Reservation> reservations = reservationRepository.findByThemeId(timeRequest.themeId());
 
-        return reservationTimes.stream()
+        List<ReservationAvailabilityTimeResponse> responses = reservationTimes.stream()
                 .map(reservationTime -> {
                     boolean isBooked = isReservationBooked(reservations, timeRequest.date(), reservationTime);
                     return ReservationAvailabilityTimeResponse.from(reservationTime, isBooked);
                 })
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
     private boolean isReservationBooked(

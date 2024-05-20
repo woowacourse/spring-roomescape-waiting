@@ -24,7 +24,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.responses.forEach(item => {
     const row = tableBody.insertRow();
 
     /*
@@ -45,7 +45,7 @@ function render(data) {
 function fetchTimes() {
   requestRead(TIME_API_ENDPOINT)
       .then(data => {
-        timesOptions.push(...data);
+        timesOptions.push(...data.responses);
       })
       .catch(error => console.error('Error fetching time:', error));
 }
@@ -53,7 +53,7 @@ function fetchTimes() {
 function fetchThemes() {
   requestRead(THEME_API_ENDPOINT)
       .then(data => {
-        themesOptions.push(...data);
+        themesOptions.push(...data.responses);
         populateSelect('theme', themesOptions, 'name');
       })
       .catch(error => console.error('Error fetching theme:', error));

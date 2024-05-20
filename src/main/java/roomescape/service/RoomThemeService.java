@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.RoomTheme;
 import roomescape.repository.RoomThemeRepository;
 import roomescape.service.dto.request.RoomThemeCreateRequest;
+import roomescape.service.dto.response.ListResponse;
 import roomescape.service.dto.response.RoomThemeResponse;
 
 @Service
@@ -21,21 +22,26 @@ public class RoomThemeService {
         this.roomThemeRepository = roomThemeRepository;
     }
 
-    public List<RoomThemeResponse> findAll() {
-        return roomThemeRepository.findAll()
+    public ListResponse<RoomThemeResponse> findAll() {
+        List<RoomThemeResponse> responses = roomThemeRepository.findAll()
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
-    public List<RoomThemeResponse> findByRanking() {
+    public ListResponse<RoomThemeResponse> findByRanking() {
         LocalDate dateTo = LocalDate.now().minusDays(1);
         LocalDate dateFrom = dateTo.minusDays(7);
 
-        return roomThemeRepository.findMostReservedThemeInPeriodByCount(dateFrom, dateTo, DEFAULT_BEST_THEME_COUNT)
+        List<RoomThemeResponse> responses = roomThemeRepository.findMostReservedThemeInPeriodByCount(dateFrom, dateTo,
+                        DEFAULT_BEST_THEME_COUNT)
                 .stream()
                 .map(RoomThemeResponse::from)
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
     public RoomThemeResponse save(RoomThemeCreateRequest roomThemeCreateRequest) {

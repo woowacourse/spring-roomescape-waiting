@@ -69,7 +69,7 @@ class ReservationTimeServiceTest {
     @DisplayName("존재하는 모든 예약 시간을 반환한다.")
     @Test
     void findAll() {
-        assertThat(reservationTimeService.findAll()).isEmpty();
+        assertThat(reservationTimeService.findAll().responses()).isEmpty();
     }
 
     @DisplayName("선택한 테마에 대한 예약시간이 존재하는 경우 예약 가능한 시간을 반환한다.")
@@ -92,7 +92,7 @@ class ReservationTimeServiceTest {
 
         // when
         List<ReservationAvailabilityTimeResponse> timeResponses =
-                reservationTimeService.findReservationAvailabilityTimes(timeRequest);
+                reservationTimeService.findReservationAvailabilityTimes(timeRequest).responses();
 
         // then
         ReservationAvailabilityTimeResponse response1 = timeResponses.get(0);
@@ -128,7 +128,7 @@ class ReservationTimeServiceTest {
 
         // when
         List<ReservationAvailabilityTimeResponse> timeResponses =
-                reservationTimeService.findReservationAvailabilityTimes(timeRequest);
+                reservationTimeService.findReservationAvailabilityTimes(timeRequest).responses();
 
         // then
         ReservationAvailabilityTimeResponse response1 = timeResponses.get(0);
@@ -152,7 +152,7 @@ class ReservationTimeServiceTest {
         ReservationTimeResponse response = reservationTimeService.save(reservationTimeRequest);
         // then
         assertAll(
-                () -> assertThat(reservationTimeService.findAll()).hasSize(1),
+                () -> assertThat(reservationTimeService.findAll().responses()).hasSize(1),
                 () -> assertThat(response.startAt()).isEqualTo(VALID_STRING_TIME)
         );
     }
@@ -178,6 +178,6 @@ class ReservationTimeServiceTest {
         // when
         reservationTimeService.deleteById(response.id());
         // then
-        assertThat(reservationTimeService.findAll()).isEmpty();
+        assertThat(reservationTimeService.findAll().responses()).isEmpty();
     }
 }

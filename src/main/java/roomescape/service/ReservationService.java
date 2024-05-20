@@ -21,12 +21,14 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.RoomThemeRepository;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
+import roomescape.service.dto.response.ListResponse;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
 
 @Service
 @Transactional
 public class ReservationService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final RoomThemeRepository roomThemeRepository;
@@ -43,21 +45,25 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
+    public ListResponse<ReservationResponse> findAll() {
+        List<ReservationResponse> responses = reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
-    public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        return reservationRepository.findByMemberId(authInfo.id())
+    public ListResponse<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
+        List<MyReservationResponse> responses = reservationRepository.findByMemberId(authInfo.id())
                 .stream()
                 .map(reservation -> MyReservationResponse.from(reservation, "예약"))
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
-    public List<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+    public ListResponse<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = new ReservationSearchSpecification()
                 .themeId(themeId)
@@ -66,9 +72,11 @@ public class ReservationService {
                 .endAt(dateTo)
                 .build();
 
-        return reservationRepository.findAll(spec).stream()
+        List<ReservationResponse> responses = reservationRepository.findAll(spec).stream()
                 .map(ReservationResponse::from)
                 .toList();
+
+        return new ListResponse<>(responses);
     }
 
     public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
