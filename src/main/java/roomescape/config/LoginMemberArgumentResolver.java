@@ -8,6 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.application.AuthService;
+import roomescape.dto.LoginMember;
 import roomescape.dto.MemberResponse;
 import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -22,19 +23,19 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(LoginMember.class);
+        return parameter.hasParameterAnnotation(LoginMemberConverter.class);
     }
 
     @Override
-    public roomescape.dto.LoginMember resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-                                                      NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public LoginMember resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         if (request == null) {
             throw new RoomescapeException(RoomescapeErrorCode.UNAUTHORIZED);
         }
         String token = authService.extractToken(request.getCookies());
         MemberResponse response = authService.findMemberByToken(token);
-        return new roomescape.dto.LoginMember(response.id(), response.name(), response.email(), response.role().name());
+        return new LoginMember(response.id(), response.name(), response.email(), response.role().name());
     }
 
 }
