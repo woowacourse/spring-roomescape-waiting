@@ -1,0 +1,78 @@
+package roomescape.service;
+
+import org.springframework.stereotype.Service;
+import roomescape.controller.request.WaitingRequest;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
+import roomescape.model.*;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
+
+    public WaitingService(WaitingRepository waitingRepository,
+                          ReservationTimeRepository reservationTimeRepository,
+                          ThemeRepository themeRepository, MemberRepository memberRepository) {
+        this.waitingRepository = waitingRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+    }
+
+    public Waiting addWaiting(WaitingRequest request, Member member) {
+        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId(),
+                request.themeId());
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
+        Waiting waiting = new Waiting(request.date(), reservationTime, theme, member);
+        return waitingRepository.save(waiting);
+    }
+
+    private ReservationTime findReservationTime(LocalDate date, long timeId, long themeId) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
+        validateWaitingDateTimeBeforeNow(date, reservationTime.getStartAt());
+        return reservationTime;
+    }
+
+    private void validateWaitingDateTimeBeforeNow(LocalDate date, LocalTime time) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        if (reservationDateTime.isBefore(now)) {
+            throw new BadRequestException("현재(%s) 이전 시간으로 예약 대기를 추가할 수 없습니다.".formatted(now));
+        }
+    }
+
+    public void deleteWaiting(long id) {
+        validateExistWaiting(id);
+        waitingRepository.deleteById(id);
+    }
+
+    private void validateExistWaiting(long id) {
+        boolean exists = waitingRepository.existsById(id);
+        if (!exists) {
+            throw new NotFoundException("해당 id:[%s] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.".formatted(id));
+        }
+    }
+
+    public List<WaitingWithRank> findMemberWaiting(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() ->
+                        new NotFoundException("해당 id:[%s] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.".formatted(memberId)));
+        return waitingRepository.findWaitingWithRankByMemberId(member.getId());
+    }
+}
