@@ -5,6 +5,6 @@ import roomescape.dto.MemberInfo;
 
 public class MemberInfoMapper {
     public static MemberInfo toResponse(Member member) {
-        return new MemberInfo(member.getId(), member.getName(), member.getRole().name());
+        return new MemberInfo(member.getId(), member.getName(), member.getRole());
     }
 }

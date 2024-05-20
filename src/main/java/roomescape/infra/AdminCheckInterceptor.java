@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.Role;
 import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
 import roomescape.service.MemberService;
@@ -25,19 +24,20 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         try {
             String token = TokenExtractor.extractFrom(request.getCookies());
-            long memberIdFromToken = tokenService.findMemberIdFromToken(token);
-            MemberInfo memberInfo = memberService.findByMemberId(memberIdFromToken);
-            sendRedirectIfNotAdmin(response, memberInfo);
-            return memberInfo.role().equals(Role.ADMIN.name());
+            long memberId = tokenService.findMemberIdFromToken(token);
+            MemberInfo memberInfo = memberService.findByMemberId(memberId);
+
+            if (memberInfo.isAdmin()) {
+                return true;
+            }
+            return blockUnauthorizedUser(response);
         } catch (RoomescapeException e) {
-            response.sendRedirect("/");
-            return false;
+            return blockUnauthorizedUser(response);
         }
     }
 
-    private void sendRedirectIfNotAdmin(HttpServletResponse response, MemberInfo memberInfo) throws IOException {
-        if (!memberInfo.role().equals(Role.ADMIN.name())) {
-            response.sendRedirect("/");
-        }
+    private boolean blockUnauthorizedUser(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/");
+        return false;
     }
 }

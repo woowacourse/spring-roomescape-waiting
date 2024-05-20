@@ -23,7 +23,7 @@ public class MemberFixture {
     public static final MemberInfo DEFAULT_MEMBER_INFO = new MemberInfo(
             DEFAULT_MEMBER.getId(),
             DEFAULT_MEMBER.getName(),
-            DEFAULT_MEMBER.getRole().name()
+            DEFAULT_MEMBER.getRole()
     );
 
 

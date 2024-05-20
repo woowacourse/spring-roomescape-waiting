@@ -1,4 +1,9 @@
 package roomescape.dto;
 
-public record MemberInfo(long id, String name, String role) {
+import roomescape.domain.Role;
+
+public record MemberInfo(long id, String name, Role role) {
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
 }
