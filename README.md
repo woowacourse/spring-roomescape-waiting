@@ -147,7 +147,7 @@ Content-Type: application/json
 Request
 
 ```
-GET /reservations/search?theme-id={$}&member-id={$}&date-from={$}&date-to={$}
+GET /reservations?themeId={$}&memberId={$}&dateFrom={$}&dateTo={$}
 Cookie: token=hello.example.token
 ```
 
@@ -332,7 +332,7 @@ Content-Type: application/json
 Request
 
 ```
-GET /times/available?date={&}&time-id={$}
+GET /times/available?date={&}&timeId={$}
 ```
 
 Response

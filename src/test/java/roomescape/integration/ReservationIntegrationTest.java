@@ -29,7 +29,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_예약자별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().get("/reservations?member-id=1")
+                    .when().get("/reservations?memberId=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -39,7 +39,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_테마별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().get("/reservations?theme-id=1")
+                    .when().get("/reservations?themeId=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
@@ -49,7 +49,7 @@ class ReservationIntegrationTest extends IntegrationTest {
         void 예약_목록을_기간별로_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createAdminCookies())
-                    .when().get("/reservations?date-from=2000-04-01&date-to=2000-04-07")
+                    .when().get("/reservations?dateFrom=2000-04-01&dateTo=2000-04-07")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));

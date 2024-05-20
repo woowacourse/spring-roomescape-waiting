@@ -35,10 +35,10 @@ public class ReservationController {
     @RoleAllowed(value = MemberRole.ADMIN)
     @GetMapping("/reservations")
     public ResponseEntity<ReservationListResponse> findAllReservation(
-            @RequestParam(required = false, name = "member-id") Long memberId,
-            @RequestParam(required = false, name = "theme-id") Long themeId,
-            @RequestParam(required = false, name = "date-from") LocalDate dateFrom,
-            @RequestParam(required = false, name = "date-to") LocalDate dateTo) {
+            @RequestParam(required = false) Long memberId,
+            @RequestParam(required = false) Long themeId,
+            @RequestParam(required = false) LocalDate dateFrom,
+            @RequestParam(required = false) LocalDate dateTo) {
         ReservationListResponse response = reservationService.findAllReservation(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok().body(response);
     }

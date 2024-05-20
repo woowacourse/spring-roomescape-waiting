@@ -193,10 +193,10 @@ function applyFilter(event) {
     const dateTo = document.getElementById('date-to').value;
 
     const queryString = new URLSearchParams({
-        'theme-id': themeId,
-        'member-id': memberId,
-        'date-from': dateFrom,
-        'date-to': dateTo
+        'themeId': themeId,
+        'memberId': memberId,
+        'dateFrom': dateFrom,
+        'dateTo': dateTo
     });
     fetch('/reservations?' + queryString, { // 예약 검색 API 호출
         method: 'GET',

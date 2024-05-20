@@ -33,13 +33,13 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         @Test
         void 예약이_가능한_시간을_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .when().get("/times/available?date=2024-10-05&theme-id=1")
+                    .when().get("/times/available?date=2024-10-05&themeId=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("times.size()", is(1));
 
             ReservationTimeAvailableListResponse response = RestAssured.get(
-                            "/times/available?date=2024-10-05&theme-id=1")
+                            "/times/available?date=2024-10-05&themeId=1")
                     .as(ReservationTimeAvailableListResponse.class);
             Assertions.assertThat(response.getTimes().get(0).getAlreadyBooked()).isFalse();
         }
@@ -47,13 +47,13 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
         @Test
         void 예약이_불가한_시간을_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
-                    .when().get("/times/available?date=2000-04-01&theme-id=1")
+                    .when().get("/times/available?date=2000-04-01&themeId=1")
                     .then().log().all()
                     .statusCode(200)
                     .body("times.size()", is(1));
 
             ReservationTimeAvailableListResponse response = RestAssured.get(
-                            "/times/available?date=2000-04-01&theme-id=1")
+                            "/times/available?date=2000-04-01&themeId=1")
                     .as(ReservationTimeAvailableListResponse.class);
             Assertions.assertThat(response.getTimes().get(0).getAlreadyBooked()).isTrue();
         }
