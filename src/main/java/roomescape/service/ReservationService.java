@@ -107,7 +107,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
 
         List<Waiting> waitings = waitingRepository.findAllByMember(member);
-        List<WaitingWithRank> waitingWithRanks =  waitings.stream()
+        List<WaitingWithRank> waitingWithRanks = waitings.stream()
                 .map(waiting -> {
                     Long rank = waitingRepository.countAllByDateAndTimeAndThemeAndIdLessThanEqual(
                             waiting.getDate(),
@@ -118,7 +118,8 @@ public class ReservationService {
                 })
                 .toList();
 
-        List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations, waitingWithRanks);
+        List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations,
+                waitingWithRanks);
         return reservationWithWaitings.stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -126,6 +127,10 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    public void deleteWaiting(final Long id) {
+        waitingRepository.deleteById(id);
     }
 
     private Theme getTheme(Long id) {

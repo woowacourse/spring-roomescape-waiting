@@ -1,40 +1,22 @@
 package roomescape.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
 public class ReservationWithWaiting {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final Long id;
+    private final Member member;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Theme theme;
+    private final ReservationStatus status;
+    private final Long rank;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
-
-    private LocalDate date;
-
-    @ManyToOne
-    private ReservationTime time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
-
-    private ReservationStatus status;
-
-    private Long rank;
-
-    public ReservationWithWaiting(final Member member, final LocalDate date, final ReservationTime time,
+    public ReservationWithWaiting(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                                   final Theme theme, final ReservationStatus status, Long rank) {
-        this.id = null;
+        this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
@@ -43,14 +25,13 @@ public class ReservationWithWaiting {
         this.rank = rank;
     }
 
-    public ReservationWithWaiting() {
-    }
-
-    public static List<ReservationWithWaiting> of(final List<Reservation> reservations, final List<WaitingWithRank> waitingWithRanks) {
+    public static List<ReservationWithWaiting> of(final List<Reservation> reservations,
+                                                  final List<WaitingWithRank> waitingWithRanks) {
         List<ReservationWithWaiting> reservationWithWaitings = new ArrayList<>();
 
         for (Reservation reservation : reservations) {
             ReservationWithWaiting reservationWithWaiting = new ReservationWithWaiting(
+                    reservation.getId(),
                     reservation.getMember(),
                     reservation.getDate(),
                     reservation.getTime(),
@@ -62,13 +43,14 @@ public class ReservationWithWaiting {
 
         for (WaitingWithRank waitingWithRank : waitingWithRanks) {
             ReservationWithWaiting reservationWithWaiting = new ReservationWithWaiting(
+                    waitingWithRank.getWaiting().getId(),
                     waitingWithRank.getWaiting().getMember(),
                     waitingWithRank.getWaiting().getDate(),
                     waitingWithRank.getWaiting().getTime(),
                     waitingWithRank.getWaiting().getTheme(),
                     ReservationStatus.WAITING,
                     waitingWithRank.getRank()
-                    );
+            );
             reservationWithWaitings.add(reservationWithWaiting);
         }
 
