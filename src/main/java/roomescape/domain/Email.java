@@ -1,8 +1,10 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Email {
     private static final String REGEX = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
     private static final Pattern PATTERN = Pattern.compile(REGEX);

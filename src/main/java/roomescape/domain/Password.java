@@ -1,5 +1,8 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Password {
     private static final int MIN_PASSWORD_LENGTH = 8;
 
