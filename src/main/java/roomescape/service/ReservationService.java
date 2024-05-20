@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
@@ -24,7 +25,20 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.RESERVED) {
+            validateDuplicatedReservation(reservation);
+        }
         return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private void validateDuplicatedReservation(final Reservation reservation) {
+        final int count = reservationRepository.countByDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        );
+
+        if (count >= MAX_RESERVATIONS_PER_TIME) {
+            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
+        }
     }
 
     @Transactional(readOnly = true)

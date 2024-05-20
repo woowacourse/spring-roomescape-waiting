@@ -21,7 +21,7 @@ public record MyReservationResponse(
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt().format(FORMATTER),
-                reservation.getStatus()
+                reservation.getStatus().getValue()
         );
     }
 }

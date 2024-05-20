@@ -116,8 +116,8 @@ public class Reservation {
         return theme;
     }
 
-    public String getStatus() {
-        return status.getValue();
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override

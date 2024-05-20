@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationTimeResponse;
@@ -46,6 +47,20 @@ class ReservationServiceTest {
 
         // then
         assertThat(response).isNotNull();
+    }
+
+    @Test
+    @DisplayName("동일한 테마, 날짜, 시간에 예약이 초과된 경우 예외가 발생한다.")
+    void throwExceptionWhenCreateDuplicatedReservation() {
+        // given
+        final Theme theme = THEME_HORROR(1L);
+        final Reservation reservation = new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme, ReservationStatus.RESERVED);
+        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
+                .willReturn(1);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(reservation))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
