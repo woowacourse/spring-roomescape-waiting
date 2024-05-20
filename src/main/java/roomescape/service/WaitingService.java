@@ -34,15 +34,14 @@ public class WaitingService {
     }
 
     public Waiting addWaiting(WaitingRequest request, Member member) {
-        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId(),
-                request.themeId());
+        ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
         Waiting waiting = new Waiting(request.date(), reservationTime, theme, member);
         return waitingRepository.save(waiting);
     }
 
-    private ReservationTime findReservationTime(LocalDate date, long timeId, long themeId) {
+    private ReservationTime findReservationTime(LocalDate date, long timeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
         validateWaitingDateTimeBeforeNow(date, reservationTime.getStartAt());

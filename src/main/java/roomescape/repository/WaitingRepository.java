@@ -18,7 +18,7 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
     @Query("""
             SELECT new roomescape.model.WaitingWithRank(
             w, 
-            (SELECT COUNT(w2) 
+            (SELECT COUNT(w2) + 1 
                 FROM Waiting w2 
                 WHERE w2.theme = w.theme 
                 AND w2.date = w.date 
