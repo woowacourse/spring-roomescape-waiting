@@ -19,13 +19,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Reservation> findAllByDateAfter(LocalDate date);
+
     default Reservation fetchById(long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
 
     boolean existsByTimeId(long timeId);
-
-    long countByThemeIdAndTimeIdAndDate(long themeId, long timeId, LocalDate date);
 
     boolean existsByThemeId(long themeId);
 

@@ -15,8 +15,11 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ReservationService {
@@ -55,10 +58,6 @@ public class ReservationService {
         final ReservationTime time = reservationTimeRepository.fetchById(request.timeId());
         final Theme theme = themeRepository.fetchById(request.themeId());
         final Member member = memberRepository.fetchById(request.memberId());
-        //TODO count 없어도 될듯
-//        final long count = reservationRepository.countByThemeIdAndTimeIdAndDate(theme.getId(),
-//                time.getId(), request.date());
-//        final WaitingRank rank = new WaitingRank(count);
 
         final Reservation reservation = new Reservation(null, member, request.date(), time, theme);
 
@@ -93,5 +92,15 @@ public class ReservationService {
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
         }
+    }
+
+    public List<Reservation> findAllWaiting() {
+        final LocalDate date = LocalDate.now();
+        final List<Reservation> reservations = reservationRepository.findAllByDateAfter(date);
+        final Set<ReservationInfo> preReservations = new HashSet<>();
+
+        return reservations.stream()
+                .filter(reservation -> !preReservations.add(ReservationInfo.from(reservation)))
+                .toList();
     }
 }
