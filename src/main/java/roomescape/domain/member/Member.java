@@ -1,7 +1,5 @@
 package roomescape.domain.member;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,23 +7,22 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "member")
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "name"))
     private MemberName memberName;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email"))
     private Email email;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "password"))
     private Password password;
 
     @Enumerated(EnumType.STRING)
