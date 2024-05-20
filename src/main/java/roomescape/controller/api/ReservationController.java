@@ -29,8 +29,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<MultipleResponse<MemberReservationResponse>> getReservationsOf(Member member) {
-        List<MemberReservationResponse> reservations = memberService.getReservationsOf(member);
+    public ResponseEntity<MultipleResponse<MemberReservationResponse>> getMyReservations(Member member) {
+        List<MemberReservationResponse> reservations = memberService.getMyReservations(member);
         MultipleResponse<MemberReservationResponse> response = new MultipleResponse<>(reservations);
 
         return ResponseEntity.ok(response);

@@ -47,7 +47,7 @@ public class MemberService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> getReservationsOf(Member member) {
+    public List<MemberReservationResponse> getMyReservations(Member member) {
         return member.getReservations().stream()
                 .map(MemberReservationResponse::from)
                 .toList();
