@@ -21,13 +21,12 @@ class MemberRepositoryTest {
     @Test
     void 등록된_이메일로_멤버_조회() {
         //given
-        Member member = new Member("ted", "ted@email.com", "123456", Role.USER);
-        memberRepository.save(member);
+        Member sevedMember = memberRepository.save(new Member("ted", "ted@email.com", "123456", Role.USER));
 
         //when
-        Member findMember = memberRepository.findByEmail(new Email(member.getEmail())).orElseThrow();
+        Member findMember = memberRepository.findByEmail(new Email(sevedMember.getEmail())).orElseThrow();
 
         //then
-        assertThat(findMember.getEmail()).isEqualTo(member.getEmail());
+        assertThat(findMember.getEmail()).isEqualTo(sevedMember.getEmail());
     }
 }

@@ -20,12 +20,10 @@ class ThemeRepositoryTest {
     @Test
     void 주어진_테마_이름으로_등록된_테마가_있는지_확인() {
         //given
-        String themeName = "테마명";
-        Theme theme = new Theme(themeName, "테마설명테마설명테마설명", "썸네일이미지");
-        themeRepository.save(theme);
+        Theme saveedTheme = themeRepository.save(new Theme("테마명", "테마설명테마설명테마설명", "썸네일이미지"));
 
         //when
-        boolean result = themeRepository.existsByName(new ThemeName(themeName));
+        boolean result = themeRepository.existsByName(new ThemeName(saveedTheme.getName()));
 
         //then
         assertThat(result).isTrue();
