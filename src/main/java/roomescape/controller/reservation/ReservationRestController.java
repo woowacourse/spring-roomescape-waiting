@@ -50,6 +50,13 @@ public class ReservationRestController {
         return reservationService.createReservation(new ReservationCreate(loginMember, request));
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/reservations/waiting/{id}")
+    public void deleteReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
+                                         @PathVariable long id) {
+        reservationService.deleteReservationWaiting(loginMember, id);
+    }
+
     @GetMapping("/admin/reservations")
     public List<ReservationResponse> findReservations(
             @RequestParam(name = "member", required = false) String email,

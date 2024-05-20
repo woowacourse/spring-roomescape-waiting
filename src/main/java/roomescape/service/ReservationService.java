@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.WAITING;
+
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +11,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.helper.LoginMember;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -17,6 +21,7 @@ import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.ReservationWaitingNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -61,19 +66,34 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
-        long timeId = reservationInfo.getTimeId();
         LocalDate date = reservationInfo.getDate();
-        long themeId = reservationInfo.getThemeId();
-        String email = reservationInfo.getEmail();
+        Member member = memberRepository.findByEmail(reservationInfo.getEmail())
+                .orElseThrow(MemberNotFoundException::new);
+        Theme theme = themeRepository.fetchById(reservationInfo.getThemeId());
+        ReservationTime time = reservationTimeRepository.fetchById(reservationInfo.getTimeId());
 
-        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        Theme theme = themeRepository.fetchById(themeId);
-        ReservationTime time = reservationTimeRepository.fetchById(timeId);
         validatePreviousDate(date, time);
         validateDuplicatedReservation(member, theme, date, time);
 
-        Reservation reservation = new Reservation(member, theme, date, time);
+        Reservation reservation = generateReservation(theme, date, time, member);
         return new ReservationResponse(reservationRepository.save(reservation));
+    }
+
+    private Reservation generateReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
+        if (reservationRepository.existsByThemeAndDateAndTimeAndReservationStatus(theme, date, time, WAITING)) {
+            return new Reservation(member, theme, date, time, WAITING);
+        }
+        return new Reservation(member, theme, date, time, RESERVED);
+    }
+
+    public void deleteReservationWaiting(LoginMember loginMember, long id) {
+        if (!memberRepository.existsByEmail(loginMember.getEmail())) {
+            throw new MemberNotFoundException();
+        }
+        if (!reservationRepository.existsByIdAndReservationStatus(id, WAITING)) {
+            throw new ReservationWaitingNotFoundException();
+        }
+        reservationRepository.deleteById(id);
     }
 
     public void deleteReservation(long id) {

@@ -29,11 +29,12 @@ function render(data) {
         const date = item.date;
         const time = item.time;
         const waitingRank = item.waitingRank;
+        const status = waitingRank === 1 ? "예약" : `${waitingRank}번째 예약대기`;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = waitingRank === 1 ? "예약" : `${waitingRank}번째 예약대기`;
+        row.insertCell(3).textContent = status;
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
@@ -44,7 +45,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.id).then(() => window.location.reload());
+                requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
@@ -57,7 +58,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `${RESERVATION_ENDPOINT}/waiting/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

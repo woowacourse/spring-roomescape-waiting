@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.dto.ReservationRankResponse;
@@ -19,8 +20,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     boolean existsByThemeId(long themeId);
 
-    boolean existsByMemberAndThemeAndDateAndTime(Member member, Theme theme, LocalDate date,
+    boolean existsByMemberAndThemeAndDateAndTime(Member member,
+                                                 Theme theme,
+                                                 LocalDate date,
                                                  ReservationTime reservationTime);
+
+    boolean existsByThemeAndDateAndTimeAndReservationStatus(Theme theme,
+                                                            LocalDate date,
+                                                            ReservationTime reservationTime,
+                                                            ReservationStatus reservationStatus);
+
+    boolean existsByIdAndReservationStatus(long id, ReservationStatus reservationStatus);
 
     @Query("""
             SELECT new roomescape.repository.dto.ReservationRankResponse
