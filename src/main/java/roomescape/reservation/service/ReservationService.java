@@ -28,10 +28,10 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(
-        ReservationRepository reservationRepository,
-        ReservationTimeRepository reservationTimeRepository,
-        ThemeRepository themeRepository,
-        MemberRepository memberRepository
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -41,8 +41,8 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse save(
-        ReservationSaveRequest reservationSaveRequest,
-        LoginMember loginMember
+            ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember
     ) {
         Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember);
         validateUniqueReservation(reservation);
@@ -52,59 +52,58 @@ public class ReservationService {
     }
 
     private Reservation createValidatedReservation(
-        ReservationSaveRequest reservationSaveRequest,
-        LoginMember loginMember
+            ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember
     ) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(
-                reservationSaveRequest.getTimeId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+        ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
         Theme theme = themeRepository.findById(reservationSaveRequest.getThemeId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
         Member member = memberRepository.findById(loginMember.id())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return reservationSaveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
     }
 
     private void validateUniqueReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(),
-            reservation.getStartAt())) {
+                reservation.getStartAt())) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
         }
     }
 
     public ReservationResponse findById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
 
         return ReservationResponse.toResponse(reservation);
     }
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll()
-            .stream()
-            .map(ReservationResponse::toResponse)
-            .toList();
+                .stream()
+                .map(ReservationResponse::toResponse)
+                .toList();
     }
 
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
         return reservationRepository.findAllByMemberId(loginMember.id())
-            .stream()
-            .map(MemberReservationResponse::toResponse)
-            .toList();
+                .stream()
+                .map(MemberReservationResponse::toResponse)
+                .toList();
     }
 
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
-                request.themeId(),
-                request.memberId(),
-                request.dateFrom(),
-                request.dateTo()
-            ).stream()
-            .map(ReservationResponse::toResponse)
-            .toList();
+                        request.themeId(),
+                        request.memberId(),
+                        request.dateFrom(),
+                        request.dateTo()
+                ).stream()
+                .map(ReservationResponse::toResponse)
+                .toList();
     }
 
     @Transactional

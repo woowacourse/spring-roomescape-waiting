@@ -2,10 +2,10 @@ package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.jwt.JwtTokenProvider;
-import roomescape.auth.dto.LoginRequest;
-import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginMember;
+import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.jwt.JwtTokenProvider;
+import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 

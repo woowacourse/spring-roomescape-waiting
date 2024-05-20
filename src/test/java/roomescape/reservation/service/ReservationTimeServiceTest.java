@@ -78,7 +78,15 @@ class ReservationTimeServiceTest {
 
         Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10, Status.SUCCESS));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(
+                        member,
+                        LocalDate.now(),
+                        theme,
+                        hour10,
+                        Status.SUCCESS
+                )
+        );
 
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
                 reservation.getDate(),
@@ -95,7 +103,12 @@ class ReservationTimeServiceTest {
     @Test
     void deleteExceptionTest() {
         Theme theme = themeRepository.save(
-                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 

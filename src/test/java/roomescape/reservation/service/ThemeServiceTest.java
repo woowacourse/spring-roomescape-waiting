@@ -78,7 +78,13 @@ class ThemeServiceTest {
     @DisplayName("이미 해당 테마로 예약 되있을 경우 삭제 시 예외가 발생한다.")
     @Test
     void deleteExceptionTest() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 

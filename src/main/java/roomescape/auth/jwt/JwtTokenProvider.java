@@ -10,10 +10,10 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.Role;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
-import roomescape.auth.dto.LoginMember;
 
 @Component
 public class JwtTokenProvider {

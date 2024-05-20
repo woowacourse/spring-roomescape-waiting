@@ -34,8 +34,9 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAll() {
-        return memberRepository.findAll().stream()
-            .map(MemberResponse::toResponse)
-            .toList();
+        return memberRepository.findAll()
+                .stream()
+                .map(MemberResponse::toResponse)
+                .toList();
     }
 }

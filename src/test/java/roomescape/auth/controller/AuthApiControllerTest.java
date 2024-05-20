@@ -5,8 +5,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.config.IntegrationTest;
 import roomescape.auth.dto.LoginRequest;
+import roomescape.config.IntegrationTest;
 import roomescape.member.dto.MemberSignUpRequest;
 import roomescape.util.CookieUtils;
 

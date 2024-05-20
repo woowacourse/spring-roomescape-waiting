@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
-import roomescape.auth.jwt.JwtTokenProvider;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
-import roomescape.auth.dto.LoginMember;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class JwtTokenProviderTest {
