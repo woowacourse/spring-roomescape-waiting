@@ -1,7 +1,7 @@
 package roomescape.core.service;
 
-import io.jsonwebtoken.MalformedJwtException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -10,6 +10,7 @@ import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
 import roomescape.core.domain.Theme;
+import roomescape.core.domain.Waiting;
 import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.reservation.MyReservationResponse;
 import roomescape.core.dto.reservation.ReservationRequest;
@@ -50,12 +51,9 @@ public class ReservationService {
     }
 
     private Reservation createReservation(final ReservationRequest request) {
-        final Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(IllegalArgumentException::new);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.getTimeId())
-                .orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(request.getThemeId())
-                .orElseThrow(IllegalArgumentException::new);
+        final Member member = getMemberById(request.getMemberId());
+        final ReservationTime reservationTime = getReservationTimeById(request.getTimeId());
+        final Theme theme = getThemeById(request.getThemeId());
         final Reservation reservation = new Reservation(member, request.getDate(), reservationTime, theme);
 
         validateDuplicatedReservation(reservation, reservationTime);
@@ -63,10 +61,24 @@ public class ReservationService {
         return reservation;
     }
 
+    private Member getMemberById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    }
+
+    private ReservationTime getReservationTimeById(final Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme getThemeById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+    }
+
     private void validateDuplicatedReservation(final Reservation reservation, final ReservationTime reservationTime) {
         final Integer reservationCount = reservationRepository.countByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservationTime, reservation.getTheme());
+                reservation.getDate(), reservationTime, reservation.getTheme());
         if (reservationCount > 0) {
             throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
         }
@@ -82,8 +94,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
-        final Member member = memberRepository.findById(loginMember.getId())
-                .orElseThrow(() -> new MalformedJwtException("올바르지 않은 접근입니다."));
+        final Member member = getMemberById(loginMember.getId());
 
         final List<MyReservationResponse> waitings = getResponsesByWaiting(member);
         final List<MyReservationResponse> reservations = getResponsesByReservation(member);
@@ -106,16 +117,11 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
-    public void delete(final long id) {
-        reservationRepository.deleteById(id);
-    }
-
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(final Long memberId, final Long themeId,
                                                                       final String from, final String to) {
-        final Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(themeId).orElseThrow(IllegalArgumentException::new);
+        final Member member = getMemberById(memberId);
+        final Theme theme = getThemeById(themeId);
         final LocalDate dateFrom = LocalDate.parse(from);
         final LocalDate dateTo = LocalDate.parse(to);
 
@@ -123,5 +129,31 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponse::new)
                 .toList();
+    }
+
+    @Transactional
+    public void delete(final long id) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+        reservationRepository.delete(reservation);
+        changeFirstWaitingToReservation(reservation);
+    }
+
+    private void changeFirstWaitingToReservation(final Reservation reservation) {
+        final LocalDate date = reservation.getDate();
+        final ReservationTime time = reservation.getReservationTime();
+        final Theme theme = reservation.getTheme();
+
+        if (waitingRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+            final Waiting waiting = waitingRepository.findFirstByDateAndTimeAndTheme(date, time, theme);
+            final Member member = waiting.getMember();
+            final String dateString = date.format(DateTimeFormatter.ISO_DATE);
+
+            final Reservation nextReservation = new Reservation(member, dateString, time, theme);
+
+            waitingRepository.delete(waiting);
+            reservationRepository.save(nextReservation);
+        }
     }
 }
