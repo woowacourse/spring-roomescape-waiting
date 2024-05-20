@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -19,8 +20,8 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = authService.extractToken(request.getCookies());
-        MemberResponse memberResponse = authService.findMemberByToken(token);
+        Cookie[] cookies = request.getCookies();
+        MemberResponse memberResponse = authService.findMemberByCookies(cookies);
         if (memberResponse.role().isAdmin()) {
             return true;
         }

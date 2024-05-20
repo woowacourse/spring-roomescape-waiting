@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -33,8 +34,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         if (request == null) {
             throw new RoomescapeException(RoomescapeErrorCode.UNAUTHORIZED);
         }
-        String token = authService.extractToken(request.getCookies());
-        MemberResponse response = authService.findMemberByToken(token);
+        Cookie[] cookies = request.getCookies();
+        MemberResponse response = authService.findMemberByCookies(cookies);
         return new LoginMember(response.id(), response.name());
     }
 
