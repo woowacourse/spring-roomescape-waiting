@@ -56,10 +56,10 @@ public class AuthController {
                 .build();
     }
 
-    private ResponseCookie createCookie(String token, long maxAge) {
+    private ResponseCookie createCookie(String token, long maxAgeSeconds) {
         return ResponseCookie
                 .from(AUTH_COOKIE_KEY, token)
-                .maxAge(maxAge)
+                .maxAge(maxAgeSeconds)
                 .httpOnly(true)
                 .path("/")
                 .build();
