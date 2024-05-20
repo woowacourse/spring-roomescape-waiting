@@ -17,7 +17,9 @@ VALUES ('15:00');
 INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
 VALUES ('admin', 'ADMIN', 'admin@email.com', 'password');
 INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
-VALUES ('아서', 'USER', 'Hyunta@wooteco.com', 'KingArthur');
+VALUES ('user', 'USER', 'user@email.com', 'password');
+INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
+VALUES ('user2', 'USER', 'user2@email.com', 'password');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
 VALUES (CURRENT_DATE - 3, 1, 1, 1, 'BOOKED');
