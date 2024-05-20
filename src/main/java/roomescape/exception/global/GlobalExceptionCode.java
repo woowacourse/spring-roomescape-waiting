@@ -1,7 +1,7 @@
-package roomescape.global.exception.global;
+package roomescape.exception.global;
 
 import org.springframework.http.HttpStatus;
-import roomescape.global.exception.model.ExceptionCode;
+import roomescape.exception.model.ExceptionCode;
 
 public enum GlobalExceptionCode implements ExceptionCode {
 

@@ -1,4 +1,4 @@
-package roomescape.global.config;
+package roomescape.config;
 
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import java.time.format.DateTimeFormatter;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.auth.provider.model.TokenProvider;
 import roomescape.auth.resolver.TokenResolver;
-import roomescape.global.interceptor.MemberRoleInterceptor;
+import roomescape.infra.MemberRoleInterceptor;
 import roomescape.member.service.MemberService;
 
 @Configuration

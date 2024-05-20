@@ -9,10 +9,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.regex.Pattern;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.role.MemberRole;
-import roomescape.global.domain.Name;
+import roomescape.vo.Name;
 
 @Entity
 public class Member {

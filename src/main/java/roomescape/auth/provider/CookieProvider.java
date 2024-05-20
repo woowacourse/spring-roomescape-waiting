@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.springframework.http.ResponseCookie;
 import roomescape.auth.domain.Token;
 import roomescape.auth.exception.CookieException;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 
 public class CookieProvider {
 

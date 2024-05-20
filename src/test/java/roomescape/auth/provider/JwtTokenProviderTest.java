@@ -13,7 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.auth.domain.Token;
 import roomescape.auth.exception.TokenException;
 import roomescape.config.TestConfig;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 
 @ExtendWith(SpringExtension.class)
 @Import(TestConfig.class)

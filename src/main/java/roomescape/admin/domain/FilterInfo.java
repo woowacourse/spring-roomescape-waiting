@@ -1,7 +1,7 @@
 package roomescape.admin.domain;
 
 import java.time.LocalDate;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.reservation.exception.ReservationExceptionCode;
 
 public class FilterInfo {

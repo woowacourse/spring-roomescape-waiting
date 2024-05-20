@@ -1,6 +1,6 @@
 package roomescape.theme.dto;
 
-import roomescape.global.domain.Name;
+import roomescape.vo.Name;
 import roomescape.theme.domain.Theme;
 
 public record ThemeRequest(

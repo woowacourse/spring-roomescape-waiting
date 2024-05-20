@@ -1,7 +1,7 @@
 package roomescape.reservationtime.exception;
 
 import org.springframework.http.HttpStatus;
-import roomescape.global.exception.model.ExceptionCode;
+import roomescape.exception.model.ExceptionCode;
 
 public enum TimeExceptionCode implements ExceptionCode {
 

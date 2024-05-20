@@ -19,7 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.global.domain.Name;
+import roomescape.vo.Name;
 import roomescape.model.ControllerTest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;

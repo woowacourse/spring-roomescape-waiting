@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import roomescape.auth.domain.Token;
 import roomescape.auth.exception.TokenException;
 import roomescape.auth.provider.model.TokenProvider;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {

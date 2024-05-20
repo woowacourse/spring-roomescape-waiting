@@ -1,4 +1,4 @@
-package roomescape.global.interceptor;
+package roomescape.infra;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,8 +7,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.provider.CookieProvider;
 import roomescape.auth.provider.model.TokenProvider;
-import roomescape.global.annotation.Auth;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.auth.annotation.Auth;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.role.MemberRole;
 import roomescape.member.service.MemberService;

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;

@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;

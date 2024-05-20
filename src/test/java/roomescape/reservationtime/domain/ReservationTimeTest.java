@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.model.RoomEscapeException;
+import roomescape.exception.model.RoomEscapeException;
 import roomescape.reservationtime.exception.TimeExceptionCode;
 
-public class ReservationTimeTest {
+class ReservationTimeTest {
 
     @Test
     @DisplayName("전달 받은 데이터로 Time 객체를 정상적으로 생성한다.")
