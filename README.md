@@ -237,7 +237,12 @@
 
 ### 예약 삭제
 - http method: DELETE
-- uri: /reservations/{id}
+- uri: /reservations/{id}?waiting={waiting}
+  - query string
+    - waiting: 대기 여부
+      - default: false
+      - true: 대기에 대한 요청
+      - false: 예약에 대한 요청
   - path variable
     - id: 예약 정보 식별자
 - response
@@ -253,7 +258,33 @@
     "message": "예약을 삭제할 권한이 없습니다."
     }
     ```
-  
+  - 삭제 실패: 일반 사용자가 일정이 지난 예약/예약 대기을 삭제 시도
+    ```
+    HTTP/1.1 401
+
+    {
+    "message": "이미 지난 예약(대기)은 삭제할 수 없습니다."
+    }
+    ```
+  - 삭제 실패: 일반 사용자가 이미 예약으로 전환된 예약 대기를 시도한다.
+    - waiting=true 
+    ```
+    HTTP/1.1 401
+
+    {
+    "message": "이미 예약으로 전환되었습니다."
+    }
+    ```
+  - 삭제 실패: 예약 대기에 대해 예약 삭제를 시도한다.
+    - waiting=true
+    ```
+    HTTP/1.1 401
+
+    {
+    "message": "예약 대기 상태입니다. 예약 대기 삭제로 요청해주세요."
+    }
+    ```
+    
 ### 시간 추가
 - http method: POST
 - uri: /times

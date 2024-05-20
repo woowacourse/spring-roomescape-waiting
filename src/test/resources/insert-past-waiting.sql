@@ -6,4 +6,5 @@ INSERT INTO reservation_time(start_at) VALUES ('10:00');
 
 INSERT INTO member(name, email, password, role) VALUES('리니', 'lini@email.com', 'lini123', 'GUEST');
 
+
 INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, `WAITING`);
