@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDetail;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.policy.FixedDateWeeklyRankingPolicy;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.service.dto.request.theme.ThemeRequest;
@@ -31,7 +31,7 @@ class ThemeServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationDetailRepository reservationDetailRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -150,7 +150,7 @@ class ThemeServiceTest {
 
     private void creatReservation(int day, ReservationTime reservationTime, Theme theme) {
         Member member = memberRepository.save(new Member("a", "b", "C"));
-        reservationRepository.save(
-                new Reservation(LocalDate.of(2023, FEBRUARY, day), reservationTime, theme, member));
+        reservationDetailRepository.save(
+                new ReservationDetail(LocalDate.of(2023, FEBRUARY, day), reservationTime, theme, member));
     }
 }

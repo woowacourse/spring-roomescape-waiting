@@ -32,7 +32,7 @@ values ('10:00'),
        ('20:00'),
        ('21:00');
 
-insert into reservation (member_id, date, time_id, theme_id)
+insert into reservation_detail (member_id, date, time_id, theme_id)
 values (1, '2024-05-07', 1, 1),
        (2, '2024-05-08', 2, 1),
        (3, '2024-05-08', 4, 2),

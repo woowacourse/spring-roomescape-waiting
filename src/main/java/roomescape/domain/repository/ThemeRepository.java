@@ -15,9 +15,9 @@ public interface ThemeRepository extends Repository<Theme, Long> {
 
     @Query(value = """
             SELECT theme.id, theme.name, theme.description, theme.thumbnail
-            FROM reservation
-            LEFT JOIN theme ON theme.id=reservation.theme_id
-            WHERE reservation.date >= ? AND reservation.date <= ?
+            FROM reservation_detail
+            LEFT JOIN theme ON theme.id=reservation_detail.theme_id
+            WHERE reservation_detail.date >= ? AND reservation_detail.date <= ?
             GROUP BY theme.id
             ORDER BY COUNT(*) DESC
             LIMIT ?;

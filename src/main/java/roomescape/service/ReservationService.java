@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDetail;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.member.AuthenticationFailureException;
@@ -28,20 +28,20 @@ import roomescape.service.dto.response.reservation.UserReservationResponse;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
+    private final ReservationDetailRepository reservationDetailRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public List<ReservationResponse> findAllReservation() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        return reservations.stream()
+        List<ReservationDetail> reservationDetails = reservationDetailRepository.findAll();
+        return reservationDetails.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationResponse> findAllReservationByConditions(ReservationSearchCond cond) {
-        return reservationRepository.findByPeriodAndMemberAndTheme(cond.start(), cond.end(), cond.memberName(),
+        return reservationDetailRepository.findByPeriodAndMemberAndTheme(cond.start(), cond.end(), cond.memberName(),
                         cond.themeName())
                 .stream()
                 .map(ReservationResponse::from)
@@ -49,7 +49,7 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> findAllByMemberId(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
+        return reservationDetailRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(UserReservationResponse::from)
                 .toList();
@@ -66,13 +66,13 @@ public class ReservationService {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(AuthenticationFailureException::new);
 
-        Reservation reservation = request.toReservation(time, theme, member);
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(savedReservation);
+        ReservationDetail reservationDetail = request.toReservationDetail(time, theme, member);
+        ReservationDetail savedReservationDetail = reservationDetailRepository.save(reservationDetail);
+        return ReservationResponse.from(savedReservationDetail);
     }
 
     private void validateDuplicateReservation(ReservationRequest request) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationDetailRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId())) {
             throw new DuplicatedReservationException();
         }
@@ -87,12 +87,12 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = getReservationById(id);
-        reservationRepository.delete(reservation);
+        ReservationDetail reservationDetail = getReservationById(id);
+        reservationDetailRepository.delete(reservationDetail);
     }
 
-    private Reservation getReservationById(Long id) {
-        return reservationRepository.findById(id)
+    private ReservationDetail getReservationById(Long id) {
+        return reservationDetailRepository.findById(id)
                 .orElseThrow(NotFoundReservationException::new);
     }
 

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+public class ReservationDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,7 +40,7 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Member member;
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public ReservationDetail(LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(null, date, time, theme, member);
     }
 }
