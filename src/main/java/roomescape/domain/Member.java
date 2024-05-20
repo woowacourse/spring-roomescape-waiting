@@ -30,7 +30,7 @@ public class Member {
     @Column(nullable = false)
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     @Builder

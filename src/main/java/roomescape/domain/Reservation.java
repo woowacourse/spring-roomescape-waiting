@@ -28,7 +28,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     @Builder
