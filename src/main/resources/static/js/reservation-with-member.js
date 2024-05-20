@@ -192,7 +192,7 @@ function applyFilter(event) {
   const fromDate = document.getElementById('date-from').value;
   const toDate = document.getElementById('date-to').value;
 
-  fetch(RESERVATION_API_ENDPOINT + "/searching?themeId=" + themeId + "&memberId=" + memberId + "&fromDate=" + fromDate + "&toDate=" + toDate, {
+  fetch(`${RESERVATION_API_ENDPOINT}/searching?themeId=${themeId}&memberId=${memberId}&fromDate=${fromDate}&toDate=${toDate}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -211,7 +211,7 @@ function requestCreate(reservation) {
     body: JSON.stringify(reservation)
   };
 
-  return fetch('/admin/reservations', requestOptions)
+  return fetch('/admin' + RESERVATION_API_ENDPOINT, requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
         throw new Error('Create failed');

@@ -1,5 +1,7 @@
+const MY_RESERVATION_API_ENDPOINT = '/reservations/mine';
+
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
+    fetch(MY_RESERVATION_API_ENDPOINT)
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');

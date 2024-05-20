@@ -1,5 +1,7 @@
+const POPULAR_THEME_API_ENDPOINT = '/themes/popular';
+
 document.addEventListener('DOMContentLoaded', () => {
-    requestRead('/themes/popular') // 인기 테마 목록 조회 API endpoint
+    requestRead(POPULAR_THEME_API_ENDPOINT)
         .then(render)
         .catch(error => console.error('Error fetching times:', error));
 });

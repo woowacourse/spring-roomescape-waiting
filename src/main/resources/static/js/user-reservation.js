@@ -1,4 +1,5 @@
 const THEME_API_ENDPOINT = '/themes';
+const RESERVATION_API_ENDPOINT = '/reservations';
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
@@ -143,7 +144,7 @@ function onReservationButtonClick() {
       timeId: selectedTimeId
     };
 
-    fetch('/reservations', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
