@@ -1,12 +1,17 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.*;
-import roomescape.domain.user.Member;
-
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
+import roomescape.domain.user.Member;
 
 @Entity
 public class Reservation {
@@ -33,7 +38,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Long id, final ReservationDate date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus reservationStatus) {
+    public Reservation(final Long id, final ReservationDate date, final ReservationTime time, final Theme theme,
+                       final Member member, final ReservationStatus reservationStatus) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -43,11 +49,13 @@ public class Reservation {
     }
 
 
-    public static Reservation fromComplete(final Long id, final String date, final ReservationTime time, final Theme theme, final Member member) {
+    public static Reservation fromComplete(final Long id, final String date, final ReservationTime time,
+                                           final Theme theme, final Member member) {
         return Reservation.from(id, date, time, theme, member, ReservationStatus.COMPLETE);
     }
 
-    private static Reservation from(final Long id, final String date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus status) {
+    private static Reservation from(final Long id, final String date, final ReservationTime time, final Theme theme,
+                                    final Member member, final ReservationStatus status) {
         return new Reservation(id, ReservationDate.from(date), time, theme, member, status);
     }
 
@@ -85,22 +93,5 @@ public class Reservation {
 
     public LocalDateTime parseLocalDateTime() {
         return LocalDateTime.of(date.date(), this.time.getStartAt());
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
