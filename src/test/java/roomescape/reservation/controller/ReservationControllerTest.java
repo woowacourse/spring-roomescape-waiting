@@ -29,9 +29,10 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.WaitingReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.reservation.service.dto.ThemeCreate;
@@ -40,7 +41,9 @@ import roomescape.util.ControllerTest;
 @DisplayName("예약 API 통합 테스트")
 class ReservationControllerTest extends ControllerTest {
     @Autowired
-    ReservationService reservationService;
+    WaitingReservationService waitingReservationService;
+    @Autowired
+    MemberReservationService memberReservationService;
 
     @Autowired
     ReservationTimeService reservationTimeService;
@@ -104,7 +107,7 @@ class ReservationControllerTest extends ControllerTest {
                 .findAny().orElseThrow();
 
         Member member = memberService.findById(memberResponseOf.id());
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
                 new MemberReservationCreate(
                         member.getId(),
                         LocalDate.now().plusDays(10),
@@ -199,7 +202,7 @@ class ReservationControllerTest extends ControllerTest {
                 .findAny().orElseThrow();
 
         Member member = memberService.findById(memberResponseOf.id());
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
                 new MemberReservationCreate(
                         member.getId(),
                         LocalDate.now().plusDays(10),

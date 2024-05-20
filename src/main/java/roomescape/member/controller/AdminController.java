@@ -18,24 +18,29 @@ import roomescape.global.annotation.LoginUser;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.MemberReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
-    private final ReservationService reservationService;
+    private final MemberReservationService memberReservationService;
+    private final WaitingReservationService waitingReservationService;
     private final MemberService memberService;
 
-    public AdminController(ReservationService reservationService, MemberService memberService) {
-        this.reservationService = reservationService;
+    public AdminController(MemberReservationService memberReservationService,
+                           WaitingReservationService waitingReservationService,
+                           MemberService memberService) {
+        this.memberReservationService = memberReservationService;
+        this.waitingReservationService = waitingReservationService;
         this.memberService = memberService;
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(
+        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(
                 MemberReservationCreate.from(memberReservationRequest)
         );
         return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.memberReservationId()))
@@ -44,7 +49,7 @@ public class AdminController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") @Min(1) long reservationId) {
-        reservationService.delete(reservationId);
+        memberReservationService.delete(reservationId);
         return ResponseEntity.noContent().build();
     }
 
@@ -56,14 +61,14 @@ public class AdminController {
     @PostMapping("/waiting/approve/{id}")
     public ResponseEntity<Void> approve(@LoginUser AuthInfo authInfo,
                                         @PathVariable("id") @Min(1) long memberReservationId) {
-        reservationService.approveWaiting(authInfo, memberReservationId);
+        waitingReservationService.approveWaiting(authInfo, memberReservationId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/waiting/deny/{id}")
     public ResponseEntity<Void> deny(@LoginUser AuthInfo authInfo,
                                      @PathVariable("id") @Min(1) long memberReservationId) {
-        reservationService.denyWaiting(authInfo, memberReservationId);
+        waitingReservationService.denyWaiting(authInfo, memberReservationId);
         return ResponseEntity.ok().build();
     }
 }

@@ -29,9 +29,10 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ThemeResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
+import roomescape.reservation.service.WaitingReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.reservation.service.dto.ThemeCreate;
@@ -41,20 +42,17 @@ import roomescape.util.ControllerTest;
 @DisplayName("관리자 페이지 테스트")
 class AdminControllerTest extends ControllerTest {
     @Autowired
-    ReservationService reservationService;
-
+    WaitingReservationService waitingReservationService;
+    @Autowired
+    MemberReservationService memberReservationService;
     @Autowired
     ReservationTimeService reservationTimeService;
-
     @Autowired
     ThemeService themeService;
-
     @Autowired
     MemberService memberService;
-
     @Autowired
     AuthService authService;
-
     @Autowired
     TokenProvider tokenProvider;
 
@@ -144,7 +142,7 @@ class AdminControllerTest extends ControllerTest {
                 getMemberClover().getPassword()
         ));
 
-        reservationService.createMemberReservation(
+        memberReservationService.createMemberReservation(
                 new MemberReservationCreate(
                         memberChoco.id(),
                         getNextDay(),
@@ -153,7 +151,7 @@ class AdminControllerTest extends ControllerTest {
                 )
         );
 
-        ReservationResponse waiting = reservationService.addWaiting(
+        ReservationResponse waiting = waitingReservationService.addWaiting(
                 new WaitingCreate(memberClover.id(), getNextDay(), reservationTimeResponse.id(), themeResponse.id()));
 
         //when & then
@@ -185,7 +183,7 @@ class AdminControllerTest extends ControllerTest {
                 getMemberClover().getPassword()
         ));
 
-        reservationService.createMemberReservation(
+        memberReservationService.createMemberReservation(
                 new MemberReservationCreate(
                         memberChoco.id(),
                         getNextDay(),
@@ -194,7 +192,7 @@ class AdminControllerTest extends ControllerTest {
                 )
         );
 
-        ReservationResponse waiting = reservationService.addWaiting(
+        ReservationResponse waiting = waitingReservationService.addWaiting(
                 new WaitingCreate(memberClover.id(), getNextDay(), reservationTimeResponse.id(), themeResponse.id()));
 
         //when & then
