@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.exception.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

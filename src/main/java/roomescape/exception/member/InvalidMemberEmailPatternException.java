@@ -1,7 +1,7 @@
 package roomescape.exception.member;
 
 import org.springframework.http.HttpStatus;
-import roomescape.exception.RoomescapeException;
+import roomescape.exception.common.RoomescapeException;
 
 public class InvalidMemberEmailPatternException extends RoomescapeException {
     public InvalidMemberEmailPatternException() {

@@ -1,7 +1,7 @@
 package roomescape.exception.reservation;
 
 import org.springframework.http.HttpStatus;
-import roomescape.exception.RoomescapeException;
+import roomescape.exception.common.RoomescapeException;
 
 public class InvalidDateTimeReservationException extends RoomescapeException {
     public InvalidDateTimeReservationException() {

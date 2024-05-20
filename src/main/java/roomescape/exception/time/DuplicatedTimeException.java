@@ -1,7 +1,7 @@
 package roomescape.exception.time;
 
 import org.springframework.http.HttpStatus;
-import roomescape.exception.RoomescapeException;
+import roomescape.exception.common.RoomescapeException;
 
 public class DuplicatedTimeException extends RoomescapeException {
     public DuplicatedTimeException() {
