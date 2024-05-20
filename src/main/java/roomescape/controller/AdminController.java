@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +28,10 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> postReservation(@RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest, reservationRequest.memberId());
+    public ResponseEntity<ReservationResponse> postReservation(
+            @RequestBody @Valid ReservationRequest reservationRequest) {
+        ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
+                reservationRequest.memberId());
         URI location = UriComponentsBuilder.newInstance()
                 .path("/reservations/{id}")
                 .buildAndExpand(reservationResponse.id())
@@ -40,5 +44,12 @@ public class AdminController {
     @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaitings() {
         return ResponseEntity.ok(reservationService.findAllWaitings());
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+        reservationService.deleteWaiting(id);
+        return ResponseEntity.noContent()
+                .build();
     }
 }

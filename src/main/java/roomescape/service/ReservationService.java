@@ -66,7 +66,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (waitingRepository.existsByTimeAndDateAndTheme(reservationTime, reservationRequest.date(), theme)) {
+        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(), theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
