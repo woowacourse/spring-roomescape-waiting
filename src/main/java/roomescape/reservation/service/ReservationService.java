@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.domain.Reservation;
@@ -21,16 +21,16 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeService reservationTimeService,
                               final ThemeService themeService,
-                              final MemberRepository memberRepository) {
+                              final MemberService memberService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.memberRepository = memberRepository;
+        this.memberService = memberService;
     }
 
     public Reservation save(final ReservationSaveRequest saveRequest, final Member member) {
@@ -53,7 +53,7 @@ public class ReservationService {
     }
 
     public Reservation save(final AdminReservationSaveRequest adminReservationSaveRequest) {
-        Member member = memberRepository.getById(adminReservationSaveRequest.memberId());
+        Member member = memberService.getById(adminReservationSaveRequest.memberId());
         return save(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 

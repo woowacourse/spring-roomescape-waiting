@@ -5,26 +5,26 @@ import roomescape.auth.controller.dto.request.LoginRequest;
 import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.MemberService;
 
 @Service
 public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
-    public AuthService(final JwtTokenProvider jwtTokenProvider, final MemberRepository memberRepository) {
+    public AuthService(final JwtTokenProvider jwtTokenProvider, final MemberService memberService) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.memberRepository = memberRepository;
+        this.memberService = memberService;
     }
 
     public String createToken(final LoginRequest loginRequest) {
-        memberRepository.getByEmail(new Email(loginRequest.email()));
+        memberService.getByEmail(new Email(loginRequest.email()));
         return jwtTokenProvider.createToken(loginRequest.email());
     }
 
     public Member findMemberByToken(final String token) {
         String email = jwtTokenProvider.getPayload(token);
-        return memberRepository.getByEmail(new Email(email));
+        return memberService.getByEmail(new Email(email));
     }
 }

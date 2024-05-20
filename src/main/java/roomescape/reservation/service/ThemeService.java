@@ -36,7 +36,7 @@ public class ThemeService {
 
     public Theme getById(long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
     public List<Theme> findPopularThemes() {
