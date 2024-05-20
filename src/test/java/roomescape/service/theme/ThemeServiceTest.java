@@ -1,5 +1,6 @@
 package roomescape.service.theme;
 
+import org.apache.catalina.Store;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.*;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -43,6 +42,8 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationDetailRepository reservationDetailRepository;
 
     @DisplayName("테마를 생성한다.")
     @Test
@@ -108,8 +109,9 @@ class ThemeServiceTest {
         Theme theme = createTheme("레벨2 탈출");
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
+        ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when&then
@@ -132,10 +134,14 @@ class ThemeServiceTest {
         Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
         Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);
         Schedule schedule3 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime);
+        ReservationDetail reservationDetail1 = reservationDetailRepository.save(new ReservationDetail(schedule1, theme1));
+        ReservationDetail reservationDetail2 = reservationDetailRepository.save(new ReservationDetail(schedule2, theme2));
+        ReservationDetail reservationDetail3 = reservationDetailRepository.save(new ReservationDetail(schedule3, theme3));
 
-        reservationRepository.save(new Reservation(member, schedule1, theme1, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(member, schedule2, theme2, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(member, schedule3, theme3, ReservationStatus.RESERVED));
+
+        reservationRepository.save(new Reservation(member, reservationDetail1, ReservationStatus.RESERVED));
+        reservationRepository.save(new Reservation(member, reservationDetail2, ReservationStatus.RESERVED));
+        reservationRepository.save(new Reservation(member, reservationDetail3, ReservationStatus.RESERVED));
 
         //when
         List<ThemeResponse> result = themeService.findPopularThemes();

@@ -3,9 +3,7 @@ package roomescape.service.reservation;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.*;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -30,14 +28,16 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationDetailRepository reservationDetailRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository, ReservationDetailRepository reservationDetailRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationDetailRepository = reservationDetailRepository;
     }
 
     public ReservationResponse create(AdminReservationRequest adminReservationRequest) {
@@ -56,9 +56,8 @@ public class ReservationService {
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
         validate(reservationDate, reservationTime, theme);
-        Schedule schedule = new Schedule(reservationDate, reservationTime);
-        Reservation reservation = reservationRepository.save(
-                new Reservation(member, schedule, theme, ReservationStatus.RESERVED));
+        ReservationDetail reservationDetail = getReservationDetail(reservationDate, reservationTime, theme);
+        Reservation reservation = reservationRepository.save(new Reservation(member, reservationDetail, ReservationStatus.RESERVED));
 
         return new ReservationResponse(reservation);
     }
@@ -91,10 +90,16 @@ public class ReservationService {
     }
 
     private void validateDuplicated(ReservationDate date, ReservationTime reservationTime, Theme theme) {
-        if (reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(),
+        if (reservationDetailRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(),
                 theme.getId())) {
             throw new InvalidReservationException("선택하신 테마와 일정은 이미 예약이 존재합니다.");
         }
+    }
+
+    private ReservationDetail getReservationDetail(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
+        Schedule schedule = new Schedule(reservationDate, reservationTime);
+        return reservationDetailRepository.findByScheduleAndTheme(schedule, theme)
+                .orElseGet(() -> reservationDetailRepository.save(new ReservationDetail(schedule, theme)));
     }
 
     public List<ReservationResponse> findAll() {

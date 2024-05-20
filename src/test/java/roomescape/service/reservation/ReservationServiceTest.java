@@ -9,9 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.*;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -44,26 +42,28 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
-    private ReservationTime reservationTime;
+    @Autowired
+    private ReservationDetailRepository reservationDetailRepository;
+    private ReservationDetail reservationDetail;
     private Theme theme;
     private Member member;
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.now().plusDays(1));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.GUEST));
-
+        reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));
     }
 
     @DisplayName("새로운 예약을 저장한다.")
     @Test
     void create() {
         //given
-        LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
-                reservationTime.getId(), theme.getId());
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(reservationDetail.getDate(), member.getId(),
+                reservationDetail.getReservationTime().getId(), theme.getId());
 
         //when
         ReservationResponse result = reservationService.create(adminReservationRequest);
@@ -71,7 +71,7 @@ class ReservationServiceTest {
         //then
         assertAll(
                 () -> assertThat(result.id()).isNotZero(),
-                () -> assertThat(result.time().id()).isEqualTo(reservationTime.getId()),
+                () -> assertThat(result.time().id()).isEqualTo(reservationDetail.getReservationTime().getId()),
                 () -> assertThat(result.theme().id()).isEqualTo(theme.getId())
         );
     }
@@ -80,8 +80,7 @@ class ReservationServiceTest {
     @Test
     void findAll() {
         //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when
@@ -95,8 +94,7 @@ class ReservationServiceTest {
     @Test
     void findByMember() {
         //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(), null, null,
                 null);
@@ -112,8 +110,7 @@ class ReservationServiceTest {
     @Test
     void findByMemberAndTheme() {
         //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
         long notMemberThemeId = theme.getId() + 1;
         ReservationFilterRequest reservationFilterRequest = new ReservationFilterRequest(member.getId(),
@@ -130,8 +127,7 @@ class ReservationServiceTest {
     @Test
     void deleteById() {
         //given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         Reservation target = reservationRepository.save(reservation);
 
         //when
@@ -145,13 +141,11 @@ class ReservationServiceTest {
     @Test
     void duplicatedReservation() {
         //given
-        LocalDate date = LocalDate.MAX;
-        Schedule schedule = new Schedule(ReservationDate.of(date), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
-                reservationTime.getId(), theme.getId());
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(reservationDetail.getDate(), member.getId(),
+                reservationDetail.getReservationTime().getId(), theme.getId());
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))
@@ -163,8 +157,7 @@ class ReservationServiceTest {
     @Test
     void cannotCreateByUnknownTime() {
         //given
-        LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(), 0L,
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(reservationDetail.getDate(), member.getId(), 0L,
                 theme.getId());
 
         //when & then
@@ -177,9 +170,8 @@ class ReservationServiceTest {
     @Test
     void cannotCreateByUnknownTheme() {
         //given
-        LocalDate date = LocalDate.now().plusDays(1);
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(date, member.getId(),
-                reservationTime.getId(), 0L);
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(reservationDetail.getDate(), member.getId(),
+                reservationDetail.getReservationTime().getId(), 0L);
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(adminReservationRequest))

@@ -1,5 +1,6 @@
 package roomescape.service.schedule;
 
+import org.apache.catalina.Store;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.*;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -46,6 +45,8 @@ class ReservationTimeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationDetailRepository reservationDetailRepository;
 
     @DisplayName("새로운 예약 시간을 저장한다.")
     @Test
@@ -96,12 +97,13 @@ class ReservationTimeServiceTest {
     @Test
     void cannotDeleteTime() {
         //given
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when&then
@@ -115,7 +117,7 @@ class ReservationTimeServiceTest {
     @Test
     void findAvailableTimes() {
         //given
-        LocalDate date = LocalDate.MAX;
+        ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
         LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(
@@ -123,13 +125,13 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
-        Schedule schedule = new Schedule(ReservationDate.of(date), bookedReservationTime);
-        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, bookedReservationTime), theme));
+        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
 
         //when
         List<AvailableReservationTimeResponse> result = reservationTimeService.findAvailableTimes(
-                new ReservationTimeReadRequest(date, theme.getId()));
+                new ReservationTimeReadRequest(reservationDate.getValue(), theme.getId()));
 
         //then
         boolean isBookedOfBookedTime = result.stream()

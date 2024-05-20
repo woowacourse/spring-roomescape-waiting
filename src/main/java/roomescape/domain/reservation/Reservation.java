@@ -1,15 +1,18 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.domain.member.Member;
 import roomescape.domain.schedule.ReservationTime;
-import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,23 +21,21 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    @Embedded
-    @AttributeOverride(name = "date.value", column = @Column(name = "DATE"))
-    private Schedule schedule;
-
     @ManyToOne
-    private Theme theme;
+    private ReservationDetail reservationDetail;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
+    @CreatedDate
+    private LocalDateTime createdAt;
+
     protected Reservation() {
     }
 
-    public Reservation(Member member, Schedule schedule, Theme theme, ReservationStatus status) {
+    public Reservation(Member member, ReservationDetail reservationDetail, ReservationStatus status) {
         this.member = member;
-        this.schedule = schedule;
-        this.theme = theme;
+        this.reservationDetail = reservationDetail;
         this.status = status;
     }
 
@@ -50,23 +51,23 @@ public class Reservation {
         return member;
     }
 
-    public LocalDate getDate() {
-        return schedule.getDate();
+    public ReservationStatus getStatus() {
+        return status;
     }
 
-    public LocalTime getTime() {
-        return schedule.getTime();
+    public LocalDate getDate() {
+        return reservationDetail.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return schedule.getReservationTime();
+        return reservationDetail.getReservationTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationDetail.getTheme();
     }
 
-    public ReservationStatus getStatus() {
-        return status;
+    public LocalTime getTime() {
+        return reservationDetail.getTime();
     }
 }
