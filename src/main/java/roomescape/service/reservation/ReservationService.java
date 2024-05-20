@@ -40,12 +40,12 @@ public class ReservationService {
         this.reservationDetailRepository = reservationDetailRepository;
     }
 
-    public ReservationResponse create(AdminReservationRequest adminReservationRequest) {
+    public ReservationResponse createAdminReservation(AdminReservationRequest adminReservationRequest) {
         return createReservation(adminReservationRequest.timeId(), adminReservationRequest.themeId(),
                 adminReservationRequest.memberId(), adminReservationRequest.date());
     }
 
-    public ReservationResponse create(ReservationRequest reservationRequest, long memberId) {
+    public ReservationResponse createMemberReservation(ReservationRequest reservationRequest, long memberId) {
         return createReservation(reservationRequest.timeId(), reservationRequest.themeId(), memberId,
                 reservationRequest.date());
     }
