@@ -84,13 +84,12 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) o;
-        return id == that.id && Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(
-                theme, that.theme) && Objects.equals(member, that.member);
+        Reservation reservation = (Reservation) o;
+        return id == reservation.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme, member);
+        return Objects.hash(id);
     }
 }

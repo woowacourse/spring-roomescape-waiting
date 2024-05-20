@@ -74,14 +74,11 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) o;
-        return id == theme.id
-                && Objects.equals(name, theme.name)
-                && Objects.equals(description, theme.description)
-                && Objects.equals(thumbnail, theme.thumbnail);
+        return id == theme.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnail);
+        return Objects.hash(id);
     }
 }
