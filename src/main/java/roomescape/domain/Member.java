@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,21 +18,22 @@ import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.clienterror.EmptyValueNotAllowedException;
 
 @Entity
+@Table(name = "member")
 public class Member {
     private static Pattern EMAIL_REGEX = Pattern.compile("^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "email")
     private String email;
     @Embedded
     @Column(nullable = false)
     private Password password;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "name")
     private String name;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "role")
     private Role role;
 
     protected Member() {

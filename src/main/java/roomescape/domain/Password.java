@@ -5,9 +5,9 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Password {
-    @Column(nullable = false)
+    @Column(nullable = false, name = "password")
     private String password;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "salt")
     private String salt;
 
     protected Password() {
