@@ -17,14 +17,22 @@ public record MemberReservationResponse(
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                convertReservationStatus(memberReservation)
+                "예약"
         );
     }
 
-    private static String convertReservationStatus(final MemberReservation memberReservation) {
-        if (memberReservation.isReserved()) {
-            return "예약";
-        }
-        return "예약대기";
+    public static MemberReservationResponse ofMemberReservationAndOrder(final MemberReservation memberReservation, final long order) {
+        Reservation reservation = memberReservation.getReservation();
+        return new MemberReservationResponse(
+                reservation.getId(),
+                reservation.getThemeName(),
+                reservation.getDate(),
+                reservation.getStartAt(),
+                convertReservationWaitingOrderStatus(order)
+        );
+    }
+
+    private static String convertReservationWaitingOrderStatus(final long order) {
+        return String.format("%d번째 예약대기", order);
     }
 }

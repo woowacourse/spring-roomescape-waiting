@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.ForbiddenException;
@@ -178,12 +179,29 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
+    @Transactional(readOnly = true)
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         Member member = memberService.findMemberById(memberId);
         List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
 
         List<MemberReservationResponse> responses = new ArrayList<>();
         for (MemberReservation memberReservation : reservations) {
+            if (!memberReservation.isReserved()) {
+                ReservationTime reservationTime = memberReservation.getReservation().getReservationTime();
+                Theme theme = memberReservation.getReservation().getTheme();
+                LocalDate date = memberReservation.getReservation().getDate();
+
+                List<MemberReservation> memberReservationsOnThemeAndDateTime = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservationTime, date, theme);
+                long order = 0;
+                for (MemberReservation alreadyBookedReservation : memberReservationsOnThemeAndDateTime) {
+                    if (memberReservation.getId().equals(alreadyBookedReservation.getId())) {
+                        break;
+                    }
+                    order++;
+                }
+                responses.add(MemberReservationResponse.ofMemberReservationAndOrder(memberReservation, order));
+                continue;
+            }
             responses.add(MemberReservationResponse.from(memberReservation));
         }
         return new MemberReservationsResponse(responses);

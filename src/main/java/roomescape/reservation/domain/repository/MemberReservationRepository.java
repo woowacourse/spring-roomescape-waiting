@@ -18,7 +18,15 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     @Query(value = """
             SELECT mr
             FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
-            WHERE mr.member = :member AND rt = :time AND t = :theme AND r.date = :date 
+            WHERE mr.member = :member AND rt = :time AND t = :theme AND r.date = :date
             """)
     Optional<MemberReservation> findByMemberAndReservationTimeAndDateAndTheme(Member member, ReservationTime time, LocalDate date, Theme theme);
+
+    @Query(value = """
+            SELECT mr
+            FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
+            WHERE r.date = :date AND rt = :time AND t = :theme
+            ORDER BY mr.id ASC
+            """)
+    List<MemberReservation> findByReservationTimeAndDateAndThemeOrderByIdAsc(ReservationTime time, LocalDate date, Theme theme);
 }
