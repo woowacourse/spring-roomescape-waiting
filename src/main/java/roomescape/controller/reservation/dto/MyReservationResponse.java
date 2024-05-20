@@ -20,4 +20,14 @@ public record MyReservationResponse(
                 reservation.getStatus().getValue()
         );
     }
+
+    public static MyReservationResponse from(final Reservation reservation, final String rank) {
+        return new MyReservationResponse(
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                rank + " " + reservation.getStatus().getValue()
+        );
+    }
 }

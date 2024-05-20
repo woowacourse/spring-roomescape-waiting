@@ -18,8 +18,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeIdAndTimeIdAndDateAndStatus(long themeId, long timeId,
                                                      LocalDate date, Status status);
 
-    boolean existsByMemberIdAndThemeIdAndTimeIdAndDateAndStatus(
-            long memberId, long themeId, long timeId, LocalDate date, Status status);
+    boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(
+            long memberId, long themeId, long timeId, LocalDate date);
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId,
                                                                 LocalDate from, LocalDate until);
@@ -35,11 +35,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = "time")
     List<Reservation> findAllByStatusAndDateAndThemeId(Status status, LocalDate date, long themeId);
 
-    default Reservation findByIdOrThrow(long id) {
-        return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
-    }
-
     Optional<Reservation> findFirstByTimeIdAndThemeIdAndDateAndStatus(Long timeId, Long themeId,
                                                                       LocalDate date,
                                                                       Status status);
+
+    List<Reservation> findAllByTimeIdAndThemeIdAndDateAndStatus(Long timeId, Long themeId,
+                                                                LocalDate date, Status status);
+
+    default Reservation findByIdOrThrow(long id) {
+        return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+    }
 }

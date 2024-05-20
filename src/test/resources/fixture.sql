@@ -42,4 +42,5 @@ VALUES (1, CURRENT_DATE - 3, 1, 1, 'RESERVED'),
        (2, CURRENT_DATE - 1, 1, 2, 'RESERVED'),
        (3, CURRENT_DATE - 7, 1, 3, 'RESERVED'),
        (3, CURRENT_DATE + 3, 4, 3, 'RESERVED'),
-       (3, CURRENT_DATE + 3, 4, 3, 'WAITING');
+       (1, CURRENT_DATE + 3, 4, 3, 'WAITING'),
+       (2, CURRENT_DATE + 3, 4, 3, 'WAITING');

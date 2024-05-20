@@ -49,7 +49,7 @@ public class WaitingReservationControllerTest {
                 .when().get("/waiting")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 
     @Test

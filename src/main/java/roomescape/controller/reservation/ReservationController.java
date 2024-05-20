@@ -42,10 +42,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<MyReservationResponse> getLoginMemberReservation(final LoginMember member) {
-        List<Reservation> reservations = reservationService.getReservationsByMember(member);
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
+        return reservationService.getReservationsByMember(member);
     }
 
     @PostMapping

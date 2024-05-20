@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationDto;
+import roomescape.controller.reservation.dto.MyReservationResponse;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -49,8 +50,28 @@ public class ReservationService {
         return reservationRepository.findAllByStatus(Status.WAITING);
     }
 
-    public List<Reservation> getReservationsByMember(final LoginMember member) {
-        return reservationRepository.findAllByMemberId(member.id());
+    public List<MyReservationResponse> getReservationsByMember(final LoginMember member) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(member.id());
+        return reservations.stream()
+                .map(this::findStatus)
+                .toList();
+    }
+
+    private MyReservationResponse findStatus(Reservation reservation) {
+        if (reservation.isReserved()) {
+            return MyReservationResponse.from(reservation);
+        }
+        return MyReservationResponse.from(reservation, findRank(reservation));
+    }
+
+    private String findRank(Reservation reservation) {
+        Long rank = reservationRepository.findAllByTimeIdAndThemeIdAndDateAndStatus(
+                        reservation.getTime().getId(), reservation.getTheme().getId(),
+                        reservation.getDate(), Status.WAITING)
+                .stream()
+                .filter(r -> r.getId() < reservation.getId())
+                .count() + 1;
+        return rank + "번째";
     }
 
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
@@ -79,7 +100,7 @@ public class ReservationService {
     public Reservation setWaitingReservationReserved(final long id) {
         final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
         if (waitingReservation.isReserved()) {
-            throw new ReservationNotFoundException("해당 시간에 예약이 존재합니다.");
+            throw new ReservationNotFoundException("해당 예약대기는 이미 예약으로 변경되었습니다.");
         }
         Reservation reservation = addReservation(new CreateReservationDto(
                 waitingReservation.getMember().getId(),
@@ -93,17 +114,18 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(final long id) {
-        final Reservation fetchReservation = reservationRepository.findByIdOrThrow(id);
-        reservationRepository.deleteById(fetchReservation.getId());
-        Optional<Reservation> firstWaitingReservation = reservationRepository
-                .findFirstByTimeIdAndThemeIdAndDateAndStatus(
-                        fetchReservation.getTime().getId(),
-                        fetchReservation.getTheme().getId(),
-                        fetchReservation.getDate(),
-                        Status.WAITING
-                );
-        firstWaitingReservation.ifPresent(
-                reservation -> setWaitingReservationReserved(reservation.getId()));
+        final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
+        reservationRepository.deleteById(deleteReservation.getId());
+        if (deleteReservation.isReserved()) {
+            Optional<Reservation> firstWaitingReservation = reservationRepository
+                    .findFirstByTimeIdAndThemeIdAndDateAndStatus(
+                            deleteReservation.getTime().getId(),
+                            deleteReservation.getTheme().getId(),
+                            deleteReservation.getDate(),
+                            Status.WAITING);
+            firstWaitingReservation
+                    .ifPresent(reservation -> setWaitingReservationReserved(reservation.getId()));
+        }
     }
 
     private void validateDateRange(final ReservationSearchCondition request) {
@@ -132,13 +154,12 @@ public class ReservationService {
 
     private void validateDuplicateWaiting(final CreateReservationDto reservationDto) {
         final boolean isExistReservation =
-                reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDateAndStatus(
+                reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
                         reservationDto.memberId(),
                         reservationDto.themeId(),
                         reservationDto.timeId(),
-                        reservationDto.date(),
-                        Status.WAITING);
-        if (isExistReservation && reservationDto.status() == Status.WAITING) {
+                        reservationDto.date());
+        if (isExistReservation && Status.WAITING == reservationDto.status()) {
             throw new DuplicateReservationException("중복된 시간으로 예약대기가 불가합니다.");
         }
     }
