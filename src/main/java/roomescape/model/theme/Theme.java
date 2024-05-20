@@ -2,6 +2,7 @@ package roomescape.model.theme;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,7 +28,7 @@ public class Theme {
     @NotNull
     @Embedded
     private Thumbnail thumbnail;
-    @OneToMany(mappedBy = "theme")
+    @OneToMany(mappedBy = "theme", fetch = FetchType.LAZY)
     private Set<Reservation> reservations;
 
     private Theme(long id, Name name, Description description, Thumbnail thumbnail) {
