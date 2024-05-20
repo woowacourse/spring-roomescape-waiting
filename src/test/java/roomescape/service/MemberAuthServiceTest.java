@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.*;
 import roomescape.infrastructure.MemberRepository;
 import roomescape.service.request.MemberSignUpAppRequest;
+import roomescape.service.response.SignupMemberAppResponse;
 import roomescape.service.response.MemberAppResponse;
 
 import java.util.List;
@@ -39,8 +40,8 @@ class MemberAuthServiceTest {
                 .thenReturn(
                         new Member(1L, VALID_USER_NAME, VALID_USER_EMAIL, VALID_USER_PASSWORD, MemberRole.USER));
 
-        MemberAppResponse actual = memberAuthService.signUp(request);
-        MemberAppResponse expected = new MemberAppResponse(1L, VALID_USER_NAME.getName(),
+        SignupMemberAppResponse actual = memberAuthService.signUp(request);
+        SignupMemberAppResponse expected = new SignupMemberAppResponse(1L, VALID_USER_NAME.getName(),
                 MemberRole.USER.name());
 
         assertThat(actual).isEqualTo(expected);
