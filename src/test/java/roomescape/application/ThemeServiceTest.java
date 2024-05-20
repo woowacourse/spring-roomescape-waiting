@@ -26,7 +26,6 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.BadRequestException;
-import roomescape.support.BaseServiceTest;
 
 class ThemeServiceTest extends BaseServiceTest {
 

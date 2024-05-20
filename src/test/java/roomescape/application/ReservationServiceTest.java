@@ -33,7 +33,6 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.UnauthorizedException;
-import roomescape.support.BaseServiceTest;
 
 class ReservationServiceTest extends BaseServiceTest {
 

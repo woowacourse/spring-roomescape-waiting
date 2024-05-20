@@ -39,6 +39,6 @@ public class AdminReservationWaitingController {
     public ResponseEntity<Void> rejectReservationWaiting(@PathVariable Long id) {
         reservationService.rejectReservationWaiting(id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }

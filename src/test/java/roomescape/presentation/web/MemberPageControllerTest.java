@@ -8,7 +8,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpStatus;
-import roomescape.support.BaseControllerTest;
+import roomescape.presentation.BaseControllerTest;
 
 class MemberPageControllerTest extends BaseControllerTest {
 

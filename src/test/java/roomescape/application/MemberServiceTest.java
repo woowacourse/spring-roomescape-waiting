@@ -13,7 +13,6 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.exception.BadRequestException;
-import roomescape.support.BaseServiceTest;
 
 class MemberServiceTest extends BaseServiceTest {
 

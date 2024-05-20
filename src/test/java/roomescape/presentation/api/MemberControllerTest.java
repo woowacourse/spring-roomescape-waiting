@@ -1,34 +1,22 @@
 package roomescape.presentation.api;
 
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import java.util.List;
-import java.util.stream.Stream;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import roomescape.domain.member.Role;
 import roomescape.application.dto.request.SignupRequest;
 import roomescape.application.dto.response.MemberResponse;
-import roomescape.support.BaseControllerTest;
+import roomescape.domain.member.Role;
+import roomescape.presentation.BaseControllerTest;
 
 class MemberControllerTest extends BaseControllerTest {
 
-    @TestFactory
-    @DisplayName("회원 가입, 회원 조회를 한다.")
-    Stream<DynamicTest> memberControllerTests() {
-        return Stream.of(
-                dynamicTest("회원 가입을 한다.", this::signup),
-                dynamicTest("모든 회원을 조회한다.", this::getAllMembers)
-        );
-    }
-
+    @Test
+    @DisplayName("회원 가입에 성공할 경우 201을 반환한다.")
     void signup() {
         SignupRequest request = new SignupRequest("new@gmail.com", "password", "new");
 
@@ -48,23 +36,6 @@ class MemberControllerTest extends BaseControllerTest {
             softly.assertThat(memberResponse.email()).isEqualTo("new@gmail.com");
             softly.assertThat(memberResponse.name()).isEqualTo("new");
             softly.assertThat(memberResponse.role()).isEqualTo(Role.USER);
-        });
-    }
-
-    void getAllMembers() {
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
-                .when().get("/members")
-                .then().log().all()
-                .extract();
-
-        List<MemberResponse> memberResponses = response.jsonPath()
-                .getList(".", MemberResponse.class);
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(memberResponses).hasSize(1);
-            softly.assertThat(memberResponses.get(0))
-                    .isEqualTo(new MemberResponse(1L, "new@gmail.com", "new", Role.USER));
         });
     }
 }

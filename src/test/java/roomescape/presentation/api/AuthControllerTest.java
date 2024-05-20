@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.LoginRequest;
-import roomescape.support.BaseControllerTest;
+import roomescape.presentation.BaseControllerTest;
 
 class AuthControllerTest extends BaseControllerTest {
 
