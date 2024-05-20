@@ -122,8 +122,8 @@ class AdminThemeControllerTest {
         jdbcTemplate.update("""
             INSERT INTO reservation_time(start_at) VALUES ('10:00');
             INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
-            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', 1, 1, 'RESERVED');
+            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
             """);
 
         RestAssured.given().log().all()

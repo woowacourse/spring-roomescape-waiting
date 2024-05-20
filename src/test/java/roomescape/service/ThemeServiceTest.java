@@ -87,8 +87,8 @@ class ThemeServiceTest {
             INSERT INTO reservation_time(start_at)
             VALUES ('08:00');
                         
-            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
-            VALUES (1, '2060-01-01', 1, 1, 'RESERVED');
+            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
+            VALUES (1, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
             """);
 
         assertThatThrownBy(() -> themeService.delete(1L))

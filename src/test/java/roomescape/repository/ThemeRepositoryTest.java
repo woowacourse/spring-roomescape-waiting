@@ -45,28 +45,28 @@ class ThemeRepositoryTest {
                    ('11:00'),
                    ('12:00');
                    
-            INSERT INTO reservation(member_id, reserved_date, time_id, theme_id, status)
-            VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 3, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 2, 3, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 3, 3, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 4, 3, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), 5, 3, 'RESERVED'),
+            INSERT INTO reservation(member_id, reserved_date, created_at, time_id, theme_id, status)
+            VALUES (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), '2024-01-01', 1, 3, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), '2024-01-01', 2, 3, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), '2024-01-01', 3, 3, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), '2024-01-01', 4, 3, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -1, CURRENT_DATE), '2024-01-01', 5, 3, 'RESERVED'),
                    
-                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), 1, 2, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), 2, 2, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), 3, 2, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), 4, 2, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), '2024-01-01', 1, 2, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), '2024-01-01', 2, 2, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), '2024-01-01', 3, 2, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -6, CURRENT_DATE), '2024-01-01', 4, 2, 'RESERVED'),
                    
-                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), 1, 4, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), 2, 4, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), 3, 4, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), '2024-01-01', 1, 4, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), '2024-01-01', 2, 4, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -7, CURRENT_DATE), '2024-01-01', 3, 4, 'RESERVED'),
                    
-                   (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), 1, 5, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), 2, 5, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-01', 1, 5, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-01', 2, 5, 'RESERVED'),
                    
-                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), 1, 1, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), 2, 1, 'RESERVED'),
-                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), 3, 1, 'RESERVED')
+                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), '2024-01-01', 1, 1, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), '2024-01-01', 2, 1, 'RESERVED'),
+                   (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), '2024-01-01', 3, 1, 'RESERVED')
             """);
 
         LocalDate start = LocalDate.now().minusDays(8);
