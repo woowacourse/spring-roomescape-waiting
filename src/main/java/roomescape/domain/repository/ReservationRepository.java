@@ -5,9 +5,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDetail;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
+    Reservation save(Reservation reservation);
+
     List<Reservation> findAll();
 
     @Query(""" 
@@ -20,8 +24,9 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             and d.theme.id = :themeId
             """)
     List<Reservation> findByPeriodAndThemeAndMember(
-            @Param("start") LocalDate start,
-            @Param("end") LocalDate end,
-            @Param("memberId") Long memberId,
-            @Param("themeId") Long themeId);
+            @Param("start") LocalDate start, @Param("end") LocalDate end,
+            @Param("memberId") Long memberId, @Param("themeId") Long themeId
+    );
+
+    boolean existsByDetailAndMember(ReservationDetail detail, Member member);
 }

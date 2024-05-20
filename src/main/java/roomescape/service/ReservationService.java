@@ -1,19 +1,23 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDetail;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
@@ -55,22 +59,44 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation saveReservation(ReservationRequest request) {
-        return new Reservation(null, null, null);
+    public Reservation saveMemberReservation(ReservationRequest request) {
+        // 검증
+        ReservationTime reservationTime = getReservationTimeById(request.timeId());
+        validateDateTimeReservation(request.date(), reservationTime);
+
+        // 프록시 또는 완전한 엔티티
+        ReservationDetail reservationDetail = reservationDetailRepository.findByDateAndThemeIdAndTimeId(
+                request.date(), request.timeId(), request.themeId()
+        ).orElseGet(() -> reservationDetailRepository.save(request.toReservationDetail(
+                reservationTime, getThemeById(request.themeId())
+        )));
+
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(AuthenticationFailureException::new);
+
+        // 검증
+        validateDuplicateReservation(reservationDetail, member);
+
+        // 바로 예약 만들기, 기존 예약이 존재하면 waiting으로, 아니라면 resolved로
+        Reservation reservation = new Reservation(member, reservationDetail, Status.RESERVED);
+        return reservationRepository.save(reservation);
     }
 
-    private void validateDuplicateReservation(ReservationRequest request) {
-        if (reservationDetailRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())) {
+    private void validateDateTimeReservation(LocalDate date, ReservationTime time) {
+        LocalDateTime localDateTime = date.atTime(time.getStartAt());
+        if (localDateTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateTimeReservationException();
+        }}
+
+    private void validateDuplicateReservation(ReservationDetail detail, Member member) {
+        if (reservationRepository.existsByDetailAndMember(detail, member)) {
             throw new DuplicatedReservationException();
         }
     }
 
-    private void validateDateTimeReservation(ReservationRequest request, ReservationTime time) {
-        LocalDateTime localDateTime = request.date().atTime(time.getStartAt());
-        if (localDateTime.isBefore(LocalDateTime.now())) {
-            throw new InvalidDateTimeReservationException();
-        }
+    @Transactional
+    public Reservation saveReservation(ReservationRequest request) {
+        return new Reservation(null, null, null);
     }
 
     @Transactional
@@ -84,12 +110,12 @@ public class ReservationService {
                 .orElseThrow(NotFoundReservationException::new);
     }
 
-    private ReservationTime findReservationTimeById(Long id) {
+    private ReservationTime getReservationTimeById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(NotFoundTimeException::new);
     }
 
-    private Theme findThemeById(Long id) {
+    private Theme getThemeById(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(NotFoundThemeException::new);
     }

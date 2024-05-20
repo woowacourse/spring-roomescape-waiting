@@ -3,9 +3,7 @@ package roomescape.domain.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.query.Param;
 import roomescape.domain.ReservationDetail;
 
 public interface ReservationDetailRepository extends Repository<ReservationDetail, Long> {
@@ -20,6 +18,8 @@ public interface ReservationDetailRepository extends Repository<ReservationDetai
     }
 
     List<TimeIdProjection> findByDateAndThemeId(LocalDate date, Long themeId);
+
+    Optional<ReservationDetail> findByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

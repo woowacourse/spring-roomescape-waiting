@@ -1,5 +1,7 @@
 package roomescape.acceptance;
 
+import static org.hamcrest.Matchers.equalTo;
+
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import java.time.LocalDate;
@@ -39,23 +41,26 @@ class MemberReservationTest {
     }
 
     @Test
-    @DisplayName("동일한 예약이 존재하지 않는 상황에, 예약 요청을 보내면, 예약된다")
+    @DisplayName("동일한 예약이 존재하지 않는 상황에, 예약 요청을 보내면, resolved 예약된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noReservation_then_addReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         String requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}", tomorrow);
 
-        // when
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
-
-        // then
-        // 예약 상태인지 확인하는 로직이 필요하다
+        // when, then
+        RestAssured
+        .given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then()
+            .log().all()
+            .statusCode(201)
+            .and()
+            .body("status", equalTo("RESERVED"));
     }
 
     @Test

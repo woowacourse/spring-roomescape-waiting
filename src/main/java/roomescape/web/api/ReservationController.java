@@ -27,6 +27,25 @@ import roomescape.service.dto.response.reservation.UserReservationResponse;
 public class ReservationController {
     private final ReservationService reservationService;
 
+    @PostMapping("/reservations")
+    public ResponseEntity<ReservationResponse> saveReservation(
+            @RequestBody @Valid UserReservationRequest request,
+            MemberInfo memberInfo
+    ) {
+        ReservationRequest reservationRequest = ReservationRequest.builder()
+                .date(request.date())
+                .memberId(memberInfo.id())
+                .timeId(request.timeId())
+                .themeId(request.themeId())
+                .build();
+
+        Reservation reservation = reservationService.saveMemberReservation(reservationRequest);
+
+        ReservationResponse response = ReservationResponse.from(reservation);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
+                .body(response);
+    }
+
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllReservation() {
         List<ReservationResponse> response = reservationService.findAllReservation();
@@ -50,25 +69,6 @@ public class ReservationController {
         List<UserReservationResponse> reservations = reservationService.findAllByMemberId(memberInfo.id());
 
         return ResponseEntity.ok(reservations);
-    }
-
-    @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> saveReservation(
-            @RequestBody @Valid UserReservationRequest request,
-            MemberInfo memberInfo
-    ) {
-        ReservationRequest reservationRequest = ReservationRequest.builder()
-                .date(request.date())
-                .memberId(memberInfo.id())
-                .timeId(request.timeId())
-                .themeId(request.themeId())
-                .build();
-
-        Reservation reservation = reservationService.saveReservation(reservationRequest);
-
-        ReservationResponse response = ReservationResponse.from(reservation);
-        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
-                .body(response);
     }
 
     @DeleteMapping("/reservations/{reservation_id}")
