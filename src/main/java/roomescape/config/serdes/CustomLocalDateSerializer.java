@@ -3,15 +3,23 @@ package roomescape.config.serdes;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.springframework.boot.jackson.JsonComponent;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.TimeZone;
 
+@JsonComponent
 public class CustomLocalDateSerializer extends JsonSerializer<LocalDate> {
-    DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMATTER = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd")
+            .toFormatter()
+            .withZone(ZoneId.of("Asia/Seoul"));
 
     @Override
     public void serialize(
@@ -20,8 +28,8 @@ public class CustomLocalDateSerializer extends JsonSerializer<LocalDate> {
             SerializerProvider serializerProvider
     ) {
         try {
-            DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-            jsonGenerator.writeString(DATE_FORMAT.format(localDate));
+            System.out.println(TIME_FORMATTER.format(localDate));
+            jsonGenerator.writeString(TIME_FORMATTER.format(localDate));
         } catch (IOException exception) {
             throw new RuntimeException("날짜 변환 과정에서 문제가 발생했습니다.");
         }

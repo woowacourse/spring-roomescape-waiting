@@ -13,7 +13,8 @@ class AdminReservationControllerTest extends IntegrationTestSupport {
     @DisplayName("예약 내역을 필터링하여 조회한다.")
     @Test
     void findReservationByFilter() {
-        Map<String, String> params = Map.of("themeId", "1",
+        Map<String, String> params = Map.of(
+                "themeId", "1",
                 "memberId", "1",
                 "dateFrom", "2024-05-04",
                 "dateTo", "2024-05-04"

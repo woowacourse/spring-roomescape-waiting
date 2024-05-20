@@ -3,6 +3,7 @@ package roomescape.config.serdes;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import org.springframework.boot.jackson.JsonComponent;
 
 import java.io.IOException;
 import java.time.LocalTime;
@@ -10,6 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 
+@JsonComponent
 public class CustomLocalTimeDeserializer extends JsonDeserializer<LocalTime> {
     private static final DateTimeFormatter TIME_FORMATTER = new DateTimeFormatterBuilder()
             .appendPattern("HH:mm")

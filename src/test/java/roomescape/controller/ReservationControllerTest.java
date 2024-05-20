@@ -139,7 +139,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
-                            "date", LocalDate.now(),
+                            "date", LocalDate.now().toString(),
                             "timeId", 1L,
                             "themeId", 1L);
 
