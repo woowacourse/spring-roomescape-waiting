@@ -9,7 +9,7 @@ import roomescape.core.domain.Waiting;
 import roomescape.core.domain.WaitingWithRank;
 
 public class MyReservationResponse {
-    private final Long reservationId;
+    private final Long id;
     private final String theme;
     private final String date;
     private final String time;
@@ -17,7 +17,7 @@ public class MyReservationResponse {
 
     private MyReservationResponse(final Long reservationId, final String theme, final String date, final String time,
                                   final String status) {
-        this.reservationId = reservationId;
+        this.id = reservationId;
         this.theme = theme;
         this.date = date;
         this.time = time;
@@ -44,8 +44,8 @@ public class MyReservationResponse {
                 time.getStartAtString(), status);
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public Long getId() {
+        return id;
     }
 
     public String getTheme() {

@@ -49,7 +49,7 @@ public class WaitingService {
             throw new IllegalArgumentException("해당 시간에 이미 예약한 내역이 존재합니다. 예약 대기할 수 없습니다.");
         }
     }
-
+    
     private Waiting createWaiting(final WaitingRequest request) {
         final Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
@@ -59,5 +59,10 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
         return new Waiting(member, request.getDate(), reservationTime, theme);
+    }
+
+    @Transactional
+    public void delete(final long id) {
+        waitingRepository.deleteById(id);
     }
 }
