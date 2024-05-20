@@ -66,13 +66,14 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Theme theme = (Theme) o;
-        return id == theme.id
-                && Objects.equals(name.getName(), theme.name.getName())
-                && Objects.equals(description.getDescription(), theme.description.getDescription())
-                && Objects.equals(thumbnail.getThumbnail(), theme.thumbnail.getThumbnail());
+        return id == theme.id;
     }
 
     @Override
