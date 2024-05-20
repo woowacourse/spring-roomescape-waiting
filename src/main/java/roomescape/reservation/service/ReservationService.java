@@ -5,13 +5,11 @@ import org.springframework.stereotype.Service;
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.SaveReservationRequest;
-import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.dto.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
-import roomescape.reservation.repository.CustomReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -24,19 +22,16 @@ import java.util.NoSuchElementException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final CustomReservationRepository customReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
-            final CustomReservationRepository customReservationRepository,
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository
     ) {
-        this.customReservationRepository = customReservationRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;

@@ -3,9 +3,13 @@ package roomescape.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -13,6 +17,8 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.web.client.HttpServerErrorException.InternalServerError;
+
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
@@ -58,5 +64,18 @@ public class CustomExceptionHandler {
         log.error(e.getMessage());
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("예기치 못한 에러가 발생하였습니다."));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String,String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+            log.warn(error.getDefaultMessage());
+        });
+        return ResponseEntity.status(BAD_REQUEST)
+                .body(errors);
     }
 }

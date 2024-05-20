@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
+import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationStatus;
@@ -115,5 +117,63 @@ class ReservationRepositoryTest {
 
         // Then
         assertThat(allByDateAndThemeId).hasSize(2);
+    }
+
+    @DisplayName("테마 id, 시작일, 종료일을 기준으로 예약 정보를 조회한다.")
+    @Test
+    void searchReservationsWithThemeIdAndFromAndToConditionTest() {
+        // Given
+        final long themeId = 1L;
+        final LocalDate from = LocalDate.now().minusDays(7);
+        final LocalDate to = LocalDate.now().plusDays(1);
+
+        // When
+        final List<Reservation> reservations = reservationRepository.searchReservations(null, themeId, new ReservationDate(from), new ReservationDate(to));
+
+        // Then
+        assertThat(reservations).hasSize(4);
+    }
+
+    @DisplayName("시작일, 종료일을 기준으로 예약 정보를 조회한다.")
+    @Test
+    void searchReservationsWithFromAndToConditionTest() {
+        // Given
+        final LocalDate from = LocalDate.now().minusDays(7);
+        final LocalDate to = LocalDate.now().plusDays(1);
+
+        // When
+        final List<Reservation> reservations = reservationRepository.searchReservations(null, null, new ReservationDate(from), new ReservationDate(to));
+
+        // Then
+        assertThat(reservations).hasSize(12);
+    }
+
+    @DisplayName("시작일 이후의 예약 정보를 조회한다.")
+    @Test
+    void searchReservationsAfterFromConditionTest() {
+        // Given
+        final LocalDate from = LocalDate.now().minusDays(7);
+
+        // When
+        final List<Reservation> reservations = reservationRepository.searchReservations(null, null, new ReservationDate(from), null);
+
+        // Then
+        assertThat(reservations).hasSize(16);
+    }
+
+    @DisplayName("회원 id, 테마 id, 시작일, 종료일을 기준으로 예약 정보를 조회한다.")
+    @Test
+    void searchReservationsWithAllConditionTest() {
+        // Given
+        final long memberId = 1L;
+        final long themeId = 11L;
+        final LocalDate from = LocalDate.now().minusDays(7);
+        final LocalDate to = LocalDate.now().plusDays(1);
+
+        // When
+        final List<Reservation> reservations = reservationRepository.searchReservations(memberId, themeId, new ReservationDate(from), new ReservationDate(to));
+
+        // Then
+        assertThat(reservations).hasSize(1);
     }
 }
