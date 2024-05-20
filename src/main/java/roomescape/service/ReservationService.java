@@ -59,8 +59,9 @@ public class ReservationService {
         Member member = getMemberById(request.memberId());
         TimeSlot timeSlot = getTimeSlotById(request.timeId());
         Theme theme = getThemeById(request.themeId());
-        validate(request.date(), timeSlot, theme, now);
         Reservation reservation = request.toEntity(member, timeSlot, theme);
+        reservation.validatePast(now);
+        validateDuplicatedReservation(request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -69,8 +70,9 @@ public class ReservationService {
         Member member = getMemberById(loginMember.id());
         TimeSlot timeSlot = getTimeSlotById(request.timeId());
         Theme theme = getThemeById(request.themeId());
-        validate(request.date(), timeSlot, theme, now);
         Reservation reservation = request.toEntity(member, timeSlot, theme);
+        reservation.validatePast(now);
+        validateDuplicatedReservation(request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -85,18 +87,6 @@ public class ReservationService {
 
     public void delete(Long id) {
         reservationRepository.deleteById(id);
-    }
-
-    private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime now) {
-        validateReservation(date, timeSlot, now);
-        validateDuplicatedReservation(date, timeSlot, theme);
-    }
-
-    private void validateReservation(LocalDate date, TimeSlot time, LocalDateTime now) {
-        LocalDate today = LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth());
-        if (date.isBefore(today) || date.isEqual(today) && time.isBefore(now)) {
-            throw new IllegalArgumentException("지나간 날짜와 시간으로 예약할 수 없습니다");
-        }
     }
 
     private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme) {

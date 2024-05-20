@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Reservation {
@@ -36,6 +37,13 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = ReservationStatus.BOOKING;
+    }
+
+    public void validatePast(LocalDateTime now) {
+        LocalDate today = LocalDate.of(now.getYear(), now.getMonth(), now.getDayOfMonth());
+        if (date.isBefore(today) || date.isEqual(today) && time.isBefore(now)) {
+            throw new IllegalArgumentException("지나간 날짜와 시간으로 예약할 수 없습니다");
+        }
     }
 
     public Long getId() {
