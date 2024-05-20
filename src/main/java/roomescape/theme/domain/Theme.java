@@ -1,0 +1,77 @@
+package roomescape.theme.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import java.util.Objects;
+
+@Entity
+public class Theme {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @Column(nullable = false)
+    private Name name;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String thumbnail;
+
+    protected Theme() {
+    }
+
+    public Theme(Long id, Name name, String description, String thumbnail) {
+        validateNotNull(name, description, thumbnail);
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
+
+    private void validateNotNull(Name name, String description, String thumbnail) {
+        if (name == null || description == null || thumbnail == null) {
+            throw new IllegalArgumentException("Theme의 name, description, thumbnail은 null일 수 없습니다.");
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Name getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Theme theme = (Theme) o;
+        return Objects.equals(id, theme.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+}
