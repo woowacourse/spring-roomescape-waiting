@@ -1,10 +1,13 @@
 package roomescape.core.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.core.domain.Member;
+import roomescape.core.domain.ReservationTime;
+import roomescape.core.domain.Theme;
 import roomescape.core.domain.Waiting;
 import roomescape.core.domain.WaitingWithRank;
 
@@ -20,4 +23,12 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             "FROM Waiting w " +
             "WHERE w.member = :member")
     List<WaitingWithRank> findAllWithRankByMember(@Param("member") final Member member);
+
+    Waiting findFirstByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time,
+                                           final Theme theme);
+
+    boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme);
+
+    boolean existsByMemberAndDateAndTimeAndTheme(final Member member, final LocalDate date, final ReservationTime time,
+                                                 final Theme theme);
 }
