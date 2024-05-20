@@ -19,9 +19,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class ThemeService {
-
-    private static final int POPULAR_THEME_RANK_COUNT = 10;
-
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -48,21 +45,21 @@ public class ThemeService {
                 popularThemeRequest.endDate()
         );
 
-        List<Theme> popularThemes = makePopularThemeRanking(reservations);
+        List<Theme> popularThemes = makePopularThemeRanking(reservations, popularThemeRequest.limit());
 
         return popularThemes.stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
 
-    private List<Theme> makePopularThemeRanking(List<Reservation> reservations) {
+    private List<Theme> makePopularThemeRanking(List<Reservation> reservations, int rankingLimit) {
         Map<Theme, Long> reservationCounting = reservations.stream()
                 .collect(groupingBy(Reservation::getTheme, Collectors.counting()));
 
         return reservationCounting.entrySet()
                 .stream()
                 .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                .limit(POPULAR_THEME_RANK_COUNT)
+                .limit(rankingLimit)
                 .map(Map.Entry::getKey)
                 .toList();
     }
