@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
+import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.waiting.MemberWaitingRequest;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
@@ -58,5 +59,29 @@ class WaitingControllerTest {
                 .when().post("/waiting")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("이미 예약한 내역이 존재하면 예약 대기를 생성할 수 없다.")
+    void createWaitingAlreadyHaveReservation() {
+        MemberReservationRequest reservationRequest = new MemberReservationRequest(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        MemberWaitingRequest waitingRequest = new MemberWaitingRequest(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(400);
     }
 }
