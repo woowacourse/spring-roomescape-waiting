@@ -1,14 +1,14 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.user.Member;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.output.ReservationOutput;
-
-import java.util.List;
 
 @Service
 public class ReservationService {
@@ -33,14 +33,15 @@ public class ReservationService {
         return ReservationOutput.toOutputs(reservations);
     }
 
-    public List<ReservationOutput> getAllMyReservations(final long memberId) {
-        final List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+    public List<ReservationOutput> getAllMyReservations(final Member member) {
+        final List<Reservation> reservations = reservationRepository.findAllByMember(member);
         return ReservationOutput.toOutputs(reservations);
     }
 
     public List<ReservationOutput> searchReservation(final ReservationSearchInput input) {
         final List<Reservation> themeReservations = reservationRepository.getReservationByThemeIdAndMemberIdAndDateBetween(
-                input.themeId(), input.memberId(), new ReservationDate(input.fromDate()), new ReservationDate(input.toDate()));
+                input.themeId(), input.memberId(), new ReservationDate(input.fromDate()),
+                new ReservationDate(input.toDate()));
         return ReservationOutput.toOutputs(themeReservations);
     }
 

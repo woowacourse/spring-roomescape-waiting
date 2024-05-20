@@ -1,5 +1,7 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +14,6 @@ import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class ReservationRepositoryTest {
@@ -90,28 +90,29 @@ class ReservationRepositoryTest {
                 sut.existsByDateAndTimeId(ReservationDate.from("2024-10-09"), time.getId());
         assertThat(result).isFalse();
     }
+
     @Test
-    void get_reservation_themeId_memberId_between_reservationDate(){
+    void get_reservation_themeId_memberId_between_reservationDate() {
         final var newMember = memberRepository.save(MemberFixture.getDomain("alphaka@naver.com"));
         sut.save(Reservation.fromComplete(null, "2024-10-08", time, theme, member));
         sut.save(Reservation.fromComplete(null, "2024-10-09", time, theme, member));
         sut.save(Reservation.fromComplete(null, "2024-10-10", time, theme, member));
         sut.save(Reservation.fromComplete(null, "2024-10-11", time, theme, newMember));
         final var result =
-                sut.getReservationByThemeIdAndMemberIdAndDateBetween(theme.getId(),member.getId(),
-                        ReservationDate.from("2024-10-10"),ReservationDate.from("2024-10-11"));
+                sut.getReservationByThemeIdAndMemberIdAndDateBetween(theme.getId(), member.getId(),
+                        ReservationDate.from("2024-10-10"), ReservationDate.from("2024-10-11"));
 
         assertThat(result).hasSize(1);
     }
 
     @Test
-    void find_all_by_member_id(){
+    void find_all_by_member_id() {
         final var newMember = memberRepository.save(MemberFixture.getDomain("alphaka@naver.com"));
         sut.save(Reservation.fromComplete(null, "2024-10-08", time, theme, member));
         sut.save(Reservation.fromComplete(null, "2024-10-09", time, theme, member));
         sut.save(Reservation.fromComplete(null, "2024-10-10", time, theme, newMember));
 
-        assertThat(sut.findAllByMemberId(member.getId()))
+        assertThat(sut.findAllByMember(member))
                 .hasSize(2);
     }
 }

@@ -29,8 +29,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public LoginMemberRequest resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer, final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) throws Exception {
+    public LoginMemberRequest resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer,
+                                              final NativeWebRequest webRequest,
+                                              final WebDataBinderFactory binderFactory) throws Exception {
         final TokenLoginOutput output = tokenContextRequest.getTokenLoginOutput();
-        return new LoginMemberRequest(output.id(), output.email(), output.password(), output.name());
+        return new LoginMemberRequest(output.id(), output.email(), output.password(), output.name(), output.role());
     }
 }
