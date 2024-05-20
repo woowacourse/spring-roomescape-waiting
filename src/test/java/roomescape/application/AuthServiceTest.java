@@ -6,6 +6,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.dto.request.LoginRequest;
@@ -52,17 +53,6 @@ class AuthServiceTest extends BaseServiceTest {
     }
 
     @Test
-    @DisplayName("토큰으로 회원 아이디를 가져올 수 있다.")
-    void getMemberId() {
-        Long memberId = 1L;
-
-        String token = tokenProvider.createToken(memberId.toString());
-        Long memberIdByToken = authService.getMemberIdByToken(token);
-
-        assertThat(memberIdByToken).isEqualTo(memberId);
-    }
-
-    @Test
     @DisplayName("비밀번호가 일치하지 않을 경우 예외를 발생시킨다.")
     void validatePasswordWhenPasswordIsNotMatch() {
         memberService.createMember(new SignupRequest("ex@gmail.com", "password", "구름"));
@@ -72,5 +62,16 @@ class AuthServiceTest extends BaseServiceTest {
         assertThatThrownBy(() -> authService.validatePassword(request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("토큰으로 회원 아이디를 가져올 수 있다.")
+    void getMemberId() {
+        Long memberId = 1L;
+
+        String token = tokenProvider.createToken(memberId.toString());
+        Long memberIdByToken = authService.getMemberIdByToken(token);
+
+        assertThat(memberIdByToken).isEqualTo(memberId);
     }
 }

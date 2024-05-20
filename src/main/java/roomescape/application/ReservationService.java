@@ -48,20 +48,6 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    public List<ReservationResponse> getReservationsByConditions(
-            Long memberId,
-            Long themeId,
-            LocalDate dateFrom,
-            LocalDate dateTo
-    ) {
-        List<Reservation> reservations = reservationRepository
-                .findAllByConditions(memberId, themeId, dateFrom, dateTo);
-
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
     @Transactional
     public ReservationResponse addReservation(ReservationRequest request) {
         Reservation reservation = createReservation(
@@ -72,7 +58,7 @@ public class ReservationService {
                 ReservationStatus.RESERVED
         );
 
-        validateReservationExists(reservation);
+        validateReservationAlreadyExists(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -98,6 +84,36 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
+    public List<ReservationResponse> getReservationsByConditions(
+            Long memberId,
+            Long themeId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    ) {
+        List<Reservation> reservations = reservationRepository
+                .findAllByConditions(memberId, themeId, dateFrom, dateTo);
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<MyReservationResponse> getMyReservationWithRanks(long memberId) {
+        List<ReservationWithRankDto> reservations = reservationRepository.findReservationWithRanksByMemberId(memberId);
+
+        return reservations.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> getReservationWaitings() {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     @Transactional
     public void deleteReservationById(Long id) {
         if (!reservationRepository.existsById(id)) {
@@ -118,28 +134,12 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<MyReservationResponse> getMyReservationWithRanks(long memberId) {
-        List<ReservationWithRankDto> reservations = reservationRepository.findReservationWithRanksByMemberId(memberId);
-
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
-    }
-
-    public List<ReservationResponse> getReservationWaitings() {
-        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
-
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
     @Transactional
     public ReservationResponse approveReservationWaiting(Long id) {
         Reservation reservation = reservationRepository.getById(id);
 
         validateReservationNotWaiting(reservation);
-        validateReservationExists(reservation);
+        validateReservationAlreadyExists(reservation);
 
         reservation.updateToReserved();
 
@@ -192,7 +192,7 @@ public class ReservationService {
         );
 
         if (currentMemberAlreadyReserved) {
-            throw new BadRequestException("이미 예약을 하셨습니다.");
+            throw new BadRequestException("해당 회원은 이미 예약을 하였습니다.");
         }
     }
 
@@ -206,11 +206,11 @@ public class ReservationService {
         );
 
         if (reservationWaitingExists) {
-            throw new BadRequestException("이미 예약 대기를 하셨습니다.");
+            throw new BadRequestException("해당 회원은 이미 예약 대기를 하였습니다.");
         }
     }
 
-    private void validateReservationExists(Reservation reservation) {
+    private void validateReservationAlreadyExists(Reservation reservation) {
         boolean reservationExists = reservationRepository.existsByReservation(
                 reservation.getDate(),
                 reservation.getTime().getId(),
@@ -219,7 +219,7 @@ public class ReservationService {
         );
 
         if (reservationExists) {
-            throw new BadRequestException("해당 날짜/시간에 이미 예약이 존재합니다.");
+            throw new BadRequestException("이미 예약이 존재합니다.");
         }
     }
 
