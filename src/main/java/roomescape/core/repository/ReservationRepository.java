@@ -16,8 +16,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r
             FROM Reservation r
-            INNER JOIN r.theme t
-            INNER JOIN r.member m
+            JOIN FETCH r.theme t
+            JOIN FETCH r.member m
             WHERE t.id = :themeId
             AND m.id = :memberId
             AND r.date >= :from
