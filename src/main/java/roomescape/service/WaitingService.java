@@ -5,10 +5,7 @@ import roomescape.controller.request.WaitingRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.*;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
+import roomescape.repository.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,20 +20,24 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository, MemberRepository memberRepository) {
+                          ThemeRepository themeRepository, MemberRepository memberRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public Waiting addWaiting(WaitingRequest request, Member member) {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(request.themeId())));
+        validateWaitingInExistingReservation(theme, request.date(), reservationTime, member);
+        validateDuplicatedWaiting(theme, request.date(), reservationTime, member);
         Waiting waiting = new Waiting(request.date(), reservationTime, theme, member);
         return waitingRepository.save(waiting);
     }
@@ -53,6 +54,20 @@ public class WaitingService {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         if (reservationDateTime.isBefore(now)) {
             throw new BadRequestException("현재(%s) 이전 시간으로 예약 대기를 추가할 수 없습니다.".formatted(now));
+        }
+    }
+
+    private void validateWaitingInExistingReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
+        boolean duplicated = reservationRepository.existsReservationByThemeAndDateAndTimeAndMember(theme, date, time, member);
+        if (duplicated) {
+            throw new BadRequestException("현재 이름(%s)으로 예약 내역이 이미 존재합니다.".formatted(member.getName()));
+        }
+    }
+
+    private void validateDuplicatedWaiting(Theme theme, LocalDate date, ReservationTime time, Member member) {
+        boolean duplicated = waitingRepository.existsWaitingByThemeAndDateAndTimeAndMember(theme, date, time, member);
+        if (duplicated) {
+            throw new BadRequestException("현재 이름(%s)으로 예약된 예약 대기 내역이 이미 존재합니다.".formatted(member.getName()));
         }
     }
 

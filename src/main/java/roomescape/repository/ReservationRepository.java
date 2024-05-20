@@ -39,4 +39,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findAllByMember(Member member);
 
+    boolean existsReservationByThemeAndDateAndTimeAndMember(Theme theme, LocalDate date, ReservationTime time, Member member);
+
 }

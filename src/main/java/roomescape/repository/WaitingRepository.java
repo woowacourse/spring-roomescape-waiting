@@ -2,9 +2,9 @@ package roomescape.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import roomescape.model.Waiting;
-import roomescape.model.WaitingWithRank;
+import roomescape.model.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
@@ -28,4 +28,6 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
             WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+
+    boolean existsWaitingByThemeAndDateAndTimeAndMember(Theme theme, LocalDate date, ReservationTime time, Member member);
 }

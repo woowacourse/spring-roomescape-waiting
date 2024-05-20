@@ -290,4 +290,28 @@ class ReservationRepositoryTest {
         reservations = reservationRepository.findByConditions(null, member1, day1, day2);
         assertThat(reservations).hasSize(4);
     }
+
+    @DisplayName("날짜, 시간, 테마, 멤버에 해당하는 예약이 존재하면 참을 반환한다.")
+    @Test
+    void should_return_reservation_count_when_give_date_and_time_and_theme_and_member() {
+        LocalDate day = LocalDate.of(2024, 5, 15);
+        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
+        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
+        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+
+        entityManager.persist(time1);
+        entityManager.persist(time2);
+        entityManager.persist(theme);
+        entityManager.persist(member);
+
+        Reservation reservation1 = new Reservation(day, time1, theme, member);
+        Reservation reservation2 = new Reservation(day, time2, theme, member);
+
+        entityManager.persist(reservation1);
+        entityManager.persist(reservation2);
+
+        boolean exists = reservationRepository.existsReservationByThemeAndDateAndTimeAndMember(theme, day, time1, member);
+        assertThat(exists).isTrue();
+    }
 }

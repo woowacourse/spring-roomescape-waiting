@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.request.WaitingRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.*;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
+import roomescape.repository.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +37,10 @@ class WaitingServiceTest {
     private final MemberRepository memberRepository;
     @Autowired
     private final WaitingService waitingService;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationService reservationService;
 
     @Autowired
     public WaitingServiceTest(ThemeRepository themeRepository, ReservationTimeRepository reservationTimeRepository,
@@ -155,5 +157,35 @@ class WaitingServiceTest {
                 .findMemberWaiting(member.getId());
 
         assertThat(waiting).hasSize(2);
+    }
+
+    @DisplayName("이미 사용자가 예약한 날짜, 테마, 시간에 예약 대기를 추가하는 경우 예외를 발생한다.")
+    @Test
+    void should_throw_exception_when_existing_reservation() {
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        ReservationRequest reservationRequest = new ReservationRequest(now().plusDays(2), 1L, 1L);
+        reservationService.addReservation(reservationRequest, member);
+
+        WaitingRequest request = new WaitingRequest(now().plusDays(2), 1L, 1L);
+
+        assertThatThrownBy(() -> waitingService.addWaiting(request, member))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 현재 이름(배키)으로 예약 내역이 이미 존재합니다.");
+    }
+
+    @DisplayName("이미 사용자가 예약 대기한 날짜, 테마, 시간에 예약 대기를 추가하는 경우 예외를 발생한다.")
+    @Test
+    void should_throw_exception_when_existing_waiting() {
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        WaitingRequest request = new WaitingRequest(now().plusDays(2), 1L, 1L);
+        waitingService.addWaiting(request, member);
+
+        assertThatThrownBy(() -> waitingService.addWaiting(request, member))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("[ERROR] 현재 이름(배키)으로 예약된 예약 대기 내역이 이미 존재합니다.");
     }
 }
