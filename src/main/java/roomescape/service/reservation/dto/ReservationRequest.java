@@ -8,6 +8,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.common.InvalidRequestBodyException;
 
 public class ReservationRequest {
     private final LocalDate date;
@@ -29,12 +30,12 @@ public class ReservationRequest {
 
     public void validate(String date, String timeId, String themeId) {
         if (date == null || timeId == null || themeId == null) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
         try {
             LocalDate.parse(date);
         } catch (DateTimeException e) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
     }
 

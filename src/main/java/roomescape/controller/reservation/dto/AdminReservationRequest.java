@@ -2,6 +2,7 @@ package roomescape.controller.reservation.dto;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import roomescape.exception.common.InvalidRequestBodyException;
 
 public class AdminReservationRequest {
     private final LocalDate date;
@@ -19,12 +20,12 @@ public class AdminReservationRequest {
 
     public void validate(String date, String timeId, String themeId, String memberId) {
         if (date == null || timeId == null || themeId == null || memberId == null) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
         try {
             LocalDate.parse(date);
         } catch (DateTimeException e) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
     }
 

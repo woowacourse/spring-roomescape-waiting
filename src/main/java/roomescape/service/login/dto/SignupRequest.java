@@ -5,6 +5,7 @@ import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.MemberRole;
+import roomescape.exception.common.InvalidRequestBodyException;
 
 public class SignupRequest {
     private final String email;
@@ -20,7 +21,7 @@ public class SignupRequest {
 
     private void validate(String email, String password, String name) {
         if (email.isBlank() || password.isBlank() || name.isBlank()) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
     }
 

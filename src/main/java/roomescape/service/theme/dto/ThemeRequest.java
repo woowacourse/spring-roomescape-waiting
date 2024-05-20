@@ -2,6 +2,7 @@ package roomescape.service.theme.dto;
 
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
+import roomescape.exception.common.InvalidRequestBodyException;
 
 public class ThemeRequest {
     private final String name;
@@ -17,7 +18,7 @@ public class ThemeRequest {
 
     private void validate(String name, String description, String thumbnail) {
         if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
     }
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalTime;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.exception.common.InvalidRequestBodyException;
 
 public class ReservationTimeRequest {
     private final LocalTime startAt;
@@ -17,7 +18,7 @@ public class ReservationTimeRequest {
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException();
+            throw new InvalidRequestBodyException();
         }
     }
 
