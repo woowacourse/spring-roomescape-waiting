@@ -2,6 +2,8 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Reservation {
 
     @Id
@@ -29,6 +32,8 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     @ColumnDefault(value = "'CONFIRMATION'")
     private ReservationStatus status;
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     protected Reservation() {
     }
@@ -94,6 +99,10 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

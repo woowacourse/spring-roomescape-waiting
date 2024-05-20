@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS member
 CREATE TABLE IF NOT EXISTS reservation
 (
     id        BIGINT       NOT NULL AUTO_INCREMENT,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     member_id BIGINT       NOT NULL,
     date      VARCHAR(255) NOT NULL,
     time_id   BIGINT,
