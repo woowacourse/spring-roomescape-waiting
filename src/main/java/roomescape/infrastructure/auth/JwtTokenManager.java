@@ -79,4 +79,17 @@ public class JwtTokenManager implements TokenManager {
         cookie.setMaxAge(ONE_MINUTE * 5000000);
         response.addCookie(cookie);
     }
+
+    @Override
+    public Date getExpiration(String token) {
+        String secretString = jwtTokenProperties.getSecretKey();
+        SecretKey key = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getBody()
+                .getExpiration();
+    }
 }

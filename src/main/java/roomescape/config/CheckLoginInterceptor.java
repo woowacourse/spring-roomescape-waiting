@@ -6,9 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.application.AuthService;
-import roomescape.dto.MemberResponse;
-import roomescape.exception.RoomescapeErrorCode;
-import roomescape.exception.RoomescapeException;
 
 @Component
 public class CheckLoginInterceptor implements HandlerInterceptor {
@@ -21,11 +18,12 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Cookie[] cookies = request.getCookies();
-        MemberResponse memberResponse = authService.findMemberByCookies(cookies);
-        if (memberResponse.role().isAdmin()) {
-            return true;
+        request.getMethod();
+        if (cookies == null) {
+            response.setStatus(401);
+            return false;
         }
-        throw new RoomescapeException(RoomescapeErrorCode.FORBIDDEN,
-                String.format("관리자 권한이 없는 사용자입니다. 사용자 id:%d", memberResponse.id()));
+        authService.validateToken(cookies);
+        return true;
     }
 }
