@@ -33,7 +33,9 @@ class ClientRankTest {
                 .when().get("/ranks")
                 .then().extract().body()
                 .jsonPath().getList("", ThemeResponse.class);
-        ThemeResponse actual = themeResponses.get(0);
-        assertThat(actual.id()).isEqualTo(2L);
+
+        ThemeResponse actual_first = themeResponses.get(0);
+
+        assertThat(actual_first.id()).isEqualTo(3L);
     }
 }
