@@ -53,22 +53,6 @@ public class WaitingReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 대기를 예약으로 전환한다.")
-    void changeWaitingReservationToReserved() {
-        RestAssured.given().log().all()
-                .cookie("token", accessToken)
-                .contentType(ContentType.JSON)
-                .when().delete("/reservations/6")
-                .then().log().all().statusCode(204);
-
-        RestAssured.given().log().all()
-                .cookie("token", accessToken)
-                .contentType(ContentType.JSON)
-                .when().post("/waiting/7")
-                .then().log().all().statusCode(201);
-    }
-
-    @Test
     @DisplayName("해당 시간대에 예약이 존재하면 전환되지 않는다.")
     void changeReservedWaitingReservationToReserved() {
         RestAssured.given().log().all()

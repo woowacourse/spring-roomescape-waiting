@@ -94,25 +94,16 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약대기 상태를 예약으로 바꾼다.")
-    void setWaitingReservationReserved() {
-        final LocalDate now = LocalDate.now();
-        CreateReservationDto reservationDto = new CreateReservationDto(
-                1L, 2L, now.plusDays(1), 3L, Status.WAITING);
-        Reservation reserved = reservationService.addReservation(new CreateReservationDto(
-                1L, 2L, now.plusDays(1), 3L, Status.RESERVED));
-        Reservation waiting = reservationService.addReservation(reservationDto);
-        reservationService.deleteReservation(reserved.getId());
-
-        Reservation reservation = reservationService.setWaitingReservationReserved(waiting.getId());
-        
-        assertThat(reservationService.getReservedReservations()).contains(reservation);
-    }
-
-    @Test
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         assertThatCode(() -> reservationService.deleteReservation(1L))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("예약대기가 있는 예약을 삭제하는 경우, 예약대기가 예약으로 바뀐다.")
+    void deleteExistWaitingReservation() {
+        reservationService.deleteReservation(6L);
+        assertThat(reservationService.getWaitingReservations()).isEmpty();
     }
 }

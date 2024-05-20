@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
@@ -90,9 +91,19 @@ public class ReservationService {
         return reservation;
     }
 
+    @Transactional
     public void deleteReservation(final long id) {
         final Reservation fetchReservation = reservationRepository.findByIdOrThrow(id);
         reservationRepository.deleteById(fetchReservation.getId());
+        Optional<Reservation> firstWaitingReservation = reservationRepository
+                .findFirstByTimeIdAndThemeIdAndDateAndStatus(
+                        fetchReservation.getTime().getId(),
+                        fetchReservation.getTheme().getId(),
+                        fetchReservation.getDate(),
+                        Status.WAITING
+                );
+        firstWaitingReservation.ifPresent(
+                reservation -> setWaitingReservationReserved(reservation.getId()));
     }
 
     private void validateDateRange(final ReservationSearchCondition request) {

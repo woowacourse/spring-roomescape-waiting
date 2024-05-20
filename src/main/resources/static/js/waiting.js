@@ -33,7 +33,7 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
-        actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
+        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }

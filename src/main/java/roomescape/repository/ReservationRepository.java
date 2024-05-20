@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Reservation;
@@ -37,4 +38,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     default Reservation findByIdOrThrow(long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
+
+    Optional<Reservation> findFirstByTimeIdAndThemeIdAndDateAndStatus(Long timeId, Long themeId,
+                                                                      LocalDate date,
+                                                                      Status status);
 }
