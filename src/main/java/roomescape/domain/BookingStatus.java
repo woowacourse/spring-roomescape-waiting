@@ -5,20 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class ReservationStatus {
+public class BookingStatus {
 
     private final Map<ReservationTime, Boolean> reservationStatus;
 
-    private ReservationStatus(Map<ReservationTime, Boolean> reservationStatus) {
+    private BookingStatus(Map<ReservationTime, Boolean> reservationStatus) {
         this.reservationStatus = reservationStatus;
     }
 
-    public static ReservationStatus of(List<ReservationTime> reservedTimes, List<ReservationTime> reservationTimes) {
+    public static BookingStatus of(List<ReservationTime> reservedTimes, List<ReservationTime> reservationTimes) {
         Map<ReservationTime, Boolean> reservationStatus = new HashMap<>();
         for (ReservationTime reservationTime : reservationTimes) {
             reservationStatus.put(reservationTime, isReserved(reservedTimes, reservationTime));
         }
-        return new ReservationStatus(reservationStatus);
+        return new BookingStatus(reservationStatus);
     }
 
     private static boolean isReserved(List<ReservationTime> reservedTimes, ReservationTime reservationTime) {
@@ -38,7 +38,7 @@ public class ReservationStatus {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
-        ReservationStatus that = (ReservationStatus) object;
+        BookingStatus that = (BookingStatus) object;
         return Objects.equals(reservationStatus, that.reservationStatus);
     }
 

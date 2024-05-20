@@ -9,7 +9,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-class ReservationStatusTest {
+class BookingStatusTest {
 
     @Test
     @DisplayName("예약된 시간과 전체 시간을 비교하여 예약 여부를 구한다.")
@@ -21,11 +21,11 @@ class ReservationStatusTest {
                 reservationTime1,
                 reservationTime2
         );
-        ReservationStatus reservationStatus = ReservationStatus.of(reservedTimes, reservationTimes);
+        BookingStatus bookingStatus = BookingStatus.of(reservedTimes, reservationTimes);
 
         assertAll(
-                () -> assertThat(reservationStatus.getReservationStatus().get(reservationTime1)).isTrue(),
-                () -> assertThat(reservationStatus.getReservationStatus().get(reservationTime2)).isFalse()
+                () -> assertThat(bookingStatus.getReservationStatus().get(reservationTime1)).isTrue(),
+                () -> assertThat(bookingStatus.getReservationStatus().get(reservationTime2)).isFalse()
         );
     }
 }
