@@ -10,10 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
 
@@ -24,22 +22,12 @@ class ThemeControllerTest {
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "password";
 
-    private String accessToken;
-
     @LocalServerPort
     private int port;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
     }
 
     @Test
