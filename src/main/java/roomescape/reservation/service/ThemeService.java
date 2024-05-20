@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.PopularThemes;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
@@ -51,9 +52,8 @@ public class ThemeService {
 
     public List<PopularThemeResponse> findPopularThemeBetweenWeekLimitTen() {
         List<Theme> themes = getThemeBetweenWeek();
-        Theme theme = new Theme();
-
-        return theme.getPopularTheme(themes).stream()
+        PopularThemes popularThemes = new PopularThemes(themes);
+        return popularThemes.getPopularThemes().stream()
                 .map(PopularThemeResponse::toResponse)
                 .collect(Collectors.toList());
     }
