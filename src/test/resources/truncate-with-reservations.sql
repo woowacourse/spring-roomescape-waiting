@@ -4,11 +4,13 @@ TRUNCATE TABLE reservation;
 TRUNCATE TABLE reservation_time;
 TRUNCATE TABLE theme;
 TRUNCATE TABLE member;
+TRUNCATE TABLE reservation_detail;
 
 ALTER TABLE reservation ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE reservation_time ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE theme ALTER COLUMN ID RESTART WITH 1;
 ALTER TABLE member ALTER COLUMN ID RESTART WITH 1;
+ALTER TABLE reservation_detail ALTER COLUMN ID RESTART WITH 1;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 
@@ -22,7 +24,10 @@ INSERT INTO member(name, email, password, role) VALUES('admin', 'admin@email.com
 INSERT INTO member(name, email, password, role) VALUES('guest', 'guest@email.com', 'guest123', 'GUEST');
 INSERT INTO member(name, email, password, role) VALUES('토미', 'tomi@email.com', 'tomi123', 'GUEST');
 
+INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 2);
+INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -8, CURRENT_DATE), 1, 3);
 
-INSERT INTO reservation(date, member_id, time_id, theme_id, status) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, `RESERVED`);
-INSERT INTO reservation(date, member_id, time_id, theme_id, status) VALUES (DATEADD('DAY', -7, CURRENT_DATE), 2, 1, 2, `RESERVED`);
-INSERT INTO reservation(date, member_id, time_id, theme_id, status) VALUES (DATEADD('DAY', -8, CURRENT_DATE), 3, 1, 3, `RESERVED`);
+INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (1, 1, 'RESERVED');
+INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (2, 2, 'RESERVED');
+INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (3, 3, 'RESERVED');
