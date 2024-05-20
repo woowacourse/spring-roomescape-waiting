@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
@@ -47,8 +49,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
     void notExistReservationTimeIdExceptionTest() {
-        Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
-        Long themeId = themeRepository.save(theme).getId();
+        Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
 
         LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(
@@ -89,5 +90,27 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-}
 
+    @Test
+    void findByMemberAndThemeAndDateBetweenTest() {
+        Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
+        Long themeId = themeRepository.save(theme).getId();
+        LocalTime localTime = LocalTime.parse("10:00");
+        ReservationTime reservationTime = new ReservationTime(localTime);
+        Long timeId = reservationTimeRepository.save(reservationTime).getId();
+        Member member = new Member("마크", "mark@woowa.com", "1234");
+        memberRepository.save(member);
+
+        // when
+        LocalDate localDate = LocalDate.now().plusYears(1);
+        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(localDate, themeId, timeId);
+        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, member.getRole(), member.getName(),
+                member.getEmail());
+        reservationService.save(reservationCreateRequest, loginMemberInToken);
+
+        // then
+        assertThat(
+                reservationService.findAllBySearch(new ReservationSearchRequest(member.getId(), themeId, localDate, localDate)))
+                .isNotEmpty();
+    }
+}

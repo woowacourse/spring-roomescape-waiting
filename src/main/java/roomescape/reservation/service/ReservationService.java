@@ -83,10 +83,12 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllBySearch(ReservationSearchRequest reservationSearchRequest) {
-        Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
         Member member = memberRepository.findById(reservationSearchRequest.memberId()).get();
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme,
-                        reservationSearchRequest.dateTo(), reservationSearchRequest.dateFrom()).stream()
+        Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
+
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member,
+                        theme,
+                        reservationSearchRequest.dateFrom(), reservationSearchRequest.dateTo()).stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }

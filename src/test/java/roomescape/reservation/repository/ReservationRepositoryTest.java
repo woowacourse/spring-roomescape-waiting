@@ -151,9 +151,7 @@ public class ReservationRepositoryTest {
         Member member = memberRepository.save(new Member("hogi", "hoho@naver.com", "1234"));
         Theme theme = themeRepository.save(new Theme("a", "a", "a"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, time
-                ));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, time));
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
 
@@ -180,5 +178,23 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAll();
 
         assertThat(reservations.size()).isEqualTo(0);
+    }
+
+    @Test
+    void findByMemberAndThemeAndDateBetween() {
+        Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
+        themeRepository.save(theme);
+        LocalTime localTime = LocalTime.parse("10:00");
+        ReservationTime reservationTime = new ReservationTime(localTime);
+        reservationTimeRepository.save(reservationTime);
+        Member member = new Member("마크", "mark@woowa.com", "1234");
+        memberRepository.save(member);
+
+        LocalDate localDate = LocalDate.now().plusYears(1);
+        Reservation reservation = new Reservation(member, localDate, theme, reservationTime);
+        reservationRepository.save(reservation);
+
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, localDate, localDate);
+        assertThat(reservations.size()).isEqualTo(1);
     }
 }
