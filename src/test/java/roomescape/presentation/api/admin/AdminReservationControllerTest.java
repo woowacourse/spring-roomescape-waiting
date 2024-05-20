@@ -49,7 +49,7 @@ class AdminReservationControllerTest extends BaseControllerTest {
     private ReservationRepository reservationRepository;
 
     @Test
-    @DisplayName("조건에 맞는 예약들을 조회하고 성공할 경우 200을 반환한다.")
+    @DisplayName("조건에 맞는 예약들(예약 대기 제외)을 조회하고 성공할 경우 200을 반환한다.")
     void getReservationsByConditions() {
         adminLogin();
 
@@ -57,7 +57,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "유저", Role.USER));
+        Member member1 = memberRepository.save(new Member("ex2@gmail.com", "password", "유저2", Role.USER));
         reservationRepository.save(new Reservation(date, member, reservationTime, theme, ReservationStatus.RESERVED));
+        reservationRepository.save(new Reservation(date, member1, reservationTime, theme, ReservationStatus.WAITING));
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)

@@ -42,6 +42,7 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                 AND (:themeId IS NULL OR r.theme.id = :themeId)
                 AND (:dateFrom IS NULL OR r.date >= :dateFrom)
                 AND (:dateTo IS NULL OR r.date <= :dateTo)
+                AND r.status = 'RESERVED'
             """)
     List<Reservation> findAllByConditions(
             @Param("memberId") Long memberId,
