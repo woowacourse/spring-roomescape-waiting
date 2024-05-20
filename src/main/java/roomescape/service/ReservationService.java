@@ -50,7 +50,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (reservationRepository.existsByTimeAndDate(reservationTime, reservationRequest.date())) {
+        if (reservationRepository.existsByTimeAndDateAndTheme(reservationTime, reservationRequest.date(), theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
@@ -66,7 +66,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (waitingRepository.existsByTimeAndDate(reservationTime, reservationRequest.date())) {
+        if (waitingRepository.existsByTimeAndDateAndTheme(reservationTime, reservationRequest.date(), theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
@@ -122,6 +122,13 @@ public class ReservationService {
                 waitingWithRanks);
         return reservationWithWaitings.stream()
                 .map(MyReservationResponse::from)
+                .toList();
+    }
+
+    public List<WaitingResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingResponse::from)
                 .toList();
     }
 
