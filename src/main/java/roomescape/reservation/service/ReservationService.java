@@ -9,9 +9,11 @@ import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
@@ -30,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -37,17 +40,19 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeRepository themeRepository;
+    private final MemberReservationRepository memberReservationRepository;
     private final MemberService memberService;
     private final ThemeService themeService;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository, ReservationTimeService reservationTimeService,
-                              final ThemeRepository themeRepository,
+                              final ThemeRepository themeRepository, MemberReservationRepository memberReservationRepository,
                               final MemberService memberService, ThemeService themeService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeRepository = themeRepository;
+        this.memberReservationRepository = memberReservationRepository;
         this.memberService = memberService;
         this.themeService = themeService;
     }
@@ -101,19 +106,24 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate requestDate = request.date();
-
-        ReservationTime requestReservationTime = reservationTimeService.findTimeById(request.timeId());
+        ReservationTime requestTime = reservationTimeService.findTimeById(request.timeId());
         Theme theme = themeService.findThemeById(request.themeId());
         Member member = memberService.findMemberById(memberId);
 
-        validateDateAndTime(requestDate, requestReservationTime, now);
-        validateReservationDuplicate(request, theme);
+        validateDateAndTime(request.date(), requestTime, LocalDateTime.now());
+        validateDuplication(request, requestTime, theme, member);
 
-        // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
-        Reservation savedReservation = reservationRepository.save(request.toEntity(requestReservationTime, theme, member, ReservationStatus.RESERVED));
+        Reservation savedReservation = reservationRepository.save(request.toEntity(requestTime, theme, member));
+        memberReservationRepository.save(new MemberReservation(savedReservation, member, request.status()));
         return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateDuplication(final ReservationRequest request, final ReservationTime requestTime, final Theme theme, final Member member) {
+        if (request.status() == ReservationStatus.RESERVED) {
+            validateReservationDuplicate(request.date(), requestTime, theme);
+        } else if (request.status() == ReservationStatus.WAITING) {
+            validateReservationWaitingDuplicate(member, request.date(), requestTime, theme);
+        }
     }
 
     private void validateDateAndTime(final LocalDate requestDate, final ReservationTime requestReservationTime, final LocalDateTime now) {
@@ -137,15 +147,23 @@ public class ReservationService {
         return false;
     }
 
-    private void validateReservationDuplicate(final ReservationRequest reservationRequest, final Theme theme) {
-        ReservationTime time = reservationTimeService.findTimeById(reservationRequest.timeId());
+    private void validateReservationDuplicate(final LocalDate requestDate, final ReservationTime time, final Theme theme) {
+        Optional<Reservation> reservation = reservationRepository.findByReservationTimeAndDateAndTheme(
+                time, requestDate, theme);
 
-        List<Reservation> duplicateTimeReservations = reservationRepository.findByReservationTimeAndDateAndTheme(
-                time, reservationRequest.date(), theme);
+        if (reservation.isPresent()) {
+            throw new DataDuplicateException(ErrorType.RESERVATION_WAITING_DUPLICATED,
+                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s/%s/%s]", requestDate, time, theme));
+        }
+    }
 
-        if (duplicateTimeReservations.size() > 0) {
+    private void validateReservationWaitingDuplicate(final Member member, final LocalDate requestDate, final ReservationTime time, final Theme theme) {
+        Optional<MemberReservation> memberReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(
+                member, time, requestDate, theme);
+
+        if (memberReservation.isPresent()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s]", reservationRequest));
+                    String.format("이미 해당 날짜/시간/테마에 예약 또는 예약대기 중 입니다. [values: %s/%s/%s]", requestDate, time, theme));
         }
     }
 
@@ -162,10 +180,11 @@ public class ReservationService {
 
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         Member member = memberService.findMemberById(memberId);
-        List<Reservation> reservations = reservationRepository.findByMember(member);
+        List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
+
         List<MemberReservationResponse> responses = new ArrayList<>();
-        for (Reservation reservation : reservations) {
-            responses.add(MemberReservationResponse.from(reservation));
+        for (MemberReservation memberReservation : reservations) {
+            responses.add(MemberReservationResponse.from(memberReservation));
         }
         return new MemberReservationsResponse(responses);
     }

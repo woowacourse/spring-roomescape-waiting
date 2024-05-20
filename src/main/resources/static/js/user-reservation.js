@@ -149,6 +149,7 @@ function onReservationButtonClick() {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
+            status: 'RESERVED'
         };
 
         fetch('/reservations', {
@@ -185,6 +186,7 @@ function onReservationWaitingButtonClick() {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
+            status: 'WAITING'
         };
 
         fetch('/reservations', {

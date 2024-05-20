@@ -23,6 +23,7 @@ public class MemberService {
     }
 
     public Member addMember(final SignUpRequest request) {
+        //TODO: 동일한 email 존재하는 지 검증하는 로직 추가
         return memberRepository.save(request.toMemberEntity());
     }
 

@@ -16,9 +16,12 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.service.ReservationService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -35,6 +38,8 @@ public class ReservationControllerTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationService reservationService;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -58,7 +63,8 @@ public class ReservationControllerTest {
                 "name", "썬",
                 "date", LocalDate.now().plusDays(1L).toString(),
                 "timeId", "1",
-                "themeId", "1"
+                "themeId", "1",
+                "status", ReservationStatus.RESERVED.name()
         );
 
         RestAssured.given().log().all()
@@ -112,18 +118,19 @@ public class ReservationControllerTest {
         Theme theme2 = themeRepository.save(new Theme("테마명2", "설명", "썸네일URL"));
         Theme theme3 = themeRepository.save(new Theme("테마명3", "설명", "썸네일URL"));
 
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme1, member));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme2, member));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime2, theme3, member));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime1, theme3, anotherMember));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime2, theme2, anotherMember));
+        LocalDate date = LocalDate.now().plusDays(1);
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme2.getId(), ReservationStatus.RESERVED), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme2.getId(), ReservationStatus.RESERVED), anotherMember.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme3.getId(), ReservationStatus.RESERVED), anotherMember.getId());
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
                 .header("Cookie", accessTokenCookie)
-                .when().get("/reservations/member")
+                .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.reservations.size()", is(3));

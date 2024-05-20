@@ -17,10 +17,12 @@ public record ReservationRequest(
         @NotNull(message = "예약(Reservation) 요청의 timeId는 null 일 수 없습니다.")
         Long timeId,
         @NotNull(message = "예약(Reservation) 요청의 themeId는 null 일 수 없습니다.")
-        Long themeId
+        Long themeId,
+        @NotNull(message = "예약(Reservation) 요청의 ReservationStatus는 null 일 수 없습니다.")
+        ReservationStatus status
 ) {
 
-    public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
-        return new Reservation(this.date, reservationTime, theme, member, status);
+    public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member) {
+        return new Reservation(this.date, reservationTime, theme, member);
     }
 }

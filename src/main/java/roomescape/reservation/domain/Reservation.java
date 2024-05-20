@@ -2,8 +2,6 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,40 +32,28 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus reservationStatus;
 
     public Reservation() {
     }
 
     public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
-        this(null, date, reservationTime, theme, member, ReservationStatus.RESERVED);
+        this(null, date, reservationTime, theme, member);
     }
 
-    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
-        this(null, date, reservationTime, theme, member, status);
-    }
-
-    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
+    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
-        this.reservationStatus = status;
 
         validateNotNull();
     }
 
     private void validateNotNull() {
-        if (date == null || reservationTime == null || theme == null || member == null || reservationStatus == null) {
+        if (date == null || reservationTime == null || theme == null || member == null) {
             throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약(Reservation) 생성에 null이 입력되었습니다.");
         }
-    }
-
-    public boolean isReserved() {
-        return reservationStatus == ReservationStatus.RESERVED;
     }
 
     public Long getId() {
@@ -106,7 +92,6 @@ public class Reservation {
                 ", reservationTime=" + reservationTime +
                 ", theme=" + theme +
                 ", member=" + member +
-                ", reservationStatus=" + reservationStatus +
                 '}';
     }
 }

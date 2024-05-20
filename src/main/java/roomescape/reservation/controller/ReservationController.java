@@ -71,7 +71,7 @@ public class ReservationController {
     @Auth
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<ReservationResponse> saveReservation(
+    public ApiResponse<ReservationResponse> requestReservation(
             @Valid @RequestBody final ReservationRequest reservationRequest,
             @MemberId final Long memberId,
             final HttpServletResponse response
