@@ -173,9 +173,9 @@ class ReservationControllerTest extends ControllerTest {
 
     private static Stream<ReservationSaveRequest> invalidPostRequests() {
         return Stream.of(
-                new ReservationSaveRequest(null, 1L, 1L, BOOKING.name()),
-                new ReservationSaveRequest(MIA_RESERVATION_DATE, null, 1L, BOOKING.name()),
-                new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, null, BOOKING.name()),
+                new ReservationSaveRequest(null, 1L, 1L, BOOKING.getIdentifier()),
+                new ReservationSaveRequest(MIA_RESERVATION_DATE, null, 1L, BOOKING.getIdentifier()),
+                new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, null, BOOKING.getIdentifier()),
                 new ReservationSaveRequest(MIA_RESERVATION_DATE, 1L, 1L, null)
         );
     }
@@ -264,7 +264,7 @@ class ReservationControllerTest extends ControllerTest {
         Long themeId = 1L;
         Long timeId = 1L;
         ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, timeId, themeId, BOOKING.name());
+                MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
 
         BDDMockito.given(themeService.findById(themeId))
                 .willReturn(WOOTECO_THEME(themeId));
@@ -291,7 +291,7 @@ class ReservationControllerTest extends ControllerTest {
         Long notExistingTimeId = 1L;
         Long themeId = 1L;
         ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, notExistingTimeId, themeId, BOOKING.name());
+                MIA_RESERVATION_DATE, notExistingTimeId, themeId, BOOKING.getIdentifier());
 
         BDDMockito.given(themeService.findById(themeId))
                 .willReturn(WOOTECO_THEME(themeId));
@@ -316,7 +316,7 @@ class ReservationControllerTest extends ControllerTest {
         Long timeId = 1L;
         Long notExistingThemeId = 1L;
         ReservationSaveRequest request = new ReservationSaveRequest(
-                MIA_RESERVATION_DATE, timeId, notExistingThemeId, BOOKING.name());
+                MIA_RESERVATION_DATE, timeId, notExistingThemeId, BOOKING.getIdentifier());
 
         BDDMockito.given(reservationTimeService.findById(timeId))
                 .willReturn(new ReservationTime(1L, MIA_RESERVATION_TIME));

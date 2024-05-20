@@ -24,6 +24,6 @@ public record ReservationSaveRequest(
 
     public Reservation toModel(Theme theme, ReservationTime time, Member member) {
         String validStatusValue = status.toUpperCase().trim();
-        return new Reservation(member, date, time, theme, ReservationStatus.valueOf(validStatusValue));
+        return new Reservation(member, date, time, theme, ReservationStatus.from(validStatusValue));
     }
 }
