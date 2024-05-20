@@ -45,7 +45,7 @@ class ReservationServiceTest {
         ReservationSaveRequest saveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-12-24"), 2L);
 
         // when
-        ReservationResponse response = reservationService.save(saveRequest, member);
+        ReservationResponse response = reservationService.reserve(saveRequest, member);
 
         // then
         assertNotNull(response);
@@ -61,7 +61,7 @@ class ReservationServiceTest {
         ReservationSaveRequest saveRequest = new ReservationSaveRequest(1L, LocalDate.parse("2024-12-12"), 1L);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> reservationService.save(saveRequest, member));
+        assertThrows(IllegalArgumentException.class, () -> reservationService.reserve(saveRequest, member));
     }
 
     @DisplayName("모든 예약을 조회한다.")

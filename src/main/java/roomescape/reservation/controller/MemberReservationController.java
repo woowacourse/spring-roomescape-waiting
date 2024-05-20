@@ -33,11 +33,21 @@ public class MemberReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> save(
+    public ResponseEntity<ReservationResponse> reserve(
             @RequestBody @Valid final ReservationSaveRequest reservationSaveRequest,
             @AuthenticationPrincipal Member member
     ) {
-        ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, member);
+        ReservationResponse reservationResponse = reservationService.reserve(reservationSaveRequest, member);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> registerWaiting(
+            @RequestBody @Valid final ReservationSaveRequest reservationSaveRequest,
+            @AuthenticationPrincipal Member member
+    ) {
+        ReservationResponse reservationResponse = reservationService.registerWaiting(reservationSaveRequest, member);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

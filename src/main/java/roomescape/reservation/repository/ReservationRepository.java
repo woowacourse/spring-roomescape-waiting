@@ -7,12 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
     List<Reservation> findByDateAndThemeId(LocalDate date, long themeId);
-
-    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     List<Reservation> findByTimeId(long timeId);
 
@@ -25,4 +24,10 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     @Modifying
     @Query("delete from Reservation where id = :id")
     int deleteById(@Param("id") long id);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(LocalDate date, long timeId, long themeId,
+                                                                long memberId, Status status);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, Status status);
+
 }

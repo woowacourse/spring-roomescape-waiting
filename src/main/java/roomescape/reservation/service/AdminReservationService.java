@@ -27,7 +27,7 @@ public class AdminReservationService {
 
     public ReservationResponse save(final AdminReservationSaveRequest adminReservationSaveRequest) {
         Member member = findMemberById(adminReservationSaveRequest.memberId());
-        return reservationService.save(adminReservationSaveRequest.toReservationSaveRequest(), member);
+        return reservationService.reserve(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 
     private Member findMemberById(final long memberId) {
