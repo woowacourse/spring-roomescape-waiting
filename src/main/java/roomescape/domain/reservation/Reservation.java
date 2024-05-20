@@ -41,6 +41,10 @@ public class Reservation {
         this.member = member;
     }
 
+    public boolean isMember(Member member) {
+        return this.member.equals(member);
+    }
+
     public Long getId() {
         return id;
     }

@@ -67,10 +67,9 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(Member member, Reservation reservation) {
-        boolean isReservationExist = reservationRepository.existsBySlotAndMember(reservation.getSlot(), member);
         boolean isWaitingExist = waitingRepository.existsByReservationAndMember(reservation, member);
 
-        if (isReservationExist || isWaitingExist) {
+        if (reservation.isMember(member) || isWaitingExist) {
             throw new RoomEscapeBusinessException("중복된 예약을 할 수 없습니다.");
         }
     }
