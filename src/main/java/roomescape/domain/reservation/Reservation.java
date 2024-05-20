@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
+import roomescape.global.exception.RoomescapeException;
 
 @Entity
 public class Reservation {
@@ -35,8 +36,10 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(Member Member, String rawDate, ReservationTime time, Theme theme, ReservationStatus status) {
+    public Reservation(Member Member, String rawDate, ReservationTime time, Theme theme,
+        ReservationStatus status) {
         this(null, Member, rawDate, time, theme, status);
+        validatePastReservation(LocalDate.parse(rawDate), time);
     }
 
     public Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
@@ -52,6 +55,15 @@ public class Reservation {
     protected Reservation() {
     }
 
+    private void validatePastReservation(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
+        }
+        if (date.isEqual(LocalDate.now()) && time.isBeforeNow()) {
+            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -61,7 +73,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date.getDate();
+        return date.getValue();
     }
 
     public ReservationTime getTime() {
