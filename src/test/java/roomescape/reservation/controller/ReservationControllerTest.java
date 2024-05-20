@@ -21,7 +21,7 @@ import roomescape.reservation.dto.ReservationCreateRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
-    private static final int COUNT_OF_RESERVATION = 4;
+    private static final int COUNT_OF_RESERVATION = 5;
     private static final int BRI_COUNT_OF_RESERVATION = 1;
 
     @LocalServerPort

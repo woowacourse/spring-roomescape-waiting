@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 
@@ -26,12 +27,16 @@ public class Waiting {
     private LocalDateTime createdAt;
 
     public Waiting(Reservation reservation, Member member) {
-        this.reservation = reservation;
-        this.member = member;
+        this.reservation = Objects.requireNonNull(reservation);
+        this.member = Objects.requireNonNull(member);
         this.createdAt = LocalDateTime.now();
     }
 
     protected Waiting() {
+    }
+
+    public boolean isBefore(LocalDateTime dateTime) {
+        return reservation.isBefore(dateTime);
     }
 
     public Long getId() {
