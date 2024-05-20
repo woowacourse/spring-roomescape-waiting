@@ -19,10 +19,10 @@ VALUES ('admin@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u
         'ADMIN'), -- password: abc123
        ('user@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u1JkIT.gm', '유저',
         'USER'),  -- password: abc123
-       ('example1@gmail.com', '1234', '구름1', 'USER'),
-       ('example2@gmail.com', '1234', '구름2', 'USER'),
-       ('example3@gmail.com', '1234', '구름3', 'USER'),
-       ('example4@gmail.com', '1234', '구름4', 'USER');
+       ('example1@gmail.com', '1234', '구름a', 'USER'),
+       ('example2@gmail.com', '1234', '구름b', 'USER'),
+       ('example3@gmail.com', '1234', '구름c', 'USER'),
+       ('example4@gmail.com', '1234', '구름d', 'USER');
 
 INSERT INTO reservation (date, member_id, time_id, theme_id, status)
 VALUES ('2024-04-28', 1, 1, 5, 'RESERVED'),

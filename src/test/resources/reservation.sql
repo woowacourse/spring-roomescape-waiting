@@ -1,6 +1,6 @@
 INSERT INTO member (id, email, password, name, role)
-VALUES (1, 'alstn1@gmail.com', '1234', '구름1', 'USER'),
-       (2, 'alstn2@gmail.com', '1234', '구름2', 'USER');
+VALUES (1, 'alstn1@gmail.com', '1234', '구름a', 'USER'),
+       (2, 'alstn2@gmail.com', '1234', '구름b', 'USER');
 
 INSERT INTO theme (id, name, description, thumbnail)
 VALUES (1, '고풍 한옥 마을', '한국의 전통적인 아름다움이 당신을 맞이합니다.', 'https://via.placeholder.com/150/92c952'),

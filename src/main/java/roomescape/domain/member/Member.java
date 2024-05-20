@@ -25,8 +25,8 @@ public class Member {
     @Embedded
     private Password password;
 
-    @Column(nullable = false, length = NAME_MAX_LENGTH)
-    private String name;
+    @Embedded
+    private MemberName name;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -40,28 +40,13 @@ public class Member {
     }
 
     private Member(Long id, String email, String password, String name, Role role) {
-        validate(name, role);
+        validateRole(role);
 
         this.id = id;
         this.email = new Email(email);
         this.password = new Password(password);
-        this.name = name;
+        this.name = new MemberName(name);
         this.role = role;
-    }
-
-    private void validate(String name, Role role) {
-        validateName(name);
-        validateRole(role);
-    }
-
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 필수 값입니다.");
-        }
-
-        if (name.length() > NAME_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이름은 %d자를 넘을 수 없습니다.", NAME_MAX_LENGTH));
-        }
     }
 
     private void validateRole(Role role) {
@@ -100,7 +85,7 @@ public class Member {
     }
 
     public String getName() {
-        return name;
+        return name.getValue();
     }
 
     public Role getRole() {
