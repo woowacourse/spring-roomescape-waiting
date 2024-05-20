@@ -10,6 +10,7 @@ import roomescape.service.dto.request.RoomThemeCreateRequest;
 import roomescape.service.dto.response.RoomThemeResponse;
 
 @Service
+@Transactional
 public class RoomThemeService {
 
     private static final int DEFAULT_BEST_THEME_COUNT = 10;
@@ -37,7 +38,6 @@ public class RoomThemeService {
                 .toList();
     }
 
-    @Transactional
     public RoomThemeResponse save(RoomThemeCreateRequest roomThemeCreateRequest) {
         RoomTheme roomTheme = roomThemeCreateRequest.toRoomTheme();
         RoomTheme savedRoomTheme = roomThemeRepository.save(roomTheme);

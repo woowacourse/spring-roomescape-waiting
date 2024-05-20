@@ -16,6 +16,7 @@ import roomescape.service.dto.response.ReservationAvailabilityTimeResponse;
 import roomescape.service.dto.response.ReservationTimeResponse;
 
 @Service
+@Transactional
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -33,7 +34,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    @Transactional
     public ReservationTimeResponse save(ReservationTimeRequest reservationTimeRequest) {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
 
