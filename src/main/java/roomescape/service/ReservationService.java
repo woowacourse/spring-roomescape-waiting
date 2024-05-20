@@ -39,7 +39,11 @@ public class ReservationService {
     }
 
     public List<Reservation> getReservations() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAllByStatus(Status.RESERVED);
+    }
+
+    public List<Reservation> getWaitingReservations() {
+        return reservationRepository.findAllByStatus(Status.WAITING);
     }
 
     public List<Reservation> getReservationsByMember(final LoginMember member) {

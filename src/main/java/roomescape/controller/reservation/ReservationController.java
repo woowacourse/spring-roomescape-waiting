@@ -40,6 +40,14 @@ public class ReservationController {
                 .toList();
     }
 
+    @GetMapping("/waiting")
+    public List<ReservationResponse> getWaitingReservations() {
+        return reservationService.getWaitingReservations()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     @GetMapping("/mine")
     public List<MyReservationResponse> getLoginMemberReservation(final LoginMember member) {
         List<Reservation> reservations = reservationService.getReservationsByMember(member);
