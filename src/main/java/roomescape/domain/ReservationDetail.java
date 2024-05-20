@@ -36,11 +36,7 @@ public class ReservationDetail {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Member member;
-
-    public ReservationDetail(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public ReservationDetail(LocalDate date, ReservationTime time, Theme theme) {
+        this(null, date, time, theme);
     }
 }
