@@ -2,9 +2,8 @@ package roomescape.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Map;
-import java.util.Optional;
-import roomescape.domain.Reservation;
+
+import roomescape.entity.Reservation;
 import roomescape.domain.ReservationStatus;
 
 public record ReservationDetailResponse(

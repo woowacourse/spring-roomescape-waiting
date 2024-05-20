@@ -3,6 +3,8 @@ package roomescape.domain;
 import java.util.Collections;
 import java.util.List;
 
+import roomescape.entity.ReservationTime;
+
 public class ReservationTimes {
     private final List<ReservationTime> reservationTimes;
 

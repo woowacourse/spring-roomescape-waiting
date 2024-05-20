@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,6 +7,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
+import roomescape.domain.LoginMember;
+import roomescape.domain.Role;
 
 @Entity
 public class Member {

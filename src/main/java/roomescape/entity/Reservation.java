@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
@@ -17,7 +17,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-import jdk.jshell.Snippet.Status;
+
+import roomescape.domain.Duration;
+import roomescape.domain.LoginMember;
+import roomescape.domain.ReservationStatus;
 import roomescape.exception.RoomescapeException;
 
 @Entity

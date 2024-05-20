@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.Fixture;
 import roomescape.domain.LoginMember;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.dto.LoginRequest;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;

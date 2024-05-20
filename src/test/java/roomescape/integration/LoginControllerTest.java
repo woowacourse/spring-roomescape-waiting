@@ -18,7 +18,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

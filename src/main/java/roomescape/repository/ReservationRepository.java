@@ -1,15 +1,13 @@
 package roomescape.repository;
 
-import jakarta.persistence.Column;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.Duration;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.dto.ReservationDetailResponse;
+
+import roomescape.entity.Reservation;
+import roomescape.entity.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 

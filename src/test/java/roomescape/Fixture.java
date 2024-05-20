@@ -1,7 +1,7 @@
 package roomescape;
 
 import roomescape.domain.LoginMember;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.domain.Role;
 
 public class Fixture {

@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.entity;
 
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
 

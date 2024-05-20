@@ -3,6 +3,8 @@ package roomescape.domain;
 import java.util.Collections;
 import java.util.List;
 
+import roomescape.entity.Member;
+
 public class Members {
     private final List<Member> members;
 

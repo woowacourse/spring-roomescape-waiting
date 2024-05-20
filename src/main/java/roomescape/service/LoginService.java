@@ -9,7 +9,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import roomescape.domain.LoginMember;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.domain.Role;
 import roomescape.dto.LoginRequest;
 import roomescape.exception.RoomescapeException;

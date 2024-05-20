@@ -4,7 +4,7 @@ import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.entity.Member;
 import roomescape.domain.Members;
 import roomescape.dto.MemberResponse;
 import roomescape.exception.RoomescapeException;

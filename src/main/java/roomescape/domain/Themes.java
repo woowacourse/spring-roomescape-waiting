@@ -3,6 +3,8 @@ package roomescape.domain;
 import java.util.Collections;
 import java.util.List;
 
+import roomescape.entity.Theme;
+
 public class Themes {
     private final List<Theme> themes;
 
