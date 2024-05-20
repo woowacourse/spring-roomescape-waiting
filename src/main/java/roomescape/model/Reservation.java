@@ -19,12 +19,15 @@ public class Reservation {
     private LocalDate date;
     @NotNull
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
     @NotNull
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
     @NotNull
     @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
     private Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
