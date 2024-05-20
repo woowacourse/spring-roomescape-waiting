@@ -5,6 +5,11 @@ import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
 import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,10 +18,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Objects;
 
 import roomescape.domain.Duration;
 import roomescape.domain.LoginMember;
@@ -25,7 +26,8 @@ import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Reservation implements Comparable<Reservation> {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private LocalDate date;
@@ -37,6 +39,10 @@ public class Reservation implements Comparable<Reservation> {
     private Member member;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+
+    protected Reservation() {
+
+    }
 
     public Reservation(long id, Reservation reservationBeforeSave) {
         this(id,
@@ -61,10 +67,6 @@ public class Reservation implements Comparable<Reservation> {
         this.theme = theme;
         this.member = member;
         this.status = ReservationStatus.BOOKED;
-    }
-
-    public Reservation() {
-
     }
 
     private void validateTheme(Theme theme) {
