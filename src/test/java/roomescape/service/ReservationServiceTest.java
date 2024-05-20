@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class ReservationServiceTest {
 
     private static final int INITIAL_RESERVATION_COUNT = 3;
-    private static final int INITIAL_TIME_COUNT = 3;
+    private static final int INITIAL_TIME_COUNT = 2;
 
     @Autowired
     private ReservationService reservationService;
@@ -43,9 +43,6 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.now())));
-
         reservationRepository.saveAll(List.of(
                 new Reservation(
                         LocalDate.of(2000, 1, 1),
@@ -92,6 +89,7 @@ class ReservationServiceTest {
     @Test
     void should_not_throw_exception_when_current_date() {
         ReservationDto reservationDto = new ReservationDto(LocalDate.now(), 3L, 1L, 1L);
+        reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         assertThatCode(() -> reservationService.saveReservation(reservationDto))
                 .doesNotThrowAnyException();
     }
