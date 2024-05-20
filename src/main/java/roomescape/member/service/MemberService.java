@@ -5,12 +5,12 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Password;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
@@ -31,9 +31,11 @@ public class MemberService {
     private long validityInMilliseconds;
 
     private final MemberJpaRepository memberJpaRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public MemberService(MemberJpaRepository MemberJpaRepository) {
-        this.memberJpaRepository = MemberJpaRepository;
+    public MemberService(MemberJpaRepository memberJpaRepository, PasswordEncoder passwordEncoder) {
+        this.memberJpaRepository = memberJpaRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Member getLoginMemberById(Long memberId) {
@@ -52,7 +54,7 @@ public class MemberService {
         Member member = memberJpaRepository.findByEmail(new Email(loginRequest.email()))
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
 
-        if (member.isPassword(new Password(loginRequest.password()))) {
+        if (passwordEncoder.matches(member.getPassword().password(), loginRequest.password())) {
             return parseToToken(member);
         }
         throw new AuthenticationException("비밀번호가 일치하지 않습니다.");

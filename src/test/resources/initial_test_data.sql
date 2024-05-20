@@ -22,17 +22,18 @@ VALUES ('레벨3 탈출', '우테코 레벨3를 탈출하는 내용입니다.', 
 INSERT INTO theme (name, description, thumbnail)
 VALUES ('레벨4 탈출', '우테코 레벨4를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
+--모든 멤버의 비밀번호는 문자열 'password'를 BCryptPasswordEncoder 로 인코딩한 암호 입니다.
 INSERT INTO member (name, email, password, role)
-VALUES ('카고', 'kargo123@email.com', 'password', 'USER');
+VALUES ('카고', 'kargo123@email.com', '$2a$10$I5luDmIIQbnvBpUcJZrICedhIJSOMQ0QvnhIGkLoOaEyjupvVjHLm', 'USER');
 
 INSERT INTO member (name, email, password, role)
-VALUES ('브라운', 'brown123@email.com', 'password', 'USER');
+VALUES ('브라운', 'brown123@email.com', '$2a$10$I5luDmIIQbnvBpUcJZrICedhIJSOMQ0QvnhIGkLoOaEyjupvVjHLm', 'USER');
 
 INSERT INTO member (name, email, password, role)
-VALUES ('솔라', 'solar123@email.com', 'password', 'USER');
+VALUES ('솔라', 'solar123@email.com', '$2a$10$I5luDmIIQbnvBpUcJZrICedhIJSOMQ0QvnhIGkLoOaEyjupvVjHLm', 'USER');
 
 INSERT INTO member (name, email, password, role)
-VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN');
+VALUES ('어드민', 'admin@email.com', '$2a$10$I5luDmIIQbnvBpUcJZrICedhIJSOMQ0QvnhIGkLoOaEyjupvVjHLm', 'ADMIN');
 
 INSERT INTO reservation(member_id, date, reservation_time_id, theme_id) VALUES
                                (1L, DATEADD('DAY', -10, CURRENT_DATE), 1, 3),
