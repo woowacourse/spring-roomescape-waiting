@@ -9,6 +9,14 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Long> {
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            WHERE r.reservationMember.id = :memberId 
+                AND r.theme.id = :themeId 
+                AND r.date BETWEEN :start AND :end
+            """)
     List<Reservation> findByReservationMember_IdAndTheme_IdAndDateBetween(
             long memberId,
             long themeId,
