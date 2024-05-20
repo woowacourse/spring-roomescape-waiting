@@ -21,10 +21,10 @@ class MemberRepositoryTest {
         Member member = MemberFixture.email("example@gmail.com");
         memberRepository.save(member);
 
-        Optional<Member> memberOptional = memberRepository.findByEmail("example@gmail.com");
+        Optional<Member> memberOptional = memberRepository.findByEmail(new Email("example@gmail.com"));
 
         assertThat(memberOptional).isPresent();
-        assertThat(memberOptional.get().getEmail()).isEqualTo("example@gmail.com");
+        assertThat(memberOptional.get().getEmail().getValue()).isEqualTo("example@gmail.com");
     }
 
     @Test
@@ -33,7 +33,7 @@ class MemberRepositoryTest {
         Member member = MemberFixture.email("example@gmail.com");
         memberRepository.save(member);
 
-        assertThat(memberRepository.existsByEmail("example@gmail.com")).isTrue();
-        assertThat(memberRepository.existsByEmail("nothing@gmail.com")).isFalse();
+        assertThat(memberRepository.existsByEmail(new Email("example@gmail.com"))).isTrue();
+        assertThat(memberRepository.existsByEmail(new Email("nothing@gmail.com"))).isFalse();
     }
 }

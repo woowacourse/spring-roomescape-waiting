@@ -1,6 +1,7 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,7 +13,6 @@ import java.util.Objects;
 @Entity
 public class Member {
 
-    private static final int EMAIL_MAX_LENGTH = 255;
     private static final int PASSWORD_MAX_LENGTH = 255;
     private static final int NAME_MAX_LENGTH = 30;
 
@@ -20,8 +20,8 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Embedded
+    private Email email;
 
     @Column(nullable = false)
     private String password;
@@ -40,31 +40,20 @@ public class Member {
         this(null, email, password, name, role);
     }
 
-    public Member(Long id, String email, String password, String name, Role role) {
-        validate(email, password, name, role);
+    private Member(Long id, String email, String password, String name, Role role) {
+        validate(password, name, role);
 
         this.id = id;
-        this.email = email;
+        this.email = new Email(email);
         this.password = password;
         this.name = name;
         this.role = role;
     }
 
-    private void validate(String email, String password, String name, Role role) {
-        validateEmail(email);
+    private void validate(String password, String name, Role role) {
         validatePassword(password);
         validateName(name);
         validateRole(role);
-    }
-
-    private void validateEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 필수 값입니다.");
-        }
-
-        if (email.length() > EMAIL_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이메일은 %d자를 넘을 수 없습니다.", EMAIL_MAX_LENGTH));
-        }
     }
 
     private void validatePassword(String password) {
@@ -114,7 +103,7 @@ public class Member {
         return id;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
