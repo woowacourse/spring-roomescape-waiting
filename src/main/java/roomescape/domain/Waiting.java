@@ -55,6 +55,10 @@ public class Waiting {
         return member.equals(reservationMember);
     }
 
+    public boolean hasMemberId(Long memberId) {
+        return memberId.equals(member.getId());
+    }
+
     public Long getId() {
         return id;
     }

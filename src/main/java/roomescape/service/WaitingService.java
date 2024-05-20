@@ -6,6 +6,7 @@ import roomescape.infrastructure.*;
 import roomescape.service.request.WaitingAppRequest;
 import roomescape.service.response.WaitingAppResponse;
 import roomescape.service.response.WaitingWithRankAppResponse;
+import roomescape.web.exception.AuthorizationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -91,5 +92,14 @@ public class WaitingService {
                 .stream()
                 .map(WaitingWithRankAppResponse::new)
                 .toList();
+    }
+
+    public void deleteMemberWaiting(Long memberId, Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 삭제 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
+        if (!waiting.hasMemberId(memberId)) {
+            throw new AuthorizationException(String.format("예약 대기 삭제 권한이 없는 사용자입니다. (id: %d)", memberId));
+        }
+        waitingRepository.deleteById(waitingId);
     }
 }

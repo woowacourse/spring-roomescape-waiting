@@ -11,6 +11,7 @@ import roomescape.infrastructure.*;
 import roomescape.service.request.WaitingAppRequest;
 import roomescape.service.response.WaitingAppResponse;
 import roomescape.service.response.WaitingWithRankAppResponse;
+import roomescape.web.exception.AuthorizationException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -165,5 +166,49 @@ class WaitingServiceTest {
         assertThat(waitingWithRankAppResponses)
                 .hasSize(1)
                 .containsExactly(new WaitingWithRankAppResponse(new WaitingWithRank(savedWaiting, 2L)));
+    }
+
+    @Test
+    @DisplayName("사용자의 예약 대기를 올바르게 삭제한다.")
+    void deleteMemberWaiting() {
+        Member reservedMember = memberRepository.save(members.get(0));
+        Member waitingMember = memberRepository.save(members.get(1));
+        String date = LocalDate.now().minusDays(1).toString();
+        Theme theme = themeRepository.save(VALID_THEME);
+        ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
+        reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
+        Waiting savedWaiting = waitingRepository.save(new Waiting(waitingMember, new ReservationDate(date), time, theme));
+
+        waitingService.deleteMemberWaiting(waitingMember.getId(), savedWaiting.getId());
+
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 대기 삭제 시 예외가 발생한다.")
+    void deleteNotExistWaiting() {
+        Member member = memberRepository.save(members.get(0));
+
+        assertThatThrownBy(() ->
+                waitingService.deleteMemberWaiting(member.getId(), 1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("예약 대기 삭제 실패: 대기를 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("자신이 생성하지 않은 예약 대기 삭제 시 예외가 발생한다.")
+    void deleteWaitingWithInvalidMember() {
+        Member reservedMember = memberRepository.save(members.get(0));
+        Member waitingMember = memberRepository.save(members.get(1));
+        String date = LocalDate.now().minusDays(1).toString();
+        Theme theme = themeRepository.save(VALID_THEME);
+        ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
+        reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
+        Waiting savedWaiting = waitingRepository.save(new Waiting(waitingMember, new ReservationDate(date), time, theme));
+
+        assertThatThrownBy(() ->
+                waitingService.deleteMemberWaiting(reservedMember.getId(), savedWaiting.getId()))
+                .isInstanceOf(AuthorizationException.class)
+                .hasMessageContaining("예약 대기 삭제 권한이 없는 사용자입니다.");
     }
 }

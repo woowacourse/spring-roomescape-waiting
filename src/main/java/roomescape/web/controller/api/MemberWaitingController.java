@@ -3,10 +3,7 @@ package roomescape.web.controller.api;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import roomescape.service.WaitingService;
 import roomescape.service.request.WaitingAppRequest;
 import roomescape.service.response.WaitingAppResponse;
@@ -50,5 +47,12 @@ public class MemberWaitingController {
                 .toList();
 
         return ResponseEntity.ok(waitingWithRankWebResponses);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@Valid @Auth LoginMember loginMember, @PathVariable Long id) {
+        waitingService.deleteMemberWaiting(loginMember.id(), id);
+
+        return ResponseEntity.noContent().build();
     }
 }
