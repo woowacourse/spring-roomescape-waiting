@@ -42,10 +42,6 @@ public class MemberReservation extends BaseEntity {
         this(null, member, reservation, reservationStatus);
     }
 
-    public boolean isRegisteredMember(Member member) {
-        return this.member.equals(member);
-    }
-
     public boolean isPending() {
         return this.reservationStatus.equals(ReservationStatus.PENDING);
     }
@@ -56,6 +52,14 @@ public class MemberReservation extends BaseEntity {
 
     public void deny() {
         this.reservationStatus = ReservationStatus.DENY;
+    }
+
+    public boolean canDelete(Member member) {
+        return member.isAdmin() || isRegisteredMember(member);
+    }
+
+    private boolean isRegisteredMember(Member member) {
+        return this.member.equals(member);
     }
 
     public Long getId() {

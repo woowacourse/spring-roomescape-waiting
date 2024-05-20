@@ -158,17 +158,13 @@ public class ReservationService {
     }
 
     private void delete(Member member, MemberReservation memberReservation) {
-        if (!canDelete(member, memberReservation)) {
+        if (!memberReservation.canDelete(member)) {
             throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
         memberReservationRepository.deleteById(memberReservation.getId());
         memberReservationRepository.updateStatusByReservationIdAndWaitingNumber(
                 ReservationStatus.APPROVED, memberReservation.getReservation(),
                 ReservationStatus.PENDING, 1);
-    }
-
-    private boolean canDelete(Member member, MemberReservation memberReservation) {
-        return member.isAdmin() || memberReservation.isRegisteredMember(member);
     }
 
     private void validatePastReservation(Reservation reservation) {
