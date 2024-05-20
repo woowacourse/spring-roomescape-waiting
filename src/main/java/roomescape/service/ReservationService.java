@@ -108,8 +108,8 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<ReservationDetailResponse> findAllByMemberId(long userId) {
-        return reservationRepository.findAllByMemberId(userId).stream()
+    public List<ReservationDetailResponse> findAllByMemberId(long memberId) {
+        return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationDetailResponse::from)
                 .toList();
     }
