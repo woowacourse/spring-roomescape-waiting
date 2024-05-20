@@ -9,14 +9,14 @@ public class ThemeName {
     private static final Pattern THEME_NAME_FORMAT = Pattern.compile("^[가-힣0-9a-zA-Z\\s]+$");
     private static final int NAME_LENGTH = 10;
 
-    private String name;
+    private String value;
 
     protected ThemeName() {
     }
 
-    public ThemeName(String name) {
-        validate(name);
-        this.name = name;
+    public ThemeName(String value) {
+        validate(value);
+        this.value = value;
     }
 
     private void validate(String name) {
@@ -36,7 +36,7 @@ public class ThemeName {
         }
     }
 
-    public String getName() {
-        return name;
+    public String getValue() {
+        return value;
     }
 }

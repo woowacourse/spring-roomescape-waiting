@@ -63,7 +63,7 @@ class ThemeRepositoryTest {
     void findByIdNameTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         Theme savedTheme = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findByThemeNameName(savedTheme.getName()).get();
+        Theme findTheme = themeRepository.findByThemeName(new ThemeName(savedTheme.getName())).get();
 
         assertAll(
                 () -> assertThat(findTheme.getName()).isEqualTo(HORROR_THEME_NAME),
@@ -131,7 +131,7 @@ class ThemeRepositoryTest {
         reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
 
-        LocalDate dateFrom = LocalDate.now(). minusWeeks(1);
+        LocalDate dateFrom = LocalDate.now().minusWeeks(1);
         List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, 2);
 
         assertAll(

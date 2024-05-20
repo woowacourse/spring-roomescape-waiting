@@ -16,6 +16,7 @@ public class Theme {
     private Long id;
 
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name"))
     @Column(nullable = false)
     private ThemeName themeName;
 
@@ -48,7 +49,7 @@ public class Theme {
     }
 
     public String getName() {
-        return themeName.getName();
+        return themeName.getValue();
     }
 
     public String getDescription() {

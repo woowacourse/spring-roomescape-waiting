@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
@@ -30,7 +31,8 @@ public class ThemeService {
     }
 
     private void validateUniqueThemeName(ThemeSaveRequest themeSaveRequest) {
-        themeRepository.findByThemeNameName(themeSaveRequest.name()).ifPresent(empty -> {
+        ThemeName name = new ThemeName(themeSaveRequest.name());
+        themeRepository.findByThemeName(name).ifPresent(empty -> {
             throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
         });
     }
