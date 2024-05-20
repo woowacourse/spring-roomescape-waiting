@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +15,7 @@ import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -51,7 +49,7 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
         Member member = getMember(authInfo.getId());
         return memberReservationRepository.findAllByMember(member)
@@ -59,6 +57,12 @@ public class ReservationService {
                 .map(MyReservationResponse::from)
                 .toList();
     }
+
+//    private void checkReservationStatus(List<MemberReservation> memberReservations) {
+//        for (MemberReservation memberReservation : memberReservations) {
+//            memberReservation.
+//        }
+//    }
 
     @Transactional
     public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
@@ -96,8 +100,12 @@ public class ReservationService {
             throw new ForbiddenException("중복된 예약입니다.");
         }
 
+        if (memberReservationRepository.existsByReservation(reservation)) {
+            System.out.println("예약 대기랑께");
+        }
+
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation));
+                new MemberReservation(member, reservation, LocalDateTime.now(), ReservationStatus.BOOKED));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 

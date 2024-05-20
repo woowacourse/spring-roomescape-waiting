@@ -3,8 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
-import static roomescape.fixture.MemberFixture.getMemberClover;
+import static roomescape.fixture.MemberFixture.*;
 import static roomescape.fixture.ReservationFixture.getNextDayReservation;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
@@ -17,6 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.ForbiddenException;
+import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationFixture;
+import roomescape.fixture.ReservationTimeFixture;
+import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.MyReservationResponse;
@@ -252,4 +255,20 @@ class ReservationServiceTest extends ServiceTest {
                 () -> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
         );
     }
+
+    @DisplayName("중복된 예약이 존재한다")
+    @Test
+    void existSameReservation() {
+        //given
+        Reservation reservation = getNextDayReservation(ReservationTimeFixture.get1PM(), getTheme1());
+        Member choco = getMemberChoco();
+        Member tacan = getMemberTacan();
+
+        Reservation reservation1 = reservationRepository.save(reservation);
+        memberReservationRepository.save(new MemberReservation(choco, reservation));
+        //when
+
+        //then
+    }
+
 }

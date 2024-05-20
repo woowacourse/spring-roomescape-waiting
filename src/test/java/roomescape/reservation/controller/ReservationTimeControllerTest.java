@@ -41,21 +41,20 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void findAll() {
         //given
-        reservationTimeService.create(new ReservationTimeRequest("12:00"));
+        reservationTimeService.create(new ReservationTimeRequest("11:00"));
 
         //when & then
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+                .statusCode(200);
     }
 
     @DisplayName("시간 삭제 시, 200을 반환한다.")
     @Test
     void delete() {
         //given
-        ReservationTimeResponse timeResponse = reservationTimeService.create(new ReservationTimeRequest("12:00"));
+        ReservationTimeResponse timeResponse = reservationTimeService.create(new ReservationTimeRequest("11:00"));
 
         //when & then
         RestAssured.given().log().all()

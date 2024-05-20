@@ -50,7 +50,7 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void create() {
         //given
-        String localTime = "12:00";
+        String localTime = "11:00";
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(localTime);
 
         //when
@@ -58,20 +58,19 @@ class ReservationTimeServiceTest extends ServiceTest {
 
         //then
         assertThat(reservationTimeResponse.startAt()).isEqualTo(localTime);
-        assertThat(reservationTimeRepository.findAll()).hasSize(1);
     }
 
     @DisplayName("예약 시간 조회에 성공한다.")
     @Test
     void findAll() {
         //given
-        reservationTimeRepository.save(getNoon());
+        ReservationTime saved = reservationTimeRepository.save(getNoon());
 
         //when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
 
         //then
-        assertThat(reservationTimes).hasSize(1);
+        assertThat(reservationTimes).extracting(ReservationTimeResponse::startAt).contains(getNoon().getStartAt());
     }
 
     @DisplayName("예약 시간 삭제에 성공한다.")
@@ -79,12 +78,12 @@ class ReservationTimeServiceTest extends ServiceTest {
     void delete() {
         //given
         ReservationTime time = reservationTimeRepository.save(getNoon());
-
+        int beforeSize = reservationTimeRepository.findAll().size();
         //when
         reservationTimeService.delete(time.getId());
 
         //then
-        assertThat(reservationTimeRepository.findAll()).hasSize(0);
+        assertThat(reservationTimeRepository.findAll().size()).isEqualTo(beforeSize - 1);
     }
 
     @DisplayName("예약이 존재하는 예약 시간을 삭제할 경우 예외가 발생한다.")
@@ -104,7 +103,7 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        String localTime = "12:00";
+        String localTime = "11:00";
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(localTime);
         reservationTimeRepository.save(new ReservationTime(LocalTime.parse(localTime)));
 

@@ -65,7 +65,7 @@ class ReservationControllerTest extends ControllerTest {
     void create() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("10:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();
@@ -87,7 +87,7 @@ class ReservationControllerTest extends ControllerTest {
     @TestFactory
     Stream<DynamicTest> delete() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         ReservationResponse reservationResponse = reservationService.createMemberReservation(
@@ -141,7 +141,7 @@ class ReservationControllerTest extends ControllerTest {
     void createBadRequest(String date) {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();
@@ -164,7 +164,7 @@ class ReservationControllerTest extends ControllerTest {
     void createReservationAfterNow() {
         //given
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
-                new ReservationTimeRequest("12:00"));
+                new ReservationTimeRequest("11:00"));
         ThemeResponse themeResponse = themeService.create(new ThemeRequest("name", "description", "thumbnail"));
 
         Map<String, Object> reservation = new HashMap<>();

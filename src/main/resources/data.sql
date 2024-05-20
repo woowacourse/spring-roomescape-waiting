@@ -59,23 +59,23 @@ VALUES ('관리자', 'admin@roomescape.com', '$2a$10$pebanHuZMA0tfsogsWhgHOruvQQ
 
 
 -- 예약 목록 추가
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (1, 1);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (1, 3);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (1, 7);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (2, 2);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (2, 4);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (2, 8);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (3, 3);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (3, 5);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (3, 6);
-INSERT INTO member_reservation(member_id, reservation_id)
-VALUES (3, 7);
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (1, 1, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (1, 3, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (1, 7, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (2, 2, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (2, 4, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (2, 8, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (3, 3, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (3, 5, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (3, 6, CURRENT_TIME(), '예약');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (3, 7, CURRENT_TIME(), '예약');

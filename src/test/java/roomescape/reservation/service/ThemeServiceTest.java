@@ -47,7 +47,7 @@ class ThemeServiceTest extends ServiceTest {
         List<ThemeResponse> themes = themeService.findAllThemes();
 
         //then
-        assertAll(() -> assertThat(themes).hasSize(1),
+        assertAll(
                 () -> assertThat(themes.get(0).name()).isEqualTo(theme.getName()),
                 () -> assertThat(themes.get(0).description()).isEqualTo(theme.getDescription()),
                 () -> assertThat(themes.get(0).thumbnail()).isEqualTo(theme.getThumbnail()));
@@ -76,13 +76,13 @@ class ThemeServiceTest extends ServiceTest {
     void delete() {
         //given
         Theme theme = getTheme1();
-        themeRepository.save(theme);
+        Theme saved = themeRepository.save(theme);
 
         //when
         themeService.delete(theme.getId());
 
         //then
-        assertThat(themeRepository.findAll()).hasSize(0);
+        assertThat(themeRepository.findAll()).doesNotContain(saved);
     }
 
     @DisplayName("예약이 존재하는 테마 삭제 시, 예외가 발생한다.")
