@@ -57,4 +57,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException exception) {
         return new ResponseEntity<>("[ERROR] " + exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception exception) {
+        return new ResponseEntity<>("[ERROR] 예상하지 못한 오류 : " + exception.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
