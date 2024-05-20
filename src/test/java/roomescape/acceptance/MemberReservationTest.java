@@ -1,5 +1,6 @@
 package roomescape.acceptance;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
@@ -32,7 +33,7 @@ class MemberReservationTest {
     private String getToken(String email, String password) {
         String requestBody = String.format("{\"email\":\"%s\", \"password\":\"%s\"}", email, password);
 
-        return RestAssured.given().log().all()
+        return given().log().all()
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/login")
@@ -49,8 +50,7 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}", tomorrow);
 
         // when, then
-        RestAssured
-        .given().log().all()
+        given().log().all()
             .cookie("token", getToken("mangcho@woowa.net", "password"))
             .contentType("application/json")
             .body(requestBody)
@@ -73,8 +73,7 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured
-        .given().log().all()
+        given().log().all()
             .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
             .contentType("application/json")
             .body(requestBody)
@@ -85,8 +84,7 @@ class MemberReservationTest {
             .body("status", equalTo("RESERVED"));
 
         // when, then
-        RestAssured
-        .given().log().all()
+        given().log().all()
             .cookie("token", getToken("mangcho@woowa.net", "password"))
             .contentType("application/json")
             .body(requestBody)
@@ -108,20 +106,23 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
+        given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+            .then().log().all().statusCode(201);
 
         // when, then
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(400);
+        given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(400);
     }
 
     @Test
@@ -135,27 +136,33 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
+        given().log().all()
+            .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(201);
 
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
+        given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(201);
 
         // when, then
-        RestAssured.given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(400);
+        given().log().all()
+            .cookie("token", getToken("mangcho@woowa.net", "password"))
+            .contentType("application/json")
+            .body(requestBody)
+        .when()
+            .post("/reservations")
+        .then().log().all()
+            .statusCode(400);
     }
 
     @Test
@@ -169,7 +176,7 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -177,14 +184,14 @@ class MemberReservationTest {
                 .then().log().all().statusCode(201);
 
         // when
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().delete("/reservations")
                 .then().log().all().statusCode(204);
 
-        Response response = RestAssured.given().log().all()
+        Response response = given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -207,14 +214,14 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
                 .then().log().all().statusCode(201);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("picachu@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -222,14 +229,14 @@ class MemberReservationTest {
                 .then().log().all().statusCode(201);
 
         // when
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().delete("/reservations")
                 .then().log().all().statusCode(204);
 
-        Response response = RestAssured.given().log().all()
+        Response response = given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -253,7 +260,7 @@ class MemberReservationTest {
                 themeId, yesterday, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -273,7 +280,7 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -293,7 +300,7 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -314,7 +321,7 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -330,7 +337,7 @@ class MemberReservationTest {
         Long reservationId = 1L;
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/" + reservationId)
                 .then().log().all().statusCode(204);
@@ -349,7 +356,7 @@ class MemberReservationTest {
                 themeId, yesterday, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1")
                 .then().log().all().statusCode(400);
@@ -362,7 +369,7 @@ class MemberReservationTest {
             "/test-data/reservations-details.sql", "/test-data/waiting-reservations.sql"})
     void when_getReservations_then_returnReservations() {
         // when
-        Response response = RestAssured.given().log().all()
+        Response response = given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().get("/reservations")
                 .then().log().all().statusCode(200)
@@ -379,7 +386,7 @@ class MemberReservationTest {
             "/test-data/past-reservations.sql", "/test-data/past-waiting-reservations.sql"})
     void when_getReservations_then_doesNotReturnPastReservations() {
         // when
-        Response response = RestAssured.given().log().all()
+        Response response = given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().get("/reservations")
                 .then().log().all().statusCode(200)
@@ -402,7 +409,7 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=true")
                 .then().log().all().statusCode(204);
@@ -420,7 +427,7 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=true")
                 .then().log().all().statusCode(400);
@@ -438,7 +445,7 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -446,7 +453,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(201);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=true")
                 .then().log().all().statusCode(400);
@@ -464,14 +471,14 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
                 .then().log().all().statusCode(201);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -479,12 +486,12 @@ class MemberReservationTest {
                 .then().log().all().statusCode(201);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=false")
                 .then().log().all().statusCode(204);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=true")
                 .then().log().all().statusCode(400);
@@ -502,14 +509,14 @@ class MemberReservationTest {
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
                 .then().log().all().statusCode(201);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
@@ -517,7 +524,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(201);
 
         // when, then
-        RestAssured.given().log().all()
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/1?waiting=true")
                 .then().log().all().statusCode(400);
