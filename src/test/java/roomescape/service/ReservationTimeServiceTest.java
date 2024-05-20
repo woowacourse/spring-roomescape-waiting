@@ -89,7 +89,7 @@ class ReservationTimeServiceTest {
         final ReservationTime reservationTime = RESERVATION_TIME_SIX(1L);
 
         given(reservationTimeRepository.findById(anyLong())).willReturn(Optional.of(reservationTime));
-        given(reservationRepository.countByTime_Id(anyLong())).willReturn(1);
+        given(reservationRepository.countByTimeId(anyLong())).willReturn(1);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(1L))

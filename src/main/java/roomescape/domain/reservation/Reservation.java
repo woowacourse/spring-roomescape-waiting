@@ -83,10 +83,6 @@ public class Reservation {
         this.status = ReservationStatus.RESERVED;
     }
 
-    public Long getReservationTimeId() {
-        return time.getId();
-    }
-
     public String getThemeName() {
         return theme.getName();
     }

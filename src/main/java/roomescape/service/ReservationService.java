@@ -24,8 +24,8 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
-        final int count = reservationRepository.countByDateAndTime_IdAndTheme_Id(
-                reservation.getDate(), reservation.getReservationTimeId(), reservation.getTheme().getId()
+        final int count = reservationRepository.countByDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
         );
         validateDuplicatedReservation(count);
         reservation.toReserved();
@@ -48,7 +48,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllBy(final ReservationFilterParam filterParam) {
-        final List<Reservation> reservations = reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+        final List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                 filterParam.themeId(), filterParam.memberId(), filterParam.dateFrom(), filterParam.dateTo()
         );
         return reservations.stream()
@@ -65,7 +65,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
-        final List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+        final List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();

@@ -55,7 +55,7 @@ public class ReservationTimeService {
     }
 
     private void validateHasReservation(final ReservationTime reservationTime) {
-        final int reservationCount = reservationRepository.countByTime_Id(reservationTime.getId());
+        final int reservationCount = reservationRepository.countByTimeId(reservationTime.getId());
         if (reservationCount > 0) {
             throw new IllegalArgumentException("해당 예약 시간의 예약 건이 존재합니다.");
         }

@@ -61,7 +61,7 @@ class ReservationRepositoryTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // when
-        final List<Reservation> actual = reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+        final List<Reservation> actual = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                 theme.getId(), member.getId(), LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_NINTH)
         );
 
@@ -73,7 +73,7 @@ class ReservationRepositoryTest {
     @DisplayName("동일 시간대의 예약 건수를 조회한다.")
     void countByDateAndTime() {
         // when
-        final int actual = reservationRepository.countByDateAndTime_IdAndTheme_Id(
+        final int actual = reservationRepository.countByDateAndTimeIdAndThemeId(
                 LocalDate.parse(DATE_MAY_EIGHTH), reservationTime.getId(), theme.getId()
         );
 
@@ -122,7 +122,7 @@ class ReservationRepositoryTest {
         final long timeId = 2L;
 
         // when
-        final int actual = reservationRepository.countByTime_Id(timeId);
+        final int actual = reservationRepository.countByTimeId(timeId);
 
         // then
         assertThat(actual).isEqualTo(0);
@@ -146,7 +146,7 @@ class ReservationRepositoryTest {
         final Long memberId = member.getId();
 
         // when
-        final List<Reservation> actual = reservationRepository.findByMember_Id(memberId);
+        final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
 
         // then
         assertThat(actual).hasSize(1);

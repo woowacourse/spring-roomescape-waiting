@@ -54,7 +54,7 @@ class ReservationServiceTest {
         // given
         final Theme theme = THEME_HORROR(1L);
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
-        given(reservationRepository.countByDateAndTime_IdAndTheme_Id(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
+        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
                 .willReturn(1);
 
         // when & then
@@ -99,7 +99,7 @@ class ReservationServiceTest {
         final ReservationFilterParam reservationFilterParam
                 = new ReservationFilterParam(1L, 1L,
                 LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"));
-        given(reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(1L, 1L,
+        given(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(1L, 1L,
                 LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")))
                 .willReturn(List.of(reservation1, reservation2));
 
