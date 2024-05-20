@@ -273,6 +273,7 @@ class WaitingReservationServiceTest extends ServiceTest {
         memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
 
         //then
+        // TODO: 테스트 수정
         assertThat(memberReservationRepository.findById(waitingReservation.getId())).isNotNull();
         assertThat(memberReservationRepository.findById(waitingReservation.getId()).get()
                 .getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);

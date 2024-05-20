@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.global.util.Scheduler;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -13,6 +14,7 @@ import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,13 +22,15 @@ public class MemberReservationService {
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
     private final ReservationCommonService reservationCommonService;
+    private final Scheduler scheduler;
 
     public MemberReservationService(ReservationRepository reservationRepository,
                                     MemberReservationRepository memberReservationRepository,
-                                    ReservationCommonService reservationCommonService) {
+                                    ReservationCommonService reservationCommonService, Scheduler scheduler) {
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
         this.reservationCommonService = reservationCommonService;
+        this.scheduler = scheduler;
     }
 
 
@@ -70,6 +74,16 @@ public class MemberReservationService {
         MemberReservation memberReservation = reservationCommonService.getMemberReservation(memberReservationId);
         Member member = reservationCommonService.getMember(authInfo.getId());
         reservationCommonService.delete(member, memberReservation);
+        scheduler.executeAfterDelay(() ->  updateStatus(memberReservation.getReservation()),2, TimeUnit.HOURS);
+    }
+
+    private void updateStatus(Reservation reservation){
+        memberReservationRepository.updateStatusByReservationIdAndWaitingNumber(
+                ReservationStatus.APPROVED,
+                reservation,
+                ReservationStatus.PENDING,
+                1
+        );
     }
 
     @Transactional
