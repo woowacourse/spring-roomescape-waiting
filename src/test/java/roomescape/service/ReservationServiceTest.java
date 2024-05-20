@@ -89,7 +89,7 @@ class ReservationServiceTest {
     @Test
     void should_not_throw_exception_when_current_date() {
         ReservationDto reservationDto = new ReservationDto(LocalDate.now(), 3L, 1L, 1L);
-        reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        reservationTimeRepository.save(new ReservationTime(3L, LocalTime.now()));
         assertThatCode(() -> reservationService.saveReservation(reservationDto))
                 .doesNotThrowAnyException();
     }

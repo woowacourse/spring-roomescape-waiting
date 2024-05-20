@@ -35,14 +35,9 @@ class ThemeServiceTest {
     private ThemeService themeService;
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
 
     @BeforeEach
     void setUp() {
-        reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(3, 0))));
-
         reservationRepository.saveAll(List.of(
                 new Reservation(
                         LocalDate.now().minusDays(1),

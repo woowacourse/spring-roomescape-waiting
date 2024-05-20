@@ -32,12 +32,16 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private Set<Reservation> reservations;
 
-    public Member(Long id, String name, String email, String password, Role role) {
+    private Member(Long id, MemberName name, MemberEmail email, MemberPassword password, Role role) {
         this.id = id;
-        this.name = new MemberName(name);
-        this.email = new MemberEmail(email);
-        this.password = new MemberPassword(password);
+        this.name = name;
+        this.email = email;
+        this.password = password;
         this.role = role;
+    }
+
+    public Member(Long id, String name, String email, String password, Role role) {
+        this(id, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
     }
 
     public Member() {

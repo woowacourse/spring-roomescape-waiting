@@ -40,7 +40,7 @@ class ReservationTimeServiceTest {
     @BeforeEach
     void setUp() {
         reservationTimeRepository.saveAll(List.of(
-                new ReservationTime(LocalTime.of(3, 0))));
+                new ReservationTime(3L, LocalTime.of(3, 0))));
 
         reservationRepository.saveAll(List.of(
                 new Reservation(

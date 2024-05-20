@@ -24,15 +24,11 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(LocalTime startAt) {
-        this(0L, startAt);
-    }
-
     public ReservationTime() {
     }
 
     public static ReservationTime from(ReservationTimeDto reservationTimeDto) {
-        return new ReservationTime(reservationTimeDto.getStartAt());
+        return new ReservationTime(0L, reservationTimeDto.getStartAt());
     }
 
     public Long getId() {

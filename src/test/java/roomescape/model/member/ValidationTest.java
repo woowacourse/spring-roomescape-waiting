@@ -89,7 +89,7 @@ class ValidationTest { // TODO: 생성자 id 제거
     @DisplayName("예약 시간의 시간 시간이 null인 경우 예외가 발생한다.")
     @Test
     void should_throw_exception_when_time_startAt_null() {
-        ReservationTime reservationTime = new ReservationTime(null);
+        ReservationTime reservationTime = new ReservationTime(5L, null);
         assertThatThrownBy(() -> reservationTimeRepository.save(reservationTime))
                 .isInstanceOf(ConstraintViolationException.class);
     }
