@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.member.MemberInfo;
 import roomescape.service.dto.request.reservation.ReservationRequest;
@@ -36,13 +37,11 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> findAllReservationByConditions(
             @RequestParam("from") LocalDate start,
             @RequestParam("to") LocalDate end,
-            @RequestParam("name") String memberName,
-            @RequestParam("theme") String themeName
+            @RequestParam("memberId") Long memberId,
+            @RequestParam("themeId") Long themeId
     ) {
-        ReservationSearchCond searchCond = new ReservationSearchCond(start, end, memberName, themeName);
-        List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(
-                searchCond);
-
+        ReservationSearchCond searchCond = new ReservationSearchCond(start, end, memberId, themeId);
+        List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(searchCond);
         return ResponseEntity.ok(reservations);
     }
 
@@ -54,8 +53,10 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> saveReservation(@Valid @RequestBody UserReservationRequest request,
-                                                               MemberInfo memberInfo) {
+    public ResponseEntity<ReservationResponse> saveReservation(
+            @RequestBody @Valid UserReservationRequest request,
+            MemberInfo memberInfo
+    ) {
         ReservationRequest reservationRequest = ReservationRequest.builder()
                 .date(request.date())
                 .memberId(memberInfo.id())
@@ -63,8 +64,11 @@ public class ReservationController {
                 .themeId(request.themeId())
                 .build();
 
-        ReservationResponse response = reservationService.saveReservation(reservationRequest);
-        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
+        Reservation reservation = reservationService.saveReservation(reservationRequest);
+
+        ReservationResponse response = ReservationResponse.from(reservation);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
+                .body(response);
     }
 
     @DeleteMapping("/reservations/{reservation_id}")

@@ -5,15 +5,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDetail;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationDetailRepository;
+import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
@@ -30,45 +30,33 @@ import roomescape.service.dto.response.reservation.UserReservationResponse;
 public class ReservationService {
     private final ReservationDetailRepository reservationDetailRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public List<ReservationResponse> findAllReservation() {
-        List<ReservationDetail> reservationDetails = reservationDetailRepository.findAll();
-        return reservationDetails.stream()
+        List<Reservation> reservations = reservationRepository.findAll();
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationResponse> findAllReservationByConditions(ReservationSearchCond cond) {
-        return reservationDetailRepository.findByPeriodAndMemberAndTheme(cond.start(), cond.end(), cond.memberName(),
-                        cond.themeName())
-                .stream()
+        List<Reservation> reservations = reservationRepository.findByPeriodAndThemeAndMember(
+                cond.start(), cond.end(), cond.themeId(), cond.memberId());
+
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<UserReservationResponse> findAllByMemberId(Long memberId) {
-        return reservationDetailRepository.findAllByMemberId(memberId)
-                .stream()
-                .map(UserReservationResponse::from)
-                .toList();
+        return null;
     }
 
     @Transactional
-    public ReservationResponse saveReservation(ReservationRequest request) {
-        ReservationTime time = findReservationTimeById(request.timeId());
-        Theme theme = findThemeById(request.themeId());
-
-        validateDateTimeReservation(request, time);
-        validateDuplicateReservation(request);
-
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(AuthenticationFailureException::new);
-
-        ReservationDetail reservationDetail = request.toReservationDetail(time, theme, member);
-        ReservationDetail savedReservationDetail = reservationDetailRepository.save(reservationDetail);
-        return ReservationResponse.from(savedReservationDetail);
+    public Reservation saveReservation(ReservationRequest request) {
+        return new Reservation(null, null, null);
     }
 
     private void validateDuplicateReservation(ReservationRequest request) {
