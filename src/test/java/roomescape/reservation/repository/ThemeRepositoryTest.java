@@ -3,7 +3,6 @@ package roomescape.reservation.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import roomescape.reservation.domain.Theme;
 @DataJpaTest
 class ThemeRepositoryTest {
 
-    private static final int DEFAULT_THEME_COUNT = 5;
+    private static final int DEFAULT_THEME_COUNT = 4;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -21,7 +20,7 @@ class ThemeRepositoryTest {
     @DisplayName("모든 테마를 조회한다.")
     @Test
     void findAll() {
-        Iterable<Theme> result = themeRepository.findAll();
+        final var result = themeRepository.findAll();
 
         assertThat(result).hasSize(DEFAULT_THEME_COUNT);
     }
@@ -29,7 +28,7 @@ class ThemeRepositoryTest {
     @DisplayName("id로 테마를 조회한다.")
     @Test
     void findById() {
-        Optional<Theme> result = themeRepository.findById(1L);
+        final var result = themeRepository.findById(1L);
 
         assertThat(result.get().getId()).isEqualTo(1L);
     }
@@ -37,7 +36,7 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 생성한다.")
     @Test
     void save() {
-        Theme theme = new Theme("테마 이름", "테마 설명", "테마 썸네일");
+        final var theme = new Theme("테마 이름", "테마 설명", "테마 썸네일");
 
         themeRepository.save(theme);
 
@@ -47,13 +46,13 @@ class ThemeRepositoryTest {
     @DisplayName("id로 테마를 삭제한다.")
     @Test
     void deleteById() {
-        int result = themeRepository.deleteById(5);
+        final var result = themeRepository.deleteById(4);
 
         assertAll(
                 () -> assertThat(result).isEqualTo(1),
                 () -> assertThat(themeRepository.findAll())
                         .extracting(Theme::getId)
-                        .doesNotContain(5L)
+                        .doesNotContain(4L)
         );
     }
 }

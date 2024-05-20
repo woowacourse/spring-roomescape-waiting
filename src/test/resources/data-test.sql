@@ -7,8 +7,7 @@ insert into theme(theme_name, description, thumbnail)
 values ('링', '이거 겁나 무서움', '링 썸네일'),
        ('도시괴담', '이건 조금 덜 무서움', '도시괴담 썸네일'),
        ('콜러', '공포 테마 중독자 추천', '콜러 썸네일'),
-       ('제로', '심약자는 도전하지 마시오', '제로 썸네일'),
-       ('테마 5', '삭제할 테마', '테마 5 썸네일');
+       ('제로', '심약자는 도전하지 마시오', '제로 썸네일');
 insert into member(member_name, email, password, member_role)
 values ('제리', 'jerry@gmail.com', 'password', 'ADMIN'),
        ('오리', 'duck@gmail.com', 'password', 'MEMBER');

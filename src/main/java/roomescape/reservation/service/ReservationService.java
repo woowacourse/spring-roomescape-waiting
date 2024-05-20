@@ -14,28 +14,27 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberRepository memberRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
+                              final ReservationTimeService reservationTimeService,
                               final ThemeService themeService,
                               final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberRepository = memberRepository;
     }
 
     public Reservation save(final ReservationSaveRequest saveRequest, final Member member) {
-        ReservationTime reservationTime = reservationTimeRepository.getById(saveRequest.timeId());
+        ReservationTime reservationTime = reservationTimeService.getById(saveRequest.timeId());
         Theme theme = themeService.getById(saveRequest.themeId());
         validateDuplicateReservation(saveRequest);
 
