@@ -1,22 +1,23 @@
 package roomescape.model.member;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Embeddable
-public class Email {
+public class MemberEmail {
 
     @NotNull
     @NotBlank
-    @jakarta.validation.constraints.Email
+    @Email
     private String email;
 
-    public Email(String email) {
+    public MemberEmail(String email) {
         this.email = email;
     }
 
-    public Email() {
+    public MemberEmail() {
     }
 
     public String getEmail() {

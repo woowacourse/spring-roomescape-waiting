@@ -17,15 +17,15 @@ public class Member {
     @NotNull
     @Valid
     @Embedded
-    private Name name;
+    private MemberName name;
     @NotNull
     @Valid
     @Embedded
-    private Email email;
+    private MemberEmail email;
     @NotNull
     @Valid
     @Embedded
-    private Password password;
+    private MemberPassword password;
     @NotNull
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -34,9 +34,9 @@ public class Member {
 
     public Member(long id, String name, String email, String password, Role role) {
         this.id = id;
-        this.name = new Name(name);
-        this.email = new Email(email);
-        this.password = new Password(password);
+        this.name = new MemberName(name);
+        this.email = new MemberEmail(email);
+        this.password = new MemberPassword(password);
         this.role = role;
     }
 

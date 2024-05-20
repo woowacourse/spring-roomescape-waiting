@@ -5,17 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Embeddable
-public class Password {
+public class MemberPassword {
 
     @NotNull
     @NotBlank
     private String password;
 
-    public Password(String password) {
+    public MemberPassword(String password) {
         this.password = password;
     }
 
-    public Password() {
+    public MemberPassword() {
     }
 
     public String getPassword() {

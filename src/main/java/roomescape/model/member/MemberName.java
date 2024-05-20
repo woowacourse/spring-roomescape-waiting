@@ -5,17 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Embeddable
-public class Name {
+public class MemberName {
 
     @NotNull
     @NotBlank
     private String name;
 
-    public Name(String name) {
+    public MemberName(String name) {
         this.name = name;
     }
 
-    public Name() {
+    public MemberName() {
     }
 
     public String getName() {
