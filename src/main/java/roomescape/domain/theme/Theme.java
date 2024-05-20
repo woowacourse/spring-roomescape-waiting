@@ -46,10 +46,6 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme withId(long id) {
-        return new Theme(id, name, description, thumbnail);
-    }
-
     public Long getId() {
         return id;
     }

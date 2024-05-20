@@ -53,10 +53,6 @@ public class Member {
         return this.password.matches(password);
     }
 
-    public Member withId(long id) {
-        return new Member(id, this.name, this.email, this.password, this.role);
-    }
-
     public Long getId() {
         return id;
     }
