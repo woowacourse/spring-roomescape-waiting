@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.member.MemberArgumentResolver;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -24,7 +25,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody ReservationRequest reservationRequest,
-            MemberRequest memberRequest
+            @MemberArgumentResolver MemberRequest memberRequest
     ) {
         ReservationResponse reservationResponse =
                 reservationService.addReservation(reservationRequest, memberRequest);
@@ -39,7 +40,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
+    public List<ReservationOfMemberResponse> findReservationsByMember(@MemberArgumentResolver MemberRequest memberRequest) {
         return reservationService.findReservationsByMember(memberRequest.toLoginMember());
     }
 

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.login.dto.LoginRequest;
+import roomescape.member.MemberNameArgumentResolver;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.service.MemberService;
 
@@ -35,7 +36,7 @@ public class LoginController {
     }
 
     @GetMapping("/check")
-    public MemberNameResponse getLoginMemberName(MemberNameResponse memberNameResponse) {
+    public MemberNameResponse getLoginMemberName(@MemberNameArgumentResolver MemberNameResponse memberNameResponse) {
         return memberNameResponse;
     }
 }
