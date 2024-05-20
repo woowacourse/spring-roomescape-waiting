@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.SignUpRequest;
 import roomescape.global.exception.error.ErrorType;
+import roomescape.global.exception.model.DataDuplicateException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -13,6 +14,7 @@ import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MembersResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MemberService {
@@ -23,7 +25,10 @@ public class MemberService {
     }
 
     public Member addMember(final SignUpRequest request) {
-        //TODO: 동일한 email 존재하는 지 검증하는 로직 추가
+        Optional<Member> memberHasEmail = memberRepository.findByEmail(new Email(request.email()));
+        if (memberHasEmail.isPresent()) {
+            throw new DataDuplicateException(ErrorType.EMAIL_DUPLICATED, ErrorType.EMAIL_DUPLICATED.getDescription());
+        }
         return memberRepository.save(request.toMemberEntity());
     }
 

@@ -120,6 +120,30 @@ public class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("회원가입 시, 이미 요청한 Email로 가입된 회원이 있으면 409 Conflict 를 Response 한다.")
+    void failSignupByEmailDuplicate() {
+        // given
+        String name = "이름";
+        String email = "test@email.com";
+        String password = "12341234";
+        memberRepository.save(new Member(name, email, password, Role.MEMBER));
+
+        Map<String, String> signupParams = Map.of(
+                "name", name,
+                "email", email,
+                "password", password
+        );
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .body(signupParams)
+                .when().post("/signup")
+                .then().statusCode(409).log().all();
+    }
+
+    @Test
     @DisplayName("로그아웃을 하면 현재 토큰을 만료된 토큰으로 변경하여 Response한다.")
     void logout() {
         // given
