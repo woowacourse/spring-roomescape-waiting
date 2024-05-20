@@ -46,6 +46,13 @@
 - 테마를 삭제할 수 있다.
     - 해당 테마를 예약한 내역이 존재하면 예외를 던진다.
 
+### 예약 대기 관리 페이지
+
+- `/admin/waiting` 으로 접속할 수 있다.
+- 예약 대기 목록을 볼 수 있다.
+    - 순서, 예약자 이름, 테마, 날짜, 시간을 볼 수 있다.
+- 예약 대기를 삭제할 수 있다.
+
 ### 로그인 페이지
 
 - `/login` 으로 접속할 수 있다.
@@ -71,6 +78,7 @@
 | GET         | `/admin/reservation`                 | 예약 관리 페이지         |                                                   | `templates/admin/reservation-new.html`                               |
 | GET         | `/admin/time`                        | 시간 관리 페이지         |                                                   | `templates/admin/time.html`                                          |
 | GET         | `/admin/theme`                       | 테마 관리 페이지         |                                                   | `templates/admin/theme.html`                                         |
+| GET         | `/admin/waiting`                     | 예약 대기 관리 페이지      |                                                   | `templates/admin/waiting.html`                                       |
 | GET         | `/reservation`                       | 사용자 예약 페이지        |                                                   | `templates/reservation.html`                                         |
 | GET         | `/reservations`                      | 예약 목록 조회          |                                                   | [List of ReservationsResponse](#List-of-ReservationResponse)         |
 | POST        | `/reservations`                      | 예약 추가             | [ReservationRequest](#ReservationRequest)         | [ReservationResponse](#ReservationResponse)                          |
@@ -92,6 +100,9 @@
 | GET         | `/members`                           | 회원 목록 조회          |                                                   | [List of MemberResponse](#List-of-MemberResponse)                    |
 | GET         | `/reservations/mine`                 | 로그인 회원의 예약 목록 조회  |                                                   | [List of MyReservationResponse](#List-of-MyReservationResponse)      |
 | GET         | `/reservations-mine`                 | 로그인 회원의 예약 목록 페이지 |                                                   | `templates/reservation-mine.html`                                    |
+| POST        | `/waitings`                          | 예약 대기 추가          | [MemberWaitingRequest](#MemberWaitingRequest)     | [WaitingResponse](#WaitingResponse)                                  |
+| GET         | `/waitings`                          | 예약 대기 목록 조회       |                                                   | [List of WaitingResponse](#List-of-WaitingResponse)                  |
+| DELETE      | `/waitings/{id}`                     | 예약 대기 삭제          |                                                   | `HTTP/1.1 204`                                                       |
 
 ### ReservationRequest
 
@@ -291,25 +302,109 @@ HTTP/1.1 200 OK
 ```json
 [
   {
-    "reservationId": 1,
+    "id": 1,
     "theme": "테마1",
     "date": "2024-03-01",
     "time": "10:00",
     "status": "예약"
   },
   {
-    "reservationId": 2,
+    "id": 2,
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
     "status": "예약"
   },
   {
-    "reservationId": 3,
+    "id": 1,
     "theme": "테마3",
     "date": "2024-03-01",
     "time": "14:00",
-    "status": "예약"
+    "status": "예약 대기"
+  }
+]
+```
+
+### MemberWaitingRequest
+
+```json
+{
+  "date": "2021-07-01",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### WaitingResponse
+
+```
+HTTP/1.1 201 Created
+```
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "홍길동"
+  },
+  "date": "2021-07-01",
+  "time": {
+    "id": 1,
+    "time": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "테마1",
+    "description": "테마1 설명",
+    "thumbnail": "테마1 섬네일"
+  }
+}
+```
+
+### List of WaitingResponse
+
+```
+HTTP/1.1 200 OK
+```
+
+```json
+[
+  {
+    "id": 1,
+    "member": {
+      "id": 1,
+      "name": "홍길동"
+    },
+    "date": "2021-07-01",
+    "time": {
+      "id": 1,
+      "time": "10:00"
+    },
+    "theme": {
+      "id": 1,
+      "name": "테마1",
+      "description": "테마1 설명",
+      "thumbnail": "테마1 섬네일"
+    }
+  },
+  {
+    "id": 2,
+    "member": {
+      "id": 1,
+      "name": "홍길동"
+    },
+    "date": "2021-07-01",
+    "time": {
+      "id": 2,
+      "time": "11:00"
+    },
+    "theme": {
+      "id": 1,
+      "name": "테마1",
+      "description": "테마1 설명",
+      "thumbnail": "테마1 섬네일"
+    }
   }
 ]
 ```
