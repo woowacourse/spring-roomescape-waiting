@@ -21,8 +21,8 @@ public class MemberName {
     }
 
     private void validate(String name) {
-        validateLength(name);
         validateBlank(name);
+        validateLength(name);
         validateFormat(name);
     }
 
