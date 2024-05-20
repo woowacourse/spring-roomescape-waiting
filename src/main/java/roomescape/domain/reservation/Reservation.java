@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
@@ -35,6 +36,10 @@ public class Reservation {
     @Column(name = "reserved_date")
     private LocalDate date;
 
+    @NotNull
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @NotNull
     @JoinColumn(name = "time_id")
@@ -50,17 +55,18 @@ public class Reservation {
     @Column(name = "status")
     private ReservationStatus status;
 
-    public Reservation(Member Member, String rawDate, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, Member, rawDate, time, theme, status);
+    public Reservation(Member Member, String rawDate, LocalDateTime createdAt, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, Member, rawDate, createdAt, time, theme, status);
     }
 
-    public Reservation(Long id, Member Member, String rawDate,
+    public Reservation(Long id, Member Member, String rawDate, LocalDateTime createdAt,
         ReservationTime time, Theme theme, ReservationStatus status) {
 
         validate(rawDate);
         this.id = id;
         this.member = Member;
         this.date = LocalDate.parse(rawDate);
+        this.createdAt = createdAt;
         this.time = time;
         this.theme = theme;
         this.status = status;

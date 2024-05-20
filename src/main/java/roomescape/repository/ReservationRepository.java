@@ -35,7 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 WHERE r2.theme = r.theme
                 AND r2.date = r.date
                 AND r2.time = r.time
-                AND r2.id < r.id
+                AND r2.createdAt < r.createdAt
             )
         )
         FROM Reservation r

@@ -4,6 +4,7 @@ import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.domain.reservation.ReservationStatus.STANDBY;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
@@ -50,7 +51,8 @@ public class ReservationService {
         Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
-        Reservation reservation = new Reservation(member, rawDate, time, theme, status);
+        LocalDateTime createdAt = LocalDateTime.now();
+        Reservation reservation = new Reservation(member, rawDate, createdAt, time, theme, status);
 
         validatePastReservation(reservation.getDate(), time);
 
