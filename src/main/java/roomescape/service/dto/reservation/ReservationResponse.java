@@ -11,14 +11,20 @@ public class ReservationResponse {
     private final ThemeResponse theme;
     private final String date;
     private final ReservationTimeResponse time;
+    private final String reservationStatus;
 
-    public ReservationResponse(long id, MemberResponse member, ThemeResponse theme, String date,
-                               ReservationTimeResponse time) {
+    public ReservationResponse(long id,
+                               MemberResponse member,
+                               ThemeResponse theme,
+                               String date,
+                               ReservationTimeResponse time,
+                               String reservationStatus) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
+        this.reservationStatus = reservationStatus;
     }
 
     public ReservationResponse(Reservation reservation) {
@@ -26,7 +32,8 @@ public class ReservationResponse {
                 new MemberResponse(reservation),
                 new ThemeResponse(reservation.getTheme()),
                 reservation.getDate().toString(),
-                new ReservationTimeResponse(reservation.getTime()));
+                new ReservationTimeResponse(reservation.getTime()),
+                reservation.getReservationStatus().toString());
     }
 
     public long getId() {
@@ -47,5 +54,9 @@ public class ReservationResponse {
 
     public ReservationTimeResponse getTime() {
         return time;
+    }
+
+    public String getReservationStatus() {
+        return reservationStatus;
     }
 }

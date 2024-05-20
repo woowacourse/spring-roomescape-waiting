@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -62,7 +63,7 @@ class ThemeServiceTest {
         Theme theme = new Theme("공포", "공포는 무서워", "hi.jpg");
         LocalDate date = LocalDate.parse("2025-11-30");
         ReservationTime time = new ReservationTime("11:00");
-        Reservation reservation = new Reservation(member, theme, date, time);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
 
         memberRepository.save(member);
         reservationTimeRepository.save(time);

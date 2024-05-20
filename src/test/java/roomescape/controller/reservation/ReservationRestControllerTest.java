@@ -129,7 +129,8 @@ class ReservationRestControllerTest {
                 actualResponse.get(0).getId(), new MemberResponse("tt@tt.com", "재즈"),
                 new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
                 "2100-08-05",
-                new ReservationTimeResponse(1L, "10:00")
+                new ReservationTimeResponse(1L, "10:00"),
+                "RESERVED"
         );
 
         assertThat(actualResponse)

@@ -16,7 +16,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
-import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
@@ -60,7 +59,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationRankResponse> findReservationsByMemberEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(UnauthorizedEmailException::new);
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         return reservationRepository.findReservationRankByMember(member);
     }
 
@@ -73,12 +72,12 @@ public class ReservationService {
         validatePreviousDate(date, time);
         validateDuplicatedReservation(member, theme, date, time);
 
-        Reservation reservation = generateReservation(theme, date, time, member);
-        return new ReservationResponse(reservationRepository.save(reservation));
+        Reservation reservation = reservationRepository.save(generateReservation(theme, date, time, member));
+        return new ReservationResponse(reservation);
     }
 
     private Reservation generateReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
-        if (reservationRepository.existsByThemeAndDateAndTimeAndReservationStatus(theme, date, time, WAITING)) {
+        if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
             return new Reservation(member, theme, date, time, WAITING);
         }
         return new Reservation(member, theme, date, time, RESERVED);

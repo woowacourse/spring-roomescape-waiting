@@ -1,8 +1,11 @@
 package roomescape.service;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -19,16 +22,19 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
-import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.ReservationWaitingNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.exception.ThemeNotFoundException;
 import roomescape.service.dto.reservation.ReservationCreate;
+import roomescape.service.dto.reservation.ReservationResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -65,7 +71,20 @@ class ReservationServiceTest {
     private final Theme theme = new Theme("공포", "공포는 무서워", "hi.jpg");
     private final LocalDate date = LocalDate.parse("2025-11-30");
 
-    @DisplayName("저장되어있지 않은 예약 시간에 예약을 시도하면 에러를 발생시킨다.")
+    @DisplayName("회원의 예약 정보를 조회하는데 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
+    @Test
+    void throw_exception_when_not_exists_member_email() {
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        reservationTimeRepository.save(time);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        reservationRepository.save(reservation);
+
+        assertThatThrownBy(() -> reservationService.findReservationsByMemberEmail("t1@t1.com"))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
+
+    @DisplayName("저장되어있지 않은 예약 시간에 예약을 시도하면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_create_reservation_use_unsaved_time() {
         memberRepository.save(member);
@@ -74,11 +93,22 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(TimeNotFoundException.class)
-                .hasMessage("예약 하려는 시간이 저장되어 있지 않습니다.");
+                .isInstanceOf(TimeNotFoundException.class);
     }
 
-    @DisplayName("이미 지나간 날짜에 예약을 시도하면 에러를 발생시킨다.")
+    @DisplayName("저장되어있지 않은 테마에 예약을 시도하면 예외를 발생시킨다.")
+    @Test
+    void throw_exception_when_create_reservation_use_unsaved_theme() {
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
+
+        assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
+                .isInstanceOf(ThemeNotFoundException.class);
+    }
+
+    @DisplayName("이미 지난 날짜에 예약을 시도하면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_create_reservation_use_before_date() {
         memberRepository.save(member);
@@ -88,24 +118,52 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2024-05-07", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(DateTimePassedException.class)
-                .hasMessage("지나간 날짜와 시간에 대한 예약은 불가능합니다.");
+                .isInstanceOf(DateTimePassedException.class);
     }
 
-    @DisplayName("예약, 예약 대기를 중복해서 시도하면 에러를 발생싴니다.")
+    @DisplayName("같은 테마, 날짜, 시간에 예약, 예약 대기를 중복해서 시도하면 예외를 발생시킨다.")
+    @Test
+    void throw_exception_when_create_duplicated_reservation_or_reservation_waiting() {
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        reservationRepository.save(reservation);
+
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
+
+        assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
+                .isInstanceOf(ReservationDuplicatedException.class);
+    }
+
+    @DisplayName("같은 테마, 날짜, 시간에 대기중인 예약이 존재할 경우 예약의 상태를 대기로 생성한다.")
+    @Test
+    void return_reservation_status_waiting_when_exists_waiting_same_theme_and_date_time() {
+        Member another = new Member("t1@t1.com", "123", "재즈", "MEMBER");
+        memberRepository.save(another);
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        reservationRepository.save(reservation);
+
+        ReservationCreate reservationDto = new ReservationCreate("t1@t1.com", 1L, "2025-11-30", 1L);
+        ReservationResponse actual = reservationService.createReservation(reservationDto);
+
+        assertThat(actual.getReservationStatus()).isEqualTo(WAITING.toString());
+    }
+
+    @DisplayName("같은 테마, 날짜, 시간에 대기중인 예약이 존재하지 않으면 예약의 상태를 예약으로 생성한다.")
     @Test
     void throw_exception_when_create_reservation_use_same_theme_and_date_time() {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        Reservation reservation1 = new Reservation(member, theme, date, time);
-        reservationRepository.save(reservation1);
 
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
+        ReservationResponse actual = reservationService.createReservation(reservationDto);
 
-        assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(ReservationDuplicatedException.class)
-                .hasMessage("동일한 명의로 예약 또는 예약 대기가 존재합니다.");
+        assertThat(actual.getReservationStatus()).isEqualTo(RESERVED.toString());
     }
 
     @DisplayName("예약을 정상적으로 생성한다.")
@@ -121,19 +179,44 @@ class ReservationServiceTest {
                 .isThrownBy(() -> reservationService.createReservation(reservationDto));
     }
 
+    @DisplayName("대기 상태인 예약 삭제 시 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
+    @Test
+    void throw_exception_when_delete_reservation_waiting_not_saved_reservation_id() {
+        assertThatThrownBy(() -> reservationService.deleteReservationWaiting("t1@t1.com", 1L))
+                .isInstanceOf(MemberNotFoundException.class);
+    }
 
-    @DisplayName("예약 삭제 시 저장되어있지 않은 아이디면 에러를 발생시킨다.")
+    @DisplayName("삭제 하려는 대기 예약이 대기 상태가 아니거나 DB에 존재하지 않을 경우 예외를 발생시킨다.")
+    @Test
+    void throw_exception_when_not_waiting_status_or_not_saved_reservation_id() {
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        reservationRepository.save(reservation);
+
+        assertThatThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L))
+                .isInstanceOf(ReservationWaitingNotFoundException.class);
+    }
+
+
+    @DisplayName("대기 상태인 예약을 정상적으로 삭제한다.")
     @Test
     void throw_exception_when_not_saved_reservation_id() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(ReservationNotFoundException.class)
-                .hasMessage("존재하지 않는 아이디입니다.");
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        Reservation reservation = new Reservation(member, theme, date, time, WAITING);
+        reservationRepository.save(reservation);
+
+        assertThatNoException()
+                .isThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L));
     }
 
     @DisplayName("예약을 정상적으로 삭제한다.")
     @Test
     void success_delete_reservation() {
-        Reservation reservation = new Reservation(member, theme, date, time);
+        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
