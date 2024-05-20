@@ -6,19 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
 
 @RestController
-@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
     private final ReservationService reservationService;
 
-    @PostMapping("/reservations")
+    @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(@Valid @RequestBody ReservationRequest request) {
         ReservationResponse response = reservationService.saveReservation(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
