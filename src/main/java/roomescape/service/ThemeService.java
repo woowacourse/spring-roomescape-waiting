@@ -3,12 +3,14 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private static final int POPULAR_START_DATE = 8;
@@ -42,10 +44,12 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findAll() {
         return themeRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findPopular() {
         LocalDate start = LocalDate.now().minusDays(POPULAR_START_DATE);
         LocalDate end = LocalDate.now().minusDays(POPULAR_END_DATE);

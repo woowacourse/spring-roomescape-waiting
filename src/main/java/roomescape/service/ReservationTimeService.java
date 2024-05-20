@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.global.exception.RoomescapeException;
@@ -12,6 +13,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.FindTimeAndAvailabilityDto;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -42,10 +44,12 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
         return reservationTimeRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
         List<Reservation> reservations =
             reservationRepository.findAllByDateAndThemeId(date, themeId);

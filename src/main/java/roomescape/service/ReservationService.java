@@ -135,7 +135,7 @@ public class ReservationService {
             throw new RoomescapeException("자신의 예약만 삭제할 수 있습니다.");
         }
 
-        reservationRepository.deleteById(reservationId);
+        delete(reservation);
     }
 
     private void delete(Reservation reservation) {
@@ -145,10 +145,12 @@ public class ReservationService {
         firstWaiting.forEach(Reservation::reserve);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAll() {
         return reservationRepository.findAllByStatus(RESERVED);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
@@ -156,6 +158,7 @@ public class ReservationService {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId, dateFrom, dateTo);
     }
 
+    @Transactional(readOnly = true)
     public List<FindReservationWithRankDto> findAllWithRankByMemberId(Long memberId) {
         List<ReservationWithRank> reservations =
             reservationRepository.findReservationsWithRankByMemberId(memberId);
@@ -165,6 +168,7 @@ public class ReservationService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllStandby() {
         return reservationRepository.findAllByStatus(STANDBY);
     }
