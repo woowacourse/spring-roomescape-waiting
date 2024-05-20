@@ -8,18 +8,18 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.model.IntegrationTest;
-import roomescape.reservationtime.dto.TimeRequest;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
 
-public class ReservationTimeIntegrationTest extends IntegrationTest {
+class ReservationTimeIntegrationTest extends IntegrationTest {
 
     @Test
     @DisplayName("시간을 잘 등록하고 삭제하고 확인이 가능하다.")
     void reservationTimePageWorks() {
-        TimeRequest timeRequest = new TimeRequest(LocalTime.of(10, 0));
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(timeRequest)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(201);

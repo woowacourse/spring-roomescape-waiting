@@ -28,10 +28,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.dto.TimeRequest;
-import roomescape.reservationtime.dto.TimeResponse;
-import roomescape.reservationtime.exception.TimeExceptionCode;
-import roomescape.reservationtime.repository.TimeRepository;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -41,44 +41,45 @@ class ReservationTimeServiceTest {
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(17, 3));
 
     @InjectMocks
-    private TimeService timeService;
+    private ReservationTimeService reservationTimeService;
     @Mock
-    private TimeRepository timeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
     @Mock
     private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("시간을 추가한다.")
     void addReservationTime() {
-        when(timeRepository.save(any()))
+        when(reservationTimeRepository.save(any()))
                 .thenReturn(time);
 
-        TimeRequest timeRequest = new TimeRequest(time.getStartAt());
-        TimeResponse timeResponse = timeService.addReservationTime(timeRequest);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(time.getStartAt());
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.addReservationTime(
+                reservationTimeRequest);
 
-        Assertions.assertThat(timeResponse.id())
+        Assertions.assertThat(reservationTimeResponse.id())
                 .isEqualTo(1);
     }
 
     @Test
     @DisplayName("시간을 찾는다.")
     void findReservationTimes() {
-        when(timeRepository.findAllByOrderByStartAt())
+        when(reservationTimeRepository.findAllByOrderByStartAt())
                 .thenReturn(List.of(time));
 
-        List<TimeResponse> timeResponses = timeService.findReservationTimes();
+        List<ReservationTimeResponse> reservationTimeRespons = reservationTimeService.findReservationTimes();
 
-        Assertions.assertThat(timeResponses).hasSize(1);
+        Assertions.assertThat(reservationTimeRespons).hasSize(1);
     }
 
     @Test
     @DisplayName("중복된 예약 시간 생성 요청시 예외를 던진다.")
     void validation_ShouldThrowException_WhenStartAtIsDuplicated() {
-        when(timeRepository.findByStartAt(any()))
+        when(reservationTimeRepository.findByStartAt(any()))
                 .thenReturn(Optional.of(time));
 
-        TimeRequest timeRequest = new TimeRequest(CURRENT_TIME);
-        assertThatThrownBy(() -> timeService.addReservationTime(timeRequest))
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(CURRENT_TIME);
+        assertThatThrownBy(() -> reservationTimeService.addReservationTime(reservationTimeRequest))
                 .isExactlyInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("이미 존재하는 예약 시간입니다.");
     }
@@ -87,10 +88,10 @@ class ReservationTimeServiceTest {
     @DisplayName("시간을 지운다.")
     void removeReservationTime() {
         doNothing()
-                .when(timeRepository)
+                .when(reservationTimeRepository)
                 .deleteById(time.getId());
 
-        assertDoesNotThrow(() -> timeService.removeReservationTime(time.getId()));
+        assertDoesNotThrow(() -> reservationTimeService.removeReservationTime(time.getId()));
     }
 
     @Test
@@ -108,9 +109,9 @@ class ReservationTimeServiceTest {
 
         Throwable reservationExistAtTime = assertThrows(
                 RoomEscapeException.class,
-                () -> timeService.removeReservationTime(1L));
+                () -> reservationTimeService.removeReservationTime(1L));
 
-        assertEquals(TimeExceptionCode.EXIST_RESERVATION_AT_CHOOSE_TIME.getMessage(),
+        assertEquals(ReservationTimeExceptionCode.EXIST_RESERVATION_AT_CHOOSE_TIME.getMessage(),
                 reservationExistAtTime.getMessage());
     }
 

@@ -3,7 +3,7 @@ package roomescape.reservationtime.exception;
 import org.springframework.http.HttpStatus;
 import roomescape.exception.model.ExceptionCode;
 
-public enum TimeExceptionCode implements ExceptionCode {
+public enum ReservationTimeExceptionCode implements ExceptionCode {
 
     FOUND_TIME_IS_NULL_EXCEPTION(HttpStatus.BAD_REQUEST, "존재하는 시간이 없습니다."),
     TIME_IS_OUT_OF_OPERATING_TIME(HttpStatus.BAD_REQUEST, "운영 시간 외의 예약 시간 요청입니다."),
@@ -14,7 +14,7 @@ public enum TimeExceptionCode implements ExceptionCode {
     private final HttpStatus httpStatus;
     private final String message;
 
-    TimeExceptionCode(HttpStatus httpStatus, String message) {
+    ReservationTimeExceptionCode(HttpStatus httpStatus, String message) {
         this.httpStatus = httpStatus;
         this.message = message;
     }

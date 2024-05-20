@@ -10,35 +10,35 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservationtime.dto.TimeRequest;
-import roomescape.reservationtime.dto.TimeResponse;
-import roomescape.reservationtime.service.TimeService;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
+import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.reservationtime.service.ReservationTimeService;
 
 @RestController
 @RequestMapping("/times")
-public class TimeController {
-    private final TimeService timeService;
+public class ReservationTimeController {
+    private final ReservationTimeService reservationTimeService;
 
-    public TimeController(TimeService timeService) {
-        this.timeService = timeService;
+    public ReservationTimeController(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping
-    public ResponseEntity<TimeResponse> reservationTimeSave(
-            @RequestBody TimeRequest timeRequest) {
+    public ResponseEntity<ReservationTimeResponse> reservationTimeSave(
+            @RequestBody ReservationTimeRequest reservationTimeRequest) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(timeService.addReservationTime(timeRequest));
+                .body(reservationTimeService.addReservationTime(reservationTimeRequest));
     }
 
     @GetMapping
-    public List<TimeResponse> reservationTimesList() {
-        return timeService.findReservationTimes();
+    public List<ReservationTimeResponse> reservationTimesList() {
+        return reservationTimeService.findReservationTimes();
     }
 
     @DeleteMapping("/{reservationTimeId}")
     public ResponseEntity<Void> reservationTimeRemove(@PathVariable long reservationTimeId) {
-        timeService.removeReservationTime(reservationTimeId);
+        reservationTimeService.removeReservationTime(reservationTimeId);
         return ResponseEntity.noContent().build();
     }
 }

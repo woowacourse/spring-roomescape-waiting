@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.model.RoomEscapeException;
-import roomescape.reservationtime.exception.TimeExceptionCode;
+import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
 
 @Entity
 public class ReservationTime {
@@ -48,10 +48,10 @@ public class ReservationTime {
 
     public void validateTime(LocalTime startAt) {
         if (startAt == null) {
-            throw new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
+            throw new RoomEscapeException(ReservationTimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION);
         }
         if (startAt.isBefore(OPEN_TIME) || startAt.isAfter(CLOSE_TIME)) {
-            throw new RoomEscapeException(TimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME);
+            throw new RoomEscapeException(ReservationTimeExceptionCode.TIME_IS_OUT_OF_OPERATING_TIME);
         }
     }
 

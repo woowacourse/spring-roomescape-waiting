@@ -20,28 +20,28 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeExceptionCode;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.exception.TimeExceptionCode;
-import roomescape.reservationtime.repository.TimeRepository;
+import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final TimeRepository timeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository, MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
-        ReservationTime time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
+        ReservationTime time = reservationTimeRepository.findById(reservationRequest.timeId())
+                .orElseThrow(() -> new RoomEscapeException(ReservationTimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
         Member member = memberRepository.findMemberById(memberId)
@@ -53,8 +53,8 @@ public class ReservationService {
     }
 
     public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
-        ReservationTime time = timeRepository.findById(adminReservationRequest.timeId())
-                .orElseThrow(() -> new RoomEscapeException(TimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
+        ReservationTime time = reservationTimeRepository.findById(adminReservationRequest.timeId())
+                .orElseThrow(() -> new RoomEscapeException(ReservationTimeExceptionCode.FOUND_TIME_IS_NULL_EXCEPTION));
         Theme theme = themeRepository.findById(adminReservationRequest.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeExceptionCode.FOUND_THEME_IS_NULL_EXCEPTION));
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
@@ -74,7 +74,7 @@ public class ReservationService {
     }
 
     public List<ReservationTimeAvailabilityResponse> findTimeAvailability(long themeId, LocalDate date) {
-        List<ReservationTime> allTimes = timeRepository.findAllByOrderByStartAt();
+        List<ReservationTime> allTimes = reservationTimeRepository.findAllByOrderByStartAt();
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndDate(themeId, date);
         List<ReservationTime> bookedTimes = extractReservationTimes(reservations);
 

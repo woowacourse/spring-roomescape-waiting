@@ -27,7 +27,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.TimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -46,7 +46,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
-    private TimeRepository timeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
     private ThemeRepository themeRepository;
@@ -63,7 +63,7 @@ class ReservationServiceTest {
         when(reservationRepository.save(any()))
                 .thenReturn(reservation);
 
-        when(timeRepository.findById(1L))
+        when(reservationTimeRepository.findById(1L))
                 .thenReturn(Optional.of(new ReservationTime()));
 
         when(themeRepository.findById(1L))

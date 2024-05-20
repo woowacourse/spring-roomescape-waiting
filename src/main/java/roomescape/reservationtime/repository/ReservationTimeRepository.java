@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.repository.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 
-public interface TimeRepository extends Repository<ReservationTime, Long> {
+public interface ReservationTimeRepository extends Repository<ReservationTime, Long> {
 
     ReservationTime save(ReservationTime time);
 
