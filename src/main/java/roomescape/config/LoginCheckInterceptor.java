@@ -16,13 +16,12 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         String httpMethod = request.getMethod();
         Cookie[] cookies = request.getCookies();
-        String contentType = request.getContentType();
 
         if (isPostRequestMembersPath(requestURI, httpMethod)) {
             return true;
         }
         if (cookies == null || CookieUtils.extractTokenFromCookie(cookies) == null) {
-            redirectToLoginPage(contentType, requestURI, response);
+            redirectToLoginPage(httpMethod, requestURI, response);
             return false;
         }
         return true;
@@ -32,11 +31,11 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         return requestURI.equals("/members") && httpMethod.equals("POST");
     }
 
-    private void redirectToLoginPage(String contentType, String requestURI, HttpServletResponse response) throws IOException {
-        if (contentType != null && contentType.contains("application/json")) {
-            response.sendRedirect("/login");
+    private void redirectToLoginPage(String httpMethod, String requestURI, HttpServletResponse response) throws IOException {
+        if (httpMethod.equals("GET")) {
+            response.sendRedirect("/login?redirectURL=" + requestURI);
             return;
         }
-        response.sendRedirect("/login?redirectURL=" + requestURI);
+        response.sendRedirect("/login");
     }
 }
