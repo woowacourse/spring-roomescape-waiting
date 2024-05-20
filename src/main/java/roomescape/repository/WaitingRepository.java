@@ -13,4 +13,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<Waiting> findAllByMember(Member member);
 
     Long countAllByDateAndTimeAndThemeAndIdLessThanEqual(LocalDate date, ReservationTime time, Theme theme, Long id);
+
+    boolean existsByTimeAndDate(ReservationTime time, LocalDate date);
 }
