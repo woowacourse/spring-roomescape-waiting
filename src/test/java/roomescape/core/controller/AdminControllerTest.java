@@ -258,4 +258,14 @@ class AdminControllerTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
+    @Test
+    @DisplayName("예약 대기 관리 페이지로 이동한다.")
+    void moveToWaitingManagePage() {
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
