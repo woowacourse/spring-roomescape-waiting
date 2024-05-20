@@ -15,9 +15,9 @@ VALUES ('테마1', '테마1 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461
        ('테마5', '테마5 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
 INSERT INTO reservation (date, member_id, time_id, theme_id, status)
-VALUES ('2024-05-07', 1, 1, 1, 'BOOKED'),
-       ('2024-05-08', 1, 2, 1, 'BOOKED'),
-       ('2024-05-09', 1, 3, 1, 'BOOKED'),
-       ('2024-05-10', 1, 1, 2, 'BOOKED'),
-       ('2024-05-11', 1, 2, 2, 'BOOKED'),
-       ('2024-05-12', 1, 1, 3, 'BOOKED');
+VALUES ('2024-05-14', 1, 1, 1, 'BOOKED'),
+       ('2024-05-15', 1, 2, 1, 'BOOKED'),
+       ('2024-05-16', 1, 3, 1, 'BOOKED'),
+       ('2024-05-17', 1, 1, 2, 'BOOKED'),
+       ('2024-05-18', 1, 2, 2, 'BOOKED'),
+       ('2024-05-19', 1, 1, 3, 'BOOKED');
