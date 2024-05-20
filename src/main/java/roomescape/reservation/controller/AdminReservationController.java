@@ -25,6 +25,8 @@ import roomescape.reservation.service.ThemeService;
 import java.net.URI;
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 @RestController
 public class AdminReservationController {
 
@@ -52,7 +54,7 @@ public class AdminReservationController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> saveReservation(@RequestBody final SaveReservationRequest request) {
+    public ResponseEntity<ReservationResponse> saveReservation(@Valid @RequestBody final SaveReservationRequest request) {
         final Reservation savedReservation = reservationService.saveReservation(request);
 
         return ResponseEntity.created(URI.create("/reservations/" + savedReservation.getId()))

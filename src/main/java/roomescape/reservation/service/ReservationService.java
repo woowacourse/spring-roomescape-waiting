@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+
 import roomescape.member.model.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.SaveReservationRequest;
@@ -47,14 +48,12 @@ public class ReservationService {
     }
 
     public List<Reservation> searchReservations(final SearchReservationsRequest request) {
-        final SearchReservationsParams searchReservationsParams = new SearchReservationsParams(
+        return reservationRepository.searchReservations(
                 request.memberId(),
                 request.themeId(),
-                request.from(),
-                request.to()
+                new ReservationDate(request.from()),
+                new ReservationDate(request.to())
         );
-
-        return customReservationRepository.searchReservations(searchReservationsParams);
     }
 
     public Reservation saveReservation(final SaveReservationRequest request) {

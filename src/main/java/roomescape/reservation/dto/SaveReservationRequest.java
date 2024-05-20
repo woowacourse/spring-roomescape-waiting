@@ -8,7 +8,9 @@ import roomescape.reservation.model.Theme;
 
 import java.time.LocalDate;
 
-public record SaveReservationRequest(LocalDate date, Long memberId, Long timeId, Long themeId) {
+import jakarta.validation.constraints.NotNull;
+
+public record SaveReservationRequest(@NotNull(message = "예약 날짜는 공백을 입력 할 수 없습니다.") LocalDate date,  Long memberId, Long timeId, Long themeId) {
 
     public SaveReservationRequest setMemberId(final Long memberId) {
         return new SaveReservationRequest(date, memberId, timeId, themeId);
