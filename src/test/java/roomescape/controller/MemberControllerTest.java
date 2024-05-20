@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -27,7 +28,7 @@ class MemberControllerTest {
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("admin123", "admin@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }
 
     @DisplayName("모든 사용자 조회 성공 테스트 - 사용자 총 3명")
@@ -35,7 +36,7 @@ class MemberControllerTest {
     void findAllMembers() {
         //when&then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().get("/members")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(2));

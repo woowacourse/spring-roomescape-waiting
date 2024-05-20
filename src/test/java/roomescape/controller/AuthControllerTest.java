@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.auth.dto.SignUpRequest;
 
@@ -75,11 +76,11 @@ class AuthControllerTest {
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("lini123", "lini@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         //when&then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/login/check")
                 .then().log().all()
                 .assertThat().statusCode(200).body("name", is("lini"));

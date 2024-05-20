@@ -13,8 +13,6 @@ import roomescape.util.CookieUtil;
 
 @Component
 public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResolver {
-    private static final String AUTH_COOKIE_NAME = "auth_token";
-
     private final TokenProvider tokenProvider;
 
     @Autowired
@@ -33,7 +31,7 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        return CookieUtil.searchValueFromKey(request.getCookies(), AUTH_COOKIE_NAME)
+        return CookieUtil.searchValueFromKey(request.getCookies(), AuthConstants.AUTH_COOKIE_NAME)
                 .map(tokenProvider::extractMemberId)
                 .orElseThrow(() -> new UnauthorizedException("로그인 정보를 찾을 수 없습니다."));
     }

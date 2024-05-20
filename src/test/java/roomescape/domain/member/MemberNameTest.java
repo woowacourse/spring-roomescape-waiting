@@ -14,7 +14,7 @@ class MemberNameTest {
     @EmptySource
     @ValueSource(strings = {"linirinilinirinilinirinilinirini"})
     void invalidNameLength(String name) {
-        assertThatThrownBy(() -> new Member(name, "lini@email.com", "lini123", Role.GUEST))
+        assertThatThrownBy(() -> new Member(name, "lini@email.com", "lini123", Role.MEMBER))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("이름은 1자 이상, 20자 이하여야 합니다.");
     }

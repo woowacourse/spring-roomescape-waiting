@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
@@ -55,13 +56,13 @@ class AdminReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("admin123", "admin@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         guestToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("guest123", "guest@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         memberId = 2;
     }
@@ -71,7 +72,7 @@ class AdminReservationControllerTest {
     void createReservation() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .body(new AdminReservationRequest(date, memberId, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -83,20 +84,20 @@ class AdminReservationControllerTest {
     void deleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", guestToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, guestToken)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().delete("/admin/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(0));
@@ -108,7 +109,7 @@ class AdminReservationControllerTest {
     void findByMemberAndTheme() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("memberId", 1)
                 .queryParam("themeId", 2)
                 .when().get("/admin/reservations/search")
@@ -122,7 +123,7 @@ class AdminReservationControllerTest {
     void findByDateFrom() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("dateFrom", LocalDate.now().minusDays(7).toString())
                 .when().get("/admin/reservations/search")
                 .then().log().all()
@@ -135,7 +136,7 @@ class AdminReservationControllerTest {
     void findByTheme() {
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", adminToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .queryParam("themeId", 1)
                 .when().get("/admin/reservations/search")
                 .then().log().all()

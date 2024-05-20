@@ -26,9 +26,9 @@ class MemberServiceTest {
     @Test
     void findAll() {
         //given
-        memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.GUEST));
-        memberRepository.save(new Member("lini2", "lini2@email.com", "lini123", Role.GUEST));
-        memberRepository.save(new Member("lini3", "lini3@email.com", "lini123", Role.GUEST));
+        memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
+        memberRepository.save(new Member("lini2", "lini2@email.com", "lini123", Role.MEMBER));
+        memberRepository.save(new Member("lini3", "lini3@email.com", "lini123", Role.MEMBER));
 
         //when
         List<MemberResponse> memberResponses = memberService.findAll();
@@ -41,7 +41,7 @@ class MemberServiceTest {
     @Test
     void findById() {
         //given
-        Member member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.GUEST));
+        Member member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
 
         //when
         Member result = memberService.findById(member.getId());

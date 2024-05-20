@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.AuthConstants;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.auth.AuthService;
 import roomescape.service.auth.dto.LoginCheckResponse;
@@ -20,7 +21,6 @@ import roomescape.util.CookieUtil;
 
 @RestController
 public class AuthController {
-    private static final String AUTH_COOKIE_NAME = "auth_token";
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         String token = authService.login(loginRequest).token();
-        Cookie cookie = CookieUtil.createCookie(AUTH_COOKIE_NAME, token);
+        Cookie cookie = CookieUtil.createCookie(AuthConstants.AUTH_COOKIE_NAME, token);
 
         httpServletResponse.addCookie(cookie);
         return ResponseEntity.ok().build();
@@ -44,7 +44,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse httpServletResponse) {
-        httpServletResponse.addCookie(CookieUtil.expiredCookie(AUTH_COOKIE_NAME));
+        httpServletResponse.addCookie(CookieUtil.expiredCookie(AuthConstants.AUTH_COOKIE_NAME));
         return ResponseEntity.ok().build();
     }
 
@@ -52,7 +52,7 @@ public class AuthController {
     public LoginCheckResponse check(HttpServletRequest httpServletRequest) {
         Cookie[] cookies = httpServletRequest.getCookies();
 
-        return CookieUtil.searchValueFromKey(cookies, AUTH_COOKIE_NAME)
+        return CookieUtil.searchValueFromKey(cookies, AuthConstants.AUTH_COOKIE_NAME)
                 .map(authService::check)
                 .orElseThrow(() -> new UnauthorizedException("로그인 정보를 찾을 수 없습니다."));
     }

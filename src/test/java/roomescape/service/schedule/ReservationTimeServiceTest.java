@@ -98,7 +98,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-        Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
+        Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.MEMBER));
         Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
@@ -121,7 +121,7 @@ class ReservationTimeServiceTest {
                 new ReservationTime(time.plusHours(5)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-        Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
+        Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.MEMBER));
         Schedule schedule = new Schedule(ReservationDate.of(date), bookedReservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);

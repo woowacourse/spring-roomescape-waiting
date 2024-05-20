@@ -106,7 +106,7 @@ class ThemeServiceTest {
         //given
         Theme theme = createTheme("레벨2 탈출");
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
+        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
         Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
         reservationRepository.save(reservation);
@@ -127,7 +127,7 @@ class ThemeServiceTest {
         Theme theme3 = createTheme("레벨3 탈출");
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
+        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
         Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
         Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);
         Schedule schedule3 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime);

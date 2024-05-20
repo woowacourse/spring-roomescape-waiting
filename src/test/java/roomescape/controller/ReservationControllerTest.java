@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.AuthConstants;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
@@ -50,7 +51,7 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("guest123", "guest@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }
 
     @DisplayName("예약 추가 성공 테스트")
@@ -58,7 +59,7 @@ class ReservationControllerTest {
     void createReservation() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -71,14 +72,14 @@ class ReservationControllerTest {
         //given
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations");
 
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -95,7 +96,7 @@ class ReservationControllerTest {
         //when&then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(invalidDate, timeId, themeId))
                 .when().post("/reservations")
                 .then().log().all()
@@ -107,13 +108,13 @@ class ReservationControllerTest {
     void findAllReservations() {
         //given
         RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations");
 
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(1));
@@ -124,20 +125,20 @@ class ReservationControllerTest {
     void deleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().delete("/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(0));
@@ -148,7 +149,7 @@ class ReservationControllerTest {
     void cannotDeleteReservationSuccess() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .body(new ReservationRequest(date, timeId, themeId))
                 .when().post("/reservations")
                 .then().extract().body().jsonPath().get("id");
@@ -157,17 +158,17 @@ class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("guest123", "guest2@email.com"))
                 .when().post("/login")
-                .then().log().all().extract().cookie("token");
+                .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
         //when
         RestAssured.given().log().all()
-                .cookie("token", wrongToken)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, wrongToken)
                 .when().delete("/reservations/" + id)
                 .then().log().all()
                 .assertThat().statusCode(401);
 
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().get("/reservations")
                 .then().log().all()
                 .assertThat().body("size()", is(1));

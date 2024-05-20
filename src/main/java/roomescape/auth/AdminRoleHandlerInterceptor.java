@@ -10,8 +10,6 @@ import roomescape.util.CookieUtil;
 
 @Component
 public class AdminRoleHandlerInterceptor implements HandlerInterceptor {
-    private static final String AUTH_COOKIE_NAME = "auth_token";
-
     private final TokenProvider tokenProvider;
 
     public AdminRoleHandlerInterceptor(TokenProvider tokenProvider) {
@@ -20,7 +18,7 @@ public class AdminRoleHandlerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        boolean isRequestFromAdmin = CookieUtil.searchValueFromKey(request.getCookies(), AUTH_COOKIE_NAME)
+        boolean isRequestFromAdmin = CookieUtil.searchValueFromKey(request.getCookies(), AuthConstants.AUTH_COOKIE_NAME)
                 .map(tokenProvider::extractMemberRole)
                 .map(Role::valueOf)
                 .map(Role::isAdmin)
