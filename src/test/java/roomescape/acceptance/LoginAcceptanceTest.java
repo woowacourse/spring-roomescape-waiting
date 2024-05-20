@@ -34,6 +34,7 @@ class LoginAcceptanceTest extends BasicAcceptanceTest {
                 dynamicTest("admin 예약 관리 페이지에 접속한다", () -> moveToReservationAdminPage(userToken.get(), 403)),
                 dynamicTest("admin 시간 관리 페이지에 접속한다", () -> moveToTimeAdminPage(userToken.get(), 403)),
                 dynamicTest("admin 테마 관리 페이지에 접속한다", () -> moveToThemeAdminPage(userToken.get(), 403)),
+                dynamicTest("admin 예약 대기 관리 페이지에 접속한다", () -> moveToWaitingAdminPage(userToken.get(), 403)),
                 dynamicTest("로그아웃 한다", () -> logout(200))
         );
     }
@@ -49,6 +50,7 @@ class LoginAcceptanceTest extends BasicAcceptanceTest {
                 dynamicTest("admin 예약 관리 페이지에 접속한다", () -> moveToReservationAdminPage(adminToken.get(), 200)),
                 dynamicTest("admin 시간 관리 페이지에 접속한다", () -> moveToTimeAdminPage(adminToken.get(), 200)),
                 dynamicTest("admin 테마 관리 페이지에 접속한다", () -> moveToThemeAdminPage(adminToken.get(), 200)),
+                dynamicTest("admin 예약 대기 관리 페이지에 접속한다", () -> moveToWaitingAdminPage(adminToken.get(), 200)),
                 dynamicTest("로그아웃 한다", () -> logout(200))
         );
     }
@@ -81,6 +83,14 @@ class LoginAcceptanceTest extends BasicAcceptanceTest {
         RestAssured.given().log().all()
                 .cookies("token", token)
                 .when().get("/admin/time")
+                .then().log().all()
+                .statusCode(expectedHttpCode);
+    }
+
+    private void moveToWaitingAdminPage(String token, int expectedHttpCode) {
+        RestAssured.given().log().all()
+                .cookies("token", token)
+                .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(expectedHttpCode);
     }
