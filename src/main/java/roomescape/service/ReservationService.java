@@ -95,6 +95,7 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> findAllUserReservation(Long memberId) {
+        //TODO TypeSort 적용해보기
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
                 findMemberById(memberId),
                 LocalDate.now(),

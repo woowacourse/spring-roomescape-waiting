@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import roomescape.domain.Member;
 
 public record MemberJoinRequest(
+        // TODO 전반적인 메세지 처리 일관성
+
         @NotBlank
         @Email
         String email,

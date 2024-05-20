@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
 public record PopularThemeRequest(
+        // TODO 형식 없애주기
         @NotNull
         @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
         LocalDate startDate,
