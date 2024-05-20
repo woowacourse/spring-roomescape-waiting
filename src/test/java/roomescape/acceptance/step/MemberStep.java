@@ -30,5 +30,7 @@ public class MemberStep {
                 .when().post("/login")
                 .then().assertThat().statusCode(200).extract().header(HttpHeaders.SET_COOKIE);
     }
-
+    public static String 멤버_로그인(){
+        return 로그인(멤버_생성());
+    }
 }

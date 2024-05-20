@@ -9,12 +9,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.acceptance.config.AcceptanceTest;
 import roomescape.controller.api.dto.request.ReservationTimeRequest;
+import roomescape.controller.api.dto.response.AvailReservationTimeResponse;
+import roomescape.controller.api.dto.response.AvailableReservationTimesResponse;
 import roomescape.controller.api.dto.response.ReservationTimeResponse;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.fixture.ReservationTimeFixture;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.acceptance.step.MemberStep.멤버_로그인;
+import static roomescape.acceptance.step.ReservationStep.예약_생성;
 import static roomescape.acceptance.step.ReservationTimeStep.예약_시간_생성;
+import static roomescape.acceptance.step.ThemeStep.테마_생성;
 
 @AcceptanceTest
 public class ReservationTimeAcceptanceTest {
@@ -69,7 +77,7 @@ public class ReservationTimeAcceptanceTest {
         class ContextWithExistTime {
             @Test
             @DisplayName("409를 반환한다.")
-            void some() {
+            void it_returns_409() {
                 final ReservationTimeResponse createResponse = 예약_시간_생성();
                 final ReservationTimeRequest request = new ReservationTimeRequest(
                         createResponse.startAt()
@@ -118,4 +126,32 @@ public class ReservationTimeAcceptanceTest {
         }
     }
 
+    @Nested
+    @DisplayName("예약 가능한 시간을 가져올때")
+    class DescribeGetAvailableTimes {
+        @Test
+        @DisplayName("200과 결과를 반환한다.")
+        void it_returns_200_and_response() {
+            final String token = 멤버_로그인();
+            final var theme = 테마_생성();
+            final var reservationTime1 = 예약_시간_생성("10:00");
+            final var reservationTime2 = 예약_시간_생성("11:00");
+            예약_생성("2024-10-03", theme.id(), reservationTime1.id(), token);
+
+            final Map<String, Object> params = new HashMap<>();
+            params.put("date","2024-10-03");
+            params.put("themeId", theme.id());
+
+            //@formatter:off
+            final var response = RestAssured.given().params(params).contentType(ContentType.JSON)
+                    .when().get("/times/available")
+                    .then().assertThat().statusCode(200).extract().as(AvailableReservationTimesResponse.class);
+            //@formatter:on
+
+            assertThat(response.data()).containsExactly(
+                    new AvailReservationTimeResponse(reservationTime1.id(), reservationTime1.startAt(), true),
+                    new AvailReservationTimeResponse(reservationTime2.id(), reservationTime2.startAt(), false)
+            );
+        }
+    }
 }
