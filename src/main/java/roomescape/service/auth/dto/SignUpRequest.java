@@ -10,6 +10,6 @@ public record SignUpRequest(
         @NotBlank(message = "비밀번호를 입력해주세요.") String password
 ) {
     public Member toMember() {
-        return new Member(name, email, password, Role.GUEST);
+        return new Member(name, email, password, Role.MEMBER);
     }
 }
