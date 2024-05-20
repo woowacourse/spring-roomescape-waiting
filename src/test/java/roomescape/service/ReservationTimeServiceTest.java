@@ -8,16 +8,17 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.TestDataInitExtension;
 import roomescape.domain.dto.BookResponse;
 import roomescape.domain.dto.ReservationTimeRequest;
 import roomescape.domain.dto.ReservationTimeResponse;
 import roomescape.exception.DeleteNotAllowException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = "/data.sql")
+@ExtendWith(TestDataInitExtension.class)
 class ReservationTimeServiceTest {
     private final ReservationTimeService service;
 

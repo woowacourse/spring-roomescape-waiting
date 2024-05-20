@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.TestDataInitExtension;
 import roomescape.domain.Password;
 import roomescape.domain.PasswordEncoder;
 import roomescape.domain.dto.LoginRequest;
@@ -22,7 +22,7 @@ import roomescape.domain.dto.SignupRequest;
 import roomescape.exception.SignupFailException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = "/data.sql")
+@ExtendWith(TestDataInitExtension.class)
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
     @InjectMocks

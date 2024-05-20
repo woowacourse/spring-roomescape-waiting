@@ -7,9 +7,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.TestDataInitExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
@@ -20,7 +21,7 @@ import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = "/data.sql")
+@ExtendWith(TestDataInitExtension.class)
 class ReservationServiceTest {
     private final ReservationService service;
 

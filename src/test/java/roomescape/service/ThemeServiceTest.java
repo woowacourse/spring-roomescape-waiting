@@ -6,16 +6,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.TestDataInitExtension;
 import roomescape.domain.dto.ThemeRequest;
 import roomescape.domain.dto.ThemeResponse;
 import roomescape.domain.dto.ThemeResponses;
 import roomescape.exception.DeleteNotAllowException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = "/data.sql")
+@ExtendWith(TestDataInitExtension.class)
 class ThemeServiceTest {
     private final ThemeService service;
 
