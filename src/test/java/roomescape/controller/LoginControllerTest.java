@@ -64,7 +64,7 @@ class LoginControllerTest {
                 .then().log().all()
                 .statusCode(200).extract().as(MemberResponse.class);
 
-        assertThat(client.name()).isEqualTo("어드민");
+        assertThat(client.name()).isEqualTo("admin");
     }
 
     @DisplayName("로그아웃을 수행한다.")
