@@ -446,4 +446,25 @@ class ReservationServiceTest extends ServiceTest {
                         .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage())
         );
     }
+
+    @DisplayName("기존 예약이 삭제 될 경우, 대기하는 다음 예약이 자동으로 승인된다.")
+    @Test
+    void changeToApprove() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        MemberReservation firstReservation = memberReservationRepository.save(
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
+        MemberReservation waitingReservation = memberReservationRepository.save(
+                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+
+        //when
+        reservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
+
+        //then
+        assertThat(memberReservationRepository.findById(waitingReservation.getId())).isNotNull();
+        assertThat(memberReservationRepository.findById(waitingReservation.getId()).get()
+                .getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);
+    }
 }

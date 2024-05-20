@@ -3,6 +3,7 @@ package roomescape.reservation.domain.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
@@ -28,6 +29,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<MemberReservation> findBy(Long memberId, Long themeId, ReservationStatus status, LocalDate startDate,
                                    LocalDate endDate);
 
+    // TODO: Change to JPQL
     @Query(value = """
             SELECT RN_TABLE.ID AS id, TH.name as themeName, RE.date as date, T.START_AT as time, RN_TABLE.RN as waitingNumber, RESERVATION_STATUS as status
             FROM
@@ -42,6 +44,23 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<MyReservationProjection> findByMember(long memberId);
 
     List<MemberReservation> findAllByReservationStatus(ReservationStatus reservationStatus);
+
+    @Modifying
+    @Query(value = """
+            UPDATE MEMBER_RESERVATION MR
+            SET MR.RESERVATION_STATUS = ?
+            WHERE MR.RESERVATION_ID = ?
+            AND MR.RESERVATION_STATUS = ?
+            AND MR.ID IN (
+                SELECT ID
+                FROM (
+                    SELECT ID, ROW_NUMBER() OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN
+                    FROM MEMBER_RESERVATION
+                ) RN_TABLE
+                WHERE RN = ?
+            )
+            """, nativeQuery = true)
+    void updateStatusByReservationIdAndWaitingNumber(String toSetStatus, long reservationId, String toChangeStatus, int waitingNumber);
 
     void deleteByReservationId(long reservationId);
 

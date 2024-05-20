@@ -162,6 +162,9 @@ public class ReservationService {
             throw new AuthorizationException(ErrorType.NOT_A_RESERVATION_MEMBER);
         }
         memberReservationRepository.deleteById(memberReservation.getId());
+        memberReservationRepository.updateStatusByReservationIdAndWaitingNumber(
+                ReservationStatus.APPROVED.name(), memberReservation.getReservation().getId(),
+                ReservationStatus.PENDING.name(), 1);
     }
 
     private boolean canDelete(Member member, MemberReservation memberReservation) {

@@ -8,6 +8,7 @@ import roomescape.reservation.domain.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
+    // TODO: Change to Pagination
     @Query(value = """
                 SELECT theme.id, theme.name, theme.description, theme.thumbnail, COUNT(*) AS reservation_count 
                 FROM theme 
