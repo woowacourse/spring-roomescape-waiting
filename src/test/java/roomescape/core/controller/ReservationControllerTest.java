@@ -21,6 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
+import roomescape.core.dto.waiting.MemberWaitingRequest;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
 
@@ -263,13 +264,23 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("현재 로그인된 회원의 예약 목록을 조회한다.")
+    @DisplayName("현재 로그인된 회원의 예약 대기를 포함한 예약 목록을 조회한다.")
     void findLoginMemberReservation() {
+        MemberWaitingRequest waitingRequest = new MemberWaitingRequest(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
+
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 }
