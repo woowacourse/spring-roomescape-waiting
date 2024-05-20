@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -17,9 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.FindReservationWithRankDto;
 
@@ -36,6 +39,9 @@ class ReservationServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     private final String rawDate = "2060-01-01";
 
     private final Long timeId = 1L;
@@ -46,7 +52,8 @@ class ReservationServiceTest {
     void setUpData() {
         jdbcTemplate.update("""
             INSERT INTO member(name, email, password, role)
-            VALUES ('러너덕', 'user@a.com', '123a!', 'USER');
+            VALUES ('러너덕', 'user@a.com', '123a!', 'USER'),
+                   ('트레', 'tre@a.com', '123a!', 'USER');
                         
             INSERT INTO theme(name, description, thumbnail)
             VALUES ('테마1', 'd1', 'https://test.com/test1.jpg');
@@ -125,6 +132,46 @@ class ReservationServiceTest {
             () -> reservationService.reserve(memberId, today, savedTime.getId(), themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
+    }
+
+    @DisplayName("성공: 예약 대기")
+    @Test
+    void standby() {
+        Reservation reservation = reservationService.standby(memberId, rawDate, timeId, themeId);
+        assertThat(reservation.getId()).isEqualTo(1L);
+    }
+
+    @DisplayName("실패: 본인의 예약에 대기를 걸 수 없다.")
+    @Test
+    void standby_CantReserveAndThenStandbyForTheSameReservation() {
+        reservationService.reserve(memberId, rawDate, timeId, themeId);
+
+        assertThatThrownBy(() -> reservationService.standby(memberId, rawDate, timeId, themeId))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
+    }
+
+    @DisplayName("성공: 본인의 예약대기를 삭제할 수 있다.")
+    @Test
+    void deleteStandby() {
+        reservationService.reserve(memberId, rawDate, timeId, themeId);
+        reservationService.standby(2L, rawDate, timeId, themeId);
+        Member member = memberRepository.findById(2L).get();
+
+        assertThatCode(() -> reservationService.deleteStandby(2L, member))
+            .doesNotThrowAnyException();
+    }
+
+    @DisplayName("실패: 타인의 예약대기를 삭제할 수 없다.")
+    @Test
+    void deleteStandby_ReservedByOther() {
+        reservationService.reserve(memberId, rawDate, timeId, themeId);
+        reservationService.standby(2L, rawDate, timeId, themeId);
+        Member member = memberRepository.findById(1L).get();
+
+        assertThatThrownBy(() -> reservationService.deleteStandby(2L, member))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("자신의 예약만 삭제할 수 있습니다.");
     }
 
     @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
