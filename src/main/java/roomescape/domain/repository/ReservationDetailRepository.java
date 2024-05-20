@@ -21,21 +21,6 @@ public interface ReservationDetailRepository extends Repository<ReservationDetai
 
     List<TimeIdProjection> findByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<ReservationDetail> findAllByMemberId(Long memberId);
-
-    @Query(""" 
-            select r from ReservationDetail r
-            join fetch r.member m 
-            inner join r.theme th 
-            where r.date >= :start and r.date <= :end
-            and m.name = :memberName
-            and th.name = :themeName """)
-    List<ReservationDetail> findByPeriodAndMemberAndTheme(
-            @Param("start") LocalDate start,
-            @Param("end") LocalDate end,
-            @Param("memberName") String memberName,
-            @Param("themeName") String themeName);
-
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     ReservationDetail save(ReservationDetail reservationDetail);
