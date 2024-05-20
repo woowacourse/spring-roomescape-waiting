@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.dto.TokenResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -52,8 +53,8 @@ class LoginServiceTest {
     void getTokenIfLoginSucceeds() throws AuthenticationException {
         LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
 
-        String token = loginService.createMemberToken(loginRequest);
+        TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);
 
-        assertThat(token).isNotNull();
+        assertThat(tokenResponse.token()).isNotNull();
     }
 }
