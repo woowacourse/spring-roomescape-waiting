@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
@@ -49,7 +50,8 @@ public class ThemeService {
         if (startDate.isAfter(endDate)) {
             throw new BadRequestException(ErrorType.INVALID_REQUEST_ERROR);
         }
-        return themeRepository.findTopThemesByReservations(startDate, endDate, limit).stream()
+        PageRequest pageRequest = PageRequest.of(0, limit);
+        return themeRepository.findTopThemesByReservations(startDate, endDate, pageRequest).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
