@@ -4,10 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import roomescape.exception.RoomescapeException;
-
-import java.util.List;
 
 import static roomescape.exception.ExceptionType.EMPTY_DESCRIPTION;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
@@ -25,9 +22,6 @@ public class Theme {
     private String description;
 
     private String thumbnail;
-    // TODO: 사용하지 않음
-    @OneToMany(mappedBy = "theme")
-    private List<Reservation> reservations;
 
     protected Theme() {
     }
@@ -70,10 +64,6 @@ public class Theme {
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
-    }
-
-    public boolean isIdOf(long id) {
-        return this.id == id;
     }
 
     public boolean isNameOf(String name) {
