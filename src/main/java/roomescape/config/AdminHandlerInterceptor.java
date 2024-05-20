@@ -17,9 +17,7 @@ public class AdminHandlerInterceptor implements HandlerInterceptor {
     private final JwtProvider jwtProvider;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-                             Object handler)
-            throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         Cookie tokenCookie = extractCookie(request, "token");
         String token = tokenCookie.getValue();
         Role role = jwtProvider.extractRole(token);
