@@ -2,6 +2,8 @@ package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -34,8 +36,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 and (:endDate is null or r.date <= :endDate)
                 and (:themeId is null or r.theme.id = :themeId)
                 and (:memberId is null or r.member.id = :memberId)""")
-    List<Reservation> findByConditions(@Nullable LocalDate startDate, @Nullable LocalDate endDate, @Nullable Long themeId,
-                                       @Nullable Long memberId);
+    List<Reservation> findByConditions(
+            Optional<LocalDate> startDate,
+            Optional<LocalDate> endDate,
+            Long themeId,
+            Long memberId
+    );
 
     boolean existsByTime(ReservationTime time);
 

@@ -2,6 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
@@ -79,8 +81,8 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
         List<Reservation> reservations = reservationRepository.findByConditions(
-                reservationConditionRequest.dateFrom(),
-                reservationConditionRequest.dateTo(),
+                Optional.ofNullable(reservationConditionRequest.dateFrom()),
+                Optional.ofNullable(reservationConditionRequest.dateTo()),
                 reservationConditionRequest.themeId(),
                 reservationConditionRequest.memberId()
         );
