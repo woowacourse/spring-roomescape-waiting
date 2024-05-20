@@ -1,5 +1,6 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.exception.InvalidMemberException;
@@ -9,6 +10,7 @@ public class Password {
     private static final int MINIMUM_PASSWORD_LENGTH = 6;
     private static final int MAXIMUM_PASSWORD_LENGTH = 12;
 
+    @Column(name = "password")
     private String value;
 
     protected Password() {
