@@ -53,10 +53,8 @@ public class ReservationService {
         Optional<Reservation> reservation = reservationRepository.findBySlot(slot);
         if (reservation.isPresent()) {
             Reservation foundReservation = reservation.get();
+            Waiting waiting = foundReservation.addWaiting(member);
 
-            validateDuplicateReservation(member, foundReservation);
-
-            Waiting waiting = new Waiting(member, foundReservation);
             waitingRepository.save(waiting);
             return ReservationResponse.createByWaiting(waiting);
         }
@@ -64,14 +62,6 @@ public class ReservationService {
         Reservation newReservation = new Reservation(member, slot);
         reservationRepository.save(newReservation);
         return ReservationResponse.createByReservation(newReservation);
-    }
-
-    private void validateDuplicateReservation(Member member, Reservation reservation) {
-        boolean isWaitingExist = waitingRepository.existsByReservationAndMember(reservation, member);
-
-        if (reservation.isMember(member) || isWaitingExist) {
-            throw new RoomEscapeBusinessException("중복된 예약을 할 수 없습니다.");
-        }
     }
 
     @Transactional(readOnly = true)

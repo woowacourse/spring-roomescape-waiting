@@ -41,6 +41,4 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<WaitingReadOnly> findAllReadOnly();
 
     Optional<Waiting> findFirstByReservation(Reservation reservation, Sort sort);
-
-    boolean existsByReservationAndMember(Reservation reservation, Member member);
 }
