@@ -2,6 +2,7 @@ package roomescape.model.theme;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
+import java.util.Objects;
 
 @Embeddable
 public class Thumbnail {
@@ -18,5 +19,22 @@ public class Thumbnail {
 
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Thumbnail other = (Thumbnail) o;
+        return Objects.equals(thumbnail, other.thumbnail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(thumbnail);
     }
 }

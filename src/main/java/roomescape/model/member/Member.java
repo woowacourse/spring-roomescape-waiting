@@ -76,9 +76,9 @@ public class Member {
         }
         Member member = (Member) o;
         return id == member.id
-                && Objects.equals(name.getName(), member.name.getName())
-                && Objects.equals(email.getEmail(), member.email.getEmail())
-                && Objects.equals(password.getPassword(), member.password.getPassword())
+                && Objects.equals(name, member.name)
+                && Objects.equals(email, member.email)
+                && Objects.equals(password, member.password)
                 && role == member.role;
     }
 
