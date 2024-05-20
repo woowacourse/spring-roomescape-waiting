@@ -11,7 +11,7 @@ import roomescape.domain.reservation.Status;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.LoginMember;
 import roomescape.dto.MyReservationResponse;
-import roomescape.dto.ReservationCriteria;
+import roomescape.dto.ReservationCriteriaRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeErrorCode;
@@ -79,11 +79,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findByCriteria(ReservationCriteria reservationCriteria) {
-        Long themeId = reservationCriteria.themeId();
-        Long memberId = reservationCriteria.memberId();
-        LocalDate dateFrom = reservationCriteria.dateFrom();
-        LocalDate dateTo = reservationCriteria.dateTo();
+    public List<ReservationResponse> findByCriteria(ReservationCriteriaRequest reservationCriteriaRequest) {
+        Long themeId = reservationCriteriaRequest.themeId();
+        Long memberId = reservationCriteriaRequest.memberId();
+        LocalDate dateFrom = reservationCriteriaRequest.dateFrom();
+        LocalDate dateTo = reservationCriteriaRequest.dateTo();
         return reservationRepository.findByCriteria(themeId, memberId, dateFrom, dateTo).stream()
                 .map(ReservationResponse::from)
                 .toList();

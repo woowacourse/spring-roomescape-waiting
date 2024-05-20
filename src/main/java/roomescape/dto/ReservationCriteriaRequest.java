@@ -3,7 +3,7 @@ package roomescape.dto;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public record ReservationCriteria(
+public record ReservationCriteriaRequest(
         Long themeId,
         Long memberId,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,

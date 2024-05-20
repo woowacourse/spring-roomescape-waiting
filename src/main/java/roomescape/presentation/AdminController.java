@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.domain.reservation.Status;
 import roomescape.dto.AdminReservationRequest;
-import roomescape.dto.ReservationCriteria;
+import roomescape.dto.ReservationCriteriaRequest;
 import roomescape.dto.ReservationResponse;
 
 @RestController
@@ -38,8 +38,8 @@ public class AdminController {
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> searchAdmin(ReservationCriteria reservationCriteria) {
-        List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteria);
+    public ResponseEntity<List<ReservationResponse>> searchAdmin(ReservationCriteriaRequest reservationCriteriaRequest) {
+        List<ReservationResponse> responses = reservationService.findByCriteria(reservationCriteriaRequest);
         return ResponseEntity.ok(responses);
     }
 }
