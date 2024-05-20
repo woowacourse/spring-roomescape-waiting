@@ -9,7 +9,6 @@ import roomescape.model.theme.Theme;
 import java.time.LocalDate;
 import java.util.List;
 
-@Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(value = """

@@ -8,7 +8,6 @@ import roomescape.model.member.MemberPassword;
 
 import java.util.Optional;
 
-@Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmailAndPassword(MemberEmail email, MemberPassword password);

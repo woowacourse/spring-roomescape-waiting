@@ -6,7 +6,6 @@ import roomescape.model.ReservationTime;
 
 import java.time.LocalTime;
 
-@Repository
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
     boolean existsByStartAt(LocalTime startAt);

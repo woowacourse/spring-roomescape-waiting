@@ -9,7 +9,6 @@ import roomescape.model.ReservationTime;
 import java.time.LocalDate;
 import java.util.List;
 
-@Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
