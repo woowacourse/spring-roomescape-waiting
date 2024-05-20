@@ -23,7 +23,7 @@
 |          | GET    | `/login/check`                                          | 인증 정보 조회              |                                        | `@RestController` |
 | `MEMBER` | GET    | `/token-reissue`                                        | JWT 토큰 재발급            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations`                                         | 예약 정보 조회              |                                        | `@RestController` |
-| `MEMBER` | GET    | `/reservations/member`                                  | 내 예약 정보 조회            |                                        | `@RestController` |
+| `MEMBER` | GET    | `/reservations/my`                                      | 내 예약 정보 조회            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
 |          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`  | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
 | `MEMBER` | POST   | `/reservations`                                         | 예약 추가                 |                                        | `@RestController` |
@@ -199,7 +199,7 @@ Content-Type: application/json
 - Request
 
 ```
-GET /reservations/member HTTP/1.1
+GET /reservations/my HTTP/1.1
 Cookie: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM;
 ```
 

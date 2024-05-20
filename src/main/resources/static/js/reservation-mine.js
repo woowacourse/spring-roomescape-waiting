@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('/reservations/member') // 내 예약 목록 조회 API 호출
+  fetch('/reservations/my') // 내 예약 목록 조회 API 호출
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');

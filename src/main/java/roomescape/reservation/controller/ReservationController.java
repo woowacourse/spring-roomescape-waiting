@@ -42,7 +42,7 @@ public class ReservationController {
     }
 
     @Auth
-    @GetMapping("/reservations/member")
+    @GetMapping("/reservations/my")
     public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
         return ApiResponse.success(reservationService.findReservationByMemberId(memberId));
     }
