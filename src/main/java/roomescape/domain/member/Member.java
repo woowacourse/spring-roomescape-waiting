@@ -49,8 +49,8 @@ public class Member {
         this.role = role;
     }
 
-    public boolean matchPassword(String password) {
-        return this.password.matches(password);
+    public boolean isSamePassword(String password) {
+        return this.password.isSamePassword(password);
     }
 
     public Long getId() {

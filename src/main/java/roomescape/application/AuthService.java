@@ -26,7 +26,7 @@ public class AuthService {
     public TokenResponse createToken(TokenRequest tokenRequest) {
         String email = tokenRequest.email();
         Member member = getMemberBy(email);
-        if (!member.matchPassword(tokenRequest.password())) {
+        if (!member.isSamePassword(tokenRequest.password())) {
             throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "로그인 회원 정보가 일치하지 않습니다.");
         }
         String payload = String.valueOf(member.getId());

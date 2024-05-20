@@ -32,7 +32,7 @@ public class Password {
         return password;
     }
 
-    public boolean matches(String password) {
-        return this.password.matches(password);
+    public boolean isSamePassword(String password) {
+        return this.password.equals(password);
     }
 }
