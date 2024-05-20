@@ -6,6 +6,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.login.dto.TokenResponse;
 import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberRequest;
 import roomescape.util.TokenExtractor;
@@ -31,8 +32,8 @@ public class MemberRequestArgumentResolver implements HandlerMethodArgumentResol
             WebDataBinderFactory binderFactory
     ) throws Exception {
         HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-        String token = TokenExtractor.extractTokenFromCookie(servletRequest.getCookies());
+        TokenResponse tokenResponse = TokenExtractor.extractTokenFromCookie(servletRequest.getCookies());
 
-        return loginService.getMemberRequestByToken(token);
+        return loginService.getMemberRequestByToken(tokenResponse);
     }
 }

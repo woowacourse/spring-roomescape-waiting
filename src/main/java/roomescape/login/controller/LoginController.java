@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.dto.LoginRequest;
+import roomescape.login.dto.TokenResponse;
 import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
@@ -31,8 +32,8 @@ public class LoginController {
 
     @PostMapping
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) throws AuthenticationException {
-        String token = loginService.createMemberToken(loginRequest);
-        ResponseCookie responseCookie = ResponseCookie.from(TOKEN, token)
+        TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);
+        ResponseCookie responseCookie = ResponseCookie.from(TOKEN, tokenResponse.token())
                 .httpOnly(true)
                 .path("/")
                 .build();

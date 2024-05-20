@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import javax.naming.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.login.dto.TokenResponse;
 import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
@@ -24,8 +25,8 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws AuthenticationException {
-        String token = TokenExtractor.extractTokenFromCookie(request.getCookies());
-        MemberRequest memberRequest = loginService.getMemberRequestByToken(token);
+        TokenResponse tokenResponse = TokenExtractor.extractTokenFromCookie(request.getCookies());
+        MemberRequest memberRequest = loginService.getMemberRequestByToken(tokenResponse);
 
         if (memberService.isAdmin(memberRequest)) {
             return true;
