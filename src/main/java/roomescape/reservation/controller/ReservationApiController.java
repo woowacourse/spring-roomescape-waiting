@@ -36,7 +36,7 @@ public class ReservationApiController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/mine")
     public ResponseEntity<ResourcesResponse<MemberReservationResponse>> findMemberReservations(
             LoginMember loginMember
     ) {

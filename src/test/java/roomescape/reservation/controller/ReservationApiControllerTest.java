@@ -39,7 +39,7 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
                 .when()
-                .get("/reservations-mine")
+                .get("/reservations/mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
