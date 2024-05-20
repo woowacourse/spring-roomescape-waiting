@@ -1,5 +1,7 @@
 package roomescape.waiting.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
@@ -7,8 +9,10 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.waiting.dto.WaitingRequest;
@@ -20,6 +24,8 @@ class WaitingControllerTest {
 
     @LocalServerPort
     private int port;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
@@ -31,7 +37,7 @@ class WaitingControllerTest {
     void createWaitingTest() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2050, 5, 5), 2L, 2L);
         long expectedId = COUNT_OF_WAITING + 1;
-        Cookies userCookies = makeUserCookie();
+        Cookies userCookies = makeUserCookie("bri@abc.com", "1234");
 
         RestAssured.given().log().all()
                 .cookies(userCookies)
@@ -43,8 +49,25 @@ class WaitingControllerTest {
                 .header("Location", "/waitings/" + expectedId);
     }
 
-    private Cookies makeUserCookie() {
-        LoginRequest request = new LoginRequest("bri@abc.com", "1234");
+    @DisplayName("예약 대기 주인에 한하여, 예약 대기를 취소할 수 있다.")
+    @Test
+    void deleteWaitingTest() {
+        Cookies userCookies = makeUserCookie("duck@abc.com", "1234");
+
+        RestAssured.given().log().all()
+                .cookies(userCookies)
+                .contentType(ContentType.JSON)
+                .when().delete("/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+
+
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting", Integer.class);
+        assertThat(countAfterDelete).isEqualTo(COUNT_OF_WAITING - 1);
+    }
+
+    private Cookies makeUserCookie(String email, String password) {
+        LoginRequest request = new LoginRequest(email, password);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

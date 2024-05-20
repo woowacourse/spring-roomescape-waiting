@@ -61,4 +61,22 @@ public class WaitingService {
         return reservation.getMember().equals(member)
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
     }
+
+    public void deleteWaiting(Long waitingId, Long requestMemberId) {
+        Waiting waiting = findWaiting(waitingId);
+
+        validateIsOwner(waiting, requestMemberId);
+        waitingRepository.delete(waiting);
+    }
+
+    private Waiting findWaiting(Long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new BadArgumentRequestException("해당 예약 대기가 존재하지 않습니다."));
+    }
+
+    private void validateIsOwner(Waiting waiting, Long requestMemberId) {
+        if (waiting.isNotWaitingOwner(requestMemberId)) {
+            throw new BadArgumentRequestException("해당 예약을 취소할 수 없습니다.");
+        }
+    }
 }
