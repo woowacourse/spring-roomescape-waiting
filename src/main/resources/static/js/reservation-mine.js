@@ -3,13 +3,25 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
-        .then(response => {
-            if (response.status === 200) return response.json();
-            throw new Error('Read failed');
+    Promise.all([
+        fetch('/reservations/mine').then(response => {
+            if (!response.ok) throw new Error('Failed to fetch reservations');
+            return response.json();
+        }),
+        fetch('/waitings/mine').then(response => {
+            if (!response.ok) throw new Error('Failed to fetch waitings');
+            return response.json();
         })
-        .then(render)
-        .catch(error => console.error('Error fetching reservations:', error));
+    ]).then(([reservations, waitings]) => {
+        reservations.forEach(reservation => {
+            reservation.status = "예약";
+        });
+        waitings.forEach(waiting => {
+            waiting.status = (waiting.order) + "번째 예약대기";
+        });
+        const combinedData = [...reservations, ...waitings];
+        render(combinedData);
+    }).catch(error => console.error('Error fetching data:', error));
 });
 
 function render(data) {
@@ -26,7 +38,7 @@ function render(data) {
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
-        const status = '예약';
+        const status = item.status;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;

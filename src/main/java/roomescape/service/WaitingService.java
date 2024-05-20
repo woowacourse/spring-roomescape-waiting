@@ -5,8 +5,10 @@ import roomescape.domain.*;
 import roomescape.infrastructure.*;
 import roomescape.service.request.WaitingAppRequest;
 import roomescape.service.response.WaitingAppResponse;
+import roomescape.service.response.WaitingWithRankAppResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class WaitingService {
@@ -82,5 +84,12 @@ public class WaitingService {
                     "동일한 사용자의 중복된 예약 대기를 생성할 수 없습니다. {date: %s, timeId: %d, themeId: %d}",
                     date.getDate(), timeId, themeId));
         }
+    }
+
+    public List<WaitingWithRankAppResponse> findWaitingWithRankByMemberId(Long memberId) {
+        return waitingRepository.findAllWaitingWithRankByMemberId(memberId)
+                .stream()
+                .map(WaitingWithRankAppResponse::new)
+                .toList();
     }
 }

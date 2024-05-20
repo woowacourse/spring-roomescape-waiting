@@ -10,13 +10,15 @@ import roomescape.domain.*;
 import roomescape.infrastructure.*;
 import roomescape.service.request.WaitingAppRequest;
 import roomescape.service.response.WaitingAppResponse;
+import roomescape.service.response.WaitingWithRankAppResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.Fixture.*;
+import static roomescape.Fixture.VALID_RESERVATION_TIME;
+import static roomescape.Fixture.VALID_THEME;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = "/truncate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -66,7 +68,7 @@ class WaitingServiceTest {
     @DisplayName("올바르게 예약 대기를 생성한다.")
     void save() {
         Member otherMember = memberRepository.save(members.get(0));
-        Member member =memberRepository.save(members.get(1));
+        Member member = memberRepository.save(members.get(1));
         String date = LocalDate.now().plusDays(1).toString();
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
@@ -114,7 +116,7 @@ class WaitingServiceTest {
     @DisplayName("날짜, 시간, 테마에 대해서 중복된 대기 생성 시 예외가 발생한다.")
     void saveWithDuplicatedWaiting() {
         Member otherMember = memberRepository.save(members.get(0));
-        Member member =memberRepository.save(members.get(1));
+        Member member = memberRepository.save(members.get(1));
         String date = LocalDate.now().plusDays(1).toString();
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
@@ -132,7 +134,7 @@ class WaitingServiceTest {
     @DisplayName("지나간 시간에 대한 대기 생성 시 예외가 발생한다.")
     void saveWithPastTime() {
         Member otherMember = memberRepository.save(members.get(0));
-        Member member =memberRepository.save(members.get(1));
+        Member member = memberRepository.save(members.get(1));
         String date = LocalDate.now().minusDays(1).toString();
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
@@ -143,5 +145,25 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("지나간 시간에 대한 에약 대기는 생성할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("지나간 시간에 대한 대기 생성 시 예외가 발생한다.")
+    void findWaitingWithRankByMemberId() {
+        List<Member> savedMembers = members.stream()
+                .map(memberRepository::save)
+                .toList();
+        String date = LocalDate.now().minusDays(1).toString();
+        Theme theme = themeRepository.save(VALID_THEME);
+        ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
+        reservationRepository.save(new Reservation(savedMembers.get(0), new ReservationDate(date), time, theme));
+        waitingRepository.save(new Waiting(savedMembers.get(1), new ReservationDate(date), time, theme));
+        Waiting savedWaiting = waitingRepository.save(new Waiting(savedMembers.get(2), new ReservationDate(date), time, theme));
+
+        List<WaitingWithRankAppResponse> waitingWithRankAppResponses = waitingService.findWaitingWithRankByMemberId(savedMembers.get(2).getId());
+
+        assertThat(waitingWithRankAppResponses)
+                .hasSize(1)
+                .containsExactly(new WaitingWithRankAppResponse(new WaitingWithRank(savedWaiting, 2L)));
     }
 }
