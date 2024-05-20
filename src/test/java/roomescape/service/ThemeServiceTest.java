@@ -9,12 +9,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.InvalidRequestException;
 import roomescape.service.exception.ThemeUsedException;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ThemeServiceTest {
 
     @Autowired
