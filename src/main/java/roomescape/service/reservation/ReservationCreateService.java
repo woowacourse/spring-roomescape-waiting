@@ -3,6 +3,7 @@ package roomescape.service.reservation;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -20,13 +21,13 @@ public class ReservationCreateService {
         this.reservationRepository = reservationRepository;
     }
 
-    public Reservation createReservation(ReservationSaveRequest request, Member member) {
+    public Reservation createReservation(ReservationSaveRequest request, Member member, ReservationStatus reservationStatus) {
         ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
         reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId());
 
-        Reservation reservation = request.toEntity(request, reservationTime, theme, member);
+        Reservation reservation = request.toEntity(reservationTime, theme, member, reservationStatus);
         return reservationRepository.save(reservation);
     }
 }

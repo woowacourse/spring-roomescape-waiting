@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.UserReservationResponse;
@@ -62,7 +63,7 @@ public class ReservationApiController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservationByUser(@RequestBody @Valid ReservationSaveRequest request,
                                                                     @AuthenticatedMember Member member) {
-        Reservation newReservation = reservationCreateService.createReservation(request, member);
+        Reservation newReservation = reservationCreateService.createReservation(request, member, ReservationStatus.RESERVED);
         return ResponseEntity.created(URI.create("/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
