@@ -11,11 +11,11 @@ import roomescape.global.exception.RoomescapeException;
 public class Date {
 
     @Column(name = "date")
-    private LocalDate date;
+    private LocalDate value;
 
     public Date(String rawDate) {
         try {
-            this.date = LocalDate.parse(rawDate);
+            this.value = LocalDate.parse(rawDate);
         } catch (DateTimeParseException e) {
             throw new RoomescapeException("잘못된 날짜 형식입니다.");
         }
@@ -24,8 +24,8 @@ public class Date {
     protected Date() {
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getValue() {
+        return value;
     }
 
     @Override
@@ -36,12 +36,12 @@ public class Date {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Date date1 = (Date) o;
-        return Objects.equals(date, date1.date);
+        Date date = (Date) o;
+        return Objects.equals(value, date.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date);
+        return Objects.hash(value);
     }
 }
