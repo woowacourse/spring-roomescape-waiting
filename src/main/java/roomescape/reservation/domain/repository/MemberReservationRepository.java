@@ -29,11 +29,10 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<MemberReservation> findBy(Long memberId, Long themeId, ReservationStatus status, LocalDate startDate,
                                    LocalDate endDate);
 
-    // TODO: Change to JPQL
     @Query(value = """
             SELECT RN_TABLE.ID AS id, TH.name as themeName, RE.date as date, T.START_AT as time, RN_TABLE.RN as waitingNumber, RESERVATION_STATUS as status
             FROM
-            (SELECT ID, MEMBER_ID, RESERVATION_ID, ROW_NUMBER() OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN, RESERVATION_STATUS
+            (SELECT ID, MEMBER_ID, RESERVATION_ID, COUNT(*) OVER(PARTITION BY RESERVATION_ID ORDER BY CREATED_AT) AS RN, RESERVATION_STATUS
             FROM MEMBER_RESERVATION) AS RN_TABLE
             LEFT JOIN MEMBER AS M ON RN_TABLE.MEMBER_ID = M.ID
             LEFT JOIN RESERVATION AS RE ON RN_TABLE.RESERVATION_ID = RE.ID
@@ -47,20 +46,21 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     @Modifying
     @Query(value = """
-        UPDATE MemberReservation mr
-        SET mr.reservationStatus = :toSetStatus
-        WHERE mr.reservation = :reservation
-        AND mr.reservationStatus = :toChangeStatus
-        AND mr.id IN (
-            SELECT rn_table.id
-            FROM (
-                SELECT mr2.id as id, COUNT(*) OVER(PARTITION BY mr2.reservation.id ORDER BY mr2.createdAt) AS rn
-                FROM MemberReservation mr2
-            ) rn_table
-            WHERE rn_table.rn = :waitingNumber
-        )
-        """)
-    void updateStatusByReservationIdAndWaitingNumber(ReservationStatus toSetStatus, Reservation reservation, ReservationStatus toChangeStatus, int waitingNumber);
+            UPDATE MemberReservation mr
+            SET mr.reservationStatus = :toSetStatus
+            WHERE mr.reservation = :reservation
+            AND mr.reservationStatus = :toChangeStatus
+            AND mr.id IN (
+                SELECT rn_table.id
+                FROM (
+                    SELECT mr2.id as id, COUNT(*) OVER(PARTITION BY mr2.reservation.id ORDER BY mr2.createdAt) AS rn
+                    FROM MemberReservation mr2
+                ) rn_table
+                WHERE rn_table.rn = :waitingNumber
+            )
+            """)
+    void updateStatusByReservationIdAndWaitingNumber(ReservationStatus toSetStatus, Reservation reservation,
+                                                     ReservationStatus toChangeStatus, int waitingNumber);
 
     void deleteByReservationId(long reservationId);
 
