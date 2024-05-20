@@ -22,6 +22,7 @@ import roomescape.service.dto.ReservationTimeInfoDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -89,7 +90,7 @@ class ReservationServiceTest {
     @Test
     void should_not_throw_exception_when_current_date() {
         ReservationDto reservationDto = new ReservationDto(LocalDate.now(), 3L, 1L, 1L);
-        reservationTimeRepository.save(new ReservationTime(3L, LocalTime.now()));
+        reservationTimeRepository.save(new ReservationTime(3L, LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         assertThatCode(() -> reservationService.saveReservation(reservationDto))
                 .doesNotThrowAnyException();
     }
