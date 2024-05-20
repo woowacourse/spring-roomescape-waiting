@@ -1,4 +1,4 @@
-package roomescape.web.controller;
+package roomescape.web.api;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 

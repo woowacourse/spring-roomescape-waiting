@@ -1,4 +1,4 @@
-package roomescape.web.controller;
+package roomescape.web.api;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
