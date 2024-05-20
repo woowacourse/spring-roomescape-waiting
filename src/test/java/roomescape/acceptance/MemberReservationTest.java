@@ -40,7 +40,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("동일한 예약이 존재하지 않는 상황에, 예약 요청을 보내면, 예약된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noReservation_then_addReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
@@ -60,7 +60,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("동일한 예약이 존재하는 상황에, 예약 요청을 보내면, 예약 대기 상태가 된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_reservationExists_then_addWaitingReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
@@ -93,7 +93,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("내가 예약한 상태에서, 예약 요청을 보내면, 예약이 거절된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myReservationExists_then_rejectReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
@@ -120,7 +120,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("내가 예약 대기한 상태에서, 예약 요청을 보내면, 예약이 거절된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myWaitingReservationExists_then_rejectReservation() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
@@ -158,7 +158,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("예약을 취소한 상태에서, 예약 요청을 보내면, 예약된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_canceledReservation_then_addReservation() {
         // given
         Long themeId = 1L;
@@ -196,7 +196,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("뒤에 예약 대기가 존재하는 상태에서, 예약 대기를 취소하고 다시 예약 요청을 보내면, 예약 대기 상태가 된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_canceledWaitingReservation_then_addWaitingReservation() {
         // given
         Long themeId = 1L;
@@ -281,7 +281,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("존재하지 않는 테마에 대한 예약 요청을 보내면, 예약이 거절된다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/times.sql"})
     void when_noThemeReservation_then_rejectReservation() {
         // given
         Long themeId = 100L;
@@ -301,7 +301,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("존재하지 않는 회원에 대한 예약 요청을 보내면, 예약이 거절된다")
-    @Sql(value = {"/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/themes.sql", "/test-data/times.sql"})
     void when_noMemberReservation_then_rejectReservation() {
         // given
         Long themeId = 1L;
@@ -322,7 +322,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("예약이 존재하지 않는 상황에서, 예약을 취소 요청을 보내면, 요청을 무시한다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noReservation_then_throwException() {
         // given
         Long reservationId = 1L;
@@ -336,7 +336,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("과거 resolved 예약에 대해 취소 요청을 보내면, 요청을 무시한다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
             "/test-data/past-reservations.sql"})
     void when_pastTimeReservation_then_nothingHappens() {
         // given
@@ -356,8 +356,8 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("resolved 예약과 waiting 예약이 모두 있는 상태에서, 모든 예약을 조회하면, resolved 예약과 waiting 예약을 모두 반환한다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
-            "/test-data/reservations.sql", "/test-data/waiting-reservations.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
+            "/test-data/reservations-details.sql", "/test-data/waiting-reservations.sql"})
     void when_getReservations_then_returnReservations() {
         // when
         Response response = RestAssured.given().log().all()
@@ -373,7 +373,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("과거의 resolved 예약과 waiting 예약은 조회되지 않는다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
             "/test-data/past-reservations.sql", "/test-data/past-waiting-reservations.sql"})
     void when_getReservations_then_doesNotReturnPastReservations() {
         // when
@@ -389,7 +389,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("내 waiting 예약이 존재해야만, waiting 예약을 삭제할 수 있다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
             "/test-data/waiting-reservations.sql"})
     void when_myWaitingReservationExists_then_deleteWaitingReservation() {
         // given
@@ -408,7 +408,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("내 waiting 예약이 존재하지 않으면, waiting 예약을 삭제할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noWaitingReservation_then_canNotDeleteWaitingReservation() {
         // given
         Long themeId = 1L;
@@ -426,7 +426,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("다른 사람의 waiting 예약을 삭제할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
             "/test-data/waiting-reservations.sql"})
     void when_anotherWaitingReservationExists_then_canNotDeleteOthersWaitingReservation() {
         // given
@@ -452,8 +452,8 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("resolved 예약으로 전환되면, pending 예약 취소 요청을 할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
-            "/test-data/reservations.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
+            "/test-data/reservations-details.sql"})
     void when_reservationStatusChangedIntoResolved_then_canNotDeleteWaitingReservation() {
         // given
         Long themeId = 1L;
@@ -490,7 +490,7 @@ class MemberReservationTest {
 
     @Test
     @DisplayName("waiting 예약에 대해, resolved 예약 취소 요청을 할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/reservation-times.sql",
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
             "/test-data/waiting-reservations.sql"})
     void when_waitingReservationExists_then_canNotDeleteResolvedReservation() {
         // given
