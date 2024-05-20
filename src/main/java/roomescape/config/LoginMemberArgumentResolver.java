@@ -35,7 +35,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         }
         String token = authService.extractToken(request.getCookies());
         MemberResponse response = authService.findMemberByToken(token);
-        return new LoginMember(response.id(), response.name(), response.email(), response.role().name());
+        return new LoginMember(response.id(), response.name());
     }
 
 }
