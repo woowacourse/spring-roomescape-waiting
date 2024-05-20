@@ -12,12 +12,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSpec;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -66,11 +68,13 @@ class JpaReservationRepositoryTest {
     @DisplayName("날짜, 테마, 사용자로 예약을 조회한다.")
     @Sql(scripts = "/insert-reservations.sql")
     void findByMemberAndThemeBetweenDates() {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
-                2L,
-                3L,
-                LocalDate.of(1999, 12, 24),
-                LocalDate.of(1999, 12, 29));
+        Specification<Reservation> specification = ReservationSpec.where()
+                .equalsMemberId(2L)
+                .equalsThemeId(3L)
+                .greaterThanOrEqualsStartDate(LocalDate.of(1999, 12, 24))
+                .lessThanOrEqualsEndDate(LocalDate.of(1999, 12, 29))
+                .build();
+        List<Reservation> reservations = reservationRepository.findAll(specification);
         assertThat(reservations).hasSize(2);
     }
 

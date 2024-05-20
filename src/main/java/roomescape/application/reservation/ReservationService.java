@@ -3,6 +3,7 @@ package roomescape.application.reservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationFilterRequest;
@@ -13,6 +14,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSpec;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -57,8 +59,14 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {
-        return reservationRepository.findByMemberAndThemeBetweenDates(
-                        request.memberId(), request.themeId(), request.startDate(), request.endDate())
+        Specification<Reservation> specification = ReservationSpec.where()
+                .equalsMemberId(request.memberId())
+                .equalsThemeId(request.themeId())
+                .greaterThanOrEqualsStartDate(request.startDate())
+                .lessThanOrEqualsEndDate(request.endDate())
+                .build();
+
+        return reservationRepository.findAll(specification)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
