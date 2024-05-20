@@ -28,12 +28,12 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        const waitingRank = item.waitingRank;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        row.insertCell(3).textContent = waitingRank === 1 ? "예약" : `${waitingRank}번째 예약대기`;
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화

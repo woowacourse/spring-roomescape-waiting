@@ -20,7 +20,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.reservation.DateTimePassedException;
-import roomescape.exception.reservation.ReservationConflictException;
+import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
@@ -60,7 +60,7 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private final Member member = new Member("t1@t1.com", "123", "러너덕", "MEMBER");
+    private final Member member = new Member("tt@tt.com", "123", "영이", "MEMBER");
     private final ReservationTime time = new ReservationTime("11:00");
     private final Theme theme = new Theme("공포", "공포는 무서워", "hi.jpg");
     private final LocalDate date = LocalDate.parse("2025-11-30");
@@ -92,7 +92,7 @@ class ReservationServiceTest {
                 .hasMessage("지나간 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
-    @DisplayName("같은 테마를 같은 시간에 예약을 시도하면 에러를 발생시킨다.")
+    @DisplayName("예약, 예약 대기를 중복해서 시도하면 에러를 발생싴니다.")
     @Test
     void throw_exception_when_create_reservation_use_same_theme_and_date_time() {
         memberRepository.save(member);
@@ -104,8 +104,8 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatThrownBy(() -> reservationService.createReservation(reservationDto))
-                .isInstanceOf(ReservationConflictException.class)
-                .hasMessage("해당 테마는 같은 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(ReservationDuplicatedException.class)
+                .hasMessage("동일한 명의로 예약 또는 예약 대기가 존재합니다.");
     }
 
     @DisplayName("예약을 정상적으로 생성한다.")
@@ -115,7 +115,7 @@ class ReservationServiceTest {
         themeRepository.save(theme);
         memberRepository.save(member);
 
-        ReservationCreate reservationDto = new ReservationCreate("t1@t1.com", 1L, "2025-11-30", 1L);
+        ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
 
         assertThatNoException()
                 .isThrownBy(() -> reservationService.createReservation(reservationDto));

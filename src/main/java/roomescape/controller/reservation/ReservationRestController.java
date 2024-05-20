@@ -16,8 +16,8 @@ import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.controller.helper.AuthenticationPrincipal;
 import roomescape.controller.helper.LoginMember;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.ReservationService;
-import roomescape.service.dto.reservation.MyReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -31,15 +31,9 @@ public class ReservationRestController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping("/admin/reservations")
-    public List<ReservationResponse> findReservations(
-            @RequestParam(name = "member", required = false) String email,
-            @RequestParam(name = "theme", required = false) Long themeId,
-            @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
-            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
-
-        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
-        return reservationService.findAllReservations(request);
+    @GetMapping("/reservations")
+    public List<ReservationRankResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
+        return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,9 +43,22 @@ public class ReservationRestController {
         return reservationService.createReservation(new ReservationCreate(loginMember, request));
     }
 
-    @GetMapping("/reservations")
-    public List<MyReservationResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
-        return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/reservations/waiting")
+    public ReservationResponse createReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
+                                                        @Valid @RequestBody MemberReservationRequest request) {
+        return reservationService.createReservation(new ReservationCreate(loginMember, request));
+    }
+
+    @GetMapping("/admin/reservations")
+    public List<ReservationResponse> findReservations(
+            @RequestParam(name = "member", required = false) String email,
+            @RequestParam(name = "theme", required = false) Long themeId,
+            @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
+            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
+
+        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
+        return reservationService.findAllReservations(request);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

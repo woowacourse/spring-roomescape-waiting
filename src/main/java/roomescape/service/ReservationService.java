@@ -13,14 +13,15 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
+import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.reservation.DateTimePassedException;
-import roomescape.exception.reservation.ReservationConflictException;
+import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.reservation.MyReservationResponse;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -54,10 +55,9 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservationResponse> findReservationsByMemberEmail(String email) {
-        return reservationRepository.findAllByMemberEmail(email)
-                .stream().map(MyReservationResponse::new)
-                .toList();
+    public List<ReservationRankResponse> findReservationsByMemberEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(UnauthorizedEmailException::new);
+        return reservationRepository.findReservationRankByMember(member);
     }
 
     public ReservationResponse createReservation(ReservationCreate reservationInfo) {
@@ -66,14 +66,14 @@ public class ReservationService {
         long themeId = reservationInfo.getThemeId();
         String email = reservationInfo.getEmail();
 
-        ReservationTime time = reservationTimeRepository.fetchById(timeId);
-        validatePreviousDate(date, time);
-        validateDuplicatedReservation(date, themeId, timeId);
-
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.fetchById(themeId);
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, theme, date, time));
-        return new ReservationResponse(savedReservation);
+        ReservationTime time = reservationTimeRepository.fetchById(timeId);
+        validatePreviousDate(date, time);
+        validateDuplicatedReservation(member, theme, date, time);
+
+        Reservation reservation = new Reservation(member, theme, date, time);
+        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     public void deleteReservation(long id) {
@@ -81,6 +81,18 @@ public class ReservationService {
             throw new ReservationNotFoundException();
         }
         reservationRepository.deleteById(id);
+    }
+
+    private void validatePreviousDate(LocalDate date, ReservationTime time) {
+        if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new DateTimePassedException();
+        }
+    }
+
+    private void validateDuplicatedReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
+        if (reservationRepository.existsByMemberAndThemeAndDateAndTime(member, theme, date, time)) {
+            throw new ReservationDuplicatedException();
+        }
     }
 
     private Specification<Reservation> getSearchSpecification(ReservationSearchParams request) {
@@ -104,17 +116,5 @@ public class ReservationService {
             }
             return builder.and(predicates.toArray(new Predicate[0]));
         });
-    }
-
-    private void validatePreviousDate(LocalDate date, ReservationTime time) {
-        if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new DateTimePassedException();
-        }
-    }
-
-    private void validateDuplicatedReservation(LocalDate date, Long themeId, Long timeId) {
-        if (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
-            throw new ReservationConflictException();
-        }
     }
 }
