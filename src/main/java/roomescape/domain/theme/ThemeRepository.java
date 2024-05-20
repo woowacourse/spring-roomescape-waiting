@@ -20,5 +20,5 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             """)
     List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit);
 
-    boolean existsByName(String name);
+    boolean existsByName(ThemeName name);
 }

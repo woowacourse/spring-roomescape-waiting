@@ -41,8 +41,8 @@ class ThemeRepositoryTest {
         themeRepository.save(theme);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(themeRepository.existsByName("테마1")).isTrue();
-            softly.assertThat(themeRepository.existsByName("테마2")).isFalse();
+            softly.assertThat(themeRepository.existsByName(new ThemeName("테마1"))).isTrue();
+            softly.assertThat(themeRepository.existsByName(new ThemeName("테마2"))).isFalse();
         });
     }
 }

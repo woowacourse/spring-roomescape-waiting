@@ -1,6 +1,7 @@
 package roomescape.domain.theme;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,7 +11,6 @@ import java.util.Objects;
 @Entity
 public class Theme {
 
-    private static final int NAME_MAX_LENGTH = 30;
     private static final int DESCRIPTION_MAX_LENGTH = 255;
     private static final int THUMBNAIL_MAX_LENGTH = 255;
 
@@ -18,8 +18,8 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = NAME_MAX_LENGTH)
-    private String name;
+    @Embedded
+    private ThemeName name;
 
     @Column(nullable = false)
     private String description;
@@ -35,28 +35,13 @@ public class Theme {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {
-        validate(name, description, thumbnail);
-
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
-    private void validate(String name, String description, String thumbnail) {
-        validateNAme(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
-    }
 
-    private void validateNAme(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 필수 값입니다.");
-        }
-
-        if (name.length() > NAME_MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("이름은 %d자를 넘을 수 없습니다.", NAME_MAX_LENGTH));
-        }
+        this.id = id;
+        this.name = new ThemeName(name);
+        this.description = description;
+        this.thumbnail = thumbnail;
     }
 
     private static void validateDescription(String description) {
@@ -100,8 +85,12 @@ public class Theme {
         return id;
     }
 
-    public String getName() {
+    public ThemeName getName() {
         return name;
+    }
+
+    public String getRawName() {
+        return name.getValue();
     }
 
     public String getDescription() {

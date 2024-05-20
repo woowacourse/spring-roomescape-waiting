@@ -19,26 +19,6 @@ class ThemeTest {
     }
 
     @ParameterizedTest
-    @DisplayName("이름이 공백이면 예외가 발생한다.")
-    @NullAndEmptySource
-    @ValueSource(strings = {" "})
-    void validateName(String name) {
-        assertThatThrownBy(() -> new Theme(name, "description", "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이름은 필수 값입니다.");
-    }
-
-    @Test
-    @DisplayName("이름이 30자를 넘으면 예외가 발생한다.")
-    void validateNameLength() {
-        String name = "a".repeat(31);
-
-        assertThatThrownBy(() -> new Theme(name, "description", "thumbnail"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이름은 30자를 넘을 수 없습니다.");
-    }
-
-    @ParameterizedTest
     @DisplayName("설명이 공백이면 예외가 발생한다.")
     @NullAndEmptySource
     @ValueSource(strings = {" "})

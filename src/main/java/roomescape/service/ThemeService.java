@@ -35,13 +35,17 @@ public class ThemeService {
     public ThemeResponse addTheme(ThemeRequest themeRequest) {
         Theme theme = themeRequest.toTheme();
 
-        if (themeRepository.existsByName(theme.getName())) {
-            throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
-        }
+        validateDuplicateName(theme);
 
         Theme savedTheme = themeRepository.save(theme);
 
         return ThemeResponse.from(savedTheme);
+    }
+
+    private void validateDuplicateName(Theme theme) {
+        if (themeRepository.existsByName(theme.getName())) {
+            throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
+        }
     }
 
     @Transactional
