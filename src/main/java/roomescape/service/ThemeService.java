@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.VisitDate;
 import roomescape.exception.ExistReservationException;
+import roomescape.exception.NotExistException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.input.ThemeInput;
@@ -47,6 +48,8 @@ public class ThemeService {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ExistReservationException(THEME, id);
         }
-        themeRepository.deleteById(id);
+        if (themeRepository.deleteReservationTimeById(id) == 0) {
+            throw new NotExistException(THEME, id);
+        }
     }
 }
