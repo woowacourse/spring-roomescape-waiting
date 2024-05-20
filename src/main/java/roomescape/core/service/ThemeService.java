@@ -61,9 +61,11 @@ public class ThemeService {
     public void delete(final long id) {
         final Theme theme = themeRepository.findById(id).orElseThrow(IllegalArgumentException::new);
         final int reservationCount = reservationRepository.countByTheme(theme);
+
         if (reservationCount > 0) {
             throw new IllegalArgumentException("예약 내역이 존재하는 테마는 삭제할 수 없습니다.");
         }
+
         themeRepository.deleteById(id);
     }
 }
