@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.BDDMockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -201,16 +202,16 @@ class ReservationControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("유효하지 않은 예약 상태 값으로 예약 POST 요청 시 상태코드 400을 반환한다.")
-    void createReservationWithInvalidReservationStatus() throws  Exception {
+    void createReservationWithInvalidReservationStatus() throws Exception {
         // given
         String invalidDateFormatRequest = """
-        {
-            "status": "invalid",
-            "date": "2023-03-08",
-            "timeId": 1,
-            "themeId": 1
-        }
-        """;
+                {
+                    "status": "invalid",
+                    "date": "2023-03-08",
+                    "timeId": 1,
+                    "themeId": 1
+                }
+                """;
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -221,6 +222,40 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").exists());
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"booking\"", "\" booking\"", "\"BOOKING \"", "\"BOOKINg\""})
+    @DisplayName("예약 POST 요청 시 예약 상태 값을 검증하여 유효한 경우 상태코드 201을 반환한다.")
+    void crestReservationWithReservationStatusValidation(String statusValue) throws Exception {
+        // given
+        String request = """
+                {
+                    "status": "valid",
+                    "date": "2023-03-08",
+                    "timeId": 1,
+                    "themeId": 1
+                }
+                """;
+        ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
+        Theme expectedTheme = WOOTECO_THEME(1L);
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L), BOOKING);
+
+        BDDMockito.given(reservationService.create(any()))
+                .willReturn(expectedReservation);
+        BDDMockito.given(reservationTimeService.findById(anyLong()))
+                .willReturn(expectedTime);
+        BDDMockito.given(themeService.findById(anyLong()))
+                .willReturn(expectedTheme);
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .cookie(COOKIE)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request.replace("\"valid\"", statusValue)))
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
 
     @Test
     @DisplayName("서비스 정책에 맞지 않는 예약 POST 요청 시 상태코드 400을 반환한다.")

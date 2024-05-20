@@ -20,10 +20,10 @@ public record ReservationSaveRequest(
         Long themeId,
         @NotBlank(message = "예약 상태는 비어있을 수 없습니다.")
         @ReservationStatusFormat
-        String status)
-{
+        String status) {
 
     public Reservation toModel(Theme theme, ReservationTime time, Member member) {
-        return new Reservation(member, date, time, theme, ReservationStatus.valueOf(status));
+        String validStatusValue = status.toUpperCase().trim();
+        return new Reservation(member, date, time, theme, ReservationStatus.valueOf(validStatusValue));
     }
 }
