@@ -3,7 +3,6 @@ package roomescape.controller.reservation.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.Status;
 
 public record MyReservationResponse(
         Long id,
@@ -18,7 +17,7 @@ public record MyReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                Status.RESERVED.getValue()
+                reservation.getStatus().getValue()
         );
     }
 }

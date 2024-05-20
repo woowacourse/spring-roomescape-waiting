@@ -5,11 +5,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.controller.member.dto.LoginMember;
-import roomescape.controller.reservation.dto.CreateReservationRequest;
+import roomescape.controller.reservation.dto.CreateReservationDto;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -52,16 +53,18 @@ public class ReservationService {
                 condition.dateFrom(), condition.dateTo());
     }
 
-    public Reservation addReservation(final CreateReservationRequest reservationRequest) {
-        validateDuplicate(reservationRequest);
-        final LocalDate date = reservationRequest.date();
-        final ReservationTime time = reservationTimeRepository.findByIdOrThrow(
-                reservationRequest.timeId());
+    public Reservation addReservation(final CreateReservationDto reservationDto) {
+        validateDuplicate(reservationDto);
+        validateDuplicateWaiting(reservationDto);
+        final LocalDate date = reservationDto.date();
+        final ReservationTime time = reservationTimeRepository
+                .findByIdOrThrow(reservationDto.timeId());
         validateBeforeDay(date, time);
 
-        final Theme theme = themeRepository.findByIdOrThrow(reservationRequest.themeId());
-        final Member member = memberRepository.findByEmailOrThrow(reservationRequest.memberId());
-        final Reservation reservation = new Reservation(null, member, date, time, theme);
+        final Theme theme = themeRepository.findByIdOrThrow(reservationDto.themeId());
+        final Member member = memberRepository.findByEmailOrThrow(reservationDto.memberId());
+        final Reservation reservation = new Reservation(null, member, date, time, theme,
+                reservationDto.status());
         return reservationRepository.save(reservation);
     }
 
@@ -79,13 +82,31 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicate(final CreateReservationRequest reservationRequest) {
-        final boolean isExistsReservation = reservationRepository.existsByThemeIdAndTimeIdAndDate(
-                reservationRequest.themeId(),
-                reservationRequest.timeId(),
-                reservationRequest.date());
-        if (isExistsReservation) {
+    private void validateDuplicate(final CreateReservationDto reservationDto) {
+        final boolean isExistReservation =
+                reservationRepository.existsByThemeIdAndTimeIdAndDateAndStatus(
+                        reservationDto.themeId(),
+                        reservationDto.timeId(),
+                        reservationDto.date(),
+                        Status.RESERVED);
+        if (isExistReservation && reservationDto.status() == Status.RESERVED) {
             throw new DuplicateReservationException("중복된 시간으로 예약이 불가합니다.");
+        }
+        if (!isExistReservation && reservationDto.status() == Status.WAITING) {
+            throw new DuplicateReservationException("예약이 존재하지 않을 경우 예약대기할 수 없습니다.");
+        }
+    }
+
+    private void validateDuplicateWaiting(final CreateReservationDto reservationDto) {
+        final boolean isExistReservation =
+                reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDateAndStatus(
+                        reservationDto.memberId(),
+                        reservationDto.themeId(),
+                        reservationDto.timeId(),
+                        reservationDto.date(),
+                        Status.WAITING);
+        if (isExistReservation && reservationDto.status() == Status.WAITING) {
+            throw new DuplicateReservationException("중복된 시간으로 예약대기가 불가합니다.");
         }
     }
 

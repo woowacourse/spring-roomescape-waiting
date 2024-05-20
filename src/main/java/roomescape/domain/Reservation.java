@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,17 +24,20 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     protected Reservation() {
     }
 
     public Reservation(final Long id, final Member member, final LocalDate date,
-                       final ReservationTime time, final Theme theme) {
+                       final ReservationTime time, final Theme theme, final Status status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public Long getId() {
@@ -55,6 +60,10 @@ public class Reservation {
         return theme;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     @Override
     public boolean equals(final Object target) {
         if (this == target) {
@@ -70,16 +79,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(getId());
-    }
-
-    @Override
-    public String toString() {
-        return "Reservation{" +
-                "id=" + id +
-                ", member='" + member + '\'' +
-                ", date=" + date +
-                ", time=" + time +
-                ", theme=" + theme +
-                '}';
     }
 }

@@ -12,14 +12,17 @@ VALUES ('봄', '설명1', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3
        ('겨울', '설명4', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
 INSERT INTO MEMBER(NAME, EMAIL, PASSWORD, ROLE)
-VALUES ('레디', 'redddy@gmail.com', '3e2b2d79b2f6f90ba2f3ae18a90ae990b149b2fdbc208f55ac9b763b4dad0a16', 'ADMIN'),
-       ('재즈', 'gkatjraud1@redddybabo.com', 'f8e5bc8fdaca1bccab597398b0f26a814c1486fb8a37515c075f4ff023abe726', 'USER'),
-       ('제제', 'jinwuo0925@gmail.com', '4e5ef62cc65465fbd14118b6e894aa0fa3fbe72c31fcdb6829a3ea21163b3e3a', 'USER');
+VALUES ('레디', 'redddy@gmail.com',
+        '3e2b2d79b2f6f90ba2f3ae18a90ae990b149b2fdbc208f55ac9b763b4dad0a16', 'ADMIN'),
+       ('재즈', 'gkatjraud1@redddybabo.com',
+        'f8e5bc8fdaca1bccab597398b0f26a814c1486fb8a37515c075f4ff023abe726', 'USER'),
+       ('제제', 'jinwuo0925@gmail.com',
+        '4e5ef62cc65465fbd14118b6e894aa0fa3fbe72c31fcdb6829a3ea21163b3e3a', 'USER');
 
-INSERT INTO RESERVATION(MEMBER_ID, DATE, TIME_ID, THEME_ID)
-VALUES (1, CURRENT_DATE - 3, 1, 1),
-       (2, CURRENT_DATE - 2, 3, 2),
-       (1, CURRENT_DATE - 1, 2, 2),
-       (2, CURRENT_DATE - 1, 1, 2),
-       (3, CURRENT_DATE - 7, 1, 3),
-       (3, CURRENT_DATE + 3, 4, 3);
+INSERT INTO RESERVATION(MEMBER_ID, DATE, TIME_ID, THEME_ID, STATUS)
+VALUES (1, CURRENT_DATE - 3, 1, 1, 'RESERVED'),
+       (2, CURRENT_DATE - 2, 3, 2, 'RESERVED'),
+       (1, CURRENT_DATE - 1, 2, 2, 'RESERVED'),
+       (2, CURRENT_DATE - 1, 1, 2, 'RESERVED'),
+       (3, CURRENT_DATE - 7, 1, 3, 'RESERVED'),
+       (3, CURRENT_DATE + 3, 4, 3, 'RESERVED');

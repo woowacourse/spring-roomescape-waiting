@@ -23,12 +23,12 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         final List<Reservation> expected = List.of(
-                new Reservation(1L, null, null, null, null),
-                new Reservation(2L, null, null, null, null),
-                new Reservation(3L, null, null, null, null),
-                new Reservation(4L, null, null, null, null),
-                new Reservation(5L, null, null, null, null),
-                new Reservation(6L, null, null, null, null)
+                new Reservation(1L, null, null, null, null, null),
+                new Reservation(2L, null, null, null, null, null),
+                new Reservation(3L, null, null, null, null, null),
+                new Reservation(4L, null, null, null, null, null),
+                new Reservation(5L, null, null, null, null, null),
+                new Reservation(6L, null, null, null, null, null)
         );
 
         assertThat(reservationRepository.findAll()).isEqualTo(expected);
@@ -68,7 +68,8 @@ class ReservationRepositoryTest {
         final LocalDate now = LocalDate.now();
         final ReservationSearchCondition condition = new ReservationSearchCondition(1L, 1L,
                 now.minusDays(7), now.minusDays(1));
-        final List<Reservation> expected = List.of(new Reservation(1L, null, null, null, null));
+        final List<Reservation> expected = List.of(
+                new Reservation(1L, null, null, null, null, null));
         //when
         final List<Reservation> reservations = reservationRepository
                 .findAllByThemeIdAndMemberIdAndDateBetween(

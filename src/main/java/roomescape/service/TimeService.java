@@ -12,6 +12,7 @@ import roomescape.controller.time.dto.CreateTimeRequest;
 import roomescape.controller.time.dto.ReadTimeResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.exception.DuplicateTimeException;
@@ -46,7 +47,8 @@ public class TimeService {
             return List.of();
         }
         final List<Reservation> reservations = reservationRepository
-                .findAllByDateAndThemeId(reservationDate, request.themeId());
+                .findAllByStatusAndDateAndThemeId(
+                        Status.RESERVED, reservationDate, request.themeId());
         final Set<ReservationTime> bookedTimes = reservations.stream()
                 .map(Reservation::getTime)
                 .collect(Collectors.toSet());

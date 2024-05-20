@@ -339,7 +339,7 @@ Content-Type: application/json
 **request**
 
 ```http request
-POST /waiting HTTP/1.1
+POST /reservations/waiting HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 host: localhost:8080
 
@@ -368,7 +368,7 @@ HTTP/1.1 201
 **request**
 
 ```http request
-DELETE /waiting/{id} HTTP/1.1
+DELETE /reservations/{id} HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 ```
 

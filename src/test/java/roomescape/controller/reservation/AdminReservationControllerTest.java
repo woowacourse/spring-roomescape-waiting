@@ -12,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.controller.member.dto.MemberLoginRequest;
-import roomescape.controller.reservation.dto.CreateReservationRequest;
+import roomescape.controller.reservation.dto.AdminCreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
@@ -79,7 +79,7 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("ADMIN이 예약 생성")
     void createReservationAdmin() {
-        final CreateReservationRequest request = new CreateReservationRequest(1L,
+        final AdminCreateReservationRequest request = new AdminCreateReservationRequest(1L,
                 1L, LocalDate.now().plusDays(1), 1L);
 
         RestAssured.given().log().all()
