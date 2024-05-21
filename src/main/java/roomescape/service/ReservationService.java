@@ -9,6 +9,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -26,11 +27,19 @@ public class ReservationService {
     }
 
     public ReservationResponse create(final Reservation reservation) {
+        validateDate(reservation.getDate());
+
         final int count = reservationRepository.countByDateAndTime_IdAndTheme_Id(
                 reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId()
         );
         validateDuplicatedReservation(count);
         return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private void validateDate(final LocalDate date) {
+        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
+            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+        }
     }
 
     private void validateDuplicatedReservation(final int count) {

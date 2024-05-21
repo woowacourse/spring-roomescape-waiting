@@ -39,8 +39,7 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
-//        validateDate(date);
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         this.id = null;
         this.member = member;
         this.date = date;
@@ -48,23 +47,9 @@ public class Reservation {
         this.theme = theme;
     }
 
-//    private void validateDate(final LocalDate date) {
-//        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
-//            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-//        }
-//    }
-
     public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
         return this.time.equals(time) && this.date.equals(date);
     }
-
-    public boolean isNotReservedBy(Member member) {
-        return this.member != member;
-    }
-
-//    public boolean isWaiting() {
-//        return this.status == ReservationStatus.WAITING;
-//    }
 
     public Long getReservationTimeId() {
         return time.getId();

@@ -40,16 +40,39 @@ public class Waiting {
     public Waiting() {
     }
 
+    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
+    public boolean isNotReservedBy(Member member) {
+        return this.member != member;
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public String getMemberName() {
+        return member.getNameString();
     }
 
     public LocalDate getDate() {
         return date;
     }
 
+    public ReservationTime getTime() {
+        return time;
+    }
+
     public LocalTime getStartAt() {
         return time.getStartAt();
+    }
+
+    public Theme getTheme() {
+        return theme;
     }
 
     public String getThemeName() {

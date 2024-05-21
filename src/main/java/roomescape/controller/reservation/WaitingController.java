@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.auth.AuthenticationPrincipal;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.Waiting;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
@@ -50,8 +50,9 @@ public class WaitingController {
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation waiting = saveRequest.toWaiting(memberResponse, themeResponse, reservationTimeResponse);
-        return ResponseEntity.status(HttpStatus.CREATED).body(waitingService.create(waiting));
+        final Waiting waiting = saveRequest.toWaiting(memberResponse, themeResponse, reservationTimeResponse);
+        ReservationResponse response = waitingService.create(waiting);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{reservationId}")
