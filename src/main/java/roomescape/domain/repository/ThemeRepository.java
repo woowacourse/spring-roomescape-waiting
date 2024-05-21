@@ -5,9 +5,15 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.Theme;
+import roomescape.exception.theme.NotFoundThemeException;
 
 public interface ThemeRepository extends Repository<Theme, Long> {
     Theme save(Theme theme);
+
+    default Theme getById(Long id) {
+        return findById(id)
+                .orElseThrow(NotFoundThemeException::new);
+    }
 
     Optional<Theme> findById(Long id);
 

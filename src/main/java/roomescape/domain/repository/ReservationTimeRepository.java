@@ -8,15 +8,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.reservation.NotFoundReservationException;
 
 public interface ReservationTimeRepository extends Repository<ReservationTime, LocalTime> {
+    ReservationTime save(ReservationTime time);
+
+    default ReservationTime getById(Long id) {
+        return findById(id)
+                .orElseThrow(NotFoundReservationException::new);
+    }
+
     List<ReservationTime> findAll();
 
     Optional<ReservationTime> findById(Long id);
 
     boolean existsByStartAt(LocalTime startAt);
-
-    ReservationTime save(ReservationTime time);
 
     void delete(ReservationTime time);
 
