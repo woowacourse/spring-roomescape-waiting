@@ -111,4 +111,17 @@ public class ReservationService {
             throw new CancelReservationException("예약은 어드민만 취소할 수 있습니다.");
         }
     }
+
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.getById(reservationId);
+        rejectAlreadyCanceled(reservation);
+        reservation.cancel();
+    }
+
+    private void rejectAlreadyCanceled(Reservation reservation) {
+        if (reservation.isCanceled()) {
+            throw new CancelReservationException("이미 취소된 예약입니다.");
+        }
+    }
 }

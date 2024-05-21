@@ -61,4 +61,8 @@ public class Reservation {
     public boolean isReserved() {
         return this.status == Status.RESERVED;
     }
+
+    public boolean isCanceled() {
+        return this.status == Status.CANCELED;
+    }
 }
