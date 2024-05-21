@@ -16,6 +16,14 @@ public record ReservationRequest(
         Long detailId
 ) {
 
+    public static ReservationRequest from(ReservationWaiting waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
+
+    public static ReservationRequest from(Reservation waiting) {
+        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
+    }
+
     public Reservation createReservation(Member member, ReservationDetail detail) {
         return new ReservationBuilder()
                 .member(member)
@@ -28,13 +36,5 @@ public record ReservationRequest(
                 .member(member)
                 .reservationDetail(detail)
                 .build();
-    }
-
-    public static ReservationRequest from(ReservationWaiting waiting) {
-        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
-    }
-
-    public static ReservationRequest from(Reservation waiting) {
-        return new ReservationRequest(waiting.getMemberId(), waiting.getDetailId());
     }
 }

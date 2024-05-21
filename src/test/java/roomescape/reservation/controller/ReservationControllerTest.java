@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -139,7 +135,7 @@ class ReservationControllerTest {
         List<ReservationTimeAvailabilityResponse> actual = RestAssured.given()
                 .cookie("token", cookie)
                 .when()
-                .get("/reservations/times/"+reservation.getTimeId()+"?date="+reservation.getDate())
+                .get("/reservations/times/" + reservation.getTimeId() + "?date=" + reservation.getDate())
                 .then()
                 .statusCode(200)
                 .extract()
