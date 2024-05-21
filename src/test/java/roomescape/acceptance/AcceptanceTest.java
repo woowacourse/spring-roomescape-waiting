@@ -135,8 +135,8 @@ abstract class AcceptanceTest {
                 .statusCode(statusCode);
     }
 
-    protected void assertGetResponseWithLogin(final String path, final int statusCode) {
-        final String accessToken = getAccessToken(ADMIN_EMAIL);
+    protected void assertGetResponseWithLogin(final String email, final String path, final int statusCode) {
+        final String accessToken = getAccessToken(email);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)

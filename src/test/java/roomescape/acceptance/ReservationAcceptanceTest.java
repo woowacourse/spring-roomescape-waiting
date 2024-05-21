@@ -94,12 +94,20 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertDeleteResponse("/reservations/", notExistingReservationTimeId, 400);
     }
+
+    @Test
+    @DisplayName("특정 사용자의 예약 목록을 성공적으로 조회하면 200을 응답한다.")
+    void respondOkWhenFindMyReservations() {
+        saveReservation();
+
+        assertGetResponseWithLogin(MEMBER_MIA_EMAIL, "/reservations/mine", 200);
+    }
     
     @Test
     @DisplayName("예약 대기 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindReservationWaitings() {
         saveReservationWaiting();
 
-        assertGetResponseWithLogin("/admin/reservations", 200);
+        assertGetResponseWithLogin(ADMIN_EMAIL, "/admin/reservations", 200);
     }
 }

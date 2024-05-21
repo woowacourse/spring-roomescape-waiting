@@ -7,9 +7,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
+import roomescape.dto.auth.LoginMember;
+import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationTimeResponse;
@@ -146,7 +149,21 @@ class ReservationServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    // TODO: 사용자 예약 목록 조회 서비스 테스트
+    @Test
+    @DisplayName("특정 사용자의 예약 목록을 조회한다.")
+    void findMyReservations() {
+        // given
+        final LoginMember loginMember = new LoginMember(1L, MEMBER_MIA_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.findByMemberId(loginMember.id()))
+                .willReturn(List.of(reservation));
+
+        // when
+        final List<MyReservationResponse> actual = reservationService.findMyReservations(loginMember);
+
+        // then
+        assertThat(actual).hasSize(1);
+    }
 
     @Test
     @DisplayName("예약 대기 목록을 조회한다.")
@@ -157,9 +174,9 @@ class ReservationServiceTest {
                 .willReturn(List.of(reservation));
 
         // when
-        final List<ReservationResponse> waitings = reservationService.findReservationWaitings();
+        final List<ReservationResponse> actual = reservationService.findReservationWaitings();
 
         // then
-        assertThat(waitings).hasSize(1);
+        assertThat(actual).hasSize(1);
     }
 }
