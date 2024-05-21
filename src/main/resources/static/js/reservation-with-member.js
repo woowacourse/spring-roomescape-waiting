@@ -185,18 +185,26 @@ function applyFilter(event) {
   const dateTo = document.getElementById('date-to').value;
 
   fetch('/admin/reservations/search?themeId=' + themeId +
-      '&memberId=' + memberId +
-      '&dateFrom=' + dateFrom +
-      '&dateTo=' + dateTo, { // 예약 검색 API 호출
+    '&memberId=' + memberId +
+    '&dateFrom=' + dateFrom +
+    '&dateTo=' + dateTo, { // 예약 검색 API 호출
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     },
   }).then(response => {
-    if (response.status === 200) return response.json();
-    throw new Error('Read failed');
+    if (response.status === 200) {
+      return response.json();
+    } else {
+      return response.json().then(data => {
+        throw new Error(data.message);
+      })
+    }
   }).then(render)
-      .catch(error => console.error("Error fetching available times:", error));
+  .catch(error => {
+    alert(error.message);
+    console.error("Error fetching available times:", error);
+  });
 }
 
 function requestCreate(reservation) {

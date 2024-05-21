@@ -161,7 +161,10 @@ function onReservationButtonClick() {
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Reservation failed');
+        return response.json().then(data => {
+            throw new Error(data.message);
+          }
+        );
       }
       return response.json();
     })
@@ -174,7 +177,7 @@ function onReservationButtonClick() {
       location.reload();
     })
     .catch(error => {
-      alert("An error occurred while making the reservation.");
+      alert(error.message);
       console.error(error);
     });
   } else {
@@ -212,7 +215,11 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
     .then(response => {
-      if (!response.ok) throw new Error('Reservation waiting failed');
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.message);
+        })
+      }
       return response.json();
     })
     .then(data => {
@@ -220,8 +227,8 @@ function onWaitButtonClick() {
       window.location.href = "/";
     })
     .catch(error => {
-      alert("An error occurred while making the reservation waiting.");
-      console.error(error);
+      alert(error.message);
+      console.error(error.message);
     });
   } else {
     alert("Please select a date, theme, and time before making a reservation waiting.");

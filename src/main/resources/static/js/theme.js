@@ -96,7 +96,10 @@ function deleteRow(event) {
 
   requestDelete(id)
       .then(() => row.remove())
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        alert(error.message);
+        console.log(error.message);
+      });
 }
 
 
@@ -112,7 +115,15 @@ function requestCreate(data) {
   return fetch(ADMIN_API_ENDPOINT, requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
-        throw new Error('Create failed');
+        else {
+          return response.json().then(data => {
+            throw new Error(data.message);
+          })
+        }
+      })
+      .catch(error => {
+        alert(error.message);
+        console.error(error.message);
       });
 }
 
@@ -131,6 +142,10 @@ function requestDelete(id) {
 
   return fetch(`${ADMIN_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
-        if (response.status !== 204) throw new Error('Delete failed');
+        if (response.status !== 204) {
+          return response.json().then(data => {
+            throw new Error(data.message);
+          })
+        }
       });
 }

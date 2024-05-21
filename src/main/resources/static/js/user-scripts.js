@@ -26,7 +26,9 @@ function updateUIBasedOnLogin() {
   fetch('/login/check') // 로그인 상태 확인 API 호출
       .then(response => {
         if (!response.ok) { // 요청이 실패하거나 로그인 상태가 아닌 경우
-          throw new Error('Not logged in or other error');
+          return response.json().then(data => {
+            throw new Error(data.message);
+          })
         }
         return response.json(); // 응답 본문을 JSON으로 파싱
       })
@@ -50,7 +52,7 @@ function updateUIBasedOnLogin() {
       })
       .catch(error => {
         // 에러 처리 또는 로그아웃 상태일 때 UI 업데이트
-        console.error('Error:', error);
+        console.error('Error:', error.message);
         document.getElementById('profile-name').textContent = 'Profile'; // 기본 텍스트로 재설정
         document.querySelector('.nav-item.dropdown').style.display = 'none'; // 드롭다운 메뉴 숨김
         document.querySelector('.nav-item a[href="/login"]').parentElement.style.display = 'block'; // 로그인 버튼 표시
@@ -87,8 +89,9 @@ function login() {
   })
       .then(response => {
         if (response.status !== 200) {
-          alert('Login failed'); // 로그인 실패 시 경고창 표시
-          throw new Error('Login failed');
+          return response.json().then(data => {
+            throw new Error(data.message);
+          })
         }
       })
       .then(() => {
@@ -96,7 +99,8 @@ function login() {
         window.location.href = '/';
       })
       .catch(error => {
-        console.error('Error during login:', error);
+        alert(error.message);
+        console.error('Error during login:', error.message);
       });
 }
 
