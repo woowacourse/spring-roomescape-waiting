@@ -7,7 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
+import roomescape.system.exception.RoomescapeException;
 
 @Entity
 public class ReservationTime {
@@ -29,6 +31,13 @@ public class ReservationTime {
     }
 
     protected ReservationTime() {
+    }
+
+    public void validateDuplication(List<ReservationTime> others) {
+        if (others.stream()
+            .anyMatch(other -> startAt.equals(other.startAt))) {
+            throw new RoomescapeException("이미 존재하는 시간은 추가할 수 없습니다.");
+        }
     }
 
     public boolean isBeforeNow() {

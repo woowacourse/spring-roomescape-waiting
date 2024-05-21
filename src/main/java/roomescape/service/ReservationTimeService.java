@@ -25,14 +25,12 @@ public class ReservationTimeService {
     }
 
     public ReservationTime save(String startAt) {
-        validateDuplication(startAt);
-        return reservationTimeRepository.save(new ReservationTime(startAt));
-    }
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAllByStartAt(
+            new Time(startAt));
+        ReservationTime reservationTime = new ReservationTime(startAt);
+        reservationTime.validateDuplication(reservationTimes);
 
-    private void validateDuplication(String rawTime) {
-        if (reservationTimeRepository.existsByStartAt(new Time(rawTime))) {
-            throw new RoomescapeException("이미 존재하는 시간은 추가할 수 없습니다.");
-        }
+        return reservationTimeRepository.save(reservationTime);
     }
 
     public void delete(Long id) {
