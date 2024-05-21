@@ -1,12 +1,14 @@
 package roomescape.controller.config;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.exception.AuthorizationException;
+import roomescape.controller.CookieUtils;
 import roomescape.model.member.LoginMember;
 import roomescape.service.AuthService;
 import roomescape.service.dto.MemberInfo;
@@ -15,9 +17,11 @@ import roomescape.service.dto.MemberInfo;
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
+    private final CookieUtils cookieUtils;
 
-    public LoginMemberArgumentResolver(AuthService authService) {
+    public LoginMemberArgumentResolver(AuthService authService, CookieUtils cookieUtils) {
         this.authService = authService;
+        this.cookieUtils = cookieUtils;
     }
 
     @Override
@@ -30,11 +34,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                   ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) throws Exception {
-        String cookie = webRequest.getHeader("cookie");
-        if (cookie == null) {
-            throw new AuthorizationException();
-        }
-        String token = cookie.substring(6);
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        Cookie[] cookies = request.getCookies();
+        String token = cookieUtils.extractToken(cookies);
         MemberInfo loginMemberInfo = authService.checkToken(token);
         return new LoginMember(loginMemberInfo.getId());
     }
