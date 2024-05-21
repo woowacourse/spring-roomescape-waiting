@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
@@ -13,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exceptions.NotFoundException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.WaitingResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -32,5 +34,20 @@ class WaitingServiceTest {
         MemberRequest memberRequest = new MemberRequest(MEMBER_1);
         assertThatThrownBy(() -> waitingService.addWaiting(reservationRequest, memberRequest))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("예약이 있을 때 예약 대기를 신청하는 경우 잘 예약된다.")
+    void addWaitingWithReservation() {
+        ReservationRequest reservationRequest = new ReservationRequest(
+                RESERVATION_1.getDate(),
+                RESERVATION_1.getReservationTime().getId(),
+                RESERVATION_1.getTheme().getId()
+        );
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+
+        WaitingResponse waitingResponse = waitingService.addWaiting(reservationRequest, memberRequest);
+
+        assertThat(waitingResponse.id()).isNotNull();
     }
 }
