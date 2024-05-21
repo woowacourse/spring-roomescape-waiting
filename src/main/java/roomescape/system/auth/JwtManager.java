@@ -41,10 +41,6 @@ public class JwtManager {
         }
 
         String token = extractTokenFromCookies(cookies);
-        if (token.isBlank()) {
-            throw new AuthorizationException("요청 토큰이 존재하지 않습니다.");
-        }
-
         return parse(token);
     }
 
@@ -54,7 +50,7 @@ public class JwtManager {
                 return cookie.getValue();
             }
         }
-        return "";
+        throw new AuthorizationException("요청 토큰이 존재하지 않습니다.");
     }
 
     private Long parse(String token) {
