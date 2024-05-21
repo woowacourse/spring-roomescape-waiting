@@ -106,9 +106,8 @@ class ReservationControllerE2ETest {
     }
 
     @DisplayName("예약 날짜가 누락된 경우 응답 코드 400을 반환한다.")
-    @TestFactory
-    Stream<DynamicTest> checkReservationDate() {
-
+    @Test
+    void checkReservationDate() {
         Map<String, String> reservationParams = Map.of(
                 "date", "",
                 "timeId", "1",
@@ -116,21 +115,16 @@ class ReservationControllerE2ETest {
                 "memberId", "1"
         );
 
-        return Stream.of(
-                dynamicTest("예약을 추가한다", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations")
-                            .then().log().all()
-                            .statusCode(400);
-                })
-        );
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON).body(reservationParams)
+                .when().cookie("token", token).post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @DisplayName("예약 시간이 누락된 경우 응답 코드 400을 반환한다.")
     @TestFactory
-    Stream<DynamicTest> checkReservationTime() {
-
+    void checkReservationTime() {
         Map<String, String> reservationParams = Map.of(
                 "date", "2024-10-10",
                 "timeId", "시간 선택",
@@ -138,21 +132,16 @@ class ReservationControllerE2ETest {
                 "memberId", "1"
         );
 
-        return Stream.of(
-                dynamicTest("예약을 추가한다", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON).body(reservationParams)
-                            .when().post("/reservations")
-                            .then().log().all()
-                            .statusCode(400);
-                })
-        );
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @DisplayName("예약 시간이 현재 시간보다 이전 시간이면 예약이 불가능한지 확인한다.")
-    @TestFactory
-    Stream<DynamicTest> checkIsPassedReservationTime() {
-
+    @Test
+    void checkIsPassedReservationTime() {
         Map<String, String> reservationParams = Map.of(
                 "date", "2020-05-01",
                 "timeId", "1",
@@ -160,21 +149,16 @@ class ReservationControllerE2ETest {
                 "memberId", "1"
         );
 
-        return Stream.of(
-                dynamicTest("예약을 추가한다", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON).body(reservationParams)
-                            .when().cookie("token", token).post("/reservations")
-                            .then().log().all()
-                            .statusCode(400);
-                })
-        );
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON).body(reservationParams)
+                .when().cookie("token", token).post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @DisplayName("중복된 시간에 예약이 불가능한지 확인한다.")
     @TestFactory
     Stream<DynamicTest> checkDuplicatedReservationDateTime() {
-
         Map<String, String> reservationParams1 = Map.of(
                 "date", "2025-05-01",
                 "timeId", "1",
