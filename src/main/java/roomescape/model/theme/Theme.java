@@ -41,7 +41,7 @@ public class Theme {
         this(id, new Name(name), new Description(description), new Thumbnail(thumbnail));
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     public static Theme from(ThemeDto themeDto) {

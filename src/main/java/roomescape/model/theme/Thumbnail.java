@@ -15,7 +15,7 @@ public class Thumbnail {
         this.thumbnail = thumbnail;
     }
 
-    public Thumbnail() {
+    protected Thumbnail() {
     }
 
     public String getThumbnail() {

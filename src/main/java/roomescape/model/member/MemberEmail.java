@@ -17,7 +17,7 @@ public class MemberEmail {
         this.email = email;
     }
 
-    public MemberEmail() {
+    protected MemberEmail() {
     }
 
     public String getEmail() {

@@ -39,7 +39,7 @@ public class Reservation {
         this(0L, date, time, theme, member);
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation of(ReservationDto reservationDto, ReservationTime time, Theme theme, Member member) {

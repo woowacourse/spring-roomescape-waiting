@@ -44,7 +44,7 @@ public class Member {
         this(id, new MemberName(name), new MemberEmail(email), new MemberPassword(password), role);
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public Long getId() {

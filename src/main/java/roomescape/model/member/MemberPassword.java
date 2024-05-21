@@ -15,7 +15,7 @@ public class MemberPassword {
         this.password = password;
     }
 
-    public MemberPassword() {
+    protected MemberPassword() {
     }
 
     public String getPassword() {
