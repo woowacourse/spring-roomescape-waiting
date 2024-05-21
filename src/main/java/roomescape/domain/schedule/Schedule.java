@@ -30,6 +30,10 @@ public class Schedule {
         return time.getStartAt();
     }
 
+    public ReservationDate getReservationDate() {
+        return date;
+    }
+
     public ReservationTime getReservationTime() {
         return time;
     }

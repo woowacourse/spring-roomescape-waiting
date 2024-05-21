@@ -225,7 +225,9 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) return response.json().then(data => {
+            throw new Error(data.message || 'Reservation waiting failed');
+          });
           return response.json();
         })
         .then(data => {

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.domain.reservation.ReservationWaitingRepository;
 import roomescape.domain.schedule.ReservationDate;
@@ -24,14 +25,17 @@ public class ReservationWaitingService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationRepository reservationRepository;
 
     public ReservationWaitingService(ReservationTimeRepository reservationTimeRepository,
                                      ThemeRepository themeRepository, MemberRepository memberRepository,
-                                     ReservationWaitingRepository reservationWaitingRepository) {
+                                     ReservationWaitingRepository reservationWaitingRepository,
+                                     ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationWaitingResponse create(ReservationRequest waitingRequest, long memberId) {
@@ -49,8 +53,8 @@ public class ReservationWaitingService {
 
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
-        // TODO: 예약 대기 검증 추가
 
+        validate(reservationDate, reservationTime, theme);
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(member, theme, schedule));
 
         return new ReservationWaitingResponse(waiting);
@@ -69,6 +73,12 @@ public class ReservationWaitingService {
     private Member findMemberById(long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidMemberException("존재하지 않는 회원입니다."));
+    }
+
+    private void validate(ReservationDate date, ReservationTime reservationTime, Theme theme) {
+        if (!reservationRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(), theme.getId())) {
+            throw new InvalidReservationException("현재 해당 테마가 예약 가능하므로 예약 대기는 등록할 수 없습니다.");
+        }
     }
 
     public void deleteById(long waitingId, long memberId) {
