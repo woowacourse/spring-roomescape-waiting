@@ -65,8 +65,10 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        if (reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(request.date(), request.timeId(),
-                request.themeId())) {
+        int reservationCount = reservationRepository.countByDateValueAndTime_IdAndTheme_Id(request.date(),
+                request.timeId(),
+                request.themeId());
+        if (reservationCount > 0) {
             throw new DuplicateSaveException("중복되는 예약이 존재합니다");
         }
 

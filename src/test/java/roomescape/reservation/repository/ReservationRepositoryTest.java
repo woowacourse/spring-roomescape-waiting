@@ -45,9 +45,9 @@ class ReservationRepositoryTest {
     void should_check_existence_of_reservation_when_date_and_theme_and_time_is_given() {
         assertAll(
                 () -> assertThat(
-                        reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(TOMORROW, 1L, 1L)).isTrue(),
+                        reservationRepository.countByDateValueAndTime_IdAndTheme_Id(TOMORROW, 1L, 1L)).isEqualTo(1),
                 () -> assertThat(
-                        reservationRepository.existsByDateValueAndTime_IdAndTheme_Id(YESTERDAY, 1L, 1L)).isFalse()
+                        reservationRepository.countByDateValueAndTime_IdAndTheme_Id(YESTERDAY, 1L, 1L)).isZero()
         );
     }
 }

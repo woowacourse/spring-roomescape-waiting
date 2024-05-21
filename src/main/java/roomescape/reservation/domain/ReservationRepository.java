@@ -24,5 +24,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"theme", "time"})
     List<Reservation> findByMember_Id(Long memberId);
 
-    boolean existsByDateValueAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    int countByDateValueAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
 }
