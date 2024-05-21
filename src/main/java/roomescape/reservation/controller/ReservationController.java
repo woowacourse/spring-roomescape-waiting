@@ -108,6 +108,17 @@ public class ReservationController {
     }
 
     @Admin
+    @PostMapping("/reservations/waitings/{reservationId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> approveWaitingReservation(
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("reservationId") final Long reservationId
+    ) {
+        reservationService.approveWaitingReservation(reservationId);
+
+        return ApiResponse.success();
+    }
+
+    @Admin
     @GetMapping("/reservations/waitings")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationsResponse> getFirstOrderWaitingReservations() {

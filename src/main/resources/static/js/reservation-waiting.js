@@ -26,7 +26,7 @@ function render(data) {
       acceptButton.textContent = '승인';
       acceptButton.className = 'btn btn-primary';
       acceptButton.onclick = function () {
-        requestDeleteWaiting(reservationId).then(() => window.location.reload());
+        requestApproveWaiting(item.id).then(() => window.location.reload());
       };
       acceptCell.appendChild(acceptButton);
 
@@ -35,7 +35,7 @@ function render(data) {
       cancelButton.textContent = '거절';
       cancelButton.className = 'btn btn-danger';
       cancelButton.onclick = function () {
-        requestDeleteWaiting(reservationId).then(() => window.location.reload());
+        requestDeleteWaiting(item.id).then(() => window.location.reload());
       };
       cancelCell.appendChild(cancelButton);
     });
@@ -48,5 +48,15 @@ function requestDeleteWaiting(reservationId) {
   }).then(response => {
     if (response.status === 204) return;
     throw new Error('Delete failed');
+  });
+}
+
+function requestApproveWaiting(reservationId) {
+  const endpoint = `/reservations/waitings/${reservationId}`;
+  return fetch(endpoint, {
+    method: 'POST'
+  }).then(response => {
+    if (response.status === 200) return;
+    throw new Error('Approve failed');
   });
 }

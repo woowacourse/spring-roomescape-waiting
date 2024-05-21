@@ -123,6 +123,15 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public void approveWaitingReservation(final Long reservationId) {
+        Reservation reservation = findReservationById(reservationId);
+        MemberReservation memberReservation = findMemberReservationByReservation(reservation);
+        changeWaitingOrdersStatus(reservation);
+
+        memberReservation.changeStatusToReserve();
+    }
+
     private void changeOrdersStatus(final Reservation reservation) {
         List<MemberReservation> waitingReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
         for (MemberReservation waitingReservation : waitingReservations) {
@@ -133,6 +142,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void removeWaitingReservationById(final Long reservationId, final Long memberId) {
         Member member = memberService.findMemberById(memberId);
         Reservation reservation = findReservationById(reservationId);
@@ -184,7 +194,7 @@ public class ReservationService {
 
     private void validateCanReserve(final ReservationRequest request, final long order) {
         if (request.status().isReserved() && order > 0) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "이미 예약 정보가 존재하여 '예약'할 수 없습니다. '예약 대기'로 요청해주세요.");
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "이미 요청하신 날짜/테마/시간 에 예약 정보가 존재하여 예약할 수 없습니다. '예약 대기'로 요청해주세요.");
         }
     }
 

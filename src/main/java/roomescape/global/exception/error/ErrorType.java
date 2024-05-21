@@ -38,7 +38,8 @@ public enum ErrorType {
     RESERVATION_PERIOD_IN_PAST("이미 지난 시간대는 예약할 수 없습니다."),
 
     // 500 Internal Server Error,
-    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다.");
+    INTERNAL_SERVER_ERROR("서버 내부에서 에러가 발생하였습니다."),
+    ;
 
     private final String description;
 
