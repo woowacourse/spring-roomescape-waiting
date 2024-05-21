@@ -298,6 +298,90 @@ HTTP/1.1 204
 ---
 </details>
 
+## 예약 대기
+
+<details>
+<summary> 예약 대기 생성 API </summary>
+
+### 예약 대기 생성 API
+
+#### Request
+
+```http request
+POST /waitings HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+
+{
+    "date": "2023-08-05",
+    "timeId": 1,
+    "themeId": 1
+}
+```
+
+#### Response
+
+```
+HTTP/1.1 201
+Location: /waitings/1 
+
+{
+    "waitingId": 1,
+    "date": "2023-08-05",
+    "timeId": 1,
+    "themeId": 1
+}
+```
+</details>
+<br>
+
+<details>
+<summary> 예약 대기 목록 조회 API </summary>
+
+### 예약 대기 목록 조회 API
+
+#### Request
+
+```http request
+GET /waitings HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "timeId": 1,
+        "themeId": 1
+    }
+]
+```
+</details>
+<br>
+
+<details>
+<summary> 예약 대기 취소 API </summary>
+
+### 예약 대기 취소 API
+
+#### Request
+
+```http request
+DELETe /waitings/{waitingId} HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 204
+```
+</details>
+<br>
+
 ## 시간
 
 <details>
