@@ -18,28 +18,32 @@ public class Theme {
     public Theme() {
     }
 
-    public Theme(Long id) {
-        this(id, null, null, null);
-    }
-
-    public Theme(Long id, String name, String description, String thumbnail) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-
-    }
-
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
     }
 
-    public Long getId() {
-        return id;
+    public Theme(Long id, String name, String description, String thumbnail) {
+        validateThemeContents(name, description, thumbnail);
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    private void validateThemeContents(String name, String description, String thumbnail) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("테마명이 입력되지 않았습니다.");
+        }
+        if (description == null || description.isEmpty()) {
+            throw new IllegalArgumentException("테마 설명이 입력되지 않았습니다.");
+        }
+        if (thumbnail == null || thumbnail.isEmpty()) {
+            throw new IllegalArgumentException("썸네일이 입려되지 않았습니다.");
+        }
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -52,6 +56,10 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }
