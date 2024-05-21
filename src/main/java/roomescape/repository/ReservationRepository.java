@@ -30,6 +30,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.time
             JOIN FETCH r.theme
             WHERE r.member = :member
+            ORDER BY r.date, r.time.startAt
             """)
     List<Reservation> findByMember(Member member);
 

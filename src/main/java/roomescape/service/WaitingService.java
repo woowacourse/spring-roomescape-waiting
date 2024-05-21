@@ -1,11 +1,13 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.domain.dto.WaitingRequest;
 import roomescape.domain.dto.WaitingResponse;
 import roomescape.exception.ReservationFailException;
@@ -32,6 +34,11 @@ public class WaitingService {
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingWithRank> findWaitingsByMember(final Member member) {
+        return waitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
     @Transactional
