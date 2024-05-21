@@ -10,7 +10,6 @@ import roomescape.reservation.controller.dto.response.ReservationTimeDeleteRespo
 import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationMapping;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -45,7 +44,7 @@ public class ReservationTimeService {
     }
 
     public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
-        List<ReservationMapping> usedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId);
+        List<Reservation> usedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId);
         List<ReservationTime> reservationTimes =
                 StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false).toList();
 
@@ -58,9 +57,9 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<ReservationMapping> usedTimeIds) {
+    private boolean isAlreadyBooked(final ReservationTime reservationTime, final List<Reservation> usedTimeIds) {
         return usedTimeIds.stream()
-                .anyMatch(reservationMapping -> reservationMapping.getTimeId() == reservationTime.getId());
+                .anyMatch(reservation -> reservation.getTime().getId() == reservationTime.getId());
     }
 
     public ReservationTimeDeleteResponse delete(final long id) {

@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationMapping;
 import roomescape.reservation.domain.Status;
 
 @DataJpaTest
@@ -129,8 +128,8 @@ class ReservationRepositoryTest {
 
         assertThat(result)
                 .hasSize(1)
-                .extracting(ReservationMapping::getTimeId)
-                .containsExactly(1);
+                .extracting(reservation -> reservation.getTime().getId())
+                .containsExactly(1L);
     }
 
     @DisplayName("테마 id, 멤버 id, 날짜 사이로 얘약을 조회한다.")
