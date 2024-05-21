@@ -103,7 +103,7 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
         //when & then
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .queryParam("dateFrom", LocalDate.now().minusDays(7).toString())
+                .queryParam("dateFrom", LocalDate.now().plusDays(7).toString())
                 .when().get("/admin/reservations/search")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(2));
