@@ -28,14 +28,14 @@ public class ReservationRestController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationRankResponse> findMemberReservations(@AuthenticationPrincipal LoginMember loginMember) {
+    public List<ReservationRankResponse> findReservations(@AuthenticationPrincipal LoginMember loginMember) {
         return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
-    public ReservationResponse createReservationMember(@AuthenticationPrincipal LoginMember loginMember,
-                                                       @Valid @RequestBody MemberReservationRequest request) {
+    public ReservationResponse createReservation(@AuthenticationPrincipal LoginMember loginMember,
+                                                 @Valid @RequestBody MemberReservationRequest request) {
         ReservationCreate create = new ReservationCreate(
                 loginMember.getEmail(),
                 request.getThemeId(),
@@ -47,7 +47,7 @@ public class ReservationRestController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations/waiting")
-    public ReservationResponse createReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
+    public ReservationResponse createWaitingReservation(@AuthenticationPrincipal LoginMember loginMember,
                                                         @Valid @RequestBody MemberReservationRequest request) {
         ReservationCreate create = new ReservationCreate(
                 loginMember.getEmail(),

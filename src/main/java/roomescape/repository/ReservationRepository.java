@@ -53,7 +53,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @Query("""
             SELECT new roomescape.repository.dto.ReservationWaitingResponse
-            (row_number() OVER (ORDER BY r.id), r.member.name, r.theme.name, r.date, r.time)
+            (r.id, r.member.name, r.theme.name, r.date, r.time)
             FROM Reservation r
             WHERE r.status = :reservationStatus
             """)

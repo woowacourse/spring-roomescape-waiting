@@ -52,7 +52,13 @@ public class AdminReservationRestController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/admin/reservations/{id}")
-    public void deleteReservation(@PathVariable long id) {
+    public void deleteConfirmedReservation(@PathVariable long id) {
         reservationService.deleteConfirmedReservation(id);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/admin/reservations/waiting/{id}")
+    public void deleteWaitingReservation(@PathVariable long id) {
+        reservationService.deleteWaitingReservation(id);
     }
 }

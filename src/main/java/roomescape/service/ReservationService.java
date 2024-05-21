@@ -103,6 +103,10 @@ public class ReservationService {
         first.ifPresent(value -> value.updateStatus(CONFIRMED));
     }
 
+    public void deleteWaitingReservation(long id) {
+        reservationRepository.deleteById(id);
+    }
+
     private void validatePreviousDate(LocalDate date, ReservationTime time) {
         if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new DateTimePassedException();
