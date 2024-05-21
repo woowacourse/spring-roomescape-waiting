@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import roomescape.config.serdes.CustomLocalDateDeserializer;
-import roomescape.config.serdes.CustomLocalDateSerializer;
-import roomescape.config.serdes.CustomLocalTimeDeserializer;
-import roomescape.config.serdes.CustomLocalTimeSerializer;
+import roomescape.config.objectmapper.CustomLocalDateDeserializer;
+import roomescape.config.objectmapper.CustomLocalDateSerializer;
+import roomescape.config.objectmapper.CustomLocalTimeDeserializer;
+import roomescape.config.objectmapper.CustomLocalTimeSerializer;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

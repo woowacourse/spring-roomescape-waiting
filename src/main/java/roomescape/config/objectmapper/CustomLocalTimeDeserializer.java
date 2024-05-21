@@ -1,4 +1,4 @@
-package roomescape.config.serdes;
+package roomescape.config.objectmapper;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
