@@ -1,7 +1,8 @@
 package roomescape.core.domain;
 
 public enum Status {
-    BOOKED("예약");
+    BOOKED("예약"),
+    STANDBY("대기");
 
     private final String value;
 
