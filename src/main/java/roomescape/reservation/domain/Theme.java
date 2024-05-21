@@ -47,4 +47,7 @@ public class Theme {
         return thumbnail;
     }
 
+    public boolean sameThemeId(Long id) {
+        return this.id.equals(id);
+    }
 }

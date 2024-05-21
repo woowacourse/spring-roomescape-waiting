@@ -56,4 +56,8 @@ public class Member {
     public Role getRole() {
         return role;
     }
+
+    public boolean sameMemberId(Long memberId) {
+        return this.id.equals(memberId);
+    }
 }
