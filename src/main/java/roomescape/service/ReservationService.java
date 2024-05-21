@@ -107,5 +107,8 @@ public class ReservationService {
         if (reservation.isNotOwner(memberInfo.id())) {
             throw new CancelReservationException("다른 회원의 예약을 취소할 수 없습니다.");
         }
+        if (reservation.isReserved()) {
+            throw new CancelReservationException("예약은 어드민만 취소할 수 있습니다.");
+        }
     }
 }

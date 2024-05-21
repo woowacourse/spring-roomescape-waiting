@@ -19,7 +19,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import roomescape.exception.reservation.CancelReservationException;
 
 @Entity
 @Getter
@@ -56,9 +55,10 @@ public class Reservation {
     }
 
     public void cancel() {
-        if (this.status == Status.RESERVED) {
-            throw new CancelReservationException();
-        }
         this.status = Status.CANCELED;
+    }
+
+    public boolean isReserved() {
+        return this.status == Status.RESERVED;
     }
 }
