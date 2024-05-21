@@ -1,7 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +8,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.dto.SignupRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @DataJpaTest
 class MemberRepositoryTest {
     @Autowired
@@ -17,7 +17,7 @@ class MemberRepositoryTest {
 
     @DisplayName("Db에 등록된 모든 회원 목록을 조회한다.")
     @Test
-    void given_when_findAll_then_returnReservations() {
+    void given_when_findAll_then_returnMembers() {
         //given, when, then
         assertThat(memberRepository.findAll()).hasSize(2);
     }
@@ -32,5 +32,13 @@ class MemberRepositoryTest {
         Member savedMember = memberRepository.save(expected);
         //then
         assertThat(savedMember).isEqualTo(expected);
+    }
+
+    @DisplayName("email 주소를 통해 회원을 조회한다.")
+    @Test
+    void given_when_findByEmail_then_returnMember() {
+        //given, when, then
+        final Member member = memberRepository.findByEmail("user@test.com").get();
+        assertThat(member.getEmail()).isEqualTo("user@test.com");
     }
 }

@@ -75,11 +75,18 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.existsById(1L)).isTrue();
     }
 
+    @DisplayName("타임 Id로 등록한 예약이 존재하는지 확인할 수 있다.")
+    @Test
+    void given_when_isExistByTimeId_then_getExistResult() {
+        //given, when, then
+        assertThat(reservationRepository.existsByTimeId(2L)).isTrue();
+    }
+
     @DisplayName("테마 Id로 등록한 예약이 존재하는지 확인할 수 있다.")
     @Test
     void given_when_isExistThemeId_then_getExistResult() {
         //given, when, then
-        assertThat(reservationRepository.existsByTimeId(2L)).isTrue();
+        assertThat(reservationRepository.existsByThemeId(2L)).isTrue();
     }
 
     @DisplayName("memberId, themeId, 기간을 이용하여 예약을 조회할 수 있다.")
