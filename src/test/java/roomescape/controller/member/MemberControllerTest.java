@@ -9,6 +9,8 @@ import roomescape.controller.member.dto.MemberLoginResponse;
 import roomescape.controller.member.dto.SignupRequest;
 import roomescape.service.exception.DuplicateEmailException;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -17,6 +19,13 @@ class MemberControllerTest {
 
     @Autowired
     MemberController memberController;
+
+    @Test
+    @DisplayName("회원 조회")
+    void findMembers() {
+        final List<MemberLoginResponse> members = memberController.getMembers();
+        assertThat(members).hasSize(3);
+    }
 
     @Test
     @DisplayName("회원 가입")

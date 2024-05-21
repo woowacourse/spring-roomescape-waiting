@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -45,7 +46,7 @@ class ReservationControllerTest {
 
         accessToken = RestAssured
                 .given().log().all()
-                .body(new MemberLoginRequest("redddy@gmail.com", "0000"))
+                .body(new MemberLoginRequest("jinwuo0925@gmail.com", "1111"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
@@ -100,6 +101,29 @@ class ReservationControllerTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("나의 예약 조회")
+    void getReservationMine() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3));
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제")
+    void deleteWaitReservation() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .when().delete("/reservations/wait/8")
+                .then().log().all()
+                .statusCode(204);
     }
 
     static Stream<Arguments> invalidRequestParameterProvider() {

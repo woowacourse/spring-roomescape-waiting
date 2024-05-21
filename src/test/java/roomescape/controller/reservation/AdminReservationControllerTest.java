@@ -9,10 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.member.dto.MemberLoginRequest;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 
 import java.time.LocalDate;
+
+import static org.hamcrest.CoreMatchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -79,5 +81,17 @@ class AdminReservationControllerTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("ADMIN이 예약 대기 목록 조회")
+    void getWaitReservation() {
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .when().get("/admin/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
     }
 }
