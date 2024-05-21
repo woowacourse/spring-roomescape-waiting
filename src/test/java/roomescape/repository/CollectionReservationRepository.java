@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -62,6 +63,16 @@ public class CollectionReservationRepository implements ReservationRepository {
                 .filter(reservation -> theme.equals(reservation.getTheme()))
                 .filter(reservation -> date.equals(reservation.getDate()))
                 .anyMatch(reservation -> reservationTime.equals(reservation.getReservationTime()));
+    }
+
+    @Override
+    public Optional<Reservation> findByThemeAndDateAndTime(Theme theme, LocalDate date,
+                                                           ReservationTime reservationTime) {
+        return reservations.stream()
+                .filter(reservation -> theme.equals(reservation.getTheme()))
+                .filter(reservation -> date.equals(reservation.getDate()))
+                .filter(reservation -> reservationTime.equals(reservation.getReservationTime()))
+                .findAny();
     }
 
     @Override

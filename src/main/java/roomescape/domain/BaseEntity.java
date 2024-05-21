@@ -14,4 +14,8 @@ public abstract class BaseEntity {
     public void prePersist() {
         createAt = LocalDateTime.now();
     }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
+    }
 }

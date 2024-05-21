@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -40,6 +41,12 @@ public class JpaReservationRepository implements ReservationRepository {
     @Override
     public boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime) {
         return jpaReservationDao.existsByThemeAndDateAndTime(theme, date, reservationTime);
+    }
+
+    @Override
+    public Optional<Reservation> findByThemeAndDateAndTime(Theme theme, LocalDate date,
+                                                           ReservationTime reservationTime) {
+        return jpaReservationDao.findByThemeAndDateAndTime(theme, date, reservationTime);
     }
 
     @Override

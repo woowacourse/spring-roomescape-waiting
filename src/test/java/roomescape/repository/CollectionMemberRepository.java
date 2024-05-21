@@ -14,7 +14,7 @@ public class CollectionMemberRepository implements MemberRepository {
     }
 
     public CollectionMemberRepository(List<Member> members) {
-        this.members = members;
+        this.members = new ArrayList<>(members);
     }
 
     @Override
