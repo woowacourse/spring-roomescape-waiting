@@ -63,6 +63,10 @@ public class Reservation {
         return !date.isBefore(dateFrom) && !date.isAfter(dateTo);
     }
 
+    public boolean isSameMember(Member member) {
+        return Objects.equals(this.member, member);
+    }
+
     public Long getId() {
         return id;
     }
