@@ -51,7 +51,7 @@ class ReservationIntegrationTest {
                 .assertThat()
                 .statusCode(200)
                 .and()
-                .body("size()", equalTo(3));
+                .body("size()", equalTo(2));
     }
 
     @DisplayName("사용자가 예약을 추가할 수 있다.")

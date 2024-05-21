@@ -1,11 +1,3 @@
-SET REFERENTIAL_INTEGRITY FALSE;
-TRUNCATE TABLE reservation_time RESTART IDENTITY;
-TRUNCATE TABLE theme RESTART IDENTITY;
-TRUNCATE TABLE member RESTART IDENTITY;
-TRUNCATE TABLE reservation RESTART IDENTITY;
-SET REFERENTIAL_INTEGRITY TRUE;
-
-
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
 INSERT INTO reservation_time (start_at) VALUES ('11:00');
 INSERT INTO reservation_time (start_at) VALUES ('12:00');
@@ -29,9 +21,9 @@ INSERT INTO member (name, email, role, password) VALUES ('썬', 'sun@email.com',
 INSERT INTO member (name, email, role, password) VALUES ('배키', 'dmsgml@email.com', 'MEMBER', '1111');
 INSERT INTO member (name, email, role, password) VALUES ('포비', 'pobi@email.com', 'ADMIN', '2222');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 1, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 2, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 4, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 4, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 3, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1 , 1, 3, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -1, 1, 1, 1, 'ACCEPT', CURRENT_TIMESTAMP - 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -1, 2, 1, 1, 'ACCEPT', CURRENT_TIMESTAMP - 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -2, 4, 1, 1, 'ACCEPT', CURRENT_TIMESTAMP + 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -3, 4, 2, 1, 'ACCEPT', CURRENT_TIMESTAMP + 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -1, 3, 2, 1, 'ACCEPT', CURRENT_TIMESTAMP);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (CURRENT_DATE -1, 1, 3, 2, 'ACCEPT', CURRENT_TIMESTAMP);

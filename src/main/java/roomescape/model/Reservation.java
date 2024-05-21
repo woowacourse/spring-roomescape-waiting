@@ -3,6 +3,7 @@ package roomescape.model;
 import static roomescape.model.ReservationStatus.ACCEPT;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
@@ -13,6 +14,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import jdk.jfr.Timestamp;
+
 @Entity
 public class Reservation {
 
@@ -22,6 +25,8 @@ public class Reservation {
     private LocalDate date;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
+    @Timestamp
+    private LocalDateTime createdAt;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
@@ -81,6 +86,10 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override
