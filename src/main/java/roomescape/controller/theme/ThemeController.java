@@ -56,7 +56,7 @@ public class ThemeController {
         return ResponseEntity.noContent()
                 .build();
     }
-    //TODO 위치 변경 고려
+
     @GetMapping(value = "/popular", params = {"from", "until", "limit"})
     public List<PopularThemeResponse> getPopularThemes(@Valid final PopularThemeRequest popularThemeRequest) {
         return popularThemeCache.computeIfAbsent(popularThemeRequest, request ->

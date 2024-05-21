@@ -19,7 +19,6 @@ public class Reservation {
     private final Long id;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private final Member member;
-    //TODO date, time, theme 이거 세놈 ReservationInfo 로 뺄까...?
     @Column(nullable = false)
     private final LocalDate date;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
