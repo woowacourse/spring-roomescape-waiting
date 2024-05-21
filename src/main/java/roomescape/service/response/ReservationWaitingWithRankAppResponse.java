@@ -9,7 +9,8 @@ public record ReservationWaitingWithRankAppResponse(
         ReservationDate date,
         ReservationTimeAppResponse reservationTimeAppResponse,
         ThemeAppResponse themeAppResponse,
-        Long rank) {
+        Long rank,
+        boolean isDenied) {
 
     public ReservationWaitingWithRankAppResponse(ReservationWaitingWithRank waitingWithRank) {
         this(
@@ -23,7 +24,8 @@ public record ReservationWaitingWithRankAppResponse(
                         waitingWithRank.getWaiting().getTheme().getName(),
                         waitingWithRank.getWaiting().getTheme().getDescription(),
                         waitingWithRank.getWaiting().getTheme().getThumbnail()),
-                waitingWithRank.getRank()
+                waitingWithRank.getRank(),
+                waitingWithRank.getWaiting().isDenied()
         );
     }
 }

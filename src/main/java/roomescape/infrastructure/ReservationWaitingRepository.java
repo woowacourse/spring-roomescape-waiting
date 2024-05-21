@@ -23,6 +23,7 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
                     WHERE w2.theme = w.theme
                       AND w2.date = w.date
                       AND w2.time = w.time
+                      AND w2.isDenied = FALSE
                       AND w2.id < w.id) AS Long))
             FROM ReservationWaiting w
             WHERE w.member.id = :memberId
@@ -35,6 +36,7 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
                 WHERE w.date = :date
                 AND w.time.id = :timeId
                 AND w.theme.id = :themeId
+                AND w.isDenied = FALSE
                 ORDER BY w.id
                 LIMIT 1
             """)

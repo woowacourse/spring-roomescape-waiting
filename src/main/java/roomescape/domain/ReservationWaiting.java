@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 @Entity
 public class ReservationWaiting {
 
+    private static final boolean DEFAULT_DENIED = false;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,20 +29,27 @@ public class ReservationWaiting {
     @JoinColumn(nullable = false)
     private Theme theme;
 
+    private boolean isDenied;
+
     public ReservationWaiting() {
     }
 
     public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
-        this(null, now, member, date, time, theme);
+        this(null, now, member, date, time, theme, DEFAULT_DENIED);
     }
 
-    public ReservationWaiting(Long id, LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+    public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, boolean isDenied) {
+        this(null, now, member, date, time, theme, isDenied);
+    }
+
+    public ReservationWaiting(Long id, LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme, boolean isDenied) {
         validateDateTime(now, date, time);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.isDenied = isDenied;
     }
 
     private static void validateDateTime(final LocalDateTime now, final ReservationDate date, final ReservationTime time) {
@@ -57,6 +66,10 @@ public class ReservationWaiting {
 
     public boolean hasMemberId(Long memberId) {
         return memberId.equals(member.getId());
+    }
+
+    public boolean isAllowed() {
+        return !isDenied;
     }
 
     public Long getId() {
@@ -77,5 +90,13 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isDenied() {
+        return isDenied;
+    }
+
+    public void setDenied(final boolean denied) {
+        isDenied = denied;
     }
 }

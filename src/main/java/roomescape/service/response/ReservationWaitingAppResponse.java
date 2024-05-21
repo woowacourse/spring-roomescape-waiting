@@ -8,7 +8,8 @@ public record ReservationWaitingAppResponse(
         String name,
         ReservationDate date,
         ReservationTimeAppResponse reservationTimeAppResponse,
-        ThemeAppResponse themeAppResponse) {
+        ThemeAppResponse themeAppResponse,
+        boolean isDenied) {
 
     public ReservationWaitingAppResponse(ReservationWaiting waiting) {
         this(
@@ -21,7 +22,8 @@ public record ReservationWaitingAppResponse(
                 new ThemeAppResponse(waiting.getTheme().getId(),
                         waiting.getTheme().getName(),
                         waiting.getTheme().getDescription(),
-                        waiting.getTheme().getThumbnail())
+                        waiting.getTheme().getThumbnail()),
+                waiting.isDenied()
         );
     }
 }

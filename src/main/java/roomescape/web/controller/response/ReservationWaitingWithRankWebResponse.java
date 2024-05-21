@@ -10,7 +10,8 @@ public record ReservationWaitingWithRankWebResponse(
         LocalDate date,
         ReservationTimeWebResponse time,
         ThemeWebResponse theme,
-        Long order) {
+        Long order,
+        boolean isDenied) {
 
     public ReservationWaitingWithRankWebResponse(ReservationWaitingWithRankAppResponse response) {
         this(
@@ -19,7 +20,8 @@ public record ReservationWaitingWithRankWebResponse(
                 response.date().getDate(),
                 ReservationTimeWebResponse.from(response.reservationTimeAppResponse()),
                 ThemeWebResponse.from(response.themeAppResponse()),
-                response.rank()
+                response.rank(),
+                response.isDenied()
         );
     }
 }
