@@ -5,6 +5,7 @@ import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
+import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 
 import java.time.LocalDateTime;
@@ -87,4 +88,17 @@ public class ReservationWaitingService {
                 .toList();
     }
 
+    public void delete(long memberId, long waitingId) {
+        if (canDelete(memberId, waitingId)) {
+            waitingRepository.delete(waitingId);
+        } else {
+            throw new RoomescapeException(PERMISSION_DENIED);
+        }
+    }
+
+    private boolean canDelete(long memberId, long waitingId) {
+        return waitingRepository.findAllByMemberId(memberId).stream()
+                .map(ReservationWaiting::getId)
+                .anyMatch(id -> id == waitingId);
+    }
 }

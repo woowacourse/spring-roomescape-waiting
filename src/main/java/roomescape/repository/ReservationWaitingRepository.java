@@ -13,4 +13,6 @@ public interface ReservationWaitingRepository {
     List<ReservationWaiting> findByReservation(Reservation reservation);
 
     boolean existsByReservationAndWaitingMember(Reservation reservation, Member waitingMember);
+
+    void delete(long id);
 }

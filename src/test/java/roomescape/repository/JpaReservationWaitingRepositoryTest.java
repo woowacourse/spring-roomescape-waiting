@@ -23,6 +23,8 @@ class JpaReservationWaitingRepositoryTest extends DatabaseClearBeforeEachTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Override
     public void doAfterClear() {
@@ -62,5 +64,29 @@ class JpaReservationWaitingRepositoryTest extends DatabaseClearBeforeEachTest {
 
         Assertions.assertThat(byReservation)
                 .contains(save);
+    }
+
+    @Test
+    @DisplayName("예약과 대기 회원을 기준으로 예약 대기 존재 여부를 잘 확인하는지 확인")
+    void existsByReservationAndWaitingMember() {
+        waitingRepository.save(DEFAULT_WAITING);
+        boolean exists = waitingRepository.existsByReservationAndWaitingMember(DEFAULT_WAITING.getReservation(),
+                DEFAULT_WAITING.getWaitingMember());
+
+        Assertions.assertThat(exists)
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("예약 대기를 잘 지우는지 확인")
+    void delete() {
+        waitingRepository.save(DEFAULT_WAITING);
+        List<ReservationWaiting> beforeDelete = waitingRepository.findByReservation(DEFAULT_RESERVATION);
+        waitingRepository.delete(DEFAULT_WAITING.getId());
+        List<ReservationWaiting> afterDelete = waitingRepository.findByReservation(DEFAULT_RESERVATION);
+
+        Assertions.assertThat(beforeDelete)
+                .containsAll(afterDelete)
+                .contains(DEFAULT_WAITING);
     }
 }

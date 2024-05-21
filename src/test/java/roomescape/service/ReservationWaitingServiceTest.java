@@ -4,6 +4,7 @@ import static roomescape.exception.ExceptionType.DUPLICATE_WAITING;
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
+import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 import static roomescape.fixture.MemberFixture.DEFAULT_ADMIN;
 import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
@@ -16,6 +17,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.fixture.ReservationWaitingFixture;
 import roomescape.repository.CollectionMemberRepository;
@@ -118,5 +120,20 @@ class ReservationWaitingServiceTest {
         Assertions.assertThatThrownBy(() -> waitingService.save(ReservationWaitingFixture.DEFAULT_REQUEST))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(DUPLICATE_WAITING.getMessage());
+    }
+
+    @Test
+    @DisplayName("자신의 예약 대기가 아닌 경우 지워지지 않는지 확인")
+    void deleteFailWhenNotMine() {
+        initServiceWithMember();
+        themeRepository.save(DEFAULT_THEME);
+        reservationTimeRepository.save(DEFAULT_TIME);
+        reservationRepository.save(DEFAULT_RESERVATION);
+
+        ReservationWaitingResponse response = waitingService.save(ReservationWaitingFixture.DEFAULT_REQUEST);
+
+        Assertions.assertThatThrownBy(() -> waitingService.delete(DEFAULT_MEMBER.getId(), response.id()))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(PERMISSION_DENIED.getMessage());
     }
 }

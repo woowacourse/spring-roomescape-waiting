@@ -35,4 +35,9 @@ public class JpaReservationWaitingRepository implements ReservationWaitingReposi
                                                        Member waitingMember) {
         return waitingDao.existsByReservationAndWaitingMember(reservation, waitingMember);
     }
+
+    @Override
+    public void delete(long id) {
+        waitingDao.deleteById(id);
+    }
 }

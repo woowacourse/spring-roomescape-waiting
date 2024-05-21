@@ -95,4 +95,13 @@ public class ReservationWaiting extends BaseEntity {
 
         return Objects.equals(id, that.id);
     }
+
+    @Override
+    public String toString() {
+        return "ReservationWaiting{" +
+                "id=" + id +
+                ", reservation=" + reservation +
+                ", waitingMember=" + waitingMember +
+                '}';
+    }
 }

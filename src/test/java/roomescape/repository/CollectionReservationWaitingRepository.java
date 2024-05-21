@@ -48,4 +48,12 @@ public class CollectionReservationWaitingRepository implements
                 .filter(reservationWaiting -> reservationWaiting.getReservation().equals(reservation))
                 .anyMatch(reservationWaiting -> reservationWaiting.getWaitingMember().equals(waitingMember));
     }
+
+    @Override
+    public void delete(long id) {
+        reservationWaitings.stream()
+                .filter(reservationWaiting -> reservationWaiting.hasIdOf(id))
+                .findAny()
+                .ifPresent(reservationWaitings::remove);
+    }
 }
