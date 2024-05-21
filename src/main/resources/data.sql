@@ -48,7 +48,9 @@ ALTER TABLE theme ALTER COLUMN id RESTART WITH 16;
 -- 예약
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
 VALUES (1, CURRENT_DATE, 1, 1, 'SUCCESS'),
+       (1, CURRENT_DATE, 1, 1, 'WAIT'),
        (2, CURRENT_DATE, 1, 2, 'SUCCESS'),
+       (1, CURRENT_DATE, 1, 2, 'WAIT'),
        (3, CURRENT_DATE, 1, 3, 'SUCCESS'),
        (4, CURRENT_DATE, 1, 4, 'SUCCESS'),
        (5, CURRENT_DATE, 1, 5, 'SUCCESS'),
@@ -68,6 +70,7 @@ VALUES (1, CURRENT_DATE, 1, 1, 'SUCCESS'),
        (1, DATEADD('DAY', 3, CURRENT_DATE), 9, 4, 'SUCCESS'),
        (2, DATEADD('DAY', 3, CURRENT_DATE), 10, 5, 'SUCCESS'),
        (3, DATEADD('DAY', 3, CURRENT_DATE), 1, 6, 'SUCCESS'),
+       (1, DATEADD('DAY', 3, CURRENT_DATE), 1, 6, 'WAIT'),
        (1, DATEADD('DAY', 4, CURRENT_DATE), 2, 7, 'SUCCESS'),
        (2, DATEADD('DAY', 4, CURRENT_DATE), 3, 1, 'SUCCESS'),
        (1, DATEADD('DAY', 5, CURRENT_DATE), 4, 1, 'SUCCESS');
