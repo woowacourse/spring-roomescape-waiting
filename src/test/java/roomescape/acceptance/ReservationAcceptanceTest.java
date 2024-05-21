@@ -341,7 +341,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("리니가 로그인을 한다", () -> {
                     liniToken = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .body(new LoginRequest("lini123", "lini2@email.com"))
+                            .body(new LoginRequest("lini123", "lini@email.com"))
                             .when().post("/login")
                             .then().log().all().extract().cookie("token");
                 }),
@@ -516,7 +516,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("리니가 본인의 예약 내역을 조회하면, 일정이 지난 예약만 있으므로 0개 내역이 조회된다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", liniToken)
-                            .when().post("/members/reservations")
+                            .when().get("/members/reservations")
                             .then().log().all()
                             .assertThat().statusCode(201).body("size()", is(0));
                 }),
@@ -554,7 +554,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("리니가 본인의 예약 내역을 조회하면, 일정이 지난 예약 대기만 있으므로 0개 내역이 조회된다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", liniToken)
-                            .when().post("/members/reservations")
+                            .when().get("/members/reservations")
                             .then().log().all()
                             .assertThat().statusCode(201).body("size()", is(0));
                 })

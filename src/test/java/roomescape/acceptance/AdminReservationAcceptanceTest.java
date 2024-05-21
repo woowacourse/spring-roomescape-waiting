@@ -51,7 +51,7 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", adminToken)
                 .body(new AdminReservationRequest(date, guestId, timeId, themeId))
-                .when().post("/reservations")
+                .when().post("/admin/reservations")
                 .then().log().all()
                 .assertThat().statusCode(201).body("id", is(greaterThan(0)));
     }
