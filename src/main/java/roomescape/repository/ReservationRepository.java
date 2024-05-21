@@ -25,17 +25,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByReservationTimeId(long timeId);
 
-    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
-           "FROM Reservation r " +
-           "WHERE r.member = :member " +
-           "AND r.theme = :theme " +
-           "AND r.reservationTime = :reservationTime " +
-           "AND r.date = :date")
+    @Query("""
+            SELECT CASE 
+            WHEN COUNT(r) > 0 
+            THEN true 
+            ELSE false END 
+            FROM Reservation r 
+            WHERE r.member = :member 
+            AND r.theme = :theme 
+            AND r.reservationTime = :reservationTime 
+            AND r.date = :date
+            """)
     boolean hasBookedReservation(
             @Param("member") Member member,
             @Param("theme") Theme theme,
             @Param("reservationTime") ReservationTime reservationTime,
             @Param("date") LocalDate date);
-
 }
 
