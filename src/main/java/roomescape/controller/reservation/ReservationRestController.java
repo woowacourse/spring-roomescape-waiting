@@ -17,6 +17,7 @@ import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.controller.helper.AuthenticationPrincipal;
 import roomescape.controller.helper.LoginMember;
 import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.repository.dto.ReservationWaitingResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
@@ -78,6 +79,11 @@ public class ReservationRestController {
 
         ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
         return reservationService.findAllReservations(request);
+    }
+
+    @GetMapping("/admin/reservations/waiting")
+    public List<ReservationWaitingResponse> findReservationWaitings() {
+        return reservationService.findAllReservationWaitings();
     }
 
     @ResponseStatus(HttpStatus.CREATED)

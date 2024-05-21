@@ -12,6 +12,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.repository.dto.ReservationWaitingResponse;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -42,4 +43,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             WHERE r.member = :member
             """)
     List<ReservationRankResponse> findReservationRankByMember(Member member);
+
+    @Query("""
+            SELECT new roomescape.repository.dto.ReservationWaitingResponse
+            (row_number() OVER (ORDER BY r.id), r.member.name, r.theme.name, r.date, r.time)
+            FROM Reservation r
+            WHERE r.reservationStatus = :reservationStatus
+            """)
+    List<ReservationWaitingResponse> findReservationByReservationStatus(ReservationStatus reservationStatus);
 }

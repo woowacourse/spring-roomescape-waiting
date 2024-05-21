@@ -25,6 +25,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.repository.dto.ReservationWaitingResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -51,10 +52,15 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
         Specification<Reservation> specification = getSearchSpecification(request);
-
         return reservationRepository.findAll(specification)
-                .stream().map(ReservationResponse::new)
+                .stream()
+                .map(ReservationResponse::new)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationWaitingResponse> findAllReservationWaitings() {
+        return reservationRepository.findReservationByReservationStatus(WAITING);
     }
 
     @Transactional(readOnly = true)
