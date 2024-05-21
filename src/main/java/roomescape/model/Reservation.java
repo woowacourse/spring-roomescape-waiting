@@ -1,5 +1,7 @@
 package roomescape.model;
 
+import static roomescape.model.ReservationStatus.ACCEPT;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -16,6 +18,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    private ReservationStatus status;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
@@ -26,12 +29,19 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+
+    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime time, Theme theme,
+                       Member member) {
         this.id = id;
         this.date = date;
+        this.status = status;
         this.time = time;
         this.theme = theme;
         this.member = member;
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(id, date, ACCEPT, time, theme, member);
     }
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -58,6 +68,10 @@ public class Reservation {
         return member;
     }
 
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -68,13 +82,14 @@ public class Reservation {
         }
         Reservation that = (Reservation) object;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
-                && Objects.equals(getTime(), that.getTime()) && Objects.equals(getTheme(),
-                that.getTheme()) && Objects.equals(getMember(), that.getMember());
+                && getStatus() == that.getStatus() && Objects.equals(getTime(), that.getTime())
+                && Objects.equals(getTheme(), that.getTheme()) && Objects.equals(getMember(),
+                that.getMember());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDate(), getTime(), getTheme(), getMember());
+        return Objects.hash(getId(), getDate(), getStatus(), getTime(), getTheme(), getMember());
     }
 
     @Override
@@ -82,6 +97,7 @@ public class Reservation {
         return "Reservation{" +
                 "id=" + id +
                 ", date=" + date +
+                ", status=" + status +
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +
