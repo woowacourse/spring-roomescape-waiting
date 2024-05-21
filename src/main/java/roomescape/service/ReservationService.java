@@ -116,6 +116,13 @@ public class ReservationService {
         return reservationResponses;
     }
 
+    public List<WaitingResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
