@@ -1,12 +1,14 @@
 package roomescape.core.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
+import roomescape.core.domain.Status;
 import roomescape.core.domain.Theme;
 import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.reservation.MyReservationResponse;
@@ -36,15 +38,13 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(final ReservationRequest request) {
-        final Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(IllegalArgumentException::new);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.getTimeId())
-                .orElseThrow(IllegalArgumentException::new);
-        final Theme theme = themeRepository.findById(request.getThemeId())
-                .orElseThrow(IllegalArgumentException::new);
-        final Reservation reservation = new Reservation(member, request.getDate(), reservationTime, theme);
+        final Member member = getMember(request);
+        final ReservationTime reservationTime = getReservationTime(request);
+        final Theme theme = getTheme(request);
+        final Reservation reservation = new Reservation(
+                member, request.getDate(), reservationTime, theme, Status.BOOKED, LocalDateTime.now());
 
-        validateDuplicatedReservation(reservation, reservationTime);
+        validateDuplicatedReservation(reservation);
         reservation.validateDateAndTime();
 
         final Reservation savedReservation = reservationRepository.save(reservation);
@@ -52,12 +52,50 @@ public class ReservationService {
         return new ReservationResponse(savedReservation.getId(), savedReservation);
     }
 
-    private void validateDuplicatedReservation(final Reservation reservation, final ReservationTime reservationTime) {
+    @Transactional
+    public ReservationResponse createWaiting(final ReservationRequest request) {
+        final Member member = getMember(request);
+        final ReservationTime reservationTime = getReservationTime(request);
+        final Theme theme = getTheme(request);
+        final Reservation reservation = new Reservation(
+                member, request.getDate(), reservationTime, theme, Status.STANDBY, LocalDateTime.now());
+
+        validateDuplicatedMemberWaiting(reservation);
+        reservation.validateDateAndTime();
+
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationResponse(savedReservation.getId(), savedReservation);
+    }
+
+    private Theme getTheme(ReservationRequest request) {
+        return themeRepository.findById(request.getThemeId())
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    private ReservationTime getReservationTime(ReservationRequest request) {
+        return reservationTimeRepository.findById(request.getTimeId())
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    private Member getMember(ReservationRequest request) {
+        return memberRepository.findById(request.getMemberId())
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    private void validateDuplicatedReservation(final Reservation reservation) {
         final Integer reservationCount = reservationRepository.countByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservationTime, reservation.getTheme());
+                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
         if (reservationCount > 0) {
             throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
+        }
+    }
+
+    private void validateDuplicatedMemberWaiting(final Reservation reservation) {
+        final Integer waitingCount = reservationRepository.countByMemberAndDateAndTimeAndTheme(
+                reservation.getMember(), reservation.getDate(), reservation.getReservationTime(), reservation.getTheme()
+        );
+        if (waitingCount > 0) {
+            throw new IllegalArgumentException("해당 시간에 이미 예약 대기 내역이 존재합니다.");
         }
     }
 
