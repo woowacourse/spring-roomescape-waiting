@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.config.IntegrationTest;
-import roomescape.reservation.dto.ThemeSaveRequest;
+import roomescape.reservation.dto.request.ThemeSaveRequest;
 import roomescape.util.CookieUtils;
 
 class ThemeApiControllerTest extends IntegrationTest {

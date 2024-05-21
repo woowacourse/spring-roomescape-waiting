@@ -28,7 +28,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.ReservationSearchCondRequest;
+import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 
 @DataJpaTest
 public class ReservationRepositoryTest {

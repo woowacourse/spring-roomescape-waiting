@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.config.IntegrationTest;
-import roomescape.reservation.dto.TimeSaveRequest;
+import roomescape.reservation.dto.request.TimeSaveRequest;
 import roomescape.util.CookieUtils;
 
 class ReservationTimeApiControllerTest extends IntegrationTest {

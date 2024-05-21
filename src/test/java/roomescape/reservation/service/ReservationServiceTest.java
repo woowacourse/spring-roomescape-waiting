@@ -28,7 +28,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.dto.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
