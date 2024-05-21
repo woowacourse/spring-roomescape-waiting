@@ -3,11 +3,8 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.DateFixture.getNextDay;
-import static roomescape.fixture.MemberFixture.getMemberAdmin;
 import static roomescape.fixture.MemberFixture.getMemberChoco;
 import static roomescape.fixture.MemberFixture.getMemberClover;
-import static roomescape.fixture.MemberFixture.getMemberEden;
 import static roomescape.fixture.ReservationFixture.getNextDayReservation;
 import static roomescape.fixture.ReservationTimeFixture.getNoon;
 import static roomescape.fixture.ThemeFixture.getTheme1;
@@ -20,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.exception.AuthorizationException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
@@ -36,10 +32,8 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
-import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
-import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ServiceTest;
 
 @DisplayName("사용자 예약 로직 테스트")
@@ -245,7 +239,8 @@ class MemberReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2, ReservationStatus.APPROVED));
 
         //when
-        List<MyReservationInfo> myReservations = memberReservationService.findMyReservations(AuthInfo.from(memberChoco));
+        List<MyReservationInfo> myReservations = memberReservationService.findMyReservations(
+                AuthInfo.from(memberChoco));
 
         //then
         assertThat(myReservations).hasSize(2);

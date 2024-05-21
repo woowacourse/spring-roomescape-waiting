@@ -1,6 +1,7 @@
 package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -44,25 +45,28 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findAllByReservationStatus(ReservationStatus reservationStatus);
 
-    @Modifying
-    @Query(value = """
-            UPDATE MemberReservation mr
-            SET mr.reservationStatus = :toSetStatus
-            WHERE mr.reservation = :reservation
-            AND mr.reservationStatus = :toChangeStatus
-            AND mr.id IN (
-                SELECT rn_table.id
-                FROM (
-                    SELECT mr2.id as id, COUNT(*) OVER(PARTITION BY mr2.reservation.id ORDER BY mr2.createdAt) AS rn
-                    FROM MemberReservation mr2
-                ) rn_table
-                WHERE rn_table.rn = :waitingNumber
-            )
-            """)
-    void updateStatusByReservationIdAndWaitingNumber(ReservationStatus toSetStatus, Reservation reservation,
-                                                     ReservationStatus toChangeStatus, int waitingNumber);
-
     void deleteByReservationId(long reservationId);
 
     boolean existsByReservationAndMember(Reservation reservation, Member member);
+
+    @Modifying
+    @Query(value = """
+                    UPDATE MemberReservation mr
+                    SET mr.reservationStatus = :toSetStatus
+                    WHERE mr.reservationStatus = :toChangeStatus
+                    AND mr.id IN (
+                        SELECT rn_table.member_reservation_id
+                        FROM (
+                            SELECT mr2.id as member_reservation_id, COUNT(*) OVER(PARTITION BY mr2.reservation.id ORDER BY mr2.createdAt) AS rn, mr2.reservation AS reservation
+                            FROM MemberReservation mr2
+                        ) rn_table
+                        JOIN WaitingUpdateHistory wuh ON wuh.reservation = rn_table.reservation
+                        WHERE rn_table.rn = :waitingNumber
+                        AND :startTime <= wuh.expireTime
+                        AND wuh.expireTime <= :endTime
+                    )
+            """)
+    void updateStatusBy(ReservationStatus toSetStatus, ReservationStatus toChangeStatus,
+                        int waitingNumber, LocalDateTime startTime, LocalDateTime endTime);
+
 }

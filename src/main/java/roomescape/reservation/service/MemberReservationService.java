@@ -1,20 +1,22 @@
 package roomescape.reservation.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
-import roomescape.global.util.Scheduler;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.dto.ReservationQueryRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.domain.*;
+import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import roomescape.waiting.service.WaitingHistoryService;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,15 +24,16 @@ public class MemberReservationService {
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
     private final ReservationCommonService reservationCommonService;
-    private final Scheduler scheduler;
+    private final WaitingHistoryService waitingHistoryService;
 
     public MemberReservationService(ReservationRepository reservationRepository,
                                     MemberReservationRepository memberReservationRepository,
-                                    ReservationCommonService reservationCommonService, Scheduler scheduler) {
+                                    ReservationCommonService reservationCommonService,
+                                    WaitingHistoryService waitingHistoryService) {
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
         this.reservationCommonService = reservationCommonService;
-        this.scheduler = scheduler;
+        this.waitingHistoryService = waitingHistoryService;
     }
 
 
@@ -59,7 +62,8 @@ public class MemberReservationService {
         ReservationTime reservationTime = reservationCommonService.getReservationTime(memberReservationCreate.timeId());
         Theme theme = reservationCommonService.getTheme(memberReservationCreate.themeId());
         Member member = reservationCommonService.getMember(memberReservationCreate.memberId());
-        Reservation reservation = reservationCommonService.getReservation(memberReservationCreate.date(), reservationTime, theme);
+        Reservation reservation = reservationCommonService.getReservation(memberReservationCreate.date(),
+                reservationTime, theme);
 
         reservationCommonService.validatePastReservation(reservation);
         reservationCommonService.validateDuplicatedReservation(reservation, member);
@@ -74,16 +78,7 @@ public class MemberReservationService {
         MemberReservation memberReservation = reservationCommonService.getMemberReservation(memberReservationId);
         Member member = reservationCommonService.getMember(authInfo.getId());
         reservationCommonService.delete(member, memberReservation);
-        scheduler.executeAfterDelay(() ->  updateStatus(memberReservation.getReservation()),2, TimeUnit.HOURS);
-    }
-
-    private void updateStatus(Reservation reservation){
-        memberReservationRepository.updateStatusByReservationIdAndWaitingNumber(
-                ReservationStatus.APPROVED,
-                reservation,
-                ReservationStatus.PENDING,
-                1
-        );
+        waitingHistoryService.createHistory(memberReservation.getReservation());
     }
 
     @Transactional

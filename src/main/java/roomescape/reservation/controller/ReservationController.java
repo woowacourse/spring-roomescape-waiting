@@ -24,7 +24,7 @@ import roomescape.reservation.controller.dto.WaitingRequest;
 import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.WaitingCreate;
-import roomescape.reservation.service.WaitingReservationService;
+import roomescape.waiting.service.WaitingReservationService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -32,7 +32,8 @@ public class ReservationController {
     private final MemberReservationService memberReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(MemberReservationService memberReservationService, WaitingReservationService waitingReservationService) {
+    public ReservationController(MemberReservationService memberReservationService,
+                                 WaitingReservationService waitingReservationService) {
         this.memberReservationService = memberReservationService;
         this.waitingReservationService = waitingReservationService;
     }

@@ -1,5 +1,19 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.DateFixture.getNextDay;
+import static roomescape.fixture.MemberFixture.getMemberAdmin;
+import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.getMemberClover;
+import static roomescape.fixture.MemberFixture.getMemberEden;
+import static roomescape.fixture.ReservationFixture.getNextDayReservation;
+import static roomescape.fixture.ReservationTimeFixture.getNoon;
+import static roomescape.fixture.ThemeFixture.getTheme1;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,40 +25,21 @@ import roomescape.exception.ErrorType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.domain.*;
-import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ServiceTest;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static roomescape.fixture.DateFixture.getNextDay;
-import static roomescape.fixture.MemberFixture.*;
-import static roomescape.fixture.ReservationFixture.getNextDayReservation;
-import static roomescape.fixture.ReservationTimeFixture.getNoon;
-import static roomescape.fixture.ThemeFixture.getTheme1;
+import roomescape.waiting.service.WaitingReservationService;
 
 @DisplayName("예약 대기 로직 테스트")
 class WaitingReservationServiceTest extends ServiceTest {
     @Autowired
-    ReservationRepository reservationRepository;
-    @Autowired
-    ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    ThemeRepository themeRepository;
-    @Autowired
     MemberRepository memberRepository;
-    @Autowired
-    MemberReservationRepository memberReservationRepository;
     @Autowired
     WaitingReservationService waitingReservationService;
     @Autowired
@@ -231,7 +226,8 @@ class WaitingReservationServiceTest extends ServiceTest {
 
         //when & then
         assertThatThrownBy(
-                () -> waitingReservationService.denyWaiting(AuthInfo.from(admin), reservationResponse.memberReservationId()))
+                () -> waitingReservationService.denyWaiting(AuthInfo.from(admin),
+                        reservationResponse.memberReservationId()))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(ErrorType.NOT_A_WAITING_RESERVATION.getMessage());
     }
@@ -255,27 +251,5 @@ class WaitingReservationServiceTest extends ServiceTest {
                         .isInstanceOf(AuthorizationException.class)
                         .hasMessage(ErrorType.NOT_ALLOWED_PERMISSION_ERROR.getMessage())
         );
-    }
-
-    @DisplayName("기존 예약이 삭제 될 경우, 대기하는 다음 예약이 자동으로 승인된다.")
-    @Test
-    void changeToApprove() {
-        //given
-        Member memberClover = memberRepository.save(getMemberClover());
-
-        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
-        MemberReservation firstReservation = memberReservationRepository.save(
-                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
-        MemberReservation waitingReservation = memberReservationRepository.save(
-                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
-
-        //when
-        memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
-
-        //then
-        // TODO: 테스트 수정
-        assertThat(memberReservationRepository.findById(waitingReservation.getId())).isNotNull();
-        assertThat(memberReservationRepository.findById(waitingReservation.getId()).get()
-                .getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);
     }
 }

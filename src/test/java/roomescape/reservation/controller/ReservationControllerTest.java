@@ -32,11 +32,11 @@ import roomescape.reservation.controller.dto.ThemeResponse;
 import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.ThemeService;
-import roomescape.reservation.service.WaitingReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.util.ControllerTest;
+import roomescape.waiting.service.WaitingReservationService;
 
 @DisplayName("예약 API 통합 테스트")
 class ReservationControllerTest extends ControllerTest {
