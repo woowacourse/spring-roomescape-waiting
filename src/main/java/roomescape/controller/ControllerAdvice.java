@@ -6,8 +6,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.controller.dto.ErrorMessageResponse;
-import roomescape.global.exception.AuthorizationException;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.AuthorizationException;
+import roomescape.system.exception.RoomescapeException;
 
 @RestControllerAdvice
 public class ControllerAdvice {

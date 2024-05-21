@@ -3,8 +3,8 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
-import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
+import roomescape.system.exception.RoomescapeException;
 
 @Service
 public class MemberService {

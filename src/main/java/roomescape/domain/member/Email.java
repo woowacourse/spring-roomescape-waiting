@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @Embeddable
 public class Email {

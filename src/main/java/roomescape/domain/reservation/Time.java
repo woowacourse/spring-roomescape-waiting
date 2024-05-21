@@ -5,7 +5,7 @@ import jakarta.persistence.Embeddable;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @Embeddable
 public class Time {

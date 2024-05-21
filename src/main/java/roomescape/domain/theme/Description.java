@@ -3,7 +3,7 @@ package roomescape.domain.theme;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @Embeddable
 public class Description {
@@ -26,7 +26,8 @@ public class Description {
             throw new RoomescapeException("테마 설명은 null이거나 비어 있을 수 없습니다.");
         }
         if (value.length() > MAX_DESCRIPTION_LENGTH) {
-            throw new RoomescapeException(String.format("테마 길이는 최대 %d글자입니다.", MAX_DESCRIPTION_LENGTH));
+            throw new RoomescapeException(
+                String.format("테마 길이는 최대 %d글자입니다.", MAX_DESCRIPTION_LENGTH));
         }
     }
 

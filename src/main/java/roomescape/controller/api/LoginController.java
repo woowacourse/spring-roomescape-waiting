@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.LoginCheckResponse;
 import roomescape.controller.dto.LoginRequest;
 import roomescape.domain.member.Member;
-import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.LoginService;
+import roomescape.system.argumentresolver.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/login")

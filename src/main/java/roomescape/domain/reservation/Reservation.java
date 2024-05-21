@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @Entity
 public class Reservation {

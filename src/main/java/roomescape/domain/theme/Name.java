@@ -3,7 +3,7 @@ package roomescape.domain.theme;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @Embeddable
 public class Name {

@@ -12,19 +12,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ThemeServiceTest {
 
-    @Autowired
-    private ThemeService themeService;
-
     private final String name = "themeName";
     private final String description = "themeDesc";
     private final String thumbnail = "https://";
+    @Autowired
+    private ThemeService themeService;
 
     @DisplayName("실패: 이름이 null 또는 빈 값이면 예외 발생")
     @ParameterizedTest

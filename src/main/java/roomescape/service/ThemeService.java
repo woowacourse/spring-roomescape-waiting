@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.theme.Name;
 import roomescape.domain.theme.Theme;
-import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.system.exception.RoomescapeException;
 
 @Service
 public class ThemeService {
@@ -19,7 +19,8 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository,
+        ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }

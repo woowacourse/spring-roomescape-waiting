@@ -1,17 +1,16 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Time;
-import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.FindTimeAndAvailabilityDto;
+import roomescape.system.exception.RoomescapeException;
 
 @Service
 public class ReservationTimeService {
@@ -47,7 +46,8 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
-    public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
+    public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date,
+        Long themeId) {
         List<Reservation> reservations =
             reservationRepository.findAllByDateAndThemeId(new Date(date.toString()), themeId);
 

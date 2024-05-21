@@ -15,18 +15,16 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ReservationTimeServiceTest {
 
+    private final String rawTime = "19:00";
     @Autowired
     private ReservationTimeService reservationTimeService;
-
-    private final String rawTime = "19:00";
-
 
     @DisplayName("성공: 예약 시간을 저장하고, id 값과 함께 반환한다.")
     @Test

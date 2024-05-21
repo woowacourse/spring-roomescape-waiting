@@ -1,4 +1,4 @@
-package roomescape.global.argumentresolver;
+package roomescape.system.argumentresolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
@@ -8,8 +8,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.member.Member;
-import roomescape.global.auth.JwtManager;
 import roomescape.service.MemberService;
+import roomescape.system.auth.JwtManager;
 
 @Component
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
@@ -17,7 +17,8 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     private final JwtManager jwtManager;
     private final MemberService memberService;
 
-    public AuthenticationPrincipalArgumentResolver(JwtManager jwtManager, MemberService memberService) {
+    public AuthenticationPrincipalArgumentResolver(JwtManager jwtManager,
+        MemberService memberService) {
         this.jwtManager = jwtManager;
         this.memberService = memberService;
     }

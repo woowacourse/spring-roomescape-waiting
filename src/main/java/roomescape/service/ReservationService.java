@@ -10,11 +10,11 @@ import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.system.exception.RoomescapeException;
 
 @Service
 public class ReservationService {

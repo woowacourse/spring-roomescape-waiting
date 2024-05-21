@@ -1,12 +1,12 @@
-package roomescape.global.auth;
+package roomescape.system.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Member;
-import roomescape.global.exception.AuthorizationException;
 import roomescape.service.MemberService;
+import roomescape.system.exception.AuthorizationException;
 
 @Component
 public class CheckRoleInterceptor implements HandlerInterceptor {
@@ -20,7 +20,8 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+        Object handler) {
         Long memberId = jwtManager.parseToken(request);
         Member member = memberService.findById(memberId);
         if (member.isNotAdmin()) {

@@ -17,25 +17,22 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.global.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.system.exception.RoomescapeException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/truncate.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class ReservationServiceTest {
 
-    @Autowired
-    private ReservationService reservationService;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
     private final String rawDate = "2060-01-01";
-
     private final Long timeId = 1L;
     private final Long themeId = 1L;
     private final Long memberId = 1L;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
 
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
     @Test
@@ -100,7 +97,8 @@ class ReservationServiceTest {
         String today = LocalDate.now().toString();
         String oneMinuteAgo = LocalTime.now().minusMinutes(1).toString();
 
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(oneMinuteAgo));
+        ReservationTime savedTime = reservationTimeRepository.save(
+            new ReservationTime(oneMinuteAgo));
 
         assertThatThrownBy(
             () -> reservationService.save(memberId, today, savedTime.getId(), themeId)

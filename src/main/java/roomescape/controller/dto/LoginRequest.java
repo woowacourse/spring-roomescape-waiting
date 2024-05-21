@@ -1,6 +1,6 @@
 package roomescape.controller.dto;
 
-import roomescape.global.exception.RoomescapeException;
+import roomescape.system.exception.RoomescapeException;
 
 public record LoginRequest(String email, String password) {
 
