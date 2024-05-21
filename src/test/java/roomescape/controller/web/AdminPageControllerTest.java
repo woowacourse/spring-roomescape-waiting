@@ -22,7 +22,8 @@ class AdminPageControllerTest extends BaseControllerTest {
             "/admin",
             "/admin/reservation",
             "/admin/time",
-            "/admin/theme"
+            "/admin/theme",
+            "/admin/waiting"
     })
     void pageTest(String path) {
         adminLogin();
