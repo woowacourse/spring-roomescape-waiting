@@ -100,6 +100,10 @@ public class Reservation {
         return status;
     }
 
+    public void setStatus(final Status status) {
+        this.status = status;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

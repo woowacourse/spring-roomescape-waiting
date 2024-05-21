@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
@@ -157,12 +158,24 @@ public class ReservationService {
 
     public ReservationDeleteResponse delete(final long id) {
         validateNotExitsReservationById(id);
+        confirmReservationIfWaitingExists(id);
         return new ReservationDeleteResponse(reservationRepository.deleteById(id));
     }
 
     private void validateNotExitsReservationById(final long id) {
         if (reservationRepository.findById(id).isEmpty()) {
             throw new NoSuchElementException("[ERROR] (id : " + id + ") 에 대한 예약이 존재하지 않습니다.");
+        }
+    }
+    
+    private void confirmReservationIfWaitingExists(final long id) {
+        Reservation reservation = reservationRepository.findById(id).get();
+        Optional<Long> waitingId = reservationRepository.findEarliestRegisteredWaiting(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.PENDING
+        );
+        if (waitingId.isPresent()) {
+            Reservation waiting = reservationRepository.findById(waitingId.get()).get();
+            waiting.setStatus(Status.RESERVED);
         }
     }
 
