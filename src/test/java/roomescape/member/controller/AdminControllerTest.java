@@ -52,7 +52,7 @@ class AdminControllerTest extends ControllerTest {
     String token;
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
     }
 
