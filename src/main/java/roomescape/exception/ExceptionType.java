@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import org.springframework.http.HttpStatus;
+import roomescape.domain.Password;
 
 public enum ExceptionType {
     EMPTY_NAME(BAD_REQUEST, "이름은 필수 값입니다."),
@@ -31,7 +32,8 @@ public enum ExceptionType {
     NO_QUERY_PARAMETER(BAD_REQUEST, "필수 검색 조건이 누락되었습니다. 요청을 다시 확인해 주세요"),
     INVALID_EMAIL(BAD_REQUEST, "잘못된 이메일 형식입니다."),
     INVALID_NAME(BAD_REQUEST, "잘못된 이름 형식입니다. 빈 값이 아닌 문자열을 입력해 주세요."),
-    INVALID_PASSWORD(BAD_REQUEST, "잘못된 비밀번호 형식입니다. 비밀번호는 8자 이상의 문자열이어야 합니다."),
+    INVALID_PASSWORD(BAD_REQUEST,
+            String.format("잘못된 비밀번호 형식입니다. 비밀번호는 %d자 이상의 문자열이어야 합니다.", Password.MIN_PASSWORD_LENGTH)),
     ;
 
     private final HttpStatus status;

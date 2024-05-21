@@ -9,6 +9,7 @@ import roomescape.exception.RoomescapeException;
 @Embeddable
 public class Password {
 
+    public static final int MIN_PASSWORD_LENGTH = 8;
     private String value;
 
     public Password() {
@@ -23,7 +24,7 @@ public class Password {
         if (value == null || value.isBlank()) {
             throw new RoomescapeException(INVALID_PASSWORD);
         }
-        if (value.length() < 8) {
+        if (value.length() < MIN_PASSWORD_LENGTH) {
             throw new RoomescapeException(INVALID_PASSWORD);
         }
     }
