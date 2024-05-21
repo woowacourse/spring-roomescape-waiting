@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
 import static roomescape.util.Fixture.HOUR_10;
 import static roomescape.util.Fixture.JOJO_EMAIL;
@@ -10,7 +11,11 @@ import static roomescape.util.Fixture.JOJO_PASSWORD;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.MEMBER_JOJO;
+import static roomescape.util.Fixture.MEMBER_KAKI;
+import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,6 +33,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 
 @DataJpaTest
@@ -89,6 +95,26 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
 
         assertThat(reservations.size()).isEqualTo(1);
+    }
+
+    @DisplayName("회원 id로 예약 대기 순번 목록을 조회한다.")
+    @Test
+    void findWaitingWithRanksByMemberId() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+        Member kaki = memberRepository.save(MEMBER_KAKI);
+
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
+
+        List<WaitingWithRank> waitings = reservationRepository.findWaitingWithRanksByMemberId(jojo.getId());
+        assertThat(waitings).hasSize(1)
+                .first()
+                .extracting(WaitingWithRank::getRank)
+                .isEqualTo(2L);
     }
 
     @DisplayName("id 값을 받아 Reservation 반환")

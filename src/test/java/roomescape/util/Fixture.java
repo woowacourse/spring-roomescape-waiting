@@ -35,6 +35,7 @@ public class Fixture {
     public static final String JOJO_EMAIL = "jojo@email.com";
     public static final String JOJO_PASSWORD = "1234";
 
+    public static final Member MEMBER_KAKI = new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
     public static final Member MEMBER_JOJO = new Member(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);
     public static final LoginMember LOGIN_JOJO = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
 

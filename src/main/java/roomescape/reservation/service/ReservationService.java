@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
@@ -10,6 +11,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -98,11 +100,25 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findAllByMemberId(loginMember.id())
-                .stream()
-                .map(MemberReservationResponse::toResponse)
+    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) { // TODO : 쿼리 성능 개선
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id());
+        List<WaitingWithRank> waitingWithRanks = reservationRepository.findWaitingWithRanksByMemberId(loginMember.id());
+
+        return reservations.stream()
+                .map(reservation -> createMemberReservationResponse(reservation, waitingWithRanks))
                 .toList();
+    }
+
+    private MemberReservationResponse createMemberReservationResponse(Reservation reservation, List<WaitingWithRank> waitingWithRanks) {
+        if (reservation.getStatus().isWait()) {
+            WaitingWithRank waitingWithRank = waitingWithRanks.stream()
+                    .filter(waiting -> Objects.equals(waiting.getWaiting().getId(), reservation.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("예약 예약 내역이 없습니다."));
+
+            return MemberReservationResponse.toWaitResponse(waitingWithRank);
+        }
+        return MemberReservationResponse.toResponse(reservation);
     }
 
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
