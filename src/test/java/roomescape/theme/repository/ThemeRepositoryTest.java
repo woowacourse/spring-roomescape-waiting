@@ -3,17 +3,22 @@ package roomescape.theme.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.Time;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -62,25 +67,27 @@ class ThemeRepositoryTest {
         assertThat(themeRepository.findAll()).hasSize(2);
     }
 
-//    @Test
-//    @DisplayName("지난 7일 기준 예약이 많은 테마 순으로 조회한다.")
-//    void getTopReservationThemes() {
-//        // Given
-//        LocalDate reservationStartDate = LocalDate.now()
-//                .minusDays(6);
-//        Time time = new Time(LocalTime.of(12, 0));
-//        Theme theme = new Theme("테마1", "설명1", "image.png");
-//
-//        //When
-//        entityManager.merge(theme);
-//        entityManager.merge(time);
-//        entityManager.merge(new Reservation("도비", reservationStartDate, time, theme));
-//
-//        // Then
-//        List<Theme> themes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(
-//                reservationStartDate, reservationStartDate.plusWeeks(1));
-//        Assertions.assertThat(themes)
-//                .isEqualTo(new Theme(1L,"테마1", "설명1", "image.png"));
-//    }
+    @Test
+    @DisplayName("지난 7일 기준 예약이 많은 테마 순으로 조회한다.")
+    void getTopReservationThemes() {
+        // Given
+        LocalDate reservationStartDate = LocalDate.now()
+                .minusDays(6);
+        Time time = new Time(LocalTime.of(12, 0));
+        Theme theme = new Theme("테마1", "설명1", "image.png");
+        Member member = new Member("켬미", "kyum@naver.com", "1111");
+
+        //When
+        entityManager.persist(theme);
+        entityManager.persist(time);
+        entityManager.persist(member);
+        entityManager.persist(new Reservation(member, theme, time, reservationStartDate));
+
+        // Then
+        List<Theme> themes = themeRepository.findThemesByReservationDateOrderByReservationCountDesc(
+                reservationStartDate, reservationStartDate.plusWeeks(1));
+        assertThat(themes)
+                .containsExactlyInAnyOrder(theme);
+    }
 
 }
