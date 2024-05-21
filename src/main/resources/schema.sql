@@ -7,7 +7,7 @@ create table if not exists member
     primary key (id)
 );
 
-create table if not exists role
+create table if not exists member_role
 (
     member_id bigint      not null,
     role      varchar(10) not null,
@@ -20,7 +20,10 @@ create table if not exists theme
     id          bigint       not null auto_increment,
     name        varchar(20)  not null,
     description varchar(200) not null,
-    thumbnail   varchar(200) not null,
+    thumbnail_url varchar
+(
+    200
+) not null,
     primary key (id)
 );
 
