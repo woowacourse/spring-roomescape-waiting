@@ -5,7 +5,6 @@ import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
-import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,7 +63,7 @@ public class ReservationService {
         validatePastTimeReservation(beforeSave);
 
         Reservation saved = reservationRepository.save(beforeSave);
-        return toResponse(saved);
+        return ReservationResponseMapper.toResponse(saved);
     }
 
     private void validateDuplicateReservation(ReservationTime requestedTime, Theme requestedTheme, LocalDate date) {

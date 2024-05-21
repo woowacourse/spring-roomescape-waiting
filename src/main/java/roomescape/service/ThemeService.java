@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DELETE_USED_THEME;
 import static roomescape.exception.ExceptionType.DUPLICATE_THEME;
-import static roomescape.service.mapper.ThemeResponseMapper.toResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,7 +29,8 @@ public class ThemeService {
     }
 
     public ThemeResponse save(ThemeRequest themeRequest) {
-        boolean hasDuplicateTheme = themeRepository.findAll().stream()
+        boolean hasDuplicateTheme = themeRepository.findAll()
+                .stream()
                 .anyMatch(theme -> theme.isNameOf(themeRequest.name()));
 
         if (hasDuplicateTheme) {
@@ -40,7 +40,7 @@ public class ThemeService {
         Theme saved = themeRepository.save(
                 new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail()));
 
-        return toResponse(saved);
+        return ThemeResponseMapper.toResponse(saved);
     }
 
     public List<ThemeResponse> findAll() {

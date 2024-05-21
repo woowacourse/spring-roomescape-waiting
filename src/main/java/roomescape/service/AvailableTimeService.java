@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
-import static roomescape.service.mapper.AvailableTimeResponseMapper.toResponse;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -16,6 +15,7 @@ import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.mapper.AvailableTimeResponseMapper;
 
 @Service
 @Transactional
@@ -46,7 +46,8 @@ public class AvailableTimeService {
 
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(reservationTime -> toResponse(reservationTime, alreadyUsedTimes.contains(reservationTime)))
+                .map(reservationTime -> AvailableTimeResponseMapper.toResponse(
+                        reservationTime, alreadyUsedTimes.contains(reservationTime)))
                 .toList();
     }
 }
