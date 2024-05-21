@@ -69,15 +69,15 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 
-    public List<Reservation> findAllInBookingByMember(Member member) {
+    public List<Reservation> findReservationsInBookingByMember(Member member) {
         return reservationRepository.findAllByMemberAndStatusWithDetails(member, ReservationStatus.BOOKING);
     }
 
-    public List<WaitingReservation> findAllInWaitingWithPreviousCountByMember(Member member) {
+    public List<WaitingReservation> findWaitingReservationsWithPreviousCountByMember(Member member) {
         return reservationRepository.findWaitingReservationsByMemberWithDetails(member);
     }
 
-    public List<Reservation> findAllInWaiting() {
+    public List<Reservation> findWaitingReservations() {
         return reservationRepository.findAllByStatusWithDetails(ReservationStatus.WAITING);
     }
 

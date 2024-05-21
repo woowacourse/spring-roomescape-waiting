@@ -287,9 +287,9 @@ class ReservationControllerTest extends ControllerTest {
         WaitingReservation expectedWaitingReservation = new WaitingReservation(
                 MIA_RESERVATION(expectedTime, HORROR_THEME(), USER_MIA(), WAITING), 0);
 
-        BDDMockito.given(reservationService.findAllInBookingByMember(any()))
+        BDDMockito.given(reservationService.findReservationsInBookingByMember(any()))
                 .willReturn(List.of(expectedReservation));
-        BDDMockito.given(reservationService.findAllInWaitingWithPreviousCountByMember(any()))
+        BDDMockito.given(reservationService.findWaitingReservationsWithPreviousCountByMember(any()))
                 .willReturn(List.of(expectedWaitingReservation));
 
         // when & then

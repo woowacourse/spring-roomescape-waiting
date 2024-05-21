@@ -209,7 +209,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
 
         // when
-        List<Reservation> reservations = reservationService.findAllInBookingByMember(mia);
+        List<Reservation> reservations = reservationService.findReservationsInBookingByMember(mia);
 
         // then
         assertThat(reservations).hasSize(1)
@@ -226,7 +226,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when
-        List<WaitingReservation> waitingReservations = reservationService.findAllInWaitingWithPreviousCountByMember(mia);
+        List<WaitingReservation> waitingReservations = reservationService.findWaitingReservationsWithPreviousCountByMember(mia);
 
         // then
         assertThat(waitingReservations).hasSize(1)
@@ -246,7 +246,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.deleteMyWaitingReservation(waitingReservation.getId(), mia);
 
         // then
-        List<WaitingReservation> waitingReservations = reservationService.findAllInWaitingWithPreviousCountByMember(mia);
+        List<WaitingReservation> waitingReservations = reservationService.findWaitingReservationsWithPreviousCountByMember(mia);
         assertThat(waitingReservations).hasSize(0);
     }
 
@@ -285,7 +285,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.create(new Reservation(mia, TOMMY_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
 
         // when
-        List<Reservation> reservations = reservationService.findAllInWaiting();
+        List<Reservation> reservations = reservationService.findWaitingReservations();
 
         // then
         assertThat(reservations).hasSize(2)

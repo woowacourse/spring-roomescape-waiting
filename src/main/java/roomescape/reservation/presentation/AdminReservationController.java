@@ -71,17 +71,17 @@ public class AdminReservationController {
                 .toList());
     }
 
-    @GetMapping("/waiting")
-    public ResponseEntity<List<ReservationResponse>> findAllInWaiting() {
-        List<Reservation> waitingReservations = reservationService.findAllInWaiting();
-        return ResponseEntity.ok(waitingReservations.stream()
-                .map(ReservationResponse::from)
-                .toList());
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> findWaitingReservations() {
+        List<Reservation> waitingReservations = reservationService.findWaitingReservations();
+        return ResponseEntity.ok(waitingReservations.stream()
+                .map(ReservationResponse::from)
+                .toList());
     }
 }
