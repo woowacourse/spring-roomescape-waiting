@@ -66,9 +66,7 @@ public class TimeService {
 
     public AvailabilityTimeResponse addTime(final CreateTimeRequest createTimeRequest) {
         final ReservationTime time = createTimeRequest.toDomain();
-        final List<ReservationTime> times = timeRepository.findAll();
-        validateDuplicate(times, time);
-
+        validateDuplicate(time);
         final ReservationTime savedTime = timeRepository.save(time);
         return AvailabilityTimeResponse.from(savedTime, false);
     }
@@ -81,10 +79,8 @@ public class TimeService {
         timeRepository.deleteById(findTime.getId());
     }
 
-    private void validateDuplicate(final List<ReservationTime> times, final ReservationTime parsedTime) {
-        final boolean hasSameTime = times.stream()
-                .anyMatch(time -> time.isSameTime(parsedTime));
-        if (hasSameTime) {
+    private void validateDuplicate(final ReservationTime time) {
+        if (timeRepository.existsByStartAt(time.getStartAt())) {
             throw new DuplicateTimeException("중복된 시간은 생성이 불가합니다.");
         }
     }
