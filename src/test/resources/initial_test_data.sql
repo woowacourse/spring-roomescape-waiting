@@ -40,3 +40,6 @@ INSERT INTO reservation(member_id, date, reservation_time_id, theme_id) VALUES
                                (1L, DATEADD('DAY', -5, CURRENT_DATE), 3, 3),
                                (2L, DATEADD('DAY', -2, CURRENT_DATE), 2, 2),
                                (2L, DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
+
+INSERT INTO waiting(date, reservation_time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -10, CURRENT_DATE), 1, 3, 2);

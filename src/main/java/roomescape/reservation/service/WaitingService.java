@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
@@ -42,6 +41,7 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
+    //TODO: 메서드 분리
     @Transactional
     public WaitingResponse addWaiting(ReservationRequest reservationRequest, MemberRequest memberRequest) {
         ReservationTime reservationTime = reservationTimeRepository.getById(reservationRequest.timeId());
@@ -55,7 +55,12 @@ public class WaitingService {
 
         Member member = memberRequest.toMember();
         if (reservation.isSameMember(member)) {
-            throw new DuplicationException("이미 예약에 성공하셨으므로 예약 대기를 걸 수 없습니다.");
+            throw new DuplicationException("이미 예약에 성공하셨습니다.");
+        }
+
+        if (waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(reservationRequest.date(),
+                reservationTime, theme, member)) {
+            throw new DuplicationException("이미 예약 대기를 거셨습니다.");
         }
 
         Waiting waiting = new Waiting(reservationRequest.date(), reservationTime, theme, member);
