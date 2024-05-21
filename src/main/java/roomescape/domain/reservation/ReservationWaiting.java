@@ -46,6 +46,10 @@ public class ReservationWaiting {
         this.schedule = schedule;
     }
 
+    public boolean isRegisteredBefore(LocalDateTime dateTime) {
+        return createdAt.isBefore(dateTime);
+    }
+
     public Long getId() {
         return id;
     }
@@ -72,5 +76,9 @@ public class ReservationWaiting {
 
     public ReservationTime getReservationTime() {
         return schedule.getReservationTime();
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
