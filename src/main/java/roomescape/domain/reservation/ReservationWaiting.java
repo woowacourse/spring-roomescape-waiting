@@ -46,8 +46,8 @@ public class ReservationWaiting {
         this.schedule = schedule;
     }
 
-    public boolean isRegisteredBefore(LocalDateTime dateTime) {
-        return createdAt.isBefore(dateTime);
+    public boolean isWaitingOf(long memberId) {
+        return member.getId() == memberId;
     }
 
     public Long getId() {
