@@ -112,9 +112,9 @@ INSERT INTO reservation (date, time_id, theme_id)
 VALUES (FORMATDATETIME(DATEADD('DAY', -5, NOW()), 'yyyy-MM-dd'), 1, 1);
 
 INSERT INTO member_reservation (member_id, reservation_id)
-VALUES (2, 1);
-INSERT INTO member_reservation (member_id, reservation_id)
 VALUES (1, 2);
+INSERT INTO member_reservation (member_id, reservation_id)
+VALUES (2, 1);
 INSERT INTO member_reservation (member_id, reservation_id)
 VALUES (1, 3);
 INSERT INTO member_reservation (member_id, reservation_id)
