@@ -1,7 +1,8 @@
-package roomescape.domain.reservation;
+package roomescape.infrastructure.reservation;
 
 import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
+import roomescape.domain.reservation.Reservation;
 
 public class ReservationSpec {
     private Specification<Reservation> spec;

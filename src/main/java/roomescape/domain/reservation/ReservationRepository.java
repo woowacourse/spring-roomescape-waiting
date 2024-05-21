@@ -2,13 +2,15 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.ListCrudRepository;
 
-public interface ReservationRepository extends
-        ListCrudRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
+public interface ReservationRepository {
+
+    Reservation save(Reservation reservation);
+
+    List<Reservation> findAll();
+
+    List<Reservation> findAll(Specification<Reservation> specification);
 
     List<Reservation> findAllByMemberId(Long id);
 
@@ -18,9 +20,7 @@ public interface ReservationRepository extends
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
-    List<Reservation> findAll(Specification<Reservation> specification);
+    Reservation getById(long id);
 
-    default Reservation getById(long id) {
-        return findById(id).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
-    }
+    void deleteById(long id);
 }

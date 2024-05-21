@@ -19,14 +19,13 @@ import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSpec;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @DataJpaTest
-class JpaReservationRepositoryTest {
+class ReservationJpaRepositoryTest {
     private static final LocalDateTime BASE_TIME = LocalDateTime.of(2000, 1, 1, 12, 0);
 
     @PersistenceContext
