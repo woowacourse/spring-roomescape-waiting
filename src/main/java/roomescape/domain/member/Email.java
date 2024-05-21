@@ -16,7 +16,7 @@ public class Email {
     @Column(nullable = false, unique = true)
     private String email;
 
-    public Email() {
+    protected Email() {
     }
 
     public Email(String email) {

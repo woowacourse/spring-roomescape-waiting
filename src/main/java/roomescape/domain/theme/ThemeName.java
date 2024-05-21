@@ -18,7 +18,7 @@ public class ThemeName {
         this.name = name;
     }
 
-    public ThemeName() {
+    protected ThemeName() {
     }
 
     public String asText() {

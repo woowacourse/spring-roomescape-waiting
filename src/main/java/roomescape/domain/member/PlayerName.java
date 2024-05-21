@@ -13,7 +13,7 @@ public class PlayerName {
     @Column(nullable = false)
     private String name;
 
-    public PlayerName() {
+    protected PlayerName() {
     }
 
     public PlayerName(String name) {
