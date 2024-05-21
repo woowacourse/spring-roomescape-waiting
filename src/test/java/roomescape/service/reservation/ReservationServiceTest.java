@@ -152,6 +152,17 @@ class ReservationServiceTest {
         assertThat(reservations).hasSize(2);
     }
 
+    @DisplayName("취소된 예약 외 모든 예약 내역을 조회한다.")
+    @Test
+    @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-reservation.sql"})
+    void findAllExceptPastReservation() {
+        //when
+        List<ReservationResponse> reservations = reservationService.findAll();
+
+        //then
+        assertThat(reservations).hasSize(0);
+    }
+
     @DisplayName("사용자 조건으로 예약 내역을 조회한다.")
     @Test
     void findByMember() {

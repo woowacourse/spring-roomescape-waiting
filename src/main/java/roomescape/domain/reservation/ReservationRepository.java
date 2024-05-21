@@ -22,5 +22,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByReservationDetailIdAndStatusAndMemberId(Long reservationDetailId, ReservationStatus status, Long memberId);
 
-    Collection<Reservation> findByStatusNot(ReservationStatus canceled);
+    @Query("select r from Reservation as r where r.status != :status AND r.reservationDetail.schedule.date >= :date")
+    Collection<Reservation> findByStatusNotAndDateAfter(ReservationStatus status, ReservationDate date);
 }

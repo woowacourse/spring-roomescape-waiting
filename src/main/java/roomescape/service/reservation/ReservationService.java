@@ -99,9 +99,8 @@ public class ReservationService {
         return ReservationStatus.RESERVED;
     }
 
-    //TODO: 이전 일정은 미조회
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findByStatusNot(ReservationStatus.CANCELED).stream().map(ReservationResponse::new).toList();
+        return reservationRepository.findByStatusNotAndDateAfter(ReservationStatus.CANCELED, ReservationDate.of(LocalDate.now())).stream().map(ReservationResponse::new).toList();
     }
 
     public void deleteById(long id) {
