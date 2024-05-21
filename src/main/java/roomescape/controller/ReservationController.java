@@ -38,7 +38,8 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@AuthenticationPrincipal Member member) {
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
+            @AuthenticationPrincipal Member member) {
         List<Reservation> memberReservations = reservationService.findMemberReservations(member);
         List<MemberReservationResponse> responses =
                 memberReservations.stream()
@@ -53,6 +54,14 @@ public class ReservationController {
         Reservation reservation = reservationService.addReservation(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
     }
+
+    @PostMapping("/reservations/pending")
+    public ResponseEntity<Reservation> createPendingReservation(@RequestBody ReservationRequest request,
+                                                                @AuthenticationPrincipal Member member) {
+        Reservation reservation = reservationService.addPendingReservation(request, member);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
+    }
+
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long id) {

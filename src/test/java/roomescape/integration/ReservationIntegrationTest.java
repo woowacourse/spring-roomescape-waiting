@@ -115,6 +115,24 @@ class ReservationIntegrationTest {
                 .statusCode(200);
     }
 
+    @DisplayName("대기상태의 예약을 추가할 수 있다.")
+    @Test
+    void should_create_pending_reservation() {
+        String cookie = createCookie("1234", "sun@email.com");
+        ReservationRequest request =
+                new ReservationRequest(LocalDate.of(2030, 8, 5), 6L, 10L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .cookie(cookie)
+                .when().post("/reservations/pending")
+                .then().log().all()
+                .assertThat()
+                .statusCode(201)
+                .header("Location", response -> equalTo("/reservations/" + response.path("id")));
+    }
+
     private String createCookie(String password, String email) {
         MemberLoginRequest loginRequest = new MemberLoginRequest(password, email);
 

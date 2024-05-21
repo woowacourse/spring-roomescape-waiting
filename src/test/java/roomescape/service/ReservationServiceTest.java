@@ -5,7 +5,10 @@ import static java.time.LocalDate.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import static roomescape.model.ReservationStatus.ACCEPT;
+import static roomescape.model.ReservationStatus.PENDING;
 import static roomescape.model.Role.ADMIN;
 import static roomescape.model.Role.MEMBER;
 
@@ -113,8 +116,30 @@ class ReservationServiceTest {
         reservationService.addReservation(request, member);
 
         List<Reservation> allReservations = reservationRepository.findAll();
-        assertThat(allReservations).hasSize(1);
+        assertSoftly(assertions -> {
+            assertions.assertThat(allReservations).hasSize(1);
+            assertions.assertThat(allReservations).extracting("status").containsExactly(ACCEPT);
+        });
     }
+
+    @DisplayName("사용자가 대기상태의 예약을 추가한다.")
+    @Test
+    void should_add_pending_reservation_times_when_give_member_request() {
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        LocalDate reservationDate = now().plusDays(2);
+        ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
+
+        reservationService.addPendingReservation(request, member);
+
+        List<Reservation> allReservations = reservationRepository.findAll();
+        assertSoftly(assertions -> {
+            assertions.assertThat(allReservations).hasSize(1);
+            assertions.assertThat(allReservations).extracting("status").containsExactly(PENDING);
+        });
+    }
+
 
     @DisplayName("관리자가 예약 시간을 추가한다")
     @Test
@@ -199,6 +224,7 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
         reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        themeRepository.save(new Theme("name", "description", "thumbnail"));
 
         ReservationRequest request = new ReservationRequest(LocalDate.now(), 3L, 1L);
 
