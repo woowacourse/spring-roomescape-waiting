@@ -59,10 +59,6 @@ public class Member {
         return this.password.matches(password);
     }
 
-    public boolean isSame(Member other) {
-        return this.equals(other);
-    }
-
     public Long getId() {
         return id;
     }

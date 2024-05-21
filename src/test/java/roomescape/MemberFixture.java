@@ -1,11 +1,13 @@
-package roomescape.presentation.acceptance;
+package roomescape;
 
+import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.Email;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.PlayerName;
 import roomescape.domain.Role;
 
+@TestComponent
 public class MemberFixture {
 
     public static Member defaultValue() {

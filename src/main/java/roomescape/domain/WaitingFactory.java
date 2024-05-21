@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.repository.MemberQueryRepository;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.ThemeQueryRepository;
@@ -35,6 +36,7 @@ public class WaitingFactory {
         this.clock = clock;
     }
 
+    @Transactional
     public Waiting create(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Time time = timeQueryRepository.getById(timeId);
         Theme theme = themeQueryRepository.getById(themeId);

@@ -18,12 +18,14 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
     @Query("""
             select new roomescape.domain.dto.WaitingWithRank(
             w,
-                (select count(w2)
+                cast((select count(w2)
                 from Waiting w2
                 where w2.date = w.date
                 and w2.time = w.time
                 and w2.theme = w.theme
-                and w2.id < w.id))
+                and w2.id < w.id)
+                as long)
+            )
             from Waiting w
             where w.member.id = :memberId
             """)
@@ -37,11 +39,6 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
 
     List<Waiting> findAll();
 
-    default Waiting getById(Long id) {
-        return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,
-                String.format("존재하지 않는 예약 대기입니다. 요청 예약 대기 id:%d", id)));
-    }
-
     @Query("""
             select w
             from Waiting w
@@ -52,4 +49,9 @@ public interface WaitingQueryRepository extends Repository<Waiting, Long> {
             limit 1
             """)
     Optional<Waiting> findCandidateWaiting(LocalDate date, Time time, Theme theme);
+
+    default Waiting getById(Long id) {
+        return findById(id).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_WAITING,
+                String.format("존재하지 않는 예약 대기입니다. 요청 예약 대기 id:%d", id)));
+    }
 }

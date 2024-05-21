@@ -10,6 +10,8 @@ import roomescape.exception.RoomescapeException;
 
 public interface MemberQueryRepository extends Repository<Member, Long> {
 
+    Member save(Member member);
+
     Optional<Member> findById(Long id);
 
     List<Member> findAll();
@@ -23,6 +25,6 @@ public interface MemberQueryRepository extends Repository<Member, Long> {
 
     default Member getByEmail(Email email) {
         return findByEmail(email).orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_MEMBER,
-                String.format("존재하지 않는 회원입니다. 입력한 회원 email:%s", email)));
+                String.format("존재하지 않는 회원입니다. 입력한 회원 email:%s", email.getEmail())));
     }
 }

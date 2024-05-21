@@ -59,6 +59,7 @@ public class TestDataInitializer implements CommandLineRunner {
         Theme theme2 = createTheme("테마2", "테마2 설명");
         Theme theme3 = createTheme("테마3", "테마3 설명");
 
+        createReservation(member1, LocalDate.of(1999, 12, 25), time1, theme1);
         createReservation(member1, LocalDate.now().minusDays(1), time1, theme1);
         createReservation(member2, LocalDate.now().minusDays(2), time1, theme2);
         createReservation(member2, LocalDate.now().minusDays(2), time2, theme2);

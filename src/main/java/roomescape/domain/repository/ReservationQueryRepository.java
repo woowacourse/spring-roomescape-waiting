@@ -27,14 +27,14 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
 
     @Query("""
             select new roomescape.domain.dto.AvailableTimeDto(
-            rt.id, rt.startAt, (
+            t.id, t.startAt, (
                 select count(r) > 0
                 from Reservation r
-                where r.time.id = rt.id
+                where r.time.id = t.id
                 and r.date = :date
                 and r.theme.id = :themeId)
             )
-            from Time rt
+            from Time t
             """)
     List<AvailableTimeDto> findAvailableReservationTimes(LocalDate date, Long themeId);
 
@@ -48,7 +48,6 @@ public interface ReservationQueryRepository extends Repository<Reservation, Long
             order by count(r.id) desc
             """)
     List<Theme> findPopularThemesDateBetween(LocalDate startDate, LocalDate endDate);
-
 
     @Query("""
             select r

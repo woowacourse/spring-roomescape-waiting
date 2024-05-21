@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.ReservationRequestFixture;
 import roomescape.application.ServiceTest;
 import roomescape.application.dto.ReservationRequest;
 import roomescape.domain.repository.ReservationQueryRepository;

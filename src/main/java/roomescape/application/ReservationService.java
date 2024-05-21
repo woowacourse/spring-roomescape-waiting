@@ -47,8 +47,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancel(Long id) {
-        reservationScheduler.cancel(id);
+    public void cancel(Long reservationId) {
+        reservationScheduler.cancel(reservationId);
     }
 
     public List<ReservationResponse> findAll() {
@@ -76,7 +76,7 @@ public class ReservationService {
         Stream<MyReservationResponse> reservationsStream = getReservationsStreamBy(memberId);
         Stream<MyReservationResponse> waitingsStream = getWaitingsStreamBy(memberId);
         return Stream.concat(reservationsStream, waitingsStream)
-                .sorted(Comparator.comparing(MyReservationResponse::date).reversed())
+                .sorted(Comparator.comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::time).reversed())
                 .toList();
     }
 

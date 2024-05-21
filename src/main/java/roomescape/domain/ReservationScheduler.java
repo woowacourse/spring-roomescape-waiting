@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.repository.ReservationCommandRepository;
 import roomescape.domain.repository.ReservationQueryRepository;
 import roomescape.domain.repository.WaitingCommandRepository;
@@ -21,7 +22,8 @@ public class ReservationScheduler {
     public ReservationScheduler(ReservationCommandRepository reservationCommandRepository,
                                 ReservationQueryRepository reservationQueryRepository,
                                 WaitingCommandRepository waitingCommandRepository,
-                                WaitingQueryRepository waitingQueryRepository, Clock clock) {
+                                WaitingQueryRepository waitingQueryRepository,
+                                Clock clock) {
         this.reservationCommandRepository = reservationCommandRepository;
         this.reservationQueryRepository = reservationQueryRepository;
         this.waitingCommandRepository = waitingCommandRepository;
@@ -29,8 +31,9 @@ public class ReservationScheduler {
         this.clock = clock;
     }
 
-    public void cancel(Long id) {
-        Reservation reservation = reservationQueryRepository.getById(id);
+    @Transactional
+    public void cancel(Long reservationId) {
+        Reservation reservation = reservationQueryRepository.getById(reservationId);
         if (reservation.isPast(clock)) {
             throw new RoomescapeException(RoomescapeErrorCode.DATE_EXPIRED);
         }

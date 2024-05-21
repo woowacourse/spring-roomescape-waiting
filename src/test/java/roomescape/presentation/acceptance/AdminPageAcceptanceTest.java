@@ -1,6 +1,7 @@
 package roomescape.presentation.acceptance;
 
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,43 +10,15 @@ import roomescape.application.dto.TokenRequest;
 
 class AdminPageAcceptanceTest extends AcceptanceTest {
 
-    private String memberToken;
-
-    @BeforeEach
-    void memberTokenSetUp() {
-        TokenRequest tokenRequest = new TokenRequest("member@wooteco.com", "wootecoCrew6!");
-        memberToken = RestAssured.given()
-                .contentType("application/json")
-                .body(tokenRequest)
-                .when().post("/login")
-                .then()
-                .statusCode(200)
-                .extract()
-                .cookie("token");
-    }
-
     @DisplayName("요청자가 운영자라면 200 OK 응답을 받는다.")
     @Nested
     class Admin {
 
-        private String adminToken;
-
-        @BeforeEach
-        void adminTokenSetUp() {
-            TokenRequest tokenRequest = new TokenRequest("admin@wooteco.com", "wootecoCrew6!");
-            adminToken = RestAssured.given()
-                    .contentType("application/json")
-                    .body(tokenRequest)
-                    .when().post("/login")
-                    .then()
-                    .statusCode(200)
-                    .extract()
-                    .cookie("token");
-        }
-
         @DisplayName("admin 요청하면 200 OK 응답한다.")
         @Test
         void adminPageTest() {
+            adminTokenSetup();
+
             RestAssured.given().log().all()
                     .cookie("token", adminToken)
                     .when().get("/admin")
@@ -56,6 +29,8 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
         @DisplayName("예약 페이지를 요청하면 200 OK 응답한다.")
         @Test
         void reservationPageTest() {
+            adminTokenSetup();
+
             RestAssured.given().log().all()
                     .cookie("token", adminToken)
                     .when().get("/admin/reservation")
@@ -66,6 +41,8 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
         @DisplayName("시간 추가 페이지를 요청하면 200 OK 응답한다.")
         @Test
         void timePageTest() {
+            adminTokenSetup();
+
             RestAssured.given().log().all()
                     .cookie("token", adminToken)
                     .when().get("/admin/time")
@@ -77,6 +54,8 @@ class AdminPageAcceptanceTest extends AcceptanceTest {
     @DisplayName("요청자가 운영자가 아니라면 401 응답을 받는다.")
     @Test
     void basicMemberUnAuthorized() {
+        memberTokenSetUp();
+
         RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .when().get("/admin")

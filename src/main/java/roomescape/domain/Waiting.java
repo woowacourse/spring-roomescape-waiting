@@ -12,6 +12,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.exception.RoomescapeErrorCode;
+import roomescape.exception.RoomescapeException;
 
 @Entity
 public class Waiting {
@@ -42,6 +44,18 @@ public class Waiting {
     }
 
     public Waiting(Long id, Member member, LocalDate date, Time time, Theme theme) {
+        if (member == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약자는 필수입니다.");
+        }
+        if (date == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
+        }
+        if (time == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 시간은 필수입니다.");
+        }
+        if (theme == null) {
+            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "테마는 필수입니다.");
+        }
         this.id = id;
         this.member = member;
         this.date = date;
