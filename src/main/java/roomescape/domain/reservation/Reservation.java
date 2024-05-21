@@ -1,12 +1,12 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
@@ -44,14 +44,6 @@ public class Reservation {
         this.member = member;
     }
 
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public Long getId() {
         return id;
     }
@@ -75,11 +67,11 @@ public class Reservation {
     @Override
     public String toString() {
         return "Reservation{" +
-               "id=" + id +
-               ", date=" + date +
-               ", time=" + time +
-               ", theme=" + theme +
-               ", member=" + member +
-               '}';
+                "id=" + id +
+                ", date=" + date +
+                ", time=" + time +
+                ", theme=" + theme +
+                ", member=" + member +
+                '}';
     }
 }

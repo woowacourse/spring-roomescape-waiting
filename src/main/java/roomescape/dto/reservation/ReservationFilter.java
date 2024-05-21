@@ -6,14 +6,14 @@ public class ReservationFilter {
 
     private Long memberId;
     private Long themeId;
-    private LocalDate dateFrom;
-    private LocalDate dateTo;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public ReservationFilter() {
     }
 
     public boolean existFilter() {
-        return memberId != null || themeId != null || dateFrom != null || dateTo != null;
+        return memberId != null || themeId != null || startDate != null || endDate != null;
     }
 
     public Long getMemberId() {
@@ -24,12 +24,12 @@ public class ReservationFilter {
         return themeId;
     }
 
-    public LocalDate getDateFrom() {
-        return dateFrom;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public LocalDate getDateTo() {
-        return dateTo;
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
     public void setMemberId(Long memberId) {
@@ -40,11 +40,11 @@ public class ReservationFilter {
         this.themeId = themeId;
     }
 
-    public void setDateFrom(LocalDate dateFrom) {
-        this.dateFrom = dateFrom;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public void setDateTo(LocalDate dateTo) {
-        this.dateTo = dateTo;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

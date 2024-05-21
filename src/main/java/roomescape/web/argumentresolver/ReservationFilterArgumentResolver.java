@@ -41,10 +41,10 @@ public class ReservationFilterArgumentResolver implements HandlerMethodArgumentR
                 filter.setThemeId(Long.parseLong(themeId));
             }
             if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-                filter.setDateFrom(LocalDate.parse(dateFrom));
+                filter.setStartDate(LocalDate.parse(dateFrom));
             }
             if (dateTo != null && !dateTo.trim().isEmpty()) {
-                filter.setDateTo(LocalDate.parse(dateTo));
+                filter.setEndDate(LocalDate.parse(dateTo));
             }
         } catch (NumberFormatException | DateTimeParseException e) {
             throw new IllegalArgumentException(

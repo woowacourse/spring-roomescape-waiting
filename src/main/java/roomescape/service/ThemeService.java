@@ -42,7 +42,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getPopularThemes() {
-        List<Long> popularThemeIds = reservationRepository.findThemeReservationCountsForDate(
+        List<Long> popularThemeIds = reservationRepository.findTopThemeIdsByReservationCountsForDate(
                 DateUtil.A_WEEK_AGO, DateUtil.YESTERDAY);
 
         return themeRepository.findAllById(popularThemeIds)

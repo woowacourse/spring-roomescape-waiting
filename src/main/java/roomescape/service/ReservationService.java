@@ -57,18 +57,17 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
-        Member member = findMember(memberId);
-        List<Reservation> reservations = reservationRepository.findByMember(member);
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return reservations.stream().map(UserReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
+        List<Reservation> reservations = reservationRepository.findByMemberOrThemeOrDateRange(
                 filter.getMemberId(),
                 filter.getThemeId(),
-                filter.getDateFrom(),
-                filter.getDateTo()
+                filter.getStartDate(),
+                filter.getEndDate()
         );
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -127,8 +126,8 @@ public class ReservationService {
     private void validateReservationNotDuplicate(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getThemeId())
+                reservation.getTime().getId(),
+                reservation.getTheme().getId())
         ) {
             throw new IllegalArgumentException(
                     "[ERROR] 해당 시간에 동일한 테마가 예약되어있어 예약이 불가능합니다.",
