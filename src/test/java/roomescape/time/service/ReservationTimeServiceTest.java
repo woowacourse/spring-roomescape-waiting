@@ -1,55 +1,40 @@
 package roomescape.time.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.Fixtures;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.ReservationTimeCreateRequest;
 import roomescape.time.dto.ReservationTimeResponse;
-import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Import(value = {ReservationTimeService.class})
+@Sql(value = "/recreate_table.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("예약 시간 서비스")
 class ReservationTimeServiceTest {
 
-    private ReservationTimeService reservationTimeService;
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-    @Mock
-    private ReservationRepository reservationRepository;
-    private Long id;
-    private LocalTime startAt;
-    private ReservationTime reservationTimeFixture;
+    private final ReservationTimeService reservationTimeService;
 
-    @BeforeEach
-    void setUp() {
-        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
-        this.id = 1L;
-        this.startAt = LocalTime.of(10, 10);
-        this.reservationTimeFixture = new ReservationTime(id, startAt);
+    @Autowired
+    public ReservationTimeServiceTest(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
     @DisplayName("에약 시간 서비스는 시간을 생성한다.")
     @Test
     void createTime() {
         // given
-        Mockito.when(reservationTimeRepository.save(any()))
-                .thenReturn(reservationTimeFixture);
+        LocalTime startAt = LocalTime.of(3, 30);
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt);
 
         // when
@@ -64,9 +49,8 @@ class ReservationTimeServiceTest {
     @Test
     void validateIsDuplicated() {
         // given
-        Mockito.when(reservationTimeRepository.existsByStartAt(reservationTimeFixture.getStartAt()))
-                .thenReturn(Boolean.TRUE);
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(reservationTimeFixture.getStartAt());
+        LocalTime startAt = LocalTime.of(10, 0);
+        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.createTime(request))
@@ -78,57 +62,48 @@ class ReservationTimeServiceTest {
     @Test
     void readReservationTime() {
         // given
-        Mockito.when(reservationTimeRepository.findById(id))
-                .thenReturn(Optional.of(reservationTimeFixture));
+        Long id = 1L;
 
         // when
         ReservationTimeResponse reservationTime = reservationTimeService.readReservationTime(id);
 
         // then
         assertThat(reservationTime.startAt())
-                .isEqualTo(startAt);
+                .isEqualTo(LocalTime.of(10, 0));
     }
 
     @DisplayName("예약 시간 서비스는 시간들을 반환한다.")
     @Test
     void readReservationTimes() {
-        // given
-        Mockito.when(reservationTimeRepository.findAll())
-                .thenReturn(List.of(reservationTimeFixture));
-
         // when
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes(null, null);
+        List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes();
 
         // then
-        assertThat(reservationTimes.size()).isEqualTo(1);
+        assertThat(reservationTimes.size()).isEqualTo(3);
     }
 
     @DisplayName("예약 시간 서비스는 지정된 날짜와 테마별 예약 가능 여부를 포함하여 시간들을 반환한다.")
     @Test
     void readReservationTimesByDateAndThemeId() {
         // given
-        LocalDate date = LocalDate.of(2024, 12, 2);
-        Long themeId = 2L;
-        Mockito.when(reservationRepository.findByDateAndThemeId(date, themeId))
-                .thenReturn(List.of(Fixtures.reservationFixture));
-        Mockito.when(reservationTimeRepository.findAll())
-                .thenReturn(List.of(reservationTimeFixture));
+        LocalDate date = LocalDate.of(2099, 12, 31);
+        Long themeId = 1L;
 
         // when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes(date, themeId);
 
         // then
-        assertThat(reservationTimes).hasSize(1);
-        assertThat(reservationTimes).contains(ReservationTimeResponse.of(reservationTimeFixture, true));
+        assertThat(reservationTimes).hasSize(3);
+        assertThat(reservationTimes).contains(
+                ReservationTimeResponse.of(new ReservationTime(1L, LocalTime.of(10, 0)), true)
+        );
     }
 
     @DisplayName("예약 시간 서비스는 id에 맞는 시간을 삭제한다.")
     @Test
     void deleteTime() {
         // given
-        Mockito.when(reservationRepository.existsByTimeId(id))
-                .thenReturn(false);
-        Mockito.doNothing().when(reservationTimeRepository).deleteById(id);
+        Long id = 3L;
 
         // when & then
         assertThatCode(() -> reservationTimeService.deleteTime(id))
@@ -139,8 +114,7 @@ class ReservationTimeServiceTest {
     @Test
     void deleteTimeWithExistsReservation() {
         // given
-        Mockito.when(reservationRepository.existsByTimeId(id))
-                .thenReturn(true);
+        Long id = 1L;
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteTime(id))

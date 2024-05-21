@@ -1,65 +1,50 @@
 package roomescape.theme.service;
 
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.Fixtures;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BadRequestException;
-import roomescape.reservation.repository.MemberReservationRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.theme.repository.ThemeRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static roomescape.Fixtures.themeFixture;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Import(value = {ThemeService.class})
+@Sql(value = "/recreate_table.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("테마 서비스")
 class ThemeServiceTest {
 
-    private ThemeService themeService;
-    @Mock
-    private ThemeRepository themeRepository;
-    @Mock
-    private ReservationRepository reservationRepository;
-    @Mock
-    private MemberReservationRepository memberReservationRepository;
+    private final ThemeService themeService;
 
-    @BeforeEach
-    void setUp() {
-        this.themeService = new ThemeService(themeRepository, reservationRepository, memberReservationRepository);
+    @Autowired
+    public ThemeServiceTest(ThemeService themeService) {
+        this.themeService = themeService;
     }
 
     @DisplayName("테마 서비스는 테마를 생성한다.")
     @Test
     void createTheme() {
         // given
-        Mockito.when(themeRepository.save(any()))
-                .thenReturn(themeFixture);
-        ThemeCreateRequest request = new ThemeCreateRequest(
-                "힐링",
-                "완전 힐링되는 테마",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        );
+        String name = "새로운 테마";
+        String description = "완전 새로운 테마";
+        String thumbnail = "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg";
+        ThemeCreateRequest request = new ThemeCreateRequest(name, description, thumbnail);
 
         // when
         ThemeResponse actual = themeService.createTheme(request);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(actual.name()).isEqualTo(themeFixture.getName());
-        softAssertions.assertThat(actual.description()).isEqualTo(themeFixture.getDescription());
-        softAssertions.assertThat(actual.thumbnail()).isEqualTo(themeFixture.getThumbnail());
+        softAssertions.assertThat(actual.name()).isEqualTo(name);
+        softAssertions.assertThat(actual.description()).isEqualTo(description);
+        softAssertions.assertThat(actual.thumbnail()).isEqualTo(thumbnail);
         softAssertions.assertAll();
     }
 
@@ -67,8 +52,6 @@ class ThemeServiceTest {
     @Test
     void validateDuplicated() {
         // given
-        Mockito.when(themeRepository.findByName("공포"))
-                .thenReturn(Optional.of(themeFixture));
         ThemeCreateRequest request = new ThemeCreateRequest(
                 "공포", "공포스러운 테마", "http://example.org"
         );
@@ -82,29 +65,18 @@ class ThemeServiceTest {
     @DisplayName("테마 서비스는 모든 테마를 조회한다.")
     @Test
     void findAll() {
-        // given
-        Mockito.when(themeRepository.findAll())
-                .thenReturn(List.of(themeFixture));
-
         // when
         List<ThemeResponse> themeResponses = themeService.readThemes();
 
         // then
-        assertThat(themeResponses).hasSize(1);
+        assertThat(themeResponses).hasSize(3);
     }
 
     @DisplayName("테마 서비스는 최근 일주일 간의 인기 있는 테마를 조회힌다.")
     @Test
     void readPopularThemes() {
         // given
-        List<Long> expected = List.of(5L, 1L, 2L, 3L, 4L);
-        for (Long id : expected) {
-            int index = id.intValue() - 1;
-            Mockito.when(themeRepository.findById(id))
-                    .thenReturn(Optional.ofNullable(Fixtures.themeFixtures.get(index)));
-        }
-        Mockito.when(memberReservationRepository.findByReservationDateBetween(any(), any()))
-                .thenReturn(Fixtures.memberReservationForPopularTheme);
+        List<Long> expected = List.of(2L, 1L);
 
         // when
         List<ThemeResponse> popularThemes = themeService.readPopularThemes();
@@ -121,10 +93,7 @@ class ThemeServiceTest {
     @Test
     void delete() {
         // given
-        Long id = 1L;
-        Mockito.when(reservationRepository.existsByThemeId(id))
-                .thenReturn(false);
-        Mockito.doNothing().when(themeRepository).deleteById(id);
+        Long id = 3L;
 
         // when & then
         assertThatCode(() -> themeService.deleteTheme(id))
@@ -136,8 +105,6 @@ class ThemeServiceTest {
     void deleteThemeWithExistsReservation() {
         // given
         Long id = 1L;
-        Mockito.when(reservationRepository.existsByThemeId(id))
-                .thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(id))
