@@ -25,7 +25,7 @@ public class ReservationCreateService {
         ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
-        reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId());
+        reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId(), reservationStatus);
 
         Reservation reservation = request.toEntity(reservationTime, theme, member, reservationStatus);
         return reservationRepository.save(reservation);

@@ -1,15 +1,17 @@
 package roomescape.service.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class ReservationCreateValidator {
@@ -40,7 +42,10 @@ public class ReservationCreateValidator {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다."));
     }
 
-    public void validateAlreadyBooked(LocalDate date, long timeId, long themeId) {
+    public void validateAlreadyBooked(LocalDate date, long timeId, long themeId, ReservationStatus reservationStatus) {
+        if (reservationStatus.isWaiting()) {
+            return;
+        }
         if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalArgumentException("해당 시간에 이미 예약된 테마입니다.");
         }
