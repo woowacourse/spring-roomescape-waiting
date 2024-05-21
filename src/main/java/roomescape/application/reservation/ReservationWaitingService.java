@@ -25,6 +25,9 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationWaitingResponse enqueueWaitingList(ReservationRequest request) {
         Reservation reservation = reservationService.create(request);
+        if (reservationStatusRepository.existsAlreadyWaitingOrBooked(reservation)) {
+            throw new IllegalArgumentException("이미 예약했거나 대기한 항목입니다.");
+        }
         ReservationStatus status = reservationStatusRepository.save(
                 new ReservationStatus(reservation, BookStatus.WAITING)
         );

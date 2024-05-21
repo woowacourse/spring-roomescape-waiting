@@ -16,4 +16,6 @@ public interface ReservationStatusRepository {
     long getWaitingCount(Reservation reservation);
 
     List<ReservationStatus> findActiveReservationStatusesByMemberId(long memberId);
+
+    boolean existsAlreadyWaitingOrBooked(Reservation reservation);
 }

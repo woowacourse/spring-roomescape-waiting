@@ -58,6 +58,20 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
     List<ReservationStatus> findAllByStatusInAndReservationMemberId(List<BookStatus> statuses, long memberId);
 
     @Override
+    default boolean existsAlreadyWaitingOrBooked(Reservation reservation) {
+        return existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTime(
+                reservation.getMember().getId(),
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime()
+        );
+    }
+
+    boolean existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTime(
+            Long id, Theme theme, LocalDate date, ReservationTime time
+    );
+
+    @Override
     default ReservationStatus getById(long id) {
         return findById(id).orElseThrow(() -> new NoSuchElementException("예약 정보를 찾을 수 없습니다."));
     }

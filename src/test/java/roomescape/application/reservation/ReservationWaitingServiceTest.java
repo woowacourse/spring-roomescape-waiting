@@ -1,6 +1,8 @@
 package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +10,8 @@ import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
@@ -83,5 +87,23 @@ class ReservationWaitingServiceTest {
 
         ReservationStatus status = reservationStatusRepository.getById(secondId);
         assertThat(status.isBooked()).isTrue();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BookStatus.class, names = {"BOOKED", "WAITING"})
+    @DisplayName("이미 예약된 항목의 경우, 예약 대기를 시도할 경우 예외가 발생한다.")
+    void alreadyBookedOnQueueing(BookStatus status) {
+        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
+        LocalDate date = LocalDate.parse("2023-01-01");
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        Reservation reservation = new Reservation(member, date, time, theme,
+                LocalDateTime.parse("1999-01-01T00:00:00"));
+        reservationStatusRepository.save(new ReservationStatus(reservation, status));
+
+        assertThatCode(() -> reservationWaitingService.enqueueWaitingList(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 예약했거나 대기한 항목입니다.");
     }
 }

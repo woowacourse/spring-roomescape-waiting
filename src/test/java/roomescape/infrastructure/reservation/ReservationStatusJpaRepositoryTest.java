@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.member.Member;
@@ -87,4 +90,21 @@ class ReservationStatusJpaRepositoryTest {
 
         assertThat(waitingCount).isEqualTo(4);
     }
+
+    @ParameterizedTest
+    @EnumSource(value = BookStatus.class, names = {"WAITING", "BOOKED"})
+    @DisplayName("하나의 예약 정보에 대해, 이미 예약/대기된 상태를 확인한다.")
+    void alreadyExistsReservationOrWaitingTest(BookStatus status) {
+        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
+        LocalDate date = LocalDate.of(2024, 12, 25);
+        Reservation reservation = new Reservation(member, date, time, theme, LocalDateTime.of(2023, 1, 5, 12, 0));
+        entityManager.persist(new ReservationStatus(reservation, status));
+
+        boolean exists = reservationStatusRepository.existsAlreadyWaitingOrBooked(reservation);
+
+        assertThat(exists).isTrue();
+    }
+
 }
