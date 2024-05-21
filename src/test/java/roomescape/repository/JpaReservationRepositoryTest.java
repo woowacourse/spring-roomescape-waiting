@@ -1,5 +1,15 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,17 +20,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 @SpringBootTest
 @Transactional
@@ -76,7 +75,7 @@ class JpaReservationRepositoryTest {
         List<Reservation> beforeSaveAndDelete = reservationRepository.findAll();
         Reservation saved = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        reservationRepository.delete(saved.getId());
+        reservationRepository.deleteById(saved.getId());
 
         List<Reservation> afterSaveAndDelete = reservationRepository.findAll();
 
@@ -127,7 +126,7 @@ class JpaReservationRepositoryTest {
     void findByMemberId() {
         Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
+        List<Reservation> reservations = reservationRepository.findAllByReservationMember_Id(member.getId());
 
         assertThat(reservations)
                 .extracting(Reservation::getId)
@@ -146,7 +145,7 @@ class JpaReservationRepositoryTest {
         Reservation onPeriodreservation = reservationRepository.save(new Reservation(member, onPeriodDate, time, theme));
         Reservation notOnPeriodreservation = reservationRepository.save(new Reservation(member, notOnPeriodDate, time, theme));
 
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
+        List<Reservation> reservations = reservationRepository.findByReservationMember_IdAndTheme_IdAndDateBetween(
                 member.getId(), theme.getId(), startDate, endDate);
 
         assertThat(reservations)

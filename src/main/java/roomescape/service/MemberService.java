@@ -6,7 +6,9 @@ import static roomescape.service.mapper.MemberInfoMapper.toResponse;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
+import roomescape.domain.Password;
 import roomescape.domain.Sha256Encryptor;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberInfo;
@@ -28,8 +30,10 @@ public class MemberService {
         String email = loginRequest.email();
         String password = loginRequest.password();
         String encryptedPassword = encryptor.encrypt(password);
-        Member loginSuccessMember = memberRepository.findByEmailAndEncryptedPassword(email, encryptedPassword)
+        Member loginSuccessMember = memberRepository.findByEmailAndEncryptedPassword(
+                new Email(email), new Password(encryptedPassword))
                 .orElseThrow(() -> new RoomescapeException(LOGIN_FAIL));
+
         return loginSuccessMember.getId();
     }
 

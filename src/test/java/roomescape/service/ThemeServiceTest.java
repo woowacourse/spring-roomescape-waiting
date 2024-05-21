@@ -1,5 +1,12 @@
 package roomescape.service;
 
+import static roomescape.exception.ExceptionType.DELETE_USED_THEME;
+import static roomescape.exception.ExceptionType.DUPLICATE_THEME;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,17 +24,12 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
-import java.time.LocalDate;
-
-import static roomescape.exception.ExceptionType.DELETE_USED_THEME;
-import static roomescape.exception.ExceptionType.DUPLICATE_THEME;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
 @SpringBootTest
 @Transactional
 class ThemeServiceTest {
+    @Autowired
+    private ThemeService themeService;
+
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -39,9 +41,6 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeService themeService;
 
     @Test
     @DisplayName("중복된 테마를 생성할 수 없는지 확인")

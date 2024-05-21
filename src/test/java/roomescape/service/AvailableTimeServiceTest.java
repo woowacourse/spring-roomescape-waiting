@@ -1,5 +1,12 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +21,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 @SpringBootTest
 @Transactional

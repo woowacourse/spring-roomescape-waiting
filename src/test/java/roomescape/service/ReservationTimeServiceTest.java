@@ -1,5 +1,15 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_REQUEST;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +25,12 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_REQUEST;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
 @SpringBootTest
 @Transactional
 class ReservationTimeServiceTest {
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -40,9 +42,6 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ReservationTimeService reservationTimeService;
 
     @Test
     @DisplayName("중복된 예약 시간을 생성할 수 없는지 확인")

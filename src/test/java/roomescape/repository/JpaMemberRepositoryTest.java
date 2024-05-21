@@ -1,16 +1,17 @@
 package roomescape.repository;
 
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Email;
 import roomescape.domain.Member;
-
-import java.util.List;
-
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import roomescape.domain.Password;
 
 @SpringBootTest
 @Transactional
@@ -25,7 +26,8 @@ class JpaMemberRepositoryTest {
         Member savedMember = memberRepository.save(DEFAULT_MEMBER);
         String email = savedMember.getEmail();
         String encryptedPassword = savedMember.getEncryptedPassword();
-        Member foundMember = memberRepository.findByEmailAndEncryptedPassword(email, encryptedPassword)
+        Member foundMember = memberRepository.findByEmailAndEncryptedPassword(
+                new Email(email), new Password(encryptedPassword))
                 .orElseThrow();
 
         Assertions.assertThat(foundMember.getId()).isEqualTo(DEFAULT_MEMBER.getId());

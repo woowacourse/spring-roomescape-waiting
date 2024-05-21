@@ -1,10 +1,17 @@
 package roomescape.repository;
 
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -12,18 +19,11 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.fixture.ThemeFixture;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
-
 @SpringBootTest
 @Transactional
 class JpaThemeRepositoryTest {
     @Autowired
-    private JpaThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -68,7 +68,8 @@ class JpaThemeRepositoryTest {
 
         reservationRepository.save(new Reservation(member, date, reservationTime1, theme3));
 
-        List<Theme> result = themeRepository.findAndOrderByPopularity(date, date.plusDays(1), 10);
+        List<Theme> result = themeRepository.findAndOrderByPopularityFirstTheme(
+                date, date.plusDays(1), PageRequest.of(0, 10));
 
         Assertions.assertThat(result)
                 .extracting(Theme::getId)
@@ -80,7 +81,7 @@ class JpaThemeRepositoryTest {
     void delete() {
         Theme theme = themeRepository.save(DEFAULT_THEME);
 
-        themeRepository.delete(theme.getId());
+        themeRepository.deleteById(theme.getId());
 
         Assertions.assertThat(themeRepository.findAll()).isEmpty();
     }

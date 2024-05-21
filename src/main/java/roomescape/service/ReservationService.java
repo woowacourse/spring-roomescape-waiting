@@ -1,5 +1,15 @@
 package roomescape.service;
 
+import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
+import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
+import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
+import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
+import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -17,17 +27,6 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationResponseMapper;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
-import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
-import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
-import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
-import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
 
 @Service
 @Transactional
@@ -88,7 +87,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByMemberAndThemeBetweenDates(ReservationSearchCondition condition) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeBetweenDates(
+        List<Reservation> reservations = reservationRepository.findByReservationMember_IdAndTheme_IdAndDateBetween(
                 condition.memberId(), condition.themeId(), condition.start(), condition.end());
         
         return reservations
@@ -98,13 +97,13 @@ public class ReservationService {
     }
 
     public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
-        return reservationRepository.findByMemberId(memberId)
+        return reservationRepository.findAllByReservationMember_Id(memberId)
                 .stream()
                 .map(LoginMemberReservationResponseMapper::toResponse)
                 .toList();
     }
 
     public void delete(long id) {
-        reservationRepository.delete(id);
+        reservationRepository.deleteById(id);
     }
 }

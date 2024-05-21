@@ -6,6 +6,7 @@ import static roomescape.service.mapper.ThemeResponseMapper.toResponse;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
@@ -50,7 +51,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAndOrderByPopularity(LocalDate start, LocalDate end, int count) {
-        return themeRepository.findAndOrderByPopularity(start, end, count)
+        return themeRepository.findAndOrderByPopularityFirstTheme(start, end, PageRequest.of(0, count))
                 .stream()
                 .map(ThemeResponseMapper::toResponse)
                 .toList();
@@ -58,7 +59,7 @@ public class ThemeService {
 
     public void delete(long id) {
         validateUsedTheme(id);
-        themeRepository.delete(id);
+        themeRepository.deleteById(id);
     }
 
     private void validateUsedTheme(long id) {

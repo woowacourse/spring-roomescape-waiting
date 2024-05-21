@@ -1,5 +1,13 @@
 package roomescape.repository;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
+import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
+import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,15 +18,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
-import static roomescape.fixture.ReservationTimeFixture.DEFAULT_TIME;
-import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
 @SpringBootTest
 @Transactional
@@ -69,7 +68,7 @@ class JpaReservationTimeRepositoryTest {
         List<ReservationTime> beforeSaveAndDelete = reservationTimeRepository.findAll();
         ReservationTime savedTime = reservationTimeRepository.save(DEFAULT_TIME);
 
-        reservationTimeRepository.delete(savedTime.getId());
+        reservationTimeRepository.deleteById(savedTime.getId());
 
         List<ReservationTime> afterSaveAndDelete = reservationTimeRepository.findAll();
 
@@ -100,8 +99,11 @@ class JpaReservationTimeRepositoryTest {
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<ReservationTime> response = reservationTimeRepository.findUsedTimeByDateAndTheme(
-                reservation.getDate(), reservation.getTheme());
+        List<ReservationTime> response = reservationRepository.findAllByDateAndTheme_Id(
+                        reservation.getDate(), reservation.getTheme().getId())
+                .stream()
+                .map(Reservation::getReservationTime)
+                .toList();
 
         Assertions.assertThat(response)
                 .extracting(ReservationTime::getId)
