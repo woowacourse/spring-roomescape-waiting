@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.infrastructure.MemberId;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.WaitingResponse;
 
 
 @RestController
@@ -28,13 +28,32 @@ import roomescape.service.dto.response.WaitingResponse;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationResponse>> get() {
+        return ResponseEntity.ok(reservationService.findAllReservations());
+    }
+
+    @GetMapping(params = {"themeId", "memberId", "dateFrom", "dateTo"})
+    public ResponseEntity<List<ReservationResponse>> get(
+            @ModelAttribute ReservationConditionRequest request
+    ) {
+        return ResponseEntity.ok(reservationService.findAllReservationsByCondition(request));
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponse>> getMine(@MemberId Long id) {
+        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> postReservation(
+    public ResponseEntity<ReservationResponse> post(
             @RequestBody @Valid UserReservationRequest userReservationRequest,
             @MemberId Long id
     ) {
@@ -49,41 +68,8 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @PostMapping("/waiting")
-    public ResponseEntity<WaitingResponse> postReservationWaiting(
-            @RequestBody @Valid UserReservationRequest userReservationRequest,
-            @MemberId Long id
-    ) {
-        ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(id);
-        WaitingResponse waitingResponse = reservationService.createWaiting(reservationRequest, id);
-        URI location = UriComponentsBuilder.newInstance()
-                .path("/reservations/waiting/{id}")
-                .buildAndExpand(waitingResponse.id())
-                .toUri();
-
-        return ResponseEntity.created(location)
-                .body(waitingResponse);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
-        return ResponseEntity.ok(reservationService.findAllReservations());
-    }
-
-    @GetMapping(params = {"themeId", "memberId", "dateFrom", "dateTo"})
-    public ResponseEntity<List<ReservationResponse>> getReservations(
-            @ModelAttribute ReservationConditionRequest request
-    ) {
-        return ResponseEntity.ok(reservationService.findAllReservationsByCondition(request));
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservation(@MemberId Long id) {
-        return ResponseEntity.ok(reservationService.findAllByMemberId(id));
-    }
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent()
                 .build();
@@ -91,7 +77,7 @@ public class ReservationController {
 
     @DeleteMapping("/mine/{id}")
     public ResponseEntity<Void> deleteMyWaiting(@PathVariable Long id) {
-        reservationService.deleteWaiting(id);
+        waitingService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
     }

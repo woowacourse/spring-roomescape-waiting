@@ -22,7 +22,6 @@ import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.WaitingResponse;
 
 @Service
 public class ReservationService {
@@ -58,23 +57,6 @@ public class ReservationService {
         Reservation reservation = reservationRequest.toEntity(member, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
-    }
-
-    public WaitingResponse createWaiting(final ReservationRequest reservationRequest,
-                                         final Long memberId) {
-        Member member = getMember(memberId);
-        ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
-        Theme theme = getTheme(reservationRequest.themeId());
-
-        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(),
-                theme)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
-        }
-        validateIsPastTime(reservationRequest.date(), reservationTime);
-
-        Waiting waiting = reservationRequest.toWaiting(member, reservationTime, theme);
-        Waiting savedWaiting = waitingRepository.save(waiting);
-        return WaitingResponse.from(savedWaiting);
     }
 
     private void validateIsPastTime(LocalDate date, ReservationTime time) {
@@ -126,13 +108,6 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<WaitingResponse> findAllWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
-        return waitings.stream()
-                .map(WaitingResponse::from)
-                .toList();
-    }
-
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
@@ -149,10 +124,6 @@ public class ReservationService {
 
         waitingRepository.delete(waiting);
         reservationRepository.save(new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
-    }
-
-    public void deleteWaiting(final Long id) {
-        waitingRepository.deleteById(id);
     }
 
     private Theme getTheme(Long id) {
