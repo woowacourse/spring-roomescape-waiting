@@ -50,6 +50,7 @@ import static roomescape.TestFixture.TEST_ERROR_MESSAGE;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
+import static roomescape.common.StubLoginMemberArgumentResolver.STUBBED_LOGIN_MEMBER;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
@@ -377,5 +378,36 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].status").value("예약"))
                 .andExpect(jsonPath("$[1].theme").value(HORROR_THEME_NAME))
                 .andExpect(jsonPath("$[1].status").value("1번째 예약대기"));
+    }
+
+    @Test
+    @DisplayName("사용자 대기 예약 DELETE 요청 시 상태코드 204를 반환한다.")
+    void deleteMyWaitingReservation() throws Exception {
+        // given
+        BDDMockito.willDoNothing()
+                .given(reservationService)
+                .deleteMyWaitingReservation(1L, USER_MIA(1L));
+
+        // when & then
+        mockMvc.perform(delete("/reservations/{id}/waiting", 1L)
+                        .cookie(COOKIE))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("서비스 정책에 맞지 않는 대기 예약 DELETE 요청 시 상태코드 400을 반환한다.")
+    void deleteMyWaitingReservationWithoutOwnerShip() throws Exception {
+        // given
+        BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
+                .given(reservationService)
+                .deleteMyWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
+
+        // when & then
+        mockMvc.perform(delete("/reservations/{id}/waiting", 1L)
+                        .cookie(COOKIE))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(TEST_ERROR_MESSAGE));
     }
 }
