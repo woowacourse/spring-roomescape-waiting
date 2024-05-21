@@ -15,7 +15,7 @@ public class SchedulerConfig {
         this.waitingHistoryService = waitingHistoryService;
     }
 
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 0 4 * * *")
     public void run() {
         waitingHistoryService.approveReservationStatus();
     }

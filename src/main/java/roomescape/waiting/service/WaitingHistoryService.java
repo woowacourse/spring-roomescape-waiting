@@ -24,7 +24,7 @@ public class WaitingHistoryService {
 
     @Transactional
     public void createHistory(Reservation reservation) {
-        LocalDateTime expireTime = LocalDateTime.now().minusHours(1);
+        LocalDateTime expireTime = LocalDateTime.now().plusDays(1);
         waitingUpdateHistoryRepository.save(new WaitingUpdateHistory(reservation, expireTime));
     }
 
@@ -32,6 +32,6 @@ public class WaitingHistoryService {
     public void approveReservationStatus() {
         LocalDateTime now = LocalDateTime.now();
         memberReservationRepository.updateStatusBy(ReservationStatus.APPROVED, ReservationStatus.PENDING,
-                1, now.minusHours(2), now);
+                1, now.minusDays(1), now);
     }
 }
