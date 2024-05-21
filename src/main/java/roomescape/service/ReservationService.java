@@ -129,9 +129,9 @@ public class ReservationService {
 
     public void deleteStandby(Long reservationId, Member member) {
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
+            .orElseThrow(() -> new RoomescapeException("예약대기가 존재하지 않아 삭제할 수 없습니다."));
 
-        if (reservation.isNotReservedBy(member)) {
+        if (member.isNotAdmin() && reservation.isNotReservedBy(member)) {
             throw new RoomescapeException("자신의 예약만 삭제할 수 있습니다.");
         }
 

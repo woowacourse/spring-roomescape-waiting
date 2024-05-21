@@ -70,4 +70,8 @@ public class Member {
     public boolean isAdmin() {
         return role == Role.ADMIN;
     }
+
+    public boolean isNotAdmin() {
+        return role != Role.ADMIN;
+    }
 }
