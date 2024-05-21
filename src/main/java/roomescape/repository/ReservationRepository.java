@@ -30,7 +30,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                                         LocalDate date,
                                         ReservationTime reservationTime);
 
-    boolean existsByIdAndStatus(long id, ReservationStatus reservationStatus);
+    boolean existsByIdAndMemberAndStatus(long id, Member member, ReservationStatus reservationStatus);
 
     @Query("""
             SELECT new roomescape.repository.dto.ReservationRankResponse

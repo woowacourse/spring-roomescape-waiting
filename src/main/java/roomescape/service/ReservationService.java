@@ -90,10 +90,8 @@ public class ReservationService {
     }
 
     public void deleteReservationWaiting(String email, long id) {
-        if (!memberRepository.existsByEmail(email)) {
-            throw new MemberNotFoundException();
-        }
-        if (!reservationRepository.existsByIdAndStatus(id, WAITING)) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
+        if (!reservationRepository.existsByIdAndMemberAndStatus(id, member, WAITING)) {
             throw new ReservationWaitingNotFoundException();
         }
         reservationRepository.deleteById(id);
