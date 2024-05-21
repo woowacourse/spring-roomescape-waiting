@@ -6,7 +6,6 @@ import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 import static roomescape.TestFixture.ROOM_THEME1;
 
-import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,29 +37,6 @@ class ReservationRepositoryTest {
     @Test
     void findAll() {
         assertThat(reservationRepository.findAll()).isEmpty();
-    }
-
-
-    @DisplayName("날짜와 시간이 같은 예약이 존재하는지 여부를 반환한다.")
-    @Test
-    void duplicatedReservationTest() {
-        // given
-        LocalDate date = DATE_AFTER_1DAY;
-
-        Member member = memberRepository.save(MEMBER_BROWN);
-        ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
-        Reservation reservation = new Reservation(member, date, savedReservationTime, savedRoomTheme);
-        reservationRepository.save(reservation);
-
-        // when
-        boolean result = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date,
-                savedReservationTime.getId(),
-                savedRoomTheme.getId());
-
-        // then
-        assertThat(result).isTrue();
     }
 
     @DisplayName("예약을 저장한다.")

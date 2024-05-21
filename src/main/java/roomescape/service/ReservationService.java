@@ -75,21 +75,15 @@ public class ReservationService {
     public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
                 .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다."));
-        validateOutdatedDateTime(
-                reservationCreateRequest.date(),
-                reservationTime.getStartAt());
-        validateDuplicatedDateTime(
-                reservationCreateRequest.date(),
-                reservationCreateRequest.timeId(),
-                reservationCreateRequest.themeId());
-
         Member member = memberRepository.findById(reservationCreateRequest.memberId())
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
-
         RoomTheme roomTheme = roomThemeRepository.findById(reservationCreateRequest.themeId())
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다."));
-
         Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme);
+
+        validateOutdatedDateTime(reservation.getDate(), reservationTime.getStartAt());
+        validateDuplicatedDateTime(reservation);
+
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -111,10 +105,11 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedDateTime(LocalDate date, Long timeId, Long themeId) {
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
-        if (exists) {
-            throw new BadRequestException("중복된 시간과 날짜에 대한 예약을 생성할 수 없습니다.");
-        }
+    private void validateDuplicatedDateTime(Reservation reservation) {
+        reservationRepository.findByDateAndTimeAndTheme(
+                        reservation.getDate(),
+                        reservation.getTime(),
+                        reservation.getTheme())
+                .ifPresent(reservation::validateDuplicatedDateTime);
     }
 }
