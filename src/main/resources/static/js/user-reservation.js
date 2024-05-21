@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+  document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -47,9 +48,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -80,10 +78,6 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-  /*
-  TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-        요청 포맷에 맞게 설정
-  */
   fetch(`/times/available?date=${date}&themeId=${themeId}`, {
     method: 'GET',
     headers: {
@@ -109,11 +103,6 @@ function renderAvailableTimes(times) {
     return;
   }
   times.forEach(time => {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-          response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-    */
-
     const div = createSlot('time', time.startAt, time.timeId, time.alreadyBooked);
     timeSlots.appendChild(div);
   });
@@ -124,18 +113,22 @@ function checkDateAndThemeAndTime() {
   const selectedThemeElement = document.querySelector('.theme-slot.active');
   const selectedTimeElement = document.querySelector('.time-slot.active');
   const reserveButton = document.getElementById("reserve-button");
+  const waitButton = document.getElementById("wait-button");
 
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
       // 선택된 시간이 이미 예약된 경우
       reserveButton.classList.add("disabled");
+      waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
     } else {
       // 선택된 시간이 예약 가능한 경우
       reserveButton.classList.remove("disabled");
+      waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
     }
   } else {
     // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
     reserveButton.classList.add("disabled");
+    waitButton.classList.add("disabled");
   }
 }
 
@@ -145,12 +138,6 @@ function onReservationButtonClick() {
   const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
   if (selectedDate && selectedThemeId && selectedTimeId) {
-
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-          [5단계] 예약 생성 기능 변경 - 사용자
-          request 명세에 맞게 설정
-    */
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
@@ -178,6 +165,45 @@ function onReservationButtonClick() {
         });
   } else {
     alert("Please select a date, theme, and time before making a reservation.");
+  }
+}
+
+function onWaitButtonClick() {
+  const selectedDate = document.getElementById("datepicker").value;
+  const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+  const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+  if (selectedDate && selectedThemeId && selectedTimeId) {
+    const reservationData = {
+      date: selectedDate,
+      theme: selectedThemeId,
+      time: selectedTimeId
+    };
+
+    /*
+    TODO: [3단계] 예약 대기 생성 요청 API 호출
+     */
+    fetch('', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData)
+    })
+        .then(response => {
+          if (!response.ok) throw new Error('Reservation waiting failed');
+          return response.json();
+        })
+        .then(data => {
+          alert('Reservation waiting successful!');
+          window.location.href = "/";
+        })
+        .catch(error => {
+          alert("An error occurred while making the reservation waiting.");
+          console.error(error);
+        });
+  } else {
+    alert("Please select a date, theme, and time before making a reservation waiting.");
   }
 }
 
