@@ -3,6 +3,7 @@ package roomescape.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
@@ -113,10 +114,27 @@ public class ReservationService {
                 .orElseThrow(IllegalArgumentException::new);
         return reservationRepository.findAllByMember(member)
                 .stream()
-                .map(reservation -> new MyReservationResponse(
-                        reservation.getId(), reservation.getTheme().getName(), reservation.getDateString(),
-                        reservation.getReservationTime().getStartAtString(), reservation.getStatus().getValue()))
+                .map(reservation -> new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
+                        reservation.getDateString(), reservation.getReservationTime().getStartAtString(),
+                        getStatus(reservation)))
                 .toList();
+    }
+
+    private String getStatus(final Reservation reservation) {
+        Integer rank = findRankByCreateAt(reservation);
+        if (rank == 0) {
+            return reservation.getStatus().getValue();
+        }
+        return reservation.getStatus().waitingRankStatus(rank);
+    }
+
+    private Integer findRankByCreateAt(final Reservation reservation) {
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeOrderByCreateAtAsc(
+                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
+        return IntStream.range(0, reservations.size())
+                .filter(i -> reservations.get(i).isEqualCreateAt(reservation))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
     }
 
     @Transactional

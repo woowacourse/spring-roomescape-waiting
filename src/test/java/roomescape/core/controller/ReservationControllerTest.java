@@ -8,6 +8,7 @@ import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,7 +138,7 @@ class ReservationControllerTest {
     void findAllReservations() {
         ValidatableResponse response = e2eTest.get("/reservations", accessToken);
         response.statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 
     @Test
@@ -189,5 +190,24 @@ class ReservationControllerTest {
         ValidatableResponse response = e2eTest.get("/reservations/mine", accessToken);
         response.statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    @DisplayName("예약 대기 요청 시, 나의 예약 목록의 예약 대기 상태에 대기 순번을 표시한다.")
+    void findReservationWaitingRank() {
+        String alreadyBookedDate = LocalDate.parse("2224-05-08").format(DateTimeFormatter.ISO_DATE);
+        MemberReservationRequest request = new MemberReservationRequest(alreadyBookedDate, 1L, 1L);
+        e2eTest.post(request, "/reservations/waiting", accessToken);
+        ValidatableResponse response = e2eTest.get("/reservations/mine", accessToken);
+        response.body("status", is(List.of("예약", "1번째 예약대기")));
+    }
+
+    @Test
+    @DisplayName("예약 대기 요청 시, 현재 로그인된 회원의 예약과 중복된 예약을 대기 요청하면 예외가 발생한다.")
+    void duplicateReservationWaiting() {
+        String alreadyBookedDate = LocalDate.parse("2024-05-07").format(DateTimeFormatter.ISO_DATE);
+        MemberReservationRequest request = new MemberReservationRequest(alreadyBookedDate, 1L, 1L);
+        ValidatableResponse response = e2eTest.post(request, "/reservations/waiting", accessToken);
+        response.statusCode(400);
     }
 }

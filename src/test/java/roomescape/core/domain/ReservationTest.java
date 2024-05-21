@@ -2,6 +2,7 @@ package roomescape.core.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,5 +54,15 @@ class ReservationTest {
         assertThatThrownBy(reservation::validateDateAndTime)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("지난 시간에는 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("예약 시간이 같은 예약인지의 여부를 반환할 수 있다.")
+    void isEqualReservationCreateAt() {
+        final LocalDateTime createAt = LocalDateTime.parse("2024-05-21T23:09:00");
+        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.BOOKED, createAt);
+        final Reservation sameCreateAtReservation = new Reservation(member, date, time, theme, Status.BOOKED, createAt);
+        assertTrue(reservation.isEqualCreateAt(sameCreateAtReservation));
     }
 }
