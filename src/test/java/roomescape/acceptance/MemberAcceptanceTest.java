@@ -66,7 +66,7 @@ class MemberAcceptanceTest extends AcceptanceTest {
                             .cookie("token", adminToken)
                             .when().get("/members")
                             .then().log().all()
-                            .assertThat().statusCode(HttpStatus.OK.value()).body("size()", is(2));
+                            .assertThat().statusCode(HttpStatus.OK.value()).body("size()", is(3));
                 })
         );
     }

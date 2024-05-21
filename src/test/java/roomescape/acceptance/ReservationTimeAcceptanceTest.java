@@ -28,7 +28,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     void createReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.of(10,0)))
                 .when().post("/times")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
     }
@@ -36,7 +36,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("시간 추가 실패 테스트 - 중복 시간 오류")
     @TestFactory
     Stream<DynamicTest> createDuplicateTime() {
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.of(10,0);;
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     RestAssured.given().log().all()
@@ -61,7 +61,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                            .body(new ReservationTimeCreateRequest(LocalTime.of(10,0)))
                             .when().post("/times");
                 }),
                 DynamicTest.dynamicTest("모든 시간 내역을 조회한다.", () -> {
@@ -79,7 +79,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     timeId = (int) RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                            .body(new ReservationTimeCreateRequest(LocalTime.of(10,0)))
                             .when().post("/times")
                             .then().log().all().extract().response().jsonPath().get("id");
                     ;

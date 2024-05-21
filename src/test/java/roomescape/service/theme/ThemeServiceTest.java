@@ -106,7 +106,7 @@ class ThemeServiceTest {
     void cannotDeleteByReservation() {
         //given
         Theme theme = createTheme();
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10,0)));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
         ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
         ReservationDetail reservationDetail = reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));
