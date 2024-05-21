@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationWaitingResponse;
 import roomescape.reservation.service.AdminReservationService;
 
 @RestController
@@ -44,5 +45,10 @@ public class AdminReservationController {
         return ResponseEntity.ok(
                 adminReservationService.getByFilter(memberId, themeId, dateFrom, dateTo)
         );
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationWaitingResponse>> getAllWaitings() {
+        return ResponseEntity.ok(adminReservationService.getAllWaitings());
     }
 }

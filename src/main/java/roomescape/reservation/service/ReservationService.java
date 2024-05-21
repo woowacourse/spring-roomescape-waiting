@@ -144,7 +144,7 @@ public class ReservationService {
         return responses;
     }
 
-    private int countWaitingRank(final Reservation reservation) {
+    public int countWaitingRank(final Reservation reservation) {
         if (reservation.getStatus().equals(Status.PENDING)) {
             return reservationRepository.countAlreadyRegisteredWaitings(
                     reservation.getId(),

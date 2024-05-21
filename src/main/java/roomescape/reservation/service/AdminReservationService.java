@@ -2,13 +2,16 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationWaitingResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 
 @Service
@@ -87,6 +90,17 @@ public class AdminReservationService {
                         (dateTo == null ||
                                 (reservation.getDate().isEqual(dateTo) || reservation.getDate().isBefore(dateTo)))
                 ).distinct()
+                .toList();
+    }
+
+    public List<ReservationWaitingResponse> getAllWaitings() {
+        return reservationRepository.findByStatus(Status.PENDING)
+                .stream()
+                .map(reservation -> ReservationWaitingResponse.of(
+                        reservation,
+                        reservationService.countWaitingRank(reservation)
+                ))
+                .sorted(Comparator.comparingInt(ReservationWaitingResponse::rank))
                 .toList();
     }
 }

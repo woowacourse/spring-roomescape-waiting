@@ -41,4 +41,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     int countAlreadyRegisteredWaitings(@Param("id") long id, @Param("date") LocalDate date,
                                        @Param("timeId") long timeId, @Param("themeId") long themeId,
                                        @Param("status") Status status);
+
+    List<Reservation> findByStatus(Status status);
 }
