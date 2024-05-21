@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DomainValidationException;
-import roomescape.global.exception.DuplicateSaveException;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingStatus;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -65,17 +65,17 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        int reservationCount = reservationRepository.countByDateAndTimeAndTheme(request.date(),
+        int sameReservationCount = reservationRepository.countByDateAndTimeAndTheme(
+                request.date(),
                 request.timeId(),
-                request.themeId());
-        if (reservationCount > 0) {
-            throw new DuplicateSaveException("중복되는 예약이 존재합니다");
-        }
+                request.themeId()
+        );
 
+        WaitingStatus waitingStatus = new WaitingStatus(sameReservationCount + 1);
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 
-        Reservation reservation = request.toReservation(member, reservationTime, theme);
+        Reservation reservation = request.toReservation(member, reservationTime, theme, waitingStatus);
         if (reservation.isPast()) {
             throw new DomainValidationException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
         }

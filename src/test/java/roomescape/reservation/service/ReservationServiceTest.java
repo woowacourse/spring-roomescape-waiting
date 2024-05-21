@@ -9,7 +9,6 @@ import static roomescape.reservation.fixture.ReservationFixture.RESERVATION_REQU
 import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_1;
 import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_2;
 import static roomescape.theme.fixture.ThemeFixture.THEME_1;
-import static roomescape.time.fixture.DateTimeFixture.TOMORROW;
 import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_10_00_ID_1;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.DomainValidationException;
-import roomescape.global.exception.DuplicateSaveException;
 import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
@@ -109,15 +107,5 @@ class ReservationServiceTest {
                 () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1,
                         PAST_DATE_RESERVATION_REQUEST))
                 .isInstanceOf(DomainValidationException.class);
-    }
-
-    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 미리 존재하는 경우 예외가 발생한다")
-    @Test
-    void should_throw_exception_when_reserve_date_and_time_and_theme_duplicated() {
-        when(reservationRepository.countByDateAndTimeAndTheme(TOMORROW, 1L, 1L)).thenReturn(1);
-
-        assertThatThrownBy(
-                () -> reservationService.saveMemberReservation(MemberFixture.MEMBER_ID_1, RESERVATION_REQUEST_1))
-                .isInstanceOf(DuplicateSaveException.class);
     }
 }
