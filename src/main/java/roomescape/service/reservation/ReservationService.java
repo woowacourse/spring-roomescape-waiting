@@ -54,7 +54,6 @@ public class ReservationService {
     private ReservationResponse createReservation(long timeId, long themeId, long memberId, LocalDate date) {
         ReservationDate reservationDate = ReservationDate.of(date);
         ReservationTime reservationTime = findTimeById(timeId);
-        validateIfBefore(reservationDate, reservationTime);
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
         ReservationDetail reservationDetail = getReservationDetail(reservationDate, reservationTime, theme);
@@ -67,13 +66,6 @@ public class ReservationService {
     private ReservationTime findTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 시간입니다."));
-    }
-
-    private void validateIfBefore(ReservationDate date, ReservationTime time) {
-        LocalDateTime value = LocalDateTime.of(date.getValue(), time.getStartAt());
-        if (value.isBefore(LocalDateTime.now())) {
-            throw new InvalidReservationException("현재보다 이전으로 일정을 설정할 수 없습니다.");
-        }
     }
 
     private Theme findThemeById(long themeId) {
