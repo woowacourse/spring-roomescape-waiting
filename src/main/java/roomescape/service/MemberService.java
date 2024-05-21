@@ -30,9 +30,7 @@ public class MemberService {
     }
 
     public void signup(MemberCreateRequest request) {
-        if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new EmailDuplicatedException();
-        }
+        validateAlreadyExistsEmail(request);
         MemberPassword encryptPassword = encryptor.encryptPassword(request.getPassword());
         Member member = new Member(request.getEmail(), encryptPassword, request.getName());
         memberRepository.save(member);
@@ -42,17 +40,27 @@ public class MemberService {
     public String login(MemberLoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(UnauthorizedEmailException::new);
         MemberPassword requestPassword = encryptor.encryptPassword(request.getPassword());
-        System.out.println(requestPassword.toString());
-        if (member.isMismatchedPassword(requestPassword)) {
-            throw new UnauthorizedPasswordException();
-        }
+        validateWrongPassword(member, requestPassword);
         return jwtManager.generateToken(member);
     }
 
     @Transactional(readOnly = true)
     public List<MemberResponse> findAllMembers() {
-        return memberRepository.findAll().stream()
+        return memberRepository.findAll()
+                .stream()
                 .map(MemberResponse::new)
                 .toList();
+    }
+
+    private void validateAlreadyExistsEmail(MemberCreateRequest request) {
+        if (memberRepository.existsByEmail(request.getEmail())) {
+            throw new EmailDuplicatedException();
+        }
+    }
+
+    private void validateWrongPassword(Member member, MemberPassword requestPassword) {
+        if (member.isMismatchedPassword(requestPassword)) {
+            throw new UnauthorizedPasswordException();
+        }
     }
 }

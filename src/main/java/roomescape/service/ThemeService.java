@@ -34,7 +34,6 @@ public class ThemeService {
     @Transactional(readOnly = true)
     public List<ThemeResponse> findTopBookedThemes(PopularThemeRequest request) {
         List<Theme> topBookedThemes = themeRepository.findPopularThemes(request.getStartDate(), request.getEndDate());
-
         return topBookedThemes.stream()
                 .limit(request.getCount())
                 .map(ThemeResponse::new)
