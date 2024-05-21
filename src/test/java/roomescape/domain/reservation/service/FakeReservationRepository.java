@@ -5,6 +5,7 @@ import static roomescape.domain.reservation.domain.reservation.ReservationStatus
 import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
+import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 
@@ -26,13 +28,6 @@ public class FakeReservationRepository implements ReservationRepository {
 
     public FakeReservationRepository() {
         this.reservations = new HashMap<>();
-    }
-
-    FakeReservationRepository(List<Reservation> reservations) {
-        this.reservations = new HashMap<>();
-        for (int i = 0; i < reservations.size(); i++) {
-            this.reservations.put(reservations.get(i).getId(), reservations.get(i));
-        }
     }
 
     @Override
@@ -116,10 +111,23 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return reservations.values()
+    public List<ReservationWithOrderDto> findByMemberId(Long memberId) {
+        List<Reservation> memberReservations = reservations.values()
                 .stream()
                 .filter(reservation -> reservation.getMember().getId().equals(memberId))
                 .toList();
+        List<ReservationWithOrderDto> result = new ArrayList<>();
+
+        for (Reservation reservation : memberReservations) {
+            long rank = reservations.values().stream()
+                    .filter(r -> r.getDate().equals(reservation.getDate())
+                            && r.getTheme().getId().equals(reservation.getTheme().getId())
+                            && r.getTime().getId().equals(reservation.getTime().getId())
+                            && r.getReservationTimestamp().isBefore(reservation.getReservationTimestamp()))
+                    .count();
+
+            result.add(new ReservationWithOrderDto(reservation, rank));
+        }
+        return result;
     }
 }

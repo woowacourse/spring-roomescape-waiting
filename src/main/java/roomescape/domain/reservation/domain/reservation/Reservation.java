@@ -80,6 +80,10 @@ public class Reservation {
         return status;
     }
 
+    public LocalDateTime getReservationTimestamp() {
+        return reservationTimestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

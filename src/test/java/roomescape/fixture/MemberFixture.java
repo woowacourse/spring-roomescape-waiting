@@ -15,4 +15,6 @@ public class MemberFixture {
     public static final String MEMBER_PASSWORD = "123123";
     public static final Member MEMBER_MEMBER = new Member(1L, "도도", MEMBER_EMAIL, MEMBER_PASSWORD, MEMBER);
     public static final Member NULL_ID_MEMBER = new Member(null, "도도", MEMBER_EMAIL, MEMBER_PASSWORD, MEMBER);
+
+    public static final Member NULL_ID_DUMMY_MEMBER = new Member(null, "dummy", "abc@gmail.com", "123213", ADMIN);
 }

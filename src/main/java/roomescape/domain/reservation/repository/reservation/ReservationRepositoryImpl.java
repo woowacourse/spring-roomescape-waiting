@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -52,7 +53,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(Long memberId) {
+    public List<ReservationWithOrderDto> findByMemberId(Long memberId) {
         return jpaReservationRepository.findByMemberId(memberId);
     }
 

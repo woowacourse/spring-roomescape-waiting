@@ -2,11 +2,13 @@ package roomescape.domain.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.TODAY;
 import static roomescape.fixture.MemberFixture.MEMBER_MEMBER;
+import static roomescape.fixture.MemberFixture.NULL_ID_DUMMY_MEMBER;
 import static roomescape.fixture.MemberFixture.NULL_ID_MEMBER;
 import static roomescape.fixture.ReservationTimeFixture.NULL_ID_RESERVATION_TIME;
 import static roomescape.fixture.ReservationTimeFixture.TEN_RESERVATION_TIME;
@@ -14,6 +16,7 @@ import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 import static roomescape.fixture.ThemeFixture.NULL_ID_DUMMY_THEME;
 import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.RepositoryTest;
 import roomescape.domain.member.repository.JpaMemberRepository;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 import roomescape.domain.reservation.repository.reservation.JpaReservationRepository;
 import roomescape.domain.reservation.repository.reservation.ReservationRepositoryImpl;
 import roomescape.domain.reservation.repository.reservationTime.JpaReservationTimeRepository;
@@ -45,6 +49,7 @@ class ReservationRepositoryImplTest extends RepositoryTest {
     void setUp() {
         reservationRepository = new ReservationRepositoryImpl(jpaReservationRepository);
         jpaMemberRepository.save(NULL_ID_MEMBER);
+        jpaMemberRepository.save(NULL_ID_DUMMY_MEMBER);
         jpaThemeRepository.save(NULL_ID_DUMMY_THEME);
         jpaReservationTimeRepository.save(NULL_ID_RESERVATION_TIME);
         jpaReservationRepository.save(
@@ -114,8 +119,24 @@ class ReservationRepositoryImplTest extends RepositoryTest {
     @DisplayName("멤버 ID로 예약목록을 불러올 수 있습니다.")
     @Test
     void should_find_reservations_by_member_id() {
-        List<Reservation> reservations = reservationRepository.findByMemberId(1L);
+        List<ReservationWithOrderDto> reservations = reservationRepository.findByMemberId(1L);
 
         assertThat(reservations).hasSize(1);
+    }
+
+    @DisplayName("몇번째 예약 대기인지 알 수 있다.")
+    @Test
+    void should_find_order_number_of_waiting_reservation() {
+        Reservation reservation = new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME,
+                DUMMY_THEME, NULL_ID_MEMBER, RESERVED, LocalDateTime.now().minusHours(10));
+        Reservation waitingReservation = new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME,
+                DUMMY_THEME, NULL_ID_DUMMY_MEMBER, WAITING, LocalDateTime.now().minusHours(2));
+        reservationRepository.save(reservation);
+        reservationRepository.save(waitingReservation);
+
+        List<ReservationWithOrderDto> reservationWithOrderDtos = reservationRepository.findByMemberId(
+                waitingReservation.getMember().getId());
+
+        assertThat(reservationWithOrderDtos.get(0).orderNumber()).isOne();
     }
 }

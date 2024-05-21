@@ -2,12 +2,18 @@ package roomescape.domain.reservation.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.reservation.domain.reservation.Reservation;
 
 public record ReservationMineResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {
 
-    public ReservationMineResponse(Reservation reservation) {
-        this(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(),
-                reservation.getTime().getStartAt(), "예약");
+    public static ReservationMineResponse from(ReservationWithOrderDto reservationWithOrderDto) {
+        if (reservationWithOrderDto.orderNumber() == 0) {
+            return new ReservationMineResponse(reservationWithOrderDto.getId(),
+                    reservationWithOrderDto.getTheme().getName(), reservationWithOrderDto.getDate(),
+                    reservationWithOrderDto.getTime().getStartAt(), "예약");
+        }
+        String status = reservationWithOrderDto.orderNumber() + "번째 예약대기";
+        return new ReservationMineResponse(reservationWithOrderDto.getId(),
+                reservationWithOrderDto.getTheme().getName(), reservationWithOrderDto.getDate(),
+                reservationWithOrderDto.getTime().getStartAt(), status);
     }
 }
