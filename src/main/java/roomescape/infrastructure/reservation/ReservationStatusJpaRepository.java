@@ -59,16 +59,17 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
 
     @Override
     default boolean existsAlreadyWaitingOrBooked(Reservation reservation) {
-        return existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTime(
+        return existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTimeAndStatusIn(
                 reservation.getMember().getId(),
                 reservation.getTheme(),
                 reservation.getDate(),
-                reservation.getTime()
+                reservation.getTime(),
+                NON_CANCELLED_STATUSES
         );
     }
 
-    boolean existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTime(
-            Long id, Theme theme, LocalDate date, ReservationTime time
+    boolean existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTimeAndStatusIn(
+            Long id, Theme theme, LocalDate date, ReservationTime time, List<BookStatus> statuses
     );
 
     @Override
