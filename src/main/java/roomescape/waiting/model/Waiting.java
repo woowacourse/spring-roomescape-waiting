@@ -25,6 +25,15 @@ public class Waiting extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    public Waiting(final Reservation reservation, final Member member) {
+        this.id = null;
+        this.reservation = reservation;
+        this.member = member;
+    }
+
+    protected Waiting() {
+    }
+
     public Long getId() {
         return id;
     }

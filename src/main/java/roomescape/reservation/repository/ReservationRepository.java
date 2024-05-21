@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.model.Reservation;
@@ -47,6 +48,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             where t.id = :themeId and m.id = :memberId and r.date between :dateFrom and :dateTo
             """)
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+
+    Optional<Reservation> findByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

@@ -3,6 +3,7 @@ truncate table reservation_time;
 truncate table reservation;
 truncate table member;
 truncate table theme;
+truncate table waiting;
 SET REFERENTIAL_INTEGRITY TRUE;
 
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
