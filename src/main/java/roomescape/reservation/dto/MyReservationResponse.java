@@ -1,6 +1,7 @@
 package roomescape.reservation.dto;
 
 import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.WaitingReservationRanking;
 
 import java.time.LocalDate;
@@ -15,11 +16,13 @@ public record MyReservationResponse(
 ) {
 
     public static MyReservationResponse from(MemberReservation memberReservation) {
+        Reservation reservation = memberReservation.getReservation();
+
         return new MyReservationResponse(
                 memberReservation.getId(),
-                memberReservation.getReservation().getTheme().getName(),
-                memberReservation.getReservation().getDate(),
-                memberReservation.getReservation().getTime().getStartAt(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
                 memberReservation.getStatus().getStatusName()
         );
     }
@@ -27,12 +30,13 @@ public record MyReservationResponse(
     public static MyReservationResponse from(WaitingReservationRanking waitingReservationRanking) {
         MemberReservation memberReservation = waitingReservationRanking.getMemberReservation();
         String status = waitingReservationRanking.getDisplayRank() + "번째 " + memberReservation.getStatus().getStatusName();
+        Reservation reservation = memberReservation.getReservation();
 
         return new MyReservationResponse(
                 memberReservation.getId(),
-                memberReservation.getReservation().getTheme().getName(),
-                memberReservation.getReservation().getDate(),
-                memberReservation.getReservation().getTime().getStartAt(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
                 status
         );
     }
