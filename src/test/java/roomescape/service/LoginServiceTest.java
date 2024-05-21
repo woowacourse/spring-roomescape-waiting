@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.Fixture;
-import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.LoginRequest;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
@@ -92,10 +92,10 @@ class LoginServiceTest {
             ));
 
             //when
-            LoginMember loginMember = loginService.checkLogin(token);
+            LoginMemberRequest loginMemberRequest = loginService.checkLogin(token);
 
             //then
-            assertThat(loginMember.getName())
+            assertThat(loginMemberRequest.name())
                     .isEqualTo(defaultUser.getName());
         }
     }

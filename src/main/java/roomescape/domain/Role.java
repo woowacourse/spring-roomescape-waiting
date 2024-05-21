@@ -21,6 +21,10 @@ public enum Role {
                 .orElseThrow(() -> new RoomescapeException(ExceptionType.NOT_FOUND_ROLE));
     }
 
+    public boolean isAdmin() {
+        return this == Role.ADMIN;
+    }
+
 
     public String getTokenValue() {
         return tokenValue;

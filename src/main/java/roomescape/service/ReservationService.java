@@ -10,13 +10,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
@@ -42,14 +42,14 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse save(LoginMember loginMember,
+    public ReservationResponse save(LoginMemberRequest loginMemberRequest,
                                     ReservationRequest reservationRequest) {
 
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
         Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Member requestedMember = memberRepository.findById(loginMember.getId())
+        Member requestedMember = memberRepository.findById(loginMemberRequest.id())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
         Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
                 requestedTheme);

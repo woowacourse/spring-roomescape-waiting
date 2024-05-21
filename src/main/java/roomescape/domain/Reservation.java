@@ -120,10 +120,6 @@ public class Reservation implements Comparable<Reservation> {
         return id;
     }
 
-    public LoginMember getLoginMember() {
-        return member.getLoginMember();
-    }
-
     public LocalDate getDate() {
         return date;
     }
@@ -142,6 +138,10 @@ public class Reservation implements Comparable<Reservation> {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     public ReservationStatus getStatus() {

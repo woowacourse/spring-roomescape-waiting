@@ -1,12 +1,12 @@
 package roomescape.dto;
 
-import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
 
 public record LoginMemberResponse(long id, String name) {
-    public static LoginMemberResponse from(LoginMember loginMember) {
+    public static LoginMemberResponse from(Member member) {
         return new LoginMemberResponse(
-                loginMember.getId(),
-                loginMember.getName().getValue()
+                member.getId(),
+                member.getName().getValue()
         );
     }
 }

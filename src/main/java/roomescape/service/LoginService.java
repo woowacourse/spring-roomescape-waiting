@@ -9,9 +9,10 @@ import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Email;
-import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
+import roomescape.domain.Name;
 import roomescape.domain.Role;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.LoginRequest;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
@@ -41,12 +42,12 @@ public class LoginService {
         ));
     }
 
-    public LoginMember checkLogin(String token) {
+    public LoginMemberRequest checkLogin(String token) {
         try {
             Claims claims = jwtGenerator.getClaims(token);
-            return new LoginMember(
+            return new LoginMemberRequest(
                     claims.get("id", Long.class),
-                    claims.get("name", String.class),
+                    new Name(claims.get("name", String.class)),
                     Role.findByValue(claims.get("role", String.class))
             );
         } catch (ExpiredJwtException e) {

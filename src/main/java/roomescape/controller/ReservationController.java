@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.LoginMember;
 import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
@@ -27,9 +27,9 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> saveReservation(@Authenticated LoginMember loginMember,
+    public ResponseEntity<ReservationResponse> saveReservation(@Authenticated LoginMemberRequest loginMemberRequest,
                                                                @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse savedReservationResponse = reservationService.save(loginMember, reservationRequest);
+        ReservationResponse savedReservationResponse = reservationService.save(loginMemberRequest, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + savedReservationResponse.id()))
                 .body(savedReservationResponse);
     }
@@ -48,8 +48,9 @@ public class ReservationController {
     }
 
     @GetMapping("/member/reservations")
-    public List<ReservationDetailResponse> findMemberReservations(@Authenticated LoginMember loginMember) {
-        return reservationService.findAllByMemberId(loginMember.getId());
+    public List<ReservationDetailResponse> findMemberReservations(
+            @Authenticated LoginMemberRequest loginMemberRequest) {
+        return reservationService.findAllByMemberId(loginMemberRequest.id());
     }
 
     @GetMapping("/reservations/search")

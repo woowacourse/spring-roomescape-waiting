@@ -22,11 +22,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
-import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
@@ -39,7 +39,7 @@ import roomescape.repository.ThemeRepository;
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationServiceTest {
 
-    private final LoginMember loginMember = Fixture.defaultLoginuser;
+    private final LoginMemberRequest loginMemberRequest = Fixture.defaultLoginuser;
     private final Member member = Fixture.defaultMember;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -66,7 +66,7 @@ class ReservationServiceTest {
     void createFutureReservationTest() {
         //when
         ReservationResponse saved = reservationService.save(
-                loginMember,
+                loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
                         defaultTime.getId(),
@@ -85,7 +85,7 @@ class ReservationServiceTest {
     @Test
     void createPastReservationFailTest() {
         assertThatThrownBy(() -> reservationService.save(
-                loginMember,
+                loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
                         defaultTime.getId(),
@@ -99,7 +99,7 @@ class ReservationServiceTest {
     @Test
     void createReservationWithTimeNotExistsTest() {
         assertThatThrownBy(() -> reservationService.save(
-                loginMember,
+                loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
                         2L,
@@ -113,7 +113,7 @@ class ReservationServiceTest {
     @Test
     void createReservationWithThemeNotExistsTest() {
         assertThatThrownBy(() -> reservationService.save(
-                loginMember,
+                loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
                         defaultTime.getId(),
@@ -160,7 +160,7 @@ class ReservationServiceTest {
         @Test
         void duplicatedReservationFailTest() {
             assertThatThrownBy(() -> reservationService.save(
-                    loginMember,
+                    loginMemberRequest,
                     new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
                     .isInstanceOf(RoomescapeException.class)
                     .hasMessage(DUPLICATE_RESERVATION.getMessage());

@@ -36,19 +36,11 @@ public class Member {
     }
 
     public Member(Long id, Name name, Role role, Email email, Password password) {
-        this(new LoginMember(id, name, role), email, password);
-    }
-
-    public Member(LoginMember loginMember, Email email, Password password) {
-        this.id = loginMember.getId();
-        this.name = loginMember.getName();
-        this.role = loginMember.getRole();
+        this.id = id;
+        this.name = name;
+        this.role = role;
         this.email = email;
         this.password = password;
-    }
-
-    public LoginMember getLoginMember() {
-        return new LoginMember(id, name, role);
     }
 
     public Role getRole() {

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.config.CookieExtractor;
-import roomescape.domain.LoginMember;
+import roomescape.dto.LoginMemberRequest;
 import roomescape.dto.LoginRequest;
 import roomescape.dto.LoginResponse;
 import roomescape.service.LoginService;
@@ -48,7 +48,7 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginResponse> loginCheck(@Authenticated LoginMember loginMember) {
-        return ResponseEntity.ok(LoginResponse.from(loginMember));
+    public ResponseEntity<LoginResponse> loginCheck(@Authenticated LoginMemberRequest loginMemberRequest) {
+        return ResponseEntity.ok(LoginResponse.from(loginMemberRequest));
     }
 }
