@@ -38,11 +38,12 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Reservation saveMemberReservation(ReservationRequest request) {
+    public Reservation saveReservation(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        rejectPastReservation(request.date(), reservationTime);
+
         LocalDate date = request.date();
         Theme theme = themeRepository.getById(request.themeId());
-        rejectPastReservation(request.date(), reservationTime);
         // 프록시 또는 완전한 엔티티
         ReservationDetail reservationDetail = reservationDetailRepository.getByDateAndTimeAndTheme(
                 date, reservationTime, theme);
@@ -93,11 +94,6 @@ public class ReservationService {
 
     public List<UserReservationResponse> findAllByMemberId(Long memberId) {
         return null;
-    }
-
-    @Transactional
-    public Reservation saveReservation(ReservationRequest request) {
-        return new Reservation(null, null, null);
     }
 
     @Transactional
