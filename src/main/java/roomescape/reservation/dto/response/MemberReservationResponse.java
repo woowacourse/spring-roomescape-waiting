@@ -1,14 +1,19 @@
 package roomescape.reservation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.GenerationType;
 import roomescape.reservation.domain.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MemberReservationResponse(
-        Long reservationId, String theme, LocalDate date,
-        @JsonFormat(pattern = "HH:mm") LocalTime time, String status) {
+        Long reservationId,
+        String theme,
+        LocalDate date,
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        String status
+) {
     public static MemberReservationResponse from(final Reservation reservation) {
         return new MemberReservationResponse(
                 reservation.getId(),

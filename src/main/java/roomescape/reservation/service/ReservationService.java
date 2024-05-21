@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -67,19 +66,24 @@ public class ReservationService {
         final Theme theme = themeService.findThemeById(themeId);
         final List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
 
-        final List<ReservationTimeInfoResponse> response = new ArrayList<>();
-        for (final ReservationTime time : allTimes) {
-            boolean alreadyBooked = false;
-            for (final Reservation reservation : reservations) {
-                if (reservation.getReservationTime() == time) {
-                    alreadyBooked = true;
-                    break;
-                }
-            }
-            response.add(new ReservationTimeInfoResponse(time.getId(), time.getStartAt(), alreadyBooked));
-        }
+        final List<ReservationTimeInfoResponse> response = getReservationTimeInfoResponses(
+                allTimes, reservations);
 
         return new ReservationTimeInfosResponse(response);
+    }
+
+    private List<ReservationTimeInfoResponse> getReservationTimeInfoResponses(
+            final List<ReservationTime> allTimes,
+            final List<Reservation> reservations
+    ) {
+        return allTimes.stream()
+                .map(time -> new ReservationTimeInfoResponse(
+                        time.getId(),
+                        time.getStartAt(),
+                        reservations.stream()
+                                .anyMatch(reservation -> reservation.getReservationTime() == time))
+                )
+                .toList();
     }
 
     public Reservation findReservationById(final Long id) {
@@ -94,7 +98,7 @@ public class ReservationService {
         final Long reservationMemberId = reservation.getMember().getId();
 
         if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
-            reservationRepository.deleteById(reservation.getId());
+            reservationRepository.delete(reservation);
             return;
         }
         throw new ForbiddenException(
@@ -129,7 +133,8 @@ public class ReservationService {
             throw new ValidateException(
                     ErrorType.RESERVATION_PERIOD_IN_PAST,
                     String.format("지난 날짜나 시간은 예약이 불가능합니다. [now: %s %s | request: %s %s]",
-                            now.toLocalDate(), now.toLocalTime(), requestDate, requestReservationTime.getStartAt()));
+                            now.toLocalDate(), now.toLocalTime(), requestDate, requestReservationTime.getStartAt())
+            );
         }
     }
 
@@ -198,10 +203,9 @@ public class ReservationService {
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         final Member member = memberService.findMemberById(memberId);
         final List<Reservation> reservations = reservationRepository.findByMember(member);
-        final List<MemberReservationResponse> responses = new ArrayList<>();
-        for (final Reservation reservation : reservations) {
-            responses.add(MemberReservationResponse.from(reservation));
-        }
+        final List<MemberReservationResponse> responses = reservations.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
         return new MemberReservationsResponse(responses);
     }
 }

@@ -40,9 +40,7 @@ public class AdminInterceptor implements HandlerInterceptor {
         }
 
         final Cookie token = getToken(request);
-
         final Long memberId = jwtHandler.getMemberIdFromToken(token.getValue());
-
         final Member member = memberService.findMemberById(memberId);
 
         if (member.isAdmin()) {
