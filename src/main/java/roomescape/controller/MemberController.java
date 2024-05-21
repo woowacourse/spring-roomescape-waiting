@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.MemberLoginRequest;
+import roomescape.controller.request.RegisterRequest;
 import roomescape.controller.response.MemberNameResponse;
 import roomescape.model.Member;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -51,5 +53,11 @@ public class MemberController {
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         response.addCookie(authService.expireCookie(request.getCookies()));
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/members")
+    public ResponseEntity<Member> registerMember(@RequestBody RegisterRequest registerRequest) {
+        Member member = memberService.register(registerRequest);
+        return ResponseEntity.created(URI.create("/members/" + member.getId())).body(member);
     }
 }

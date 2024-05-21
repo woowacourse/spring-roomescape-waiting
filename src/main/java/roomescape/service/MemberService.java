@@ -2,9 +2,11 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.controller.request.MemberLoginRequest;
+import roomescape.controller.request.RegisterRequest;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Member;
+import roomescape.model.Role;
 import roomescape.repository.MemberRepository;
 
 import java.util.List;
@@ -37,5 +39,9 @@ public class MemberService {
 
     public List<Member> findAllMembers() {
         return memberRepository.findAll();
+    }
+
+    public Member register(RegisterRequest request) {
+        return memberRepository.save(new Member(request.name(), Role.MEMBER, request.email(), request.password()));
     }
 }

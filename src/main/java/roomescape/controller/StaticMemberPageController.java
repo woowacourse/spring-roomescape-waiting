@@ -30,4 +30,9 @@ public class StaticMemberPageController {
     public String getWaitingPage() {
         return "waiting";
     }
+
+    @GetMapping("/signup")
+    public String getSignupPage() {
+        return "signup";
+    }
 }
