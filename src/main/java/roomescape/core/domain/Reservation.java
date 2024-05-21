@@ -37,7 +37,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme, final Status status, final LocalDateTime createAt) {
+    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme,
+                       final Status status, final LocalDateTime createAt) {
         this(null, member, date, time, theme, status, createAt);
     }
 
@@ -77,6 +78,10 @@ public class Reservation {
     private boolean isDateToday() {
         final ZoneId kst = ZoneId.of("Asia/Seoul");
         return date.isEqual(LocalDate.now(kst));
+    }
+
+    public boolean isEqualCreateAt(final Reservation reservation) {
+        return this.getCreateAt().equals(reservation.getCreateAt());
     }
 
     public Long getId() {
