@@ -66,4 +66,22 @@ class ReservationWaitingControllerTest {
                 .then().log().all()
                 .assertThat().statusCode(201).body("id", is(greaterThan(0)));
     }
+
+    @DisplayName("예약 대기 삭제 성공 테스트")
+    @Test
+    void deleteReservationWaitingById() {
+        // given
+        long id = RestAssured.given().contentType(ContentType.JSON)
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
+                .body(new ReservationRequest(date, timeId, themeId))
+                .when().post("/reservations/waiting")
+                .then().extract().body().jsonPath().getLong("id");
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
+                .when().delete("/reservations/waiting/" + id)
+                .then().log().all()
+                .assertThat().statusCode(204);
+    }
 }
