@@ -39,6 +39,10 @@ public class Waiting {
         return reservation.isBefore(dateTime);
     }
 
+    public void confirmReservation() {
+        reservation.updateMember(member);
+    }
+
     public boolean isNotWaitingOwner(Long memberId) {
         return !member.getId().equals(memberId);
     }

@@ -1,9 +1,11 @@
 package roomescape.reservation.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
@@ -51,7 +53,8 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservations(ReservationSearchRequest request) {
         ReservationSearch search = request.createReservationSearch();
-        return reservationRepository.findByCondition(search.memberId(), search.themeId(), search.startDate(), search.endDate())
+        return reservationRepository.findByCondition(search.memberId(), search.themeId(), search.startDate(),
+                        search.endDate())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -106,7 +109,7 @@ public class ReservationService {
     }
 
     private ReservationResponse createReservation(Reservation reservation) {
-        validateIsAvailable(reservation);
+        validateIsAfterFromNow(reservation);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -126,13 +129,30 @@ public class ReservationService {
                 .orElseThrow(() -> new BadArgumentRequestException("해당 테마가 존재하지 않습니다."));
     }
 
-    private void validateIsAvailable(Reservation reservation) {
+    @Transactional
+    public void deleteReservation(Long reservationId) {
+        Reservation reservation = findReservationById(reservationId);
+        validateIsAfterFromNow(reservation);
+        Optional<Waiting> highPriorityWaiting
+                = waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(reservationId);
+
+        if (highPriorityWaiting.isEmpty()) {
+            reservationRepository.deleteById(reservationId);
+            return;
+        }
+        Waiting waiting = highPriorityWaiting.get();
+        waiting.confirmReservation();
+        waitingRepository.delete(waiting);
+    }
+
+    private Reservation findReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new BadArgumentRequestException("해당 예약이 존재하지 않습니다."));
+    }
+
+    private void validateIsAfterFromNow(Reservation reservation) {
         if (reservation.isBefore(LocalDateTime.now())) {
             throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
         }
-    }
-
-    public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
     }
 }

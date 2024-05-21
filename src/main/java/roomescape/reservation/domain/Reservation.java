@@ -63,6 +63,10 @@ public class Reservation {
         return time.isBefore(currentDateTime.toLocalTime());
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+    }
+
     public Long getId() {
         return id;
     }
