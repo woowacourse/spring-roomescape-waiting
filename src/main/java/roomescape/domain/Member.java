@@ -107,7 +107,7 @@ public class Member {
     @Override
     public int hashCode() {
         if (id == null) {
-            throw new IllegalArgumentException("ID가 비어 있을 경우 hasCode()를 호출할 수 없습니다.");
+            throw new IllegalArgumentException("ID가 비어 있을 경우 hashCode()를 호출할 수 없습니다.");
         }
 
         return id.hashCode();
