@@ -1,8 +1,6 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import roomescape.domain.member.Member;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;

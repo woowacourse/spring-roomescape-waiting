@@ -12,16 +12,16 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     //TODO: 테스트 추가
     @Query(value = """
-        SELECT t.id, t.name, t.description, t.thumbnail, COUNT(r.id) AS reservation_count
-        FROM theme t
-        INNER JOIN reservation_detail rd ON rd.theme_id = t.id
-        INNER JOIN reservation r ON r.reservation_detail_id = rd.id
-        WHERE rd.date BETWEEN :startDate AND :endDate
-        AND r.status = 'RESERVED'
-        GROUP BY t.id
-        ORDER BY reservation_count DESC
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT t.id, t.name, t.description, t.thumbnail, COUNT(r.id) AS reservation_count
+            FROM theme t
+            INNER JOIN reservation_detail rd ON rd.theme_id = t.id
+            INNER JOIN reservation r ON r.reservation_detail_id = rd.id
+            WHERE rd.date BETWEEN :startDate AND :endDate
+            AND r.status = 'RESERVED'
+            GROUP BY t.id
+            ORDER BY reservation_count DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<Theme> findByReservationTermAndLimit(@Param("startDate") LocalDate startDate,
                                               @Param("endDate") LocalDate endDate, @Param("limit") long limit);
 }

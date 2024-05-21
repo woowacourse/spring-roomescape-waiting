@@ -2,7 +2,6 @@ package roomescape.service.schedule;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDetail;
 import roomescape.domain.reservation.ReservationDetailRepository;
 import roomescape.domain.reservation.ReservationRepository;

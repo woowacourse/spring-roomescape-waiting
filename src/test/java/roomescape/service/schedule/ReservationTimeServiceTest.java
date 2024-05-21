@@ -1,6 +1,5 @@
 package roomescape.service.schedule;
 
-import org.apache.catalina.Store;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

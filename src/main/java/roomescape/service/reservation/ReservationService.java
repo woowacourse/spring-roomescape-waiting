@@ -93,7 +93,7 @@ public class ReservationService {
     }
 
     private ReservationStatus determineStatus(ReservationDetail reservationDetail, Member member) {
-        if(reservationRepository.existsByReservationDetailIdAndStatusAndMemberId(reservationDetail.getId(), ReservationStatus.RESERVED, member.getId())){
+        if (reservationRepository.existsByReservationDetailIdAndStatusAndMemberId(reservationDetail.getId(), ReservationStatus.RESERVED, member.getId())) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
