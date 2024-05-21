@@ -46,8 +46,8 @@
 ## 3단계 요구 사항
 
 - [ ] 예약 대기 관련 API(`/reservations/waitlists`)
-    - [ ] 예약 대기 생성 API
-        - [ ] request
+    - [x] 예약 대기 생성 API
+        - [x] request
           ```json
           {
             "date" : "2024-05-20",
@@ -55,7 +55,7 @@
             "themeId" : 1
           }
           ```
-        - [ ] response(`201` CREATED)
+        - [x] response(`201` CREATED)
           ```json
           {
             "id": 1,
