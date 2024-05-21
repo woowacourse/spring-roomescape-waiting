@@ -72,7 +72,7 @@ public class MemberReservation {
         }
     }
 
-    public void validateCanConfirm(Long waitingRank) {
+    public void validateRankCanConfirm(Long waitingRank) {
         if (waitingRank.equals(CAN_CONFIRM_RANK)) {
             return;
         }
