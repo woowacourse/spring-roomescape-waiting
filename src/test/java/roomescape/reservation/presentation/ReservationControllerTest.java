@@ -386,7 +386,7 @@ class ReservationControllerTest extends ControllerTest {
         // given
         BDDMockito.willDoNothing()
                 .given(reservationService)
-                .deleteMyWaitingReservation(1L, USER_MIA(1L));
+                .deleteMyWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}/waiting", 1L)
