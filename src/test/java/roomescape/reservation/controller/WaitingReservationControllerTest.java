@@ -18,6 +18,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.util.ControllerTest;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static roomescape.fixture.MemberFixture.getMemberTacan;
 
@@ -58,4 +59,36 @@ class WaitingReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
+    @DisplayName("예약 대기인 예약을 삭제한다.")
+    @Test
+    void delete() {
+        //given
+        ReservationTime reservationTime = ReservationTimeFixture.get2PM();
+        Theme theme2 = ThemeFixture.getTheme2();
+        Reservation alreadBookedReservation = ReservationFixture.getNextMonthReservation(reservationTime, theme2);
+        ReservationRequest reservationRequest = new ReservationRequest(
+                alreadBookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
+                alreadBookedReservation.getTime().getId(),
+                alreadBookedReservation.getTheme().getId()
+        );
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+
+        List<Reservation> all = reservationRepository.findAll();
+        Long addedId = all.get(all.size() - 1).getId();
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().delete("/reservations/waiting/" + addedId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
 }
