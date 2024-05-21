@@ -19,8 +19,17 @@ public class MemberReservation {
     private LocalDateTime createdTime;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
+    private Integer waitingOrder;
 
     public MemberReservation() {
+    }
+
+    public MemberReservation(Member member, Reservation reservation, LocalDateTime createdTime, ReservationStatus status, Integer waitingOrder) {
+        this.member = member;
+        this.reservation = reservation;
+        this.createdTime = createdTime;
+        this.status = status;
+        this.waitingOrder = waitingOrder;
     }
 
     public MemberReservation(Member member, Reservation reservation, LocalDateTime createdTime, ReservationStatus status) {
@@ -61,6 +70,10 @@ public class MemberReservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public Integer getWaitingOrder() {
+        return waitingOrder;
     }
 
     @Override

@@ -91,5 +91,4 @@ class WaitingReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(204);
     }
-
 }

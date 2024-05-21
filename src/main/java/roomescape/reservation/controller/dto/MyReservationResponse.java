@@ -13,6 +13,15 @@ public record MyReservationResponse(long reservationId, String themeName, LocalD
     }
 
     public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus) {
+        if (myReservationWithStatus.status().isWaiting()) {
+            return new MyReservationResponse(
+                    myReservationWithStatus.reservationId(),
+                    myReservationWithStatus.themeName(),
+                    myReservationWithStatus.date(),
+                    myReservationWithStatus.time(),
+                    myReservationWithStatus.waitingOrder() + "번째 " + myReservationWithStatus.status().getStatus()
+            );
+        }
         return new MyReservationResponse(
                 myReservationWithStatus.reservationId(),
                 myReservationWithStatus.themeName(),

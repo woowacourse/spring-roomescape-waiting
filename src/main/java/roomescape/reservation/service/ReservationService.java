@@ -82,15 +82,17 @@ public class ReservationService {
         Member member = getMember(memberId);
         Reservation reservation = getReservation(date, reservationTime, theme);
         ReservationStatus reservationStatus = ReservationStatus.BOOKED;
+        Integer waitingOrder = 1;
 
         validateReservation(reservation, member);
 
         if (memberReservationRepository.existsByReservation(reservation)) {
             reservationStatus = ReservationStatus.WAITING;
+            waitingOrder = memberReservationRepository.findAllByReservation(reservation).size() + 1;
         }
 
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation, LocalDateTime.now(), reservationStatus));
+                new MemberReservation(member, reservation, LocalDateTime.now(), reservationStatus, waitingOrder));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
     }
 

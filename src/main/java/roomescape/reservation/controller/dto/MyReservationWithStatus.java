@@ -7,10 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MyReservationWithStatus(long reservationId, String themeName, LocalDate date, LocalTime time,
-                                      ReservationStatus status) {
+                                      ReservationStatus status, Integer waitingOrder) {
     public static MyReservationWithStatus from(MemberReservation memberReservation) {
         return new MyReservationWithStatus(memberReservation.getId(),
                 memberReservation.getReservation().getTheme().getName(), memberReservation.getReservation().getDate(),
-                memberReservation.getReservation().getTime().getStartAt(), memberReservation.getStatus());
+                memberReservation.getReservation().getTime().getStartAt(), memberReservation.getStatus(), memberReservation.getWaitingOrder());
     }
 }
