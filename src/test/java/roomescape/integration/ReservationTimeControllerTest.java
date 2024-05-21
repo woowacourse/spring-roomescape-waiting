@@ -22,6 +22,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
+import roomescape.domain.ReservationStatus;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -72,7 +73,7 @@ public class ReservationTimeControllerTest {
 
         LocalDate findDate = LocalDate.of(2024, 5, 4);
         reservationRepository.save(
-                new Reservation(findDate, usedReservationTime, theme, defaultMember));
+                new Reservation(findDate, usedReservationTime, theme, defaultMember, ReservationStatus.BOOKED));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = RestAssured.given().log().all()
@@ -157,7 +158,7 @@ public class ReservationTimeControllerTest {
         @Test
         void deleteUsedTimeTest() {
             reservationRepository.save(
-                    new Reservation(LocalDate.now(), usedReservationTime, defaultTheme, defaultMember)
+                    new Reservation(LocalDate.now(), usedReservationTime, defaultTheme, defaultMember, ReservationStatus.BOOKED)
             );
 
             RestAssured.given().log().all()

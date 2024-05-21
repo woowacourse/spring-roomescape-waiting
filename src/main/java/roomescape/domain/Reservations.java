@@ -12,7 +12,6 @@ public class Reservations {
         this.reservations = reservations;
     }
 
-
     public boolean hasSameReservation(Reservation otherReservation) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isSameReservation(otherReservation));
@@ -21,6 +20,12 @@ public class Reservations {
     public boolean hasReservationTimeOf(long timeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isReservationTimeOf(timeId));
+    }
+
+    public List<Reservation> waiting(){
+        return reservations.stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+                .toList();
     }
 
     public List<Reservation> getReservations() {

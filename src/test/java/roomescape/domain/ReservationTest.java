@@ -3,6 +3,7 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+
 import static roomescape.exception.ExceptionType.EMPTY_DATE;
 import static roomescape.exception.ExceptionType.EMPTY_MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_THEME;
@@ -10,9 +11,11 @@ import static roomescape.exception.ExceptionType.EMPTY_TIME;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import roomescape.Fixture;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -29,22 +32,22 @@ class ReservationTest {
     @Test
     void constructTest() {
         assertAll(
-                () -> assertThatThrownBy(() -> new Reservation(DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, null))
+                () -> assertThatThrownBy(() -> new Reservation(DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, null, ReservationStatus.BOOKED))
                         .isInstanceOf(RoomescapeException.class)
                         .hasMessage(EMPTY_MEMBER.getMessage()),
 
                 () -> assertThatThrownBy(
-                        () -> new Reservation(null, DEFAULT_TIME, DEFAULT_THEME, Fixture.defaultMember))
+                        () -> new Reservation(null, DEFAULT_TIME, DEFAULT_THEME, Fixture.defaultMember, ReservationStatus.BOOKED))
                         .isInstanceOf(RoomescapeException.class)
                         .hasMessage(EMPTY_DATE.getMessage()),
 
                 () -> assertThatThrownBy(
-                        () -> new Reservation(DEFAULT_DATE, null, DEFAULT_THEME, Fixture.defaultMember))
+                        () -> new Reservation(DEFAULT_DATE, null, DEFAULT_THEME, Fixture.defaultMember, ReservationStatus.BOOKED))
                         .isInstanceOf(RoomescapeException.class)
                         .hasMessage(EMPTY_TIME.getMessage()),
 
                 () -> assertThatThrownBy(
-                        () -> new Reservation(DEFAULT_DATE, DEFAULT_TIME, null, Fixture.defaultMember))
+                        () -> new Reservation(DEFAULT_DATE, DEFAULT_TIME, null, Fixture.defaultMember, ReservationStatus.BOOKED))
                         .isInstanceOf(RoomescapeException.class)
                         .hasMessage(EMPTY_THEME.getMessage())
         );
@@ -55,9 +58,9 @@ class ReservationTest {
     @DisplayName("날짜를 기준으로 비교를 잘 하는지 확인.")
     void compareTo() {
         Reservation first = new Reservation(1L, LocalDate.of(1999, 12, 1), new ReservationTime(
-                LocalTime.of(16, 30)), DEFAULT_THEME, Fixture.defaultMember);
+                LocalTime.of(16, 30)), DEFAULT_THEME, Fixture.defaultMember, ReservationStatus.BOOKED);
         Reservation second = new Reservation(2L, LocalDate.of(1998, 1, 8), new ReservationTime(
-                LocalTime.of(16, 30)), DEFAULT_THEME, Fixture.defaultMember);
+                LocalTime.of(16, 30)), DEFAULT_THEME, Fixture.defaultMember, ReservationStatus.BOOKED);
         int compareTo = first.compareTo(second);
         Assertions.assertThat(compareTo)
                 .isGreaterThan(0);
@@ -70,8 +73,8 @@ class ReservationTest {
         Theme theme = new Theme(1L, "name", "description", "thumbnail");
         ReservationTime time = new ReservationTime(1L, LocalTime.now());
 
-        Reservation savedReservation = new Reservation(1L, date, time, theme, Fixture.defaultMember);
-        Reservation nonSavedReservation = new Reservation(date, time, theme, Fixture.defaultMember);
+        Reservation savedReservation = new Reservation(1L, date, time, theme, Fixture.defaultMember, ReservationStatus.BOOKED);
+        Reservation nonSavedReservation = new Reservation(date, time, theme, Fixture.defaultMember, ReservationStatus.BOOKED);
 
         assertThat(savedReservation.isSameReservation(nonSavedReservation))
                 .isTrue();
@@ -96,7 +99,7 @@ class ReservationTest {
                 LocalDate.of(2024, 5, 5),
                 new ReservationTime(LocalTime.of(16, 30)),
                 new Theme("name", "description", "thumbnail"),
-                Fixture.defaultMember
+                Fixture.defaultMember, ReservationStatus.BOOKED
         );
 
         assertAll(

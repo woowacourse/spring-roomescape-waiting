@@ -3,6 +3,7 @@ package roomescape.controller;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import roomescape.domain.LoginMember;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.ReservationDetailResponse;
@@ -31,6 +33,14 @@ public class ReservationController {
                                                                @RequestBody ReservationRequest reservationRequest) {
         ReservationResponse savedReservationResponse = reservationService.save(loginMember, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + savedReservationResponse.id()))
+                .body(savedReservationResponse);
+    }
+
+    @PostMapping("/reservations-waiting")
+    public ResponseEntity<ReservationResponse> saveReservationWaiting(@Authenticated LoginMember loginMember,
+                                                                      @RequestBody ReservationRequest reservationRequest) {
+        ReservationResponse savedReservationResponse = reservationService.saveWaiting(loginMember, reservationRequest);
+        return ResponseEntity.created(URI.create("/reservations-waiting/" + savedReservationResponse.id()))
                 .body(savedReservationResponse);
     }
 
@@ -56,15 +66,20 @@ public class ReservationController {
     public List<ReservationResponse> searchReservation(@RequestParam Long themeId,
                                                        @RequestParam Long memberId,
                                                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
-                                                           LocalDate dateFrom,
+                                                       LocalDate dateFrom,
                                                        @RequestParam(defaultValue = "#{T(java.time.LocalDate).now()}")
-                                                           LocalDate dateTo) {
+                                                       LocalDate dateTo) {
         return reservationService.searchReservation(themeId, memberId, dateFrom, dateTo);
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable long id) {
         reservationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping("/reservations-waiting/{id}")
+    public ResponseEntity<Void> deleteReservationWaiting(@Authenticated LoginMember loginMember, @PathVariable long id) {
+        reservationService.deleteById(loginMember, id);
         return ResponseEntity.noContent().build();
     }
 }

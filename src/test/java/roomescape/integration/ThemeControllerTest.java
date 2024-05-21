@@ -22,6 +22,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
+import roomescape.domain.ReservationStatus;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -75,49 +76,49 @@ public class ThemeControllerTest {
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, firstTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, firstTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, firstTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(4), defaultReservationTime, firstTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(5), defaultReservationTime, firstTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, secondTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, secondTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, secondTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(4), defaultReservationTime, secondTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, thirdTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, thirdTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(3), defaultReservationTime, thirdTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
 
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(1), defaultReservationTime, fourthTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(
                 new Reservation(LocalDate.now().minusDays(2), defaultReservationTime, fourthTheme,
-                        defaultMember));
+                        defaultMember, ReservationStatus.BOOKED));
 
         //then
         List<ThemeResponse> themeResponses = RestAssured.given().log().all()
@@ -213,7 +214,7 @@ public class ThemeControllerTest {
         @Test
         void deleteUsedThemeTest() {
             reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultReservationTime, usedTheme, defaultMember)
+                    new Reservation(LocalDate.now(), defaultReservationTime, usedTheme, defaultMember, ReservationStatus.BOOKED)
             );
 
             RestAssured.given().log().all()

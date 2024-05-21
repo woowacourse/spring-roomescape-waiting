@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS reservation
 (
     id        BIGINT NOT NULL AUTO_INCREMENT,
     date      DATE   NOT NULL,
+    created_at      TIMESTAMP   NOT NULL,
     time_id   BIGINT NOT NULL,
     theme_id  BIGINT NOT NULL,
     member_id BIGINT NOT NULL,

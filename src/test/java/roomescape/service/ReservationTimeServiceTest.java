@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
+import roomescape.domain.ReservationStatus;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.domain.ReservationTimes;
@@ -85,9 +86,9 @@ class ReservationTimeServiceTest {
         LocalDate selectedDate = LocalDate.of(2024, 1, 1);
 
         reservationRepository.save(new Reservation(selectedDate, reservationTime1, DEFUALT_THEME,
-                Fixture.defaultMember));
+                Fixture.defaultMember, ReservationStatus.BOOKED));
         reservationRepository.save(new Reservation(selectedDate, reservationTime3, DEFUALT_THEME,
-                Fixture.defaultMember));
+                Fixture.defaultMember, ReservationStatus.BOOKED));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = reservationTimeService.findByThemeAndDate(selectedDate,
@@ -148,7 +149,7 @@ class ReservationTimeServiceTest {
                     LocalDate.now(),
                     new ReservationTime(1L, SAVED_TIME),
                     defaultTheme,
-                    Fixture.defaultMember
+                    Fixture.defaultMember, ReservationStatus.BOOKED
             ));
 
             //when & then

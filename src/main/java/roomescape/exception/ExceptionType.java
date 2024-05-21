@@ -16,6 +16,7 @@ public enum ExceptionType {
     EMPTY_MEMBER(BAD_REQUEST, "사용자 정보는 필수값 입니다."),
     PAST_TIME_RESERVATION(BAD_REQUEST, "이미 지난 시간에 예약할 수 없습니다."),
     DUPLICATE_RESERVATION(BAD_REQUEST, "같은 시간에 이미 예약이 존재합니다."),
+    DUPLICATE_WAITING_RESERVATION(BAD_REQUEST, "같은 시간에 이미 예약 혹은 예약 대기가 존재합니다."),
     DUPLICATE_RESERVATION_TIME(BAD_REQUEST, "이미 예약시간이 존재합니다."),
     DUPLICATE_THEME(BAD_REQUEST, "이미 동일한 테마가 존재합니다."),
     INVALID_DATE_TIME_FORMAT(BAD_REQUEST, "해석할 수 없는 날짜, 시간 포맷입니다."),

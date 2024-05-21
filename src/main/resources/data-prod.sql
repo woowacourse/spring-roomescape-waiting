@@ -21,23 +21,23 @@ VALUES ('user', 'USER', 'user@email.com', 'password');
 INSERT INTO member (NAME, ROLE, EMAIL, PASSWORD)
 VALUES ('user2', 'USER', 'user2@email.com', 'password');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 2, 1, 2, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 3, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 4, 2, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 3, 1, 3, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 2, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE - 1, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE, 1, 1, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE + 1, 1, 2, 1, 'BOOKED');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (CURRENT_DATE + 2, 1, 2, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 3, CURRENT_TIMESTAMP, 1, 1, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 3, CURRENT_TIMESTAMP, 2, 1, 2, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 3, CURRENT_TIMESTAMP, 3, 1, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 3, CURRENT_TIMESTAMP, 4, 2, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 3, CURRENT_TIMESTAMP, 1, 3, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 2, CURRENT_TIMESTAMP, 1, 1, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 1, CURRENT_TIMESTAMP, 1, 1, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE - 1, CURRENT_TIMESTAMP,2, 1, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE + 1, CURRENT_TIMESTAMP, 1, 2, 1, 'BOOKED');
+INSERT INTO reservation (date, created_at, time_id, theme_id, member_id, status)
+VALUES (CURRENT_DATE + 2, CURRENT_TIMESTAMP, 1, 2, 1, 'BOOKED');

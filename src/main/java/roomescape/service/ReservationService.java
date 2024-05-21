@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
+import static roomescape.exception.ExceptionType.DUPLICATE_WAITING_RESERVATION;
 import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
 import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
@@ -9,17 +10,22 @@ import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import roomescape.domain.LoginMember;
-import roomescape.entity.Member;
-import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Reservations;
-import roomescape.entity.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
+import roomescape.entity.Member;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -27,6 +33,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -45,49 +52,63 @@ public class ReservationService {
     public ReservationResponse save(LoginMember loginMember,
                                     ReservationRequest reservationRequest) {
 
-        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Member requestedMember = memberRepository.findById(loginMember.getId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
-                requestedTheme);
+        Reservation reservation = getReservation(loginMember.getId(), reservationRequest, ReservationStatus.BOOKED);
 
         Reservations reservations = new Reservations(reservationRepository.findAll());
-        if (reservations.hasSameReservation(beforeSaveReservation)) {
+        if (reservations.hasSameReservation(reservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
-        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
 
-        return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
+        return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    public ReservationResponse saveWaiting(LoginMember loginMember,
+                                           ReservationRequest reservationRequest) {
+
+        Reservation reservation = getReservation(loginMember.getId(), reservationRequest, ReservationStatus.WAITING);
+        Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(loginMember.getId()));
+        if (reservations.hasSameReservation(reservation)) {
+            throw new RoomescapeException(DUPLICATE_WAITING_RESERVATION);
+        }
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     public ReservationResponse saveByAdmin(AdminReservationRequest reservationRequest) {
-        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Member requestedMember = memberRepository.findById(reservationRequest.memberId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
-        Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
-                requestedMember);
+        Reservation beforeSaveReservation = getReservation(reservationRequest.memberId(),
+                new ReservationRequest(
+                        reservationRequest.date(),
+                        reservationRequest.timeId(),
+                        reservationRequest.themeId()),
+                ReservationStatus.BOOKED);
 
         Reservations reservations = new Reservations(reservationRepository.findAll());
         if (reservations.hasSameReservation(beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
-        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
 
         return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
     }
 
+    private Reservation getReservation(long memberId, ReservationRequest reservationRequest, ReservationStatus reservationStatus) {
+        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
+        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
+        Member requestedMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
+        Reservation reservation = reservationRequest.toReservation(
+                requestedMember,
+                requestedTime,
+                requestedTheme,
+                reservationStatus);
+
+        if (reservation.isBefore(LocalDateTime.now())) {
+            throw new RoomescapeException(PAST_TIME_RESERVATION);
+        }
+        return reservation;
+    }
 
     public List<ReservationResponse> findAll() {
         Reservations reservations = new Reservations(reservationRepository.findAll());
@@ -109,8 +130,20 @@ public class ReservationService {
     }
 
     public List<ReservationDetailResponse> findAllByMemberId(long memberId) {
-        return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(ReservationDetailResponse::from)
+        Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(memberId));
+        List<Waiting> waitings = reservations.waiting().stream()
+                .map(reservation -> new Waiting(reservation,
+                        reservationRepository.findAndCountWaitingNumber(
+                                reservation.getDate(),
+                                reservation.getReservationTime(),
+                                reservation.getTheme(),
+                                reservation.getCreatedAt())))
                 .toList();
+        return ReservationDetailResponse.of(reservations, waitings);
+    }
+
+    @Transactional
+    public void deleteById(LoginMember loginMember, long id) {
+        reservationRepository.deleteByMemberIdAndId(loginMember.getId(), id);
     }
 }

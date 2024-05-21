@@ -22,6 +22,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.Fixture;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.Role;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -93,34 +95,34 @@ public class ReservationControllerTest {
         void initData() {
             reservation1 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(5), defaultTime, defaultTheme1,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation2 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(4), defaultTime, defaultTheme1,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation3 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(3), defaultTime, defaultTheme1,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation4 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(2), defaultTime, defaultTheme1,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation5 = reservationRepository.save(
                     new Reservation(LocalDate.now().minusDays(1), defaultTime, defaultTheme1,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
 
             reservation6 = reservationRepository.save(
-                    new Reservation(LocalDate.now(), defaultTime, defaultTheme1, defaultMember));
+                    new Reservation(LocalDate.now(), defaultTime, defaultTheme1, defaultMember, ReservationStatus.BOOKED));
             reservation7 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme2,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation8 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme2,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation9 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme2,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
             reservation10 = reservationRepository.save(
                     new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme2,
-                            defaultMember));
+                            defaultMember, ReservationStatus.BOOKED));
         }
 
         @DisplayName("존재하는 모든 예약을 조회할 수 있다.")
@@ -173,6 +175,31 @@ public class ReservationControllerTest {
                     .body("size()", is(11));
         }
 
+        @DisplayName("예약 대기 하나를 생성할 수 있다.")
+        @Test
+        void createWaitingReservationTest() {
+            Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+            memberRepository.save(testMember);
+            String newToken = JWT_GENERATOR.generateWith(
+                    Map.of(
+                            "id", testMember.getId(),
+                            "name", testMember.getName(),
+                            "role", testMember.getRole().getTokenValue()
+                    )
+            );
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", newToken)
+                    .contentType(ContentType.JSON)
+                    .body(Map.of(
+                            "date", reservation7.getDate().toString(),
+                            "timeId", reservation7.getReservationTime().getId(),
+                            "themeId", reservation7.getTheme().getId()))
+                    .post("/reservations-waiting")
+                    .then().log().all()
+                    .statusCode(201);
+        }
+
         @DisplayName("지난 시간에 예약을 생성할 수 없다.")
         @Test
         void createPastReservationTest() {
@@ -200,9 +227,9 @@ public class ReservationControllerTest {
                     .cookie("token", token)
                     .contentType(ContentType.JSON)
                     .body(Map.of(
-                            "date", reservation6.getDate().toString(),
-                            "timeId", reservation6.getReservationTime().getId(),
-                            "themeId", reservation6.getTheme().getId()))
+                            "date", reservation7.getDate().toString(),
+                            "timeId", reservation7.getReservationTime().getId(),
+                            "themeId", reservation7.getTheme().getId()))
                     .post("/reservations")
                     .then().log().all()
                     .statusCode(400)
@@ -222,6 +249,37 @@ public class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(9));
+        }
+
+        @DisplayName("예약 대기 하나를 삭제할 수 있다.")
+        @Test
+        void deleteWaitingReservationTest() {
+            Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+            memberRepository.save(testMember);
+            String newToken = JWT_GENERATOR.generateWith(
+                    Map.of(
+                            "id", testMember.getId(),
+                            "name", testMember.getName(),
+                            "role", testMember.getRole().getTokenValue()
+                    )
+            );
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", newToken)
+                    .contentType(ContentType.JSON)
+                    .body(Map.of(
+                            "date", reservation7.getDate().toString(),
+                            "timeId", reservation7.getReservationTime().getId(),
+                            "themeId", reservation7.getTheme().getId()))
+                    .post("/reservations-waiting")
+                    .then().log().all()
+                    .statusCode(201);
+
+            RestAssured.given().log().all()
+                    .when().cookie("token", newToken)
+                    .delete("/reservations-waiting/11")
+                    .then().log().all()
+                    .statusCode(204);
         }
 
         @DisplayName("날짜를 이용해서 검색할 수 있다.")
