@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Set;
@@ -22,12 +23,15 @@ public class Member {
     private long id;
     @NotNull
     @Embedded
+    @Valid
     private Name name;
     @NotNull
     @Embedded
+    @Valid
     private Email email;
     @NotNull
     @Embedded
+    @Valid
     private Password password;
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -64,6 +68,10 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public Set<Reservation> getReservations() {
+        return reservations;
     }
 
     @Override

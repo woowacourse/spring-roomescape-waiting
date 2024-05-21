@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Set;
@@ -21,12 +22,15 @@ public class Theme {
     private long id;
     @NotNull
     @Embedded
+    @Valid
     private Name name;
     @NotNull
     @Embedded
+    @Valid
     private Description description;
     @NotNull
     @Embedded
+    @Valid
     private Thumbnail thumbnail;
     @OneToMany(mappedBy = "theme", fetch = FetchType.LAZY)
     private Set<Reservation> reservations;
