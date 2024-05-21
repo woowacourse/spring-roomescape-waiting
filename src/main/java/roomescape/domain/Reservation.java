@@ -54,6 +54,11 @@ public class Reservation {
         return !this.member.getId().equals(id);
     }
 
+    public Reservation approve() {
+        this.status = Status.RESERVED;
+        return this;
+    }
+
     public void cancel() {
         this.status = Status.CANCELED;
     }

@@ -26,6 +26,12 @@ public class AdminController {
                 .body(ReservationResponse.from(reservation));
     }
 
+    @PostMapping("/admin/reservations/{id}")
+    public ResponseEntity<ReservationResponse> approveReservation(@PathVariable("id") Long id) {
+        Reservation reservation = reservationService.approveReservation(id);
+        return ResponseEntity.ok(ReservationResponse.from(reservation));
+    }
+
     @DeleteMapping("/admin/reservations/{id}")
     public ResponseEntity<Void> cancelReservation(@PathVariable("id") Long id) {
         reservationService.cancelReservation(id);

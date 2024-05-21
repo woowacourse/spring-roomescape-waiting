@@ -113,4 +113,49 @@ class AdminReservationTest {
                 .then().log().all()
                 .statusCode(400);
     }
+
+    @Test
+    @DisplayName("예약과 대기가 존재하는 상태에서, 예약을 삭제하고 대기를 승인하면, 예약 상태로 변경된다")
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_adminApproveReservation_then_reserved() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        String requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}", tomorrow);
+
+        given().log().all()
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("RESERVED"));
+
+        given().log().all()
+                .cookie("token", getToken("picachu@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"));
+
+        // when
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when()
+                .delete("/admin/reservations/" + 1)
+                .then().log().all()
+                .statusCode(204);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when()
+                .post("/admin/reservations/" + 2)
+                .then().log().all()
+                .statusCode(200)
+                .body("status", equalTo("RESERVED"));
+    }
 }

@@ -19,6 +19,7 @@ import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.reservation.CancelReservationException;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.exception.reservation.ReservationException;
 import roomescape.service.dto.request.member.MemberInfo;
 import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.request.reservation.ReservationSearchCond;
@@ -109,6 +110,28 @@ public class ReservationService {
         }
         if (reservation.isReserved()) {
             throw new CancelReservationException("예약은 어드민만 취소할 수 있습니다.");
+        }
+    }
+
+    @Transactional
+    public Reservation approveReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.getById(reservationId);
+        rejectIfAnyReservationExist(reservation);
+        rejectIfAlreadyCanceled(reservation);
+        return reservation.approve();
+    }
+
+    private void rejectIfAnyReservationExist(Reservation reservation) {
+        boolean reservationExists = reservationRepository.existsByDetailAndStatus(
+                reservation.getDetail(), Status.RESERVED);
+        if (reservationExists) {
+            throw new ReservationException("다른 예약이 존재합니다.");
+        }
+    }
+
+    private void rejectIfAlreadyCanceled(Reservation reservation) {
+        if (reservation.isCanceled()) {
+            throw new CancelReservationException("이미 취소된 예약입니다.");
         }
     }
 
