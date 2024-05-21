@@ -9,6 +9,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.WaitingReservationRanking;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
@@ -21,8 +22,10 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -113,10 +116,17 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> readMemberReservations(LoginMember loginMember) {
-        return memberReservationRepository.findByMemberId(loginMember.id()).stream()
-                .map(MyReservationResponse::from)
-                .toList();
+        List<MemberReservation> confirmationReservation = memberReservationRepository
+                .findByMemberIdAndStatus(loginMember.id(), ReservationStatus.CONFIRMATION);
+        List<WaitingReservationRanking> waitingReservation = memberReservationRepository.
+                findWaitingReservationRankingByMemberId(loginMember.id());
 
+        return Stream.concat(
+                        confirmationReservation.stream().map(MyReservationResponse::from),
+                        waitingReservation.stream().map(MyReservationResponse::from)
+                ).sorted(Comparator.comparing(MyReservationResponse::date)
+                        .thenComparing(MyReservationResponse::time))
+                .toList();
     }
 
     public List<ReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {

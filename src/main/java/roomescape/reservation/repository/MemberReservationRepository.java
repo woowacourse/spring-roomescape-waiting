@@ -7,6 +7,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.WaitingReservationRanking;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,10 +17,18 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     Optional<MemberReservation> findByMemberAndReservationAndStatus(Member member, Reservation reservation, ReservationStatus status);
 
-    List<MemberReservation> findByMemberId(Long memberId);
+    List<MemberReservation> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
     @Query("select mr from MemberReservation mr where mr.member.id = :memberId AND mr.reservation in :reservations")
     List<MemberReservation> findByMemberIdAndReservations(@Param("memberId") Long memberId, @Param("reservations") List<Reservation> reservations);
 
     List<MemberReservation> findByReservationDateBetween(LocalDate start, LocalDate end);
+
+    @Query("select mr as memberReservation, " +
+            "(select count(*) from MemberReservation as cmr " +
+            "where cmr.reservation.id = mr.reservation.id and cmr.createdAt > mr.createdAt) as rank " +
+            "from MemberReservation mr " +
+            "where mr.status = 'WAITING' and mr.member.id = :memberId"
+    )
+    List<WaitingReservationRanking> findWaitingReservationRankingByMemberId(@Param("memberId") Long memberId);
 }

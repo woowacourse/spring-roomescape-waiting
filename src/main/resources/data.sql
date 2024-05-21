@@ -28,3 +28,4 @@ INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 7 );
 INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 8 );
 
 INSERT INTO member_reservation (member_id, reservation_id, status ) VALUES ( 1, 3, 'WAITING' );
+INSERT INTO member_reservation (member_id, reservation_id, status ) VALUES ( 3, 3, 'WAITING' );
