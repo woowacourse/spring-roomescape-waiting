@@ -15,7 +15,7 @@ public class LoginRequest {
     }
 
     private void validate(String email, String password) {
-        if (email.isBlank() || password.isBlank()) {
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
             throw new InvalidRequestBodyException();
         }
     }
