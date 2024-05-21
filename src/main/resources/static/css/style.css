@@ -60,3 +60,8 @@
 .cursor-pointer{
     cursor: pointer;
 }
+
+.mr-3.img-thumbnail {
+    width: 250px;
+    height: auto;
+}
