@@ -41,7 +41,7 @@ public class WaitingApiController {
     }
 
     @DeleteMapping("/waitings/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable
+    public ResponseEntity<Void> deleteWaiting(@PathVariable
                                             @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
         reservationDeleteService.deleteReservation(id);
         return ResponseEntity.noContent().build();
