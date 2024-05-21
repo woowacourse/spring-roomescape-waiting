@@ -36,14 +36,9 @@ function render(data) {
 function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
-
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 승인 API 호출
-     */
-    const endpoint = '' + id;
+    const endpoint = '/admin/reservations/waiting/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'PUT'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
