@@ -13,13 +13,16 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.service.exception.DeletingException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
+import roomescape.service.exception.UserDeleteReservationException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -73,6 +76,33 @@ public class ReservationService {
         reservationRepository.deleteById(fetchReservation.getId());
     }
 
+    public void deleteWaitReservation(final long reservationId, final long memberId) {
+        //TODO 이 id가 예약 대기인지 확인을 해야함.
+        final Reservation fetchReservation = reservationRepository.fetchById(reservationId);
+
+        if (!Objects.equals(memberId, fetchReservation.getMember().getId())) {
+            throw new DeletingException("다른 회원의 예약 대기는 취소 불가합니다.");
+        }
+
+        final boolean isWaitReservation = reservationRepository.existsByIdBeforeAndThemeIdAndTimeIdAndDate(reservationId,
+                fetchReservation.getTheme().getId(), fetchReservation.getTime().getId(), fetchReservation.getDate());
+
+        if (!isWaitReservation) {
+            throw new UserDeleteReservationException("유저는 예약 대기만 삭제 가능합니다.");
+        }
+        reservationRepository.deleteById(fetchReservation.getId());
+    }
+
+    public List<Reservation> findAllWaiting() {
+        final LocalDate date = LocalDate.now();
+        final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
+        final Set<ReservationInfo> preReservations = new HashSet<>();
+
+        return reservations.stream()
+                .filter(reservation -> !preReservations.add(ReservationInfo.from(reservation)))
+                .toList();
+    }
+
     private void validateBeforeDay(final LocalDateTime reservationDateTime) {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new PreviousTimeException("지난 시간으로 예약할 수 없습니다.");
@@ -86,15 +116,5 @@ public class ReservationService {
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new InvalidSearchDateException("from은 to보다 이전 날짜여야 합니다.");
         }
-    }
-
-    public List<Reservation> findAllWaiting() {
-        final LocalDate date = LocalDate.now();
-        final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
-        final Set<ReservationInfo> preReservations = new HashSet<>();
-
-        return reservations.stream()
-                .filter(reservation -> !preReservations.add(ReservationInfo.from(reservation)))
-                .toList();
     }
 }

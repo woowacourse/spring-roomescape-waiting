@@ -70,10 +70,9 @@ public class ReservationController {
                 .toList();
     }
 
-    //TODO 유저가 삭제할 때 예약 대기인지 확인해야 함.
     @DeleteMapping("/wait/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final long id) {
-        reservationService.deleteReservation(id);
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final long id, final LoginMember member) {
+        reservationService.deleteWaitReservation(id, member.id());
         return ResponseEntity.noContent()
                 .build();
     }

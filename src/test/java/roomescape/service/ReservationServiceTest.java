@@ -10,7 +10,9 @@ import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
 import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.service.exception.DeletingException;
 import roomescape.service.exception.InvalidSearchDateException;
+import roomescape.service.exception.UserDeleteReservationException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -67,5 +69,36 @@ class ReservationServiceTest {
 
         //then
         assertThat(allWaiting).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 삭제한다.")
+    void deleteWaitReservation() {
+        final long waitReservationId = 8L;
+        final long memberId = 3L;
+        final List<Reservation> beforeDeleting = reservationService.getReservations();
+        reservationService.deleteWaitReservation(waitReservationId, memberId);
+        final List<Reservation> afterDeleting = reservationService.getReservations();
+
+        assertThat(afterDeleting).hasSize(beforeDeleting.size() - 1);
+    }
+
+    @Test
+    @DisplayName("다른 회원의 예약 대기를 삭제할 경우 예외가 발생한다.")
+    void deleteWaitReservationAnotherUser() {
+        final long waitReservationId = 8L;
+        final long anotherMemberId = 2L;
+
+        assertThatThrownBy(() -> reservationService.deleteWaitReservation(waitReservationId, anotherMemberId))
+                .isInstanceOf(DeletingException.class);
+    }
+
+    @Test
+    @DisplayName("예약 대기가 아닌 예약을 삭제하면 예외가 발생한다.")
+    void deleteReservationThrowException() {
+        final long reservationId = 1L;
+        final long memberId = 1L;
+        assertThatThrownBy(() -> reservationService.deleteWaitReservation(reservationId, memberId))
+                .isInstanceOf(UserDeleteReservationException.class);
     }
 }
