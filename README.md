@@ -105,7 +105,7 @@ CREATE TABLE reservation_wait
 ## 4단계 요구 사항
 
 - [x] 어드민 예약 대기 목록 조회 view (`/admin/reservation/wait`)
-- [ ] 어드민 예약 대기 목록 조회(`/admin/reservations/wait`)
+- [x] 어드민 예약 대기 목록 조회(`/admin/reservations/wait`)
 - [ ] 어드민 예약 대기 취소
 - [ ] 어드민 예약 대기 승인
     - [ ] 자동 승인
