@@ -24,7 +24,6 @@ import roomescape.member.security.crypto.PasswordBcryptEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class MemberAuthServiceTest {
-
     @Mock
     private PasswordBcryptEncoder passwordBcryptEncoder;
     @Mock

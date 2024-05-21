@@ -22,7 +22,6 @@ import roomescape.member.repository.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
-
     private static final String USERNAME = "username";
     private static final String USER_EXAMPLE_COM = "user@example.com";
     private static final String USER_EXAMPLE_PASSWORD = "password";
@@ -66,5 +65,4 @@ class MemberServiceTest {
             memberService.findMember(request);
         });
     }
-
 }

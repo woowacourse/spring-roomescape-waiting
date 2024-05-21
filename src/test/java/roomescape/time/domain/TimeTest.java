@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import roomescape.exception.BadRequestException;
 
 class TimeTest {
-
     @Test
     @DisplayName("시간이 null일 경우 예외가 발생한다.")
     void validation_ShouldThrowException_WhenStartAtIsNull() {
@@ -39,5 +38,4 @@ class TimeTest {
                 }
         );
     }
-
 }

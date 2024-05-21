@@ -17,7 +17,6 @@ import roomescape.time.domain.Time;
 
 @DataJpaTest
 class TimeRepositoryTest {
-
     @PersistenceContext
     private EntityManager entityManager;
 

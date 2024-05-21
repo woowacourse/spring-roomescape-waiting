@@ -36,7 +36,6 @@ import roomescape.theme.service.ThemeService;
 
 @WebMvcTest(ThemeController.class)
 public class ThemeControllerTest {
-
     private final Theme theme = new Theme(1L, "포레스트", "공포 테마",
             "https://zerogangnam.com/storage/AVISPw8N2JfMThKvnk3VJzeY9qywIaYd8pTy46Xx.jpg");
 
@@ -105,5 +104,4 @@ public class ThemeControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
-
 }

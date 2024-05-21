@@ -17,7 +17,6 @@ import roomescape.member.domain.Member;
 
 @DataJpaTest
 class MemberRepositoryTest {
-
     @PersistenceContext
     EntityManager entityManager;
 

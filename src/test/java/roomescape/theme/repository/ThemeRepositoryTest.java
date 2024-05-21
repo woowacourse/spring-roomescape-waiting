@@ -22,7 +22,6 @@ import roomescape.time.domain.Time;
 
 @DataJpaTest
 class ThemeRepositoryTest {
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -89,5 +88,4 @@ class ThemeRepositoryTest {
         assertThat(themes)
                 .containsExactlyInAnyOrder(theme);
     }
-
 }

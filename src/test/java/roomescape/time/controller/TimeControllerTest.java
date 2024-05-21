@@ -34,7 +34,6 @@ import roomescape.time.service.TimeService;
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(TimeController.class)
 class TimeControllerTest {
-
     private final Time time = new Time(4L, LocalTime.of(12, 0));
 
     @Autowired
@@ -88,5 +87,4 @@ class TimeControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
-
 }

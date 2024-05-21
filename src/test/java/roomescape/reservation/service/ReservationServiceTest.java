@@ -34,7 +34,6 @@ import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
-
     private final Time time = new Time(1L, LocalTime.of(12, 0));
     private final Theme theme = new Theme(1L, "그켬미", "켬미 방탈출", "thumbnail");
     private final Member member = new Member(1L, "켬미", "kyummi@email.com", "pass");
@@ -139,5 +138,4 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(reservationRequest)).isInstanceOf(
                 ConflictException.class);
     }
-
 }

@@ -29,7 +29,6 @@ import roomescape.member.service.MemberService;
 
 @WebMvcTest(MemberLoginController.class)
 class MemberLoginControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
