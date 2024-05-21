@@ -13,6 +13,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r FROM Reservation r
             JOIN FETCH r.time
             JOIN FETCH r.theme
+            JOIN FETCH r.reservationMember
             WHERE r.reservationMember.id = :memberId 
                 AND r.theme.id = :themeId 
                 AND r.date BETWEEN :start AND :end
@@ -28,6 +29,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r FROM Reservation r 
             JOIN FETCH r.time 
             JOIN FETCH r.theme 
+            JOIN FETCH r.reservationMember
             WHERE r.reservationMember.id = :memberId
             """)
     List<Reservation> findAllByReservationMember_Id(long memberId);
@@ -36,6 +38,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r FROM Reservation r 
             JOIN FETCH r.time 
             JOIN FETCH r.theme
+            JOIN FETCH r.reservationMember
             WHERE r.date = :date AND r.theme.id = :themeId
             """)
     List<Reservation> findAllByDateAndTheme_Id(LocalDate date, long themeId);
