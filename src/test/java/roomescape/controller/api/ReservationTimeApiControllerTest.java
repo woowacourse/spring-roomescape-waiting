@@ -36,10 +36,10 @@ public class ReservationTimeApiControllerTest extends BaseControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservationTimes.size()", is(3));
+                .body("reservationTimes.size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/times/3")
+                .when().delete("/times/1")
                 .then().log().all()
                 .statusCode(204);
     }

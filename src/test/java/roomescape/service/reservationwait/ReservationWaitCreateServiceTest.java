@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
@@ -23,7 +22,6 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.BaseServiceTest;
 import roomescape.service.dto.request.ReservationWaitSaveRequest;
 
-@Sql(value = "claspath:clean_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationWaitCreateServiceTest extends BaseServiceTest {
 
     @Autowired
@@ -44,12 +42,11 @@ class ReservationWaitCreateServiceTest extends BaseServiceTest {
     @BeforeEach
     void setUp() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        themeRepository.save(new Theme("방탈출1", "1번 방탈출", "썸네일1"));
-        memberRepository.save(
-                new Member(
-                        new MemberName("사용자"),
-                        new MemberEmail("user@wooteco.com"),
-                        new MemberPassword("user1"), Role.USER));
+        themeRepository.save(new Theme("방탈출 1", "1번 방탈출", "썸네일 1"));
+        memberRepository.save(new Member(new MemberName("사용자1"),
+                new MemberEmail("user1@wooteco.com"),
+                new MemberPassword("1234"),
+                Role.USER));
     }
 
     @Test

@@ -8,7 +8,7 @@ public class TokenGenerator {
 
     public static String makeUserToken() {
         return RestAssured.given().log().all()
-                .body(new LoginRequest("user@naver.com", "1234"))
+                .body(new LoginRequest("user@wooteco.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
@@ -16,7 +16,7 @@ public class TokenGenerator {
 
     public static String makeAdminToken() {
         return RestAssured.given().log().all()
-                .body(new LoginRequest("admin@naver.com", "1234"))
+                .body(new LoginRequest("admin@wooteco.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");

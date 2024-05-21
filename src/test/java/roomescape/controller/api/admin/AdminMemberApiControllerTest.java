@@ -6,15 +6,24 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.controller.BaseControllerTest;
 import roomescape.util.TokenGenerator;
 
 class AdminMemberApiControllerTest extends BaseControllerTest {
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     @BeforeEach
     public void setUp() {
         super.setUp();
+        jdbcTemplate.update(
+                "INSERT INTO member (name, email, password, `role`) VALUES ('관리자1', 'admin@wooteco.com', '1234', 'ADMIN')");
+        jdbcTemplate.update(
+                "INSERT INTO member (name, email, password, `role`) VALUES ('사용자1', 'user@wooteco.com', '1234', 'USER')");
     }
 
     @Test

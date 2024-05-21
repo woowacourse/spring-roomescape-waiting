@@ -4,24 +4,30 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.controller.BaseControllerTest;
 import roomescape.service.dto.request.LoginRequest;
 
 class AdminControllerTest extends BaseControllerTest {
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     @BeforeEach
     public void setUp() {
         super.setUp();
+        jdbcTemplate.update(
+                "INSERT INTO member (name, email, password, `role`) VALUES ('admin', 'admin@wooteco.com', '1234', 'ADMIN')");
     }
 
     @Test
     @DisplayName("어드민 메인 페이지로 정상적으로 이동한다.")
     void moveToAdminMainPage_Success() {
         String token = RestAssured.given().log().all()
-                .body(new LoginRequest("admin@naver.com", "1234"))
+                .body(new LoginRequest("admin@wooteco.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
