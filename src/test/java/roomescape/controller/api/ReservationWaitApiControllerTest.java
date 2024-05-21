@@ -51,7 +51,7 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
         jdbcTemplate.update(
                 "INSERT INTO member (name, email, password, `role`) VALUES ('사용자1', 'user@wooteco.com', '1234', 'USER')");
         jdbcTemplate.update(
-                "INSERT INTO reservation_wait (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE + INTERVAL '1' DAY , 1, 1)");
+                "INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status) VALUES (1, CURRENT_DATE + INTERVAL '1' DAY , 1, 1, 'WAITING')");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

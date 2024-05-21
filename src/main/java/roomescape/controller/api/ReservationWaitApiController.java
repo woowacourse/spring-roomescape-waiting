@@ -39,7 +39,7 @@ public class ReservationWaitApiController {
 
     @DeleteMapping("/reservations/wait/{reservationWaitId}")
     public ResponseEntity<Void> deleteReservationWait(@PathVariable long reservationWaitId) {
-        reservationWaitDeleteService.deleteById(reservationWaitId);
+        reservationWaitDeleteService.cancelById(reservationWaitId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,6 +2,7 @@ package roomescape.service.reservationwait;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.ReservationWait;
 import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationWaitRepository;
 
@@ -15,9 +16,9 @@ public class ReservationWaitDeleteService {
     }
 
     @Transactional
-    public void deleteById(long id) {
-        reservationWaitRepository.findById(id)
+    public void cancelById(long id) {
+        ReservationWait reservationWait = reservationWaitRepository.findById(id)
                 .orElseThrow(() -> new InvalidRequestException("존재하지 않는 예약 대기입니다."));
-        reservationWaitRepository.deleteById(id);
+        reservationWait.cancel();
     }
 }

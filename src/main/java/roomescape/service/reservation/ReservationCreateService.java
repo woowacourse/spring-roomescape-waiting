@@ -1,5 +1,7 @@
 package roomescape.service.reservation;
 
+import static roomescape.domain.ReservationWaitStatus.WAITING;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
@@ -83,7 +85,8 @@ public class ReservationCreateService {
     }
 
     private void validateAlreadyWait(LocalDate date, long timeId, long themeId, long memberId) {
-        if (reservationWaitRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
+        if (reservationWaitRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(date, timeId, themeId,
+                memberId, WAITING)) {
             throw new InvalidRequestException("이미 예약 대기 중입니다.");
         }
     }

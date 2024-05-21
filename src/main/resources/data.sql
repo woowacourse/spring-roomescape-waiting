@@ -16,8 +16,8 @@ INSERT INTO member (name, email, password, `role`)
 VALUES ('testAdmin', 'admin@naver.com', '1234', 'ADMIN');
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (1, CURRENT_DATE + INTERVAL '1' DAY, 1, 1);
-INSERT INTO reservation_wait (member_id, date, time_id, theme_id)
-VALUES (2, CURRENT_DATE + INTERVAL '1' DAY, 1, 1);
-INSERT INTO reservation_wait (member_id, date, time_id, theme_id)
-VALUES (3, CURRENT_DATE + INTERVAL '1' DAY, 1, 1);
+INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
+VALUES (2, CURRENT_DATE + INTERVAL '1' DAY, 1, 1, 'WAITING');
+INSERT INTO reservation_wait (member_id, date, time_id, theme_id, status)
+VALUES (3, CURRENT_DATE + INTERVAL '1' DAY, 1, 1, 'WAITING');
 

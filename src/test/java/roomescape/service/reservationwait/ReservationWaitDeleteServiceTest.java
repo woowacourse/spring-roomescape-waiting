@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
@@ -52,21 +53,21 @@ class ReservationWaitDeleteServiceTest extends BaseServiceTest {
                 Role.USER));
         ReservationWaitSaveRequest request = new ReservationWaitSaveRequest(
                 LocalDate.now().plusDays(1L), 1L, 1L);
-        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme));
+        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme, ReservationWaitStatus.WAITING));
     }
 
     @Test
     @DisplayName("예약 대기를 삭제한다.")
     void deleteReservationWait_Success() {
-        reservationWaitDeleteService.deleteById(1L);
+        reservationWaitDeleteService.cancelById(1L);
 
-        assertThat(reservationWaitRepository.findAll()).hasSize(0);
+        assertThat(reservationWaitRepository.findAllByStatus(ReservationWaitStatus.WAITING)).hasSize(0);
     }
 
     @Test
     @DisplayName("존재하지 않는 예약 대기 삭제 시 예외가 발생한다.")
     void deleteReservationWaitByUndefinedId_Failure() {
-        assertThatThrownBy(() -> reservationWaitDeleteService.deleteById(2L))
+        assertThatThrownBy(() -> reservationWaitDeleteService.cancelById(2L))
                 .isInstanceOf(InvalidRequestException.class);
     }
 }

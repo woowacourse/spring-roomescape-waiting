@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,19 +29,31 @@ public class ReservationWait {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(value = EnumType.STRING)
+    private ReservationWaitStatus status;
+
     public ReservationWait() {
     }
 
-    public ReservationWait(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationWait(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
+                           ReservationWaitStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
-    public ReservationWait(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public ReservationWait(Member member, LocalDate date, ReservationTime time, Theme theme,
+                           ReservationWaitStatus status) {
+        this(null, member, date, time, theme, status);
+    }
+
+    public void cancel() {
+        if (status.isWaiting()) {
+            status = ReservationWaitStatus.CANCELED;
+        }
     }
 
     public Long getId() {
@@ -62,6 +76,10 @@ public class ReservationWait {
         return theme;
     }
 
+    public ReservationWaitStatus getStatus() {
+        return status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -73,11 +91,11 @@ public class ReservationWait {
         ReservationWait that = (ReservationWait) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+                && Objects.equals(theme, that.theme) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return Objects.hash(id, member, date, time, theme, status);
     }
 }

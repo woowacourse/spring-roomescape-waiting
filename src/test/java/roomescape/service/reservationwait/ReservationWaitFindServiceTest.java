@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
@@ -55,12 +56,12 @@ class ReservationWaitFindServiceTest extends BaseServiceTest {
         Member member = memberRepository.findById(1L).get();
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         Theme theme = themeRepository.findById(1L).get();
-        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme));
+        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme, ReservationWaitStatus.WAITING));
         Member member2 = memberRepository.save(new Member(new MemberName("사용자2"),
                 new MemberEmail("user2@wooteco.com"),
                 new MemberPassword("1234"),
                 Role.USER));
-        reservationWaitRepository.save(new ReservationWait(member2, LocalDate.now().plusDays(1L), time, theme));
+        reservationWaitRepository.save(new ReservationWait(member2, LocalDate.now().plusDays(1L), time, theme, ReservationWaitStatus.WAITING));
 
         assertThat(reservationWaitFindService.findReservationWaits()).hasSize(2);
     }
@@ -71,8 +72,8 @@ class ReservationWaitFindServiceTest extends BaseServiceTest {
         Member member = memberRepository.findById(1L).get();
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         Theme theme = themeRepository.findById(1L).get();
-        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme));
-        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme));
+        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme, ReservationWaitStatus.WAITING));
+        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme, ReservationWaitStatus.WAITING));
 
         assertThat(reservationWaitFindService.findUserReservationWaits(1L)).hasSize(2);
     }

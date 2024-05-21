@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
@@ -76,7 +77,7 @@ class ReservationWaitCreateServiceTest extends BaseServiceTest {
         ReservationTime time = reservationTimeRepository.findById(1L).get();
         Theme theme = themeRepository.findById(1L).get();
         LocalDate date = LocalDate.now().plusDays(1L);
-        reservationWaitRepository.save(new ReservationWait(member, date, time, theme));
+        reservationWaitRepository.save(new ReservationWait(member, date, time, theme, ReservationWaitStatus.WAITING));
 
         ReservationWaitSaveRequest request = new ReservationWaitSaveRequest(
                 date, 1L, 1L);
