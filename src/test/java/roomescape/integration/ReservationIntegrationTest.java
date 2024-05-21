@@ -124,15 +124,7 @@ class ReservationIntegrationTest extends IntegrationTest {
 
         @Test
         void 시간대와_테마가_똑같은_중복된_예약은_추가할_수_없다() {
-            params.put("date", "2000-04-07");
-
-            RestAssured.given().log().all()
-                    .cookies(cookieProvider.createCookies())
-                    .contentType(ContentType.JSON)
-                    .body(params)
-                    .when().post("/reservations")
-                    .then().log().all()
-                    .statusCode(201);
+            params.put("date", "2000-04-01");
 
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())

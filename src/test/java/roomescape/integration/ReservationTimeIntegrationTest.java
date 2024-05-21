@@ -31,7 +31,7 @@ class ReservationTimeIntegrationTest extends IntegrationTest {
     @DisplayName("예약 가능 시간 목록 조회 API")
     class FindAllAvailableReservationTime {
         @Test
-        void 예약이_가능한_시간을_조회할_수_있다() {
+        void 예약이_가능한_시간을_필터링해_조회할_수_있다() {
             RestAssured.given().log().all()
                     .when().get("/times/available?date=2024-10-05&themeId=1")
                     .then().log().all()
