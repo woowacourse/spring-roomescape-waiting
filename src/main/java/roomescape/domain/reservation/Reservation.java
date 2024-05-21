@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
@@ -61,6 +62,15 @@ public class Reservation {
         }
         if (date.isEqual(LocalDate.now()) && time.isBeforeNow()) {
             throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
+        }
+    }
+
+    public void validateDuplication(List<Reservation> others) {
+        if (others.stream()
+            .anyMatch(other -> date.equals(other.date) &&
+                time.equals(other.time) &&
+                theme.equals(other.theme))) {
+            throw new RoomescapeException("해당 시간에 예약이 이미 존재합니다.");
         }
     }
 

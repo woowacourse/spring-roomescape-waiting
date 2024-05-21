@@ -41,7 +41,9 @@ public class ReservationService {
         Theme theme = findTheme(themeId);
         Reservation reservation = new Reservation(member, date, time, theme, RESERVED);
 
-        validateDuplication(date, timeId, themeId);
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeIdAndThemeId(
+            new Date(date), timeId, themeId);
+        reservation.validateDuplication(reservations);
 
         return reservationRepository.save(reservation);
     }
@@ -59,13 +61,6 @@ public class ReservationService {
     private Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
             .orElseThrow(() -> new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다."));
-    }
-
-    private void validateDuplication(String rawDate, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(new Date(rawDate), timeId,
-            themeId)) {
-            throw new RoomescapeException("해당 시간에 예약이 이미 존재합니다.");
-        }
     }
 
     public void delete(Long id) {
