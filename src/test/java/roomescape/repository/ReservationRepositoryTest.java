@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,13 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.Fixture;
-import roomescape.domain.Email;
 import roomescape.domain.Member;
-import roomescape.domain.Name;
-import roomescape.domain.Password;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
 import roomescape.domain.Theme;
 
 @DataJpaTest
@@ -48,6 +43,7 @@ class ReservationRepositoryTest {
     private static final LocalDate DAY_BEFORE_1 = LocalDate.now().minusDays(1);
     private static final LocalDate DAY_BEFORE_7 = LocalDate.now().minusDays(7);
     private static final LocalDate DAY_BEFORE_10 = LocalDate.now().minusDays(10);
+
     @BeforeEach
     void initDate() {
         theme1 = themeRepository.save(theme1);
@@ -63,6 +59,7 @@ class ReservationRepositoryTest {
 
         defaultMember = memberRepository.save(defaultMember);
     }
+
     @DisplayName("인기 테마를 구할 수 있다.")
     @Test
     void popularThemeTest() {

@@ -42,7 +42,8 @@ public class ThemeService {
 
     public List<ThemeResponse> findAndOrderByPopularity(int count) {
         Duration lastWeek = Duration.ofLastWeek();
-        return reservationRepository.findAndOrderByPopularity(lastWeek.getStartDate(), lastWeek.getEndDate(), count).stream()
+        return reservationRepository.findAndOrderByPopularity(lastWeek.getStartDate(), lastWeek.getEndDate(), count)
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

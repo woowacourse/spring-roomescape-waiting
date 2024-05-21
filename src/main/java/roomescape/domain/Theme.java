@@ -64,14 +64,6 @@ public class Theme {
         }
     }
 
-    public boolean isIdOf(long id) {
-        return this.id == id;
-    }
-
-    public boolean isNameOf(String name) {
-        return this.name.equals(name);
-    }
-
     public long getId() {
         return id;
     }
