@@ -45,7 +45,7 @@
 
 ## 3단계 요구 사항
 
-- [x] 예약 대기 관련 API(`/reservations/waitlists`)
+- [x] 예약 대기 관련 API(`/reservations/wait`)
     - [x] 예약 대기 생성 API
         - [x] request
           ```json
@@ -101,3 +101,17 @@ CREATE TABLE reservation_wait
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 ```
+
+## 4단계 요구 사항
+
+- [ ] 어드민 예약 대기 목록 조회 view (`/admin/reservation/wait`)
+- [ ] 어드민 예약 대기 목록 조회(`/admin/reservations/wait`)
+- [ ] 어드민 예약 대기 취소
+- [ ] 어드민 예약 대기 승인
+    - [ ] 자동 승인
+        - [ ] 예약 취소가 발생하는 경우 예약 대기가 있을 때 우선순위에 따라 자동으로 예약
+            - [ ] 예약 취소 시 예약 대기 있는지 확인
+            - [ ] 없으면 바로 삭제
+            - [ ] 있으면,
+                - [ ] 예약 대기 제일 첫 예약을 가져와서 `reservation` 테이블로 이동
+                - [ ] 예약 대기에서 삭제
