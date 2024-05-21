@@ -21,6 +21,7 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -40,7 +41,8 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void create() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(1L, reservation.getMember(), reservation.getDate(),
                         reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED));
@@ -57,8 +59,10 @@ class ReservationServiceTest {
     void throwExceptionWhenCreateDuplicatedReservation() {
         // given
         final Theme theme = THEME_HORROR(1L);
-        final Reservation reservation = new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme, ReservationStatus.RESERVED);
-        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH), RESERVATION_TIME_SIX().getId(), theme.getId()))
+        final Reservation reservation = new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), theme, ReservationStatus.RESERVED);
+        given(reservationRepository.countByDateAndTimeIdAndThemeId(LocalDate.parse(DATE_MAY_EIGHTH),
+                RESERVATION_TIME_SIX().getId(), theme.getId()))
                 .willReturn(1);
 
         // when & then
@@ -70,8 +74,10 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAllReservations() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), THEME_DETECTIVE(), ReservationStatus.RESERVED);
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SEVEN(), THEME_DETECTIVE(), ReservationStatus.RESERVED);
         given(reservationRepository.findAll())
                 .willReturn(List.of(reservation1, reservation2));
 
@@ -98,8 +104,10 @@ class ReservationServiceTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
-        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         final ReservationFilterParam reservationFilterParam
                 = new ReservationFilterParam(1L, 1L,
                 LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"));
@@ -154,7 +162,8 @@ class ReservationServiceTest {
     void findMyReservations() {
         // given
         final LoginMember loginMember = new LoginMember(1L, MEMBER_MIA_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByMemberId(loginMember.id()))
                 .willReturn(List.of(reservation));
 
@@ -169,7 +178,8 @@ class ReservationServiceTest {
     @DisplayName("예약 대기 목록을 조회한다.")
     void findReservationWaitings() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.findByStatus(ReservationStatus.WAITING))
                 .willReturn(List.of(reservation));
 
@@ -178,5 +188,39 @@ class ReservationServiceTest {
 
         // then
         assertThat(actual).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 승인한다.")
+    void approveReservationWaiting() {
+        // given
+        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
+                waiting.getTime(), ReservationStatus.RESERVED))
+                .willReturn(false);
+
+        // when
+        reservationService.approveReservationWaiting(waiting.getId());
+
+        // then
+        assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("이미 예약이 있는 상태에서 승인을 할 경우 예외가 발생한다.")
+    void throwExceptionWhenAlreadyExistsReservation() {
+        // given
+        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
+        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
+                waiting.getTime(), ReservationStatus.RESERVED))
+                .willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.approveReservationWaiting(waiting.getId()))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

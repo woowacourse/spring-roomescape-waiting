@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,4 +26,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     int countByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
 
     boolean existsById(final Long id);
+
+    boolean existsByThemeAndDateAndTimeAndStatus(final Theme theme, final LocalDate date,
+                                                 final ReservationTime time, final ReservationStatus status);
 }

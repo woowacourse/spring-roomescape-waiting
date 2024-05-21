@@ -110,4 +110,17 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertGetResponseWithLogin(ADMIN_EMAIL, "/admin/reservations", 200);
     }
+
+    @Test
+    @DisplayName("예약 대기를 성공적으로 승인하면 200을 응답한다.")
+    void respondOkWhenApproveReservationWaiting() {
+        final Long id = saveReservationWaiting();
+        final String accessToken = getAccessToken(ADMIN_EMAIL);
+
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .when().put("/admin/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(200);
+    }
 }

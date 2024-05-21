@@ -81,7 +81,7 @@ abstract class AcceptanceTest {
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
         final MemberReservationSaveRequest request
-                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)

@@ -80,4 +80,19 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
     }
+
+    public void approveReservationWaiting(final Long waitingId) {
+        final Reservation waiting = reservationRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 예약 대기가 없습니다."));
+        validateIsApprovable(waiting);
+        waiting.toReserved();
+    }
+
+    private void validateIsApprovable(final Reservation waiting) {
+        final boolean isExisting = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                waiting.getTheme(), waiting.getDate(), waiting.getTime(), ReservationStatus.RESERVED);
+        if (isExisting ) {
+            throw new IllegalStateException("이미 예약이 존재하여 승인이 불가능합니다.");
+        }
+    }
 }

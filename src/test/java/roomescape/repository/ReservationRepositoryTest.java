@@ -163,4 +163,13 @@ class ReservationRepositoryTest {
 
         assertThat(actual).allSatisfy(reservation -> assertThat(reservation.getStatus()).isEqualTo(status));
     }
+
+    @Test
+    @DisplayName("테마, 날짜, 시간에 해당하는 예약이 있는지 확인한다.")
+    void findByThemeAndDateAndTime() {
+        final boolean actual = reservationRepository.existsByThemeAndDateAndTimeAndStatus(
+                theme, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, ReservationStatus.RESERVED);
+
+        assertThat(actual).isTrue();
+    }
 }
