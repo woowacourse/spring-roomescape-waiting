@@ -39,5 +39,5 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
             WHERE mr.status = :status
             """)
-    List<MemberReservation> findAllByStatus(ReservationStatus status);
+    List<MemberReservation> findByStatus(ReservationStatus status);
 }

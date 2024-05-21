@@ -38,7 +38,7 @@ public class ReservationController {
     @Admin
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getAllReservationsByStatus(@RequestParam final ReservationStatus status) {
+    public ApiResponse<ReservationsResponse> getReservationsByStatus(@RequestParam final ReservationStatus status) {
         return ApiResponse.success(reservationService.findReservationsByStatus(status));
     }
 

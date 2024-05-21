@@ -59,7 +59,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationsResponse findReservationsByStatus(final ReservationStatus status) {
-        List<MemberReservation> memberReservations = memberReservationRepository.findAllByStatus(status);
+        List<MemberReservation> memberReservations = memberReservationRepository.findByStatus(status);
         List<ReservationResponse> response = memberReservations.stream()
                 .map(memberReservation -> ReservationResponse.from(memberReservation.getReservation()))
                 .toList();
@@ -68,7 +68,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationsResponse findFirstOrderWaitingReservations() {
-        List<MemberReservation> waitingMemberReservations = memberReservationRepository.findAllByStatus(ReservationStatus.WAITING);
+        List<MemberReservation> waitingMemberReservations = memberReservationRepository.findByStatus(ReservationStatus.WAITING);
         List<ReservationResponse> response = waitingMemberReservations.stream()
                 .filter(MemberReservation::isFirstWaitingOrder)
                 .map(memberReservation -> ReservationResponse.from(memberReservation.getReservation()))
