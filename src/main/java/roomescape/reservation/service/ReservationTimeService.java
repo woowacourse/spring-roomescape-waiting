@@ -5,12 +5,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.reservation.controller.dto.AvailableTimeResponse;
 import roomescape.reservation.controller.dto.ReservationTimeRequest;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.AvailableTimes;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -43,7 +45,12 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(long timeId) {
+        List<ReservationTime> list = reservationRepository.findAll()
+                .stream()
+                .map(Reservation::getTime)
+                .toList();
         if (reservationRepository.existsByTimeId(timeId)) {
             throw new BadRequestException("예약이 존재하여 삭제할 수 없습니다.");
         }

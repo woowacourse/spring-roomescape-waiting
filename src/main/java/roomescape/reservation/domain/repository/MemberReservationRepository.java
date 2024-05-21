@@ -28,6 +28,10 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findAllByMember(Member member);
 
+    List<MemberReservation> findAllByReservation(Reservation reservation);
+
+    boolean existsByReservation(Reservation reservation);
+
     void deleteByReservation_Id(long reservationId);
 
     boolean existsByReservationAndMember(Reservation reservation, Member member);

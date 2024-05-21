@@ -21,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.TokenProvider;
-import roomescape.member.controller.dto.MemberResponse;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -56,7 +53,7 @@ class ReservationControllerTest extends ControllerTest {
     String token;
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         token = tokenProvider.createAccessToken(getMemberChoco().getEmail());
     }
 

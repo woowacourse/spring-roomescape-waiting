@@ -58,12 +58,6 @@ public class ReservationService {
                 .toList();
     }
 
-//    private void checkReservationStatus(List<MemberReservation> memberReservations) {
-//        for (MemberReservation memberReservation : memberReservations) {
-//            memberReservation.
-//        }
-//    }
-
     @Transactional
     public ReservationResponse createMemberReservation(AuthInfo authInfo, ReservationRequest reservationRequest) {
         LocalDate date = LocalDate.parse(reservationRequest.date());
@@ -91,22 +85,26 @@ public class ReservationService {
         Theme theme = getTheme(themeId);
         Member member = getMember(memberId);
         Reservation reservation = getReservation(date, reservationTime, theme);
+        ReservationStatus reservationStatus = ReservationStatus.BOOKED;
 
-        if (reservation.isPast()) {
-            throw new BadRequestException("올바르지 않는 데이터 요청입니다.");
-        }
-
-        if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
-            throw new ForbiddenException("중복된 예약입니다.");
-        }
+        validateReservation(reservation, member);
 
         if (memberReservationRepository.existsByReservation(reservation)) {
-            System.out.println("예약 대기랑께");
+            reservationStatus = ReservationStatus.WAITING;
         }
 
         MemberReservation memberReservation = memberReservationRepository.save(
-                new MemberReservation(member, reservation, LocalDateTime.now(), ReservationStatus.BOOKED));
+                new MemberReservation(member, reservation, LocalDateTime.now(), reservationStatus));
         return ReservationResponse.from(memberReservation.getId(), reservation, member);
+    }
+
+    private void validateReservation(Reservation reservation, Member member) {
+        if (reservation.isPast()) {
+            throw new BadRequestException("올바르지 않는 데이터 요청입니다.");
+        }
+        if (memberReservationRepository.existsByReservationAndMember(reservation, member)) {
+            throw new ForbiddenException("중복된 예약입니다.");
+        }
     }
 
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {

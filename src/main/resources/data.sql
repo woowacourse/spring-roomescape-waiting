@@ -56,6 +56,8 @@ INSERT INTO member(name, email, password, role)
 VALUES ('클로버', 'dev.clover@gmail.com', '$2a$10$Aj0C7gcvbSkKpro5bvGHVeOmsdbCRTZVm7bENr93g9EK2QdI40XlO', 'USER');
 INSERT INTO member(name, email, password, role)
 VALUES ('관리자', 'admin@roomescape.com', '$2a$10$pebanHuZMA0tfsogsWhgHOruvQQzIB/7N1MnN/.m8OSYO2fxlMtEC', 'ADMIN');
+INSERT INTO member(name, email, password, role)
+VALUES ('타칸', 'dev.tacan@gmail.com', '$2a$10$xFQbps5IJ6r9h69yhgYFe.hrbU59NA6snxaCVtllkcheE.nqq..UG', 'USER');
 
 
 -- 예약 목록 추가

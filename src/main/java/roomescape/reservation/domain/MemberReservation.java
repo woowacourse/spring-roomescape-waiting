@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
@@ -15,8 +16,18 @@ public class MemberReservation {
     private Member member;
     @ManyToOne
     private Reservation reservation;
+    private LocalDateTime createdTime;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     public MemberReservation() {
+    }
+
+    public MemberReservation(Member member, Reservation reservation, LocalDateTime createdTime, ReservationStatus status) {
+        this.member = member;
+        this.reservation = reservation;
+        this.createdTime = createdTime;
+        this.status = status;
     }
 
     public MemberReservation(Long id, Member member, Reservation reservation) {
@@ -28,6 +39,8 @@ public class MemberReservation {
     public MemberReservation(Member member, Reservation reservation) {
         this.member = member;
         this.reservation = reservation;
+        this.createdTime = LocalDateTime.now();
+        this.status = ReservationStatus.BOOKED;
     }
 
     public boolean isMember(Member member) {
@@ -44,6 +57,10 @@ public class MemberReservation {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override
