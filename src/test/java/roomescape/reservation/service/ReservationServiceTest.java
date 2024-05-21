@@ -1,18 +1,22 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
 import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.HOUR_11;
 import static roomescape.util.Fixture.JOJO_EMAIL;
 import static roomescape.util.Fixture.JOJO_NAME;
+import static roomescape.util.Fixture.JOJO_PASSWORD;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
+import static roomescape.util.Fixture.TOMORROW;
 
-import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,10 +30,14 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.ReservationSaveRequest;
+import roomescape.reservation.dto.ReservationWaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
@@ -47,6 +55,9 @@ class ReservationServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationService reservationService;
@@ -74,7 +85,7 @@ class ReservationServiceTest {
     void validateDuplicatedReservationSuccess() {
         Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
@@ -92,7 +103,7 @@ class ReservationServiceTest {
     void validateDuplicatedReservationWaiting() {
         themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
@@ -109,7 +120,7 @@ class ReservationServiceTest {
     void validateReservationWaitingAfterReservation() {
         themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
@@ -119,6 +130,33 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("현재 날짜 이후의 예약들을 예약 날짜, 예약 시간, 예약 추가 순으로 정렬해 예약 대기 목록을 조회한다.")
+    @Test
+    void findWaitingReservations() {
+        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+        ReservationTime hour11 = reservationTimeRepository.save(new ReservationTime(HOUR_11));
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour11, Status.WAIT);
+        Reservation reservation2 = new Reservation(kaki, TODAY, theme, hour10, Status.WAIT);
+        Reservation reservation3 = new Reservation(kaki, TODAY, theme, hour11, Status.WAIT);
+        Reservation reservation4 = new Reservation(jojo, TOMORROW, theme, hour10, Status.WAIT);
+
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+        reservationRepository.save(reservation3);
+        reservationRepository.save(reservation4);
+
+        List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
+
+        assertThat(waitingReservations).extracting(ReservationWaitingResponse::id)
+                .containsExactly(reservation2.getId(), reservation3.getId(), reservation4.getId(), reservation1.getId());
     }
 
     @DisplayName("예약 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")

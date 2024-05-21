@@ -15,6 +15,7 @@ import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
 import roomescape.reservation.dto.ReservationSearchConditionRequest;
+import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -108,17 +109,29 @@ public class ReservationService {
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
-        List<Reservation> waitList = waitingReservations.stream()
+        List<Reservation> sortedByCreatedAtWaitingReservations = waitingReservations.stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
 
-        Waitings waitings = new Waitings(waitList);
+        Waitings waitings = new Waitings(sortedByCreatedAtWaitingReservations);
 
         return reservationRepository.findAllByMemberId(loginMember.id()).stream()
                 .map(reservation -> MemberReservationResponse.toResponse(
                         reservation,
                         waitings.findMemberRank(reservation, loginMember.id())
                 )).toList();
+    }
+
+    public List<ReservationWaitingResponse> findWaitingReservations() {
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
+
+        return waitingReservations.stream()
+                .filter(Reservation::isAfterToday)
+                .sorted(Comparator.comparing(Reservation::getDate)
+                        .thenComparing(Reservation::getStartAt)
+                        .thenComparing(Reservation::getCreatedAt))
+                .map(ReservationWaitingResponse::toResponse)
+                .toList();
     }
 
     public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {

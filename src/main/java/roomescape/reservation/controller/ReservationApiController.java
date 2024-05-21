@@ -16,6 +16,7 @@ import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
 import roomescape.reservation.dto.ReservationSearchConditionRequest;
+import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -48,6 +49,13 @@ public class ReservationApiController {
         List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
 
         return ResponseEntity.ok(reservationResponses);
+    }
+
+    @GetMapping("/admin/reservations/waiting")
+    public ResponseEntity<List<ReservationWaitingResponse>> findWaitingReservations() {
+        List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
+
+        return ResponseEntity.ok(waitingReservations);
     }
 
     @PostMapping(path = {"/reservations", "/admin/reservations"})

@@ -1,6 +1,7 @@
 package roomescape.util;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class Fixture {
 
@@ -8,8 +9,8 @@ public class Fixture {
     public static final String HORROR_DESCRIPTION = "공포";
     public static final String THUMBNAIL = "https://i.pinimg.com/236x.jpg";
 
-    public static final String HOUR_10 = "10:00";
-    public static final String HOUR_11 = "11:00";
+    public static final LocalTime HOUR_10 = LocalTime.parse("10:00");
+    public static final LocalTime HOUR_11 = LocalTime.parse("11:00");
 
     public static final String KAKI_NAME = "카키";
     public static final String KAKI_EMAIL = "kaki@email.com";
