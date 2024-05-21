@@ -66,7 +66,8 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(), theme)) {
+        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(),
+                theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
@@ -133,7 +134,21 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
+
         reservationRepository.deleteById(id);
+        if (waitingRepository.existsByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
+            convertFirstWaitingToReservation(reservation);
+        }
+    }
+
+    private void convertFirstWaitingToReservation(final Reservation reservation) {
+        Waiting waiting = waitingRepository.findFirstByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
+
+        waitingRepository.delete(waiting);
+        reservationRepository.save(new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
     }
 
     public void deleteWaiting(final Long id) {
