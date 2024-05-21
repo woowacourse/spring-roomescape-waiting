@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.ReservationTime;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,5 +30,12 @@ class ReservationTimeRepositoryTest {
         );
 
         assertThat(timeRepository.findAll()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("예약 시간 존재 여부를 확인한다.")
+    void existsTrue() {
+        assertThat(timeRepository.existsByStartAt(LocalTime.of(18, 0))).isTrue();
+        assertThat(timeRepository.existsByStartAt(LocalTime.of(0, 0))).isFalse();
     }
 }

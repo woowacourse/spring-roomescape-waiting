@@ -23,6 +23,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
@@ -45,6 +46,24 @@ class ReservationServiceTest {
     void deleteReservation() {
         assertThatCode(() -> reservationService.deleteReservation(1L))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("예약을 저장한다.")
+    void saveReservation() {
+        final long memberId = 3L;
+        final long themeId = 4L;
+        final long timeId = 1L;
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final CreateReservationRequest request = new CreateReservationRequest(memberId, themeId, date, timeId);
+        final Reservation reservation = reservationService.addReservation(request);
+
+        assertAll(
+                () -> assertThat(reservation.getMember().getId()).isEqualTo(memberId),
+                () -> assertThat(reservation.getTheme().getId()).isEqualTo(themeId),
+                () -> assertThat(reservation.getDate()).isEqualTo(date),
+                () -> assertThat(reservation.getTime().getId()).isEqualTo(timeId)
+        );
     }
 
     @Test
