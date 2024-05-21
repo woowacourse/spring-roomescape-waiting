@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

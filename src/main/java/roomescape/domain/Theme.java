@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class Theme {
+public class Theme extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

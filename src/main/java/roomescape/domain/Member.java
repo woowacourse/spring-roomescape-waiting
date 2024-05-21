@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public class Member {
+public class Member extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
