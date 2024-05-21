@@ -30,6 +30,10 @@ public class Theme {
     @Column
     private String thumbnail;
 
+    public Theme(Long id) {
+        this(id, null, null, null);
+    }
+
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
     }

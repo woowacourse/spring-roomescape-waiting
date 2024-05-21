@@ -12,12 +12,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 
-@Disabled
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @SqlMergeMode(MergeMode.MERGE)
 @Sql("/init/truncate.sql")
 class MemberReservationTest {
@@ -51,15 +53,15 @@ class MemberReservationTest {
 
         // when, then
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(201)
-            .and()
-            .body("status", equalTo("RESERVED"));
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .and()
+                .body("status", equalTo("RESERVED"));
     }
 
     @Test
@@ -74,25 +76,25 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         given().log().all()
-            .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(201)
-            .body("status", equalTo("RESERVED"));
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("RESERVED"));
 
         // when, then
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(201)
-            .body("status", equalTo("WAITING"));
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"));
     }
 
     @Test
@@ -107,22 +109,22 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-            .then().log().all().statusCode(201);
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all().statusCode(201);
 
         // when, then
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(400);
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @Test
@@ -137,34 +139,35 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         given().log().all()
-            .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(201);
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201);
 
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(201);
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201);
 
         // when, then
         given().log().all()
-            .cookie("token", getToken("mangcho@woowa.net", "password"))
-            .contentType("application/json")
-            .body(requestBody)
-        .when()
-            .post("/reservations")
-        .then().log().all()
-            .statusCode(400);
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("예약을 취소한 상태에서, 예약 요청을 보내면, 예약된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
@@ -203,6 +206,7 @@ class MemberReservationTest {
         // 예약 상태인지 확인하는 로직이 필요하다
     }
 
+    @Disabled
     @Test
     @DisplayName("뒤에 예약 대기가 존재하는 상태에서, 예약 대기를 취소하고 다시 예약 요청을 보내면, 예약 대기 상태가 된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
@@ -248,6 +252,7 @@ class MemberReservationTest {
         // 예약 상태인지 확인하는 로직이 필요하다
     }
 
+    @Disabled
     @Test
     @DisplayName("이미 지난 시간에 대한 예약 요청을 보내면, 예약이 거절된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql"})
@@ -268,6 +273,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("존재하지 않는 시간에 대한 예약 요청을 보내면, 예약이 거절된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql"})
@@ -288,6 +294,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("존재하지 않는 테마에 대한 예약 요청을 보내면, 예약이 거절된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/times.sql"})
@@ -308,6 +315,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("존재하지 않는 회원에 대한 예약 요청을 보내면, 예약이 거절된다")
     @Sql(value = {"/test-data/themes.sql", "/test-data/times.sql"})
@@ -329,6 +337,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("예약이 존재하지 않는 상황에서, 예약을 취소 요청을 보내면, 요청을 무시한다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
@@ -343,6 +352,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(204);
     }
 
+    @Disabled
     @Test
     @DisplayName("과거 resolved 예약에 대해 취소 요청을 보내면, 요청을 무시한다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -362,7 +372,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-
+    @Disabled
     @Test
     @DisplayName("resolved 예약과 waiting 예약이 모두 있는 상태에서, 모든 예약을 조회하면, resolved 예약과 waiting 예약을 모두 반환한다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -380,6 +390,7 @@ class MemberReservationTest {
         // 정렬과 페이징 처리가 필요하다
     }
 
+    @Disabled
     @Test
     @DisplayName("과거의 resolved 예약과 waiting 예약은 조회되지 않는다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -396,6 +407,7 @@ class MemberReservationTest {
         // 지난 예약과 예약 대기 상태가 조회되지 않는지 확인하는 로직이 필요하다
     }
 
+    @Disabled
     @Test
     @DisplayName("내 waiting 예약이 존재해야만, waiting 예약을 삭제할 수 있다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -415,6 +427,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(204);
     }
 
+    @Disabled
     @Test
     @DisplayName("내 waiting 예약이 존재하지 않으면, waiting 예약을 삭제할 수 없다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
@@ -433,6 +446,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("다른 사람의 waiting 예약을 삭제할 수 없다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -459,6 +473,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("resolved 예약으로 전환되면, pending 예약 취소 요청을 할 수 없다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -497,6 +512,7 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
+    @Disabled
     @Test
     @DisplayName("waiting 예약에 대해, resolved 예약 취소 요청을 할 수 없다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
