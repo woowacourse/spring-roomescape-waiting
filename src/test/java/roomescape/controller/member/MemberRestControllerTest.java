@@ -214,19 +214,17 @@ class MemberRestControllerTest {
                 .header("Location", "http://localhost:" + port + "/login");
     }
 
-    @DisplayName("어드민이 아닌 멤버가 멤버 목록을 조회할 시 로그인 페이지로 리다이렉트 시킨다.")
+    @DisplayName("어드민이 아닌 멤버가 멤버 목록을 조회할 시 예외를 발생시키고 403 상태코드를 응답한다")
     @Test
     void return_302_when_not_admin_find_all_members() {
         Member member = new Member("t2@t2.com", "124", "재즈", "MEMBER");
         String memberToken = jwtManager.generateToken(member);
 
         RestAssured.given().log().all()
-                .redirects().follow(false)
                 .cookie("token", memberToken)
                 .contentType(ContentType.JSON)
                 .when().get("/admin/members")
                 .then().log().all()
-                .statusCode(302)
-                .header("Location", "http://localhost:" + port + "/");
+                .statusCode(403);
     }
 }

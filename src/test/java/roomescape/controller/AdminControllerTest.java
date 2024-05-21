@@ -44,16 +44,14 @@ class AdminControllerTest {
                 .header("Location", "http://localhost:" + port + "/login");
     }
 
-    @DisplayName("어드민 권한 토큰이 없는 사용자가 어드민 페이지를 요청하면 / 페이지로 리다이렉트 시킨다.")
+    @DisplayName("어드민 권한 토큰이 없는 사용자가 어드민 페이지를 요청하면 예외를 발생시키고 403 상태코드를 응답한다")
     @Test
     void redirect_index_page_when_not_admin_get_admin_page() {
         RestAssured.given().log().all()
-                .redirects().follow(false)
                 .cookie("token", memberToken)
                 .when().get("/admin/**")
                 .then().log().all()
-                .statusCode(302)
-                .header("Location", "http://localhost:" + port + "/");
+                .statusCode(403);
     }
 
     @DisplayName("어드민 관리 페이지 호출 테스트")

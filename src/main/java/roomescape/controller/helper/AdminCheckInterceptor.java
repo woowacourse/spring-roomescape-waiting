@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
+import roomescape.exception.ForbiddenException;
 import roomescape.global.CookieUtils;
 import roomescape.global.JwtManager;
 
@@ -42,7 +43,6 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        response.sendRedirect("/");
-        return false;
+        throw new ForbiddenException("권한이 없습니다.");
     }
 }
