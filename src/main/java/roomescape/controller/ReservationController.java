@@ -21,7 +21,6 @@ import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.WaitingResponse;
 
 
 @RestController
@@ -81,21 +80,5 @@ public class ReservationController {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
-    }
-
-    @PostMapping("/waitings")
-    public ResponseEntity<WaitingResponse> postWaiting(
-            @RequestBody @Valid UserReservationRequest userReservationRequest,
-            @MemberId Long id
-    ) {
-        ReservationRequest reservationRequest = userReservationRequest.toReservationRequest(id);
-        WaitingResponse waitingResponse = waitingService.createWaiting(reservationRequest, id);
-        URI location = UriComponentsBuilder.newInstance()
-                .path("/waitings/{id}")
-                .buildAndExpand(waitingResponse.id())
-                .toUri();
-
-        return ResponseEntity.created(location)
-                .body(waitingResponse);
     }
 }
