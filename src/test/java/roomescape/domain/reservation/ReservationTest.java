@@ -21,7 +21,7 @@ class ReservationTest {
     @DisplayName("id, reservationDate, reservationTime,Theme,Member 을 통해 도메인을 생성한다.")
     void create_with_id_name_reservationDate_reservationTime() {
         assertThatCode(() ->
-                new Reservation(
+                new ReservationInfo(
                         ReservationDate.from("2024-04-03"),
                         ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
@@ -34,7 +34,7 @@ class ReservationTest {
     @DisplayName("id, 문자열들 을 통해 도메인을 생성한다.")
     void create_with_factory_method() {
         assertThatCode(() ->
-                Reservation.from(
+                ReservationInfo.from(
                         "2024-04-03",
                         ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
@@ -44,9 +44,9 @@ class ReservationTest {
 
     private static Stream<Arguments> maskingDateAndTime() {
         return Stream.of(
-                Arguments.arguments(Reservation.from("2024-04-01", ReservationTime.from("10:00"),
+                Arguments.arguments(ReservationInfo.from("2024-04-01", ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain())),
-                Arguments.arguments(Reservation.from("2024-04-02", ReservationTime.from("09:59"),
+                Arguments.arguments(ReservationInfo.from("2024-04-02", ReservationTime.from("09:59"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain()))
         );
     }
@@ -54,8 +54,8 @@ class ReservationTest {
     @ParameterizedTest
     @MethodSource("maskingDateAndTime")
     @DisplayName("날짜가 이전이거나 날짜가 같을 때 시간이 이전이면 참을 반환한다.")
-    void return_true_when_date_is_before_or_date_is_equal_and_time_is_before(final Reservation reservation) {
-        final boolean result = reservation.isBefore(LocalDate.parse("2024-04-02"), LocalTime.parse("10:00"));
+    void return_true_when_date_is_before_or_date_is_equal_and_time_is_before(final ReservationInfo reservationInfo) {
+        final boolean result = reservationInfo.isBefore(LocalDate.parse("2024-04-02"), LocalTime.parse("10:00"));
         assertThat(result).isTrue();
     }
 

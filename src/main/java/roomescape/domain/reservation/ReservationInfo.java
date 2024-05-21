@@ -9,10 +9,10 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "reservation", uniqueConstraints = {
+@Table(name = "reservation_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
 })
-public class Reservation {
+public class ReservationInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,18 +29,18 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    protected Reservation() {
+    protected ReservationInfo() {
     }
 
-    public Reservation(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member) {
+    public ReservationInfo(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member) {
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
     }
 
-    public static Reservation from(final String date, final ReservationTime time, final Theme theme, final Member member) {
-        return new Reservation(ReservationDate.from(date), time, theme, member);
+    public static ReservationInfo from(final String date, final ReservationTime time, final Theme theme, final Member member) {
+        return new ReservationInfo(ReservationDate.from(date), time, theme, member);
     }
 
     public Long getId() {
@@ -83,7 +83,7 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Reservation that = (Reservation) o;
+        final ReservationInfo that = (ReservationInfo) o;
         return Objects.equals(id, that.id);
     }
 

@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Component;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
@@ -35,19 +35,19 @@ public class ReservationCreateValidator {
         this.nowDateTimeFormatter = nowDateTimeFormatter;
     }
 
-    public Reservation validateReservationInput(final ReservationInput input) {
+    public ReservationInfo validateReservationInput(final ReservationInput input) {
         final ReservationTime reservationTime = validateExistReservationTime(input.timeId());
         final Theme theme = validateExistTheme(input.themeId());
         final Member member = validateExistMember(input.memberId());
 
-        final Reservation reservation = input.toReservation(reservationTime, theme, member);
+        final ReservationInfo reservationInfo = input.toReservation(reservationTime, theme, member);
         if (reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
-            throw new AlreadyExistsException(RESERVATION, reservation.getLocalDateTimeFormat());
+            throw new AlreadyExistsException(RESERVATION, reservationInfo.getLocalDateTimeFormat());
         }
-        if (reservation.isBefore(nowDateTimeFormatter.getDate(), nowDateTimeFormatter.getTime())) {
-            throw new PastTimeReservationException(reservation.getLocalDateTimeFormat());
+        if (reservationInfo.isBefore(nowDateTimeFormatter.getDate(), nowDateTimeFormatter.getTime())) {
+            throw new PastTimeReservationException(reservationInfo.getLocalDateTimeFormat());
         }
-        return reservation;
+        return reservationInfo;
     }
 
     private ReservationTime validateExistReservationTime(final long timeId) {

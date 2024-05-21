@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
@@ -49,7 +49,7 @@ public class ReservationTimeService {
         final List<ReservationTime> alreadyBookedReservationTimes =
                 reservationRepository.getReservationByThemeIdAndDateValue(input.themeId(), input.date())
                         .stream()
-                        .map(Reservation::getTime)
+                        .map(ReservationInfo::getTime)
                         .toList();
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 

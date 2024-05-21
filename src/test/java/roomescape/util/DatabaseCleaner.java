@@ -10,7 +10,7 @@ public class DatabaseCleaner {
     JdbcTemplate jdbcTemplate;
     public void initialize(){
         jdbcTemplate.update("SET REFERENTIAL_INTEGRITY FALSE");
-        jdbcTemplate.update("TRUNCATE TABLE reservation");
+        jdbcTemplate.update("TRUNCATE TABLE reservation_info");
         jdbcTemplate.update("TRUNCATE TABLE theme");
         jdbcTemplate.update("TRUNCATE TABLE member");
         jdbcTemplate.update("TRUNCATE TABLE reservation_time");

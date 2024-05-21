@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.user.Member;
@@ -76,7 +76,7 @@ class ReservationTimeServiceTest {
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
-        reservationRepository.save(Reservation.from(
+        reservationRepository.save(ReservationInfo.from(
                 "2024-04-30",
                 reservationTime,
                 theme,
@@ -104,7 +104,7 @@ class ReservationTimeServiceTest {
         final ReservationTime time2 = reservationTimeRepository.save(ReservationTime.from("11:00"));
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-        reservationRepository.save(Reservation.from("2025-01-01", time1, theme, member));
+        reservationRepository.save(ReservationInfo.from("2025-01-01", time1, theme, member));
 
 
         final List<AvailableReservationTimeOutput> actual = sut.getAvailableTimes(

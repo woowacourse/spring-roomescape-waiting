@@ -15,7 +15,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                 t.description AS description,
                 t.thumbnail AS thumbnail
             FROM Theme AS t
-            INNER JOIN Reservation AS r ON r.theme_id = t.id
+            INNER JOIN reservation_info AS r ON r.theme_id = t.id
             WHERE r.date BETWEEN ? AND ?
             GROUP BY t.id
             ORDER BY COUNT(r.id) DESC

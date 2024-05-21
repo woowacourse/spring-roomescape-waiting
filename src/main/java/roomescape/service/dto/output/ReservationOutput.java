@@ -1,25 +1,25 @@
 package roomescape.service.dto.output;
 
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationInfo;
 
 import java.util.List;
 
 public record ReservationOutput(long id, ThemeOutput theme, String date, ReservationTimeOutput time,
                                 MemberOutput member) {
 
-    public static ReservationOutput toOutput(final Reservation reservation) {
+    public static ReservationOutput toOutput(final ReservationInfo reservationInfo) {
         return new ReservationOutput(
-                reservation.getId(),
-                ThemeOutput.toOutput(reservation.getTheme()),
-                reservation.getDate()
+                reservationInfo.getId(),
+                ThemeOutput.toOutput(reservationInfo.getTheme()),
+                reservationInfo.getDate()
                         .asString(),
-                ReservationTimeOutput.toOutput(reservation.getTime()),
-                MemberOutput.toOutput(reservation.getMember())
+                ReservationTimeOutput.toOutput(reservationInfo.getTime()),
+                MemberOutput.toOutput(reservationInfo.getMember())
         );
     }
 
-    public static List<ReservationOutput> toOutputs(final List<Reservation> reservations) {
-        return reservations.stream()
+    public static List<ReservationOutput> toOutputs(final List<ReservationInfo> reservationInfos) {
+        return reservationInfos.stream()
                 .map(ReservationOutput::toOutput)
                 .toList();
     }

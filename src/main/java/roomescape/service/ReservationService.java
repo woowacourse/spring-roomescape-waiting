@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.input.ReservationInput;
@@ -23,25 +23,25 @@ public class ReservationService {
     }
 
     public ReservationOutput createReservation(final ReservationInput input) {
-        final Reservation reservation = reservationCreateValidator.validateReservationInput(input);
-        final Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationOutput.toOutput(savedReservation);
+        final ReservationInfo reservationInfo = reservationCreateValidator.validateReservationInput(input);
+        final ReservationInfo savedReservationInfo = reservationRepository.save(reservationInfo);
+        return ReservationOutput.toOutput(savedReservationInfo);
     }
 
     public List<ReservationOutput> getAllReservations() {
-        final List<Reservation> reservations = reservationRepository.findAll();
-        return ReservationOutput.toOutputs(reservations);
+        final List<ReservationInfo> reservationInfos = reservationRepository.findAll();
+        return ReservationOutput.toOutputs(reservationInfos);
     }
 
     public List<ReservationOutput> getAllMyReservations(final long memberId) {
-        final List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return ReservationOutput.toOutputs(reservations);
+        final List<ReservationInfo> reservationInfos = reservationRepository.findAllByMemberId(memberId);
+        return ReservationOutput.toOutputs(reservationInfos);
     }
 
     public List<ReservationOutput> searchReservation(final ReservationSearchInput input) {
-        final List<Reservation> themeReservations = reservationRepository.getReservationByThemeIdAndMemberIdAndDateBetween(
+        final List<ReservationInfo> themeReservationInfos = reservationRepository.getReservationByThemeIdAndMemberIdAndDateBetween(
                 input.themeId(), input.memberId(), new ReservationDate(input.fromDate()), new ReservationDate(input.toDate()));
-        return ReservationOutput.toOutputs(themeReservations);
+        return ReservationOutput.toOutputs(themeReservationInfos);
     }
 
     public void deleteReservation(final long id) {

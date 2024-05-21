@@ -1,6 +1,6 @@
 SET REFERENTIAL_INTEGRITY FALSE;
 
-TRUNCATE TABLE reservation;
+TRUNCATE TABLE reservation_info;
 TRUNCATE TABLE theme;
 TRUNCATE TABLE member;
 TRUNCATE TABLE reservation_time;
