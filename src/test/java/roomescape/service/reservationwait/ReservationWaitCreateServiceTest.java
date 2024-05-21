@@ -1,6 +1,7 @@
 package roomescape.service.reservationwait;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,14 +9,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWait;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.Role;
+import roomescape.exception.InvalidRequestException;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitRepository;
 import roomescape.repository.ThemeRepository;
@@ -32,6 +37,9 @@ class ReservationWaitCreateServiceTest extends BaseServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationWaitRepository reservationWaitRepository;
@@ -59,5 +67,39 @@ class ReservationWaitCreateServiceTest extends BaseServiceTest {
         reservationWaitCreateService.create(request, member);
 
         assertThat(reservationWaitRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("이미 예약 대기 중인 경우 예외가 발생한다.")
+    void checkAlreadyWait_Failure() {
+        Member member = memberRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        Theme theme = themeRepository.findById(1L).get();
+        LocalDate date = LocalDate.now().plusDays(1L);
+        reservationWaitRepository.save(new ReservationWait(member, date, time, theme));
+
+        ReservationWaitSaveRequest request = new ReservationWaitSaveRequest(
+                date, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationWaitCreateService.create(request, member))
+                .isInstanceOf(InvalidRequestException.class)
+                .hasMessage("이미 예약 대기 중입니다.");
+    }
+
+    @Test
+    @DisplayName("이미 예약 중인 경우 예외가 발생한다.")
+    void checkAlreadyBooked_Failure() {
+        Member member = memberRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        Theme theme = themeRepository.findById(1L).get();
+        LocalDate date = LocalDate.now().plusDays(1L);
+        reservationRepository.save(new Reservation(member, date, time, theme));
+
+        ReservationWaitSaveRequest request = new ReservationWaitSaveRequest(
+                date, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationWaitCreateService.create(request, member))
+                .isInstanceOf(InvalidRequestException.class)
+                .hasMessage("이미 예약 중입니다.");
     }
 }
