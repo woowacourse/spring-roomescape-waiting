@@ -59,6 +59,7 @@ alter table if exists reservation
     add constraint FKnp181b4qd37y68p57h9nhosqo
         foreign key (time_id)
             references reservation_time;
+
 INSERT INTO member(name, email, password)
 VALUES ('클로버', 'test@gmail.com', 'password');
 INSERT INTO member(name, email, password)

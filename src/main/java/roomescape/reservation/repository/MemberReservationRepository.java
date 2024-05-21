@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
 
-    Optional<MemberReservation> findByMemberAndReservationAndStatus(Member member, Reservation reservation, ReservationStatus status);
+    Optional<MemberReservation> findByReservationAndStatus(Reservation reservation, ReservationStatus status);
 
     List<MemberReservation> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
@@ -31,4 +31,6 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             "where mr.status = 'WAITING' and mr.member.id = :memberId"
     )
     List<WaitingReservationRanking> findWaitingReservationRankingByMemberId(@Param("memberId") Long memberId);
+
+    Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
 }

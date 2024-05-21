@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 
 import java.time.LocalDateTime;
@@ -47,6 +48,20 @@ public class MemberReservation {
 
     public MemberReservation(Member member, Reservation reservation) {
         this(null, member, reservation, ReservationStatus.CONFIRMATION);
+    }
+
+    public void validateDuplicated(MemberReservation other) {
+        if (!reservation.equals(other.reservation)) {
+            return;
+        }
+
+        if (member.equals(other.member)) {
+            throw new BadRequestException("이미 예약한 테마입니다.");
+        }
+
+        if (status.isNotWaiting()) {
+            throw new BadRequestException("다른 사용자가 이미 예약한 테마입니다.");
+        }
     }
 
     public boolean isSameMember(Member member) {

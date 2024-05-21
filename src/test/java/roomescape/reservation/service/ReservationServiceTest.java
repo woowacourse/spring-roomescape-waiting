@@ -195,7 +195,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(Fixtures.memberFixture));
         Mockito.when(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(Fixtures.reservationFixture));
-        Mockito.when(memberReservationRepository.findByMemberAndReservationAndStatus(Fixtures.memberFixture, Fixtures.reservationFixture, ReservationStatus.CONFIRMATION))
+        Mockito.when(memberReservationRepository.findByReservationAndStatus(Fixtures.reservationFixture, ReservationStatus.CONFIRMATION))
                 .thenReturn(Optional.of(Fixtures.memberReservationFixture));
 
         ReservationCreateRequest request = new ReservationCreateRequest(
@@ -208,7 +208,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("중복된 예약입니다.");
+                .hasMessage("이미 예약한 테마입니다.");
     }
 
     @DisplayName("예약 서비스는 예약 요청에 존재하지 않는 시간이 포함된 경우 예외가 발생한다.")
@@ -256,14 +256,14 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(Fixtures.memberFixture));
         Mockito.when(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(Fixtures.reservationFixture));
-        Mockito.when(memberReservationRepository.findByMemberAndReservationAndStatus(Fixtures.memberFixture, Fixtures.reservationFixture, ReservationStatus.CONFIRMATION))
+        Mockito.when(memberReservationRepository.findByReservationAndStatus(Fixtures.reservationFixture, ReservationStatus.CONFIRMATION))
                 .thenReturn(Optional.of(new MemberReservation(Fixtures.memberFixtures.get(2), Fixtures.reservationFixture)));
         ReservationCreateRequest request = new ReservationCreateRequest(id, date, id, id);
 
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("이미 예약된 테마입니다.");
+                .hasMessage("다른 사용자가 이미 예약한 테마입니다.");
     }
 
     @DisplayName("예약 서비스는 id에 맞는 예약을 삭제한다.")

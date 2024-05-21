@@ -180,36 +180,22 @@ class MemberReservationControllerTest {
                 .extract()
                 .jsonPath().get("detail");
 
-        assertThat(detailMessage).isEqualTo("중복된 예약입니다.");
+        assertThat(detailMessage).isEqualTo("이미 예약한 테마입니다.");
     }
 
     @DisplayName("사용자 예약 컨트롤러는 예약 대기시 200을 반환한다.")
     @Test
     void createWaitingReservation() {
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", LocalDate.MAX);
+        reservation.put("date", "2099-12-31");
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
-        reservation.put("status", ReservationStatus.CONFIRMATION);
+        reservation.put("status", ReservationStatus.WAITING);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
                 .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(200);
-
-        Map<String, Object> duplicatedReservation = new HashMap<>();
-        duplicatedReservation.put("date", LocalDate.MAX);
-        duplicatedReservation.put("timeId", 1);
-        duplicatedReservation.put("themeId", 1);
-        duplicatedReservation.put("status", ReservationStatus.WAITING);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
-                .body(duplicatedReservation)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(200);
