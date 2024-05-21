@@ -68,6 +68,10 @@ public class Member extends BaseEntity {
         }
     }
 
+    public boolean isNotSameUser(final Long memberId) {
+        return !Objects.equals(id, memberId);
+    }
+
     public boolean hasNotSamePassword(final String password) {
         return !this.password.equals(password);
     }
