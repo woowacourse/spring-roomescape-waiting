@@ -1,14 +1,14 @@
 package roomescape.reservation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.dto.ThemeResponse;
 
-import java.time.LocalDate;
-
 public record ReservationResponse(
-        Long id, LocalDate date,
+        Long id,
+        LocalDate date,
         @JsonProperty("member") MemberResponse member,
         @JsonProperty("time") ReservationTimeResponse time,
         @JsonProperty("theme") ThemeResponse theme

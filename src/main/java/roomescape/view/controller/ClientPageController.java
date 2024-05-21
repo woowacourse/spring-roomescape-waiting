@@ -19,5 +19,4 @@ public class ClientPageController {
     public String showReservationMinePage() {
         return "/reservation-mine";
     }
-
 }

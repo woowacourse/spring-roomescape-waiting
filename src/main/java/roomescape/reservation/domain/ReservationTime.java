@@ -4,16 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalTime;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ValidateException;
-
-import java.time.LocalTime;
 
 @Entity
 public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalTime startAt;
 
     public ReservationTime() {
@@ -48,8 +48,8 @@ public class ReservationTime {
     @Override
     public String toString() {
         return "ReservationTime{" +
-                "id=" + id +
-                ", startAt=" + startAt +
-                '}';
+               "id=" + id +
+               ", startAt=" + startAt +
+               '}';
     }
 }

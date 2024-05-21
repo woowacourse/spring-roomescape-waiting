@@ -20,6 +20,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.dto.response.MemberReservationsResponse;
@@ -161,13 +162,8 @@ public class ReservationService {
         }
     }
 
-    public ReservationsResponse searchWith(
-            final Long themeId,
-            final Long memberId,
-            final LocalDate dateFrom,
-            final LocalDate dateTo
-    ) {
-        Specification<Reservation> specification = getReservationSpecification(dateFrom, dateTo, themeId, memberId);
+    public ReservationsResponse findFilteredReservations(final FilteredReservationRequest request) {
+        final Specification<Reservation> specification = getReservationSpecification(request);
 
         final List<ReservationResponse> response = reservationRepository.findAll(specification)
                 .stream()
@@ -178,24 +174,23 @@ public class ReservationService {
     }
 
     private Specification<Reservation> getReservationSpecification(
-            final LocalDate dateFrom,
-            final LocalDate dateTo,
-            final Long themeId,
-            final Long memberId
+            final FilteredReservationRequest request
     ) {
         Specification<Reservation> specification = (root, query, criteriaBuilder) -> null;
-        if (themeId != null) {
-            specification = specification.and(ReservationSpecification.withTheme(themeService.findThemeById(themeId)));
-        }
-        if (memberId != null) {
+        if (request.themeId() != null) {
             specification = specification.and(
-                    ReservationSpecification.withMember(memberService.findMemberById(memberId)));
+                    ReservationSpecification.withTheme(themeService.findThemeById(request.themeId()))
+            );
         }
-        if (dateFrom != null) {
-            specification = specification.and(ReservationSpecification.withDateFrom(dateFrom));
+        if (request.memberId() != null) {
+            specification = specification.and(
+                    ReservationSpecification.withMember(memberService.findMemberById(request.memberId())));
         }
-        if (dateTo != null) {
-            specification = specification.and(ReservationSpecification.withDateTo(dateTo));
+        if (request.dateFrom() != null) {
+            specification = specification.and(ReservationSpecification.withDateFrom(request.dateFrom()));
+        }
+        if (request.dateTo() != null) {
+            specification = specification.and(ReservationSpecification.withDateTo(request.dateTo()));
         }
         return specification;
     }

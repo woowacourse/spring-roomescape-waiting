@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.Admin;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.dto.response.ApiResponse;
+import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -62,7 +63,10 @@ public class ReservationController {
             @RequestParam(required = false) final LocalDate dateTo
     ) {
         return ApiResponse.success(
-                reservationService.searchWith(themeId, memberId, dateFrom, dateTo));
+                reservationService.findFilteredReservations(
+                        new FilteredReservationRequest(themeId, memberId, dateFrom, dateTo)
+                )
+        );
     }
 
     @PostMapping("/reservations")

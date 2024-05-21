@@ -20,6 +20,7 @@ public class AdminInterceptor implements HandlerInterceptor {
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     private final MemberService memberService;
+
     private final JwtHandler jwtHandler;
 
     public AdminInterceptor(final MemberService memberService, final JwtHandler jwtHandler) {

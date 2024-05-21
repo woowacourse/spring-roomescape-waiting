@@ -10,8 +10,11 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private String description;
+
     private String thumbnail;
 
     public Theme() {
@@ -56,10 +59,10 @@ public class Theme {
     @Override
     public String toString() {
         return "Theme{" +
-                "id=" + id +
-                ", name=" + name +
-                ", description=" + description +
-                ", thumbnail=" + thumbnail +
-                '}';
+               "id=" + id +
+               ", name=" + name +
+               ", description=" + description +
+               ", thumbnail=" + thumbnail +
+               '}';
     }
 }

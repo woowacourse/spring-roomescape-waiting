@@ -8,6 +8,9 @@ import roomescape.theme.domain.Theme;
 
 public class ReservationSpecification {
 
+    private ReservationSpecification() {
+    }
+
     public static Specification<Reservation> withTheme(Theme theme) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("theme"), theme);
     }

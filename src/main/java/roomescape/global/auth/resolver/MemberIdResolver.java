@@ -36,7 +36,7 @@ public class MemberIdResolver implements HandlerMethodArgumentResolver {
             final NativeWebRequest webRequest,
             final WebDataBinderFactory binderFactory
     ) throws Exception {
-        Cookie[] cookies = webRequest.getNativeRequest(HttpServletRequest.class).getCookies();
+        final Cookie[] cookies = webRequest.getNativeRequest(HttpServletRequest.class).getCookies();
         if (cookies == null) {
             throw new UnauthorizedException(ErrorType.INVALID_TOKEN, "쿠키가 존재하지 않습니다");
         }

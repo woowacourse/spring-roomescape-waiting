@@ -17,8 +17,10 @@ import roomescape.global.exception.model.UnauthorizedException;
 public class JwtHandler {
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
+
     @Value("${security.jwt.token.access.expire-length}")
     private long accessTokenExpireTime;
+
     @Value("${security.jwt.token.refresh.expire-length}")
     private long refreshTokenExpireTime;
 
