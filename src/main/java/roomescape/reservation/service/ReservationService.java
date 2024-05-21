@@ -86,7 +86,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
         Member member = memberRepository.findById(reservationSearchRequest.memberId()).get();
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme,
-                        reservationSearchRequest.dateTo(), reservationSearchRequest.dateFrom()).stream()
+                        reservationSearchRequest.dateFrom(), reservationSearchRequest.dateTo()).stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }

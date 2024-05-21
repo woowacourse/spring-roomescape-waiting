@@ -14,6 +14,6 @@ public record MyReservationResponse(
 
     public static MyReservationResponse toResponse(Reservation reservation) {
         return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(),
-                reservation.getTime().getStartAt(), "예약");
+                reservation.getTime().getStartAt(), reservation.getStatus().getStatus());
     }
 }

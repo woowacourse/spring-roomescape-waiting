@@ -15,7 +15,7 @@ public class Member {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
     @Enumerated(value = EnumType.STRING)
-    private Role role = Role.MEMBER;
+    private Role role = Role.USER;
     private String name;
     private String email;
     private String password;

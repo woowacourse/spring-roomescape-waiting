@@ -1,12 +1,15 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -16,6 +19,9 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    private LocalDateTime createdAt;
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,20 +32,25 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
         validateLastDate(date);
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
+        this.createdAt = LocalDateTime.now();
+        this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime,
+                       Status status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
+        this.createdAt = LocalDateTime.now();
+        this.status = status;
     }
 
     private void validateLastDate(LocalDate date) {
@@ -66,5 +77,13 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return reservationTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }

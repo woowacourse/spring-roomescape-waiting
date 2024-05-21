@@ -21,7 +21,7 @@ class TokenProviderTest {
 
     @BeforeEach
     void init() {
-        member = new Member(1L, Role.MEMBER, "호기", "hogi@naver.com", "asd");
+        member = new Member(1L, Role.USER, "호기", "hogi@naver.com", "asd");
     }
 
     @Test

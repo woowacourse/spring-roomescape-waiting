@@ -13,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.ReservationSearchRequest;
 
@@ -46,7 +47,7 @@ public class ReservationRepositoryTest {
         Long memberId = memberRepository.save(new Member("호기", "hogi@naver.com", "asd")).getId();
         Member member = memberRepository.findById(memberId).get();
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime));
+        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
         List<Reservation> reservations = reservationRepository.findAll();
 
@@ -68,7 +69,7 @@ public class ReservationRepositoryTest {
         Member member = memberRepository.findById(memberId).get();
 
         Long reservationId = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime)).getId();
+                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS)).getId();
         Reservation findReservation = reservationRepository.findById(reservationId).get();
 
         assertThat(findReservation.getId()).isEqualTo(reservationId);
@@ -88,7 +89,7 @@ public class ReservationRepositoryTest {
         Long memberId = memberRepository.save(new Member("호기", "hogi@naver.com", "asd")).getId();
         Member member = memberRepository.findById(memberId).get();
 
-        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime);
+        Reservation reservation = new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS);
         reservationRepository.save(reservation);
 
         List<Long> timeIds = reservationRepository.findIdByReservationsDateAndThemeId(reservation.getDate(),
@@ -112,7 +113,7 @@ public class ReservationRepositoryTest {
         Member member = memberRepository.findById(memberId).get();
 
         Long reservationId = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime)).getId();
+                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS)).getId();
         Reservation findReservation = reservationRepository.findById(reservationId).get();
 
         boolean exist = reservationRepository.existsByDateAndReservationTimeStartAt(findReservation.getDate(),
@@ -133,8 +134,8 @@ public class ReservationRepositoryTest {
 
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDate oneWeekLater = LocalDate.now().plusWeeks(1);
-        reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime));
-        reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime));
+        reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime, Status.SUCCESS));
 
         ReservationSearchRequest reservationSearchRequest = new ReservationSearchRequest(theme.getId(), member.getId(),
                 LocalDate.now().minusDays(1), tomorrow);
@@ -152,7 +153,7 @@ public class ReservationRepositoryTest {
         Theme theme = themeRepository.save(new Theme("a", "a", "a"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, time
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS
                 ));
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
@@ -167,10 +168,10 @@ public class ReservationRepositoryTest {
         Theme theme = themeRepository.save(new Theme("a", "a", "a"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Reservation reservation1 = reservationRepository.save(
-                new Reservation(member, LocalDate.parse("2024-12-05"), theme, time
+                new Reservation(member, LocalDate.parse("2024-12-05"), theme, time, Status.SUCCESS
                 ));
         Reservation reservation2 = reservationRepository.save(
-                new Reservation(member, LocalDate.parse("2025-05-05"), theme, time
+                new Reservation(member, LocalDate.parse("2025-05-05"), theme, time, Status.SUCCESS
                 ));
         List<Reservation> dateBetween = reservationRepository.findByDateBetween(LocalDate.parse("2024-01-01"),
                 LocalDate.parse("2024-12-12"));
@@ -192,7 +193,7 @@ public class ReservationRepositoryTest {
         Member member = memberRepository.findById(memberId).get();
 
         Long reservationId = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime)).getId();
+                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS)).getId();
         reservationRepository.deleteById(reservationId);
         List<Reservation> reservations = reservationRepository.findAll();
 

@@ -50,7 +50,7 @@ class ReservationServiceTest {
         Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
         Long themeId = themeRepository.save(theme).getId();
 
-        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
+        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.USER, "카키", "kaki@email.com");
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(
                 LocalDate.now(), 1L, 1L);
 
@@ -68,7 +68,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = new ReservationTime(localTime);
         Long timeId = reservationTimeRepository.save(reservationTime).getId();
 
-        Member member = new Member(1L, Role.MEMBER, "호기", "hogi@email.com", "1234");
+        Member member = new Member(1L, Role.USER, "호기", "hogi@email.com", "1234");
         memberRepository.save(member);
 
         LocalDate localDate = LocalDate.now();

@@ -20,7 +20,7 @@ class ReservationTest {
                 new Member("호기", "hogi@email.com", "1234"),
                 LocalDate.now().minusDays(1),
                 theme,
-                reservationTime)
+                reservationTime, Status.SUCCESS)
         ).isInstanceOf(IllegalArgumentException.class);
     }
 }

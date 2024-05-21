@@ -18,6 +18,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -72,14 +73,15 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.findById(themeId).get();
 
         Long memberId = memberRepository.save(
-                new Member(1L, Role.MEMBER, "카키", "kaki@email.com", "1234")).getId();
+                new Member(1L, Role.USER, "카키", "kaki@email.com", "1234")).getId();
         Member member = memberRepository.findById(memberId).get();
 
         Reservation reservation = new Reservation(
                 member,
                 LocalDate.now(),
                 theme,
-                reservationTime1
+                reservationTime1,
+                Status.SUCCESS
         );
         reservationRepository.save(reservation);
 
@@ -103,14 +105,15 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
 
         Long memberId = memberRepository.save(
-                new Member(1L, Role.MEMBER, "카키", "kaki@email.com", "1234")).getId();
+                new Member(1L, Role.USER, "카키", "kaki@email.com", "1234")).getId();
         Member member = memberRepository.findById(memberId).get();
 
         Reservation reservation = new Reservation(
                 member,
                 LocalDate.now(),
                 theme,
-                reservationTime
+                reservationTime,
+                Status.SUCCESS
         );
         reservationRepository.save(reservation);
 
