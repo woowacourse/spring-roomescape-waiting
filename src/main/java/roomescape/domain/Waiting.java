@@ -40,6 +40,10 @@ public class Waiting {
         this(null, member, date, time, theme);
     }
 
+    public Reservation toReservation() {
+        return new Reservation(member, date, time, theme);
+    }
+
     public Long getId() {
         return id;
     }

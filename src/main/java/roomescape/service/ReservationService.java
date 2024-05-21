@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -116,7 +117,17 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
+
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndThemeAndTime(
+
+                reservation.getDate(), reservation.getTheme(),
+                reservation.getTime());
+        waiting.ifPresent(waitingRepository::delete);
+        reservationRepository.save(waiting.get().toReservation());
         reservationRepository.deleteById(id);
+
     }
 
     public void deleteWaiting(Long id) {
