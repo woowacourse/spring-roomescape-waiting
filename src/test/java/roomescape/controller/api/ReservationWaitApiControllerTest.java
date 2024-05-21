@@ -32,8 +32,8 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
     void reservationWaitCreate_Success() {
         Map<String, Object> reservationWait = Map.of(
                 "date", LocalDate.now().plusDays(1L).toString(),
-                "timeId", 1,
-                "themeId", 1
+                "time", 1,
+                "theme", 1
         );
 
         RestAssured.given().log().all()
