@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -55,10 +56,6 @@ public class Reservation {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Member getMember() {
         return member;
     }
@@ -79,20 +76,12 @@ public class Reservation {
         return time;
     }
 
-    public void setTime(Time time) {
-        this.time = time;
-    }
-
     public Long getTimeId() {
         return time.getId();
     }
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public void setTheme(Theme theme) {
-        this.theme = theme;
     }
 
     public Long getThemeId() {
