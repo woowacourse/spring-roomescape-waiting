@@ -61,7 +61,7 @@ class ThemeServiceTest {
         assertThat(themeService.findAllThemes()).hasSize(1);
     }
 
-    @DisplayName("최근 일주일 간 가장 인기 있는 테마 10개를 조회한다.") //todo reservationService로 옮기기
+    @DisplayName("최근 일주일 간 가장 인기 있는 테마 10개를 조회한다.")
     @Sql("/theme-data.sql")
     @Test
     void should_find_popular_theme_of_week() {
