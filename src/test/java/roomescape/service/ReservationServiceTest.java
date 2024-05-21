@@ -149,7 +149,7 @@ class ReservationServiceTest {
 
         reservationService.deleteById(2L);
 
-        assertThat(reservationService.findAll())
+        assertThat(reservationService.findAllReserved())
             .extracting(Reservation::getId)
             .containsExactly(1L, 3L);
     }
@@ -219,7 +219,7 @@ class ReservationServiceTest {
         reservationService.reserve(adminId, LocalDate.parse("2060-01-02"), timeId, themeId);
         reservationService.standby(userId, LocalDate.parse("2060-01-02"), timeId, themeId);
 
-        assertThat(reservationService.findAll())
+        assertThat(reservationService.findAllReserved())
             .extracting(Reservation::getId)
             .containsExactly(1L, 3L);
     }
@@ -247,7 +247,7 @@ class ReservationServiceTest {
         reservationService.reserve(userId, LocalDate.parse("2060-01-05"), timeId, themeId);
         reservationService.reserve(adminId, LocalDate.parse("2060-01-06"), timeId, themeId);
 
-        List<Reservation> reservations = reservationService.findAllBy(
+        List<Reservation> reservations = reservationService.findAllByFilter(
             themeId, adminId, LocalDate.parse("2060-01-02"), LocalDate.parse("2060-01-05"));
 
         assertThat(reservations)
@@ -259,7 +259,7 @@ class ReservationServiceTest {
     @Test
     void findAllBy_FromFuture_ToPast() {
         assertThatThrownBy(
-            () -> reservationService.findAllBy(
+            () -> reservationService.findAllByFilter(
                 themeId, adminId, LocalDate.parse("2060-01-02"), LocalDate.parse("2060-01-01"))
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("날짜 조회 범위가 올바르지 않습니다.");
@@ -273,7 +273,7 @@ class ReservationServiceTest {
         reservationService.reserve(userId, LocalDate.parse("2060-01-02"), timeId, themeId);
         reservationService.reserve(userId, LocalDate.parse("2060-01-03"), timeId, themeId);
 
-        List<FindReservationWithRankDto> reservations = reservationService.findAllWithRankByMemberId(userId);
+        List<FindReservationWithRankDto> reservations = reservationService.findMyReservationsWithRank(userId);
         assertThat(reservations)
             .extracting(FindReservationWithRankDto::reservation)
             .extracting(Reservation::getId)

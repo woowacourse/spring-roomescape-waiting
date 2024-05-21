@@ -52,7 +52,7 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<FindReservationResponse>> findAll() {
-        List<Reservation> reservations = reservationService.findAll();
+        List<Reservation> reservations = reservationService.findAllReserved();
         List<FindReservationResponse> createReservationResponse = reservations.stream()
             .map(FindReservationResponse::from)
             .toList();
@@ -77,7 +77,7 @@ public class AdminReservationController {
 
     @GetMapping("/search")
     public ResponseEntity<List<FindReservationResponse>> find(SearchReservationFilterRequest request) {
-        List<Reservation> reservations = reservationService.findAllBy(
+        List<Reservation> reservations = reservationService.findAllByFilter(
             request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
         List<FindReservationResponse> response = reservations.stream()
             .map(FindReservationResponse::from)

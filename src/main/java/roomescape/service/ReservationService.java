@@ -113,12 +113,17 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAll() {
+    public List<Reservation> findAllReserved() {
         return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(RESERVED);
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<Reservation> findAllStandby() {
+        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(STANDBY);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllByFilter(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
@@ -127,17 +132,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<FindReservationWithRankDto> findAllWithRankByMemberId(Long memberId) {
+    public List<FindReservationWithRankDto> findMyReservationsWithRank(Long memberId) {
         List<ReservationWithRank> reservations =
             reservationRepository.findReservationsWithRankByMemberId(memberId);
 
         return reservations.stream()
             .map(data -> new FindReservationWithRankDto(data.reservation(), data.rank()))
             .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllStandby() {
-        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(STANDBY);
     }
 }
