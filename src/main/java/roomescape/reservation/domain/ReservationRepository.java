@@ -58,4 +58,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member = :member AND r.status = 'WAITING'
             """)
     List<WaitingReservation> findWaitingReservationsByMemberWithDetails(@Param(value = "member") Member member);
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.theme
+            JOIN FETCH r.time
+            WHERE r.status = :status
+            """)
+    List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
 }

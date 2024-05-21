@@ -77,6 +77,10 @@ public class ReservationService {
         return reservationRepository.findWaitingReservationsByMemberWithDetails(member);
     }
 
+    public List<Reservation> findAllInWaiting() {
+        return reservationRepository.findAllByStatusWithDetails(ReservationStatus.WAITING);
+    }
+
     @Transactional
     public void delete(Long id) {
         reservationRepository.deleteById(id);

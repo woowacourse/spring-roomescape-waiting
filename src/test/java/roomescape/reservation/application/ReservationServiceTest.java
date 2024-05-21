@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.contentOf;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION;
@@ -29,6 +30,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
+import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.TestFixture.TOMMY_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.USER_TOMMY;
@@ -270,5 +272,24 @@ class ReservationServiceTest extends ServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.deleteMyWaitingReservation(reservation.getId(), mia))
                 .isInstanceOf(ViolationException.class);
+    }
+
+    @Test
+    @DisplayName("대기 중인 모든 예약 목록을 조회한다.")
+    void findAllInWaitingWithDetails() {
+        // given
+        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
+        reservationService.create(new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
+
+        reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
+        reservationService.create(new Reservation(mia, TOMMY_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
+
+        // when
+        List<Reservation> reservations = reservationService.findAllInWaiting();
+
+        // then
+        assertThat(reservations).hasSize(2)
+                .extracting(Reservation::getMemberName)
+                .contains(TOMMY_NAME, MIA_NAME);
     }
 }
