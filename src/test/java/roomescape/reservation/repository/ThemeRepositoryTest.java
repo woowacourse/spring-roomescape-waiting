@@ -11,6 +11,7 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -97,7 +98,7 @@ class ThemeRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
         boolean exist = !themeRepository.findThemesThatReservationReferById(theme.getId()).isEmpty();
 
         assertThat(exist).isTrue();
@@ -127,9 +128,9 @@ class ThemeRepositoryTest {
         Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
         Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(jojo, LocalDate.now(), theme2, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
 
         LocalDate dateFrom = LocalDate.now(). minusWeeks(1);
         List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, 2);

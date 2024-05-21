@@ -10,8 +10,8 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +63,7 @@ class ReservationServiceTest {
                 new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.saveReservationSuccess(reservationSaveRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -78,12 +78,11 @@ class ReservationServiceTest {
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        LocalDate localDate = LocalDate.now();
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
         reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
 
-        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
         assertThatThrownBy(() -> reservationService.saveReservationSuccess(duplicateRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -97,9 +96,8 @@ class ReservationServiceTest {
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        LocalDate localDate = LocalDate.now();
         LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember);
 
         assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
@@ -115,9 +113,8 @@ class ReservationServiceTest {
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        LocalDate localDate = LocalDate.now();
         LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, 1L, 1L);
         reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
 
         assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))

@@ -14,7 +14,7 @@ import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
-import static roomescape.util.Fixture.YESTERDAY;
+import static roomescape.util.Fixture.TOMORROW;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -38,7 +38,7 @@ class WaitingsTest {
         Member jojo = new Member(2L, Role.USER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);
 
         Reservation kakiReservation1 = new Reservation(kaki, TODAY, theme, hourTen, Status.WAIT);
-        Reservation kakiReservation2 = new Reservation(kaki, YESTERDAY, theme, hourTen, Status.WAIT);
+        Reservation kakiReservation2 = new Reservation(kaki, TOMORROW, theme, hourTen, Status.WAIT);
         Reservation jojoReservation1 = new Reservation(jojo, TODAY, theme, hourTen, Status.WAIT);
         Reservation jojoReservation2 = new Reservation(jojo, TODAY, theme, hourEleven, Status.WAIT);
 

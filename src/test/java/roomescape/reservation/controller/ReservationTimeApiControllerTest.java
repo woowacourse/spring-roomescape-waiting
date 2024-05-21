@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static roomescape.util.Fixture.TODAY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +43,7 @@ class ReservationTimeApiControllerTest extends IntegrationTest {
         saveSuccessReservationAsDateNow();
 
         RestAssured.given()
-                .param("date", LocalDate.now().toString())
+                .param("date", TODAY.toString())
                 .param("theme-id", 1)
                 .log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())

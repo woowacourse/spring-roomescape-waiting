@@ -9,6 +9,7 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -78,7 +79,7 @@ class ReservationTimeServiceTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10, Status.SUCCESS));
+        Reservation reservation = reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
 
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
                 reservation.getDate(),
@@ -101,7 +102,7 @@ class ReservationTimeServiceTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, hour10, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
 
         assertThatThrownBy(() -> reservationTimeService.delete(hour10.getId()))
                 .isInstanceOf(IllegalArgumentException.class);

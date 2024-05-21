@@ -8,6 +8,7 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -76,7 +77,7 @@ class ReservationTimeRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
 
         boolean exist = !reservationTimeRepository.findReservationTimesThatReservationReferById(reservationTime.getId())
                 .isEmpty();

@@ -20,7 +20,7 @@ public class Fixture {
     public static final String JOJO_PASSWORD = "1234";
 
     public static final LocalDate TODAY = LocalDate.now();
-    public static final LocalDate YESTERDAY = LocalDate.now().plusDays(1);
+    public static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
     private Fixture() {
     }
