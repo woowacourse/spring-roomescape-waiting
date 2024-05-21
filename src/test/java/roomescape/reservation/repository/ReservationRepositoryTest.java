@@ -19,18 +19,18 @@ class ReservationRepositoryTest {
     EntityManager entityManager;
 
     @Test
-    void countByDateAndTimeIdAndThemeIdAndStatusIsZero() {
-        int count = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
-                LocalDate.parse("2024-12-23"), 1, 1, Status.PENDING
+    void countAlreadyRegisteredWaitingsIsZero() {
+        int count = reservationRepository.countAlreadyRegisteredWaitings(
+                4, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
         );
 
         Assertions.assertThat(count).isEqualTo(0);
     }
 
     @Test
-    void countByDateAndTimeIdAndThemeIdAndStatusIsOne() {
-        int count = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
-                LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
+    void countAlreadyRegisteredWaitingsIsOne() {
+        int count = reservationRepository.countAlreadyRegisteredWaitings(
+                5, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
         );
 
         Assertions.assertThat(count).isEqualTo(1);

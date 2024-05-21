@@ -30,5 +30,15 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, Status status);
 
-    int countByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, Status status);
+    @Query("""
+            SELECT COUNT(r) FROM Reservation r
+            WHERE r.date = :date
+                AND r.time.id = :timeId
+                AND r.theme.id = :themeId
+                AND r.status = :status 
+                AND r.id < :id
+            """)
+    int countAlreadyRegisteredWaitings(@Param("id") long id, @Param("date") LocalDate date,
+                                       @Param("timeId") long timeId, @Param("themeId") long themeId,
+                                       @Param("status") Status status);
 }

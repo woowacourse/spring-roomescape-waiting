@@ -138,13 +138,21 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         List<MemberReservationResponse> responses = new ArrayList<>();
         for (Reservation reservation : reservations) {
-            int rank = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
-                    reservation.getDate(), reservation.getTime().getId(),
-                    reservation.getTheme().getId(), reservation.getStatus()
-            );
+            int rank = countWaitingRank(reservation);
             responses.add(MemberReservationResponse.of(reservation, rank));
         }
         return responses;
+    }
+
+    private int countWaitingRank(final Reservation reservation) {
+        if (reservation.getStatus().equals(Status.PENDING)) {
+            return reservationRepository.countAlreadyRegisteredWaitings(
+                    reservation.getId(),
+                    reservation.getDate(), reservation.getTime().getId(),
+                    reservation.getTheme().getId(), reservation.getStatus()
+            ) + 1;
+        }
+        return 0;
     }
 
     public ReservationDeleteResponse delete(final long id) {
