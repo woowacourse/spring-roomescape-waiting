@@ -73,7 +73,6 @@ class ReservationControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Member member = new Member("valid", "testUser@email.com", "pass");
         jwtTokenProvider = new JwtTokenProvider(secretKey, validityInMilliseconds);
     }
 

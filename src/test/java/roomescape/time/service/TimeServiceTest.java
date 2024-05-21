@@ -25,7 +25,6 @@ import roomescape.time.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TimeServiceTest {
-
     private final Time time = new Time(1L, LocalTime.of(17, 3));
 
     @InjectMocks
@@ -94,5 +93,4 @@ class TimeServiceTest {
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("삭제를 요청한 시간에 예약이 존재합니다.");
     }
-
 }

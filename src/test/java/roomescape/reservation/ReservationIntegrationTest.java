@@ -26,7 +26,6 @@ import roomescape.reservation.repository.ReservationRepository;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/data-test.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationIntegrationTest {
-
     @LocalServerPort
     private int port;
 
