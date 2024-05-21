@@ -1,16 +1,16 @@
 package roomescape.service.response;
 
 import roomescape.domain.ReservationDate;
-import roomescape.domain.Waiting;
+import roomescape.domain.ReservationWaiting;
 
-public record WaitingAppResponse(
+public record ReservationWaitingAppResponse(
         Long id,
         String name,
         ReservationDate date,
         ReservationTimeAppResponse reservationTimeAppResponse,
         ThemeAppResponse themeAppResponse) {
 
-    public WaitingAppResponse(Waiting waiting) {
+    public ReservationWaitingAppResponse(ReservationWaiting waiting) {
         this(
                 waiting.getId(),
                 waiting.getMember().getName().getName(),

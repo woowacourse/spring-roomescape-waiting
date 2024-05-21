@@ -1,9 +1,9 @@
 package roomescape.service.response;
 
 import roomescape.domain.ReservationDate;
-import roomescape.domain.WaitingWithRank;
+import roomescape.domain.ReservationWaitingWithRank;
 
-public record WaitingWithRankAppResponse(
+public record ReservationWaitingWithRankAppResponse(
         Long id,
         String name,
         ReservationDate date,
@@ -11,7 +11,7 @@ public record WaitingWithRankAppResponse(
         ThemeAppResponse themeAppResponse,
         Long rank) {
 
-    public WaitingWithRankAppResponse(WaitingWithRank waitingWithRank) {
+    public ReservationWaitingWithRankAppResponse(ReservationWaitingWithRank waitingWithRank) {
         this(
                 waitingWithRank.getWaiting().getId(),
                 waitingWithRank.getWaiting().getMember().getName().getName(),

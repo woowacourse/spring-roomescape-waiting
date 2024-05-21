@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.Fixture.VALID_RESERVATION_TIME;
 import static roomescape.Fixture.VALID_THEME;
 
-public class WaitingControllerTest extends ControllerTest {
+public class ReservationWaitingControllerTest extends ControllerTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -34,7 +34,7 @@ public class WaitingControllerTest extends ControllerTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @DisplayName("사용자 예약 대기를 저장한다. -> 201")
     @Test
@@ -65,7 +65,7 @@ public class WaitingControllerTest extends ControllerTest {
         Theme theme = themeRepository.save(VALID_THEME);
         String date = LocalDate.now().plusMonths(1).toString();
         Member waitingMember = memberRepository.save(new Member(new MemberName("감자"), new MemberEmail("111@aaa.com"), new MemberPassword("asd"), MemberRole.USER));
-        Waiting waiting = waitingRepository.save(new Waiting(waitingMember, new ReservationDate(date), time, theme));
+        ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(waitingMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
         MemberWaitingWebRequest request = new MemberWaitingWebRequest(date, time.getId(), theme.getId());
@@ -86,7 +86,7 @@ public class WaitingControllerTest extends ControllerTest {
         Theme theme = themeRepository.save(VALID_THEME);
         String date = LocalDate.now().plusMonths(1).toString();
         Member waitingMember = memberRepository.save(new Member(new MemberName("감자"), new MemberEmail("111@aaa.com"), new MemberPassword("asd"), MemberRole.USER));
-        waitingRepository.save(new Waiting(waitingMember, new ReservationDate(date), time, theme));
+        reservationWaitingRepository.save(new ReservationWaiting(waitingMember, new ReservationDate(date), time, theme));
         String token = jwtProvider.createToken(waitingMember.getEmail().getEmail());
 
         MemberWaitingWebRequest request = new MemberWaitingWebRequest(date, time.getId(), theme.getId());

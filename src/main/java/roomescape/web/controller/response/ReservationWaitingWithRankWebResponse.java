@@ -1,10 +1,10 @@
 package roomescape.web.controller.response;
 
-import roomescape.service.response.WaitingWithRankAppResponse;
+import roomescape.service.response.ReservationWaitingWithRankAppResponse;
 
 import java.time.LocalDate;
 
-public record WaitingWithRankWebResponse(
+public record ReservationWaitingWithRankWebResponse(
         Long id,
         String name,
         LocalDate date,
@@ -12,7 +12,7 @@ public record WaitingWithRankWebResponse(
         ThemeWebResponse theme,
         Long order) {
 
-    public WaitingWithRankWebResponse(WaitingWithRankAppResponse response) {
+    public ReservationWaitingWithRankWebResponse(ReservationWaitingWithRankAppResponse response) {
         this(
                 response.id(),
                 response.name(),

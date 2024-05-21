@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.service.ReservationAndWaitingService;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationWaitingService;
 import roomescape.service.request.AdminSearchedReservationAppRequest;
 import roomescape.service.request.ReservationAppRequest;
 import roomescape.service.response.ReservationAppResponse;
@@ -22,11 +22,11 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationWaitingService reservationWaitingService;
+    private final ReservationAndWaitingService reservationAndWaitingService;
 
-    public AdminReservationController(ReservationService reservationService, ReservationWaitingService reservationWaitingService) {
+    public AdminReservationController(ReservationService reservationService, ReservationAndWaitingService reservationAndWaitingService) {
         this.reservationService = reservationService;
-        this.reservationWaitingService = reservationWaitingService;
+        this.reservationAndWaitingService = reservationAndWaitingService;
     }
 
     @PostMapping
@@ -65,7 +65,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBy(@PathVariable Long id) {
-        reservationWaitingService.deleteIfNoWaitingOrUpdateReservation(id);
+        reservationAndWaitingService.deleteIfNoWaitingOrUpdateReservation(id);
 
         return ResponseEntity.noContent().build();
     }
