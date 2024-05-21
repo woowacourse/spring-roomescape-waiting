@@ -1,26 +1,21 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.domain.*;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.ReservationConditionRequest;
-import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.UserReservationResponse;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -97,16 +92,22 @@ public class ReservationService {
     }
 
     public List<UserReservationResponse> findAllUserReservation(Long memberId) {
-        //TODO TypeSort 적용해보기
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
                 findMemberById(memberId),
                 LocalDate.now(),
-                Sort.by(Order.asc("date"), Order.asc("time.startAt"))
+                dateAscAndTimeAsc()
         );
 
         return reservations.stream()
                 .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
                 .toList();
+    }
+
+    private Sort dateAscAndTimeAsc() {
+        Sort.TypedSort<Reservation> sort = Sort.sort(Reservation.class);
+        Sort dateSort = sort.by(Reservation::getDate).ascending();
+        Sort timeSort = sort.by(Reservation::getTime).ascending();
+        return dateSort.and(timeSort);
     }
 
     private Member findMemberById(Long memberId) {

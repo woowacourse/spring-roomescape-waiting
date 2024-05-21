@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-public class ReservationTime {
+public class ReservationTime implements Comparable<ReservationTime> {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,5 +46,10 @@ public class ReservationTime {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public int compareTo(ReservationTime o) {
+        return this.startAt.compareTo(o.startAt);
     }
 }

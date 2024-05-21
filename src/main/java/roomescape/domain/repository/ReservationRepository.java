@@ -25,7 +25,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByDateBetween(LocalDate startDate, LocalDate endDate);
 
-    // TODO nullable 사용보다 더 좋은 방법 고민해보기
     @Query("""
             select r
             from Reservation r
