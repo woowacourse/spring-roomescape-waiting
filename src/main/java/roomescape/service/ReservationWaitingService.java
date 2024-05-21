@@ -103,16 +103,23 @@ public class ReservationWaitingService {
         reservationWaitingRepository.deleteById(waitingId);
     }
 
-    public List<ReservationWaitingAppResponse> findAll() {
+    public List<ReservationWaitingAppResponse> findAllAllowed() {
         return reservationWaitingRepository.findAll()
                 .stream()
+                .filter(ReservationWaiting::isAllowed)
                 .map(ReservationWaitingAppResponse::new)
                 .toList();
     }
 
-    public void deleteWaiting(Long waitingId) {
-        reservationWaitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 삭제 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
-        reservationWaitingRepository.deleteById(waitingId);
+    public ReservationWaitingAppResponse updateWaitingStatus(Long waitingId, boolean isDenied) {
+        ReservationWaiting waiting = reservationWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 상태 변경 실패: 대기를 찾을 수 없습니다. (id: %d)", waitingId)));
+        if (waiting.isDenied() == isDenied) {
+            throw new IllegalArgumentException(String.format(
+                    "예약 대기 상태 변경 실패: 이미 해당 상태로 설정되어 있습니다. {id: %d, isDenied: %b}", waitingId, isDenied));
+        }
+        waiting.setDenied(isDenied);
+        ReservationWaiting updatedWaiting = reservationWaitingRepository.save(waiting);
+        return new ReservationWaitingAppResponse(updatedWaiting);
     }
 }

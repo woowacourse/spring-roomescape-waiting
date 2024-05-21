@@ -63,6 +63,12 @@ class ReservationWaitingServiceTest {
                     new MemberEmail("333@aaa.com"),
                     new MemberPassword("asd"),
                     MemberRole.USER
+            ),
+            new Member(
+                    new MemberName("밤"),
+                    new MemberEmail("444@aaa.com"),
+                    new MemberPassword("asd"),
+                    MemberRole.USER
             )
     );
 
@@ -150,7 +156,7 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    @DisplayName("지나간 시간에 대한 대기 생성 시 예외가 발생한다.")
+    @DisplayName("예약 대기 목록을 순서와 함께 올바르게 반환한다.")
     void findWaitingWithRankByMemberId() {
         List<Member> savedMembers = members.stream()
                 .map(memberRepository::save)
@@ -160,6 +166,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(savedMembers.get(0), new ReservationDate(date), time, theme));
+        reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(3), new ReservationDate(date), time, theme, true));
         reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(1), new ReservationDate(date), time, theme));
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(2), new ReservationDate(date), time, theme));
 

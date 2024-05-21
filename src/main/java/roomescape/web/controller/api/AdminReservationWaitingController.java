@@ -1,8 +1,11 @@
 package roomescape.web.controller.api;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationWaitingService;
+import roomescape.service.response.ReservationWaitingAppResponse;
+import roomescape.web.controller.request.ReservationWaitingStatusWebRequest;
 import roomescape.web.controller.response.ReservationWaitingWebResponse;
 
 import java.util.List;
@@ -18,8 +21,8 @@ public class AdminReservationWaitingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationWaitingWebResponse>> getWaitings() {
-        List<ReservationWaitingWebResponse> waitingWebResponses = reservationWaitingService.findAll()
+    public ResponseEntity<List<ReservationWaitingWebResponse>> getAvailableWaitings() {
+        List<ReservationWaitingWebResponse> waitingWebResponses = reservationWaitingService.findAllAllowed()
                 .stream()
                 .map(ReservationWaitingWebResponse::new)
                 .toList();
@@ -27,9 +30,11 @@ public class AdminReservationWaitingController {
         return ResponseEntity.ok().body(waitingWebResponses);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        reservationWaitingService.deleteWaiting(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ReservationWaitingWebResponse> updateWaitingStatus(@PathVariable Long id, @Valid @RequestBody ReservationWaitingStatusWebRequest request) {
+        ReservationWaitingAppResponse waitingAppResponse = reservationWaitingService.updateWaitingStatus(id, request.isDenied());
+        ReservationWaitingWebResponse waitingWebResponse = new ReservationWaitingWebResponse(waitingAppResponse);
+
+        return ResponseEntity.ok(waitingWebResponse);
     }
 }
