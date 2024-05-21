@@ -17,7 +17,7 @@ public record ReservationMineResponse(long reservationId,
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().name()
+                reservation.getStatus().getName()
         );
     }
 }
