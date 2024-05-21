@@ -10,17 +10,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.exception.RoomEscapeBusinessException;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
+@Where(clause = "is_deleted = false")
+@SQLDelete(sql = "UPDATE reservation SET is_deleted = true where id = ?")
 public class Reservation {
 
     @Id
@@ -36,6 +37,8 @@ public class Reservation {
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Waiting> waitings = new ArrayList<>();
+
+    private boolean isDeleted = false;
 
     public Reservation(Member member, ReservationSlot slot) {
         this(null, member, slot);

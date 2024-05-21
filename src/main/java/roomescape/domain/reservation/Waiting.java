@@ -8,9 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import roomescape.domain.member.Member;
 
 @Entity
+@Where(clause = "is_deleted = false")
+@SQLDelete(sql = "UPDATE waiting SET is_deleted = true where id = ?")
 public class Waiting {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +27,8 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
+
+    private boolean isDeleted = false;
 
     public Waiting(Member member, Reservation reservation) {
         this(null, member, reservation);
