@@ -4,7 +4,7 @@ public interface RoleRepository {
 
     MemberRole save(MemberRole memberRole);
 
-    boolean isAdminByMemberId(long memberId);
+    boolean isNotAdminByMemberId(long memberId);
 
     MemberRole getById(long id);
 }

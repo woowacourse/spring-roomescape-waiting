@@ -92,7 +92,9 @@ class ReservationBookingServiceTest {
     @DisplayName("다른 사람의 예약을 삭제하는 경우, 예외를 반환한다.")
     void shouldThrowExceptionWhenDeleteOtherMemberReservation() {
         Long reservationId = reservationFixture.saveReservation().getId();
-        long memberId = memberRepository.save(MemberFixture.createMember("other")).getId();
+        Member member = MemberFixture.createMember("other");
+        MemberRole role = new MemberRole(member, Role.MEMBER);
+        long memberId = roleRepository.save(role).getMemberId();
         assertThatCode(() -> reservationBookingService.cancelReservation(memberId, reservationId))
                 .isInstanceOf(UnAuthorizedException.class);
     }

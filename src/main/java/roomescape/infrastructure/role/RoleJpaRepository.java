@@ -12,10 +12,10 @@ public interface RoleJpaRepository extends RoleRepository, ListCrudRepository<Me
     @Query("""
             select case when exists (
                 select 1 from MemberRole as mr
-                where mr.id = :memberId and mr.role = roomescape.domain.role.Role.ADMIN
+                where mr.id = :memberId and mr.role != roomescape.domain.role.Role.ADMIN
             ) then true else false end
             """)
-    boolean isAdminByMemberId(long memberId);
+    boolean isNotAdminByMemberId(long memberId);
 
     @Override
     default MemberRole getById(long id) {

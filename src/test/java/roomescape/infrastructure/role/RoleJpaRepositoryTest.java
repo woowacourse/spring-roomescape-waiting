@@ -32,7 +32,7 @@ class RoleJpaRepositoryTest {
         Member member = new Member("name", "email@test.com", "12341234");
         Member savedMember = memberRepository.save(member);
         entityManager.persist(new MemberRole(savedMember, Role.ADMIN));
-        boolean isAdmin = roleRepository.isAdminByMemberId(savedMember.getId());
-        assertThat(isAdmin).isTrue();
+        boolean isNotAdmin = roleRepository.isNotAdminByMemberId(savedMember.getId());
+        assertThat(isNotAdmin).isFalse();
     }
 }

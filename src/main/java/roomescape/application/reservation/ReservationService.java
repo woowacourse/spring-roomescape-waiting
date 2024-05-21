@@ -18,6 +18,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.role.RoleRepository;
 import roomescape.infrastructure.reservation.ReservationSpec;
 
 @Service
@@ -26,17 +27,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final RoleRepository roleRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
                               MemberRepository memberRepository,
+                              RoleRepository roleRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.roleRepository = roleRepository;
         this.clock = clock;
     }
 
@@ -75,5 +79,10 @@ public class ReservationService {
                 .stream()
                 .map(ReservationStatusResponse::from)
                 .toList();
+    }
+
+    public boolean hasNoAccessToReservation(long memberId, long reservationId) {
+        Reservation reservation = reservationRepository.getById(reservationId);
+        return roleRepository.isNotAdminByMemberId(memberId) && reservation.isNotOwnedBy(memberId);
     }
 }
