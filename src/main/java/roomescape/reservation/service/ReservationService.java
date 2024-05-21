@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
@@ -57,11 +58,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
     }
 
+    @Transactional
     public ReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
         ReservationCreateRequest createRequest = ReservationCreateRequest.of(request, loginMember);
         return createReservation(createRequest);
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request) {
         Member member = findMemberById(request.memberId());
         ReservationTime time = findReservationTimeById(request.timeId());
@@ -98,12 +101,14 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> readReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> readMemberReservations(LoginMember loginMember) {
         return reservationRepository.findByMemberId(loginMember.id()).stream()
                 .map(MemberReservationResponse::from)
@@ -111,18 +116,21 @@ public class ReservationService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
         return reservationRepository.findByDateBetweenAndMemberIdAndThemeId(start, end, memberId, themeId).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponse readReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
         return ReservationResponse.from(reservation);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
     }
