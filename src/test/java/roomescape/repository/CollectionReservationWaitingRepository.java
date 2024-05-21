@@ -29,6 +29,11 @@ public class CollectionReservationWaitingRepository implements
     }
 
     @Override
+    public List<ReservationWaiting> findAll() {
+        return List.copyOf(reservationWaitings);
+    }
+
+    @Override
     public List<ReservationWaiting> findAllByMemberId(long memberId) {
         return reservationWaitings.stream()
                 .filter(reservationWaiting -> reservationWaiting.getWaitingMember().hasIdOf(memberId))

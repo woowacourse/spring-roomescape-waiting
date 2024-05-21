@@ -21,6 +21,11 @@ public class JpaReservationWaitingRepository implements ReservationWaitingReposi
     }
 
     @Override
+    public List<ReservationWaiting> findAll() {
+        return waitingDao.findAll();
+    }
+
+    @Override
     public List<ReservationWaiting> findAllByMemberId(long memberId) {
         return waitingDao.findAllByWaitingMember_Id(memberId);
     }

@@ -89,4 +89,15 @@ class JpaReservationWaitingRepositoryTest extends DatabaseClearBeforeEachTest {
                 .containsAll(afterDelete)
                 .contains(DEFAULT_WAITING);
     }
+
+    @Test
+    @DisplayName("전체 예약 대기를 잘 조회하는지 확인")
+    void findAll() {
+        waitingRepository.save(DEFAULT_WAITING);
+
+        List<ReservationWaiting> all = waitingRepository.findAll();
+
+        Assertions.assertThat(all)
+                .containsExactly(DEFAULT_WAITING);
+    }
 }

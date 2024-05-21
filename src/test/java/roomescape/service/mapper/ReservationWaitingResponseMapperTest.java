@@ -20,4 +20,14 @@ class ReservationWaitingResponseMapperTest {
         Assertions.assertThat(response)
                 .isEqualTo(DEFAULT_RESPONSE);
     }
+
+    @Test
+    @DisplayName("도메인을 우선순위가 제외된 응답으로 잘 변환하는지 확인")
+    void toResponseWithoutPriority() {
+        ReservationWaitingResponse responseWithoutPriority = ReservationWaitingResponseMapper.toResponseWithoutPriority(
+                DEFAULT_WAITING);
+        Assertions.assertThat(responseWithoutPriority)
+                .isEqualTo(new ReservationWaitingResponse(DEFAULT_RESPONSE.id(), DEFAULT_RESPONSE.name(),
+                        DEFAULT_RESPONSE.date(), DEFAULT_RESPONSE.time(), DEFAULT_RESPONSE.theme(), null));
+    }
 }

@@ -8,6 +8,8 @@ import roomescape.domain.ReservationWaiting;
 public interface ReservationWaitingRepository {
     ReservationWaiting save(ReservationWaiting reservationWaiting);
 
+    List<ReservationWaiting> findAll();
+
     List<ReservationWaiting> findAllByMemberId(long memberId);
 
     List<ReservationWaiting> findByReservation(Reservation reservation);

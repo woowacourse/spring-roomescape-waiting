@@ -15,6 +15,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
@@ -79,6 +80,12 @@ public class ReservationWaitingService {
         }
     }
 
+    public List<ReservationWaitingResponse> findAll() {
+        return waitingRepository.findAll().stream()
+                .map(ReservationWaitingResponseMapper::toResponseWithoutPriority)
+                .toList();
+    }
+
     public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
         List<ReservationWaiting> allByMemberId = waitingRepository.findAllByMemberId(memberId);
         return allByMemberId
@@ -97,7 +104,10 @@ public class ReservationWaitingService {
     }
 
     private boolean canDelete(long memberId, long waitingId) {
-        return waitingRepository.findAllByMemberId(memberId).stream()
+        Role role = memberRepository.findById(memberId)
+                .map(Member::getRole)
+                .orElse(Role.MEMBER);
+        return Role.ADMIN.equals(role) || waitingRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationWaiting::getId)
                 .anyMatch(id -> id == waitingId);
     }
