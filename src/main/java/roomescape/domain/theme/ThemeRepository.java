@@ -15,7 +15,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             SELECT t.id, t.name, t.description, t.thumbnail, COUNT(r.id) AS reservation_count
             FROM theme t
             INNER JOIN reservation_detail rd ON rd.theme_id = t.id
-            INNER JOIN reservation r ON r.reservation_detail_id = rd.id
+            INNER JOIN reservation r ON r.detail_id = rd.id
             WHERE rd.date BETWEEN :startDate AND :endDate
             AND r.status = 'RESERVED'
             GROUP BY t.id

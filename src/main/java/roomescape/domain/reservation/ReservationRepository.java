@@ -12,18 +12,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r FROM Reservation AS r
             WHERE (:memberId is null or r.member.id = :memberId)
-            AND (:themeId is null or r.reservationDetail.theme.id = :themeId)
-            AND (:dateFrom is null or r.reservationDetail.schedule.date >= :dateFrom)
-            AND (:dateTo is null or r.reservationDetail.schedule.date < :dateTo)""")
+            AND (:themeId is null or r.detail.theme.id = :themeId)
+            AND (:dateFrom is null or r.detail.schedule.date >= :dateFrom)
+            AND (:dateTo is null or r.detail.schedule.date < :dateTo)""")
     List<Reservation> findBy(@Param("memberId") Long memberId, @Param("themeId") Long themeId,
                              @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
 
     List<Reservation> findByMemberId(long memberId);
 
-    boolean existsByReservationDetailIdAndStatusNotAndMemberId(Long reservationDetailId, ReservationStatus status, Long memberId);
+    boolean existsByDetailIdAndStatusNotAndMemberId(Long reservationDetailId, ReservationStatus status, Long memberId);
 
-    boolean existsByReservationDetailIdAndStatus(Long reservationDetailId, ReservationStatus status);
+    boolean existsByDetailIdAndStatus(Long reservationDetailId, ReservationStatus status);
 
-    @Query("select r from Reservation as r where r.status != :status AND r.reservationDetail.schedule.date >= :date")
+    @Query("select r from Reservation as r where r.status != :status AND r.detail.schedule.date >= :date")
     Collection<Reservation> findByStatusNotAndDateAfter(ReservationStatus status, ReservationDate date);
 }

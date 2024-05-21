@@ -8,4 +8,4 @@ INSERT INTO member(name, email, password, role) VALUES('리니', 'lini@email.com
 
 INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
 
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (1, 1, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (1, 1, 'RESERVED');

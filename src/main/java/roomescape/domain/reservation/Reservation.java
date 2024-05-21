@@ -22,7 +22,7 @@ public class Reservation {
     private Member member;
 
     @ManyToOne
-    private ReservationDetail reservationDetail;
+    private ReservationDetail detail;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -33,9 +33,9 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Member member, ReservationDetail reservationDetail, ReservationStatus status) {
+    public Reservation(Member member, ReservationDetail detail, ReservationStatus status) {
         this.member = member;
-        this.reservationDetail = reservationDetail;
+        this.detail = detail;
         this.status = status;
     }
 
@@ -56,18 +56,18 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return reservationDetail.getDate();
+        return detail.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationDetail.getReservationTime();
+        return detail.getReservationTime();
     }
 
     public Theme getTheme() {
-        return reservationDetail.getTheme();
+        return detail.getTheme();
     }
 
     public LocalTime getTime() {
-        return reservationDetail.getTime();
+        return detail.getTime();
     }
 }

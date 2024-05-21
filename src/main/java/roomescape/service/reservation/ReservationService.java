@@ -84,10 +84,10 @@ public class ReservationService {
     }
 
     private ReservationStatus determineStatus(ReservationDetail reservationDetail, Member member) {
-        if (reservationRepository.existsByReservationDetailIdAndStatusNotAndMemberId(reservationDetail.getId(), ReservationStatus.CANCELED, member.getId())) {
+        if (reservationRepository.existsByDetailIdAndStatusNotAndMemberId(reservationDetail.getId(), ReservationStatus.CANCELED, member.getId())) {
             throw new InvalidReservationException("이미 예약(대기) 상태입니다.");
         }
-        if (reservationRepository.existsByReservationDetailIdAndStatus(reservationDetail.getId(), ReservationStatus.RESERVED)) {
+        if (reservationRepository.existsByDetailIdAndStatus(reservationDetail.getId(), ReservationStatus.RESERVED)) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;

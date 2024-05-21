@@ -24,16 +24,16 @@ INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -
 INSERT INTO reservation_detail(date, time_id, theme_id) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 4);
 
 -- 인기 순위: 5 -> 2 -> 3 -> 4
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (1, 1, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (2, 2, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (3, 3, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (4, 1, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (5, 2, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (6, 3, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (7, 1, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (8, 2, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (9, 3, 'RESERVED');
-INSERT INTO reservation(reservation_detail_id, member_id, status) VALUES (10, 1, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (1, 1, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (2, 2, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (3, 3, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (4, 1, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (5, 2, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (6, 3, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (7, 1, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (8, 2, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (9, 3, 'RESERVED');
+INSERT INTO reservation(detail_id, member_id, status) VALUES (10, 1, 'RESERVED');
 
 
 
