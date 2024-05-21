@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.reservation.dto.ReservationRequest;
@@ -57,8 +58,14 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Void> reservationRemove(@PathVariable long reservationId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reservationRemove(@PathVariable long reservationId) {
         reservationService.removeReservations(reservationId);
-        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waiting/{waitingId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reservationWaitingRemove(@PathVariable long waitingId) {
+        reservationService.removeWaitingReservations(waitingId);
     }
 }

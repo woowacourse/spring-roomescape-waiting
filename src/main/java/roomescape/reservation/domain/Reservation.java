@@ -83,6 +83,10 @@ public class Reservation {
         return member;
     }
 
+    public String getReservationStatus() {
+        return reservationStatus.getStatus();
+    }
+
     private static void validateAtSaveDateAndTime(LocalDate date, Time time) {
         if (date.equals(LocalDate.now())) {
             validateTime(time);

@@ -45,6 +45,7 @@ public class ReservationService {
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
         Reservation saveReservation = makeReservation(reservationRequest, memberId, ReservationStatus.RESERVED);
+
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
 
@@ -108,6 +109,10 @@ public class ReservationService {
 
     public void removeReservations(long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    public void removeWaitingReservations(long waitingId) {
+        reservationRepository.deleteById(waitingId);
     }
 
     private Reservation makeReservation(ReservationRequest reservationRequest, long memberId,
