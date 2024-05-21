@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.member.MemberService;
 import roomescape.application.member.dto.request.MemberRegisterRequest;
 import roomescape.application.member.dto.response.MemberResponse;
+import roomescape.presentation.auth.PermissionRequired;
 
 @RestController
 public class MemberController {
@@ -26,6 +27,7 @@ public class MemberController {
     }
 
     @GetMapping("/members")
+    @PermissionRequired
     public ResponseEntity<List<MemberResponse>> findAll() {
         List<MemberResponse> responses = memberService.findAll();
         return ResponseEntity.ok(responses);
