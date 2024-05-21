@@ -34,12 +34,28 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT r FROM Reservation r
             JOIN FETCH r.time
             JOIN FETCH r.theme
-            JOIN FETCH r.member
-            WHERE r.member = :member
+            WHERE r.member = :member AND r.status = :status
             """)
-    List<Reservation> findAllByMemberWithDetails(@Param(value = "member") Member member);
+    List<Reservation> findAllByMemberAndStatusWithDetails(@Param(value = "member") Member member,
+                                                          @Param(value = "status") ReservationStatus status);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     int countByTime(ReservationTime time);
+
+    @Query("""
+            SELECT new roomescape.reservation.domain.WaitingReservation(
+                r,
+                (SELECT COUNT(w) FROM Reservation w
+                    WHERE w.theme = r.theme
+                        AND w.date = r.date
+                        AND w.time = r.time
+                        AND w.status = r.status
+                        AND w.id < r.id))
+            FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            WHERE r.member = :member AND r.status = 'WAITING'
+            """)
+    List<WaitingReservation> findWaitingReservationsByMemberWithDetails(@Param(value = "member") Member member);
 }

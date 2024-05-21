@@ -8,8 +8,10 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeRepository;
+import roomescape.reservation.domain.WaitingReservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -67,8 +69,12 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, fromDate, toDate);
     }
 
-    public List<Reservation> findAllByMember(Member loginMember) {
-        return reservationRepository.findAllByMemberWithDetails(loginMember);
+    public List<Reservation> findAllInBookingByMember(Member member) {
+        return reservationRepository.findAllByMemberAndStatusWithDetails(member, ReservationStatus.BOOKING);
+    }
+
+    public List<WaitingReservation> findAllInWaitingWithPreviousCountByMember(Member member) {
+        return reservationRepository.findWaitingReservationsByMemberWithDetails(member);
     }
 
     @Transactional

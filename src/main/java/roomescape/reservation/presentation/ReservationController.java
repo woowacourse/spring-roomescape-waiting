@@ -23,6 +23,7 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -78,9 +79,16 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
-        List<Reservation> reservations = reservationService.findAllByMember(loginMember);
-        return ResponseEntity.ok(reservations.stream()
+        List<MyReservationResponse> myBookingResponses = reservationService.findAllInBookingByMember(loginMember)
+                .stream()
                 .map(MyReservationResponse::from)
-                .toList());
+                .toList();
+        List<MyReservationResponse> myWaitingResponses = reservationService.findAllInWaitingWithPreviousCountByMember(loginMember)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        List<MyReservationResponse> myReservationResponses = new ArrayList<>(myBookingResponses);
+        myReservationResponses.addAll(myWaitingResponses);
+        return ResponseEntity.ok(myReservationResponses);
     }
 }

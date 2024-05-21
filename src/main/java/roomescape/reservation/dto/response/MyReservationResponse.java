@@ -2,7 +2,7 @@ package roomescape.reservation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.WaitingReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,14 +22,17 @@ public record MyReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                mapReservationStatusToResponse(reservation.getStatus())
+                "예약"
         );
     }
 
-    private static String mapReservationStatusToResponse(ReservationStatus status) {
-        if (status == ReservationStatus.BOOKING) {
-            return "예약";
-        }
-        return "예약 상태가 존재하지 않습니다.";
+    public static MyReservationResponse from(WaitingReservation waitingReservation) {
+        return new MyReservationResponse(
+                waitingReservation.getReservation().getId(),
+                waitingReservation.getReservation().getTheme().getName(),
+                waitingReservation.getReservation().getDate(),
+                waitingReservation.getReservation().getTime().getStartAt(),
+                (waitingReservation.calculateOrder()) + "번째 예약대기"
+        );
     }
 }

@@ -17,11 +17,13 @@ import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
+import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.USER_TOMMY;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 class ReservationRepositoryTest extends RepositoryTest {
     @Autowired
@@ -163,16 +165,37 @@ class ReservationRepositoryTest extends RepositoryTest {
 
     @Test
     @DisplayName("사용자의 예약 목록을 조회한다.")
-    void findAllByMember() {
+    void findAllByMemberAndStatusWithDetails() {
         //given
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
         reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
         reservationRepository.save(TOMMY_RESERVATION(reservationTime, wootecoTheme, tommy, BOOKING));
 
         //when
-        List<Reservation> reservations = reservationRepository.findAllByMemberWithDetails(mia);
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndStatusWithDetails(mia, BOOKING);
 
         //then
         assertThat(reservations).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("사용자의 대기 예약 목록을 이전 대기 예약 개수와 함께 조회한다.")
+    void findWaitingReservationsByMemberWithDetails() {
+        // given
+        reservationRepository.save(new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+        reservationRepository.save(new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
+        reservationRepository.save(new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
+
+        reservationRepository.save(new Reservation(tommy, TOMMY_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+        reservationRepository.save(new Reservation(mia, TOMMY_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
+
+        // when
+        List<WaitingReservation> waitingReservations =
+                reservationRepository.findWaitingReservationsByMemberWithDetails(mia);
+
+        // then
+        assertThat(waitingReservations).hasSize(2)
+                .extracting(WaitingReservation::getPreviousCount)
+                .contains(0L, 1L);
     }
 }

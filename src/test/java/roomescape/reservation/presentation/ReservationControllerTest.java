@@ -26,6 +26,7 @@ import roomescape.reservation.application.ThemeService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 
 import java.util.List;
@@ -39,6 +40,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.TestFixture.HORROR_THEME;
+import static roomescape.TestFixture.HORROR_THEME_NAME;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
@@ -48,6 +51,7 @@ import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 @Import(TestWebMvcConfiguration.class)
 @WebMvcTest(
@@ -355,9 +359,13 @@ class ReservationControllerTest extends ControllerTest {
         // given
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
+        WaitingReservation expectedWaitingReservation = new WaitingReservation(
+                MIA_RESERVATION(expectedTime, HORROR_THEME(), USER_MIA(), WAITING), 0);
 
-        BDDMockito.given(reservationService.findAllByMember(any()))
+        BDDMockito.given(reservationService.findAllInBookingByMember(any()))
                 .willReturn(List.of(expectedReservation));
+        BDDMockito.given(reservationService.findAllInWaitingWithPreviousCountByMember(any()))
+                .willReturn(List.of(expectedWaitingReservation));
 
         // when & then
         mockMvc.perform(get("/reservations/mine").contentType(MediaType.APPLICATION_JSON))
@@ -366,6 +374,8 @@ class ReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$[0].theme").value(WOOTECO_THEME_NAME))
                 .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()))
                 .andExpect(jsonPath("$[0].time").value(MIA_RESERVATION_TIME.toString()))
-                .andExpect(jsonPath("$[0].status").value("예약"));
+                .andExpect(jsonPath("$[0].status").value("예약"))
+                .andExpect(jsonPath("$[1].theme").value(HORROR_THEME_NAME))
+                .andExpect(jsonPath("$[1].status").value("1번째 예약대기"));
     }
 }
