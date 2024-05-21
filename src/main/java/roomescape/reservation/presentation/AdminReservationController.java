@@ -73,7 +73,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.delete(id);
+        reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -83,5 +83,11 @@ public class AdminReservationController {
         return ResponseEntity.ok(waitingReservations.stream()
                 .map(ReservationResponse::from)
                 .toList());
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id) {
+        reservationService.deleteWaitingReservationByAdmin(id);
+        return ResponseEntity.noContent().build();
     }
 }

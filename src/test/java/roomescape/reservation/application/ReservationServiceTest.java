@@ -197,7 +197,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
 
         // when & then
-        assertThatCode(() -> reservationService.delete(reservation.getId()))
+        assertThatCode(() -> reservationService.deleteReservation(reservation.getId()))
                 .doesNotThrowAnyException();
     }
 
@@ -243,7 +243,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation waitingReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when
-        reservationService.deleteMyWaitingReservation(waitingReservation.getId(), mia);
+        reservationService.deleteWaitingReservationByMember(waitingReservation.getId(), mia);
 
         // then
         List<WaitingReservation> waitingReservations = reservationService.findWaitingReservationsWithPreviousCountByMember(mia);
@@ -259,7 +259,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation miaWaitingReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteMyWaitingReservation(miaWaitingReservation.getId(), tommy))
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservationByMember(miaWaitingReservation.getId(), tommy))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -270,7 +270,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteMyWaitingReservation(reservation.getId(), mia))
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservationByMember(reservation.getId(), mia))
                 .isInstanceOf(ViolationException.class);
     }
 

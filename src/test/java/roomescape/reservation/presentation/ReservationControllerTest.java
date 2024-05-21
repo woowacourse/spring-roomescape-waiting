@@ -310,7 +310,7 @@ class ReservationControllerTest extends ControllerTest {
         // given
         BDDMockito.willDoNothing()
                 .given(reservationService)
-                .deleteMyWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
+                .deleteWaitingReservationByMember(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}/waiting", 1L)
@@ -325,7 +325,7 @@ class ReservationControllerTest extends ControllerTest {
         // given
         BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
                 .given(reservationService)
-                .deleteMyWaitingReservation(1L, STUBBED_LOGIN_MEMBER);
+                .deleteWaitingReservationByMember(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}/waiting", 1L)

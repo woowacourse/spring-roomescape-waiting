@@ -74,6 +74,10 @@ public class Reservation {
         return status.isWaiting();
     }
 
+    public boolean hasSameStatus(ReservationStatus status) {
+        return this.status == status;
+    }
+
     public String getMemberName() {
         return member.getName();
     }

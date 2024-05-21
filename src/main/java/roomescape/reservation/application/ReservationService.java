@@ -82,23 +82,18 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void deleteReservation(Long id) {
+        Reservation reservation = findByIdIfNotPresentThrowException(id);
+        validateReservationStatus(reservation, ReservationStatus.BOOKING);
         reservationRepository.deleteById(id);
     }
 
     @Transactional
-    public void deleteMyWaitingReservation(Long reservationId, Member member) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("해당 Id의 예약이 없습니다."));
-        validateReservationStatus(reservation);
+    public void deleteWaitingReservationByMember(Long reservationId, Member member) {
+        Reservation reservation = findByIdIfNotPresentThrowException(reservationId);
+        validateReservationStatus(reservation, ReservationStatus.WAITING);
         validateOwnerShip(reservation, member);
         reservationRepository.delete(reservation);
-    }
-
-    private void validateReservationStatus(Reservation reservation) {
-        if (!reservation.isWaiting()) {
-            throw new ViolationException("대기 중인 예약이 아닙니다.");
-        }
     }
 
     private void validateOwnerShip(Reservation reservation, Member member) {
@@ -106,6 +101,24 @@ public class ReservationService {
         Long ownerId = reservation.getMember().getId();
         if (!memberId.equals(ownerId)) {
             throw new ViolationException("본인의 예약 대기만 삭제할 수 있습니다.");
+        }
+    }
+
+    @Transactional
+    public void deleteWaitingReservationByAdmin(Long reservationId) {
+        Reservation reservation = findByIdIfNotPresentThrowException(reservationId);
+        validateReservationStatus(reservation, ReservationStatus.WAITING);
+        reservationRepository.delete(reservation);
+    }
+
+    private Reservation findByIdIfNotPresentThrowException(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("해당 Id의 예약이 없습니다."));
+    }
+
+    private void validateReservationStatus(Reservation reservation, ReservationStatus status) {
+        if (!reservation.hasSameStatus(status)) {
+            throw new ViolationException("상태가 " + status + "인 예약이 아닙니다.");
         }
     }
 }
