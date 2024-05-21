@@ -25,7 +25,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"member", "time", "theme"})
     List<Reservation> findAllByStatus(Status status);
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    Optional<Reservation> findFirstByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 

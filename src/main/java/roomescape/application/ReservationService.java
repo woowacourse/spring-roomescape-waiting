@@ -61,7 +61,7 @@ public class ReservationService {
         if (reservation.getStatus() == Status.RESERVATION && reservationRepository.existsByDateAndTimeIdAndThemeId(
                         reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
         ) {
-            Reservation nextReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+            Reservation nextReservation = reservationRepository.findFirstByDateAndTimeIdAndThemeId(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).orElseThrow();
             nextReservation.setStatus(Status.RESERVATION);
