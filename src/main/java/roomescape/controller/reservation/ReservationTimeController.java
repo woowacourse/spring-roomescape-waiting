@@ -28,12 +28,12 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeResponse>> findAll() {
+    public ResponseEntity<List<ReservationTimeResponse>> findAll() { // 사용자
         return ResponseEntity.ok(reservationTimeService.findAll());
     }
 
     @GetMapping("/times/filter")
-    public ResponseEntity<List<ReservationAvailabilityTimeResponse>> findReservationTimesWithBookStatus(
+    public ResponseEntity<List<ReservationAvailabilityTimeResponse>> findReservationTimesWithBookStatus( // 둘다
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") Long themeId)
     {
@@ -42,7 +42,7 @@ public class ReservationTimeController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<ReservationTimeResponse> create(
+    public ResponseEntity<ReservationTimeResponse> create( // 어드민만
             @Valid @RequestBody ReservationTimeRequest reservationTimeRequest)
     {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.save(reservationTimeRequest);

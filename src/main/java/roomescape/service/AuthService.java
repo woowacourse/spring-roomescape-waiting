@@ -3,6 +3,7 @@ package roomescape.service;
 import jakarta.servlet.http.Cookie;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.AuthInfo;
@@ -30,5 +31,11 @@ public class AuthService {
 
     public AuthInfo getAuthInfo(Cookie[] cookies) {
         return tokenProvider.getAuthInfo(cookies);
+    }
+
+    public boolean isRoleValid(Cookie[] cookies, Role role) {
+        AuthInfo authInfo = getAuthInfo(cookies);
+
+        return authInfo.isRole(role);
     }
 }

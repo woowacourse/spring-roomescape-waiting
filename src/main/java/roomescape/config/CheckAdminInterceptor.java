@@ -3,10 +3,10 @@ package roomescape.config;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.domain.Role;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.AuthorizationException;
 import roomescape.service.AuthService;
-import roomescape.service.dto.AuthInfo;
 
 public class CheckAdminInterceptor implements HandlerInterceptor {
 
@@ -17,18 +17,15 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (request.getCookies() == null) {
             throw new AuthenticationException("인증되지 않은 사용자입니다.");
         }
 
-        AuthInfo authInfo = authService.getAuthInfo(request.getCookies());
-
-        if (authInfo.isNotAdmin()) {
-            throw new AuthorizationException("접근권한이 없습니다.");
+        if (authService.isRoleValid(request.getCookies(), Role.ADMIN)) {
+            return true;
         }
 
-        return true;
+        throw new AuthorizationException("접근권한이 없습니다.");
     }
 }
