@@ -21,6 +21,7 @@ import roomescape.reservation.service.ReservationService;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
@@ -33,6 +34,15 @@ public class ReservationController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationService.addReservation(reservationRequest, id));
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> reservationWaitingSave(
+            @RequestBody ReservationRequest reservationRequest,
+            @LoginMemberId long id) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(reservationService.addWaitingReservation(reservationRequest, id));
     }
 
     @GetMapping

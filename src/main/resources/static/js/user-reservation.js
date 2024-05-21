@@ -1,4 +1,5 @@
 const THEME_API_ENDPOINT = '/themes';
+const RESERVATION_API_ENDPOINT = '/reservations'
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
@@ -34,8 +35,8 @@ function renderTheme(themes) {
   const themeSlots = document.getElementById('theme-slots');
   themeSlots.innerHTML = '';
   themes.forEach(theme => {
-    const name = '';
-    const themeId = '';
+    const name = theme.name;
+    const themeId = theme.id;
     /*
     TODO: [3단계] 사용자 예약 - 테마 목록 조회 API 호출 후 렌더링
           response 명세에 맞춰 createSlot 함수 호출 시 값 설정
@@ -85,14 +86,17 @@ function fetchAvailableTimes(date, themeId) {
   TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
         요청 포맷에 맞게 설정
   */
-  fetch('/', { // 예약 가능 시간 조회 API endpoint
+  fetch(`${RESERVATION_API_ENDPOINT}/${themeId}?date=${date}`, { // 예약 가능 시간 조회 API endpoint
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   }).then(response => {
     if (response.status === 200) return response.json();
-    throw new Error('Read failed');
+    response.text().then(text => {
+      alert('ERROR! ' + text);
+      throw new Error('Read failed');
+    });
   }).then(renderAvailableTimes)
       .catch(error => console.error("Error fetching available times:", error));
 }
@@ -113,9 +117,9 @@ function renderAvailableTimes(times) {
     TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
           response 명세에 맞춰 createSlot 함수 호출 시 값 설정
     */
-    const startAt = '';
-    const timeId = '';
-    const alreadyBooked = false;
+    const startAt = time.startAt;
+    const timeId = time.timeId;
+    const alreadyBooked = time.alreadyBooked;
     const div = createSlot('time', startAt, timeId, alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
     timeSlots.appendChild(div);
   });
@@ -149,7 +153,6 @@ function onReservationButtonClick() {
   const selectedDate = document.getElementById("datepicker").value;
   const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
   const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
-  const name = document.getElementById('user-name').value;
   if (selectedDate && selectedThemeId && selectedTimeId) {
     /*
     TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
@@ -159,8 +162,7 @@ function onReservationButtonClick() {
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
-      timeId: selectedTimeId,
-      name: name
+      timeId: selectedTimeId
     };
     fetch('/reservations', {
       method: 'POST',
@@ -170,19 +172,19 @@ function onReservationButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation failed');
+          if (!response.ok) throw new Error('예약에 실패했습니다.');
           return response.json();
         })
         .then(data => {
-          alert("Reservation successful!");
+          alert("예약에 성공했습니다!");
           location.reload();
         })
         .catch(error => {
-          alert("An error occurred while making the reservation.");
+          alert("예약에 실패했습니다");
           console.error(error);
         });
   } else {
-    alert("Please select a date, theme, and time before making a reservation.");
+    alert("예약을 만들기 전 시간과 날짜를 선택해주세요.");
   }
 }
 
@@ -194,14 +196,14 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch(`${RESERVATION_API_ENDPOINT}/waiting`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -209,19 +211,19 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) throw new Error('예약 대기 신청에 실패했습니다.');
           return response.json();
         })
         .then(data => {
-          alert('Reservation waiting successful!');
+          alert('예약 대기에 성공했습니다!');
           window.location.href = "/";
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
+          alert("예약 대기 신청에 실패했습니다.");
           console.error(error);
         });
   } else {
-    alert("Please select a date, theme, and time before making a reservation waiting.");
+    alert("예약 대기를 신청하기 전 날짜와 시간을 정해주세요.");
   }
 }
 
@@ -229,6 +231,6 @@ function requestRead(endpoint) {
   return fetch(endpoint)
       .then(response => {
         if (response.status === 200) return response.json();
-        throw new Error('Read failed');
+        throw new Error('요청을 읽는것에 실패했습니다.');
       });
 }

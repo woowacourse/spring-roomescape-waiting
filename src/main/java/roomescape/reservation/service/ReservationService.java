@@ -2,19 +2,23 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
+import roomescape.global.exception.model.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.model.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.dto.ReservationWaitingResponse;
+import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.model.ThemeNotFoundException;
@@ -40,14 +44,13 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(ReservationRequest reservationRequest, long memberId) {
-        Time time = timeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(TimeNotFoundException::new);
-        Theme theme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
-        Member member = memberRepository.findMemberById(memberId)
-                .orElseThrow(MemberNotFoundException::new);
+        Reservation saveReservation = makeReservation(reservationRequest, memberId, ReservationStatus.RESERVED);
+        return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
+    }
 
-        Reservation saveReservation = Reservation.of(reservationRequest.date(), time, theme, member);
+    public ReservationResponse addWaitingReservation(ReservationRequest reservationRequest, long memberId) {
+        validateDuplicateReservation(reservationRequest, memberId);
+        Reservation saveReservation = makeReservation(reservationRequest, memberId, ReservationStatus.WAITING);
 
         return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
@@ -60,7 +63,8 @@ public class ReservationService {
         Member member = memberRepository.findMemberById(adminReservationRequest.memberId())
                 .orElseThrow(MemberNotFoundException::new);
 
-        Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member);
+        Reservation saveReservation = Reservation.of(adminReservationRequest.date(), time, theme, member,
+                ReservationStatus.RESERVED);
 
         ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
     }
@@ -104,6 +108,28 @@ public class ReservationService {
 
     public void removeReservations(long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    private Reservation makeReservation(ReservationRequest reservationRequest, long memberId,
+                                        ReservationStatus reservationStatus) {
+        Time time = timeRepository.findById(reservationRequest.timeId())
+                .orElseThrow(TimeNotFoundException::new);
+        Theme theme = themeRepository.findById(reservationRequest.themeId())
+                .orElseThrow(ThemeNotFoundException::new);
+        Member member = memberRepository.findMemberById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+
+        return Reservation.of(reservationRequest.date(), time, theme, member, reservationStatus);
+    }
+
+    private void validateDuplicateReservation(ReservationRequest reservationRequest, long memberId) {
+        Optional<Reservation> duplicateReservation = reservationRepository.findByDateAndMemberIdAndThemeIdAndTimeId(
+                Date.saveFrom(reservationRequest.date()), memberId, reservationRequest.themeId(),
+                reservationRequest.timeId());
+
+        if (duplicateReservation.isPresent()) {
+            throw new RoomEscapeException(ReservationExceptionCode.DUPLICATE_RESERVATION);
+        }
     }
 
     private List<Time> extractReservationTimes(List<Reservation> reservations) {
