@@ -7,9 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.common.model.BaseEntity;
 
 @Entity
-public class ReservationTime {
+public class ReservationTime extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

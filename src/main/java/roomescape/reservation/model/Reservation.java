@@ -11,12 +11,13 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.model.BaseEntity;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.theme.model.Theme;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
