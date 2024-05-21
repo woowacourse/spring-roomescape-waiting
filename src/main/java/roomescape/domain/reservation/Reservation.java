@@ -43,6 +43,10 @@ public class Reservation {
         return memberId.equals(member.getId());
     }
 
+    public boolean isPast() {
+        return detail.getSchedule().isBeforeNow();
+    }
+
     public Long getId() {
         return id;
     }
@@ -69,5 +73,9 @@ public class Reservation {
 
     public LocalTime getTime() {
         return detail.getTime();
+    }
+
+    public boolean isReserved() {
+        return status.isReserved();
     }
 }

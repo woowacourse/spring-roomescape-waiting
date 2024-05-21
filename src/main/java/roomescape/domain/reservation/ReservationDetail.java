@@ -48,4 +48,8 @@ public class ReservationDetail {
     public Theme getTheme() {
         return theme;
     }
+
+    public Schedule getSchedule() {
+        return schedule;
+    }
 }

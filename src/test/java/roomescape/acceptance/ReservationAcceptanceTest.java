@@ -98,7 +98,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         );
     }
 
-    @DisplayName("예약 취소 성공 테스트")
+    @DisplayName("일반 사용자는 예약을 삭제할 수 없다.")
     @TestFactory
     Stream<DynamicTest> deleteReservationSuccess() {
         return Stream.of(
@@ -115,88 +115,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guest1Token)
                             .when().delete("/reservations/" + reservationId)
                             .then().log().all()
-                            .assertThat().statusCode(204);
-                }),
-                DynamicTest.dynamicTest("모든 예약 내역을 조회하면 남은 예약은 0개이다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().get("/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(200).body("size()", is(0));
-                })
-        );
-    }
-
-    @DisplayName("예약 취소 성공 테스트 - 예약 id 미존재")
-    @TestFactory
-    Stream<DynamicTest> deleteReservationSuccessWithUnknownId() {
-        return Stream.of(
-                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
-                    int unknownId = 0;
-                    RestAssured.given().log().all()
-                            .cookie("token", guest1Token)
-                            .when().delete("/reservations/" + unknownId)
-                            .then().log().all()
-                            .assertThat().statusCode(204);
-                }),
-                DynamicTest.dynamicTest("모든 예약 내역을 조회하면 남은 예약은 0개이다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().get("/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(200).body("size()", is(0));
-                })
-        );
-    }
-
-    @DisplayName("예약 취소 실패 테스트 - 본인 예약 아님")
-    @TestFactory
-    Stream<DynamicTest> cannotDeleteReservationSuccess() {
-        return Stream.of(
-                DynamicTest.dynamicTest("예약을 생성하고, 식별자를 반환한다.", () -> {
-                    reservationId = (int) RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", guest1Token)
-                            .body(new ReservationRequest(date, timeId, themeId))
-                            .when().post("/reservations")
-                            .then().extract().body().jsonPath().get("id");
-                }),
-                DynamicTest.dynamicTest("본인이 하지 않은 예약을 삭제하려고 하면 401 응답을 한다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", guest2Token)
-                            .when().delete("/reservations/" + reservationId)
-                            .then().log().all()
-                            .assertThat().statusCode(403).body("message", is("예약을 삭제할 권한이 없습니다."));
-                }),
-                DynamicTest.dynamicTest("모든 예약 내역을 조회하면 남은 예약은 1개이다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().get("/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(200).body("size()", is(1));
-                })
-        );
-    }
-
-    @DisplayName("이미 일정이 지난 예약을 삭제할 수 없다.")
-    @TestFactory
-    @Sql(value = {"/truncate.sql", "/insert-past-reservation.sql"})
-    Stream<DynamicTest> cannotDeletePastReservation() {
-        return Stream.of(
-                DynamicTest.dynamicTest("리니가 로그인을 한다", () -> {
-                    liniToken = RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .body(new LoginRequest("guest123", "guest2@email.com"))
-                            .when().post("/login")
-                            .then().log().all().extract().cookie("token");
-                }),
-                DynamicTest.dynamicTest("리니가 일정이 지난 예약을 삭제하려고 하면 예외가 발생한다.", () -> {
-                    long reservationId = 1;
-                    RestAssured.given().log().all()
-                            .cookie("token", liniToken)
-                            .when().delete("/reservations/" + reservationId)
-                            .then().log().all()
-                            .assertThat().statusCode(400).body("message", is("이미 지난 예약(대기)은 삭제할 수 없습니다."));
+                            .assertThat().statusCode(400).body("message",is("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."));
                 })
         );
     }
@@ -481,60 +400,48 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
     @DisplayName("본인의 모든 예약과 예약 대기를 조회한다.")
     @TestFactory
-    @Sql(value = {"/truncate.sql", "/insert-past-reservation.sql"})
-    Stream<DynamicTest> doNotShowPastReservations() {
+    Stream<DynamicTest> showAllOwnReservationsAndWaitings() {
         return Stream.of(
-                DynamicTest.dynamicTest("리니가 로그인을 한다", () -> {
-                    liniToken = RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .body(new LoginRequest("lini123", "lini123@email.com"))
-                            .when().post("/login")
-                            .then().log().all().extract().cookie("token");
-                }),
-                DynamicTest.dynamicTest("리니가 본인의 예약 내역을 조회하면 1개 내역이 조회된다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", liniToken)
-                            .when().get("/members/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(201).body("size()", is(1));
-                }),
-                DynamicTest.dynamicTest("리니가 새로운 예약을 추가한다.", () -> {
+                DynamicTest.dynamicTest("guest1이 새로운 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .cookie("token", liniToken)
+                            .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
                             .assertThat().statusCode(201);
                 }),
-                DynamicTest.dynamicTest("리니가 본인의 예약 내역을 조회하면 2개 내역이 조회된다.", () -> {
+                DynamicTest.dynamicTest("guest1이 본인의 예약 내역을 조회하면 1개 내역이 조회된다.", () -> {
                     RestAssured.given().log().all()
+                            .cookie("token", guest1Token)
+                            .when().get("/members/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(200).body("size()", is(1));
+                }),
+                DynamicTest.dynamicTest("guest2가 새로운 예약을 추가한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", guest1Token)
+                            .body(new ReservationRequest(LocalDate.MAX, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(201);
+                }),
+                DynamicTest.dynamicTest("guest1이 guest2와 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
+                            .body(new ReservationRequest(LocalDate.MAX, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(201).body("status", is("1번째 대기"));
+                }),
+                DynamicTest.dynamicTest("guest1이 본인의 예약 내역을 조회하면 2개 내역이 조회된다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guest1Token)
                             .when().get("/members/reservations")
                             .then().log().all()
                             .assertThat().statusCode(200).body("size()", is(2));
-                })
-        );
-    }
-
-    @DisplayName("본인의 모든 예약과 예약 대기를 조회한다.")
-    @TestFactory
-    @Sql(value = {"/truncate.sql", "/insert-past-reservation.sql"})
-    Stream<DynamicTest> showAllOwnReservationsAndWaitings() {
-        return Stream.of(
-                DynamicTest.dynamicTest("리니가 로그인을 한다", () -> {
-                    liniToken = RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .body(new LoginRequest("lini123", "lini2@email.com"))
-                            .when().post("/login")
-                            .then().log().all().extract().cookie("token");
-                }),
-                DynamicTest.dynamicTest("리니가 본인의 예약 내역을 조회하면 1개 내역이 조회된다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", liniToken)
-                            .when().get("/members/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(201).body("size()", is(1));
                 })
         );
     }

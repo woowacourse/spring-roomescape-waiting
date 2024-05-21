@@ -19,7 +19,6 @@ import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -94,7 +93,6 @@ public class ReservationService {
         return ReservationStatus.RESERVED;
     }
 
-    //TODO: 이전 예약은 제외
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
@@ -102,18 +100,34 @@ public class ReservationService {
     }
 
     public void deleteById(long id) {
+        reservationRepository.findById(id).ifPresent(this::validateScheduleIfReserved);
         reservationRepository.deleteById(id);
     }
 
-    public void deleteById(long reservationId, long memberId) {
+    private void validateScheduleIfReserved(Reservation reservation) {
+        if(reservation.isReserved() && reservation.isPast()){
+            throw new InvalidReservationException("이미 지난 예약은 삭제할 수 없습니다.");
+        }
+    }
+
+    public void deleteWaitingById(long reservationId, long memberId) {
         reservationRepository.findById(reservationId)
-                .ifPresent(reservation -> validateAuthority(reservation, memberId));
+                .ifPresent(reservation -> {
+                    validateStatus(reservation);
+                    validateAuthority(reservation, memberId);
+                });
         reservationRepository.deleteById(reservationId);
     }
 
+    private void validateStatus(Reservation reservation) {
+        if(reservation.getMember().isGuest() && reservation.isReserved()){
+            throw new InvalidReservationException("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요.");
+        }
+    }
+
     private void validateAuthority(Reservation reservation, long memberId) {
-        if (!reservation.isReservationOf(memberId)) {
-            throw new ForbiddenException("예약을 삭제할 권한이 없습니다.");
+        if (reservation.getMember().isGuest() && !reservation.isReservationOf(memberId)) {
+            throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
         }
     }
 

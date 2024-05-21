@@ -44,4 +44,8 @@ public class Schedule {
     public ReservationTime getReservationTime() {
         return time;
     }
+
+    public boolean isBeforeNow() {
+        return LocalDateTime.of(date.getValue(),time.getStartAt()).isBefore(LocalDateTime.now());
+    }
 }
