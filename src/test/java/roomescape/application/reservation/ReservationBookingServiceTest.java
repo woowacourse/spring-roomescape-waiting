@@ -19,15 +19,13 @@ import roomescape.application.reservation.fixture.ReservationFixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.role.MemberRole;
-import roomescape.domain.role.Role;
-import roomescape.domain.role.RoleRepository;
 import roomescape.exception.UnAuthorizedException;
 
 @ServiceTest
@@ -45,9 +43,6 @@ class ReservationBookingServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private ReservationBookingService reservationBookingService;
@@ -93,8 +88,7 @@ class ReservationBookingServiceTest {
     void shouldThrowExceptionWhenDeleteOtherMemberReservation() {
         Long reservationId = reservationFixture.saveReservation().getId();
         Member member = MemberFixture.createMember("other");
-        MemberRole role = new MemberRole(member, Role.MEMBER);
-        long memberId = roleRepository.save(role).getMemberId();
+        long memberId = memberRepository.save(member).getId();
         assertThatCode(() -> reservationBookingService.cancelReservation(memberId, reservationId))
                 .isInstanceOf(UnAuthorizedException.class);
     }
@@ -103,9 +97,9 @@ class ReservationBookingServiceTest {
     @DisplayName("관리자가 다른 사람의 예약을 삭제하는 경우, 예약이 삭제된다.")
     void shouldDeleteReservationWhenAdmin() {
         Reservation reservation = reservationFixture.saveReservation();
-        Member admin = new Member("admin", "admin@admin.com", "12341234");
-        roleRepository.save(new MemberRole(admin, Role.ADMIN));
-        reservationBookingService.cancelReservation(admin.getId(), reservation.getId());
+        Member admin = new Member("admin", "admin@admin.com", "12341234", Role.ADMIN);
+        Member savedAdmin = memberRepository.save(admin);
+        reservationBookingService.cancelReservation(savedAdmin.getId(), reservation.getId());
 
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).isEmpty();

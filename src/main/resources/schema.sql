@@ -4,15 +4,8 @@ create table if not exists member
     email    varchar(50) not null,
     name     varchar(20) not null,
     password varchar(64) not null,
+    role varchar(10) not null,
     primary key (id)
-);
-
-create table if not exists role
-(
-    member_id bigint      not null,
-    role      varchar(10) not null,
-    primary key (member_id),
-    foreign key (member_id) references member (id)
 );
 
 create table if not exists theme

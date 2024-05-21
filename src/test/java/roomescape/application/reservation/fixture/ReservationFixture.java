@@ -15,9 +15,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.role.MemberRole;
-import roomescape.domain.role.Role;
-import roomescape.domain.role.RoleRepository;
 
 @TestComponent
 public class ReservationFixture {
@@ -35,16 +32,12 @@ public class ReservationFixture {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
     private Clock clock;
 
     public Reservation saveReservation() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        Member member = MemberFixture.createMember("아루");
-        roleRepository.save(new MemberRole(member, Role.MEMBER));
+        Member member = memberRepository.save(MemberFixture.createMember("아루"));
         Reservation reservation = new Reservation(
                 member,
                 LocalDate.of(2024, 1, 1),

@@ -1,11 +1,11 @@
-insert into member (id, name, email, password)
-values (1, '아루', 'test@test1.com', '12341234'),
-       (2, '이상', 'test@test2.com', '12341234'),
-       (3, '수달', 'test@test3.com', '12341234'),
-       (4, '오리', 'test@test4.com', '12341234'),
-       (5, '제이미', 'test@test5.com', '12341234'),
-       (6, '비밥', 'test@test6.com', '12341234'),
-       (7, '웨지', 'test@test7.com', '12341234')
+insert into member (id, name, email, password, role)
+values (1, '아루', 'test@test1.com', '12341234', 'MEMBER'),
+       (2, '이상', 'test@test2.com', '12341234', 'MEMBER'),
+       (3, '수달', 'test@test3.com', '12341234', 'MEMBER'),
+       (4, '오리', 'test@test4.com', '12341234', 'MEMBER'),
+       (5, '제이미', 'test@test5.com', '12341234', 'MEMBER'),
+       (6, '비밥', 'test@test6.com', '12341234', 'MEMBER'),
+       (7, '웨지', 'test@test7.com', '12341234', 'MEMBER')
 ;
 
 insert into reservation_time (id, start_at)

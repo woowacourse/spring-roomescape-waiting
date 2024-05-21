@@ -1,5 +1,5 @@
-insert into member (id, name, email, password)
-values (1, '아루', 'test@test.com', '12341234')
+insert into member (id, name, email, password, role)
+values (1, '아루', 'test@test.com', '12341234', 'MEMBER')
 ;
 
 insert into reservation_time (id, start_at)

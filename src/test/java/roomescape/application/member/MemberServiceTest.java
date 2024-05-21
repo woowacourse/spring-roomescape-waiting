@@ -3,7 +3,6 @@ package roomescape.application.member;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +14,6 @@ import roomescape.application.member.dto.response.TokenResponse;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.role.MemberRole;
-import roomescape.domain.role.Role;
-import roomescape.domain.role.RoleRepository;
 
 @ServiceTest
 class MemberServiceTest {
@@ -27,9 +23,6 @@ class MemberServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private TokenManager tokenManager;
@@ -74,8 +67,7 @@ class MemberServiceTest {
         String mail = "email@mail.com";
         Member member = new Member("name", mail, "12341234");
         MemberLoginRequest request = new MemberLoginRequest(mail, "12341234");
-        roleRepository.save(new MemberRole(member, Role.MEMBER));
-
+        memberRepository.save(member);
         TokenResponse response = memberService.login(request);
         long id = tokenManager.extract(response.token()).memberId();
         assertThat(id).isEqualTo(member.getId());

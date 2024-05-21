@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.application.auth.dto.TokenPayload;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.UnAuthorizedException;
 
 class CredentialContextTest {

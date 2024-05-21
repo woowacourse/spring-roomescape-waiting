@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.application.auth.TokenManager;
 import roomescape.application.auth.dto.TokenPayload;
-import roomescape.domain.role.Role;
+import roomescape.domain.member.Role;
 
 public class AdminRoleInterceptor implements HandlerInterceptor {
     private final TokenManager tokenManager;
