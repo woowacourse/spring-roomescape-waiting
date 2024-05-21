@@ -39,4 +39,11 @@ public class WaitingApiController {
         return ResponseEntity.created(URI.create("/waiting/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteTheme(@PathVariable
+                                            @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
+        reservationDeleteService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
 }
