@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +17,6 @@ import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.BookableTimeResponse;
 import roomescape.domain.reservation.dto.BookableTimesRequest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
-import roomescape.domain.reservation.dto.ReservationFindRequest;
 import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
@@ -35,16 +33,6 @@ public class ReservationController {
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservationList() {
         List<Reservation> reservations = reservationService.findAllReservation();
-        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
-        return ResponseEntity.ok(reservationResponses);
-    }
-
-    @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> getConditionalReservationList(
-            @ModelAttribute ReservationFindRequest reservationFindRequest) {
-        List<Reservation> reservations = reservationService.findFilteredReservationList(
-                reservationFindRequest.themeId(), reservationFindRequest.memberId(), reservationFindRequest.dateFrom(),
-                reservationFindRequest.dateTo());
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }

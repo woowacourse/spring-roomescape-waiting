@@ -1,7 +1,10 @@
 package roomescape.domain.reservation.controller;
 
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +12,7 @@ import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.ReservationFindRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
 
@@ -28,5 +32,15 @@ public class AdminReservationController {
         Reservation reservation = reservationService.addReservation(reservationAddRequest);
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
+    }
+
+    @GetMapping("/reservations/search")
+    public ResponseEntity<List<ReservationResponse>> getConditionalReservationList(
+            @ModelAttribute ReservationFindRequest reservationFindRequest) {
+        List<Reservation> reservations = reservationService.findFilteredReservationList(
+                reservationFindRequest.themeId(), reservationFindRequest.memberId(), reservationFindRequest.dateFrom(),
+                reservationFindRequest.dateTo());
+        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
+        return ResponseEntity.ok(reservationResponses);
     }
 }
