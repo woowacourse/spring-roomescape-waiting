@@ -29,7 +29,7 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
         actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-        actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
+        actionCell.appendChild(createActionButton('거절', 'btn-danger', reject));
     });
 }
 
@@ -41,24 +41,19 @@ function approve(event) {
         method: 'PUT'
     }).then(response => {
         if (response.status === 200) return;
-        throw new Error('Delete failed');
+        throw new Error('Approve failed');
     }).then(() => location.reload());
 }
 
-function deny(event) {
+function reject(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
-
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 거절 API 호출
-     */
-    const endpoint = '' + id;
+    const endpoint = '/admin/waitings/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
-        throw new Error('Delete failed');
+        if (response.status === 204) return;
+        throw new Error('Reject failed');
     }).then(() => location.reload());
 }
 
