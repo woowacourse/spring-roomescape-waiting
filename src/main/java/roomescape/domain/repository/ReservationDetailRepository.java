@@ -17,10 +17,9 @@ public interface ReservationDetailRepository extends Repository<ReservationDetai
                 .orElseThrow(NotFoundReservationException::new);
     }
 
-    default ReservationDetail getByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
-        return findByDateAndThemeIdAndTimeId(date, themeId, timeId)
-                .orElseGet(() -> save(new ReservationDetail(
-                        date, new ReservationTime(timeId), new Theme(themeId))));
+    default ReservationDetail getByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+        return findByDateAndTimeAndTheme(date, time, theme)
+                .orElseGet(() -> save(new ReservationDetail(date, time, theme)));
     }
 
     default List<Long> findTimeIdByDateAndThemeId(LocalDate date, Long themeId) {
@@ -35,7 +34,7 @@ public interface ReservationDetailRepository extends Repository<ReservationDetai
 
     List<TimeIdProjection> findByDateAndThemeId(LocalDate date, Long themeId);
 
-    Optional<ReservationDetail> findByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
+    Optional<ReservationDetail> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

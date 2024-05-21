@@ -11,6 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDetail;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationRepository;
@@ -39,10 +40,12 @@ public class ReservationService {
     @Transactional
     public Reservation saveMemberReservation(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        LocalDate date = request.date();
+        Theme theme = themeRepository.getById(request.themeId());
         rejectPastReservation(request.date(), reservationTime);
         // 프록시 또는 완전한 엔티티
-        ReservationDetail reservationDetail = reservationDetailRepository.getByDateAndThemeIdAndTimeId(
-                request.date(), request.themeId(), request.timeId());
+        ReservationDetail reservationDetail = reservationDetailRepository.getByDateAndTimeAndTheme(
+                date, reservationTime, theme);
         Member member = memberRepository.getById(request.memberId());
         rejectDuplicateReservation(reservationDetail, member);
 
@@ -109,7 +112,7 @@ public class ReservationService {
             throw new CancelReservationException("다른 회원의 예약을 취소할 수 없습니다.");
         }
         if (reservation.isReserved()) {
-            throw new CancelReservationException("예약은 어드민만 취소할 수 있습니다.");
+            throw new CancelReservationException("예약 취소는 어드민만 할 수 있습니다.");
         }
     }
 
