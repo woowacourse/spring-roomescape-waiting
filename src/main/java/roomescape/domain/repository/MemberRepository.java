@@ -23,6 +23,4 @@ public interface MemberRepository extends Repository<Member, Long> {
     boolean existsByEmail(String email);
 
     void delete(Member member);
-
-    void deleteAll();
 }

@@ -17,20 +17,18 @@ public interface ThemeRepository extends Repository<Theme, Long> {
 
     Optional<Theme> findById(Long id);
 
-    List<Theme> findAll();
-
     @Query(value = """
-            SELECT theme.id, theme.name, theme.description, theme.thumbnail
-            FROM reservation_detail
-            LEFT JOIN theme ON theme.id=reservation_detail.theme_id
-            WHERE reservation_detail.date >= ? AND reservation_detail.date <= ?
-            GROUP BY theme.id
-            ORDER BY COUNT(*) DESC
-            LIMIT ?;
+            select theme.id, theme.name, theme.description, theme.thumbnail
+            from reservation_detail
+            left join theme on theme.id=reservation_detail.theme_id
+            where reservation_detail.date >= ? and reservation_detail.date <= ?
+            group by theme.id
+            order by count(*) desc
+            limit ?;
             """, nativeQuery = true)
     List<Theme> findThemesByPeriodWithLimit(String startDate, String endDate, int limit);
 
-    void delete(Theme theme);
+    List<Theme> findAll();
 
-    void deleteAll();
+    void delete(Theme theme);
 }

@@ -18,15 +18,9 @@ public interface ReservationTimeRepository extends Repository<ReservationTime, L
                 .orElseThrow(NotFoundReservationException::new);
     }
 
-    List<ReservationTime> findAll();
-
     Optional<ReservationTime> findById(Long id);
 
-    boolean existsByStartAt(LocalTime startAt);
-
-    void delete(ReservationTime time);
-
-    void deleteAll();
+    List<ReservationTime> findAll();
 
     @Query("""
             select d.time from ReservationDetail d
@@ -42,4 +36,8 @@ public interface ReservationTimeRepository extends Repository<ReservationTime, L
             @Param("date") LocalDate date,
             @Param("themeId") Long themeId
     );
+
+    boolean existsByStartAt(LocalTime startAt);
+
+    void delete(ReservationTime time);
 }
