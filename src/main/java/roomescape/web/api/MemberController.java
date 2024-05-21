@@ -27,7 +27,7 @@ public class MemberController {
     }
 
     @PostMapping("/members")
-    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<Void> signup(@RequestBody @Valid SignupRequest request) {
         long createdId = memberService.signup(request);
         return ResponseEntity.created(URI.create("/members/" + createdId)).build();
     }
@@ -35,7 +35,6 @@ public class MemberController {
     @DeleteMapping("/members/{id}")
     public ResponseEntity<Void> withdrawal(@PathVariable("id") String id) {
         memberService.withdrawal(Long.valueOf(id));
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

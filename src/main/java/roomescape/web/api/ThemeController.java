@@ -21,6 +21,12 @@ import roomescape.service.dto.response.theme.ThemeResponse;
 public class ThemeController {
     private final ThemeService themeService;
 
+    @PostMapping("/themes")
+    public ResponseEntity<ThemeResponse> saveTheme(@RequestBody @Valid ThemeRequest request) {
+        ThemeResponse response = themeService.saveTheme(request);
+        return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
+    }
+
     @GetMapping("/themes")
     public ResponseEntity<List<ThemeResponse>> findAllTheme() {
         List<ThemeResponse> response = themeService.findAllTheme();
@@ -33,14 +39,8 @@ public class ThemeController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("/themes")
-    public ResponseEntity<ThemeResponse> saveTheme(@Valid @RequestBody ThemeRequest request) {
-        ThemeResponse response = themeService.saveTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
-    }
-
-    @DeleteMapping("/themes/{theme_id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable(value = "theme_id") Long id) {
+    @DeleteMapping("/themes/{id}")
+    public ResponseEntity<Void> deleteTheme(@PathVariable(value = "id") Long id) {
         themeService.deleteTheme(id);
         return ResponseEntity.noContent().build();
     }

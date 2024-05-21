@@ -33,10 +33,8 @@ public class ReservationController {
             MemberInfo memberInfo
     ) {
         ReservationRequest reservationRequest = ReservationRequest.builder()
-                .date(request.date())
-                .memberId(memberInfo.id())
-                .timeId(request.timeId())
-                .themeId(request.themeId())
+                .date(request.date()).memberId(memberInfo.id())
+                .timeId(request.timeId()).themeId(request.themeId())
                 .build();
 
         Reservation reservation = reservationService.saveMemberReservation(reservationRequest);
@@ -59,23 +57,19 @@ public class ReservationController {
             @RequestParam("memberId") Long memberId,
             @RequestParam("themeId") Long themeId
     ) {
-        ReservationSearchCond searchCond = new ReservationSearchCond(start, end, memberId, themeId);
-        List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(searchCond);
+        ReservationSearchCond searchQuery = new ReservationSearchCond(start, end, memberId, themeId);
+        List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(searchQuery);
         return ResponseEntity.ok(reservations);
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> findAllByMemberId(MemberInfo memberInfo) {
         List<UserReservationResponse> reservations = reservationService.findAllByMemberId(memberInfo.id());
-
         return ResponseEntity.ok(reservations);
     }
 
-    @DeleteMapping("/reservations/{reservation_id}")
-    public ResponseEntity<Void> deleteReservation(
-            @PathVariable(value = "reservation_id") Long id,
-            MemberInfo memberInfo
-    ) {
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable(value = "id") Long id, MemberInfo memberInfo) {
         reservationService.cancelReservation(id, memberInfo);
         return ResponseEntity.noContent().build();
     }

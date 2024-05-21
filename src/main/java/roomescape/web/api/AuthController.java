@@ -1,11 +1,10 @@
 package roomescape.web.api;
 
-import static org.springframework.http.HttpHeaders.SET_COOKIE;
-
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,31 +25,34 @@ public class AuthController {
     private final JwtProvider jwtProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
-        String jwtToken = memberService.login(request);
-
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request) {
+        String token = memberService.login(request);
         return ResponseEntity.ok()
-                .header(SET_COOKIE, jwtToken)
+                .header(HttpHeaders.SET_COOKIE, token)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        ResponseCookie cookie = createEmptyTokenCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
     }
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponse> checkAuthenticated(
-            @CookieValue(value = TOKEN_COOKIE_KEY_NAME, defaultValue = "") String token) {
+            @CookieValue(value = TOKEN_COOKIE_KEY_NAME, defaultValue = "") String token
+    ) {
         MemberResponse response = new MemberResponse(jwtProvider.extractId(token), jwtProvider.extractName(token));
-
-        return ResponseEntity.ok()
-                .body(response);
+        return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie token = new Cookie(TOKEN_COOKIE_KEY_NAME, null);
-        token.setMaxAge(0);
-        token.setPath("/");
-        response.addCookie(token);
-
-        return ResponseEntity.ok()
+    private ResponseCookie createEmptyTokenCookie() {
+        return ResponseCookie.from(TOKEN_COOKIE_KEY_NAME, "")
+                .path("/")
+                .httpOnly(true)
+                .maxAge(0)
                 .build();
     }
 }

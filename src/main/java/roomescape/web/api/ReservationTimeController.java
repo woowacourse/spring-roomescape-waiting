@@ -23,6 +23,14 @@ import roomescape.service.dto.response.time.ReservationTimeResponse;
 public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
 
+    @PostMapping("/times")
+    public ResponseEntity<ReservationTimeResponse> saveReservationTime(
+            @RequestBody @Valid ReservationTimeRequest request
+    ) {
+        ReservationTimeResponse response = reservationTimeService.saveReservationTime(request);
+        return ResponseEntity.created(URI.create("/times/" + response.id())).body(response);
+    }
+
     @GetMapping("/times")
     public ResponseEntity<List<ReservationTimeResponse>> findAllReservationTime() {
         List<ReservationTimeResponse> response = reservationTimeService.findAllReservationTime();
@@ -37,13 +45,6 @@ public class ReservationTimeController {
         List<AvailableReservationTimeResponse> response = reservationTimeService.findAllAvailableReservationTime(
                 date, themeId);
         return ResponseEntity.ok().body(response);
-    }
-
-    @PostMapping("/times")
-    public ResponseEntity<ReservationTimeResponse> saveReservationTime(
-            @Valid @RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.saveReservationTime(request);
-        return ResponseEntity.created(URI.create("/times/" + response.id())).body(response);
     }
 
     @DeleteMapping("/times/{time_id}")
