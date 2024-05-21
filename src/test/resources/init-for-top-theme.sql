@@ -100,8 +100,8 @@ values ('10:00'),
        ('22:00');
 
 insert into member (name, email, password, role)
-values ('수달', 'sudal@wooteco.com', 'wootecoCrew6!', 'BASIC'),
-       ('이상', 'leesang@wooteco.com', 'wootecoCrew6!', 'BASIC'),
+values ('찰리', 'gomding@wooteco.com', 'wootecoCrew6!', 'BASIC'),
+       ('비토', 'bito@wooteco.com', 'wootecoCrew6!', 'BASIC'),
        ('회원', 'member@wooteco.com', 'wootecoCrew6!', 'BASIC');
 
 insert into reservation (date, member_id, time_id, theme_id)

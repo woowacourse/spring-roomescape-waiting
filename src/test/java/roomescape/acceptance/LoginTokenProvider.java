@@ -2,15 +2,15 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
+import roomescape.dto.TokenRequest;
 
 public class LoginTokenProvider {
     public static String login(String email, String password, int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("email", email, "password", password);
+        TokenRequest tokenRequest = new TokenRequest(email, password);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(tokenRequest)
                 .when().post("/login")
                 .then().log().cookies()
                 .statusCode(expectedHttpCode)

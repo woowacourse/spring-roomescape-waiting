@@ -28,7 +28,8 @@ public class AuthService {
         String email = tokenRequest.email();
         Member member = getMemberByEmail(email);
         if (!member.isSamePassword(tokenRequest.password())) {
-            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "로그인 회원 정보가 일치하지 않습니다.");
+            throw new RoomescapeException(HttpStatus.NOT_FOUND,
+                    String.format("존재하지 않는 회원입니다. 입력한 회원 email:%s", email));
         }
         String payload = String.valueOf(member.getId());
         String accessToken = tokenManager.createToken(payload);

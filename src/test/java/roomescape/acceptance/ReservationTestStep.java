@@ -5,17 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import roomescape.dto.AdminReservationRequest;
+import roomescape.dto.ReservationRequest;
 
 public class ReservationTestStep {
     public static Long postClientReservation(String token, String date, Long timeId, Long themeId, int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("date", date, "timeId", timeId, "themeId", themeId);
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse(date), timeId, themeId);
 
         Response response = RestAssured.given().log().all()
                 .cookies("token", token)
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(expectedHttpCode)
@@ -29,12 +31,12 @@ public class ReservationTestStep {
     }
 
     public static Long postAdminReservation(String token, String date, Long memberId, Long timeId, Long themeId, int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("date", date, "memberId", memberId, "timeId", timeId, "themeId", themeId);
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(memberId, LocalDate.parse(date), timeId, themeId);
 
         Response response = RestAssured.given().log().all()
                 .cookies("token", token)
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(adminReservationRequest)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(expectedHttpCode)

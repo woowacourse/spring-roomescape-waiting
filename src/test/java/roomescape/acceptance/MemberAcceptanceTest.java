@@ -7,12 +7,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.BasicAcceptanceTest;
+import roomescape.dto.MemberSignUpRequest;
 
 class MemberAcceptanceTest extends BasicAcceptanceTest {
     @TestFactory
@@ -36,11 +36,11 @@ class MemberAcceptanceTest extends BasicAcceptanceTest {
     }
 
     private void postMember(String name, String email, String password, int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("name", name, "email", email, "password", password);
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(name, email, password);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(memberSignUpRequest)
                 .when().post("/members")
                 .then().log().all()
                 .statusCode(expectedHttpCode);

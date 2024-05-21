@@ -8,7 +8,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.BasicAcceptanceTest;
-import roomescape.dto.ThemeResponse;
 import roomescape.TestFixtures;
+import roomescape.dto.ThemeRequest;
+import roomescape.dto.ThemeResponse;
 
 class ThemeAcceptanceTest extends BasicAcceptanceTest {
 
@@ -65,11 +65,11 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
     }
 
     private Long postTheme(int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("name", "테마", "description", "설명서", "thumbnail", "썸네일");
+        ThemeRequest themeRequest = new ThemeRequest("테마", "설명서", "썸네일");
 
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(themeRequest)
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(expectedHttpCode)

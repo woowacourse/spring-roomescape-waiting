@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.BasicAcceptanceTest;
 import roomescape.dto.AvailableTimeResponse;
+import roomescape.dto.ReservationTimeRequest;
 
 class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     @TestFactory
@@ -66,11 +67,11 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     }
 
     private Long postReservationTime(String time, int expectedHttpCode) {
-        Map<?, ?> requestBody = Map.of("startAt", time);
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.parse(time));
 
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(requestBody)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(expectedHttpCode)

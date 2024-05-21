@@ -17,9 +17,9 @@ class LoginAcceptanceTest extends BasicAcceptanceTest {
     @DisplayName("회원가입하지 않은 이메일과 비밀번호로 로그인 할 시 예외를 발생시킨다")
     Stream<DynamicTest> moveNotReservationAndAdminPage() {
         return Stream.of(
-                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("gsd", "401", 400)),
-                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("sudal@wooteco.com", "401", 400)),
-                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("email", "wootecoCrew6!", 400))
+                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("gsd@wooteco.com", "401", 404)),
+                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("bito@wooteco.com", "401", 404)),
+                dynamicTest("회원가입 하지 않은 계정으로 로그인을 시도한다", () -> LoginTokenProvider.login("email@wooteco.com", "wootecoCrew6!", 404))
         );
     }
 
