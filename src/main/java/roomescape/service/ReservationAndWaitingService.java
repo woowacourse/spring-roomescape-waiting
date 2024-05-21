@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
@@ -21,7 +20,6 @@ public class ReservationAndWaitingService {
     public void deleteIfNoWaitingOrUpdateReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 삭제 실패: 존재하지 않는 예약입니다. (id: %d)", reservationId)));
-        LoggerFactory.getLogger(ReservationAndWaitingService.class).info("Hello");
         reservationWaitingRepository.findByDateAndTimeIdAndThemeIdOrderById(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
                 .ifPresentOrElse(
                         waiting -> convertWaitingToReservation(waiting, reservation),
