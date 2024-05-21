@@ -12,8 +12,6 @@ public interface ReservationRepository {
 
     List<Reservation> findAll(Specification<Reservation> specification);
 
-    List<Reservation> findAllByMemberId(Long id);
-
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);

@@ -1,6 +1,6 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface ReservationStatusRepository {
@@ -11,7 +11,9 @@ public interface ReservationStatusRepository {
 
     void deleteById(Long id);
 
-    Optional<ReservationStatus> findFirstWaitingBy(Theme theme, LocalDate date, ReservationTime time);
+    Optional<ReservationStatus> findFirstWaiting(Reservation reservation);
 
     long getWaitingCount(Reservation reservation);
+
+    List<ReservationStatus> findActiveReservationStatusesByMemberId(long memberId);
 }

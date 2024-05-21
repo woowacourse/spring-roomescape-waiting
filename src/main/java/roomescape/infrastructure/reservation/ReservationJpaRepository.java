@@ -15,9 +15,6 @@ public interface ReservationJpaRepository extends
         JpaSpecificationExecutor<Reservation> {
 
     @Override
-    List<Reservation> findAllByMemberId(Long id);
-
-    @Override
     boolean existsByTimeId(long timeId);
 
     @Override

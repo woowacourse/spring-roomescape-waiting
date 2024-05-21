@@ -51,4 +51,8 @@ public class ReservationStatus {
     public Reservation getReservation() {
         return reservation;
     }
+
+    public void cancelWaiting() {
+        this.status = BookStatus.WAITING_CANCELLED;
+    }
 }

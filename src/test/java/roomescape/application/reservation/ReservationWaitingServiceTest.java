@@ -52,7 +52,9 @@ class ReservationWaitingServiceTest {
 
         reservationWaitingService.enqueueWaitingList(request);
 
-        Optional<ReservationStatus> firstWaiting = reservationStatusRepository.findFirstWaitingBy(theme, date, time);
+        Optional<ReservationStatus> firstWaiting = reservationStatusRepository.findFirstWaiting(
+                new Reservation(member, date, time, theme, LocalDateTime.of(2022, 1, 1, 12, 0))
+        );
         assertThat(firstWaiting).isPresent()
                 .get()
                 .extracting(ReservationStatus::getReservation)

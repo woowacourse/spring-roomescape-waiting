@@ -2,6 +2,7 @@ package roomescape.infrastructure.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;
@@ -15,10 +16,18 @@ import roomescape.domain.reservation.Theme;
 public interface ReservationStatusJpaRepository extends ReservationStatusRepository,
         ListCrudRepository<ReservationStatus, Long> {
 
+    List<BookStatus> NON_CANCELLED_STATUSES = List.of(
+            BookStatus.WAITING, BookStatus.BOOKED
+    );
+
+
     @Override
-    default Optional<ReservationStatus> findFirstWaitingBy(Theme theme, LocalDate date, ReservationTime time) {
+    default Optional<ReservationStatus> findFirstWaiting(Reservation reservation) {
         return getFirstByReservationThemeAndReservationDateAndReservationTimeAndStatusOrderByReservationCreatedAtAsc(
-                theme, date, time, BookStatus.WAITING
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime(),
+                BookStatus.WAITING
         );
     }
 
@@ -28,17 +37,25 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
 
     @Override
     default long getWaitingCount(Reservation reservation) {
-        return countByReservationThemeAndReservationDateAndReservationTimeAndReservationCreatedAtLessThan(
+        return countByReservationThemeAndReservationDateAndReservationTimeAndStatusInAndReservationCreatedAtLessThan(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime(),
+                NON_CANCELLED_STATUSES,
                 reservation.getCreatedAt()
         );
     }
 
-    long countByReservationThemeAndReservationDateAndReservationTimeAndReservationCreatedAtLessThan(
-            Theme theme, LocalDate date, ReservationTime time, LocalDateTime createdAt
+    long countByReservationThemeAndReservationDateAndReservationTimeAndStatusInAndReservationCreatedAtLessThan(
+            Theme theme, LocalDate date, ReservationTime time, List<BookStatus> statuses, LocalDateTime createdAt
     );
+
+    @Override
+    default List<ReservationStatus> findActiveReservationStatusesByMemberId(long memberId) {
+        return findAllByStatusInAndReservationMemberId(NON_CANCELLED_STATUSES, memberId);
+    }
+
+    List<ReservationStatus> findAllByStatusInAndReservationMemberId(List<BookStatus> statuses, long memberId);
 
     @Override
     default ReservationStatus getById(long id) {

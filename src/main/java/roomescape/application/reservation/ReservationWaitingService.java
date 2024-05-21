@@ -41,11 +41,8 @@ public class ReservationWaitingService {
         if (reservationService.hasNoAccessToReservation(memberId, id)) {
             throw new UnAuthorizedException();
         }
-        Reservation reservation = reservationStatus.getReservation();
-        reservationStatusRepository.deleteById(reservationStatus.getId());
-
-        reservationStatusRepository.findFirstWaitingBy(
-                reservation.getTheme(), reservation.getDate(), reservation.getTime()
-        ).ifPresent(ReservationStatus::book);
+        reservationStatus.cancelWaiting();
+        reservationStatusRepository.findFirstWaiting(reservationStatus.getReservation())
+                .ifPresent(ReservationStatus::book);
     }
 }

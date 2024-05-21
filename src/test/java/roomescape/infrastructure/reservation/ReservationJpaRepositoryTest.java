@@ -77,17 +77,6 @@ class ReservationJpaRepositoryTest {
         assertThat(reservations).hasSize(2);
     }
 
-    @Test
-    @DisplayName("memberId로 해당 멤버의 예약을 조회한다.")
-    void findAllByMemberIdTest() {
-        Member hodol = memberRepository.save(MemberFixture.createMember("호돌"));
-        Member pk = memberRepository.save(MemberFixture.createMember("피케이"));
-        createReservation(hodol, LocalDate.of(2024, 12, 25));
-        createReservation(pk, LocalDate.of(2025, 1, 1));
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(hodol.getId());
-        assertThat(reservations).hasSize(1);
-    }
-
     private Reservation createReservation() {
         Member member = memberRepository.save(MemberFixture.createMember("오리"));
         LocalDate date = LocalDate.of(2024, 12, 25);

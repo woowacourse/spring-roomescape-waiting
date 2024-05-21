@@ -57,7 +57,10 @@ class ReservationStatusJpaRepositoryTest {
             entityManager.persist(new ReservationStatus(reservation, BookStatus.WAITING));
         }
 
-        Optional<ReservationStatus> firstWaiting = reservationStatusRepository.findFirstWaitingBy(theme, date, time);
+        Optional<ReservationStatus> firstWaiting = reservationStatusRepository.findFirstWaiting(
+                new Reservation(member, date, time, theme, LocalDateTime.of(2023, 1, 5, 12, 0))
+        );
+
         assertThat(firstWaiting).isPresent()
                 .get()
                 .extracting(ReservationStatus::getReservation)

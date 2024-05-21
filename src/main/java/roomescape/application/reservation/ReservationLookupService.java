@@ -9,6 +9,7 @@ import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.infrastructure.reservation.ReservationSpec;
 
@@ -46,8 +47,9 @@ public class ReservationLookupService {
     }
 
     public List<ReservationStatusResponse> getReservationStatusesByMemberId(long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return reservations.stream()
+        return reservationStatusRepository.findActiveReservationStatusesByMemberId(memberId)
+                .stream()
+                .map(ReservationStatus::getReservation)
                 .map(reservation -> {
                     long waitingCount = reservationStatusRepository.getWaitingCount(reservation);
                     return ReservationStatusResponse.of(reservation, waitingCount);

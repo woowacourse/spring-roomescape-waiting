@@ -7,7 +7,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
 public record ReservationStatusResponse(
-        Long reservationId,
+        long id,
         String theme,
         LocalDate date,
         LocalTime time,
