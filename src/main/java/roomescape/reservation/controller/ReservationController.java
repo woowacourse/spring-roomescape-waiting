@@ -7,11 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
-import roomescape.reservation.controller.dto.MyReservationResponse;
-import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -21,9 +19,11 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @GetMapping("/reservations")
@@ -53,6 +53,7 @@ public class ReservationController {
 
     @GetMapping("/reservations/mine")
     public List<MyReservationResponse> getMyReservations(@LoginUser AuthInfo authInfo) {
-        return reservationService.findMyReservations(authInfo);
+        List<MyReservationWithStatus> myReservationWithStatuses = reservationService.findMyReservations(authInfo);
+        return waitingReservationService.handleWaitingOrder(myReservationWithStatuses);
     }
 }

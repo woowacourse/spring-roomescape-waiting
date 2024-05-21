@@ -19,10 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.ForbiddenException;
-import roomescape.fixture.MemberFixture;
-import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ReservationTimeFixture;
-import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.*;
@@ -244,12 +241,12 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(member, reservation2));
 
         //when
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(AuthInfo.of(member));
+        List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(member));
 
         //then
         assertAll(
                 () -> assertThat(myReservations).hasSize(2),
-                () -> assertThat(myReservations).extracting(MyReservationResponse::time).containsOnly(time.getStartAt())
+                () -> assertThat(myReservations).extracting(MyReservationWithStatus::time).containsOnly(time.getStartAt())
         );
     }
 

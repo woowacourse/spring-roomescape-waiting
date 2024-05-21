@@ -10,11 +10,7 @@ import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.controller.dto.MemberReservationRequest;
-import roomescape.reservation.controller.dto.MyReservationResponse;
-import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -50,11 +46,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public List<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
+    public List<MyReservationWithStatus> findMyReservations(AuthInfo authInfo) {
         Member member = getMember(authInfo.getId());
         return memberReservationRepository.findAllByMember(member)
                 .stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationWithStatus::from)
                 .toList();
     }
 
