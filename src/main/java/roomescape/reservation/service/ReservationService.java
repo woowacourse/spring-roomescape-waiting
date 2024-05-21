@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.IllegalRequestException;
@@ -101,6 +102,23 @@ public class ReservationService {
     }
 
     public void removeReservation(long id) {
+        Optional<Reservation> deleteTarget = reservationRepository.findByIdWithTimeAndTheme(id);
+        if (deleteTarget.isEmpty()) {
+            return;
+        }
+
+        Reservation removedReservation = deleteTarget.get();
+
+        List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(
+                removedReservation.getDate(),
+                removedReservation.getTimeId(),
+                removedReservation.getThemeId()
+        );
+
+        reservations.stream()
+                .filter(reservation -> reservation.isWaitingRankLowerThan(removedReservation))
+                .forEach(Reservation::increaseWaitingRank);
+
         reservationRepository.deleteById(id);
     }
 }

@@ -43,6 +43,10 @@ public class WaitingStatus {
         return waitingNumber != RESERVED;
     }
 
+    public boolean isLower(WaitingStatus other) {
+        return this.waitingNumber > other.waitingNumber;
+    }
+
     public WaitingStatus rankUp() {
         return new WaitingStatus(waitingNumber - 1);
     }

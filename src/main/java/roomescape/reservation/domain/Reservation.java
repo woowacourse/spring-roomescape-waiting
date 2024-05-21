@@ -86,12 +86,24 @@ public class Reservation {
         return member.getId().equals(memberId);
     }
 
+    public boolean isWaitingRankLowerThan(Reservation other) {
+        return waitingStatus.isLower(other.waitingStatus);
+    }
+
+    public void increaseWaitingRank() {
+        waitingStatus = waitingStatus.rankUp();
+    }
+
     public int getWaitingNumber() {
         return waitingStatus.getWaitingNumber();
     }
 
     public Long getId() {
         return id;
+    }
+
+    public Long getTimeId() {
+        return time.getId();
     }
 
     public Long getThemeId() {
