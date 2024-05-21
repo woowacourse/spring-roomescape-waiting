@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 class EmailTest {
@@ -24,8 +24,8 @@ class EmailTest {
     void createNullOrEmptyException(String email) {
         assertThatCode(() -> new Email(email))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @DisplayName("이메일 형식이 올바르지 않은 경우 예외가 발생한다.")
@@ -34,8 +34,8 @@ class EmailTest {
         String email = "google.com";
         assertThatCode(() -> new Email(email))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @DisplayName("이메일의 길이가 최소 11자 미만이거나 40자를 초과하면 예외가 발생한다.")
@@ -44,7 +44,7 @@ class EmailTest {
     void createInvalidEmailLength(String email) {
         assertThatCode(() -> new Email(email))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

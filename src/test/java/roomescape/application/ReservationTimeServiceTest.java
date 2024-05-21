@@ -5,11 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import roomescape.BasicAcceptanceTest;
-import roomescape.dto.ReservationTimeRequest;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.exception.RoomescapeErrorCode;
+import roomescape.dto.ReservationTimeRequest;
 import roomescape.exception.RoomescapeException;
 
 class ReservationTimeServiceTest extends BasicAcceptanceTest {
@@ -27,8 +27,8 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
 
         assertThatCode(() -> reservationTimeService.save(request))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.DUPLICATED_TIME);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @DisplayName("예약에 사용된 예약 시간을 삭제 요청하면, 예외가 발생한다.")
@@ -38,8 +38,8 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
 
         assertThatCode(() -> reservationTimeService.deleteById(reservationTime.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.ALREADY_RESERVED);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @DisplayName("존재하지 않는 예약 시간을 삭제 요청하면, IllegalArgumentException 예외가 발생한다.")
@@ -47,6 +47,6 @@ class ReservationTimeServiceTest extends BasicAcceptanceTest {
     void shouldThrowsIllegalArgumentExceptionWhenReservationTimeDoesNotExist() {
         assertThatCode(() -> reservationTimeService.deleteById(99L))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(RoomescapeErrorCode.NOT_FOUND_TIME.getMessage());
+                .hasMessage("존재하지 않는 예약 시간입니다.");
     }
 }

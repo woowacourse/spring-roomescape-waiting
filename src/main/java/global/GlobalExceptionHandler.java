@@ -3,20 +3,19 @@ package global;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import roomescape.exception.RoomescapeErrorCode;
 
 public class GlobalExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler
-    public ResponseEntity<?> exceptionHandler(RuntimeException exception) {
+    public ResponseEntity<String> exceptionHandler(RuntimeException exception) {
         logError(exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(RoomescapeErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+                .body("서버 내부에서 에러가 발생했습니다.");
     }
 
     @ExceptionHandler
-    public ResponseEntity<?> exceptionHandler(Exception exception) {
+    public ResponseEntity<String> exceptionHandler(Exception exception) {
         logError(exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(RoomescapeErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+                .body("서버 내부에서 에러가 발생했습니다.");
     }
 }

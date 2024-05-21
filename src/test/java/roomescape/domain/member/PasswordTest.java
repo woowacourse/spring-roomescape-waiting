@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 class PasswordTest {
@@ -15,7 +15,7 @@ class PasswordTest {
     void createInvalidPasswordTest(String password) {
         assertThatCode(() -> new Password(password))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

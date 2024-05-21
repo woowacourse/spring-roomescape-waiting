@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import roomescape.BasicAcceptanceTest;
-import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 class ThemeServiceTest extends BasicAcceptanceTest {
@@ -18,7 +18,7 @@ class ThemeServiceTest extends BasicAcceptanceTest {
     void shouldThrowIllegalArgumentExceptionWhenDeleteWithNonExistId() {
         assertThatCode(() -> themeService.deleteById(100L))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.NOT_FOUND_THEME);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

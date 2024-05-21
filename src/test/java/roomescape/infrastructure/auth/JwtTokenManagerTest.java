@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import roomescape.BasicAcceptanceTest;
-import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 class JwtTokenManagerTest extends BasicAcceptanceTest {
@@ -45,8 +45,8 @@ class JwtTokenManagerTest extends BasicAcceptanceTest {
 
         assertThatCode(() -> jwtTokenManager.getPayload(expiredToken))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.TOKEN_EXPIRED);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @DisplayName("쿠키에서 토큰을 추출한다")
@@ -69,8 +69,8 @@ class JwtTokenManagerTest extends BasicAcceptanceTest {
 
         assertThatCode(() -> jwtTokenManager.extractToken(cookies))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.UNAUTHORIZED);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @DisplayName("쿠키에 토큰이 담겨있지 않은 경우 예외가 발생한다.")
@@ -82,8 +82,8 @@ class JwtTokenManagerTest extends BasicAcceptanceTest {
 
         assertThatCode(() -> jwtTokenManager.extractToken(cookies))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.UNAUTHORIZED);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     private JwtTokenManager createJwtTokenManager(int validityInMilliseconds) {

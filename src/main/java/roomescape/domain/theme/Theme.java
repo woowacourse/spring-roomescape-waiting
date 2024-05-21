@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 @Entity
@@ -35,10 +35,10 @@ public class Theme {
         int descriptionLength = description.length();
         if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
             throw new RoomescapeException(
-                    RoomescapeErrorCode.BAD_REQUEST, String.format("테마 설명은 %s자 이하만 가능합니다.", MAX_DESCRIPTION_LENGTH));
+                    HttpStatus.BAD_REQUEST, String.format("테마 설명은 %s자 이하만 가능합니다.", MAX_DESCRIPTION_LENGTH));
         }
         if (thumbnail == null || thumbnail.isBlank()) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "테마 썸네일은 비어있을 수 없습니다.");
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "테마 썸네일은 비어있을 수 없습니다.");
         }
         this.id = id;
         this.name = name;

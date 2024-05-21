@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 class PlayerNameTest {
@@ -17,8 +17,8 @@ class PlayerNameTest {
     void shouldThrowExceptionWhenNameIsNullOrEmpty(String input) {
         assertThatCode(() -> new PlayerName(input))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @DisplayName("이름이 20자를 초과하면 예외가 발생한다.")
@@ -27,8 +27,8 @@ class PlayerNameTest {
         String input = "-".repeat(21);
         assertThatCode(() -> new PlayerName(input))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode")
-                .isEqualTo(RoomescapeErrorCode.BAD_REQUEST);
+                .extracting("httpStatus")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @DisplayName("이름이 올바르게 생성된다.")

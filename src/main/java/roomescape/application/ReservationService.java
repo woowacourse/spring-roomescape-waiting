@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -14,7 +15,6 @@ import roomescape.dto.MyReservationResponse;
 import roomescape.dto.ReservationCriteriaRequest;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Service
@@ -51,7 +51,7 @@ public class ReservationService {
     @Transactional
     public void deleteById(long id) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(RoomescapeErrorCode.NOT_FOUND_RESERVATION,
+                .orElseThrow(() -> new RoomescapeException(HttpStatus.NOT_FOUND,
                         String.format("존재하지 않는 예약입니다. 요청 예약 id:%d", id)));
         reservationRepository.deleteById(reservation.getId());
         updateReservation(reservation);

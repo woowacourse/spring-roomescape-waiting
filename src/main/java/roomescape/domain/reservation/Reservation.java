@@ -11,9 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
+import org.springframework.http.HttpStatus;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.RoomescapeErrorCode;
 import roomescape.exception.RoomescapeException;
 
 @Entity
@@ -41,7 +41,7 @@ public class Reservation {
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
         if (date == null) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "예약 날짜는 필수입니다.");
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "예약 날짜는 필수입니다.");
         }
         this.id = id;
         this.member = member;

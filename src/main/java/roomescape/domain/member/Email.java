@@ -4,7 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.exception.RoomescapeErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.RoomescapeException;
 
 @Embeddable
@@ -21,14 +21,14 @@ public class Email {
 
     public Email(String email) {
         if (email == null || email.isBlank()) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "이메일은 필수 입력값 입니다.");
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "이메일은 필수 입력값 입니다.");
         }
         if (!EMAIL_REGEX.matcher(email).matches()) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST, "이메일 형식이 올바르지 않습니다.");
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다.");
         }
         int emailLength = email.length();
         if (emailLength < MIN_LENGTH || MAX_LENGTH < emailLength) {
-            throw new RoomescapeException(RoomescapeErrorCode.BAD_REQUEST,
+            throw new RoomescapeException(HttpStatus.BAD_REQUEST,
                     String.format("이메일의 길이는 최소 %d자 이상 %d자 이하만 가능합니다. 현재 이메일 길이:%d", MIN_LENGTH, MAX_LENGTH,
                             emailLength));
         }
