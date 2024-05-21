@@ -19,6 +19,7 @@ import roomescape.exception.member.InvalidMemberRoleException;
 @Component
 public class JwtTokenProvider {
     private static final String ROLE_CLAIM_NAME = "role";
+
     private final String secretKey;
     private final long validityInMilliseconds;
     private final Clock clock;
