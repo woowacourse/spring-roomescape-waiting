@@ -46,14 +46,15 @@ class ReservationServiceTest {
 
     private final Long timeId = 1L;
     private final Long themeId = 1L;
-    private final Long memberId = 1L;
+    private final Long userId = 1L;
+    private final Long adminId = 2L;
 
     @BeforeEach
     void setUpData() {
         jdbcTemplate.update("""
             INSERT INTO member(name, email, password, role)
             VALUES ('러너덕', 'user@a.com', '123a!', 'USER'),
-                   ('트레', 'tre@a.com', '123a!', 'USER');
+                   ('트레', 'tre@a.com', '123a!', 'ADMIN');
                         
             INSERT INTO theme(name, description, thumbnail)
             VALUES ('테마1', 'd1', 'https://test.com/test1.jpg');
@@ -66,7 +67,7 @@ class ReservationServiceTest {
     @DisplayName("성공: 예약을 저장하고, 해당 예약을 id값과 함께 반환한다.")
     @Test
     void save() {
-        Reservation saved = reservationService.reserve(memberId, rawDate, timeId, themeId);
+        Reservation saved = reservationService.reserve(userId, rawDate, timeId, themeId);
         assertThat(saved.getId()).isEqualTo(1L);
     }
 
@@ -84,7 +85,7 @@ class ReservationServiceTest {
     @ValueSource(strings = {"2030-13-01", "2030-12-32"})
     void save_IllegalDate(String invalidRawDate) {
         assertThatThrownBy(
-            () -> reservationService.reserve(memberId, invalidRawDate, timeId, themeId)
+            () -> reservationService.reserve(userId, invalidRawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("잘못된 날짜 형식입니다.");
     }
@@ -93,7 +94,7 @@ class ReservationServiceTest {
     @Test
     void save_TimeIdDoesntExist() {
         assertThatThrownBy(
-            () -> reservationService.reserve(memberId, rawDate, 2L, themeId)
+            () -> reservationService.reserve(userId, rawDate, 2L, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다.");
     }
@@ -101,10 +102,10 @@ class ReservationServiceTest {
     @DisplayName("실패: 중복 예약을 생성하면 예외가 발생한다.")
     @Test
     void save_Duplication() {
-        reservationService.reserve(memberId, rawDate, timeId, themeId);
+        reservationService.reserve(userId, rawDate, timeId, themeId);
 
         assertThatThrownBy(
-            () -> reservationService.reserve(memberId, rawDate, timeId, themeId)
+            () -> reservationService.reserve(userId, rawDate, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("해당 시간에 예약이 이미 존재합니다.");
     }
@@ -115,7 +116,7 @@ class ReservationServiceTest {
         String yesterday = LocalDate.now().minusDays(1).toString();
 
         assertThatThrownBy(
-            () -> reservationService.reserve(memberId, yesterday, timeId, themeId)
+            () -> reservationService.reserve(userId, yesterday, timeId, themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
@@ -129,7 +130,7 @@ class ReservationServiceTest {
         ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(oneMinuteAgo));
 
         assertThatThrownBy(
-            () -> reservationService.reserve(memberId, today, savedTime.getId(), themeId)
+            () -> reservationService.reserve(userId, today, savedTime.getId(), themeId)
         ).isInstanceOf(RoomescapeException.class)
             .hasMessage("과거 예약을 추가할 수 없습니다.");
     }
@@ -137,51 +138,160 @@ class ReservationServiceTest {
     @DisplayName("성공: 예약 대기")
     @Test
     void standby() {
-        Reservation reservation = reservationService.standby(memberId, rawDate, timeId, themeId);
+        Reservation reservation = reservationService.standby(userId, rawDate, timeId, themeId);
         assertThat(reservation.getId()).isEqualTo(1L);
     }
 
     @DisplayName("실패: 본인의 예약에 대기를 걸 수 없다.")
     @Test
     void standby_CantReserveAndThenStandbyForTheSameReservation() {
-        reservationService.reserve(memberId, rawDate, timeId, themeId);
+        reservationService.reserve(userId, rawDate, timeId, themeId);
 
-        assertThatThrownBy(() -> reservationService.standby(memberId, rawDate, timeId, themeId))
+        assertThatThrownBy(() -> reservationService.standby(userId, rawDate, timeId, themeId))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
     }
 
-    @DisplayName("성공: 본인의 예약대기를 삭제할 수 있다.")
+    @DisplayName("성공: 예약 삭제")
+    @Test
+    void deleteReserved() {
+        reservationService.reserve(userId, "2060-01-01", timeId, themeId);
+        reservationService.reserve(userId, "2060-01-02", timeId, themeId);
+        reservationService.reserve(userId, "2060-01-03", timeId, themeId);
+
+        reservationService.deleteById(2L);
+
+        assertThat(reservationService.findAll())
+            .extracting(Reservation::getId)
+            .containsExactly(1L, 3L);
+    }
+
+    @DisplayName("실패: 예약 삭제 메서드로 예약대기를 삭제할 수 없다.")
+    @Test
+    void deleteReserved_Cannot_Delete_Standby() {
+        reservationService.reserve(adminId, rawDate, timeId, themeId);
+        reservationService.standby(userId, rawDate, timeId, themeId);
+
+        assertThatThrownBy(() -> reservationService.deleteById(2L))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("예약이 존재하지 않아 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("성공: 일반유저는 본인의 예약대기를 삭제할 수 있다.")
     @Test
     void deleteStandby() {
-        reservationService.reserve(memberId, rawDate, timeId, themeId);
-        reservationService.standby(2L, rawDate, timeId, themeId);
-        Member member = memberRepository.findById(2L).get();
+        reservationService.reserve(adminId, rawDate, timeId, themeId);
+        reservationService.standby(userId, rawDate, timeId, themeId);
+        Member user = memberRepository.findById(userId).get();
 
-        assertThatCode(() -> reservationService.deleteStandby(2L, member))
+        assertThatCode(() -> reservationService.deleteStandby(2L, user))
             .doesNotThrowAnyException();
     }
 
-    @DisplayName("실패: 타인의 예약대기를 삭제할 수 없다.")
+    @DisplayName("성공: 관리자는 다른 회원의 예약대기를 삭제할 수 있다.")
+    @Test
+    void deleteStandby_ByAdmin() {
+        reservationService.reserve(adminId, rawDate, timeId, themeId);
+        reservationService.standby(userId, rawDate, timeId, themeId);
+        Member admin = memberRepository.findById(adminId).get();
+
+        assertThatCode(() -> reservationService.deleteStandby(2L, admin))
+            .doesNotThrowAnyException();
+    }
+
+    @DisplayName("실패: 일반유저는 타인의 예약대기를 삭제할 수 없다.")
     @Test
     void deleteStandby_ReservedByOther() {
-        reservationService.reserve(memberId, rawDate, timeId, themeId);
-        reservationService.standby(2L, rawDate, timeId, themeId);
-        Member member = memberRepository.findById(1L).get();
+        reservationService.reserve(userId, rawDate, timeId, themeId);
+        reservationService.standby(adminId, rawDate, timeId, themeId);
+        Member user = memberRepository.findById(userId).get();
 
-        assertThatThrownBy(() -> reservationService.deleteStandby(2L, member))
+        assertThatThrownBy(() -> reservationService.deleteStandby(2L, user))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("자신의 예약만 삭제할 수 있습니다.");
     }
 
-    @DisplayName("성공: 주어진 멤버가 예약한 예약 목록 조회")
+    @DisplayName("실패: 예약대기 삭제 메서드로 예약을 삭제할 수 없다.")
     @Test
-    void findMyReservations() {
-        reservationService.reserve(memberId, "2060-01-01", timeId, themeId);
-        reservationService.reserve(memberId, "2060-01-02", timeId, themeId);
-        reservationService.reserve(memberId, "2060-01-03", timeId, themeId);
+    void deleteStandby_Cannot_Delete_Reserved() {
+        reservationService.reserve(userId, rawDate, timeId, themeId);
+        reservationService.standby(adminId, rawDate, timeId, themeId);
+        Member user = memberRepository.findById(userId).get();
 
-        List<FindReservationWithRankDto> reservations = reservationService.findAllWithRankByMemberId(1L);
-        assertThat(reservations).hasSize(3);
+        assertThatThrownBy(() -> reservationService.deleteStandby(1L, user))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("예약대기가 존재하지 않아 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("성공: 모든 멤버의 전체 예약을 조회할 수 있으며, 예약대기는 조회되지 않는다.")
+    @Test
+    void findAll() {
+        reservationService.reserve(userId, "2060-01-01", timeId, themeId);
+        reservationService.standby(adminId, "2060-01-01", timeId, themeId);
+        reservationService.reserve(adminId, "2060-01-02", timeId, themeId);
+        reservationService.standby(userId, "2060-01-02", timeId, themeId);
+
+        assertThat(reservationService.findAll())
+            .extracting(Reservation::getId)
+            .containsExactly(1L, 3L);
+    }
+
+    @DisplayName("성공: 모든 멤버의 전체 예약대기를 조회할 수 있으며, 예약은 조회되지 않는다.")
+    @Test
+    void findAllStandby() {
+        reservationService.reserve(userId, "2060-01-01", timeId, themeId);
+        reservationService.standby(adminId, "2060-01-01", timeId, themeId);
+        reservationService.reserve(adminId, "2060-01-02", timeId, themeId);
+        reservationService.standby(userId, "2060-01-02", timeId, themeId);
+
+        assertThat(reservationService.findAllStandby())
+            .extracting(Reservation::getId)
+            .containsExactly(2L, 4L);
+    }
+
+    @DisplayName("성공: 검색 필터를 통해 예약을 검색할 수 있다.")
+    @Test
+    void findAllBy() {
+        reservationService.reserve(userId, "2060-01-01", timeId, themeId);
+        reservationService.reserve(adminId, "2060-01-02", timeId, themeId);
+        reservationService.reserve(userId, "2060-01-03", timeId, themeId);
+        reservationService.reserve(adminId, "2060-01-04", timeId, themeId);
+        reservationService.reserve(userId, "2060-01-05", timeId, themeId);
+        reservationService.reserve(adminId, "2060-01-06", timeId, themeId);
+
+        List<Reservation> reservations = reservationService.findAllBy(
+            themeId, adminId, LocalDate.parse("2060-01-02"), LocalDate.parse("2060-01-05"));
+
+        assertThat(reservations)
+            .extracting(Reservation::getId)
+            .containsExactly(2L, 4L);
+    }
+
+    @DisplayName("실패: 검색 필터에서 시작 날짜가 끝 날짜보다 뒤일 수 없다.")
+    @Test
+    void findAllBy_FromFuture_ToPast() {
+        assertThatThrownBy(
+            () -> reservationService.findAllBy(
+                themeId, adminId, LocalDate.parse("2060-01-02"), LocalDate.parse("2060-01-01"))
+        ).isInstanceOf(RoomescapeException.class)
+            .hasMessage("날짜 조회 범위가 올바르지 않습니다.");
+    }
+
+    @DisplayName("성공: 특정 멤버가 예약한 예약 및 예약대기 목록 조회")
+    @Test
+    void findAllWithRankByMemberId() {
+        reservationService.reserve(adminId, "2060-02-01", timeId, themeId);
+        reservationService.standby(userId, "2060-02-01", timeId, themeId);
+        reservationService.reserve(userId, "2060-02-02", timeId, themeId);
+        reservationService.reserve(userId, "2060-02-03", timeId, themeId);
+
+        List<FindReservationWithRankDto> reservations = reservationService.findAllWithRankByMemberId(userId);
+        assertThat(reservations)
+            .extracting(FindReservationWithRankDto::reservation)
+            .extracting(Reservation::getId)
+            .containsExactly(2L, 3L, 4L);
+        assertThat(reservations)
+            .extracting(FindReservationWithRankDto::rank)
+            .containsExactly(1L, 0L, 0L);
     }
 }
