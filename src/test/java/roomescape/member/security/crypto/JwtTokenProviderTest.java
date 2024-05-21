@@ -16,6 +16,7 @@ import roomescape.member.domain.Member;
 
 @SpringBootTest
 class JwtTokenProviderTest {
+
     private static final String USER_NAME = "도비";
     private static final String USER_TEST_COM = "user@test.com";
     private static final String USER_PASSWORD = "pass";
@@ -55,5 +56,6 @@ class JwtTokenProviderTest {
         boolean isValid = jwtTokenProvider.validateToken(expiredToken);
         assertFalse(isValid);
     }
+
 }
 

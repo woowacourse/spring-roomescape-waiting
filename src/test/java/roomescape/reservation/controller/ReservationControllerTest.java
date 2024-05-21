@@ -33,6 +33,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.crypto.JwtTokenProvider;
 import roomescape.member.security.service.MemberAuthService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationBuilder;
 import roomescape.reservation.dto.ReservationRequest;
@@ -65,14 +66,14 @@ class ReservationControllerTest {
     private ReservationService reservationService;
     @MockBean
     private MemberAuthService memberAuthService;
+    @MockBean
+    private MemberService memberService;
 
     private JwtTokenProvider jwtTokenProvider;
 
-    private String token;
-
     @BeforeEach
     void setUp() {
-        Member member = new Member("valid", "testUser@email.com", "pass");
+        // Member member = new Member("valid", "testUser@email.com", "pass");
         jwtTokenProvider = new JwtTokenProvider(secretKey, validityInMilliseconds);
     }
 
@@ -84,10 +85,10 @@ class ReservationControllerTest {
         Mockito.when(memberAuthService.isLoginMember(any()))
                 .thenReturn(true);
         Mockito.when(memberAuthService.extractPayload(any()))
-                .thenReturn(new MemberProfileInfo(1L, "어드민", "admin@email.com"));
+                .thenReturn(new MemberProfileInfo(1L, "valid", "testUser@email.com"));
 
         Member member = new Member(1L, "valid", "testUser@email.com", "pass");
-        token = jwtTokenProvider.createToken(member, new Date());
+        String token = jwtTokenProvider.createToken(member, new Date());
         String content = new ObjectMapper().registerModule(new JavaTimeModule())
                 .writeValueAsString(new ReservationRequest(1L, 1L, 1L, reservation.getDate()));
 
@@ -130,5 +131,4 @@ class ReservationControllerTest {
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
-
 }

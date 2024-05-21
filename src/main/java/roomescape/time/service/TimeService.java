@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 
 import roomescape.exception.ConflictException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.time.repository.TimeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.dto.TimeRequest;
 import roomescape.time.dto.TimeResponse;
+import roomescape.time.repository.TimeRepository;
 
 @Service
 public class TimeService {
