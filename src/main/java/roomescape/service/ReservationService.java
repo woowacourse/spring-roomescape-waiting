@@ -4,10 +4,8 @@ import static roomescape.domain.reservation.ReservationStatus.CANCELED;
 import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
-import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,6 +28,7 @@ import roomescape.repository.dto.ReservationWaitingResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
+import roomescape.service.helper.QueryGenerator;
 
 @Service
 @Transactional
@@ -52,7 +51,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> searchConfirmedReservations(ReservationSearchParams request) {
-        Specification<Reservation> specification = getSearchSpecification(request);
+        Specification<Reservation> specification = QueryGenerator.getSearchSpecification(request);
         return reservationRepository.findAll(specification)
                 .stream()
                 .map(ReservationResponse::new)
@@ -75,10 +74,8 @@ public class ReservationService {
         Member member = memberRepository.findByEmail(createInfo.getEmail()).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.fetchById(createInfo.getThemeId());
         ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
-
         validatePreviousDate(date, time);
         validateDuplicatedReservation(member, theme, date, time);
-
         Reservation reservation = reservationRepository.save(generateReservation(theme, date, time, member));
         return new ReservationResponse(reservation);
     }
@@ -123,31 +120,5 @@ public class ReservationService {
             return new Reservation(member, theme, date, time, WAITING);
         }
         return new Reservation(member, theme, date, time, CONFIRMED);
-    }
-
-    private Specification<Reservation> getSearchSpecification(ReservationSearchParams request) {
-        return ((root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            root.fetch("member");
-            root.fetch("theme");
-            root.fetch("time");
-
-            if (request.getEmail() != null && !request.getEmail().isBlank()) {
-                predicates.add(builder.equal(root.get("member").get("email"), request.getEmail()));
-            }
-            if (request.getThemeId() != null) {
-                predicates.add(builder.equal(root.get("theme").get("id"), request.getThemeId()));
-            }
-            if (request.getDateFrom() != null) {
-                predicates.add(builder.greaterThanOrEqualTo(root.get("date"), request.getDateFrom()));
-            }
-            if (request.getDateTo() != null) {
-                predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getDateTo()));
-            }
-            if (request.getStatus() != null) {
-                predicates.add(builder.equal(root.get("status"), request.getStatus()));
-            }
-            return builder.and(predicates.toArray(new Predicate[0]));
-        });
     }
 }
