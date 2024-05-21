@@ -34,6 +34,6 @@ VALUES ('잠실 캠퍼스 탈출',
         'https://images.velog.io/images/jhy979/post/2e3aad39-3beb-47f9-849b-71b5cb426dc2/%EC%9A%B0%ED%85%8C%EC%BD%94.png');
 
 INSERT INTO reservation (member_id, date, time_id, theme_id, waiting_number)
-VALUES (1, TIMESTAMPADD(DAY,1, NOW()), 1, 1, 0),
-       (2, TIMESTAMPADD(DAY,1, NOW()), 2, 1, 0),
-       (3, TIMESTAMPADD(DAY,1, NOW()), 1, 2, 0);
+VALUES (1, TIMESTAMPADD(DAY,1, NOW()), 1, 1, 1),
+       (2, TIMESTAMPADD(DAY,1, NOW()), 2, 1, 1),
+       (3, TIMESTAMPADD(DAY,1, NOW()), 1, 2, 1);
