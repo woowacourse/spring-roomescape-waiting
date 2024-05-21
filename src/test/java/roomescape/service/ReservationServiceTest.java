@@ -141,6 +141,46 @@ class ReservationServiceTest {
         });
     }
 
+    @DisplayName("이미 예약대기를 걸어 놓은 사용자가 또 다시 예약을 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_user_add_duplicated_pending_reservation() {
+        Member member = new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222");
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(11, 0));
+        Theme theme = new Theme(1L, "name", "description", "thumbnail");
+        LocalDate reservationDate = now().plusDays(2);
+        Reservation reservation = new Reservation(reservationDate, PENDING, reservationTime, theme, member);
+        memberRepository.save(member);
+        reservationTimeRepository.save(reservationTime);
+        themeRepository.save(theme);
+        reservationRepository.save(reservation);
+
+        ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationService.addPendingReservation(request, member))
+                .isInstanceOf(DuplicatedException.class)
+                .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+    }
+
+    @DisplayName("이미 예약을 걸어 놓은 사용자가 또 다시 예약을 하면 예외가 발생한다.")
+    @Test
+    void should_throw_exception_when_user_add_duplicated_reservation() {
+        Member member = new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222");
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(11, 0));
+        Theme theme = new Theme(1L, "name", "description", "thumbnail");
+        LocalDate reservationDate = now().plusDays(2);
+        Reservation reservation = new Reservation(reservationDate, ACCEPT, reservationTime, theme, member);
+        memberRepository.save(member);
+        reservationTimeRepository.save(reservationTime);
+        themeRepository.save(theme);
+        reservationRepository.save(reservation);
+
+        ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationService.addPendingReservation(request, member))
+                .isInstanceOf(DuplicatedException.class)
+                .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
+    }
+
 
     @DisplayName("관리자가 예약 시간을 추가한다")
     @Test

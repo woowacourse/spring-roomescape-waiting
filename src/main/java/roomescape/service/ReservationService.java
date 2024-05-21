@@ -50,8 +50,7 @@ public class ReservationService {
 
     public List<Reservation> filterReservation(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         Theme theme = findThemeByThemeId(themeId);
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+        Member member = findMemberById(memberId);
         return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
     }
 
@@ -64,6 +63,7 @@ public class ReservationService {
     }
 
     public Reservation addPendingReservation(ReservationRequest request, Member member) {
+        validateDuplicatedPendingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
         Reservation reservation = new Reservation(request.date(), PENDING, reservationTime, theme, member);
@@ -80,18 +80,6 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private ReservationTime findReservationTime(LocalDate date, long timeId) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
-        validateReservationDateTimeBeforeNow(date, reservationTime.getStartAt());
-        return reservationTime;
-    }
-
-    private Theme findThemeByThemeId(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
-    }
-
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
@@ -103,11 +91,26 @@ public class ReservationService {
     private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("테마가 존재하지 않습니다."));
+        Theme theme = findThemeByThemeId(themeId);
         long countReservation = reservationRepository.countByDateAndTimeAndTheme(date, reservationTime, theme);
         if (countReservation > 0) {
             throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
+        }
+    }
+
+    public List<MemberReservation> findMemberReservations(Member member) {
+        return reservationRepository.findMemberReservation(member.getId());
+    }
+
+    private void validateDuplicatedPendingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
+        Theme theme = findThemeByThemeId(themeId);
+        Member member = findMemberById(memberId);
+        long countReservation = reservationRepository
+                .countByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member);
+        if (countReservation > 0) {
+            throw new DuplicatedException("이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
         }
     }
 
@@ -123,7 +126,20 @@ public class ReservationService {
         }
     }
 
-    public List<MemberReservation> findMemberReservations(Member member) {
-        return reservationRepository.findMemberReservation(member.getId());
+    private ReservationTime findReservationTime(LocalDate date, long timeId) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(timeId)));
+        validateReservationDateTimeBeforeNow(date, reservationTime.getStartAt());
+        return reservationTime;
+    }
+
+    private Theme findThemeByThemeId(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 테마가 존재하지 않습니다.".formatted(themeId)));
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
     }
 }
