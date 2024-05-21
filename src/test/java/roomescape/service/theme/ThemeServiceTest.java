@@ -79,7 +79,7 @@ class ThemeServiceTest {
     @Test
     void findAll() {
         //given
-        createTheme("레벨2 탈출");
+        createTheme();
 
         //when
         List<ThemeResponse> responses = themeService.findAll();
@@ -92,7 +92,7 @@ class ThemeServiceTest {
     @Test
     void deleteById() {
         //given
-        Theme theme = createTheme("레벨2 탈출");
+        Theme theme = createTheme();
 
         //when
         themeService.deleteById(theme.getId());
@@ -105,7 +105,7 @@ class ThemeServiceTest {
     @Test
     void cannotDeleteByReservation() {
         //given
-        Theme theme = createTheme("레벨2 탈출");
+        Theme theme = createTheme();
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
         ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
@@ -122,35 +122,18 @@ class ThemeServiceTest {
 
     @DisplayName("인기 테마를 조회한다.")
     @Test
+    @Sql({"/truncate.sql", "/insert-popular-theme.sql"})
     void findPopularThemes() {
-        //given
-        Theme theme1 = createTheme("레벨1 탈출");
-        Theme theme2 = createTheme("레벨2 탈출");
-        Theme theme3 = createTheme("레벨3 탈출");
-
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-        Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.GUEST));
-        Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
-        Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);
-        Schedule schedule3 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(8)), reservationTime);
-        ReservationDetail reservationDetail1 = reservationDetailRepository.save(new ReservationDetail(schedule1, theme1));
-        ReservationDetail reservationDetail2 = reservationDetailRepository.save(new ReservationDetail(schedule2, theme2));
-        ReservationDetail reservationDetail3 = reservationDetailRepository.save(new ReservationDetail(schedule3, theme3));
-
-
-        reservationRepository.save(new Reservation(member, reservationDetail1, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(member, reservationDetail2, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(member, reservationDetail3, ReservationStatus.RESERVED));
-
         //when
-        List<ThemeResponse> result = themeService.findPopularThemes();
+        List<ThemeResponse> themes = themeService.findPopularThemes();
 
         //then
-        assertThat(result).hasSize(2);
+        List<Long> result = themes.stream().map(ThemeResponse::id).toList();
+        assertThat(result).containsExactly(5L, 2L, 3L, 4L);
     }
 
-    private Theme createTheme(String name) {
-        Theme theme = new Theme(name, "우테코 레벨2를 탈출하는 내용입니다.",
+    private Theme createTheme() {
+        Theme theme = new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return themeRepository.save(theme);
     }
