@@ -32,7 +32,7 @@ class ReservationTimeRepositoryTest {
                 List.of(savedTime1.getId(), savedTime2.getId()));
 
         //then
-        assertThat(timeByIdNotIn).extracting(ReservationTime::getId).containsExactly(savedTime3.getId());
+        assertThat(timeByIdNotIn).extracting(ReservationTime::getId).containsOnly(savedTime3.getId());
     }
 
     @Test

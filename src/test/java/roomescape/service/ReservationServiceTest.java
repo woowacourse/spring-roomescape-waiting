@@ -129,13 +129,13 @@ class ReservationServiceTest {
     void 특정_테마와_날짜로_필터링_후_예약_조회() {
         //given
         Long filteringThemeId = 1L;
-        LocalDate dateFrom = LocalDate.of(2024, 5, 2);
-        LocalDate dateTo = LocalDate.of(2024, 5, 3);
+        LocalDate startDate = LocalDate.of(2024, 5, 2);
+        LocalDate endDate = LocalDate.of(2024, 5, 3);
 
         ReservationFilter reservationFilter = new ReservationFilter();
         reservationFilter.setThemeId(filteringThemeId);
-        reservationFilter.setDateFrom(dateFrom);
-        reservationFilter.setDateTo(dateTo);
+        reservationFilter.setStartDate(startDate);
+        reservationFilter.setEndDate(endDate);
 
         //when
         List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(reservationFilter);
@@ -144,8 +144,8 @@ class ReservationServiceTest {
         boolean isAllMatch = reservationResponses.stream()
                 .allMatch(response ->
                         response.theme().id() == filteringThemeId &&
-                        (response.date().isEqual(dateFrom) || response.date().isAfter(dateFrom)) &&
-                        (response.date().isEqual(dateTo) || response.date().isBefore(dateTo))
+                        (response.date().isEqual(startDate) || response.date().isAfter(startDate)) &&
+                        (response.date().isEqual(endDate) || response.date().isBefore(endDate))
                 );
         assertThat(isAllMatch).isTrue();
     }
