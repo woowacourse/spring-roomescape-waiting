@@ -72,8 +72,14 @@ public class ReservationService {
     }
 
     private void validateAlreadyBookedByMember(Long memberId, LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId)) {
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(
+            memberId, date, timeId, themeId, RESERVED)) {
             throw new RoomescapeException("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
+        }
+
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(
+            memberId, date, timeId, themeId, STANDBY)) {
+            throw new RoomescapeException("이미 대기중인 예약입니다.");
         }
     }
 

@@ -140,6 +140,17 @@ class ReservationServiceTest {
             .hasMessage("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
     }
 
+    @DisplayName("실패: 하나의 예약에 두 개 이상 대기를 걸 수 없다.")
+    @Test
+    void standby_CantStandbyMoreThanOnce() {
+        reservationService.reserve(adminId, rawDate, timeId, themeId);
+        reservationService.standby(userId, rawDate, timeId, themeId);
+
+        assertThatThrownBy(() -> reservationService.standby(userId, rawDate, timeId, themeId))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessage("이미 대기중인 예약입니다.");
+    }
+
     @DisplayName("성공: 예약 삭제")
     @Test
     void deleteReserved() {
