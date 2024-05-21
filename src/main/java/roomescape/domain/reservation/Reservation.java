@@ -109,6 +109,10 @@ public class Reservation {
         return status;
     }
 
+    public boolean isNotReservedBy(Member member) {
+        return this.member != member;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -10,11 +10,11 @@ import java.time.LocalDate;
 
 public class TestFixture {
 
-    public static final String ADMIN_NAME = "냥인";
-    public static final String ADMIN_EMAIL = "nyangin@email.com";
+    public static final String ADMIN_NAME = "테니";
+    public static final String ADMIN_EMAIL = "tenny@email.com";
     public static final String ADMIN_PASSWORD = "1234";
-    public static final String MEMBER_MIA_NAME = "미아";
-    public static final String MEMBER_MIA_EMAIL = "mia@email.com";
+    public static final String MEMBER_MIA_NAME = "냥인";
+    public static final String MEMBER_MIA_EMAIL = "nyangin@email.com";
     public static final String MEMBER_BROWN_NAME = "브라운";
     public static final String MEMBER_BROWN_EMAIL = "brown@email.com";
     public static final String MEMBER_PASSWORD = "1234";
