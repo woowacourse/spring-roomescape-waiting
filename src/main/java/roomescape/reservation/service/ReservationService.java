@@ -135,7 +135,7 @@ public class ReservationService {
 
     private Reservation getReservation(LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.findByDateAndTimeAndTheme(date, time, theme)
-                .orElse(reservationRepository.save(new Reservation(date, time, theme)));
+                .orElseGet(() -> reservationRepository.save(new Reservation(date, time, theme)));
     }
 
     private MemberReservation getMemberReservation(long memberReservationId) {

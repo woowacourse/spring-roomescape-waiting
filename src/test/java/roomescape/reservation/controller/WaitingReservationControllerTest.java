@@ -7,13 +7,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.service.TokenProvider;
+import roomescape.fixture.MemberReservationFixture;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.controller.dto.ReservationRequest;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.util.ControllerTest;
 
@@ -28,7 +31,7 @@ class WaitingReservationControllerTest extends ControllerTest {
     TokenProvider tokenProvider;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    MemberReservationRepository memberReservationRepository;
 
     String token;
 
@@ -41,9 +44,8 @@ class WaitingReservationControllerTest extends ControllerTest {
     @DisplayName("예약이 존재하는 경우에도 사용자가 다르면 예약이 된다")
     void waiting() {
         //given
-        ReservationTime reservationTime = ReservationTimeFixture.get2PM();
-        Theme theme2 = ThemeFixture.getTheme2();
-        Reservation alreadBookedReservation = ReservationFixture.getNextMonthReservation(reservationTime, theme2);
+        MemberReservation bookedMemberReservation = MemberReservationFixture.getMemberReservation1();
+        Reservation alreadBookedReservation = bookedMemberReservation.getReservation();
         ReservationRequest reservationRequest = new ReservationRequest(
                 alreadBookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
                 alreadBookedReservation.getTime().getId(),
@@ -64,13 +66,12 @@ class WaitingReservationControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        ReservationTime reservationTime = ReservationTimeFixture.get2PM();
-        Theme theme2 = ThemeFixture.getTheme2();
-        Reservation alreadBookedReservation = ReservationFixture.getNextMonthReservation(reservationTime, theme2);
+        MemberReservation bookedMemberReservation = MemberReservationFixture.getMemberReservation1();
+        Reservation bookedReservation = bookedMemberReservation.getReservation();
         ReservationRequest reservationRequest = new ReservationRequest(
-                alreadBookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
-                alreadBookedReservation.getTime().getId(),
-                alreadBookedReservation.getTheme().getId()
+                bookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
+                bookedReservation.getTime().getId(),
+                bookedReservation.getTheme().getId()
         );
 
         //when & then
@@ -82,7 +83,7 @@ class WaitingReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        List<Reservation> all = reservationRepository.findAll();
+        List<MemberReservation> all = memberReservationRepository.findAll();
         Long addedId = all.get(all.size() - 1).getId();
         RestAssured.given().log().all()
                 .cookie("token", token)
