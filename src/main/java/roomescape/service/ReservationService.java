@@ -42,9 +42,10 @@ public class ReservationService {
         ReservationDate date = new ReservationDate(request.date());
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
-        Reservation reservation = new Reservation(member, date, time, theme, ReservationStatus.RESERVED);
-        validatePastReservation(reservation);
         validateDuplication(date, request.timeId(), request.themeId());
+        Reservation reservation = new Reservation(member, date, time, theme,
+                ReservationStatus.getFirstReservationStatus());
+        validatePastReservation(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 

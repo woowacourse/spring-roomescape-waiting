@@ -17,14 +17,14 @@ class ReservationTest {
     @Test
     void create() {
         assertThatCode(
-            () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
-                ReservationStatus.RESERVED))
-            .doesNotThrowAnyException();
+                () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
+                        ReservationStatus.getFirstReservationStatus()))
+                .doesNotThrowAnyException();
 
         assertThatCode(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
-                ReservationStatus.RESERVED))
-            .doesNotThrowAnyException();
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
+                        ReservationStatus.getFirstReservationStatus()))
+                .doesNotThrowAnyException();
 
     }
 
@@ -32,35 +32,37 @@ class ReservationTest {
     @Test
     void create_WithNullDate() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME, ReservationStatus.RESERVED))
-            .isInstanceOf(IllegalArgumentException.class);
+                () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME,
+                        ReservationStatus.getFirstReservationStatus()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("시간을 null로 생성하면 예외가 발생한다.")
     @Test
     void create_WithNullTime() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME, ReservationStatus.RESERVED))
-            .isInstanceOf(IllegalArgumentException.class);
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME,
+                        ReservationStatus.getFirstReservationStatus()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("테마를 null로 생성하면 예외가 발생한다.")
     @Test
     void create_WithNullTheme() {
         assertThatThrownBy(
-            () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null,
-                ReservationStatus.RESERVED))
-            .isInstanceOf(IllegalArgumentException.class);
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null,
+                        ReservationStatus.getFirstReservationStatus()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("과거의 예약인지를 판단한다.")
     @Test
     void isPast() {
         Reservation reservation = new Reservation(
-            VALID_MEMBER,
-            new ReservationDate("1900-01-01"),
-            VALID_RESERVATION_TIME,
-            VALID_THEME, ReservationStatus.RESERVED);
+                VALID_MEMBER,
+                new ReservationDate("1900-01-01"),
+                VALID_RESERVATION_TIME,
+                VALID_THEME, ReservationStatus.getFirstReservationStatus());
 
         assertThat(reservation.isPast()).isTrue();
     }

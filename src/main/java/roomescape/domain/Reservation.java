@@ -2,21 +2,13 @@ package roomescape.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
-})
 public class Reservation {
 
     @Id
@@ -30,32 +22,30 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
-
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private ReservationStatus status;
+    @Embedded
+    private ReservationStatus reservationStatus;
 
     protected Reservation() {
     }
 
     public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
-        this(null, member, date, time, theme, status);
+                       ReservationStatus reservationStatus) {
+        this(null, member, date, time, theme, reservationStatus);
     }
 
     public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+                       ReservationStatus reservationStatus) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        validateStatus(status);
+        validateStatus(reservationStatus);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+        this.reservationStatus = reservationStatus;
     }
 
     private void validateMember(Member member) {
@@ -82,14 +72,18 @@ public class Reservation {
         }
     }
 
-    private void validateStatus(ReservationStatus status) {
-        if (status == null) {
+    private void validateStatus(ReservationStatus reservationStatus) {
+        if (reservationStatus == null) {
             throw new IllegalArgumentException("예약 상태는 비어있을 수 없습니다.");
         }
     }
 
     public boolean isPast() {
         return date.isBeforeNow() || date.isToday() && time.isBeforeNow();
+    }
+
+    public void decreasePriority() {
+        reservationStatus = reservationStatus.updateDecreasedPriorityStatus();
     }
 
     public Long getId() {
@@ -113,6 +107,6 @@ public class Reservation {
     }
 
     public ReservationStatus getStatus() {
-        return status;
+        return reservationStatus;
     }
 }

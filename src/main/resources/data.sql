@@ -14,9 +14,9 @@ INSERT INTO reservation_time(start_at)
 VALUES ('10:00'),
        ('22:00');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id, status)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 2, 1, 'RESERVED'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 1, 'RESERVED'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 1, 2, 'RESERVED'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 2, 2, 'RESERVED'),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status, priority)
+VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 2, 1, 'RESERVED', 0),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 1, 'RESERVED', 0),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 1, 2, 'RESERVED', 0),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 2, 2, 'RESERVED', 0),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2, 'WAITING', 2);
