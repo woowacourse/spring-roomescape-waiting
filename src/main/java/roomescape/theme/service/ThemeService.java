@@ -1,6 +1,7 @@
 package roomescape.theme.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
@@ -31,6 +32,7 @@ public class ThemeService {
         this.memberReservationRepository = memberReservationRepository;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ThemeResponse createTheme(ThemeCreateRequest request) {
         Theme theme = request.toTheme();
         validateDuplicated(theme);
@@ -43,12 +45,14 @@ public class ThemeService {
                 .ifPresent(theme::validateDuplicatedName);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> readThemes() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> readPopularThemes() {
         LocalDate end = LocalDate.now().minusDays(1L);
         LocalDate start = end.minusDays(Theme.POPULAR_THEME_PERIOD);
@@ -69,12 +73,14 @@ public class ThemeService {
                 ));
     }
 
+    @Transactional(readOnly = true)
     public ThemeResponse readTheme(Long id) {
         Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("존재하지 않는 테마입니다."));
         return ThemeResponse.from(theme);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTheme(Long id) {
         validateReservationExists(id);
         themeRepository.deleteById(id);

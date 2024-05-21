@@ -1,6 +1,7 @@
 package roomescape.time.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
@@ -27,6 +28,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ReservationTimeResponse createTime(ReservationTimeCreateRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
 
@@ -43,12 +45,14 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> readReservationTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> readReservationTimes(LocalDate date, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         Set<Long> alreadyBookedTimes = reservations.stream()
@@ -65,12 +69,14 @@ public class ReservationTimeService {
         return ReservationTimeResponse.of(time, alreadyBooked);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTimeResponse readReservationTime(Long id) {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 시간입니다."));
         return ReservationTimeResponse.from(reservationTime);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTime(Long id) {
         validateReservationExists(id);
         reservationTimeRepository.deleteById(id);

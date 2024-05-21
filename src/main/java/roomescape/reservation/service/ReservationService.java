@@ -69,11 +69,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public MemberReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
         ReservationCreateRequest createRequest = ReservationCreateRequest.of(request, loginMember);
         return createReservation(createRequest);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public MemberReservationResponse createReservation(ReservationCreateRequest request) {
         Member member = findMemberById(request.memberId());
         Reservation reservation = findReservationOrSave(request);
@@ -110,12 +112,14 @@ public class ReservationService {
                 .ifPresent(memberReservation::validateDuplicated);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> readReservations() {
         return memberReservationRepository.findByStatus(ReservationStatus.CONFIRMATION).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> readMemberReservations(LoginMember loginMember) {
         List<MemberReservation> confirmationReservation = memberReservationRepository
                 .findByMemberIdAndStatus(loginMember.id(), ReservationStatus.CONFIRMATION);
@@ -130,6 +134,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeId(start, end, themeId);
 
@@ -138,22 +143,25 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public MemberReservationResponse readReservation(Long id) {
         MemberReservation memberReservation = findMemberReservationById(id);
         return MemberReservationResponse.from(memberReservation);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteReservation(Long id) {
         memberReservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> readWaitingReservations() {
         return memberReservationRepository.findByStatus(ReservationStatus.WAITING).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void confirmWaitingReservation(Long id) {
         MemberReservation memberReservation = findMemberReservationById(id);
         memberReservation.validateWaitingReservation();
