@@ -2,52 +2,52 @@ package roomescape.service;
 
 import org.springframework.stereotype.Component;
 import roomescape.domain.reservation.ReservationInfo;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.user.Member;
-import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotExistException;
 import roomescape.exception.PastTimeReservationException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationInfoRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.input.ReservationInput;
+import roomescape.service.dto.input.ReservationInfoInput;
 import roomescape.util.DateTimeFormatter;
 
-import static roomescape.exception.ExceptionDomainType.*;
+import java.time.LocalDate;
+
+import static roomescape.exception.ExceptionDomainType.RESERVATION_TIME;
+import static roomescape.exception.ExceptionDomainType.THEME;
 
 @Component
-public class ReservationCreateValidator {
-    private final ReservationRepository reservationRepository;
+public class ReservationInfoCreateValidator {
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationInfoRepository reservationInfoRepository;
     private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
     private final DateTimeFormatter nowDateTimeFormatter;
 
-
-    public ReservationCreateValidator(final ReservationRepository reservationRepository, final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository, final MemberRepository memberDao, final DateTimeFormatter nowDateTimeFormatter) {
-        this.reservationRepository = reservationRepository;
+    public ReservationInfoCreateValidator(final ReservationTimeRepository reservationTimeRepository, final ReservationInfoRepository reservationInfoRepository, final ThemeRepository themeRepository, final DateTimeFormatter nowDateTimeFormatter) {
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationInfoRepository = reservationInfoRepository;
         this.themeRepository = themeRepository;
-        this.memberRepository = memberDao;
         this.nowDateTimeFormatter = nowDateTimeFormatter;
     }
 
-    public ReservationInfo validateReservationInput(final ReservationInput input) {
+    public ReservationInfo validateReservationInput(final ReservationInfoInput input) {
+        return reservationInfoRepository.findByDateValueAndTimeIdAndThemeId(
+                        LocalDate.parse(input.date()),
+                        input.timeId(),
+                        input.themeId())
+                .orElseGet(() -> createReservationInfo(input));
+    }
+    
+    private ReservationInfo createReservationInfo(final ReservationInfoInput input) {
         final ReservationTime reservationTime = validateExistReservationTime(input.timeId());
         final Theme theme = validateExistTheme(input.themeId());
-        final Member member = validateExistMember(input.memberId());
+        final ReservationInfo reservationInfo = ReservationInfo.from(input.date(), reservationTime, theme);
 
-        final ReservationInfo reservationInfo = input.toReservation(reservationTime, theme, member);
-        if (reservationRepository.existsByDateAndTimeId(ReservationDate.from(input.date()), input.timeId())) {
-            throw new AlreadyExistsException(RESERVATION, reservationInfo.getLocalDateTimeFormat());
-        }
         if (reservationInfo.isBefore(nowDateTimeFormatter.getDate(), nowDateTimeFormatter.getTime())) {
             throw new PastTimeReservationException(reservationInfo.getLocalDateTimeFormat());
         }
-        return reservationInfo;
+        return reservationInfoRepository.save(reservationInfo);
     }
 
     private ReservationTime validateExistReservationTime(final long timeId) {
@@ -58,10 +58,5 @@ public class ReservationCreateValidator {
     private Theme validateExistTheme(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotExistException(THEME, themeId));
-    }
-
-    private Member validateExistMember(final long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotExistException(MEMBER, memberId));
     }
 }

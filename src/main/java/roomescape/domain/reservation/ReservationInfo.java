@@ -1,7 +1,6 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import roomescape.domain.user.Member;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,27 +19,26 @@ public class ReservationInfo {
 
     @Embedded
     private ReservationDate date;
+
     @ManyToOne
     @JoinColumn(name = "time_id")
     private ReservationTime time;
+
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
-    @ManyToOne
-    private Member member;
 
     protected ReservationInfo() {
     }
 
-    public ReservationInfo(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member) {
+    public ReservationInfo(final ReservationDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.member = member;
     }
 
-    public static ReservationInfo from(final String date, final ReservationTime time, final Theme theme, final Member member) {
-        return new ReservationInfo(ReservationDate.from(date), time, theme, member);
+    public static ReservationInfo from(final String date, final ReservationTime time, final Theme theme) {
+        return new ReservationInfo(ReservationDate.from(date), time, theme);
     }
 
     public Long getId() {
@@ -59,9 +57,6 @@ public class ReservationInfo {
         return theme;
     }
 
-    public Member getMember() {
-        return member;
-    }
 
     public String getLocalDateTimeFormat() {
         return parseLocalDateTime().toString();
@@ -99,7 +94,6 @@ public class ReservationInfo {
                 ", value=" + date +
                 ", time=" + time +
                 ", theme=" + theme +
-                ", member=" + member +
                 '}';
     }
 }

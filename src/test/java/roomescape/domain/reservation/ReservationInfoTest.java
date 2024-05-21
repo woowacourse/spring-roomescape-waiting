@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
 
 import java.time.LocalDate;
@@ -15,19 +14,18 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-class ReservationTest {
+class ReservationInfoTest {
 
     @Test
-    @DisplayName("id, reservationDate, reservationTime,Theme,Member 을 통해 도메인을 생성한다.")
+    @DisplayName("id, reservationDate, reservationTime,Theme 을 통해 도메인을 생성한다.")
     void create_with_id_name_reservationDate_reservationTime() {
         assertThatCode(() ->
                 new ReservationInfo(
                         ReservationDate.from("2024-04-03"),
                         ReservationTime.from("10:00"),
-                        ThemeFixture.getDomain(),
-                        MemberFixture.getDomain()
-                ))
-                .doesNotThrowAnyException();
+                        ThemeFixture.getDomain()
+                )
+        ).doesNotThrowAnyException();
     }
 
     @Test
@@ -37,17 +35,17 @@ class ReservationTest {
                 ReservationInfo.from(
                         "2024-04-03",
                         ReservationTime.from("10:00"),
-                        ThemeFixture.getDomain(),
-                        MemberFixture.getDomain()))
+                        ThemeFixture.getDomain()
+                ))
                 .doesNotThrowAnyException();
     }
 
     private static Stream<Arguments> maskingDateAndTime() {
         return Stream.of(
                 Arguments.arguments(ReservationInfo.from("2024-04-01", ReservationTime.from("10:00"),
-                        ThemeFixture.getDomain(), MemberFixture.getDomain())),
+                        ThemeFixture.getDomain())),
                 Arguments.arguments(ReservationInfo.from("2024-04-02", ReservationTime.from("09:59"),
-                        ThemeFixture.getDomain(), MemberFixture.getDomain()))
+                        ThemeFixture.getDomain()))
         );
     }
 
