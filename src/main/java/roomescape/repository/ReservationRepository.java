@@ -1,66 +1,39 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import org.springframework.stereotype.Repository;
-import roomescape.domain.Duration;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
-import roomescape.domain.Themes;
 
-@Repository
-public class ReservationRepository {
-    private final ReservationDao reservationDao;
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    public ReservationRepository(ReservationDao reservationDao) {
-        this.reservationDao = reservationDao;
-    }
+    List<Reservation> findByThemeAndDate(Theme theme, LocalDate date);
 
-    public Reservation save(Reservation reservation) {
-        return reservationDao.save(reservation);
-    }
+    List<Reservation> findAllByMemberId(long userId);
 
-    public Reservations findAll() {
-        return new Reservations(reservationDao.findAll());
-    }
+    List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
 
-    public Reservations findAllByMemberId(long memberId) {
-        return new Reservations(reservationDao.findAllByMemberId(memberId));
-    }
+    List<Reservation> findByThemeIdAndDateBetween(Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    public Reservations findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
-                                                               LocalDate dateTo) {
-        if (themeId != null && memberId != null) {
-            return new Reservations(
-                    reservationDao.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
-        }
-        if (themeId != null) {
-            return new Reservations(reservationDao.findByThemeIdAndDateBetween(themeId, dateFrom, dateTo));
-        }
-        if (memberId != null) {
-            return new Reservations(reservationDao.findByMemberIdAndDateBetween(memberId, dateFrom, dateTo));
-        }
-        return new Reservations(reservationDao.findByDateBetween(dateFrom, dateTo));
-    }
+    List<Reservation> findByMemberIdAndDateBetween(Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    public Reservations findByThemeAndDate(Theme theme, LocalDate date) {
-        return new Reservations(reservationDao.findByThemeAndDate(theme, date));
-    }
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                             LocalDate dateTo);
 
-    public Themes findAndOrderByPopularity(Duration duration, int count) {
-        return new Themes(
-                reservationDao.findAndOrderByPopularity(duration.getStartDate(), duration.getEndDate(), count));
-    }
+    @Query("""
+            SELECT r.theme, COUNT(r) AS themeCount
+            FROM Reservation r
+            WHERE r.date BETWEEN :startDate AND :endDate
+            GROUP BY r.theme
+            ORDER BY themeCount DESC
+            LIMIT :limit""")
+    List<Theme> findAndOrderByPopularity(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+                                         @Param("limit") int limit);
 
-    public boolean existsByTimeId(long timeId) {
-        return reservationDao.existsByTimeId(timeId);
-    }
+    boolean existsByTimeId(long timeId);
 
-    public boolean existsByThemeId(long themeId) {
-        return reservationDao.existsByThemeId(themeId);
-    }
-
-    public void deleteById(long id) {
-        reservationDao.deleteById(id);
-    }
+    boolean existsByThemeId(long themeId);
 }

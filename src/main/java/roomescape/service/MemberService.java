@@ -7,16 +7,14 @@ import roomescape.repository.MemberRepository;
 
 @Service
 public class MemberService {
-
     private final MemberRepository memberRepository;
 
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
-
     public List<MemberResponse> findAll() {
-        return memberRepository.findAll().getMembers().stream()
+        return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }

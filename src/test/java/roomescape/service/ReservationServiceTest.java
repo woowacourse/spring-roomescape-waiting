@@ -75,7 +75,7 @@ class ReservationServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(reservationRepository.findAll().getReservations())
+                () -> assertThat(reservationRepository.findAll())
                         .hasSize(1),
                 () -> assertThat(saved.id()).isEqualTo(1L)
         );
@@ -173,7 +173,7 @@ class ReservationServiceTest {
             reservationService.delete(1L);
 
             //then
-            assertThat(reservationRepository.findAll().getReservations()).isEmpty();
+            assertThat(reservationRepository.findAll()).isEmpty();
         }
 
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")

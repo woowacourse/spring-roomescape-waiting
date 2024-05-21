@@ -146,14 +146,13 @@ class ThemeServiceTest {
         void notDuplicatedThemeNameSaveTest() {
             themeService.save(new ThemeRequest("otherName", "description", "thumbnail"));
 
-            assertThat(themeRepository.findAll().getThemes())
+            assertThat(themeRepository.findAll())
                     .hasSize(2);
         }
 
         @DisplayName("테마에 예약이 없다면 테마를 삭제할 수 있다.")
         @Test
         void removeSuccessTest() {
-
             themeService.delete(1L);
             assertThat(themeRepository.findById(1L)).isEmpty();
         }

@@ -19,7 +19,6 @@ import roomescape.repository.MemberRepository;
 
 @Service
 public class LoginService {
-
     private final MemberRepository memberRepository;
     private final JwtGenerator jwtGenerator;
 

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.LoginMemberRequest;
@@ -34,7 +33,8 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
                               MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -54,8 +54,8 @@ public class ReservationService {
         Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
                 requestedTheme);
 
-        Reservations reservations = reservationRepository.findAll();
-        if (reservations.hasSameReservation(beforeSaveReservation)) {
+        List<Reservation> reservations = reservationRepository.findAll();
+        if (hasSameReservation(reservations, beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
         if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
@@ -76,8 +76,8 @@ public class ReservationService {
         Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
                 requestedMember);
 
-        Reservations reservations = reservationRepository.findAll();
-        if (reservations.hasSameReservation(beforeSaveReservation)) {
+        List<Reservation> reservations = reservationRepository.findAll();
+        if (hasSameReservation(reservations, beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
         if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
@@ -87,21 +87,36 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
     }
 
+    private boolean hasSameReservation(List<Reservation> reservations, Reservation beforeSaveReservation) {
+        return reservations.stream()
+                .anyMatch(reservation -> reservation.isSameReservation(beforeSaveReservation));
+    }
 
     public List<ReservationResponse> findAll() {
-        Reservations reservations = reservationRepository.findAll();
-        return reservations.getReservations().stream()
+        return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
                                                        LocalDate dateTo) {
-        Reservations reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId,
-                dateFrom, dateTo);
-        return reservations.getReservations().stream()
+        return findReservationsBy(themeId, memberId, dateFrom, dateTo).stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+
+    private List<Reservation> findReservationsBy(Long themeId, Long memberId, LocalDate dateFrom,
+                                                 LocalDate dateTo) {
+        if (themeId != null && memberId != null) {
+            return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
+        }
+        if (themeId != null) {
+            return reservationRepository.findByThemeIdAndDateBetween(themeId, dateFrom, dateTo);
+        }
+        if (memberId != null) {
+            return reservationRepository.findByMemberIdAndDateBetween(memberId, dateFrom, dateTo);
+        }
+        return reservationRepository.findByDateBetween(dateFrom, dateTo);
     }
 
     public void delete(long reservationId) {
@@ -109,7 +124,7 @@ public class ReservationService {
     }
 
     public List<ReservationDetailResponse> findAllByMemberId(long userId) {
-        return reservationRepository.findAllByMemberId(userId).getReservations().stream()
+        return reservationRepository.findAllByMemberId(userId).stream()
                 .map(ReservationDetailResponse::from)
                 .toList();
     }

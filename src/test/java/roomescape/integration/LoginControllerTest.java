@@ -30,6 +30,8 @@ class LoginControllerTest {
     int port;
     private Member defaultUser = Fixture.defaultMember;
     @Autowired
+    private MemberRepository MemberRepository;
+    @Autowired
     private MemberRepository memberRepository;
 
     @BeforeEach

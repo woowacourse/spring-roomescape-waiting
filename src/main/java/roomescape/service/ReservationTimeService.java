@@ -7,8 +7,8 @@ import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
@@ -42,7 +42,7 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepository.findAll().getReservationTimes().stream()
+        return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
@@ -50,9 +50,9 @@ public class ReservationTimeService {
     public List<AvailableTimeResponse> findByThemeAndDate(LocalDate date, long themeId) {
         Theme requestedTheme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Reservations findReservations = reservationRepository.findByThemeAndDate(requestedTheme, date);
+        List<Reservation> findReservations = reservationRepository.findByThemeAndDate(requestedTheme, date);
 
-        return reservationTimeRepository.findAll().getReservationTimes().stream()
+        return reservationTimeRepository.findAll().stream()
                 .map(reservationTime -> AvailableTimeResponse.of(reservationTime, findReservations))
                 .toList();
     }
