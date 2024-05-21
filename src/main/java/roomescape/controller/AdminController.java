@@ -31,12 +31,12 @@ public class AdminController {
     }
 
     @GetMapping("/waitings")
-    public ResponseEntity<List<WaitingResponse>> get() {
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
         return ResponseEntity.ok(waitingService.findAllWaitings());
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> post(
+    public ResponseEntity<ReservationResponse> postReservation(
             @RequestBody @Valid ReservationRequest reservationRequest) {
         ReservationResponse reservationResponse = reservationService.createReservation(reservationRequest,
                 reservationRequest.memberId());
@@ -50,7 +50,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/waitings/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
