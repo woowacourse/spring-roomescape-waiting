@@ -1,16 +1,20 @@
 package roomescape.service.reservation;
 
+import static org.springframework.data.jpa.domain.Specification.where;
+import static roomescape.domain.reservation.ReservationSpecification.hasEndDate;
+import static roomescape.domain.reservation.ReservationSpecification.hasMemberId;
+import static roomescape.domain.reservation.ReservationSpecification.hasStartDate;
+import static roomescape.domain.reservation.ReservationSpecification.hasThemeId;
+
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSpecification;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
@@ -48,9 +52,12 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationListResponse findAllReservation(
             Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        Specification<Reservation> specification = ReservationSpecification.applyFiltersForSearch(
-                memberId, themeId, dateFrom, dateTo);
-        List<Reservation> reservations = reservationRepository.findAll(specification);
+        List<Reservation> reservations = reservationRepository.findAll(
+                where(hasMemberId(memberId))
+                        .and(hasThemeId(themeId))
+                        .and(hasStartDate(dateFrom))
+                        .and(hasEndDate(dateTo))
+        );
         return new ReservationListResponse(reservations.stream()
                 .map(ReservationResponse::new)
                 .toList());
