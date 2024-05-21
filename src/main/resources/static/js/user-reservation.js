@@ -172,7 +172,10 @@ function onReservationButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('예약에 실패했습니다.');
+          if (!response.ok) response.text().then(text => {
+            alert('ERROR! ' + text);
+            throw new Error('Read failed');
+          });
           return response.json();
         })
         .then(data => {
@@ -180,7 +183,6 @@ function onReservationButtonClick() {
           location.reload();
         })
         .catch(error => {
-          alert("예약에 실패했습니다");
           console.error(error);
         });
   } else {
@@ -211,15 +213,18 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('예약 대기 신청에 실패했습니다.');
+          if (!response.ok) response.text().then(text => {
+            alert('ERROR! ' + text);
+            throw new Error('Read failed');
+          });
           return response.json();
+
         })
         .then(data => {
           alert('예약 대기에 성공했습니다!');
           window.location.href = "/";
         })
         .catch(error => {
-          alert("예약 대기 신청에 실패했습니다.");
           console.error(error);
         });
   } else {
@@ -230,7 +235,10 @@ function onWaitButtonClick() {
 function requestRead(endpoint) {
   return fetch(endpoint)
       .then(response => {
-        if (response.status === 200) return response.json();
-        throw new Error('요청을 읽는것에 실패했습니다.');
+        if (response.status !== 200) response.text().then(text => {
+          alert('ERROR! ' + text);
+          throw new Error('Read failed');
+        });
+        return response.json();
       });
 }
