@@ -2,15 +2,17 @@ package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.time.LocalTime;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
 import roomescape.time.domain.Time;
 
 @DataJpaTest
@@ -45,21 +47,15 @@ class TimeRepositoryTest {
         assertThat(times).hasSize(3);
     }
 
-//    @Test
-//    @DisplayName("시간 데이터들의 연관관계가 없다면 잘 지우는지 확인")
-//    void deleteTime() {
-//        timeRepository.deleteById(3L);
-//
-//        Assertions.assertThat(timeRepository.findAllByOrderByStartAtAsc()
-//                                      .size())
-//                .isEqualTo(2);
-//    }
-//
-//    @Test
-//    @DisplayName("시간 데이터들의 연관관계가 있다면 에러가 나는지 확인")
-//    void canNotDeleteTime() {
-//        Assertions.assertThatThrownBy(() -> timeRepository.deleteById(1L))
-//                .isInstanceOf(DataAccessException.class);
-//    }
+    @Test
+    @DisplayName("시간 데이터들의 연관관계가 없다면 잘 지우는지 확인")
+    void deleteTime() {
+        entityManager.merge(new Time(LocalTime.of(10, 0)));
 
+        timeRepository.deleteById(1L);
+
+        assertThat(timeRepository.findAllByOrderByStartAtAsc()
+                .size())
+                .isEqualTo(1);
+    }
 }
