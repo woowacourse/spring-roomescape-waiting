@@ -2,25 +2,21 @@ package roomescape.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 
-@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class TokenProviderTest {
 
-    @Autowired
-    private TokenProvider tokenProvider;
-    private Member member;
+    private static TokenProvider tokenProvider;
+    private static Member member;
 
-    @BeforeEach
-    void init() {
+    @BeforeAll
+    static void beforeAll() {
+        tokenProvider = new TokenProvider("testSecretKey-testSecretKey-testSecretKey-testSecretKey", 300000L);
         member = new Member(1L, Role.MEMBER, "호기", "hogi@naver.com", "asd");
     }
 
