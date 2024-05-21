@@ -15,10 +15,14 @@ public class ReservationDate {
     }
 
     public ReservationDate(String date) {
-        this.date = parseDate(date);
+        this(parseDate(date));
     }
 
-    private LocalDate parseDate(String rawDate) {
+    public ReservationDate(LocalDate date) {
+        this.date = date;
+    }
+
+    private static LocalDate parseDate(String rawDate) {
         try {
             return LocalDate.parse(rawDate);
         } catch (DateTimeParseException | NullPointerException e) {
