@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 
-public class LoginUtil {
+public class LoginTokenProvider {
     public static String login(String email, String password, int expectedHttpCode) {
         Map<?, ?> requestBody = Map.of("email", email, "password", password);
 

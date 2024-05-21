@@ -22,8 +22,8 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
 
     @BeforeEach
     void SetUp() {
-        clientToken = LoginUtil.login("member@wooteco.com", "wootecoCrew6!", 200);
-        adminToken = LoginUtil.login("admin@wooteco.com", "wootecoCrew6!", 200);
+        clientToken = LoginTokenProvider.login("member@wooteco.com", "wootecoCrew6!", 200);
+        adminToken = LoginTokenProvider.login("admin@wooteco.com", "wootecoCrew6!", 200);
     }
 
     @TestFactory

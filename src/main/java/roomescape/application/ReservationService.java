@@ -58,8 +58,7 @@ public class ReservationService {
     }
 
     private void updateReservation(Reservation reservation) {
-        if (isWaitingUpdatableToReservation(reservation)
-        ) {
+        if (isWaitingUpdatableToReservation(reservation)) {
             Reservation nextReservation = reservationRepository.findFirstByDateAndTimeIdAndThemeId(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).orElseThrow();
