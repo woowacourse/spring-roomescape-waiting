@@ -14,6 +14,8 @@ import roomescape.reservation.repository.ThemeRepository;
 public class ThemeService {
 
     private static final int POPULAR_THEME_SIZE = 10;
+    private static final int POPULAR_THEME_LAST_DAYS = 7;
+
     private final ThemeRepository themeRepository;
 
     public ThemeService(ThemeRepository themeRepository) {
@@ -45,12 +47,13 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<PopularThemeResponse> findThemesLimitTen() {
+    public List<PopularThemeResponse> findThemesLastDaysLimitTen() {
         LocalDate today = LocalDate.now();
-        LocalDate sevenDaysBefore = today.minusDays(7);
+        LocalDate sevenDaysBefore = today.minusDays(POPULAR_THEME_LAST_DAYS);
 
-        List<Theme> popularTheme = themeRepository.findPopularThemesLimitTen(today, sevenDaysBefore, PageRequest.of(0,
-                POPULAR_THEME_SIZE));
+        List<Theme> popularTheme = themeRepository.findPopularThemesWithPagination(today, sevenDaysBefore,
+                PageRequest.of(0, POPULAR_THEME_SIZE));
+
         return popularTheme.stream()
                 .map(PopularThemeResponse::new)
                 .toList();

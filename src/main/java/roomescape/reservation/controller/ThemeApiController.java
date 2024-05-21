@@ -26,7 +26,7 @@ public class ThemeApiController {
 
     @GetMapping("/themes/popular")
     public ResponseEntity<List<PopularThemeResponse>> findTopTenThemesOfLastWeek() {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesLimitTen();
+        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesLastDaysLimitTen();
 
         return ResponseEntity.ok(popularThemeResponses);
     }

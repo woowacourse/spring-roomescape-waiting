@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +36,7 @@ public class ReservationApiController {
 
     @GetMapping("/reservations/search")
     public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
-            @Valid @ModelAttribute ReservationSearchRequest reservationSearchRequest
+            @Valid ReservationSearchRequest reservationSearchRequest
     ) {
         List<ReservationResponse> reservationResponses = reservationService.findAllBySearch(reservationSearchRequest);
 
@@ -51,7 +50,7 @@ public class ReservationApiController {
     ) {
         Long id = reservationService.save(reservationCreateRequest, loginMemberInToken);
         ReservationResponse reservationResponse = reservationService.findById(id);
-        
+
         return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
     }
 

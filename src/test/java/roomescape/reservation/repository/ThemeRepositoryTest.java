@@ -91,7 +91,7 @@ class ThemeRepositoryTest {
 
         LocalDate today = LocalDate.now();
         LocalDate sevenDaysBefore = today.minusDays(7);
-        List<Theme> themes = themeRepository.findPopularThemesLimitTen(sevenDaysBefore, today, PageRequest.of(0,
+        List<Theme> themes = themeRepository.findPopularThemesWithPagination(sevenDaysBefore, today, PageRequest.of(0,
                 10));
 
         assertAll(

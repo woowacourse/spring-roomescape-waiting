@@ -23,7 +23,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             group by th.id, th.themeName, th.description, th.thumbnail
             order by count(r.id) desc
             """)
-    List<Theme> findPopularThemesLimitTen(@Param(value = "start") LocalDate startDate,
-                                          @Param(value = "end") LocalDate endDate,
-                                          Pageable pageable);
+    List<Theme> findPopularThemesWithPagination(
+            @Param(value = "start") LocalDate startDate,
+            @Param(value = "end") LocalDate endDate,
+            Pageable pageable
+    );
 }
