@@ -11,7 +11,9 @@ import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
+import roomescape.service.dto.response.UserReservationResponses;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -74,7 +76,7 @@ public class ReservationService {
         reservationRepository.delete(foundReservation);
     }
 
-    public List<ReservationResponse> findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
+    public ReservationResponses findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
         List<Reservation> reservations = reservationRepository.findByConditions(
                 Optional.ofNullable(reservationConditionRequest.dateFrom()),
                 Optional.ofNullable(reservationConditionRequest.dateTo()),
@@ -82,25 +84,32 @@ public class ReservationService {
                 reservationConditionRequest.memberId()
         );
 
-        return toReservationResponse(reservations);
+        return toReservationResponses(reservations);
     }
 
-    private List<ReservationResponse> toReservationResponse(List<Reservation> reservations) {
-        return reservations.stream()
+    private ReservationResponses toReservationResponses(List<Reservation> reservations) {
+        List<ReservationResponse> reservationResponses = reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
+        return new ReservationResponses(reservationResponses);
     }
 
-    public List<UserReservationResponse> findAllUserReservation(Long memberId) {
+    public UserReservationResponses findAllUserReservation(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
                 findMemberById(memberId),
                 LocalDate.now(),
                 dateAscAndTimeAsc()
         );
 
-        return reservations.stream()
+        return makeUserReservationResponses(reservations);
+    }
+
+    private UserReservationResponses makeUserReservationResponses(List<Reservation> reservations) {
+        List<UserReservationResponse> userReservationResponses = reservations.stream()
                 .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
                 .toList();
+
+        return new UserReservationResponses(userReservationResponses);
     }
 
     private Sort dateAscAndTimeAsc() {

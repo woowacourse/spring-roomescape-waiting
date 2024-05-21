@@ -25,7 +25,6 @@ public class CustomLocalDateSerializer extends JsonSerializer<LocalDate> {
             SerializerProvider serializerProvider
     ) {
         try {
-            System.out.println(TIME_FORMATTER.format(localDate));
             jsonGenerator.writeString(TIME_FORMATTER.format(localDate));
         } catch (IOException exception) {
             throw new RuntimeException("날짜 변환 과정에서 문제가 발생했습니다.");

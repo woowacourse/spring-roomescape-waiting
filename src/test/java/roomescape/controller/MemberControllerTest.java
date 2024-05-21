@@ -1,17 +1,19 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.http.MediaType;
 import roomescape.IntegrationTestSupport;
+import roomescape.service.dto.response.MemberResponses;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class MemberControllerTest extends IntegrationTestSupport {
 
@@ -33,7 +35,9 @@ class MemberControllerTest extends IntegrationTestSupport {
                             .when().get("/admin/members")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .response().jsonPath().getList("$").size();
+                            .response().jsonPath().getObject("$", MemberResponses.class)
+                            .memberResponses()
+                            .size();
                 }),
                 dynamicTest("이메일 형식이 아니면 회원가입할 수 없다.", () -> {
                     Map<String, String> params = Map.of(
@@ -66,12 +70,19 @@ class MemberControllerTest extends IntegrationTestSupport {
                             .statusCode(201).extract().header("location").split("/")[2];
                 }),
                 dynamicTest("회원 목록 개수가 1증가한다.", () -> {
-                    RestAssured.given().log().all()
+                    int size = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/admin/members")
                             .then().log().all()
-                            .statusCode(200).body("size()", is(memberSize + 1));
+                            .statusCode(200)
+                            .extract()
+                            .jsonPath()
+                            .getObject(".", MemberResponses.class)
+                            .memberResponses()
+                            .size();
+
+                    assertThat(size).isEqualTo(memberSize + 1);
                 }),
                 dynamicTest("중복된 이메일로 회원가입할 수 없다.", () -> {
                     Map<String, String> params = Map.of(
@@ -97,12 +108,17 @@ class MemberControllerTest extends IntegrationTestSupport {
                             .statusCode(204);
                 }),
                 dynamicTest("회원 목록 개수가 1감소한다.", () -> {
-                    RestAssured.given().log().all()
+                    int size = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/admin/members")
                             .then().log().all()
-                            .statusCode(200).body("size()", is(memberSize));
+                            .statusCode(200).extract()
+                            .jsonPath().getObject(".", MemberResponses.class)
+                            .memberResponses()
+                            .size();
+
+                    assertThat(size).isEqualTo(memberSize);
                 })
         );
     }

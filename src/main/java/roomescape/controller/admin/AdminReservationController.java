@@ -1,21 +1,16 @@
 package roomescape.controller.admin;
 
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.ReservationConditionRequest;
-import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.request.ReservationSaveRequest;
+import roomescape.service.dto.response.ReservationResponse;
+import roomescape.service.dto.response.ReservationResponses;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -37,9 +32,9 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations(
+    public ResponseEntity<ReservationResponses> getReservations(
             @ModelAttribute @Valid ReservationConditionRequest reservationConditionRequest) {
-        List<ReservationResponse> reservationResponses = reservationService.findReservationsByCondition(reservationConditionRequest);
+        ReservationResponses reservationResponses = reservationService.findReservationsByCondition(reservationConditionRequest);
 
         return ResponseEntity.ok()
                 .body(reservationResponses);

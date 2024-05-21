@@ -22,9 +22,9 @@ public class CustomLocalTimeSerializer extends JsonSerializer<LocalTime> {
     public void serialize(
             LocalTime time,
             JsonGenerator jsonGenerator,
-            SerializerProvider serializerProvider) {
+            SerializerProvider serializerProvider
+    ) {
         try {
-            System.out.println(TIME_FORMATTER.format(time));
             jsonGenerator.writeString(TIME_FORMATTER.format(time));
         } catch (IOException exception) {
             throw new RuntimeException("시간 변환 과정에서 문제가 발생했습니다.");

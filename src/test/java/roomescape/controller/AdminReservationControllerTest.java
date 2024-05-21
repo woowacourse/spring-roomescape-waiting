@@ -1,12 +1,14 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.IntegrationTestSupport;
+import roomescape.service.dto.response.ReservationResponses;
+
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class AdminReservationControllerTest extends IntegrationTestSupport {
 
@@ -20,12 +22,18 @@ class AdminReservationControllerTest extends IntegrationTestSupport {
                 "dateTo", "2024-05-04"
         );
 
-        RestAssured.given().log().all()
+        int size = RestAssured.given().log().all()
                 .cookies("token", ADMIN_TOKEN)
                 .queryParams(params)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .extract()
+                .jsonPath()
+                .getObject(".", ReservationResponses.class)
+                .reservationResponses()
+                .size();
+
+        assertThat(size).isEqualTo(2);
     }
 }

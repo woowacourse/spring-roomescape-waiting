@@ -8,11 +8,11 @@ public record ErrorResponse(
         String message
 ) {
 
-    public ErrorResponse(ErrorCode code){
+    public ErrorResponse(ErrorCode code) {
         this(code.getStatus(), code.getMessage());
     }
 
-    public ErrorResponse(ErrorCode code, String message){
+    public ErrorResponse(ErrorCode code, String message) {
         this(code.getStatus(), message);
     }
 }

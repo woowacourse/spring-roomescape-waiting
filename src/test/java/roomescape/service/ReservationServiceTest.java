@@ -113,7 +113,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
         ReservationResponse reservationResponse = reservationService.saveReservation(reservationSaveRequest);
 
         // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId);
+        List<UserReservationResponse> allUserReservation = reservationService.findAllUserReservation(memberId).userReservationResponses();
 
         // then
         assertAll(

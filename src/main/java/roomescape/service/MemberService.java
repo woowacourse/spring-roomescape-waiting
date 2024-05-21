@@ -1,12 +1,14 @@
 package roomescape.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.service.dto.response.MemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.MemberJoinRequest;
+import roomescape.service.dto.response.MemberResponse;
+import roomescape.service.dto.response.MemberResponses;
+
+import java.util.List;
 
 @Service
 public class MemberService {
@@ -28,10 +30,12 @@ public class MemberService {
         return MemberResponse.from(savedMember);
     }
 
-    public List<MemberResponse> findAll() {
-         return memberRepository.findAll().stream()
-                 .map(MemberResponse::from)
-                 .toList();
+    public MemberResponses findAll() {
+        List<MemberResponse> members = memberRepository.findAll().stream()
+                .map(MemberResponse::from)
+                .toList();
+
+        return new MemberResponses(members);
     }
 
     public void withdraw(Long id) {

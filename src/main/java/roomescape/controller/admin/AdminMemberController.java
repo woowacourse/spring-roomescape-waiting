@@ -1,15 +1,10 @@
 package roomescape.controller.admin;
 
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.service.MemberService;
-import roomescape.service.dto.response.MemberResponse;
-// TODO List보다는 객체 반환하기
+import roomescape.service.dto.response.MemberResponses;
+
 @RestController
 @RequestMapping("/admin/members")
 public class AdminMemberController {
@@ -21,8 +16,8 @@ public class AdminMemberController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberResponse>> findAll() {
-        List<MemberResponse> memberResponses = memberService.findAll();
+    public ResponseEntity<MemberResponses> findAll() {
+        MemberResponses memberResponses = memberService.findAll();
 
         return ResponseEntity.ok()
                 .body(memberResponses);

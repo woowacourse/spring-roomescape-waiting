@@ -24,6 +24,7 @@ import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.PopularThemeRequest;
 import roomescape.service.dto.response.ThemeResponse;
 import roomescape.service.dto.request.ThemeSaveRequest;
+import roomescape.service.dto.response.ThemeResponses;
 
 @Transactional
 class ThemeServiceTest extends IntegrationTestSupport {
@@ -62,9 +63,9 @@ class ThemeServiceTest extends IntegrationTestSupport {
     @DisplayName("테마 조회")
     @Test
     void getThemes() {
-        List<ThemeResponse> themeResponses = themeService.getThemes();
+        ThemeResponses themeResponses = themeService.getThemes();
 
-        assertThat(themeResponses).hasSize(13);
+        assertThat(themeResponses.themeResponses()).hasSize(13);
     }
 
     @DisplayName("테마 삭제")
@@ -78,7 +79,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
         themeService.deleteTheme(themeResponse.id());
 
         // then
-        assertThat(themeService.getThemes()).hasSize(13);
+        assertThat(themeService.getThemes().themeResponses()).hasSize(13);
     }
 
     @DisplayName("존재하지 않는 테마 삭제")
@@ -109,7 +110,7 @@ class ThemeServiceTest extends IntegrationTestSupport {
         PopularThemeRequest popularThemeRequest = new PopularThemeRequest(LocalDate.parse("2024-05-04"), LocalDate.parse("2024-05-10"), 2);
 
         // when
-        List<ThemeResponse> popularThemes = themeService.getPopularThemes(popularThemeRequest);
+        List<ThemeResponse> popularThemes = themeService.getPopularThemes(popularThemeRequest).themeResponses();
 
         // then
         assertThat(popularThemes).hasSize(2)

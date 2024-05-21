@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.time.LocalDate;
 import roomescape.service.dto.request.ReservationSaveRequest;
+
+import java.time.LocalDate;
 
 public record UserReservationSaveRequest(
         @NotNull
@@ -22,7 +23,7 @@ public record UserReservationSaveRequest(
         @Positive
         Long themeId
 ) {
-        public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
-                return new ReservationSaveRequest(memberId, date, timeId, themeId);
-        }
+    public ReservationSaveRequest toReservationSaveRequest(Long memberId) {
+        return new ReservationSaveRequest(memberId, date, timeId, themeId);
+    }
 }

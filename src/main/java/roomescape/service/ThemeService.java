@@ -1,19 +1,20 @@
 package roomescape.service;
 
+import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ThemeRepository;
+import roomescape.exception.customexception.RoomEscapeBusinessException;
+import roomescape.service.dto.request.PopularThemeRequest;
+import roomescape.service.dto.request.ThemeSaveRequest;
+import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.dto.response.ThemeResponses;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.Theme;
-import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.customexception.RoomEscapeBusinessException;
-import roomescape.service.dto.request.PopularThemeRequest;
-import roomescape.service.dto.response.ThemeResponse;
-import roomescape.service.dto.request.ThemeSaveRequest;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -33,13 +34,11 @@ public class ThemeService {
         return new ThemeResponse(savedTheme);
     }
 
-    public List<ThemeResponse> getThemes() {
-        return themeRepository.findAll().stream()
-                .map(ThemeResponse::new)
-                .toList();
+    public ThemeResponses getThemes() {
+        return makeThemeResponses(themeRepository.findAll());
     }
 
-    public List<ThemeResponse> getPopularThemes(PopularThemeRequest popularThemeRequest) {
+    public ThemeResponses getPopularThemes(PopularThemeRequest popularThemeRequest) {
         List<Reservation> reservations = reservationRepository.findAllByDateBetween(
                 popularThemeRequest.startDate(),
                 popularThemeRequest.endDate()
@@ -47,9 +46,14 @@ public class ThemeService {
 
         List<Theme> popularThemes = makePopularThemeRanking(reservations, popularThemeRequest.limit());
 
-        return popularThemes.stream()
+        return makeThemeResponses(popularThemes);
+    }
+
+    private ThemeResponses makeThemeResponses(List<Theme> themes) {
+        List<ThemeResponse> themeResponses = themes.stream()
                 .map(ThemeResponse::new)
                 .toList();
+        return new ThemeResponses(themeResponses);
     }
 
     private List<Theme> makePopularThemeRanking(List<Reservation> reservations, int rankingLimit) {

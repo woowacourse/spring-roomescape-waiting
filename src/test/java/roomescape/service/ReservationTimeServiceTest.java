@@ -15,6 +15,7 @@ import roomescape.IntegrationTestSupport;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.ReservationTimeBookedRequest;
 import roomescape.service.dto.response.ReservationTimeBookedResponse;
+import roomescape.service.dto.response.ReservationTimeBookedResponses;
 import roomescape.service.dto.response.ReservationTimeResponse;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 
@@ -27,7 +28,7 @@ class ReservationTimeServiceTest extends IntegrationTestSupport {
     @DisplayName("예약 시간 목록 조회")
     @Test
     void getTimes() {
-        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.getTimes();
+        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.getTimes().reservationTimeResponses();
         assertThat(reservationTimeResponses).hasSize(7);
     }
 
@@ -44,10 +45,10 @@ class ReservationTimeServiceTest extends IntegrationTestSupport {
     @DisplayName("예약 시간 삭제")
     @Test
     void deleteTime() {
-        int size = reservationTimeService.getTimes().size();
+        int size = reservationTimeService.getTimes().reservationTimeResponses().size();
 
         reservationTimeService.deleteTime(6L);
-        assertThat(reservationTimeService.getTimes()).hasSize(size - 1);
+        assertThat(reservationTimeService.getTimes().reservationTimeResponses()).hasSize(size - 1);
     }
 
     @DisplayName("존재하지 않는 예약 시간 삭제")
@@ -82,11 +83,12 @@ class ReservationTimeServiceTest extends IntegrationTestSupport {
         var reservationTimeBookedRequest = new ReservationTimeBookedRequest(LocalDate.parse("2024-05-04"), 1L);
 
         // when
-        List<ReservationTimeBookedResponse> timesWithBooked = reservationTimeService.getTimesWithBooked(
+        ReservationTimeBookedResponses timesWithBooked = reservationTimeService.getTimesWithBooked(
                 reservationTimeBookedRequest);
 
         // then
-        assertThat(timesWithBooked).hasSize(7)
+        assertThat(timesWithBooked.reservationTimeBookedResponses())
+                .hasSize(7)
                 .extracting("startAt", "alreadyBooked")
                 .containsExactly(
                         tuple(LocalTime.parse("09:00"), true),

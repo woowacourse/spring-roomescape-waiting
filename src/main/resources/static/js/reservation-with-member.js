@@ -24,7 +24,7 @@ function render(data) {
   const tableBody = document.getElementById('table-body');
   tableBody.innerHTML = '';
 
-  data.forEach(item => {
+  data.reservationResponses.forEach(item => {
     const row = tableBody.insertRow();
 
     /*
@@ -44,6 +44,7 @@ function render(data) {
 
 function fetchTimes() {
   requestRead(TIME_API_ENDPOINT)
+      .then(data => data.reservationTimeResponses)
       .then(data => {
         timesOptions.push(...data);
       })
@@ -52,6 +53,7 @@ function fetchTimes() {
 
 function fetchThemes() {
   requestRead(THEME_API_ENDPOINT)
+      .then(data => data.themeResponses)
       .then(data => {
         themesOptions.push(...data);
         populateSelect('theme', themesOptions, 'name');
@@ -61,6 +63,7 @@ function fetchThemes() {
 
 function fetchMembers() {
   requestRead(MEMBER_API_ENDPOINT)
+      .then(data => data.memberResponses)
       .then(data => {
         membersOptions.push(...data);
         populateSelect('member', membersOptions, 'name');

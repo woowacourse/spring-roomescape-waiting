@@ -1,17 +1,20 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
+import roomescape.service.dto.response.ThemeResponses;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ThemeControllerTest extends IntegrationTestSupport {
 
@@ -29,7 +32,10 @@ class ThemeControllerTest extends IntegrationTestSupport {
                             .when().get("/themes")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .response().jsonPath().getList("$").size();
+                            .response().jsonPath()
+                            .getObject("$", ThemeResponses.class)
+                            .themeResponses()
+                            .size();
                 }),
                 dynamicTest("테마을 추가한다.", () -> {
                     Map<String, String> param = Map.of("name", "테마_테스트",
@@ -45,12 +51,19 @@ class ThemeControllerTest extends IntegrationTestSupport {
                             .statusCode(201).extract().header("location").split("/")[2];
                 }),
                 dynamicTest("테마 목록 개수가 1증가한다.", () -> {
-                    RestAssured.given().log().all()
+                    int size = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/themes")
                             .then().log().all()
-                            .statusCode(200).body("size()", is(themeSize + 1));
+                            .statusCode(200)
+                            .extract()
+                            .jsonPath()
+                            .getObject("$", ThemeResponses.class)
+                            .themeResponses()
+                            .size();
+
+                    assertThat(size).isEqualTo(themeSize + 1);
                 }),
                 dynamicTest("테마이름이 비어있을 수 없다.", () -> {
                     Map<String, String> param = Map.of("name", "  ",
@@ -74,12 +87,19 @@ class ThemeControllerTest extends IntegrationTestSupport {
                             .statusCode(204);
                 }),
                 dynamicTest("테마 목록 개수가 1감소한다.", () -> {
-                    RestAssured.given().log().all()
+                    int size = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/themes")
                             .then().log().all()
-                            .statusCode(200).body("size()", is(themeSize));
+                            .statusCode(200)
+                            .extract()
+                            .jsonPath()
+                            .getObject("$", ThemeResponses.class)
+                            .themeResponses()
+                            .size();
+
+                    assertThat(size).isEqualTo(themeSize);
                 })
         );
     }

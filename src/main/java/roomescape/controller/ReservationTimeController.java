@@ -1,7 +1,6 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -9,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.dto.request.ReservationTimeBookedRequest;
-import roomescape.service.dto.response.ReservationTimeBookedResponse;
-import roomescape.service.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.response.ReservationTimeBookedResponses;
+import roomescape.service.dto.response.ReservationTimeResponses;
 
 @RestController
 @RequestMapping("/times")
@@ -23,14 +22,14 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponse>> getTimes() {
-        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.getTimes();
+    public ResponseEntity<ReservationTimeResponses> getTimes() {
+        ReservationTimeResponses reservationTimeResponses = reservationTimeService.getTimes();
         return ResponseEntity.ok(reservationTimeResponses);
     }
 
     @GetMapping("/booked")
-    public ResponseEntity<List<ReservationTimeBookedResponse>> getTimesWithBooked(@ModelAttribute @Valid ReservationTimeBookedRequest reservationTimeBookedRequest) {
-        List<ReservationTimeBookedResponse> reservationTimeBookedResponses = reservationTimeService.getTimesWithBooked(reservationTimeBookedRequest);
+    public ResponseEntity<ReservationTimeBookedResponses> getTimesWithBooked(@ModelAttribute @Valid ReservationTimeBookedRequest reservationTimeBookedRequest) {
+        ReservationTimeBookedResponses reservationTimeBookedResponses = reservationTimeService.getTimesWithBooked(reservationTimeBookedRequest);
         return ResponseEntity.ok(reservationTimeBookedResponses);
     }
 }

@@ -1,22 +1,25 @@
 package roomescape.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.ReservationStatus;
+import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
+import roomescape.service.dto.response.UserReservationResponses;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 
@@ -34,8 +37,12 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/admin/reservations")
                             .then().log().all()
-                            .statusCode(200).extract()
-                            .response().jsonPath().getList("$").size();
+                            .statusCode(200)
+                            .extract()
+                            .jsonPath()
+                            .getObject(".", ReservationResponses.class)
+                            .reservationResponses()
+                            .size();
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
@@ -98,12 +105,19 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .statusCode(400);
                 }),
                 dynamicTest("예약 목록을 조회한다.", () -> {
-                    RestAssured.given().log().all()
+                    int size = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/admin/reservations")
                             .then().log().all()
-                            .statusCode(200).body("size()", is(adminReservationSize + 1));
+                            .statusCode(200)
+                            .extract()
+                            .jsonPath()
+                            .getObject(".", ReservationResponses.class)
+                            .reservationResponses()
+                            .size();
+
+                    assertThat(size).isEqualTo(adminReservationSize + 1);
                 }),
                 dynamicTest("예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
@@ -135,7 +149,9 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200).extract()
-                            .response().jsonPath().getList("$").size();
+                            .response().jsonPath().getObject("$", UserReservationResponses.class)
+                            .userReservationResponses()
+                            .size();
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
@@ -152,20 +168,21 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .statusCode(201).extract().header("location").split("/")[2];
                 }),
                 dynamicTest("내 예약 목록을 조회하면 사이즈가 1증가한다.", () -> {
-                    UserReservationResponse userReservationResponse = RestAssured.given().log().all()
+                    List<UserReservationResponse> userReservationResponses = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
                             .when().get("/reservations-mine")
                             .then().log().all()
                             .statusCode(200)
-                            .body("size()", is(userReservationSize + 1))
-                            .extract().as(UserReservationResponse[].class)[0];
+                            .extract().as(UserReservationResponses.class)
+                            .userReservationResponses();
 
                     assertAll(
-                            () -> assertThat(userReservationResponse.theme()).isEqualTo("이름1"),
-                            () -> assertThat(userReservationResponse.date()).isEqualTo(LocalDate.now()),
-                            () -> assertThat(userReservationResponse.time()).isEqualTo(LocalTime.of(9, 0, 0)),
-                            () -> assertThat(userReservationResponse.status()).isEqualTo(ReservationStatus.RESERVED.getValue())
+                            () -> assertThat(userReservationResponses).hasSize(userReservationSize + 1),
+                            () -> assertThat(userReservationResponses.get(0).theme()).isEqualTo("이름1"),
+                            () -> assertThat(userReservationResponses.get(0).date()).isEqualTo(LocalDate.now()),
+                            () -> assertThat(userReservationResponses.get(0).time()).isEqualTo(LocalTime.of(9, 0, 0)),
+                            () -> assertThat(userReservationResponses.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
                     );
                 }),
                 dynamicTest("존재하지 않는 시간으로 예약을 추가할 수 없다.", () -> {

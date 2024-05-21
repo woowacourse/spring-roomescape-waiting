@@ -1,4 +1,3 @@
-
 package roomescape.exception;
 
 import org.slf4j.Logger;
@@ -18,7 +17,7 @@ import roomescape.exception.dto.ErrorResponse;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -45,7 +44,7 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
             @Nullable HttpStatusCode status,
             @Nullable WebRequest request) {
 
-        if (exception ==null){
+        if (exception == null) {
             return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
         }
 
@@ -56,12 +55,12 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AbstractBusinessException.class)
-    public ResponseEntity<Object> handleBusinessException(AbstractBusinessException e){
+    public ResponseEntity<Object> handleBusinessException(AbstractBusinessException e) {
         return makeErrorResponseEntity(ErrorCode.INTERNAL_SERVER);
     }
 
     @ExceptionHandler(AbstractSecurityException.class)
-    public ResponseEntity<Object> handleBusinessException(AbstractSecurityException e){
+    public ResponseEntity<Object> handleBusinessException(AbstractSecurityException e) {
         return makeErrorResponseEntity(ErrorCode.INVALID_PARAMETER);
     }
 
@@ -82,7 +81,7 @@ public class GlobalExceptionHandler  extends ResponseEntityExceptionHandler {
     }
 
     private String resolveMethodArgumentNotValidMessage(MethodArgumentNotValidException exception) {
-        return  exception.getFieldErrors().stream()
+        return exception.getFieldErrors().stream()
                 .map(error -> error.getField() + "는 " + error.getDefaultMessage())
                 .collect(Collectors.joining(System.lineSeparator()));
     }
