@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixtures;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
@@ -202,5 +203,18 @@ class ReservationServiceTest {
         // when & then
         assertThatCode(() -> reservationService.deleteReservation(id))
                 .doesNotThrowAnyException();
+    }
+
+    @DisplayName("예약 서비스는 예약 삭제를 요청한 사용자가 예약의 주인이 아닌 경우 예외가 발생한다.")
+    @Test
+    void deleteNotOwnerReservation() {
+        // given
+        Long id = 1L;
+        LoginMember loginMember = new LoginMember(3L, "admin@gamil.com");
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteReservation(id, loginMember))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인의 예약 대기만 삭제할 수 있습니다.");
     }
 }

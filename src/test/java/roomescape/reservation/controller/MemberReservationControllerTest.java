@@ -300,4 +300,23 @@ class MemberReservationControllerTest {
                 .then()
                 .statusCode(204);
     }
+
+    @DisplayName("사용자 예약 컨트롤러는 본인것이 아닌 예약 대기 삭제 요청시 403을 응답한다.")
+    @Test
+    void deleteMemberReservationNotOwner() {
+        // given
+        long id = 2L;
+
+        // when
+        String detailMessage = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().delete("/reservations/" + id)
+                .then()
+                .statusCode(403).log().all()
+                .extract()
+                .jsonPath().get("detail");
+
+        // then
+        assertThat(detailMessage).isEqualTo("본인의 예약 대기만 삭제할 수 있습니다.");
+    }
 }

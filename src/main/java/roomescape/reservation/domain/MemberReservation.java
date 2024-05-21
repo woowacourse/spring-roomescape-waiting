@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import roomescape.auth.dto.LoginMember;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 
 import java.time.LocalDateTime;
@@ -48,10 +50,6 @@ public class MemberReservation {
         this(null, member, reservation, status);
     }
 
-    public MemberReservation(Member member, Reservation reservation) {
-        this(null, member, reservation, ReservationStatus.CONFIRMATION);
-    }
-
     public void validateDuplicated(MemberReservation other) {
         if (!reservation.equals(other.reservation)) {
             return;
@@ -78,6 +76,14 @@ public class MemberReservation {
         }
 
         throw new BadRequestException("예약 대기는 순서대로 승인할 수 있습니다.");
+    }
+
+    public void validateIsOwner(LoginMember loginMember) {
+        if (member.getId().equals(loginMember.id())) {
+            return;
+        }
+
+        throw new ForbiddenException("본인의 예약 대기만 삭제할 수 있습니다.");
     }
 
     public Long getId() {
