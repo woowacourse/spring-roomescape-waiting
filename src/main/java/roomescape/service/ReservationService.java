@@ -42,10 +42,12 @@ public class ReservationService {
     }
 
     public Reservation reserve(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        validateDuplication(date, timeId, themeId);
         return save(memberId, date, timeId, themeId, RESERVED);
     }
 
     public Reservation standby(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        validateAlreadyBookedByMember(memberId, date, timeId, themeId);
         return save(memberId, date, timeId, themeId, STANDBY);
     }
 
@@ -54,18 +56,9 @@ public class ReservationService {
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
         LocalDateTime createdAt = LocalDateTime.now();
+
         Reservation reservation = new Reservation(member, date, createdAt, time, theme, status);
-
-        validatePastReservation(reservation.getDate(), time);
-
-        // TODO: 코드 구조 개선 필요
-        if (status == RESERVED) {
-            validateDuplication(reservation.getDate(), timeId, themeId);
-        }
-        if (status == STANDBY) {
-            validateAlreadyBookedByMember(reservation);
-        }
-
+        validatePastReservation(date, time);
         return reservationRepository.save(reservation);
     }
 
@@ -108,15 +101,8 @@ public class ReservationService {
         }
     }
 
-    private void validateAlreadyBookedByMember(Reservation reservation) {
-        Boolean exists = reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
-            reservation.getMember().getId(),
-            reservation.getDate(),
-            reservation.getTime().getId(),
-            reservation.getTheme().getId()
-        );
-
-        if (exists) {
+    private void validateAlreadyBookedByMember(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId)) {
             throw new RoomescapeException("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
         }
     }
