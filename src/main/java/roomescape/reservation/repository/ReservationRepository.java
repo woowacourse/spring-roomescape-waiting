@@ -30,4 +30,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, Status status);
 
+    // TODO: date, time, theme가 같고 pending 상태인 개수를 반환
+    int countByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, Status status);
 }

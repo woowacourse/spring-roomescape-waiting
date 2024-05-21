@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
@@ -134,10 +135,16 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> findAllByMemberId(final long memberId) {
-        return reservationRepository.findByMemberId(memberId)
-                .stream()
-                .map(MemberReservationResponse::from)
-                .toList();
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+        List<MemberReservationResponse> responses = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            int rank = reservationRepository.countByDateAndTimeIdAndThemeIdAndStatus(
+                    reservation.getDate(), reservation.getTime().getId(),
+                    reservation.getTheme().getId(), reservation.getStatus()
+            );
+            responses.add(MemberReservationResponse.of(reservation, rank));
+        }
+        return responses;
     }
 
     public ReservationDeleteResponse delete(final long id) {

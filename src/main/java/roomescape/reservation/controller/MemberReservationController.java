@@ -67,7 +67,8 @@ public class MemberReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(
-            @AuthenticationPrincipal Member member) {
+            @AuthenticationPrincipal Member member
+    ) {
         return ResponseEntity.ok(reservationService.findAllByMemberId(member.getId()));
     }
 

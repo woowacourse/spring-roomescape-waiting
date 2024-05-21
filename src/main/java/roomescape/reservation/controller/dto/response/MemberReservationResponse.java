@@ -23,4 +23,15 @@ public record MemberReservationResponse(
                 reservation.getStatus().getValue()
         );
     }
+
+    public static MemberReservationResponse of(final Reservation reservation, final int rank) {
+        return new MemberReservationResponse(
+                reservation.getId(),
+                new MemberNameResponse(reservation.getMember().getNameValue()),
+                reservation.getDate(),
+                ReservationTimeResponse.from(reservation.getTime()),
+                ThemeResponse.from(reservation.getTheme()),
+                String.format(reservation.getStatus().getValue(), rank)
+        );
+    }
 }
