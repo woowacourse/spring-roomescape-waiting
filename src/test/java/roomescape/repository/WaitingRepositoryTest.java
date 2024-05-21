@@ -143,4 +143,28 @@ class WaitingRepositoryTest {
         boolean exists = waitingRepository.existsWaitingByThemeAndDateAndTimeAndMember(theme, day, time1, member);
         assertThat(exists).isTrue();
     }
+
+    @DisplayName("모든 예약 대기를 조회한다.")
+    @Test
+    void should_get_all_waiting() {
+        LocalDate day = LocalDate.of(2024, 5, 15);
+        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
+        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
+        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+
+        entityManager.persist(time1);
+        entityManager.persist(time2);
+        entityManager.persist(theme);
+        entityManager.persist(member);
+
+        Waiting waiting1 = new Waiting(day, time1, theme, member);
+        Waiting waiting2 = new Waiting(day, time2, theme, member);
+
+        entityManager.persist(waiting1);
+        entityManager.persist(waiting2);
+
+        List<Waiting> reservations = waitingRepository.findAll();
+        assertThat(reservations).hasSize(2);
+    }
 }

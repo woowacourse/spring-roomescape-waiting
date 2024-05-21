@@ -30,4 +30,6 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     boolean existsWaitingByThemeAndDateAndTimeAndMember(Theme theme, LocalDate date, ReservationTime time, Member member);
+
+    List<Waiting> findAll();
 }
