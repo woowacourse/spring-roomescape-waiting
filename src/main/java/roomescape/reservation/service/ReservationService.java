@@ -149,17 +149,6 @@ public class ReservationService {
         return MemberReservationResponse.from(memberReservation);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteReservation(Long id) {
-        memberReservationRepository.deleteById(id);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteReservation(Long id, LoginMember loginMember) {
-        findMemberReservationById(id).validateIsOwner(loginMember);
-        memberReservationRepository.deleteById(id);
-    }
-
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> readWaitingReservations() {
         return memberReservationRepository.findByStatus(ReservationStatus.WAITING).stream()
@@ -191,5 +180,16 @@ public class ReservationService {
                 reservation, memberReservation.getCreatedAt()
         );
         memberReservation.validateRankCanConfirm(waitingRank);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteReservation(Long id) {
+        memberReservationRepository.deleteById(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteReservation(Long id, LoginMember loginMember) {
+        findMemberReservationById(id).validateIsOwner(loginMember);
+        memberReservationRepository.deleteById(id);
     }
 }

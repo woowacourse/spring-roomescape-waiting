@@ -40,12 +40,6 @@ public class AdminReservationController {
         return reservationService.searchReservations(dateFrom, dateTo, memberId, themeId);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/waiting")
     public List<MemberReservationResponse> readWaitingReservations() {
         return reservationService.readWaitingReservations();
@@ -54,5 +48,11 @@ public class AdminReservationController {
     @PutMapping("/waiting/{id}")
     public void confirmWaitingReservation(@PathVariable Long id) {
         reservationService.confirmWaitingReservation(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }
