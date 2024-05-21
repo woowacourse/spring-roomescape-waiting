@@ -32,10 +32,10 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         return Stream.of(
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 1L, 1L, 1L, 201)),
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 2L, 2L, 2L, 201)),
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 3L, 3L, 3L, 201)),
-                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationCRD.getReservations(200, 6))
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 1L, 1L, 1L, 201)),
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 2L, 2L, 2L, 201)),
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 3L, 3L, 3L, 201)),
+                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationTestStep.getReservations(200, 6))
         );
     }
 
@@ -47,9 +47,9 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         LocalDate tomorrow = today.plusDays(1);
 
         return Stream.of(
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 1L, 1L, 1L, 201)),
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 1L, 2L, 1L, 201)),
-                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationCRD.postAdminReservation(adminToken, tomorrow.toString(), 3L, 3L, 3L, 201)),
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 1L, 1L, 1L, 201)),
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 1L, 2L, 1L, 201)),
+                dynamicTest("관리자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postAdminReservation(adminToken, tomorrow.toString(), 3L, 3L, 3L, 201)),
                 dynamicTest("날짜는 어제부터 내일까지, member_id는 1, theme_id는 1인 예약을 검색한다 (총 2개)", () -> adminSearch(adminToken, 1L, 1L, yesterday.toString(), tomorrow.toString(), 200, 2))
         );
     }
@@ -60,10 +60,10 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         return Stream.of(
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 2L, 2L, 201)),
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 3L, 3L, 201)),
-                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationCRD.getReservations(200, 6)),
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 2L, 2L, 201)),
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 3L, 3L, 201)),
+                dynamicTest("모든 예약을 조회한다 (총 6개)", () -> ReservationTestStep.getReservations(200, 6)),
                 dynamicTest("자신의 예약을 조회한다 (총 3개)", () -> getMyReservations(clientToken, 200, 3))
         );
     }
@@ -74,7 +74,7 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         return Stream.of(
-                dynamicTest("과거 시간에 대한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, yesterday.toString(), 1L, 1L, 400))
+                dynamicTest("과거 시간에 대한 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, yesterday.toString(), 1L, 1L, 400))
         );
     }
 
@@ -84,13 +84,13 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
 
         return Stream.of(
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
-                dynamicTest("내가 등록한 예약과 동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 409)),
-                dynamicTest("다른 사람이 등록한 예약과 동일한 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, "2099-04-29", 1L, 1L, 201)),
-                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 201)),
+                dynamicTest("내가 등록한 예약과 동일한 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 1L, 1L, 409)),
+                dynamicTest("다른 사람이 등록한 예약과 동일한 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, "2099-04-29", 1L, 1L, 201)),
+                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationTestStep.getReservations(200, 4)),
                 dynamicTest("예약 대기를 조회한다 (총 1개)", () -> getWaitings(adminToken, 200, 1)),
-                dynamicTest("예약 대기와 동일한 예약을 삭제한다", () -> ReservationCRD.deleteReservation(1L, 204)),
-                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4)),
+                dynamicTest("예약 대기와 동일한 예약을 삭제한다", () -> ReservationTestStep.deleteReservation(1L, 204)),
+                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationTestStep.getReservations(200, 4)),
                 dynamicTest("예약 대기를 조회한다 (총 0개)", () -> getWaitings(adminToken, 200, 0))
         );
     }
@@ -102,12 +102,12 @@ class ReservationAcceptanceTest extends BasicAcceptanceTest {
         AtomicLong reservationId = new AtomicLong();
 
         return Stream.of(
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> reservationId.set(ReservationCRD.postClientReservation(
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> reservationId.set(ReservationTestStep.postClientReservation(
                         clientToken, tomorrow.toString(), 1L, 1L, 201))),
-                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationCRD.postClientReservation(clientToken, tomorrow.toString(), 2L, 2L, 201)),
-                dynamicTest("모든 예약을 조회한다 (총 5개)", () -> ReservationCRD.getReservations(200, 5)),
-                dynamicTest("예약을 삭제한다", () -> ReservationCRD.deleteReservation(reservationId.longValue(), 204)),
-                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationCRD.getReservations(200, 4))
+                dynamicTest("사용자 페이지에서 예약을 추가한다", () -> ReservationTestStep.postClientReservation(clientToken, tomorrow.toString(), 2L, 2L, 201)),
+                dynamicTest("모든 예약을 조회한다 (총 5개)", () -> ReservationTestStep.getReservations(200, 5)),
+                dynamicTest("예약을 삭제한다", () -> ReservationTestStep.deleteReservation(reservationId.longValue(), 204)),
+                dynamicTest("모든 예약을 조회한다 (총 4개)", () -> ReservationTestStep.getReservations(200, 4))
         );
     }
 
