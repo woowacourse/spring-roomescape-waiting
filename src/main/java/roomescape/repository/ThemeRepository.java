@@ -16,5 +16,4 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT :limit
             """)
     List<Theme> findTopReservedThemesByDateRangeAndLimit(LocalDate start, LocalDate end, int limit);
-
 }

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -18,7 +17,6 @@ import roomescape.domain.Role;
 import roomescape.domain.Theme;
 
 @DataJpaTest
-@Transactional
 class ThemeRepositoryTest {
 
     @Autowired
