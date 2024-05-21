@@ -21,9 +21,9 @@ INSERT INTO member (name, email, role, password) VALUES ('썬', 'sun@email.com',
 INSERT INTO member (name, email, role, password) VALUES ('배키', 'dmsgml@email.com', 'MEMBER', '1111');
 INSERT INTO member (name, email, role, password) VALUES ('포비', 'pobi@email.com', 'ADMIN', '2222');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-09', 1, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-07', 2, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-08', 4, 1, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-09', 4, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-09', 3, 2, 1);
-INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES ('2024-05-09', 1, 3, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1, 1, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1, 2, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -2, 4, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -3, 4, 2, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1, 3, 2, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (CURRENT_DATE -1, 1, 3, 2);
