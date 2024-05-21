@@ -56,9 +56,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -213,14 +210,14 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
+    [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch('/reservations/waiting', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -233,7 +230,7 @@ function onWaitButtonClick() {
         })
         .then(data => {
           alert('Reservation waiting successful!');
-          window.location.href = "/";
+          location.reload();
         })
         .catch(error => {
           alert(error.message);

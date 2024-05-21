@@ -18,4 +18,7 @@ INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATE
 INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 3, 3, 'RESERVED');
 INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -7, CURRENT_DATE), 1, 3, 3, 'RESERVED');
 INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 3, 2, 'RESERVED');
+INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 1, 'RESERVED');
+INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 2, 2, 'RESERVED');
+INSERT INTO reservation(date, time_id, member_id, theme_id, status) VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 3, 3, 'RESERVED');
 
