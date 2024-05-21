@@ -1,10 +1,10 @@
 package roomescape.service.reservation;
 
 import static org.springframework.data.jpa.domain.Specification.where;
-import static roomescape.domain.reservation.ReservationSpecification.hasEndDate;
-import static roomescape.domain.reservation.ReservationSpecification.hasMemberId;
-import static roomescape.domain.reservation.ReservationSpecification.hasStartDate;
-import static roomescape.domain.reservation.ReservationSpecification.hasThemeId;
+import static roomescape.domain.reservation.ReservationRepository.Specs.hasEndDate;
+import static roomescape.domain.reservation.ReservationRepository.Specs.hasMemberId;
+import static roomescape.domain.reservation.ReservationRepository.Specs.hasStartDate;
+import static roomescape.domain.reservation.ReservationRepository.Specs.hasThemeId;
 
 import java.time.Clock;
 import java.time.LocalDate;
