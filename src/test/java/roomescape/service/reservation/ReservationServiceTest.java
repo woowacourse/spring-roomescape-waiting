@@ -73,7 +73,28 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.id()).isNotZero(),
                 () -> assertThat(result.time().id()).isEqualTo(reservationDetail.getReservationTime().getId()),
-                () -> assertThat(result.theme().id()).isEqualTo(theme.getId())
+                () -> assertThat(result.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(result.status()).isEqualTo(ReservationStatus.RESERVED.getDescription())
+        );
+    }
+
+    @DisplayName("어드민이 새로운 예약 대기를 저장한다.")
+    @Test
+    void createAdminWaiting() {
+        //given
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(reservationDetail.getDate(), member.getId(),
+                reservationDetail.getReservationTime().getId(), theme.getId());
+        reservationService.createAdminReservation(adminReservationRequest);
+
+        //when
+        ReservationResponse result = reservationService.createAdminReservation(adminReservationRequest);
+
+        //then
+        assertAll(
+                () -> assertThat(result.id()).isNotZero(),
+                () -> assertThat(result.time().id()).isEqualTo(reservationDetail.getReservationTime().getId()),
+                () -> assertThat(result.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(result.status()).isEqualTo(ReservationStatus.WAITING.getDescription())
         );
     }
 
@@ -91,7 +112,28 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.id()).isNotZero(),
                 () -> assertThat(result.time().id()).isEqualTo(reservationDetail.getReservationTime().getId()),
-                () -> assertThat(result.theme().id()).isEqualTo(theme.getId())
+                () -> assertThat(result.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(result.status()).isEqualTo(ReservationStatus.RESERVED.getDescription())
+        );
+    }
+
+    @DisplayName("사용자가 새로운 예약 대기를 저장한다.")
+    @Test
+    void createMemberWaiting() {
+        //given
+        ReservationRequest reservationRequest = new ReservationRequest(reservationDetail.getDate(),
+                reservationDetail.getReservationTime().getId(), theme.getId());
+        reservationService.createMemberReservation(reservationRequest, member.getId());
+
+        //when
+        ReservationResponse result = reservationService.createMemberReservation(reservationRequest, member.getId());
+
+        //then
+        assertAll(
+                () -> assertThat(result.id()).isNotZero(),
+                () -> assertThat(result.time().id()).isEqualTo(reservationDetail.getReservationTime().getId()),
+                () -> assertThat(result.theme().id()).isEqualTo(theme.getId()),
+                () -> assertThat(result.status()).isEqualTo(ReservationStatus.WAITING.getDescription())
         );
     }
 

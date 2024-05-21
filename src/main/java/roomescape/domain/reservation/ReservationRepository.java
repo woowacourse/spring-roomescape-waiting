@@ -18,4 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                              @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
 
     List<Reservation> findByMemberId(long memberId);
+
+    boolean existsByReservationDetailIdAndStatusAndMemberId(Long reservationDetailId, ReservationStatus status, Long memberId);
 }

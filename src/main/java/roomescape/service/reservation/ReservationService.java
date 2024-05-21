@@ -50,14 +50,16 @@ public class ReservationService {
                 reservationRequest.date());
     }
 
+    //TODO : n번째 예약 대기
     private ReservationResponse createReservation(long timeId, long themeId, long memberId, LocalDate date) {
         ReservationDate reservationDate = ReservationDate.of(date);
         ReservationTime reservationTime = findTimeById(timeId);
+        validateIfBefore(reservationDate, reservationTime);
         Theme theme = findThemeById(themeId);
         Member member = findMemberById(memberId);
-        validate(reservationDate, reservationTime, theme);
         ReservationDetail reservationDetail = getReservationDetail(reservationDate, reservationTime, theme);
-        Reservation reservation = reservationRepository.save(new Reservation(member, reservationDetail, ReservationStatus.RESERVED));
+        ReservationStatus reservationStatus = determineStatus(reservationDetail, member);
+        Reservation reservation = reservationRepository.save(new Reservation(member, reservationDetail, reservationStatus));
 
         return new ReservationResponse(reservation);
     }
@@ -65,6 +67,13 @@ public class ReservationService {
     private ReservationTime findTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new InvalidReservationException("더이상 존재하지 않는 시간입니다."));
+    }
+
+    private void validateIfBefore(ReservationDate date, ReservationTime time) {
+        LocalDateTime value = LocalDateTime.of(date.getValue(), time.getStartAt());
+        if (value.isBefore(LocalDateTime.now())) {
+            throw new InvalidReservationException("현재보다 이전으로 일정을 설정할 수 없습니다.");
+        }
     }
 
     private Theme findThemeById(long themeId) {
@@ -77,29 +86,17 @@ public class ReservationService {
                 .orElseThrow(() -> new InvalidMemberException("존재하지 않는 회원입니다."));
     }
 
-    private void validate(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        validateIfBefore(reservationDate, reservationTime);
-        validateDuplicated(reservationDate, reservationTime, theme);
-    }
-
-    private void validateIfBefore(ReservationDate date, ReservationTime time) {
-        LocalDateTime value = LocalDateTime.of(date.getValue(), time.getStartAt());
-        if (value.isBefore(LocalDateTime.now())) {
-            throw new InvalidReservationException("현재보다 이전으로 일정을 설정할 수 없습니다.");
-        }
-    }
-
-    private void validateDuplicated(ReservationDate date, ReservationTime reservationTime, Theme theme) {
-        if (reservationDetailRepository.existsByScheduleDateAndScheduleTimeIdAndThemeId(date, reservationTime.getId(),
-                theme.getId())) {
-            throw new InvalidReservationException("선택하신 테마와 일정은 이미 예약이 존재합니다.");
-        }
-    }
-
     private ReservationDetail getReservationDetail(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         Schedule schedule = new Schedule(reservationDate, reservationTime);
         return reservationDetailRepository.findByScheduleAndTheme(schedule, theme)
                 .orElseGet(() -> reservationDetailRepository.save(new ReservationDetail(schedule, theme)));
+    }
+
+    private ReservationStatus determineStatus(ReservationDetail reservationDetail, Member member) {
+        if(reservationRepository.existsByReservationDetailIdAndStatusAndMemberId(reservationDetail.getId(), ReservationStatus.RESERVED, member.getId())){
+            return ReservationStatus.WAITING;
+        }
+        return ReservationStatus.RESERVED;
     }
 
     public List<ReservationResponse> findAll() {
