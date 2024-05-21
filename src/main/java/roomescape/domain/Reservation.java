@@ -6,10 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
 
@@ -70,17 +67,15 @@ public class Reservation {
         }
     }
 
-    public Reservation setId(Long id) {
-        return new Reservation(id, member, date, time, theme);
-    }
-
     public boolean hasDateTime(LocalDate date, ReservationTime reservationTime) {
         return this.date.equals(date)
                 && this.time.getStartAt().equals(reservationTime.getStartAt());
     }
 
     public void validateDuplicatedDateTime(Reservation reservation) {
-        if (date.equals(reservation.date) && time.equals(reservation.time) && theme.equals(reservation.theme)) {
+        if (date.equals(reservation.date)
+                && time.equals(reservation.time)
+                && theme.equals(reservation.theme)) {
             throw new BadRequestException("중복된 시간과 날짜에 대한 예약을 생성할 수 없습니다.");
         }
     }
