@@ -40,17 +40,17 @@ class AdminReservationControllerTest {
         RestAssured.port = port;
 
         date = LocalDate.now().plusDays(1);
-        timeId = (int) RestAssured.given()
+        timeId = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(new ReservationTimeCreateRequest(LocalTime.now()))
                 .when().post("/times")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
-        themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+        themeId = RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
-                .then().extract().response().jsonPath().get("id");
+                .then().extract().response().jsonPath().getLong("id");
 
         adminToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
