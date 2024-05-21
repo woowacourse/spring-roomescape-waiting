@@ -3,8 +3,6 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,39 +38,52 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Enumerated(value = EnumType.STRING)
+    @Embedded
     @Column(nullable = false)
-    private Status status;
+    private WaitingStatus waitingStatus;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    public Reservation(Long id,
+                       Member member,
+                       ReservationDate date,
+                       ReservationTime time,
+                       Theme theme,
+                       WaitingStatus waitingStatus) {
         this.id = id;
         this.member = member;
-        this.date = new ReservationDate(date);
+        this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
-    }
-
-    protected Reservation() {
+        this.waitingStatus = waitingStatus;
     }
 
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, Status.RESERVED);
+        this(id, member, new ReservationDate(date), time, theme, WaitingStatus.createReservedStatus());
     }
 
     public Reservation(Long id, Reservation reservation) {
         this(
                 id,
                 reservation.getMember(),
-                reservation.getDate(),
+                new ReservationDate(reservation.getDate()),
                 reservation.getTime(),
                 reservation.getTheme(),
-                Status.RESERVED
+                WaitingStatus.createReservedStatus()
         );
+    }
+
+    protected Reservation() {
     }
 
     public boolean isPast() {
         return date.isPast();
+    }
+
+    public boolean isWaiting() {
+        return waitingStatus.isWaiting();
+    }
+
+    public int getWaitingNumber() {
+        return waitingStatus.getWaitingNumber();
     }
 
     public Long getId() {
@@ -111,9 +122,6 @@ public class Reservation {
         return theme;
     }
 
-    public Status getStatus() {
-        return status;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -126,11 +134,12 @@ public class Reservation {
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme) && Objects.equals(status, that.status);
+                && Objects.equals(theme, that.theme) && Objects.equals(waitingStatus,
+                that.waitingStatus);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme, status);
+        return Objects.hash(id, member, date, time, theme, waitingStatus);
     }
 }

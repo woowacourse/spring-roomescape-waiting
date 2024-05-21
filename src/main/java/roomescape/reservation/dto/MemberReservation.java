@@ -12,11 +12,19 @@ public record MemberReservation(
         String status) {
 
     public MemberReservation(Reservation reservation) {
-        this(reservation.getId(),
+        this(
+                reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getValue()
+                statusMessage(reservation)
         );
+    }
+
+    private static String statusMessage(Reservation reservation) {
+        if (reservation.isWaiting()) {
+            return reservation.getWaitingNumber() + "번째 예약 대기";
+        }
+        return "예약";
     }
 }

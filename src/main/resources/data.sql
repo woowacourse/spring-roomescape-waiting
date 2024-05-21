@@ -16,11 +16,11 @@ VALUES ('안돌', 'andole@test.com', '123', 'MEMBER'),
        ('어드민', 'admin@test.com', '123', 'ADMIN');
 
 
-INSERT INTO reservation(member_id, date, time_id, theme_id, status)
-VALUES (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '1', 'RESERVED'),
-       (2, TIMESTAMPADD(DAY, -1, NOW()), '2', '1', 'RESERVED'),
-       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '1', 'RESERVED'),
-       (3, TIMESTAMPADD(DAY, -2, NOW()), '1', '2', 'RESERVED'),
-       (2, TIMESTAMPADD(DAY, -2, NOW()), '2', '2', 'RESERVED');
+INSERT INTO reservation(member_id, date, time_id, theme_id, waiting_number)
+VALUES (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '1', 0),
+       (2, TIMESTAMPADD(DAY, -1, NOW()), '2', '1', 0),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '1', 0),
+       (3, TIMESTAMPADD(DAY, -2, NOW()), '1', '2', 0),
+       (2, TIMESTAMPADD(DAY, -2, NOW()), '2', '2', 0);
 
 
