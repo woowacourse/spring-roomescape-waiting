@@ -56,6 +56,12 @@ public class ReservationWait {
         }
     }
 
+    public void confirm() {
+        if (status.isWaiting()) {
+            status = ReservationWaitStatus.CONFIRMED;
+        }
+    }
+
     public Long getId() {
         return id;
     }

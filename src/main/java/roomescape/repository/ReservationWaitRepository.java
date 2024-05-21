@@ -10,6 +10,8 @@ import roomescape.domain.ReservationWaitStatus;
 import roomescape.domain.ReservationWaitWithRank;
 
 public interface ReservationWaitRepository extends JpaRepository<ReservationWait, Long> {
+    Optional<ReservationWait> findFirstByDateAndThemeIdAndTimeIdAndStatusOrderById(LocalDate date, long themeId, long timeId, ReservationWaitStatus status);
+
     List<ReservationWait> findAllByStatus(ReservationWaitStatus reservationWaitStatus);
 
     @Query("""
@@ -27,7 +29,7 @@ public interface ReservationWaitRepository extends JpaRepository<ReservationWait
             """)
     List<ReservationWaitWithRank> findReservationWaitWithRankByMemberId(Long memberId);
 
-    Optional<ReservationWait> findOneByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long TimeId);
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId, ReservationWaitStatus status);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(LocalDate date, long timeId, long themeId, long memberId, ReservationWaitStatus status);
 }
