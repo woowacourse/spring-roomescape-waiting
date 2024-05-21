@@ -19,7 +19,6 @@ import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -85,7 +84,10 @@ public class ReservationService {
     }
 
     private ReservationStatus determineStatus(ReservationDetail reservationDetail, Member member) {
-        if (reservationRepository.existsByReservationDetailIdAndStatusAndMemberId(reservationDetail.getId(), ReservationStatus.RESERVED, member.getId())) {
+        if (reservationRepository.existsByReservationDetailIdAndStatusNotAndMemberId(reservationDetail.getId(), ReservationStatus.CANCELED, member.getId())) {
+            throw new InvalidReservationException("이미 예약(대기) 상태입니다.");
+        }
+        if (reservationRepository.existsByReservationDetailIdAndStatus(reservationDetail.getId(), ReservationStatus.RESERVED)) {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
