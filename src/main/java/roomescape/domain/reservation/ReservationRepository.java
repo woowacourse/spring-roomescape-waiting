@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.schedule.ReservationDate;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -20,4 +21,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByMemberId(long memberId);
 
     boolean existsByReservationDetailIdAndStatusAndMemberId(Long reservationDetailId, ReservationStatus status, Long memberId);
+
+    Collection<Reservation> findByStatusNot(ReservationStatus canceled);
 }
