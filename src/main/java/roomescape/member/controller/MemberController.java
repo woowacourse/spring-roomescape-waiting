@@ -24,8 +24,9 @@ public class MemberController {
     }
 
     @GetMapping
-    public List<MemberProfileInfo> findMembers() {
-        return memberService.findAllMembers();
+    public ResponseEntity<List<MemberProfileInfo>> findMembers() {
+        List<MemberProfileInfo> response = memberService.findAllMembers();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

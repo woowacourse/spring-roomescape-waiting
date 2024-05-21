@@ -30,13 +30,15 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponse> findReservations() {
-        return reservationService.findReservations();
+    public ResponseEntity<List<ReservationResponse>> findReservations() {
+        List<ReservationResponse> response = reservationService.findReservations();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/mine")
-    public List<MyReservationResponse> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
-        return reservationService.findReservationByMemberId(memberProfileInfo.id());
+    public ResponseEntity<List<MyReservationResponse>> findReservationsByMember(MemberProfileInfo memberProfileInfo) {
+        List<MyReservationResponse> response = reservationService.findReservationByMemberId(memberProfileInfo.id());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/times/{themeId}")
