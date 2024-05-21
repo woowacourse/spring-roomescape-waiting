@@ -73,13 +73,6 @@ public class ReservationService {
         reservationRepository.deleteById(fetchReservation.getId());
     }
 
-    public int indexOfReservation(final Reservation reservation) {
-        //TODO 최적화 하기
-        final List<Reservation> reservations = reservationRepository.findAllByThemeIdAndTimeIdAndDate(
-                reservation.getTheme().getId(), reservation.getTime().getId(), reservation.getDate());
-        return reservations.indexOf(reservation);
-    }
-
     private void validateBeforeDay(final LocalDateTime reservationDateTime) {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new PreviousTimeException("지난 시간으로 예약할 수 없습니다.");
@@ -97,7 +90,7 @@ public class ReservationService {
 
     public List<Reservation> findAllWaiting() {
         final LocalDate date = LocalDate.now();
-        final List<Reservation> reservations = reservationRepository.findAllByDateAfter(date);
+        final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
         final Set<ReservationInfo> preReservations = new HashSet<>();
 
         return reservations.stream()

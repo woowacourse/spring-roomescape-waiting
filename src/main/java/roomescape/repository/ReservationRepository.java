@@ -21,7 +21,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
-    List<Reservation> findAllByDateAfter(LocalDate date);
+    List<Reservation> findAllByDateIsGreaterThanEqual(LocalDate date);
 
     default Reservation fetchById(long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
@@ -56,8 +56,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                   @Nullable @Param("dateTo") LocalDate dateTo,
                                                   @Nullable @Param("themeId") Long themeId,
                                                   @Nullable @Param("memberId") Long memberId);
-
-    List<Reservation> findAllByThemeIdAndTimeIdAndDate(long themeId, long timeId, LocalDate date);
 
     @Query("""
             SELECT new roomescape.repository.dto.ReservationRankResponse
