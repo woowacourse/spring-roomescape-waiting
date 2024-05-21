@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -10,6 +11,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 import roomescape.domain.dto.WaitingRequest;
 import roomescape.domain.dto.WaitingResponse;
+import roomescape.exception.DeleteNotAllowException;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
 import roomescape.repository.MemberRepository;
@@ -81,5 +83,15 @@ public class WaitingService {
     private Member getMember(final WaitingRequest reservationRequest) {
         return memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new InvalidIdException("memberId", reservationRequest.memberId()));
+    }
+
+    @Transactional
+    public void delete(final Long waitingId, final Member member) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기 내역이 없습니다."));
+        if (waiting.getMember() != member) {
+            throw new DeleteNotAllowException("예약 대기는 본인만 취소할 수 있습니다.");
+        }
+        waitingRepository.deleteById(waitingId);
     }
 }
