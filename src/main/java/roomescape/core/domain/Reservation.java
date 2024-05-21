@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -30,22 +31,25 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
+    @Column(nullable = false)
+    private LocalDateTime createAt;
 
     public Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(final Member member, final String date, final ReservationTime time, final Theme theme, final Status status, final LocalDateTime createAt) {
+        this(null, member, date, time, theme, status, createAt);
     }
 
     public Reservation(final Long id, final Member member, final String date, final ReservationTime time,
-                       final Theme theme) {
+                       final Theme theme, final Status status, final LocalDateTime createAt) {
         this.id = id;
         this.member = member;
         this.date = parseDate(date);
         this.time = time;
         this.theme = theme;
-        this.status = Status.BOOKED;
+        this.status = status;
+        this.createAt = createAt;
     }
 
     private LocalDate parseDate(final String date) {
@@ -113,5 +117,9 @@ public class Reservation {
 
     public Status getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
     }
 }
