@@ -15,7 +15,7 @@ import roomescape.domain.role.Role;
 import roomescape.domain.role.RoleRepository;
 
 @DataJpaTest
-class JpaRoleRepositoryTest {
+class RoleJpaRepositoryTest {
 
     @PersistenceContext
     private EntityManager entityManager;
