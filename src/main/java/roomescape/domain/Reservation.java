@@ -84,6 +84,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
         return dateTime.compareTo(otherDateTime);
     }
 
+    public void updateReservationMember(Member newReservationMember) {
+        this.reservationMember = newReservationMember;
+    }
+
     public boolean isBefore(LocalDateTime base) {
         return LocalDateTime.of(date, getTime()).isBefore(base);
     }

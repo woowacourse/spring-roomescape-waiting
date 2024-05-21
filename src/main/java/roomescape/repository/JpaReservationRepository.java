@@ -44,6 +44,11 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findById(long id) {
+        return jpaReservationDao.findById(id);
+    }
+
+    @Override
     public Optional<Reservation> findByThemeAndDateAndTime(Theme theme, LocalDate date,
                                                            ReservationTime reservationTime) {
         return jpaReservationDao.findByThemeAndDateAndTime(theme, date, reservationTime);

@@ -35,7 +35,8 @@ public enum ExceptionType {
     WAITING_WITHOUT_RESERVATION(CONFLICT, "예약 대기는 예약이 있어야만 생성할 수 있습니다."),
     WAITING_WITHOUT_MEMBER(CONFLICT, "예약 대기는 회원이 있어야만 생성할 수 있습니다."),
     WAITING_AT_ALREADY_RESERVATION(CONFLICT, "예약이 되어있는 회원이 예약 대기를 생성할 수 없습니다."),
-    DUPLICATE_WAITING(BAD_REQUEST, "같은 테마와 날짜, 시간에 예약 대기는 한번만 생성할 수 있습니다.");
+    DUPLICATE_WAITING(BAD_REQUEST, "같은 테마와 날짜, 시간에 예약 대기는 한번만 생성할 수 있습니다."),
+    NOT_FOUND_RESERVATION(BAD_REQUEST, "없는 예약입니다.");
 
     private final HttpStatus status;
     private final String message;

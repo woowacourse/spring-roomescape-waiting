@@ -18,6 +18,8 @@ public interface ReservationRepository {
 
     boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 
+    Optional<Reservation> findById(long id);
+
     Optional<Reservation> findByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 
     boolean existsByTime(ReservationTime reservationTime);

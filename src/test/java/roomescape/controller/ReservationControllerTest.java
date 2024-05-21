@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.MemberFixture.DEFAULT_ADMIN;
 import static roomescape.fixture.ReservationFixture.DEFAULT_REQUEST;
 import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
 import static roomescape.fixture.ReservationFixture.DEFAULT_RESPONSE;
@@ -43,7 +44,8 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 삭제 정상 동작 시 API 명세대로 응답이 생성되는지 확인")
     void delete() {
-        ResponseEntity<Void> response = reservationController.delete(DEFAULT_RESERVATION.getId());
+        ResponseEntity<Void> response = reservationController.delete(DEFAULT_ADMIN.getId(),
+                DEFAULT_RESERVATION.getId());
         Assertions.assertThat(response.getStatusCode())
                 .isEqualTo(HttpStatusCode.valueOf(204));
     }

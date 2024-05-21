@@ -66,6 +66,13 @@ public class CollectionReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findById(long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.hasIdOf(id))
+                .findAny();
+    }
+
+    @Override
     public Optional<Reservation> findByThemeAndDateAndTime(Theme theme, LocalDate date,
                                                            ReservationTime reservationTime) {
         return reservations.stream()

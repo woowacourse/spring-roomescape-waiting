@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import static roomescape.domain.Role.ADMIN;
 import static roomescape.domain.Role.MEMBER;
 import static roomescape.exception.ExceptionType.EMPTY_NAME;
 
@@ -50,6 +51,10 @@ public class Member extends BaseEntity {
 
     public Member(Long id, String name, String email, String encryptedPassword) {
         this(id, name, email, encryptedPassword, MEMBER);
+    }
+
+    public boolean isAdmin() {
+        return ADMIN.equals(role);
     }
 
     public boolean hasIdOf(long id) {
