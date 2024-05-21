@@ -2,12 +2,13 @@
 
 ### 요구사항
 
-- [ ] 화면 응답 파일을 수정한다.
-- [ ] API 명세를 작성한다.
+- [x] 화면 응답 파일을 수정한다.
+- [x] API 명세를 작성한다.
 - [ ] 예약 대기 요청 기능을 구현한다.
   - [ ] 예약 대기 요청은 중복이 불가하다.
   - [ ] 예약 대기 요청은 예약과 중복이 불가하다.
 - [ ] 예약 대기 취소 기능을 구현한다.
+  - [ ] 해당 유저가 삭제할 수 있다.
 - [ ] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함한다.
   - [ ] 몇 번째 대기인지 함께 표기한다.
 
@@ -59,21 +60,21 @@
     "theme": "테마1",
     "date": "2024-03-01",
     "time": "10:00",
-    "status": "예약"
+    "status": "예약 완료"
   },
   {
     "reservationId": 2,
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
-    "status": "예약"
+    "status": "대기"
   },
   {
     "reservationId": 3,
     "theme": "테마3",
     "date": "2024-03-01",
     "time": "14:00",
-    "status": "예약"
+    "status": "예약 완료"
   }
 ]
 ```
@@ -130,6 +131,63 @@
 ### Request
 
 - DELETE /reservations/{id}
+
+### Response
+
+- 204 No Content
+
+---
+
+## 예약 대기 추가
+
+### Request
+
+- POST /reservations/waiting
+- cookie: token={token}
+- content-type: application/json
+
+```json
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+- 201 Created
+- Location: /reservations/waiting/1
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "아루"
+  },
+  "date": "2024-12-25",
+  "time": {
+    "id": 1,
+    "startAt": "10:00:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "우테코에 어서오세요",
+    "description": "우테코를 탈출하세요",
+    "thumbnail": "https://avatars.githubusercontent.com/u/0"
+  }
+}
+```
+
+---
+
+## 예약 대기 삭제
+
+### Request
+
+- DELETE /reservations/waiting/{id}
 
 ### Response
 
