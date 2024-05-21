@@ -84,7 +84,7 @@ public class ReservationService {
     }
 
     private ReservationStatus determineStatus(ReservationDetail reservationDetail, Member member) {
-        if (reservationRepository.existsByDetailIdAndStatusNotAndMemberId(reservationDetail.getId(), ReservationStatus.CANCELED, member.getId())) {
+        if (reservationRepository.existsByDetailIdAndMemberId(reservationDetail.getId(), member.getId())) {
             throw new InvalidReservationException("이미 예약(대기) 상태입니다.");
         }
         if (reservationRepository.existsByDetailIdAndStatus(reservationDetail.getId(), ReservationStatus.RESERVED)) {
@@ -93,8 +93,11 @@ public class ReservationService {
         return ReservationStatus.RESERVED;
     }
 
+    //TODO: 이전 예약은 제외
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findByStatusNotAndDateAfter(ReservationStatus.CANCELED, ReservationDate.of(LocalDate.now())).stream().map(ReservationResponse::new).toList();
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
     public void deleteById(long id) {

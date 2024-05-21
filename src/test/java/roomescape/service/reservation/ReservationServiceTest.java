@@ -153,22 +153,7 @@ class ReservationServiceTest {
                 .hasMessage("이미 예약(대기) 상태입니다.");
     }
 
-    @DisplayName("취소된 예약 외 모든 예약 내역을 조회한다.")
-    @Test
-    void findAllExceptCanceledReservation() {
-        //given
-        reservationRepository.save(new Reservation(member, reservationDetail, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(member, reservationDetail, ReservationStatus.WAITING));
-        reservationRepository.save(new Reservation(member, reservationDetail, ReservationStatus.CANCELED));
-
-        //when
-        List<ReservationResponse> reservations = reservationService.findAll();
-
-        //then
-        assertThat(reservations).hasSize(2);
-    }
-
-    @DisplayName("취소된 예약 외 모든 예약 내역을 조회한다.")
+    @DisplayName("모든 예약(대기) 내역을 조회한다.")
     @Test
     @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-reservation.sql"})
     void findAllExceptPastReservation() {

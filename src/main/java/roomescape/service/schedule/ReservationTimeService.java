@@ -54,10 +54,10 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
+    //TODO: 이전 예약은 제외
     private void validateByReservation(long id) {
-        //TODO: detail이 존재하더라도, reservation은 없을 수 있음
-        if (reservationDetailRepository.existsByScheduleTimeId(id)) {
-            throw new InvalidReservationException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
+        if (reservationRepository.existsByDetailScheduleTimeId(id)) {
+            throw new InvalidReservationException("해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다.");
         }
     }
 

@@ -109,7 +109,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .when().delete("/times/" + timeId)
                 .then().log().all()
-                .assertThat().statusCode(400).body("message", is("해당 시간에 예약이 존재해서 삭제할 수 없습니다."));
+                .assertThat().statusCode(400).body("message", is("해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다."));
     }
 
     @DisplayName("예약 가능한 시간 조회 테스트 - 10:00: 예약 존재, (11:00,12:00): 예약 미존재.")

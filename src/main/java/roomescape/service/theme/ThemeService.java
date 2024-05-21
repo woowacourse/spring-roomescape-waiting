@@ -21,12 +21,10 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationDetailRepository reservationDetailRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository, ReservationDetailRepository reservationDetailRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationDetailRepository = reservationDetailRepository;
     }
 
     public ThemeResponse create(ThemeRequest themeRequest) {
@@ -53,10 +51,10 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
+    //TODO: 이전 예약은 제외
     private void validateByReservation(long id) {
-        //TODO: detail이 존재하더라도, reservation은 없을 수 있음
-        if (reservationDetailRepository.existsByThemeId(id)) {
-            throw new InvalidReservationException("해당 테마로 예약이 존재해서 삭제할 수 없습니다.");
+        if (reservationRepository.existsByDetailThemeId(id)) {
+            throw new InvalidReservationException("해당 테마로 예약(대기)이 존재해서 삭제할 수 없습니다.");
         }
     }
 

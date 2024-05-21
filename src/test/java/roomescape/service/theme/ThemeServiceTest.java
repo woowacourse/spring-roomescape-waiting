@@ -117,7 +117,7 @@ class ThemeServiceTest {
         long themeId = theme.getId();
         assertThatThrownBy(() -> themeService.deleteById(themeId))
                 .isInstanceOf(InvalidReservationException.class)
-                .hasMessage("해당 테마로 예약이 존재해서 삭제할 수 없습니다.");
+                .hasMessage("해당 테마로 예약(대기)이 존재해서 삭제할 수 없습니다.");
     }
 
     @DisplayName("인기 테마를 조회한다.")

@@ -109,7 +109,7 @@ class ReservationTimeServiceTest {
         long timeId = reservationTime.getId();
         assertThatThrownBy(() -> reservationTimeService.deleteById(timeId))
                 .isInstanceOf(InvalidReservationException.class)
-                .hasMessage("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
+                .hasMessage("해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다.");
     }
 
     @DisplayName("해당 테마와 날짜에 예약이 가능한 시간 목록을 조회한다.")
