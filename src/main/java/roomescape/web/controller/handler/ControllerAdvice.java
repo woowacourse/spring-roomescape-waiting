@@ -1,5 +1,7 @@
 package roomescape.web.controller.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ControllerAdvice {
 
+    private final Logger logger = LoggerFactory.getLogger(ControllerAdvice.class);
+
     @ExceptionHandler(value = {
             PastReservationException.class,
             ReservationExistsException.class,
@@ -25,6 +29,8 @@ public class ControllerAdvice {
             IllegalStateException.class,
     })
     public ResponseEntity<String> handleServiceException(RuntimeException e) {
+        logger.error(e.getMessage(), e);
+
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
@@ -35,6 +41,8 @@ public class ControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        logger.error(e.getMessage(), e);
+
         BindingResult result = e.getBindingResult();
         String errMessage = result.getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -45,6 +53,8 @@ public class ControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handlerException(Exception e) {
+        logger.error(e.getMessage(), e);
+
         return ResponseEntity.internalServerError().body("예기치 못한 에러 발생   " + e.getMessage());
     }
 }
