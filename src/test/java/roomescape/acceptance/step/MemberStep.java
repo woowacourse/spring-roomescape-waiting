@@ -10,6 +10,17 @@ import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 
 public class MemberStep {
+    public static MemberCreateResponse 멤버_생성(final String email){
+        final Member member = MemberFixture.getDomain(email);
+        final MemberCreateRequest request = new MemberCreateRequest(
+                member.getEmail(),
+                member.getPassword(),
+                member.getName()
+        );
+        return RestAssured.given().body(request).contentType(ContentType.JSON)
+                .when().post("/signup")
+                .then().assertThat().statusCode(201).extract().as(MemberCreateResponse.class);
+    }
     public static MemberCreateResponse 멤버_생성(){
         final Member member = MemberFixture.getDomain();
         final MemberCreateRequest request = new MemberCreateRequest(
@@ -32,5 +43,8 @@ public class MemberStep {
     }
     public static String 멤버_로그인(){
         return 로그인(멤버_생성());
+    }
+    public static String 멤버_로그인(final String email){
+        return 로그인(멤버_생성(email));
     }
 }

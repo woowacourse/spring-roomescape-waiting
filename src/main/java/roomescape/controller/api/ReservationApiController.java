@@ -8,8 +8,10 @@ import roomescape.controller.api.dto.response.MemberReservationsResponse;
 import roomescape.controller.api.dto.response.ReservationResponse;
 import roomescape.controller.api.dto.response.ReservationsResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.input.ReservationSearchInput;
 import roomescape.service.dto.output.ReservationOutput;
+import roomescape.service.dto.output.WaitingOutput;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -20,9 +22,11 @@ import java.util.List;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationApiController(final ReservationService reservationService) {
+    public ReservationApiController(final ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -52,7 +56,9 @@ public class ReservationApiController {
     @GetMapping("/mine")
     public ResponseEntity<MemberReservationsResponse> getMyReservations(final LoginMemberRequest loginMemberRequest) {
         final List<ReservationOutput> outputs = reservationService.getAllMyReservations(loginMemberRequest.id());
-        return ResponseEntity.ok(MemberReservationsResponse.toResponse(outputs));
+        final List<WaitingOutput> waitingOutputs = waitingService.getAllMyWaiting(loginMemberRequest.id());
+        final var result = MemberReservationsResponse.toResponse(outputs,waitingOutputs);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")

@@ -7,10 +7,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.config.AcceptanceTest;
 import roomescape.controller.api.dto.request.ReservationRequest;
-import roomescape.controller.api.dto.response.MemberReservationsResponse;
-import roomescape.controller.api.dto.response.ReservationResponse;
-import roomescape.controller.api.dto.response.ReservationTimeResponse;
-import roomescape.controller.api.dto.response.ThemeResponse;
+import roomescape.controller.api.dto.response.*;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -18,6 +17,7 @@ import static roomescape.acceptance.step.MemberStep.멤버_로그인;
 import static roomescape.acceptance.step.ReservationStep.예약_생성;
 import static roomescape.acceptance.step.ReservationTimeStep.예약_시간_생성;
 import static roomescape.acceptance.step.ThemeStep.테마_생성;
+import static roomescape.acceptance.step.WaitingStep.대기_생성;
 
 @AcceptanceTest
 public class ReservationAcceptanceTest {
@@ -153,25 +153,39 @@ public class ReservationAcceptanceTest {
     class DescribeGetMyReservation {
         @Nested
         @DisplayName("쿠키에 로그인 후 발급 받은 토큰을 담은 경우")
-        class ContextWithToken{
+        class ContextWithToken {
+            @Test
+            @DisplayName("예약 대기가 있을시 200과 대기와 예약을 같이 반환한다.")
+            void it_returns_200_and_reservation_and_waiting() {
+                final ThemeResponse themeResponse = 테마_생성();
+                final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
+                final String token1 = 멤버_로그인("joyson5582@gmail.com");
+                final String token2 = 멤버_로그인("alphaka@gmail.com");
+                예약_생성("2024-10-05", themeResponse.id(), reservationTimeResponse.id(), token2);
+                대기_생성("2024-10-05", themeResponse.id(), reservationTimeResponse.id(), token1);
+                예약_생성("2024-10-03", themeResponse.id(), reservationTimeResponse.id(), token1);
+                예약_생성("2024-10-04", themeResponse.id(), reservationTimeResponse.id(), token1);
+
+
+                //@formatter:off
+                final MemberReservationsResponse response = RestAssured.given().cookie(token1).contentType(ContentType.JSON)
+                        .when().get("/reservations/mine")
+                        .then().assertThat().statusCode(200).extract().as(MemberReservationsResponse.class);
+                //@formatter:on
+
+                assertThat(response.data()).hasSize(3);
+                final List<String> dates = response.data().stream().map(MemberReservationResponse::date).toList();
+                assertThat(dates).containsExactly("2024-10-03", "2024-10-04","2024-10-05");
+            }
+
             @Test
             @DisplayName("200과 응답을 반환한다.")
             void it_returns_200_and_response() {
-                //A 가 예약을 생성한다.
-                // 예약을 생성할떄 문제가 생기는건? -> TDD 테스트 (
-
-                //-> 스텝의 검증은 TDD
-
-                //B 가 예약을 생성한다
-
-                // 맨마지막에 하는 것만 해도 낫배드
-
-
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
                 final String token = 멤버_로그인();
-                예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
-                예약_생성("2024-10-04",themeResponse.id(),reservationTimeResponse.id(),token);
+                예약_생성("2024-10-03", themeResponse.id(), reservationTimeResponse.id(), token);
+                예약_생성("2024-10-04", themeResponse.id(), reservationTimeResponse.id(), token);
 
                 //@formatter:off
                 final MemberReservationsResponse response = RestAssured.given().cookie(token).contentType(ContentType.JSON)
@@ -182,6 +196,7 @@ public class ReservationAcceptanceTest {
                 assertThat(response.data()).hasSize(2);
             }
         }
+
         @Nested
         @DisplayName("쿠키에 로그인한 토큰을 담지 않은 경우")
         class ContextWithoutToken {
