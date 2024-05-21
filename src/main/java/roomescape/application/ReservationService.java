@@ -58,14 +58,20 @@ public class ReservationService {
     }
 
     private void updateReservation(Reservation reservation) {
-        if (reservation.getStatus() == Status.RESERVATION && reservationRepository.existsByDateAndTimeIdAndThemeId(
-                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+        if (isWaitingUpdatableToReservation(reservation)
         ) {
             Reservation nextReservation = reservationRepository.findFirstByDateAndTimeIdAndThemeId(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).orElseThrow();
             nextReservation.setStatus(Status.RESERVATION);
         }
+    }
+
+    private boolean isWaitingUpdatableToReservation(Reservation reservation) {
+        return reservation.getStatus() == Status.RESERVATION &&
+                reservationRepository.existsByDateAndTimeIdAndThemeId(
+                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+                );
     }
 
     public List<ReservationResponse> findAllByStatus(Status status) {
