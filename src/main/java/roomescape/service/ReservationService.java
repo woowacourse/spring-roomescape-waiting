@@ -41,7 +41,7 @@ public class ReservationService {
         ReservationDate date = new ReservationDate(request.date());
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
-        validateDuplication(date, request.timeId(), request.themeId());
+        validateDuplication(date, request.timeId(), request.themeId(), request.memberId());
         Reservation reservation = new Reservation(member, date, time, theme);
         validatePastReservation(reservation);
 
@@ -71,8 +71,8 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplication(ReservationDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+    private void validateDuplication(ReservationDate date, Long timeId, Long themeId, Long memberId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
             throw new IllegalStateException("이미 존재하는 예약 정보 입니다.");
         }
     }

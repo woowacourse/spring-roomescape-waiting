@@ -13,7 +13,8 @@ import roomescape.domain.ReservationDate;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate date, Long timeId, Long themeId,
+                                                       final Long memberId);
 
     @Query("""
                       SELECT r, r.time, r.theme, r.member
