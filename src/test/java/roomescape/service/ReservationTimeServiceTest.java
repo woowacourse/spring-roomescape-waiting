@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 
@@ -64,18 +65,18 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 특정_날짜와_테마에_예약이_없는_시간대를_조회() {
+    void 예약_가능_시간을_조회() {
         //given, when
-        List<ReservationTimeResponse> availableTimes = reservationTimeService.getAvailableTimes(
+        List<AvailableTimeResponse> availableTimes = reservationTimeService.getAvailableTimes(
                 LocalDate.now().plusDays(1),
                 1L
         );
-
-        List<Long> availableTimeIds = availableTimes.stream()
-                .map(ReservationTimeResponse::id)
-                .toList();
+        System.out.println(availableTimes);
 
         //then
-        assertThat(availableTimeIds).containsExactlyInAnyOrder(3L, 5L);
+        assertThat(availableTimes)
+                .hasSize(5)
+                .extracting(AvailableTimeResponse::alreadyBooked)
+                .containsExactly(false, false, true, true, true);
     }
 }

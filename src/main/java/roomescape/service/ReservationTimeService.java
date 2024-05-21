@@ -2,10 +2,12 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.time.ReservationTime;
+import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.repository.ReservationRepository;
@@ -41,20 +43,17 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTime);
     }
 
-    public List<ReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
-        List<Long> bookedTimeIds = findTimeIdForDateAndTheme(date, themeId);
-        List<ReservationTime> times = findAvailableTimes(bookedTimeIds);
-        return times.stream()
-                .map(ReservationTimeResponse::from)
+    public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
+        List<ReservationTime> bookedTimes = findBookedTimes(date, themeId);
+        List<AvailableTimeResponse> alreadyBookedTimeResponses = bookedTimes.stream()
+                .map(AvailableTimeResponse::createAlreadyBookedTime)
                 .toList();
-    }
 
-    private List<ReservationTime> findAvailableTimes(List<Long> bookedTimeIds) {
-        if (bookedTimeIds.isEmpty()) {
-            return reservationTimeRepository.findAll();
-        }
+        List<AvailableTimeResponse> availableTimeResponses = findAvailableTimes(bookedTimes).stream()
+                .map(AvailableTimeResponse::createAvailableTime)
+                .toList();
 
-        return reservationTimeRepository.findByIdNotIn(bookedTimeIds);
+        return concatTimeResponses(alreadyBookedTimeResponses, availableTimeResponses);
     }
 
     public void deleteReservationTime(Long id) {
@@ -63,19 +62,35 @@ public class ReservationTimeService {
         reservationRepository.deleteById(reservationTime.getId());
     }
 
-    private ReservationTime findTimeById(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 잘못된 예약시간 정보 입니다.",
-                        new Throwable("time_id : " + timeId)
-                ));
+    private List<ReservationTime> findBookedTimes(LocalDate date, Long themeId) {
+        List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(date, themeId);
+
+        return bookedReservations.stream()
+                .map(Reservation::getTime)
+                .toList();
     }
 
-    private List<Long> findTimeIdForDateAndTheme(LocalDate date, Long themeId) {
-        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
-        return reservations.stream()
-                .map(Reservation::getTimeId)
+    private List<ReservationTime> findAvailableTimes(List<ReservationTime> alreadyBookedTimes) {
+        List<Long> bookedTimeIds = alreadyBookedTimes.stream()
+                .map(ReservationTime::getId)
                 .toList();
+
+        if (bookedTimeIds.isEmpty()) {
+            return reservationTimeRepository.findAll();
+        }
+
+        return reservationTimeRepository.findByIdNotIn(bookedTimeIds);
+    }
+
+    private List<AvailableTimeResponse> concatTimeResponses(
+            List<AvailableTimeResponse> alreadyBookedTimeResponses,
+            List<AvailableTimeResponse> availableTimeResponses
+    ) {
+        List<AvailableTimeResponse> responses = new ArrayList<>();
+        responses.addAll(availableTimeResponses);
+        responses.addAll(alreadyBookedTimeResponses);
+
+        return responses;
     }
 
     private void validateTimeDuplicate(LocalTime time) {
@@ -85,6 +100,14 @@ public class ReservationTimeService {
                     new Throwable("등록 시간 : " + time)
             );
         }
+    }
+
+    private ReservationTime findTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "[ERROR] 잘못된 잘못된 예약시간 정보 입니다.",
+                        new Throwable("time_id : " + timeId)
+                ));
     }
 
     private void validateDeletable(ReservationTime reservationTime) {

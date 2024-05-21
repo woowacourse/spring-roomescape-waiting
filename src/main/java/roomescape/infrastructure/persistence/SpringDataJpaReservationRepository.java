@@ -29,6 +29,7 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     List<Reservation> findAll();
 
     @Query("SELECT r from Reservation r WHERE r.date = :date AND r.theme.id = :themeId")
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     @EntityGraph(attributePaths = {"member", "theme", "time"})
