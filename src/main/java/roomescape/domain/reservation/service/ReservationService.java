@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.service;
 
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.BookableTimeResponse;
 import roomescape.domain.reservation.dto.BookableTimesRequest;
@@ -48,28 +50,48 @@ public class ReservationService {
     }
 
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
+        validateDuplicatedReservation(reservationAddRequest);
+        Reservation reservation = getReservationWithStatus(reservationAddRequest, RESERVED);
+        validateReservationDateTime(reservation);
+        return reservationRepository.save(reservation);
+    }
+
+    public Reservation addWaitingReservation(ReservationAddRequest reservationAddRequest) {
+        validateDuplicatedWaitingReservation(reservationAddRequest);
+        Reservation reservation = getReservationWithStatus(reservationAddRequest, WAITING);
+        validateReservationDateTime(reservation);
+        return reservationRepository.save(reservation);
+    }
+
+    private void validateDuplicatedReservation(ReservationAddRequest reservationAddRequest) {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
             throw new EscapeApplicationException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
         }
+    }
 
+    private void validateDuplicatedWaitingReservation(ReservationAddRequest reservationAddRequest) {
+        if (reservationRepository.existByMemberIdAndDateAndTimeIdAndThemeId(
+                reservationAddRequest.memberId(), reservationAddRequest.date(),
+                reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
+            throw new EscapeApplicationException("겹치는 예약대기 또는 예약은 할 수 없습니다.");
+        }
+    }
+
+    private void validateReservationDateTime(Reservation reservation) {
+        LocalDateTime reservationDateTime = reservation.getDate().atTime(reservation.getTime().getStartAt());
+        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+            throw new EscapeApplicationException(reservationDateTime + ": 예약은 현재 보다 이전일 수 없습니다");
+        }
+    }
+
+    private Reservation getReservationWithStatus(ReservationAddRequest reservationAddRequest,
+                                                 ReservationStatus reservationStatus) {
         ReservationTime reservationTime = getReservationTime(reservationAddRequest.timeId());
         Theme theme = getTheme(reservationAddRequest.themeId());
         Member member = getMember(reservationAddRequest.memberId());
 
-        validateReservationDateTime(reservationAddRequest, reservationTime);
-
-        Reservation reservation = reservationAddRequest.toEntity(reservationTime, theme, member, RESERVED,
-                LocalDateTime.now());
-        return reservationRepository.save(reservation);
-    }
-
-    private void validateReservationDateTime(ReservationAddRequest reservationAddRequest,
-                                             ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = reservationAddRequest.date().atTime(reservationTime.getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new EscapeApplicationException(reservationDateTime + ": 예약은 현재 보다 이전일 수 없습니다");
-        }
+        return reservationAddRequest.toEntity(reservationTime, theme, member, reservationStatus, LocalDateTime.now());
     }
 
 

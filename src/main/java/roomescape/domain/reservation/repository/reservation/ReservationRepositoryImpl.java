@@ -56,4 +56,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return jpaReservationRepository.findByMemberId(memberId);
     }
 
+    @Override
+    public boolean existByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.existsByMemberIdAndDateValueAndTimeIdAndThemeId(memberId, date,
+                timeId, themeId);
+    }
+
 }

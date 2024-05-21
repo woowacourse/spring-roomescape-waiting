@@ -10,6 +10,10 @@ import roomescape.domain.theme.domain.Theme;
 
 public record ReservationAddRequest(LocalDate date, Long timeId, Long themeId, Long memberId) {
 
+    public ReservationAddRequest addMemberId(Long memberId) {
+        return new ReservationAddRequest(date, timeId, themeId, memberId);
+    }
+
     public Reservation toEntity(ReservationTime reservationTime, Theme theme, Member member,
                                 ReservationStatus reservationStatus, LocalDateTime timestamp) {
         return new Reservation(null, date, reservationTime, theme, member, reservationStatus, timestamp);

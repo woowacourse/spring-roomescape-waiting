@@ -73,7 +73,7 @@ class ReservationControllerTest extends ControllerTest {
                 .header("Cookie", cookie)
                 .contentType(ContentType.JSON)
                 .body(reservationAddRequest)
-                .when().post("/reservations")
+                .when().post("/reservation")
                 .then().log().all()
                 .statusCode(201);
     }

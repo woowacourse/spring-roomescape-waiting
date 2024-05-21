@@ -43,27 +43,25 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> getConditionalReservationList(
             @ModelAttribute ReservationFindRequest reservationFindRequest) {
         List<Reservation> reservations = reservationService.findFilteredReservationList(
-                reservationFindRequest.themeId(),
-                reservationFindRequest.memberId(),
-                reservationFindRequest.dateFrom(),
-                reservationFindRequest.dateTo()
-        );
+                reservationFindRequest.themeId(), reservationFindRequest.memberId(), reservationFindRequest.dateFrom(),
+                reservationFindRequest.dateTo());
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping("/reservations")
+    @PostMapping("/reservation")
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationAddRequest reservationAddRequest,
-                                                              @MemberResolver Member member) {
-        reservationAddRequest = new ReservationAddRequest(
-                reservationAddRequest.date(),
-                reservationAddRequest.timeId(),
-                reservationAddRequest.themeId(),
-                member.getId()
-        );
-        Reservation reservation = reservationService.addReservation(reservationAddRequest);
+                                                              @MemberResolver Member member,
+                                                              @RequestParam(name = "waiting", required = false, defaultValue = "false") boolean waiting) {
+        reservationAddRequest = reservationAddRequest.addMemberId(member.getId());
+        Reservation reservation;
+        if (waiting) {
+            reservation = reservationService.addWaitingReservation(reservationAddRequest);
+        } else {
+            reservation = reservationService.addReservation(reservationAddRequest);
+        }
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
-        return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
     }
 
     @DeleteMapping("/reservations/{id}")
@@ -73,9 +71,8 @@ public class ReservationController {
     }
 
     @GetMapping("/bookable-times")
-    public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("themeId") Long themeId) {
+    public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(@RequestParam("date") LocalDate date,
+                                                                         @RequestParam("themeId") Long themeId) {
         return ResponseEntity.ok(reservationService.findBookableTimes(new BookableTimesRequest(date, themeId)));
     }
 
