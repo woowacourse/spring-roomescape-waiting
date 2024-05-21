@@ -138,7 +138,7 @@ public class ReservationService {
     public List<MemberReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeId(start, end, themeId);
 
-        return memberReservationRepository.findByMemberIdAndReservations(memberId, reservations).stream()
+        return memberReservationRepository.findByMemberIdAndReservationIn(memberId, reservations).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }

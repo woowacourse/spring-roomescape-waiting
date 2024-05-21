@@ -24,8 +24,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
-    @Query("select mr from MemberReservation mr where mr.member.id = :memberId AND mr.reservation in :reservations")
-    List<MemberReservation> findByMemberIdAndReservations(@Param("memberId") Long memberId, @Param("reservations") List<Reservation> reservations);
+    List<MemberReservation> findByMemberIdAndReservationIn(Long memberId, List<Reservation> reservations);
 
     List<MemberReservation> findByReservationDateBetween(LocalDate start, LocalDate end);
 
