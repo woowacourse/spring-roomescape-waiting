@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,6 +20,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
     @ManyToOne
     private ReservationTime time;
@@ -30,7 +33,11 @@ public class Reservation {
     }
 
 
-    public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime time, Theme theme,
+    public Reservation(Long id,
+                       LocalDate date,
+                       ReservationStatus status,
+                       ReservationTime time,
+                       Theme theme,
                        Member member) {
         this.id = id;
         this.date = date;
@@ -42,6 +49,10 @@ public class Reservation {
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         this(id, date, ACCEPT, time, theme, member);
+    }
+
+    public Reservation(LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
+        this(null, date, status, time, theme, member);
     }
 
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
