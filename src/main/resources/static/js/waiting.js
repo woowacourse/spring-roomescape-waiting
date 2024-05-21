@@ -73,7 +73,7 @@ function deny(event) {
      */
     const endpoint = `/admin/reservations/waiting/${id}/reject`
     return fetch(endpoint, {
-        method: 'POST'
+        method: 'DELETE'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
