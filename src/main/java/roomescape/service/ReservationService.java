@@ -52,47 +52,17 @@ public class ReservationService {
     }
 
     private Reservation save(Long memberId, LocalDate date, Long timeId, Long themeId, ReservationStatus status) {
-        Member member = findMember(memberId);
-        ReservationTime time = findTime(timeId);
-        Theme theme = findTheme(themeId);
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RoomescapeException("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다."));
+        ReservationTime time = reservationTimeRepository.findById(timeId)
+            .orElseThrow(() -> new RoomescapeException("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다."));
+        Theme theme = themeRepository.findById(themeId)
+            .orElseThrow(() -> new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다."));
         LocalDateTime createdAt = LocalDateTime.now();
 
         Reservation reservation = new Reservation(member, date, createdAt, time, theme, status);
         validatePastReservation(date, time);
         return reservationRepository.save(reservation);
-    }
-
-    private Member findMember(Long memberId) {
-        if (memberId == null) {
-            throw new RoomescapeException("사용자 ID는 null일 수 없습니다.");
-        }
-        return memberRepository.findById(memberId)
-            .orElseThrow(() -> new RoomescapeException("입력한 사용자 ID에 해당하는 데이터가 존재하지 않습니다."));
-    }
-
-    private ReservationTime findTime(Long timeId) {
-        if (timeId == null) {
-            throw new RoomescapeException("시간 ID는 null일 수 없습니다.");
-        }
-        return reservationTimeRepository.findById(timeId)
-            .orElseThrow(() -> new RoomescapeException("입력한 시간 ID에 해당하는 데이터가 존재하지 않습니다."));
-    }
-
-    private Theme findTheme(Long themeId) {
-        if (themeId == null) {
-            throw new RoomescapeException("테마 ID는 null일 수 없습니다.");
-        }
-        return themeRepository.findById(themeId)
-            .orElseThrow(() -> new RoomescapeException("입력한 테마 ID에 해당하는 데이터가 존재하지 않습니다."));
-    }
-
-    private void validatePastReservation(LocalDate date, ReservationTime time) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
-        }
-        if (date.isEqual(LocalDate.now()) && time.isBeforeNow()) {
-            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
-        }
     }
 
     private void validateDuplication(LocalDate date, Long timeId, Long themeId) {
@@ -104,6 +74,15 @@ public class ReservationService {
     private void validateAlreadyBookedByMember(Long memberId, LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId)) {
             throw new RoomescapeException("이미 예약하셨습니다. 대기 없이 이용 가능합니다.");
+        }
+    }
+
+    private void validatePastReservation(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
+        }
+        if (date.isEqual(LocalDate.now()) && time.isBeforeNow()) {
+            throw new RoomescapeException("과거 예약을 추가할 수 없습니다.");
         }
     }
 
