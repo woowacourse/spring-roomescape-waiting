@@ -115,4 +115,9 @@ public class ReservationService {
                         new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(memberId)));
         return reservationRepository.findAllByMember(member);
     }
+
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id)));
+    }
 }

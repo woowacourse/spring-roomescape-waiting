@@ -13,6 +13,7 @@ import roomescape.model.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.model.Role.MEMBER;
@@ -166,5 +167,29 @@ class WaitingRepositoryTest {
 
         List<Waiting> reservations = waitingRepository.findAll();
         assertThat(reservations).hasSize(2);
+    }
+
+    @DisplayName("주어진 조건에 맞는 예약 대기를 조회한다.")
+    @Test
+    void should_return_waiting_when_given_theme_and_date_and_time_and_member() {
+        LocalDate day = LocalDate.of(2024, 5, 15);
+        ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = new ReservationTime(LocalTime.of(11, 0));
+        Theme theme = new Theme("무빈테마", "무빈테마설명", "무빈테마썸네일");
+        Member member = new Member("무빈", MEMBER, "email@email.com", "password");
+
+        entityManager.persist(time1);
+        entityManager.persist(time2);
+        entityManager.persist(theme);
+        entityManager.persist(member);
+
+        Waiting waiting1 = new Waiting(day, time1, theme, member);
+
+        entityManager.persist(waiting1);
+
+        Waiting expectWaiting1 = waitingRepository.findFirstByThemeAndDateAndTime(theme, day, time1).get();
+        assertThat(expectWaiting1.getId()).isEqualTo(waiting1.getId());
+        Optional<Waiting> expectWaiting2 = waitingRepository.findFirstByThemeAndDateAndTime(theme, day, time2);
+        assertThat(expectWaiting2).isEmpty();
     }
 }

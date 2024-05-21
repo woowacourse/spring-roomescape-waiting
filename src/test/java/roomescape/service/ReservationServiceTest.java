@@ -253,4 +253,19 @@ class ReservationServiceTest {
 
         assertThat(reservations).hasSize(2);
     }
+
+    @DisplayName("주어진 아이디에 맞는 예약을 반환한다.")
+    @Test
+    void should_return_reservation_when_given_id() {
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now(), reservationTime, theme1, member));
+
+        Reservation reservation = reservationService.findById(1L);
+        assertThat(reservation.getId()).isEqualTo(1);
+    }
 }

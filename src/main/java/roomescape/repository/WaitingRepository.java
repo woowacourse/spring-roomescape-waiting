@@ -6,6 +6,7 @@ import roomescape.model.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
 
@@ -32,4 +33,8 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
     boolean existsWaitingByThemeAndDateAndTimeAndMember(Theme theme, LocalDate date, ReservationTime time, Member member);
 
     List<Waiting> findAll();
+
+    boolean existsWaitingByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime time);
+
+    Optional<Waiting> findFirstByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime time);
 }

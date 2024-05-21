@@ -205,4 +205,57 @@ class WaitingServiceTest {
 
         assertThat(reservations).hasSize(2);
     }
+
+    @DisplayName("조건에 맞는 예약 대기를 반환한다.")
+    @Test
+    void should_return_waiting_when_condition_given() {
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        LocalDate date = LocalDate.now();
+
+        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
+        waitingRepository.save(new Waiting(2L, date, time, theme1, member));
+
+        Waiting waiting = waitingService.findFirstWaitingByCondition(theme1, date, time);
+
+        assertThat(waiting).isNotNull();
+    }
+
+    @DisplayName("조건에 맞는 예약 대기가 없는 경우 예외를 발생한다.")
+    @Test
+    void should_throw_exception_when_not_exist_condition_given() {
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        LocalDate date = LocalDate.now();
+
+        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
+
+        assertThatThrownBy(() -> waitingService.findFirstWaitingByCondition(theme1, date.plusDays(1), time))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("[ERROR] 해당 테마:[name1], 날짜:[" + date.plusDays(1) + "], 시간:[10:00] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.");
+    }
+
+    @DisplayName("조건에 맞는 예약 대기가 존재하면 참을 반환한다.")
+    @Test
+    void should_return_true_when_condition_given_exist() {
+        Theme theme1 = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        LocalDate date = LocalDate.now();
+
+        waitingRepository.save(new Waiting(1L, date, time, theme1, member));
+        waitingRepository.save(new Waiting(2L, date, time, theme1, member));
+
+        boolean exist = waitingService.existsWaiting(theme1, date, time);
+
+        assertThat(exist).isTrue();
+    }
 }
