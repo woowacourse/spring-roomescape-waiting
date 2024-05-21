@@ -13,7 +13,7 @@
     - 예약이 존재하지 않는 날짜, 테마, 시간에 대해 대기 생성 불가
 - 사용자는 예약 대기를 자신이 생성한 대기를 삭제할 수 있다.
 - 관리자는 예약 대기를 거절할 수 있다. (거절된 대기는 나의 예약 목록에서 확인 가능)
-  <img src="./image/MyReservationDenied.png" width="250"/>
+  <img src="./image/myReservationDenied.png" width="250"/>
 - 관리자가 예약 삭제 시 자동으로 우선순위가 가장 높은 대기를 승인한다.
 
 ### 예약 시간
