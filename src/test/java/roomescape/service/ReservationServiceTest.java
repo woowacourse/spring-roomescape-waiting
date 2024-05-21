@@ -36,6 +36,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.MemberReservation;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/init-data.sql")
@@ -277,7 +278,7 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(1L, now(), reservationTime, theme1, member));
         reservationRepository.save(new Reservation(2L, now(), reservationTime, theme1, member));
 
-        List<Reservation> reservations = reservationService
+        List<MemberReservation> reservations = reservationService
                 .findMemberReservations(member);
 
         assertThat(reservations).hasSize(2);

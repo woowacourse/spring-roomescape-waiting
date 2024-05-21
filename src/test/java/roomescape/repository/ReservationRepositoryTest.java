@@ -11,6 +11,7 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.service.dto.MemberReservation;
 
 @DataJpaTest
 @Sql("/init-data.sql")
@@ -243,5 +245,18 @@ class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         assertThat(reservations).hasSize(2);
+    }
+
+    @DisplayName("날짜, 시간, 테마에 해당하는 예약 개수를 반환한다.")
+    @Sql(scripts = {"/init-data.sql", "/member-reservation-test-data.sql"})
+    @Test
+    void should_return_member_reservation_when_give_member() {
+        List<MemberReservation> memberReservation = reservationRepository.findMemberReservation(2L);
+
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(memberReservation).hasSize(3);
+            assertions.assertThat(memberReservation).extracting("order")
+                    .containsExactlyInAnyOrder(0L, 2L, 4L);
+        });
     }
 }

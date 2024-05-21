@@ -24,6 +24,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.MemberReservation;
 
 @Service
 public class ReservationService {
@@ -122,7 +123,7 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> findMemberReservations(Member member) {
-        return reservationRepository.findAllByMember(member);
+    public List<MemberReservation> findMemberReservations(Member member) {
+        return reservationRepository.findMemberReservation(member.getId());
     }
 }
