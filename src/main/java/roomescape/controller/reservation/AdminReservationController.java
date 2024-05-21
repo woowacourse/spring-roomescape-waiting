@@ -53,15 +53,4 @@ public class AdminReservationController {
             @ModelAttribute final ReservationFilterParam reservationFilterParam) {
         return ResponseEntity.ok(reservationService.findAllBy(reservationFilterParam));
     }
-
-    @GetMapping("/waiting")
-    public ResponseEntity<List<ReservationResponse>> findReservationWaitings() {
-        return ResponseEntity.ok(reservationService.findReservationWaitings());
-    }
-
-    @PutMapping("/waiting/{id}")
-    public ResponseEntity<Void> approveReservationWaiting(@PathVariable final Long id) {
-        reservationService.approveReservationWaiting(id);
-        return ResponseEntity.ok().build();
-    }
 }

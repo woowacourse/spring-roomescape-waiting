@@ -119,7 +119,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().put("/admin/reservations/waiting/" + id)
+                .when().put("/admin/waitings/" + id)
                 .then().log().all()
                 .statusCode(200);
     }
