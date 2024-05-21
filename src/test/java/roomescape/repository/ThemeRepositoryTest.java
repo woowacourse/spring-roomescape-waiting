@@ -45,11 +45,11 @@ class ThemeRepositoryTest {
          * */
         //then
         assertAll(
-                () -> assertThat(results).hasSize(10),
+                () -> assertThat(results).hasSize(7),
                 () -> assertThat(firstTheme.getId()).isEqualTo(5L),
                 () -> assertThat(secondTheme.getId()).isEqualTo(4L),
                 () -> assertThat(thirdTheme.getId()).isEqualTo(3L),
-                () -> assertThat(fourthTheme.getId()).isEqualTo(2L)
+                () -> assertThat(fourthTheme.getId()).isEqualTo(8L)
         );
     }
 }

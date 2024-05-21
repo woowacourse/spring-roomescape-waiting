@@ -23,7 +23,7 @@ import roomescape.dto.request.TokenRequest;
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class AdminReservationTest {
 
-    private static final String EMAIL = "testDB@email.com";
+    private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort
@@ -51,7 +51,7 @@ class AdminReservationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(22));
+                .body("size()", is(28));
     }
 
     @DisplayName("reservation 페이지에 새로운 예약 정보를 추가, 조회, 삭제할 수 있다.")
@@ -73,7 +73,7 @@ class AdminReservationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(23));
+                .body("size()", is(29));
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)

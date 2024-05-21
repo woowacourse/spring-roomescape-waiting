@@ -21,7 +21,7 @@ import roomescape.dto.request.TokenRequest;
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationControllerTest {
 
-    private static final String EMAIL = "testDB@email.com";
+    private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort
@@ -64,7 +64,7 @@ class ReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(22));
+                .body("size()", is(28));
     }
 
     /* 예약 현황

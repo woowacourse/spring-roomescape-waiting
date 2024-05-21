@@ -15,7 +15,7 @@ import roomescape.dto.request.TokenRequest;
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class AdminPageTest {
 
-    private static final String EMAIL = "testDB@email.com";
+    private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort

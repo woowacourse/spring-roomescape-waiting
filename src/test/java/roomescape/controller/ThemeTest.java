@@ -72,7 +72,7 @@ class ThemeTest {
     void given_when_deleteThemeIdRegisteredReservation_then_statusCodeIsBadRequest() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().delete("/themes/1")
+                .when().delete("/themes/5")
                 .then().log().all()
                 .statusCode(400)
                 .body(containsString("예약이 등록된 테마는 제거할 수 없습니다"));

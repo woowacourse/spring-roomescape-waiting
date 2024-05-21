@@ -20,7 +20,7 @@ import roomescape.dto.response.MemberResponse;
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class LoginControllerTest {
 
-    private static final String EMAIL = "testDB@email.com";
+    private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
 
     @LocalServerPort
@@ -34,7 +34,7 @@ class LoginControllerTest {
     @DisplayName("로그인 작업을 수행한다.")
     @Test
     void given_emailPassword_when_logins_then_statusCodeIsOk() {
-        TokenRequest request = new TokenRequest("testDB@email.com", "1234");
+        TokenRequest request = new TokenRequest(EMAIL, PASSWORD);
         RestAssured.given().log().all()
                 .contentType("application/json")
                 .body(request)
@@ -63,7 +63,7 @@ class LoginControllerTest {
                 .then().log().all()
                 .statusCode(200).extract().as(MemberResponse.class);
 
-        assertThat(client.name()).isEqualTo("어드민");
+        assertThat(client.name()).isEqualTo("daon");
     }
 
     @DisplayName("로그아웃을 수행한다.")
