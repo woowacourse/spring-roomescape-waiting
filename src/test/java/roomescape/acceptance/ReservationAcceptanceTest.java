@@ -127,7 +127,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> deleteReservationSuccess() {
         return Stream.of(
                 DynamicTest.dynamicTest("예약을 생성하고, 식별자를 반환한다.", () -> {
-                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
+                    reservationId = (int) RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -177,7 +178,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> cannotDeleteReservationSuccess() {
         return Stream.of(
                 DynamicTest.dynamicTest("예약을 생성하고, 식별자를 반환한다.", () -> {
-                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
+                    reservationId = (int) RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -228,7 +230,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> deleteAndCreateReservation() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -245,6 +248,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest1이 다시 예약을 요청하면, 예약으로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -259,7 +263,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> deleteAndCreateWaiting() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -268,6 +273,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -291,6 +297,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest1이 다시 예약을 요청하면, 예약 대기로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -305,7 +312,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> createReservationByWaitingOrReserved() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -314,6 +322,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -353,7 +362,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> cannotCreateReservationBecauseAlreadyReserved() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 예약을 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -362,6 +372,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest1이 동일한 테마와 일정으로 다시 예약을 요청하면 예외가 발생한다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -376,7 +387,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> cannotDeleteReservationBecauseStillWaiting() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 예약을 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -385,6 +397,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest2가 동일한 테마와 일정으로 다시 예약을 요청하면 예약 대기로 생성된다.", () -> {
                     reservationId = (int )RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -408,7 +421,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> changeToReserved() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
+                    reservationId = (int) RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -416,6 +430,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -459,7 +474,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> cannotCreateReservationBecauseAlreadyWaiting() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON)
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -468,6 +484,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", guest2Token)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
@@ -505,6 +522,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("리니가 새로운 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookie("token", liniToken)
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
