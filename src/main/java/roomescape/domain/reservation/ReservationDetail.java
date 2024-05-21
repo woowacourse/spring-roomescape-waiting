@@ -1,14 +1,11 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
-import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.InvalidReservationException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
