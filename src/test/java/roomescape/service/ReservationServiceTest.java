@@ -165,7 +165,7 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("사용자별 모든 예약 조회 테스트")   // TODO
+    @DisplayName("사용자별 모든 예약 조회 테스트")
     @Test
     void findAllByMemberId() {
         ReservationTime reservationTime1 = reservationTimeRepository.save(
