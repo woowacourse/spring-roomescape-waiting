@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.schedule.ReservationDate;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 

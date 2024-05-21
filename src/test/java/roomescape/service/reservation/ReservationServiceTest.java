@@ -161,7 +161,7 @@ class ReservationServiceTest {
         List<ReservationResponse> reservations = reservationService.findAll();
 
         //then
-        assertThat(reservations).hasSize(0);
+        assertThat(reservations).hasSize(3);
     }
 
     @DisplayName("사용자 조건으로 예약 내역을 조회한다.")
