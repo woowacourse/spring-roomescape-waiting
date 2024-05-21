@@ -22,10 +22,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
-    @Modifying
-    @Query("delete from Reservation where id = :id")
-    int deleteById(@Param("id") long id);
-
     boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
             LocalDate date, long timeId, long themeId, long memberId, Status status
     );
@@ -33,6 +29,8 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(
             LocalDate date, long timeId, long themeId, Status status
     );
+
+    List<Reservation> findByStatus(Status status);
 
     @Query("""
             SELECT COUNT(r) FROM Reservation r
@@ -47,8 +45,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             @Param("timeId") long timeId, @Param("themeId") long themeId,
             @Param("status") Status status
     );
-
-    List<Reservation> findByStatus(Status status);
 
     @Query("""
             SELECT r.id FROM Reservation r
@@ -65,6 +61,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     );
 
     @Modifying
-    @Query("UPDATE Reservation SET status = :status WHERE id = :id")
-    void updateStatus(@Param("id") long id, @Param("status") Status status);
+    @Query("delete from Reservation where id = :id")
+    int deleteById(@Param("id") long id);
 }

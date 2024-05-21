@@ -1,9 +1,12 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
-import org.assertj.core.api.Assertions;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,7 +27,7 @@ class ReservationRepositoryTest {
                 4, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
         );
 
-        Assertions.assertThat(count).isEqualTo(0);
+        assertThat(count).isEqualTo(0);
     }
 
     @Test
@@ -33,6 +36,25 @@ class ReservationRepositoryTest {
                 5, LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
         );
 
-        Assertions.assertThat(count).isEqualTo(1);
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void earliestRegisteredWaiting() {
+        Optional<Long> waitingId = reservationRepository.findEarliestRegisteredWaiting(
+                LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
+        );
+
+        assertTrue(waitingId.isPresent());
+        assertThat(waitingId.get()).isEqualTo(4);
+    }
+
+    @Test
+    void earliestRegisteredWaitingWhenDoesNotHaveWaiting() {
+        Optional<Long> waitingId = reservationRepository.findEarliestRegisteredWaiting(
+                LocalDate.parse("2024-12-23"), 1, 1, Status.PENDING
+        );
+
+        assertTrue(waitingId.isEmpty());
     }
 }
