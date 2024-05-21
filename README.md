@@ -31,6 +31,7 @@
 
 - [x] 자신의 예약 목록 조회 기능 추가
 
+- [ ] 예약 대기 기능 추가
 
 # API 명세
 
@@ -424,3 +425,56 @@
   }
 ]
 ```
+
+## 예약 대기 추가 기능
+
+### Request
+
+> POST /reservations-waiting HTTP/1.1  
+> content-type: application/json  
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+>
+> host: localhost:8080
+
+```JSON
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+> HTTP/1.1 201
+>
+> Content-Type: application/json
+> Location: /reservations-waiting/{id}
+
+```JSON
+{
+  "id": 1,
+  "name": "브라운",
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "이름",
+    "description": "설명",
+    "thumbnail": "썸네일"
+  }
+}
+```
+
+## 예약 대기 삭제 기능
+
+### request
+
+> DELETE /reservations-waiting/1 HTTP/1.1
+
+### response
+
+> HTTP/1.1 204
