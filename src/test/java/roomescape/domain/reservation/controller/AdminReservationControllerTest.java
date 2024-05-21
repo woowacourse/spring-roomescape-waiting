@@ -2,6 +2,7 @@ package roomescape.domain.reservation.controller;
 
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -27,8 +28,9 @@ public class AdminReservationControllerTest extends ControllerTest {
                 , "10:00");
         jdbcTemplate.update("insert into theme (name, description, thumbnail )values(?,?,?)"
                 , "테마1", "테마1설명", "url");
-        jdbcTemplate.update("insert into reservation (date, time_id, theme_id, member_id) values(?,?,?,?)"
-                , AFTER_TWO_DAYS_DATE, 1, 1, 1);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, reservation_timestamp) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 
     @AfterEach

@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.TODAY;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -27,8 +28,9 @@ class ReservationControllerTest extends ControllerTest {
                 "insert into member (name, email, password, role) values ('도도', 'dodo@gmail.com', '123123', 'MEMBER')");
         jdbcTemplate.update("insert into reservation_time (start_at) values('10:00')");
         jdbcTemplate.update("insert into theme (name, description, thumbnail) values('리비', '리비 설명', 'url')");
-        jdbcTemplate.update("insert into reservation (date, time_id, theme_id, member_id) values(?,?,?,?)"
-                , AFTER_TWO_DAYS_DATE, 1, 1, 1);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, reservation_timestamp) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 
     @AfterEach

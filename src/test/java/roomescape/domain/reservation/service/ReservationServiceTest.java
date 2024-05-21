@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.member.domain.Role.ADMIN;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.BEFORE_ONE_DAYS_DATE;
@@ -15,6 +16,7 @@ import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
 import static roomescape.fixture.MemberFixture.MEMBER_MEMBER;
 import static roomescape.fixture.ReservationTimeFixture.TEN_RESERVATION_TIME;
 import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -108,7 +110,8 @@ class ReservationServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "dummy", "description", "url");
         Member member = new Member(1L, "dummy", "dummy", "dummy", ADMIN);
-        Reservation reservation = new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, member);
+        Reservation reservation = new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, member, RESERVED,
+                TIMESTAMP_BEFORE_ONE_YEAR);
         fakeReservationRepository.save(reservation);
 
         ReservationAddRequest conflictRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
@@ -151,7 +154,8 @@ class ReservationServiceTest {
         Theme theme = new Theme(null, "테마1", "설명", "썸네일");
         fakeReservationTimeRepository.save(reservationTime);
         fakeReservationRepository.save(
-                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER));
+                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
                 new BookableTimesRequest(AFTER_ONE_DAYS_DATE, 1L));
@@ -167,7 +171,8 @@ class ReservationServiceTest {
         fakeReservationTimeRepository.save(reservationTime);
         fakeReservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(11, 0)));
         fakeReservationRepository.save(
-                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER));
+                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
                 new BookableTimesRequest(AFTER_ONE_DAYS_DATE, 1L));
@@ -189,10 +194,12 @@ class ReservationServiceTest {
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
         fakeReservationRepository.save(
-                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER)
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR)
         );
         fakeReservationRepository.save(
-                new Reservation(null, BEFORE_THREE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER)
+                new Reservation(null, BEFORE_THREE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER,
+                        RESERVED, TIMESTAMP_BEFORE_ONE_YEAR)
         );
 
         List<Reservation> filteredReservationList = reservationService
@@ -211,7 +218,8 @@ class ReservationServiceTest {
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(MEMBER_MEMBER);
         fakeReservationRepository.save(
-                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER)
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR)
         );
 
         List<ReservationMineResponse> memberReservations = reservationService.findReservationByMemberId(

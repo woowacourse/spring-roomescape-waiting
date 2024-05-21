@@ -1,5 +1,7 @@
 package roomescape.domain.reservation.service;
 
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,7 +59,8 @@ public class ReservationService {
 
         validateReservationDateTime(reservationAddRequest, reservationTime);
 
-        Reservation reservation = reservationAddRequest.toEntity(reservationTime, theme, member);
+        Reservation reservation = reservationAddRequest.toEntity(reservationTime, theme, member, RESERVED,
+                LocalDateTime.now());
         return reservationRepository.save(reservation);
     }
 

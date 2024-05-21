@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
@@ -11,6 +12,7 @@ import static roomescape.fixture.ReservationTimeFixture.NULL_ID_RESERVATION_TIME
 import static roomescape.fixture.ReservationTimeFixture.TEN_RESERVATION_TIME;
 import static roomescape.fixture.ThemeFixture.DUMMY_THEME;
 import static roomescape.fixture.ThemeFixture.NULL_ID_DUMMY_THEME;
+import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +48,8 @@ class ReservationRepositoryImplTest extends RepositoryTest {
         jpaThemeRepository.save(NULL_ID_DUMMY_THEME);
         jpaReservationTimeRepository.save(NULL_ID_RESERVATION_TIME);
         jpaReservationRepository.save(
-                new Reservation(null, AFTER_TWO_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER));
+                new Reservation(null, AFTER_TWO_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
     }
 
     @AfterEach
