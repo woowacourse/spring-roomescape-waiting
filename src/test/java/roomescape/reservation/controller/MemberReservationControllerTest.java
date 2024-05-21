@@ -276,14 +276,42 @@ class MemberReservationControllerTest {
         assertThat(detailMessage).isEqualTo("요청에 잘못된 형식의 값이 있습니다.");
     }
 
-    @DisplayName("내 예약 조회 요청 시 본인의 예약만 응답한다.")
+    @DisplayName("사용자 예약 컨트롤러는 내 예약 조회 요청 시 본인의 예약만 응답한다.")
     @Test
     void readMemberReservations() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
-                .when().get("/reservations/mine")
+                .when().get("/reservations/my")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
+    }
+
+    @DisplayName("사용자 예약 컨트롤러는 예약 대기 삭제 요청시 204를 응답한다.")
+    @Test
+    void deleteMemberReservation() {
+        // given
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", LocalDate.MAX);
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.WAITING);
+
+        Long id = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .when().post("/reservations")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getLong("id");
+
+        // when & then
+        RestAssured.given()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().delete("/reservations/" + id)
+                .then()
+                .statusCode(204);
     }
 }

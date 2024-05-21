@@ -1,7 +1,6 @@
 package roomescape.reservation.dto;
 
 import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,7 +19,7 @@ public record MyReservationResponse(
                 memberReservation.getReservation().getTheme().getName(),
                 memberReservation.getReservation().getDate(),
                 memberReservation.getReservation().getTime().getStartAt(),
-                ReservationStatus.CONFIRMATION.getStatusName()
+                memberReservation.getStatus().getStatusName()
         );
     }
 }
