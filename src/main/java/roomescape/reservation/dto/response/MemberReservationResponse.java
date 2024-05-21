@@ -10,29 +10,21 @@ import java.time.LocalTime;
 public record MemberReservationResponse(
         Long reservationId, String theme, LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time, String status) {
-    public static MemberReservationResponse from(final MemberReservation memberReservation) {
+    public static MemberReservationResponse fromEntity(final MemberReservation memberReservation) {
         Reservation reservation = memberReservation.getReservation();
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                "예약"
-        );
-    }
-
-    public static MemberReservationResponse ofMemberReservationAndOrder(final MemberReservation memberReservation, final long order) {
-        Reservation reservation = memberReservation.getReservation();
-        return new MemberReservationResponse(
-                reservation.getId(),
-                reservation.getThemeName(),
-                reservation.getDate(),
-                reservation.getStartAt(),
-                convertReservationWaitingOrderStatus(order)
+                convertReservationWaitingOrderStatus(memberReservation.getOrder())
         );
     }
 
     private static String convertReservationWaitingOrderStatus(final long order) {
+        if (order == 0) {
+            return "예약";
+        }
         return String.format("%d번째 예약대기", order);
     }
 }

@@ -1,5 +1,7 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,16 +29,22 @@ public class MemberReservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Embedded
+    @Column(name = "reservation_order", nullable = false)
+    private ReservationOrder order;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     public MemberReservation() {
     }
 
-    public MemberReservation(final Reservation reservation, final Member member, final ReservationStatus status) {
+    public MemberReservation(final Reservation reservation, final Member member, final ReservationStatus status, final Long order) {
         this.reservation = reservation;
         this.member = member;
         this.status = status;
+        this.order = new ReservationOrder(order);
 
         validateNotNull();
     }
@@ -47,8 +55,20 @@ public class MemberReservation {
         }
     }
 
+    public void increaseOrder() {
+        this.order = order.increase();
+    }
+
+    public boolean isFirstOrder() {
+        return order.isFirst();
+    }
+
     public boolean isReserved() {
         return status.isReserved();
+    }
+
+    public boolean isStatus(final ReservationStatus status) {
+        return this.status == status;
     }
 
     public Long getId() {
@@ -65,5 +85,13 @@ public class MemberReservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public Long getOrder() {
+        return order.reservationOrder();
+    }
+
+    public void changeStatusToReserve() {
+        this.status = ReservationStatus.RESERVED;
     }
 }

@@ -1,7 +1,6 @@
 INSERT INTO member (name, email, password, role) VALUES ('eden', 'eden@eden.com', '12341234', 'MEMBER');
 INSERT INTO member (name, email, password, role) VALUES ('admin', 'admin@admin.com', '12341234', 'ADMIN');
 
-
 -- 테마 목록 : 11개
 INSERT INTO theme (name, description, thumbnail)
 VALUES ('테마1', '재밌는 테마입니다',
@@ -48,3 +47,9 @@ INSERT INTO reservation_time (start_at)
 VALUES ('21:00');
 INSERT INTO reservation_time (start_at)
 VALUES ('23:00');
+
+INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 1);
+INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (DATEADD('DAY', + 1, CURRENT_DATE), 1, 1, 2);
+
+INSERT INTO member_reservation (reservation_id, member_id, reservation_order, status) VALUES (1, 1, 0, 'RESERVED');
+INSERT INTO member_reservation (reservation_id, member_id, reservation_order, status) VALUES (2, 2, 1, 'WAITING');

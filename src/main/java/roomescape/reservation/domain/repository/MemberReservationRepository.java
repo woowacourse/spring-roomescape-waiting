@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -16,14 +17,14 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findByMember(final Member member);
 
-    @Query(value = """
+    @Query("""
             SELECT mr
             FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
             WHERE mr.member = :member AND rt = :time AND t = :theme AND r.date = :date
             """)
     Optional<MemberReservation> findByMemberAndReservationTimeAndDateAndTheme(Member member, ReservationTime time, LocalDate date, Theme theme);
 
-    @Query(value = """
+    @Query("""
             SELECT mr
             FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
             WHERE r.date = :date AND rt = :time AND t = :theme
@@ -31,5 +32,14 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             """)
     List<MemberReservation> findByReservationTimeAndDateAndThemeOrderByIdAsc(ReservationTime time, LocalDate date, Theme theme);
 
-    Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
+    Optional<MemberReservation> findByReservation(Reservation reservation);
+
+    @Query("""
+            SELECT mr
+            FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
+            WHERE mr.status = :status
+            """)
+    List<MemberReservation> findAllByStatus(ReservationStatus status);
+
+    List<MemberReservation> findByStatus(ReservationStatus status);
 }
