@@ -50,6 +50,6 @@ public class MemberService {
     }
 
     public Member findMemberById(Long id) {
-        return memberRepository.findByEmailOrThrow(id);
+        return memberRepository.findByIdOrThrow(id);
     }
 }

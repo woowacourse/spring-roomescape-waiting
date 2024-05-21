@@ -90,7 +90,7 @@ public class ReservationService {
         validateBeforeDay(date, time);
 
         final Theme theme = themeRepository.findByIdOrThrow(reservationDto.themeId());
-        final Member member = memberRepository.findByEmailOrThrow(reservationDto.memberId());
+        final Member member = memberRepository.findByIdOrThrow(reservationDto.memberId());
         final Reservation reservation = new Reservation(null, member, date, time, theme,
                 reservationDto.status());
         return reservationRepository.save(reservation);
