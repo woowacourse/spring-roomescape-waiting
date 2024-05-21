@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWait;
 
 public record UserReservationResponse(Long reservationId,
                                       String theme,
@@ -17,5 +18,13 @@ public record UserReservationResponse(Long reservationId,
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
                 "예약");
+    }
+
+    public UserReservationResponse(ReservationWait reservationWait) {
+        this(reservationWait.getId(),
+                reservationWait.getTheme().getName(),
+                reservationWait.getDate(),
+                reservationWait.getTime().getStartAt(),
+                "예약 대기");
     }
 }
