@@ -1,13 +1,19 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import roomescape.exception.BadRequestException;
 
 @Entity
 public class Member {
+
+    private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,6 +21,7 @@ public class Member {
     private String name;
     private String email;
     private String password;
+    @Enumerated(EnumType.STRING)
     private MemberRole role;
 
     public Member() {
@@ -25,6 +32,7 @@ public class Member {
     }
 
     public Member(Long id, String name, String email, String password, String role) {
+        validateName(name);
         this.id = id;
         this.name = name;
         this.email = email;
@@ -34,6 +42,16 @@ public class Member {
 
     public Member(Long id, String name, String email, String password) {
         this(id, name, email, password, "USER");
+    }
+
+    private void validateName(String name) {
+        if (name.isBlank()) {
+            throw new BadRequestException("공백으로 이루어진 이름으로 예약할 수 없습니다.");
+        }
+        if (ILLEGAL_NAME_REGEX.matcher(name)
+                .matches()) {
+            throw new BadRequestException("특수문자가 포함된 이름으로 예약을 시도하였습니다.");
+        }
     }
 
     public String getEmail() {

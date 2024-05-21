@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,18 +16,17 @@ import roomescape.time.domain.Time;
 @Entity
 public class Reservation {
 
-    private final String status = "예약";
-    // private static final Pattern ILLEGAL_NAME_REGEX = Pattern.compile(".*[^\\w\\s가-힣].*");
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
     private LocalDate date;
     @ManyToOne
     private Time time;
     @ManyToOne
     private Theme theme;
+    private String status = "예약";
 
     public Reservation() {
     }
@@ -48,21 +48,10 @@ public class Reservation {
         if (member == null || date == null || time == null || theme == null) {
             throw new BadRequestException("예약 정보가 부족합니다.");
         }
-        //validateName(name);
     }
-
-    /**
-     * private void validateName(String name) { if (name.isBlank()) { throw new BadRequestException("공백으로 이루어진 이름으로 예약할
-     * 수 없습니다."); } if (ILLEGAL_NAME_REGEX.matcher(name) .matches()) { throw new BadRequestException("특수문자가 포함된 이름으로 예약을
-     * 시도하였습니다."); } }
-     **/
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Member getMember() {
@@ -81,10 +70,6 @@ public class Reservation {
         return time;
     }
 
-    public void setTime(Time time) {
-        this.time = time;
-    }
-
     public Long getTimeId() {
         return time.getId();
     }
@@ -93,16 +78,24 @@ public class Reservation {
         return theme;
     }
 
-    public void setTheme(Theme theme) {
-        this.theme = theme;
-    }
-
     public Long getThemeId() {
         return theme.getId();
     }
 
     public String getStatus() {
         return status;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setTime(Time time) {
+        this.time = time;
+    }
+
+    public void setTheme(Theme theme) {
+        this.theme = theme;
     }
 
     public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
