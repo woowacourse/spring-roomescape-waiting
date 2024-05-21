@@ -10,7 +10,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.WaitingStatus;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -60,25 +59,28 @@ public class ReservationService {
 
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(
+        List<Reservation> earlierReservations = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
                 request.timeId(),
                 request.themeId()
         );
 
-        if (reservations.stream().anyMatch(reservation -> reservation.isReservedBy(memberId))) {
-            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
-        }
+        Reservation reservation = new Reservation(
+                null,
+                getMember(memberId),
+                request.date(),
+                getReservationTime(request.timeId()),
+                getTheme(request.themeId()),
+                earlierReservations.size() + 1
+        );
 
-        WaitingStatus waitingStatus = new WaitingStatus(reservations.size() + 1);
-        Member member = getMember(memberId);
-        ReservationTime reservationTime = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
-
-        Reservation reservation = request.toReservation(member, reservationTime, theme, waitingStatus);
         if (reservation.isPast()) {
             throw new DomainValidationException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
         }
+        if (earlierReservations.stream().anyMatch(earlierReservation -> earlierReservation.isReservedBy(memberId))) {
+            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
+        }
+
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
     }

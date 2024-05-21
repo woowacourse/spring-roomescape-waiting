@@ -56,8 +56,8 @@ public class Reservation {
         this.waitingStatus = waitingStatus;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, new ReservationDate(date), time, theme, WaitingStatus.createReservedStatus());
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, int waitingNumber) {
+        this(id, member, new ReservationDate(date), time, theme, new WaitingStatus(waitingNumber));
     }
 
     public Reservation(Long id, Reservation reservation) {
@@ -67,7 +67,7 @@ public class Reservation {
                 new ReservationDate(reservation.getDate()),
                 reservation.getTime(),
                 reservation.getTheme(),
-                WaitingStatus.createReservedStatus()
+                reservation.getWaitingStatus()
         );
     }
 
@@ -118,6 +118,9 @@ public class Reservation {
         return theme;
     }
 
+    public WaitingStatus getWaitingStatus() {
+        return waitingStatus;
+    }
 
     @Override
     public boolean equals(Object o) {

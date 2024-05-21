@@ -28,26 +28,30 @@ public class ReservationFixture {
             MemberFixture.MEMBER_ID_1,
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
-            THEME_1);
+            THEME_1,
+            1);
 
     public static final Reservation SAVED_RESERVATION_2 = new Reservation(
             2L,
             MemberFixture.MEMBER_ID_2,
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
-            THEME_2);
+            THEME_2,
+            1);
 
     public static final Reservation SAVED_RESERVATION_3 = new Reservation(
             3L,
             MemberFixture.MEMBER_ID_3,
             TOMORROW,
             RESERVATION_TIME_11_00_ID_2,
-            THEME_1);
+            THEME_1,
+            1);
 
     public static final Reservation MEMBER_ID_1_RESERVATION = new Reservation(
             1L,
             MemberFixture.MEMBER_ID_1,
             TOMORROW,
             RESERVATION_TIME_10_00_ID_1,
-            THEME_1);
+            THEME_1,
+            1);
 }
