@@ -45,6 +45,7 @@ public class ReservationService {
         return new ReservationResponses(reservationResponses);
     }
 
+    @Transactional
     public ReservationResponse create(final ReservationRequest reservationRequest) {
         validateDuplicatedReservation(reservationRequest);
         final ReservationTime reservationTime = getReservationTime(reservationRequest);
@@ -86,6 +87,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
         reservationRepository.deleteById(id);
     }

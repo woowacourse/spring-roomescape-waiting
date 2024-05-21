@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
@@ -37,6 +38,7 @@ public class MemberService {
         return new MemberResponses(memberResponses);
     }
 
+    @Transactional
     public SignupResponse createUser(final SignupRequest signupRequest) {
         validateExist(signupRequest);
         Password password = passwordEncoder.encode(signupRequest.password());
