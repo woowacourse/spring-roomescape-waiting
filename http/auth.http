@@ -1,0 +1,15 @@
+### 로그인 요청
+POST localhost:8080/login
+content-Type:application/json
+host: localhost:8080
+
+{
+  "password": "password",
+  "email": "admin@email.com"
+}
+
+### 인증 정보
+GET localhost:8080/login/check
+Cookie: token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJuYW1lIjoibmFtZSJ9.qHWZiKO5LIR1IfD3Q8orxnI9FQJHdWGzXAw35qjEgs552Ctg2XcGStZJ1EE8p9y3
+host: localhost:8080
+

@@ -1,0 +1,16 @@
+### 예약 목록 조회 요청
+GET localhost:8080/reservations
+
+### 예약 추가 요청
+POST localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "date": "2024-10-11",
+  "timeId": 1,
+  "themeId": 1,
+  "memberId": 1
+}
+
+### 예약 삭제 요청
+DELETE localhost:8080/reservations/1
