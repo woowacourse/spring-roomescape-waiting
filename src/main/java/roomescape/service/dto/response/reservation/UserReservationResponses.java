@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitWithRank;
 
 public record UserReservationResponses(List<UserReservationResponse> reservations) {
 
@@ -16,7 +16,8 @@ public record UserReservationResponses(List<UserReservationResponse> reservation
         return new UserReservationResponses(responses);
     }
 
-    public static UserReservationResponses of(List<Reservation> reservations, List<ReservationWait> reservationWaits) {
+    public static UserReservationResponses of(List<Reservation> reservations,
+                                              List<ReservationWaitWithRank> reservationWaits) {
         List<UserReservationResponse> responses = Stream.concat(mapToReservation(reservations).stream(),
                         mapToReservationWaits(reservationWaits).stream())
                 .sorted(Comparator.comparing(r -> LocalDateTime.of(r.date(), r.time())))
@@ -30,7 +31,7 @@ public record UserReservationResponses(List<UserReservationResponse> reservation
                 .toList();
     }
 
-    private static List<UserReservationResponse> mapToReservationWaits(List<ReservationWait> reservationWaits) {
+    private static List<UserReservationResponse> mapToReservationWaits(List<ReservationWaitWithRank> reservationWaits) {
         return reservationWaits.stream()
                 .map(UserReservationResponse::new)
                 .toList();

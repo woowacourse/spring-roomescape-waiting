@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthenticatedMember;
 import roomescape.controller.api.validator.IdPositive;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitWithRank;
 import roomescape.domain.member.Member;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.reservation.ReservationResponse;
@@ -46,7 +46,8 @@ public class ReservationApiController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<UserReservationResponses> getUserReservations(@AuthenticatedMember Member member) {
         List<Reservation> userReservations = reservationFindService.findUserReservations(member.getId());
-        List<ReservationWait> userReservationWaits = reservationWaitFindService.findUserReservationWaits(member.getId());
+        List<ReservationWaitWithRank> userReservationWaits = reservationWaitFindService.findUserReservationWaits(
+                member.getId());
         return ResponseEntity.ok(UserReservationResponses.of(userReservations, userReservationWaits));
     }
 

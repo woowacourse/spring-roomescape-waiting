@@ -2,7 +2,7 @@ package roomescape.service.reservationwait;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.ReservationWait;
+import roomescape.domain.ReservationWaitWithRank;
 import roomescape.repository.ReservationWaitRepository;
 
 @Service
@@ -14,7 +14,7 @@ public class ReservationWaitFindService {
         this.reservationWaitRepository = reservationWaitRepository;
     }
 
-    public List<ReservationWait> findUserReservationWaits(long memberId) {
-        return reservationWaitRepository.findByMemberId(memberId);
+    public List<ReservationWaitWithRank> findUserReservationWaits(long memberId) {
+        return reservationWaitRepository.findReservationWaitWithRankByMemberId(memberId);
     }
 }
