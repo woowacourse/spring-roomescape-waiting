@@ -127,7 +127,7 @@ public class ReservationService {
     public void deleteReservationWaitingById(Long reservationId, Long memberId) {
         Reservation reservation = reservationRepository.getByIdAndStatus(reservationId, ReservationStatus.WAITING);
 
-        if (!reservation.getMember().getId().equals(memberId)) {
+        if (!reservation.isOwnedBy(memberId)) {
             throw new UnauthorizedException("자신의 예약 대기만 취소할 수 있습니다.");
         }
 

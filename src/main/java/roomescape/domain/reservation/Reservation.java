@@ -126,6 +126,10 @@ public class Reservation {
         status = ReservationStatus.RESERVED;
     }
 
+    public boolean isOwnedBy(Long memberId) {
+        return member.getId().equals(memberId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
