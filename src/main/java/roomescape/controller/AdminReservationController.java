@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,8 @@ public class AdminReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createAdminReservation(@Valid @RequestBody AdminReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createAdminReservation(
+            @Valid @RequestBody AdminReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         ReservationResponse reservationResponse = reservationService.create(request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
@@ -34,7 +37,19 @@ public class AdminReservationController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllByMemberAndThemeAndPeriod(ReservationFilterRequest request) {
+    public ResponseEntity<List<ReservationResponse>> findAllByMemberAndThemeAndPeriod(
+            ReservationFilterRequest request) {
         return ResponseEntity.ok(reservationService.findDistinctReservations(request));
+    }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<ReservationResponse>> findPendingReservations() {
+        return ResponseEntity.ok(reservationService.findAllPending());
+    }
+
+    @PatchMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> bookPendingReservation(@PathVariable Long id) {
+        reservationService.bookPendingReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

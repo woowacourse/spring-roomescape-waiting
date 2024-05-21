@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRank;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
@@ -21,6 +23,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final MemberRepository memberRepository;
@@ -46,12 +49,13 @@ public class ReservationService {
     public List<ReservationResponse> findDistinctReservations(ReservationFilterRequest request) {
         Member member = getMemberById(request.memberId());
         Theme theme = getThemeById(request.themeId());
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
-                        member,
-                        theme,
-                        request.dateFrom(),
-                        request.dateTo())
-                .stream()
+        List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                member,
+                theme,
+                request.dateFrom(),
+                request.dateTo()
+        );
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -65,6 +69,14 @@ public class ReservationService {
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
+    }
+
+    public List<ReservationResponse> findAllPending() {
+        List<Reservation> reservations =
+                reservationRepository.findAllByStatusOrderByDateAscTime(ReservationStatus.PENDING);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public ReservationResponse create(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
@@ -101,11 +113,35 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    public void bookPendingReservation(Long id) {
+        Reservation reservation = getReservationById(id);
+        validateAlreadyBooked(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        reservation.updateStatusBooked();
+    }
+
+    private void validateAlreadyBooked(LocalDate date, TimeSlot timeSlot, Theme theme) {
+        boolean hasAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeAndStatusIs(
+                date,
+                timeSlot,
+                theme,
+                ReservationStatus.BOOKING
+        );
+        if (hasAlreadyBooked) {
+            throw new IllegalArgumentException("예약이 존재하여 변경할 수 없습니다.");
+        }
+    }
+
     private void validateDuplicatedReservation(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
         if (reservationRepository.existsByMemberAndDateAndTimeAndTheme(member, date, timeSlot, theme)) {
             throw new IllegalArgumentException("이미 예약을 시도 하였습니다.");
         }
     }
+
+    private Reservation getReservationById(long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다"));
+    }
+
 
     private Member getMemberById(long memberId) {
         return memberRepository.findById(memberId)

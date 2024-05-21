@@ -21,7 +21,7 @@ import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class AdminReservationTest {
+class AdminReservationControllerTest {
 
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
@@ -176,5 +176,34 @@ class AdminReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5));
+    }
+
+    @DisplayName("예약 대기 조회하면 200 OK와 응답을 반환한다.")
+    @Test
+    void findPendingReservations() {
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(10));
+    }
+
+    @DisplayName("예약 대기를 예약으로 전환하면 204 NO Content를 반환한다.")
+    @Test
+    void bookPendingReservations() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", accessToken)
+                .when().delete("/reservations/{id}", 1)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", accessToken)
+                .when().patch("/admin/reservations/waiting/{id}", 13)
+                .then().log().all()
+                .statusCode(204);
     }
 }

@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRank;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAllByMember(Member member);
+    List<Reservation> findAllByStatusOrderByDateAscTime(ReservationStatus status);
 
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
 
@@ -23,6 +24,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTime(TimeSlot timeSlot);
 
     boolean existsByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, TimeSlot timeSlot, Theme theme);
+
+    boolean existsByDateAndTimeAndThemeAndStatusIs(LocalDate date, TimeSlot timeSlot, Theme theme, ReservationStatus status);
 
     @Query("""
             SELECT new roomescape.domain.ReservationRank(

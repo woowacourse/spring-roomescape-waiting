@@ -46,6 +46,10 @@ public class Reservation {
         }
     }
 
+    public void updateStatusBooked() {
+        this.status = ReservationStatus.BOOKING;
+    }
+
     public Long getId() {
         return id;
     }
