@@ -26,6 +26,7 @@ public class AdminReservationCreateService {
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
         reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId(), ReservationStatus.RESERVED);
         Member member = reservationCreateValidator.getValidMember(request.memberId());
+        reservationCreateValidator.validateOwnReservationExist(member, theme, reservationTime, request.date());
 
         Reservation reservation = request.toEntity(request, reservationTime, theme, member);
         return reservationRepository.save(reservation);

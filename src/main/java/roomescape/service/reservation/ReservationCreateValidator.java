@@ -43,11 +43,15 @@ public class ReservationCreateValidator {
     }
 
     public void validateAlreadyBooked(LocalDate date, long timeId, long themeId, ReservationStatus reservationStatus) {
-        if (reservationStatus.isWaiting()) {
-            return;
-        }
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationStatus.isReserved()
+            && reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new IllegalArgumentException("해당 시간에 이미 예약된 테마입니다.");
+        }
+    }
+
+    public void validateOwnReservationExist(Member member, Theme theme, ReservationTime reservationTime, LocalDate date) {
+        if (reservationRepository.hasBookedReservation(member, theme, reservationTime, date)) {
+            throw new IllegalArgumentException("요청하신 예약 또는 예약 대기가 이미 존재합니다.");
         }
     }
 

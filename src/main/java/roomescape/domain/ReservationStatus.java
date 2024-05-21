@@ -11,8 +11,8 @@ public enum ReservationStatus {
         this.status = status;
     }
 
-    public boolean isWaiting() {
-        return WAITING.equals(this);
+    public boolean isReserved() {
+        return RESERVED.equals(this);
     }
 
     public String getStatus() {
