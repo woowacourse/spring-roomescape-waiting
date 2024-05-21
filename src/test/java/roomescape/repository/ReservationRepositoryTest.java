@@ -22,14 +22,13 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.domain.reservation.slot.ReservationTime;
 import roomescape.domain.reservation.slot.ReservationTimeRepository;
 import roomescape.domain.reservation.slot.Theme;
 import roomescape.domain.reservation.slot.ThemeRepository;
-import roomescape.domain.reservation.WaitingRepository;
-import roomescape.domain.reservation.dto.ReservationReadOnly;
-import roomescape.domain.reservation.dto.WaitingWithRank;
 import roomescape.service.dto.ReservationConditionRequest;
 
 @Transactional
@@ -165,21 +164,6 @@ class ReservationRepositoryTest extends IntegrationTestSupport {
                         1
                 )
         );
-    }
-
-    @DisplayName("예약 대기 내역을 순위와 함께 찾는다.")
-    @Test
-    void findWaitingReservations() {
-        // given
-        Member member = memberRepository.findById(1L).get();
-        // when
-        List<WaitingWithRank> waitingReservations = waitingRepository.findWaitingRankByMemberAndDateAfter(member,
-                LocalDate.parse("2024-05-30"));
-
-        // then
-        assertThat(waitingReservations).hasSize(2)
-                .extracting("rank")
-                .containsExactly(2L, 1L);
     }
 }
 

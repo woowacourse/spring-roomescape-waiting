@@ -9,6 +9,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -282,13 +283,17 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .statusCode(201).extract().header("location").split("/")[3];
                 }),
                 dynamicTest("예약이 있으면 예약 대기 상태로 간다.", () -> {
-                    UserReservationResponse userReservationResponse = RestAssured.given().log().all()
+                    UserReservationResponse[] responses = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", ADMIN_TOKEN)
                             .when().get("/reservations-mine?date=" + LocalDate.now())
                             .then().log().all()
                             .statusCode(200)
-                            .extract().as(UserReservationResponse[].class)[0];
+                            .extract().as(UserReservationResponse[].class);
+
+                    UserReservationResponse userReservationResponse = Arrays.stream(responses)
+                            .filter(resposne -> resposne.id() == Long.parseLong(adminReservationId))
+                            .findAny().get();
 
                     assertThat(userReservationResponse.status()).isEqualTo("1번째 " + ReservationStatus.WAIT.getValue());
                 }),

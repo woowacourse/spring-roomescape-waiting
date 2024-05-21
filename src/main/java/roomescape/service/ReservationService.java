@@ -12,9 +12,9 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRanks;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
-import roomescape.domain.reservation.dto.WaitingWithRank;
 import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.exception.RoomEscapeBusinessException;
 import roomescape.service.dto.ReservationBookedResponse;
@@ -91,11 +91,12 @@ public class ReservationService {
         Member member = findMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
 
-        List<WaitingWithRank> waitings = waitingRepository.findWaitingRankByMemberAndDateAfter(member, date);
+        List<Waiting> waitings = waitingRepository.findByReservation_Slot_DateGreaterThanEqual(date);
+        WaitingRanks waitingRanks = WaitingRanks.of(waitings, member);
 
         return Stream.concat(
                         UserReservationResponse.reservationsToResponseStream(reservations),
-                        UserReservationResponse.waitingsToResponseStream(waitings)
+                        UserReservationResponse.waitingsToResponseStream(waitingRanks)
                 )
                 .sorted(Comparator.comparing(UserReservationResponse::dateTime))
                 .toList();

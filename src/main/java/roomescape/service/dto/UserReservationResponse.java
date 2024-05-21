@@ -5,11 +5,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.slot.ReservationSlot;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.dto.WaitingWithRank;
+import roomescape.domain.reservation.WaitingRanks;
+import roomescape.domain.reservation.slot.ReservationSlot;
 
 public record UserReservationResponse(
         long id,
@@ -36,13 +38,15 @@ public record UserReservationResponse(
                 );
         }
 
-        public static Stream<UserReservationResponse> waitingsToResponseStream(List<WaitingWithRank> waitingWithRanks) {
-                return waitingWithRanks.stream()
+        public static Stream<UserReservationResponse> waitingsToResponseStream(WaitingRanks waitingRanks) {
+                Map<Waiting, Integer> waitingRankMap = waitingRanks.getWaitingRanks();
+
+                return waitingRankMap.entrySet().stream()
                         .map(UserReservationResponse::createByWaiting);
         }
 
-        private static UserReservationResponse createByWaiting(WaitingWithRank waitingWithRank) {
-                Waiting waiting = waitingWithRank.waiting();
+        private static UserReservationResponse createByWaiting(Entry<Waiting, Integer> waitingRank) {
+                Waiting waiting = waitingRank.getKey();
                 ReservationSlot slot = waiting.getReservation().getSlot();
 
                 return new UserReservationResponse(
@@ -50,7 +54,7 @@ public record UserReservationResponse(
                         slot.getTheme().getName(),
                         slot.getDate(),
                         slot.getTime().getStartAt(),
-                        waitingWithRank.rank() + "번째 " +ReservationStatus.WAIT.getValue()
+                        waitingRank.getValue() + "번째 " +ReservationStatus.WAIT.getValue()
                 );
         }
 

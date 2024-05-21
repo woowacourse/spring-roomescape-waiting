@@ -25,6 +25,11 @@ public class Waiting {
     private Reservation reservation;
 
     public Waiting(Member member, Reservation reservation) {
+        this(null, member, reservation);
+    }
+
+    public Waiting(Long id, Member member, Reservation reservation) {
+        this.id = id;
         this.member = member;
         this.reservation = reservation;
     }
@@ -34,6 +39,10 @@ public class Waiting {
 
     public boolean isMember(Member member) {
         return this.member.equals(member);
+    }
+
+    public boolean isPriority(Waiting other) {
+        return this.reservation.equals(other.reservation) && this.id < other.id;
     }
 
     public Long getId() {
