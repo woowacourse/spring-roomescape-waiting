@@ -1,5 +1,5 @@
 INSERT INTO time_slot(start_at)
-VALUES ('10:00'),
+VALUES ('00:00'),
        ('11:00'),
        ('12:00'),
        ('13:00');

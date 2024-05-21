@@ -35,7 +35,7 @@ class TimeSlotRepositoryTest {
     @Test
     void existsByStartAt() {
         //given
-        LocalTime alreadyExistingTime = LocalTime.of(10, 0);
+        LocalTime alreadyExistingTime = LocalTime.of(0, 0);
         LocalTime notExistingTime = LocalTime.of(23, 59);
 
         // when

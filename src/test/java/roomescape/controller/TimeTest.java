@@ -60,7 +60,7 @@ class TimeTest {
     @Test
     void given_when_saveDuplicatedTime_then_statusCodeIsBadRequest() {
         Map<String, Object> time = new HashMap<>();
-        time.put("startAt", "10:00");
+        time.put("startAt", "00:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
