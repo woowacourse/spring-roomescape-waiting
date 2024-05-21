@@ -81,7 +81,7 @@ class ThemeServiceTest {
     void deleteExceptionTest() {
         Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 

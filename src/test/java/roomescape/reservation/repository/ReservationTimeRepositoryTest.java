@@ -45,8 +45,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("id로 예약 시간을 조회한다.")
     @Test
     void findByIdTest() {
-        ReservationTime savedReservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
         ReservationTime findReservationTime = reservationTimeRepository.findById(savedReservationTime.getId()).get();
 
         assertThat(findReservationTime.getStartAt()).isEqualTo(HOUR_10);
@@ -55,7 +54,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("전체 엔티티를 조회한다.")
     @Test
     void findAllTest() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
@@ -65,7 +64,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("예약시간 id로 예약이 참조된 예약시간들을 찾는다.")
     @Test
     void findReservationInSameIdTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -88,8 +87,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("id를 받아 예약 시간을 삭제한다.")
     @Test
     void deleteTest() {
-        ReservationTime savedReservationTime = reservationTimeRepository.save(
-                new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime savedReservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         reservationTimeRepository.deleteById(savedReservationTime.getId());
 

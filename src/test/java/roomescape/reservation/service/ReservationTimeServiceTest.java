@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
 import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.HOUR_11;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
@@ -74,8 +75,8 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(
                 new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
-        ReservationTime hour11 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("11:00")));
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+        ReservationTime hour11 = reservationTimeRepository.save(new ReservationTime(HOUR_11));
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
@@ -98,7 +99,7 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(
                 new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 

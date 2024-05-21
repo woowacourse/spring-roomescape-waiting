@@ -31,8 +31,8 @@ class WaitingsTest {
     void findMemberRank() {
         Theme theme = new Theme(1L, new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
 
-        ReservationTime hourTen = new ReservationTime(1L, LocalTime.parse(HOUR_10));
-        ReservationTime hourEleven = new ReservationTime(2L, LocalTime.parse(HOUR_11));
+        ReservationTime hourTen = new ReservationTime(1L, HOUR_10);
+        ReservationTime hourEleven = new ReservationTime(2L, HOUR_11);
 
         Member kaki = new Member(1L, Role.USER, new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member jojo = new Member(2L, Role.USER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);

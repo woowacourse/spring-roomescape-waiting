@@ -50,7 +50,7 @@ public class ReservationRepositoryTest {
     @DisplayName("전체 예약 목록을 조회한다.")
     @Test
     void findAllTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -72,7 +72,7 @@ public class ReservationRepositoryTest {
     @DisplayName("회원 id로 예약 목록을 조회한다.")
     @Test
     void findAllByMemberId() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -96,7 +96,7 @@ public class ReservationRepositoryTest {
     @DisplayName("id 값을 받아 Reservation 반환")
     @Test
     void findByIdTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -117,7 +117,7 @@ public class ReservationRepositoryTest {
     @DisplayName("날짜와 테마 아이디로 예약 시간 아이디들을 조회한다.")
     @Test
     void findTimeIdsByDateAndThemeIdTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -139,7 +139,7 @@ public class ReservationRepositoryTest {
     @DisplayName("회원 아이디, 날짜, 시간 조간에 해당하는 예약의 상태들을 조회한다.")
     @Test
     void findStatusesByMemberIdAndDateAndReservationTimeStartAt() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -166,7 +166,7 @@ public class ReservationRepositoryTest {
     @DisplayName("예약 상태 별로 동일한 예약이 있을 경우 true를 반환한다.")
     @Test
     void existsByDateAndReservationTimeStartAtAndStatus() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -201,7 +201,7 @@ public class ReservationRepositoryTest {
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
     @Test
     void findAllByThemeIdAndMemberIdAndBetweenStartDateAndEndDate() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
@@ -238,7 +238,7 @@ public class ReservationRepositoryTest {
     @DisplayName("예약 삭제 테스트")
     @Test
     void deleteTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         Theme theme = themeRepository.save(
                 new Theme(
