@@ -78,4 +78,39 @@ class AdminReservationTest {
                 .statusCode(200)
                 .body("size()", equalTo(0));
     }
+
+    @Test
+    @DisplayName("예약이 취소된 상태에서, 어드민이 예약 상태로 변경하면, 예외가 발생한다")
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_adminChangeCanceledReservation_then_exceptionThrown() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        String requestBody = String.format("{\"themeId\":1, \"date\":\"%s\", \"timeId\":1}", tomorrow);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("RESERVED"));
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when()
+                .delete("/admin/reservations/" + 1)
+                .then().log().all()
+                .statusCode(204);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when()
+                .post("/admin/reservations/" + 1)
+                .then().log().all()
+                .statusCode(400);
+    }
 }
