@@ -4,11 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.annotation.AuthenticationPrincipal;
 import roomescape.controller.request.WaitingRequest;
+import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Member;
 import roomescape.model.Waiting;
 import roomescape.service.WaitingService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 public class WaitingController {
@@ -30,5 +32,14 @@ public class WaitingController {
     public ResponseEntity<Void> deleteWaiting(@PathVariable("id") long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponse>> getWaiting() {
+        List<Waiting> waiting = waitingService.findAllWaiting();
+        List<WaitingResponse> waitingResponses = waiting.stream()
+                .map(WaitingResponse::new)
+                .toList();
+        return ResponseEntity.ok(waitingResponses);
     }
 }

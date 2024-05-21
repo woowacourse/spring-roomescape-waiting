@@ -74,4 +74,13 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(204);
     }
+
+    @DisplayName("예약 대기를 조회한다.")
+    @Test
+    void should_get_waiting() {
+        RestAssured.given().log().all()
+                .when().get("/waiting")
+                .then().log().all()
+                .statusCode(200).extract();
+    }
 }
