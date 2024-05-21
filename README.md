@@ -1,4 +1,14 @@
 # 방탈출 사용자 예약
+### 3~4단계 요구사항
+- [x] 같은 날짜에 같은 테마, 같은 시간을 예약할 경우 예약 대기로 설정
+- [x] 내 예약 목록을 조회할 시 예약 대기도 같이 출력
+- [x] 내 예약 목록에서 예약 대기 취소 가능
+- [x] 예약 대기 순번 출력
+- [x] 관리자 예약 대기 관리 페이지 추가
+- [x] 관리자 예약 대기 관리 페이지에서 예약 대기 취소 가능
+- [x] 관리자 예약 관리 페이지에서 예약 삭제할 때, 예약 대기가 존재할 시 자동으로 승인
+- [x] 관리자 예약 관리 페이지에서 중복되는 예약을 시도할 경우 자동으로 예약 대기로 설정
+
 ### 요구사항
 - [x] 요청에 대한 적절한 상태코드를 반환하도록 수정
   - 생성 시 201, 삭제 시 204
@@ -33,32 +43,35 @@
 - content-ype: application/json
 
 ``` json
-[
-    {
-        "id": 1,
-        "name": "브라운",
-        "date": "2023-08-05",
-        "time": {
-            "id": 1,
-            "startAt": "10:00"
-        }
-    }
-]
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  },
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  }
+}
 ```
 
 ---
 
-## 예약 추가
+## 관리자 예약 추가
 
 ### Request
 
-- POST /reservations
+- POST /admin/reservations
 - content-type: application/json
 
 ```json
 {
+  "memberId": 1, 
   "date": "2023-08-05",
-  "name": "브라운",
   "timeId": 1,
   "themeId": 1
 }
@@ -73,7 +86,131 @@
 ```json
 {
   "id": 1,
-  "name": "브라운",
+  "member": {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  },
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "themeName": "테마",
+    "description": "설명",
+    "thumbnail": "url"
+  }
+}
+```
+
+---
+
+## 관리자 예약 대기 조회
+
+### Request
+
+- GET /admin/waitings
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  },
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "themeName": "테마",
+    "description": "설명",
+    "thumbnail": "url"
+  }
+}
+```
+
+---
+
+## 관리자 예약 검색
+
+### Request
+
+- GET /admin/reservations/search?${queryParams}
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  },
+  "date": "2023-08-05",
+  "time": {
+    "id": 1,
+    "startAt": "10:00"
+  },
+  "theme": {
+    "id": 1,
+    "themeName": "테마",
+    "description": "설명",
+    "thumbnail": "url"
+  }
+}
+```
+
+---
+
+## 사용자 예약 추가
+
+### Request
+
+- POST /reservations
+- cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+- content-type: application/json
+
+```json
+{
+  "date": "2023-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+### Response
+
+- 201 Created
+- Location: /reservations/1
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "member": {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  },
   "date": "2023-08-05",
   "time": {
     "id": 1,
@@ -232,6 +369,62 @@
 
 ---
 
+## 멤버 추가
+
+### Request
+
+- POST /members
+- Location: /members/1
+- content-type: application/json
+
+```json
+{
+  "name": "회원",
+  "email": "member@wooteco.com",
+  "password": "wootecoCrew6!"
+}
+```
+
+### Response
+
+- 201 Created
+- content-type: application/json
+
+```json
+{
+  "id": 1,
+  "name": "회원",
+  "email": "member@wooteco.com",
+  "password": "wootecoCrew6!"
+}
+```
+
+---
+
+## 멤버 조회
+
+### Request
+
+- GET /members
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+[
+  {
+    "id": 1,
+    "name": "회원",
+    "email": "member@wooteco.com",
+    "role": "BASIC"
+  }
+]
+```
+
+---
+
 ## 인기 테마
 
 ### Request
@@ -338,6 +531,21 @@
   "name": "어드민"
 }
 ```
+
+---
+
+## 사용자 로그아웃
+
+### Request
+
+- POST /logout HTTP/1.1
+- host: localhost:8080
+
+### Response
+
+- HTTP/1.1 200 OK
+- Connection: keep-alive
+- Set-Cookie: token=
 
 ---
 
