@@ -7,7 +7,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.infrastructure.TokenExtractor;
 import roomescape.service.AuthService;
 import roomescape.service.exception.InvalidTokenException;
-import roomescape.service.exception.MemberNotFoundException;
 
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
@@ -23,15 +22,18 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
             throws IOException {
         final String token = TokenExtractor.fromRequest(request);
         if (token == null) {
-            response.sendRedirect("/login");
-            return false;
+            return redirectToLoginPage(response);
         }
         try {
             authService.validateToken(token);
-        } catch (final InvalidTokenException | MemberNotFoundException e) {
-            response.sendRedirect("/login");
-            return false;
+        } catch (final InvalidTokenException e) {
+            return redirectToLoginPage(response);
         }
         return true;
+    }
+
+    private boolean redirectToLoginPage(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/login");
+        return false;
     }
 }

@@ -30,6 +30,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                        final WebDataBinderFactory binderFactory) {
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         final String token = TokenExtractor.fromRequest(request);
+        if (token == null) {
+            return null;
+        }
         return new LoginMember(authService.findMemberIdByToken(token));
     }
 }
