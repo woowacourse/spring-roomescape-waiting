@@ -47,7 +47,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     );
 
     @Query("""
-            SELECT r.id FROM Reservation r
+            SELECT r FROM Reservation r
             WHERE r.date = :date
                 AND r.time.id = :timeId
                 AND r.theme.id = :themeId
@@ -55,7 +55,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             ORDER BY r.id ASC
             LIMIT 1
             """)
-    Optional<Long> findEarliestRegisteredWaiting(
+    Optional<Reservation> findEarliestRegisteredWaiting(
             @Param("date") LocalDate date, @Param("timeId") long timeId,
             @Param("themeId") long themeId, @Param("status") Status status
     );
