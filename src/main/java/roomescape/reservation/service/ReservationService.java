@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.member.domain.Member;
@@ -9,7 +10,10 @@ import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.WaitingReservationRanking;
-import roomescape.reservation.dto.*;
+import roomescape.reservation.dto.MemberReservationCreateRequest;
+import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -57,6 +61,11 @@ public class ReservationService {
     private Theme findThemeById(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private MemberReservation findMemberReservationById(Long id) {
+        return memberReservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
     }
 
     public MemberReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
@@ -114,8 +123,8 @@ public class ReservationService {
 
         return Stream.concat(
                         confirmationReservation.stream().map(MyReservationResponse::from),
-                        waitingReservation.stream().map(MyReservationResponse::from)
-                ).sorted(Comparator.comparing(MyReservationResponse::date)
+                        waitingReservation.stream().map(MyReservationResponse::from))
+                .sorted(Comparator.comparing(MyReservationResponse::date)
                         .thenComparing(MyReservationResponse::time))
                 .toList();
     }
@@ -129,8 +138,7 @@ public class ReservationService {
     }
 
     public MemberReservationResponse readReservation(Long id) {
-        MemberReservation memberReservation = memberReservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
+        MemberReservation memberReservation = findMemberReservationById(id);
         return MemberReservationResponse.from(memberReservation);
     }
 
@@ -142,5 +150,24 @@ public class ReservationService {
         return memberReservationRepository.findByStatus(ReservationStatus.WAITING).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public void confirmWaitingReservation(Long id) {
+        MemberReservation memberReservation = findMemberReservationById(id);
+        memberReservation.validateWaitingReservation();
+        validateCanConfirmRank(memberReservation);
+
+        memberReservation.setStatus(ReservationStatus.CONFIRMATION);
+    }
+
+    private void validateCanConfirmRank(MemberReservation memberReservation) {
+        Reservation reservation = memberReservation.getReservation();
+        Long waitingRank = memberReservationRepository.countByReservationAndCreatedAtBefore(
+                reservation,
+                memberReservation.getCreatedAt()
+        );
+
+        memberReservation.validateCanConfirm(waitingRank);
     }
 }

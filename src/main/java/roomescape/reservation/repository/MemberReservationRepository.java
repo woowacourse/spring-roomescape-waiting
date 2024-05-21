@@ -10,6 +10,7 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.WaitingReservationRanking;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,5 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
 
-    @Query("select mr as memberReservation, " +
-            "(select count(*) from MemberReservation as cmr " +
-            "where cmr.reservation.id = mr.reservation.id and cmr.status = 'WAITING' and cmr.createdAt < mr.createdAt) as rank " +
-            "from MemberReservation mr " +
-            "where mr.status = 'WAITING'"
-    )
-    List<WaitingReservationRanking> findWaitingReservationRanking();
+    Long countByReservationAndCreatedAtBefore(Reservation reservation, LocalDateTime createdAt);
 }

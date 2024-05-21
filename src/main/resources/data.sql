@@ -18,14 +18,14 @@ INSERT INTO reservation (date, time_id, theme_id) VALUES ( FORMATDATETIME(DATEAD
 INSERT INTO reservation (date, time_id, theme_id) VALUES ( FORMATDATETIME(DATEADD('DAY', -2, NOW()), 'yyyy-MM-dd'), 1, 2);
 INSERT INTO reservation (date, time_id, theme_id) VALUES ( FORMATDATETIME(DATEADD('DAY', -2, NOW()), 'yyyy-MM-dd'), 1, 3);
 
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 2, 1 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 2 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 2, 3 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 4 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 2, 5 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 6 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 7 );
-INSERT INTO member_reservation (member_id, reservation_id) VALUES ( 1, 8 );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 2, 1, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 1, 2, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 2, 3, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 1, 4, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 2, 5, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 1, 6, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 1, 7, CURRENT_TIMESTAMP );
+INSERT INTO member_reservation (member_id, reservation_id, created_at) VALUES ( 1, 8, CURRENT_TIMESTAMP );
 
 INSERT INTO member_reservation ( member_id, reservation_id, status, created_at ) VALUES ( 1, 3, 'WAITING', CURRENT_TIMESTAMP );
 INSERT INTO member_reservation ( member_id, reservation_id, status, created_at ) VALUES ( 3, 3, 'WAITING', CURRENT_TIMESTAMP );

@@ -50,4 +50,9 @@ public class AdminReservationController {
     public List<MemberReservationResponse> readWaitingReservations() {
         return reservationService.readWaitingReservations();
     }
+
+    @PutMapping("/waiting/{id}")
+    public void confirmWaitingReservation(@PathVariable Long id) {
+        reservationService.confirmWaitingReservation(id);
+    }
 }

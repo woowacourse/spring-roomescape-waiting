@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class MemberReservation {
 
+    private static final long CAN_CONFIRM_RANK = 0L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -64,8 +66,18 @@ public class MemberReservation {
         }
     }
 
-    public boolean isSameMember(Member member) {
-        return this.member.equals(member);
+    public void validateWaitingReservation() {
+        if (status.isNotWaiting()) {
+            throw new BadRequestException("해당 예약은 대기 상태가 아닙니다.");
+        }
+    }
+
+    public void validateCanConfirm(Long waitingRank) {
+        if (waitingRank.equals(CAN_CONFIRM_RANK)) {
+            return;
+        }
+
+        throw new BadRequestException("예약 대기는 순서대로 승인할 수 있습니다.");
     }
 
     public Long getId() {
@@ -86,5 +98,9 @@ public class MemberReservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
     }
 }
