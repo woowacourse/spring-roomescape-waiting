@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class MemberReservationController {
     }
 
     @PostMapping
-    public ReservationResponse createReservation(
+    public MemberReservationResponse createReservation(
             @Valid @RequestBody MemberReservationCreateRequest request,
             LoginMember member
     ) {

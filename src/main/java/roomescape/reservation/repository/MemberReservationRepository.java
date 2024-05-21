@@ -18,6 +18,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     Optional<MemberReservation> findByReservationAndStatus(Reservation reservation, ReservationStatus status);
 
     List<MemberReservation> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
+    List<MemberReservation> findByStatus(ReservationStatus status);
 
     @Query("select mr from MemberReservation mr where mr.member.id = :memberId AND mr.reservation in :reservations")
     List<MemberReservation> findByMemberIdAndReservations(@Param("memberId") Long memberId, @Param("reservations") List<Reservation> reservations);
@@ -33,4 +34,12 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<WaitingReservationRanking> findWaitingReservationRankingByMemberId(@Param("memberId") Long memberId);
 
     Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
+
+    @Query("select mr as memberReservation, " +
+            "(select count(*) from MemberReservation as cmr " +
+            "where cmr.reservation.id = mr.reservation.id and cmr.status = 'WAITING' and cmr.createdAt < mr.createdAt) as rank " +
+            "from MemberReservation mr " +
+            "where mr.status = 'WAITING'"
+    )
+    List<WaitingReservationRanking> findWaitingReservationRanking();
 }

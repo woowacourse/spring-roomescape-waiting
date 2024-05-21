@@ -18,7 +18,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
@@ -73,7 +73,7 @@ class ReservationServiceTest {
                 .thenReturn(List.of(Fixtures.memberReservationFixture));
 
         // when
-        List<ReservationResponse> reservations = reservationService.readReservations();
+        List<MemberReservationResponse> reservations = reservationService.readReservations();
 
         // then
         assertThat(reservations.size()).isEqualTo(1);
@@ -87,7 +87,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(Fixtures.memberReservationFixture));
 
         // when
-        ReservationResponse reservation = reservationService.readReservation(id);
+        MemberReservationResponse reservation = reservationService.readReservation(id);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
@@ -109,7 +109,7 @@ class ReservationServiceTest {
                 .thenReturn(Fixtures.memberReservationFixture);
 
         // when
-        ReservationResponse reservation = reservationService.createReservation(request);
+        MemberReservationResponse reservation = reservationService.createReservation(request);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
@@ -134,7 +134,7 @@ class ReservationServiceTest {
         LoginMember loginMember = Fixtures.loginMemberFixture;
 
         // when
-        ReservationResponse reservation = reservationService.createReservation(request, loginMember);
+        MemberReservationResponse reservation = reservationService.createReservation(request, loginMember);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();
@@ -159,7 +159,7 @@ class ReservationServiceTest {
         LoginMember loginMember = Fixtures.loginMemberFixture;
 
         // when
-        ReservationResponse reservation = reservationService.createReservation(request, loginMember);
+        MemberReservationResponse reservation = reservationService.createReservation(request, loginMember);
 
         // then
         SoftAssertions softAssertions = new SoftAssertions();

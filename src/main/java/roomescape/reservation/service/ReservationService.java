@@ -9,10 +9,7 @@ import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.WaitingReservationRanking;
-import roomescape.reservation.dto.MemberReservationCreateRequest;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.*;
 import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -62,12 +59,12 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
     }
 
-    public ReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
+    public MemberReservationResponse createReservation(MemberReservationCreateRequest request, LoginMember loginMember) {
         ReservationCreateRequest createRequest = ReservationCreateRequest.of(request, loginMember);
         return createReservation(createRequest);
     }
 
-    public ReservationResponse createReservation(ReservationCreateRequest request) {
+    public MemberReservationResponse createReservation(ReservationCreateRequest request) {
         Member member = findMemberById(request.memberId());
         Reservation reservation = findReservationOrSave(request);
 
@@ -76,7 +73,7 @@ public class ReservationService {
         validateDuplicated(memberReservation);
 
         MemberReservation savedMemberReservation = memberReservationRepository.save(memberReservation);
-        return ReservationResponse.from(savedMemberReservation);
+        return MemberReservationResponse.from(savedMemberReservation);
     }
 
     private Reservation findReservationOrSave(ReservationCreateRequest request) {
@@ -103,9 +100,9 @@ public class ReservationService {
                 .ifPresent(memberReservation::validateDuplicated);
     }
 
-    public List<ReservationResponse> readReservations() {
+    public List<MemberReservationResponse> readReservations() {
         return memberReservationRepository.findAll().stream()
-                .map(ReservationResponse::from)
+                .map(MemberReservationResponse::from)
                 .toList();
     }
 
@@ -123,21 +120,27 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
+    public List<MemberReservationResponse> searchReservations(LocalDate start, LocalDate end, Long memberId, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateBetweenAndThemeId(start, end, themeId);
 
         return memberReservationRepository.findByMemberIdAndReservations(memberId, reservations).stream()
-                .map(ReservationResponse::from)
+                .map(MemberReservationResponse::from)
                 .toList();
     }
 
-    public ReservationResponse readReservation(Long id) {
+    public MemberReservationResponse readReservation(Long id) {
         MemberReservation memberReservation = memberReservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
-        return ReservationResponse.from(memberReservation);
+        return MemberReservationResponse.from(memberReservation);
     }
 
     public void deleteReservation(Long id) {
         memberReservationRepository.deleteById(id);
+    }
+
+    public List<MemberReservationResponse> readWaitingReservations() {
+        return memberReservationRepository.findByStatus(ReservationStatus.WAITING).stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 }

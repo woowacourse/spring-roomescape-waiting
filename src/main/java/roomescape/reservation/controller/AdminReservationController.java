@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
@@ -21,17 +21,17 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ReservationResponse createReservation(@Valid @RequestBody ReservationCreateRequest request) {
+    public MemberReservationResponse createReservation(@Valid @RequestBody ReservationCreateRequest request) {
         return reservationService.createReservation(request);
     }
 
     @GetMapping
-    public List<ReservationResponse> readReservations() {
+    public List<MemberReservationResponse> readReservations() {
         return reservationService.readReservations();
     }
 
     @GetMapping("/search")
-    public List<ReservationResponse> readReservations(
+    public List<MemberReservationResponse> readReservations(
             @RequestParam LocalDate dateFrom,
             @RequestParam LocalDate dateTo,
             @RequestParam Long memberId,
@@ -44,5 +44,10 @@ public class AdminReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waiting")
+    public List<MemberReservationResponse> readWaitingReservations() {
+        return reservationService.readWaitingReservations();
     }
 }
