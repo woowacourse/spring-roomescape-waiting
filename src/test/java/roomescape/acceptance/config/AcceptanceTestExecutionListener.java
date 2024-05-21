@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class AcceptanceTestExecutionListener extends AbstractTestExecutionListener {
     @Override
-    public void beforeTestClass(final TestContext testContext) throws Exception {
+    public void beforeTestClass(final TestContext testContext) {
         RestAssured.port = Optional.ofNullable(testContext.getApplicationContext()
                         .getEnvironment()
                         .getProperty("local.server.port", Integer.class))
