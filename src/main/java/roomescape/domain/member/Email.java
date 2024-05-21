@@ -4,7 +4,7 @@ public class Email {
 
     private String email;
 
-    public Email() {
+    protected Email() {
     }
 
     public Email(String email) {

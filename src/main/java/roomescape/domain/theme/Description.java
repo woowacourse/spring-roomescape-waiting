@@ -4,7 +4,7 @@ public class Description {
 
     private String description;
 
-    public Description() {
+    protected Description() {
     }
 
     public Description(String description) {

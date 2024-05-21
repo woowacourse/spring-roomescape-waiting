@@ -29,7 +29,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
