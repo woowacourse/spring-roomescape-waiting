@@ -5,6 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.controller.dto.request.SignupRequest;
+import roomescape.member.controller.dto.response.MemberResponse;
+import roomescape.member.controller.dto.response.SignupResponse;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -18,12 +20,14 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Member save(final SignupRequest signupRequest) {
-        return memberRepository.save(signupRequest.toEntity());
+    public SignupResponse save(final SignupRequest signupRequest) {
+        return SignupResponse.from(memberRepository.save(signupRequest.toEntity()));
     }
 
-    public List<Member> getAll() {
-        return StreamSupport.stream(memberRepository.findAll().spliterator(), false).toList();
+    public List<MemberResponse> getAll() {
+        return StreamSupport.stream(memberRepository.findAll().spliterator(), false)
+                .map(MemberResponse::from)
+                .toList();
     }
 
     public Member getById(long id) {

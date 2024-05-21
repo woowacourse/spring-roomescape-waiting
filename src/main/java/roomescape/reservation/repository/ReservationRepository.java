@@ -25,6 +25,9 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     @Query("""
             SELECT r FROM Reservation AS r
+            LEFT JOIN FETCH r.theme
+            LEFT JOIN FETCH r.member
+            LEFT JOIN FETCH r.time
             WHERE (:themeId IS NULL OR r.theme.id = :themeId)
             AND (:memberId IS NULL OR r.member.id = :memberId)
             AND (:dateFrom IS NULL OR r.date >= :dateFrom)

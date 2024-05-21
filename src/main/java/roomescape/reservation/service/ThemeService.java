@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.request.ThemeSaveRequest;
+import roomescape.reservation.controller.dto.response.ThemeDeleteResponse;
+import roomescape.reservation.controller.dto.response.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
@@ -25,13 +27,15 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public Theme save(final ThemeSaveRequest themeSaveRequest) {
+    public ThemeResponse save(final ThemeSaveRequest themeSaveRequest) {
         Theme theme = themeSaveRequest.toEntity();
-        return themeRepository.save(theme);
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
-    public List<Theme> getAll() {
-        return StreamSupport.stream(themeRepository.findAll().spliterator(), false).toList();
+    public List<ThemeResponse> getAll() {
+        return StreamSupport.stream(themeRepository.findAll().spliterator(), false)
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     public Theme getById(long id) {
@@ -39,7 +43,7 @@ public class ThemeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
     }
 
-    public List<Theme> findPopularThemes() {
+    public List<ThemeResponse> findPopularThemes() {
         List<Reservation> reservations = reservationRepository.findByDateBetween(
                 LocalDate.now().minusDays(8),
                 LocalDate.now().minusDays(1)
@@ -48,6 +52,7 @@ public class ThemeService {
 
         return popularThemeIds.stream()
                 .map(this::getById)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -61,10 +66,10 @@ public class ThemeService {
                 .toList();
     }
 
-    public int delete(final long id) {
+    public ThemeDeleteResponse delete(final long id) {
         validateNotExitsThemeById(id);
         validateAlreadyHasReservationByThemeId(id);
-        return themeRepository.deleteById(id);
+        return new ThemeDeleteResponse(themeRepository.deleteById(id));
     }
 
     private void validateNotExitsThemeById(final long id) {

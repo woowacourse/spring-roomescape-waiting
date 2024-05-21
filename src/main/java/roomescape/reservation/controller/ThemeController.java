@@ -27,26 +27,26 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> save(@RequestBody ThemeSaveRequest themeSaveRequest) {
-        ThemeResponse themeResponse = ThemeResponse.from(themeService.save(themeSaveRequest));
+        ThemeResponse themeResponse = themeService.save(themeSaveRequest);
         return ResponseEntity.created(URI.create("/themes/" + themeResponse.id()))
                 .body(themeResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getAll() {
-        List<ThemeResponse> themeResponses = ThemeResponse.list(themeService.getAll());
+        List<ThemeResponse> themeResponses = themeService.getAll();
         return ResponseEntity.ok(themeResponses);
     }
 
     @GetMapping("/ranking")
     public ResponseEntity<List<ThemeResponse>> findPopularThemes() {
-        List<ThemeResponse> themeResponses = ThemeResponse.list(themeService.findPopularThemes());
+        List<ThemeResponse> themeResponses = themeService.findPopularThemes();
         return ResponseEntity.ok(themeResponses);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ThemeDeleteResponse> delete(@PathVariable("id") long id) {
-        ThemeDeleteResponse themeDeleteResponse = new ThemeDeleteResponse(themeService.delete(id));
+        ThemeDeleteResponse themeDeleteResponse = themeService.delete(id);
         return ResponseEntity.ok().body(themeDeleteResponse);
     }
 }

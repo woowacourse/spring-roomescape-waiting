@@ -34,30 +34,27 @@ public class MemberReservationController {
             @RequestBody @Valid final ReservationSaveRequest reservationSaveRequest,
             @AuthenticationPrincipal Member member
     ) {
-        ReservationResponse reservationResponse =
-                ReservationResponse.from(reservationService.save(reservationSaveRequest, member));
+        ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, member);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAll() {
-        List<ReservationResponse> reservationResponses = ReservationResponse.list(reservationService.getAll());
+        List<ReservationResponse> reservationResponses = reservationService.getAll();
         return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/me")
     public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(
             @AuthenticationPrincipal Member member) {
-        List<MemberReservationResponse> memberReservationResponses =
-                MemberReservationResponse.list(reservationService.findByMemberId(member.getId()));
+        List<MemberReservationResponse> memberReservationResponses = reservationService.findByMemberId(member.getId());
         return ResponseEntity.ok(memberReservationResponses);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ReservationDeleteResponse> delete(@PathVariable("id") final long id) {
-        ReservationDeleteResponse reservationDeleteResponse =
-                new ReservationDeleteResponse(reservationService.delete(id));
+        ReservationDeleteResponse reservationDeleteResponse = reservationService.delete(id);
         return ResponseEntity.ok().body(reservationDeleteResponse);
     }
 }

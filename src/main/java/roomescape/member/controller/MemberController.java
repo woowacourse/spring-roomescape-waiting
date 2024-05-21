@@ -25,13 +25,13 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<SignupResponse> save(@RequestBody @Valid final SignupRequest signupRequest) {
-        SignupResponse signupResponse = SignupResponse.from(memberService.save(signupRequest));
+        SignupResponse signupResponse = memberService.save(signupRequest);
         return ResponseEntity.ok(signupResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getAll() {
-        List<MemberResponse> memberResponses = MemberResponse.list(memberService.getAll());
+        List<MemberResponse> memberResponses = memberService.getAll();
         return ResponseEntity.ok(memberResponses);
     }
 }

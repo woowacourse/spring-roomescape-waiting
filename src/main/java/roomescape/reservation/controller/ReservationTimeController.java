@@ -33,16 +33,14 @@ public class ReservationTimeController {
     public ResponseEntity<ReservationTimeResponse> save(
             @RequestBody @Valid final ReservationTimeSaveRequest reservationTimeSaveRequest
     ) {
-        ReservationTimeResponse reservationTimeResponse =
-                ReservationTimeResponse.from(reservationTimeService.save(reservationTimeSaveRequest));
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.save(reservationTimeSaveRequest);
         return ResponseEntity.created(URI.create("/times/" + reservationTimeResponse.id()))
                 .body(reservationTimeResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getAll() {
-        List<ReservationTimeResponse> reservationTimeResponses =
-                ReservationTimeResponse.list(reservationTimeService.getAll());
+        List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.getAll();
         return ResponseEntity.ok(reservationTimeResponses);
     }
 
@@ -52,14 +50,13 @@ public class ReservationTimeController {
             @RequestParam(name = "themeId") final long themeId
     ) {
         List<SelectableTimeResponse> selectableTimeResponses =
-                SelectableTimeResponse.list(reservationTimeService.findSelectableTimes(date, themeId));
+                reservationTimeService.findSelectableTimes(date, themeId);
         return ResponseEntity.ok(selectableTimeResponses);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ReservationTimeDeleteResponse> delete(@PathVariable("id") final long id) {
-        ReservationTimeDeleteResponse reservationTimeDeleteResponse =
-                new ReservationTimeDeleteResponse(reservationTimeService.delete(id));
+        ReservationTimeDeleteResponse reservationTimeDeleteResponse = reservationTimeService.delete(id);
         return ResponseEntity.ok().body(reservationTimeDeleteResponse);
     }
 }

@@ -2,7 +2,6 @@ package roomescape.reservation.controller.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalTime;
-import java.util.List;
 import roomescape.reservation.domain.ReservationTime;
 
 public record ReservationTimeResponse(
@@ -17,11 +16,5 @@ public record ReservationTimeResponse(
                 reservationTime.getId(),
                 reservationTime.getStartAt()
         );
-    }
-
-    public static List<ReservationTimeResponse> list(final List<ReservationTime> reservationTimes) {
-        return reservationTimes.stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
     }
 }

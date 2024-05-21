@@ -29,8 +29,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> save(
             @RequestBody @Valid final AdminReservationSaveRequest reservationSaveRequest
     ) {
-        ReservationResponse reservationResponse =
-                ReservationResponse.from(reservationService.save(reservationSaveRequest));
+        ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
@@ -43,7 +42,7 @@ public class AdminReservationController {
             @RequestParam(required = false) final LocalDate dateTo
     ) {
         List<ReservationResponse> reservationResponses =
-                ReservationResponse.list(reservationService.findByFilter(memberId, themeId, dateFrom, dateTo));
+                reservationService.findByFilter(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok(reservationResponses);
     }
 }

@@ -6,10 +6,12 @@ import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservation.controller.dto.response.ReservationTimeDeleteResponse;
+import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
+import roomescape.reservation.controller.dto.response.SelectableTimeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationMapping;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.SelectableTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
@@ -26,13 +28,15 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public ReservationTime save(final ReservationTimeSaveRequest reservationTimeSaveRequest) {
+    public ReservationTimeResponse save(final ReservationTimeSaveRequest reservationTimeSaveRequest) {
         ReservationTime reservationTime = reservationTimeSaveRequest.toEntity();
-        return reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResponse.from(reservationTimeRepository.save(reservationTime));
     }
 
-    public List<ReservationTime> getAll() {
-        return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false).toList();
+    public List<ReservationTimeResponse> getAll() {
+        return StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false)
+                .map(ReservationTimeResponse::from)
+                .toList();
     }
 
     public ReservationTime getById(Long id) {
@@ -40,12 +44,13 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 잘못된 예약 가능 시간 번호를 입력하였습니다."));
     }
 
-    public List<SelectableTime> findSelectableTimes(final LocalDate date, final long themeId) {
+    public List<SelectableTimeResponse> findSelectableTimes(final LocalDate date, final long themeId) {
         List<ReservationMapping> usedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId);
-        List<ReservationTime> reservationTimes = getAll();
+        List<ReservationTime> reservationTimes =
+                StreamSupport.stream(reservationTimeRepository.findAll().spliterator(), false).toList();
 
         return reservationTimes.stream()
-                .map(time -> new SelectableTime(
+                .map(time -> new SelectableTimeResponse(
                         time.getId(),
                         time.getStartAt(),
                         isAlreadyBooked(time, usedTimeIds)
@@ -58,10 +63,10 @@ public class ReservationTimeService {
                 .anyMatch(reservationMapping -> reservationMapping.getTimeId() == reservationTime.getId());
     }
 
-    public int delete(final long id) {
+    public ReservationTimeDeleteResponse delete(final long id) {
         validateDoesNotExists(id);
         validateAlreadyHasReservationByTimeId(id);
-        return reservationTimeRepository.deleteById(id);
+        return new ReservationTimeDeleteResponse(reservationTimeRepository.deleteById(id));
     }
 
     private void validateAlreadyHasReservationByTimeId(final long id) {

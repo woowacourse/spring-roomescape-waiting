@@ -9,6 +9,9 @@ import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
+import roomescape.reservation.controller.dto.response.MemberReservationResponse;
+import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
+import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
@@ -33,13 +36,13 @@ public class ReservationService {
         this.memberService = memberService;
     }
 
-    public Reservation save(final ReservationSaveRequest saveRequest, final Member member) {
+    public ReservationResponse save(final ReservationSaveRequest saveRequest, final Member member) {
         ReservationTime reservationTime = reservationTimeService.getById(saveRequest.timeId());
         Theme theme = themeService.getById(saveRequest.themeId());
         validateDuplicateReservation(saveRequest);
 
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.RESERVATION);
-        return reservationRepository.save(reservation);
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private void validateDuplicateReservation(ReservationSaveRequest saveRequest) {
@@ -52,27 +55,35 @@ public class ReservationService {
         return !reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isEmpty();
     }
 
-    public Reservation save(final AdminReservationSaveRequest adminReservationSaveRequest) {
+    public ReservationResponse save(final AdminReservationSaveRequest adminReservationSaveRequest) {
         Member member = memberService.getById(adminReservationSaveRequest.memberId());
         return save(adminReservationSaveRequest.toReservationSaveRequest(), member);
     }
 
-    public List<Reservation> getAll() {
-        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false).toList();
+    public List<ReservationResponse> getAll() {
+        return StreamSupport.stream(reservationRepository.findAll().spliterator(), false)
+                .map(ReservationResponse::from)
+                .toList();
     }
 
-    public List<Reservation> findByFilter(final Long memberId, final Long themeId,
-                                          final LocalDate dateFrom, final LocalDate dateTo) {
-        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo);
+    public List<ReservationResponse> findByFilter(final Long memberId, final Long themeId,
+                                                  final LocalDate dateFrom, final LocalDate dateTo) {
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
-    public List<Reservation> findByMemberId(final long memberId) {
-        return reservationRepository.findByMemberId(memberId);
+    public List<MemberReservationResponse> findByMemberId(final long memberId) {
+        return reservationRepository.findByMemberId(memberId)
+                .stream()
+                .map(MemberReservationResponse::from)
+                .toList();
     }
 
-    public int delete(final long id) {
+    public ReservationDeleteResponse delete(final long id) {
         validateNotExitsReservationById(id);
-        return reservationRepository.deleteById(id);
+        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
     }
 
     private void validateNotExitsReservationById(final long id) {

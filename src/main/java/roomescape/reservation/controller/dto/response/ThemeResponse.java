@@ -1,6 +1,5 @@
 package roomescape.reservation.controller.dto.response;
 
-import java.util.List;
 import roomescape.reservation.domain.Theme;
 
 public record ThemeResponse(
@@ -17,11 +16,5 @@ public record ThemeResponse(
                 theme.getDescription(),
                 theme.getThumbnail()
         );
-    }
-
-    public static List<ThemeResponse> list(final List<Theme> themes) {
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 }
