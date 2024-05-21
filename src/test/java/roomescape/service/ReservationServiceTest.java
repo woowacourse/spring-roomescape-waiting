@@ -145,4 +145,21 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.delete(notExistingId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    // TODO: 사용자 예약 목록 조회 서비스 테스트
+
+    @Test
+    @DisplayName("예약 대기 목록을 조회한다.")
+    void findReservationWaitings() {
+        // given
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        given(reservationRepository.findByStatus(ReservationStatus.WAITING))
+                .willReturn(List.of(reservation));
+
+        // when
+        final List<ReservationResponse> waitings = reservationService.findReservationWaitings();
+
+        // then
+        assertThat(waitings).hasSize(1);
+    }
 }

@@ -3,6 +3,8 @@ package roomescape.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.member.Member;
@@ -151,5 +153,14 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(actual).hasSize(1);
+    }
+    
+    @ParameterizedTest
+    @EnumSource(ReservationStatus.class)
+    @DisplayName("예약 상태에 따른 예약 목록을 조회한다.")
+    void findByStatus(final ReservationStatus status) {
+        final List<Reservation> actual = reservationRepository.findByStatus(status);
+
+        assertThat(actual).allSatisfy(reservation -> assertThat(reservation.getStatus()).isEqualTo(status));
     }
 }

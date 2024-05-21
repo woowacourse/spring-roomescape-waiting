@@ -76,6 +76,26 @@ abstract class AcceptanceTest {
         return Long.valueOf(id);
     }
 
+    protected Long saveReservationWaiting() {
+        final Long timeId = saveReservationTime();
+        final Long themeId = saveTheme();
+        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final MemberReservationSaveRequest request
+                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
+
+        Integer id = RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .jsonPath().get("id");
+
+        return Long.valueOf(id);
+    }
+
     protected String getAccessToken(final String email) {
         return RestAssured.given().log().all()
                 .body(new TokenRequest(email, MEMBER_PASSWORD))
@@ -110,6 +130,16 @@ abstract class AcceptanceTest {
 
     protected void assertGetResponse(final String path, final int statusCode) {
         RestAssured.given().log().all()
+                .when().get(path)
+                .then().log().all()
+                .statusCode(statusCode);
+    }
+
+    protected void assertGetResponseWithLogin(final String path, final int statusCode) {
+        final String accessToken = getAccessToken(ADMIN_EMAIL);
+
+        RestAssured.given().log().all()
+                .cookie("token", accessToken)
                 .when().get(path)
                 .then().log().all()
                 .statusCode(statusCode);

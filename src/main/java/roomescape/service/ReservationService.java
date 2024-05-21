@@ -73,4 +73,11 @@ public class ReservationService {
                 .map(MyReservationResponse::from)
                 .toList();
     }
+
+    public List<ReservationResponse> findReservationWaitings() {
+        final List<Reservation> waitings = reservationRepository.findByStatus(ReservationStatus.WAITING);
+        return waitings.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }
