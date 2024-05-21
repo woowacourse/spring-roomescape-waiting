@@ -1,5 +1,8 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Password {
 
     private String password;

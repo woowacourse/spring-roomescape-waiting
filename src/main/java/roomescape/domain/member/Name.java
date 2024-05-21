@@ -1,7 +1,9 @@
 package roomescape.domain.member;
 
+import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
 
+@Embeddable
 public class Name {
 
     private String name;

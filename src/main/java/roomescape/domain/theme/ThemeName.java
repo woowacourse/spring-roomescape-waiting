@@ -1,5 +1,8 @@
 package roomescape.domain.theme;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class ThemeName {
 
     private String name;
