@@ -13,7 +13,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @DataJpaTest
-class JpaThemeRepositoryTest {
+class ThemeJpaRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
