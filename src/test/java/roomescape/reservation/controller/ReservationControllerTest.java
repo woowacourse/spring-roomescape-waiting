@@ -1,18 +1,20 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
+import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.login.dto.LoginRequest;
+import roomescape.reservation.dto.ReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -33,29 +35,23 @@ class ReservationControllerTest {
     @DisplayName("로그인 후 Reservation을 추가한다.")
     void addReservation() {
         //given
-        Map<String, String> memberParam = new HashMap<>();
-        memberParam.put("password", "password");
-        memberParam.put("email", "admin@email.com");
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_1.getEmail().email());
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(memberParam)
+                .body(loginRequest)
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(200)
                 .extract().cookie("token");
 
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        Map<String, String> reservationParams = new HashMap<>();
-        reservationParams.put("date", tomorrow.toString());
-        reservationParams.put("timeId", "1");
-        reservationParams.put("themeId", "1");
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
 
         //when & then
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
-                .body(reservationParams)
+                .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)

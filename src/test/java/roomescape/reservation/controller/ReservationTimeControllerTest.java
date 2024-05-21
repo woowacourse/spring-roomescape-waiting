@@ -2,6 +2,8 @@ package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.InitialReservationTimeFixture.INITIAL_RESERVATION_TIME_COUNT;
+import static roomescape.InitialReservationTimeFixture.NOT_SAVED_TIME;
+import static roomescape.InitialReservationTimeFixture.RESERVATION_TIME_1;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -14,6 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.reservation.dto.ReservationTimeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -23,12 +26,11 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("예약 가능한 시간을 추가한다.")
     void addReservationGetTime() {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", "15:00");
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(NOT_SAVED_TIME.getStartAt());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(201);
@@ -38,12 +40,12 @@ class ReservationTimeControllerTest {
     @ValueSource(strings = {"", "abc", "1500", "15000", "15", "25:00"})
     @DisplayName("예약 가능한 시간이 잘못된 경우 bad request 상태코드를 반환한다.")
     void wrongGetStartAt(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
+        Map<String, String> invalidReservationTimeRequest = new HashMap<>();
+        invalidReservationTimeRequest.put("startAt", startAt);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(invalidReservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(400);
@@ -52,12 +54,11 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("중복된 예약 가능한 시간을 추가하는 경우 bad request 상태코드를 반환한다.")
     void wrongGetStartAt() {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", "09:00");
+        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(RESERVATION_TIME_1.getStartAt());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(400);
