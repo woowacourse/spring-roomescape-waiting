@@ -26,6 +26,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new CheckLoginInterceptor(memberService, tokenProvider))
                 .addPathPatterns("/login/check")
                 .addPathPatterns("/reservations/**")
+                .addPathPatterns("/waitings/**")
                 .addPathPatterns("/admin/**")
                 .order(1);
         registry.addInterceptor(new CheckAdminInterceptor())
