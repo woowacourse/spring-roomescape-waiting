@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.reservation.repository.MemberReservationRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
@@ -20,15 +19,12 @@ import java.util.stream.Collectors;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
 
     public ThemeService(ThemeRepository themeRepository,
-                        ReservationRepository reservationRepository,
                         MemberReservationRepository memberReservationRepository
     ) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
     }
 
@@ -87,7 +83,7 @@ public class ThemeService {
     }
 
     private void validateReservationExists(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (memberReservationRepository.existsByReservationThemeId(id)) {
             throw new BadRequestException("해당 테마에 예약이 존재합니다.");
         }
     }

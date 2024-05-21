@@ -16,10 +16,10 @@ public class Reservation {
     private Long id;
     private LocalDate date;
     @JoinColumn(name = "time_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private ReservationTime time;
     @JoinColumn(name = "theme_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Theme theme;
 
     protected Reservation() {

@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.reservation.repository.MemberReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.ReservationTimeCreateRequest;
@@ -21,11 +22,13 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final MemberReservationRepository memberReservationRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationRepository reservationRepository, MemberReservationRepository memberReservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.memberReservationRepository = memberReservationRepository;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -83,7 +86,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationExists(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (memberReservationRepository.existsByReservationTimeId(id)) {
             throw new BadRequestException("해당 시간대에 예약이 존재합니다.");
         }
     }

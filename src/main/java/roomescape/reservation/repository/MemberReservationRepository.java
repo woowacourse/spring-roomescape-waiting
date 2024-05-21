@@ -37,4 +37,8 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
 
     Long countByReservationAndCreatedAtBefore(Reservation reservation, LocalDateTime createdAt);
+
+    boolean existsByReservationThemeId(Long id);
+
+    boolean existsByReservationTimeId(Long id);
 }
