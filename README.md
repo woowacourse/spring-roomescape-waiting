@@ -93,14 +93,14 @@
 | GET         | `/reservations/mine`                 | 로그인 회원의 예약 목록 조회  |                                                   | [List of MyReservationResponse](#List-of-MyReservationResponse)      |
 | GET         | `/reservations-mine`                 | 로그인 회원의 예약 목록 페이지 |                                                   | `templates/reservation-mine.html`                                    |
 
+| POST        | `/reservations/waiting`              | 예약 대기             | [MemberReservationRequest](#MemberReservationRequest)   | [ReservationResponse](#ReservationResponse)                          |
 ### ERD
 ![roomescape_waiting_erd](./roomescape_waiting_erd.png)
 
-### ReservationRequest
+### MemberReservationRequest
 
 ```json
 {
-  "name": "홍길동",
   "date": "2021-07-01",
   "timeId": 1,
   "themeId": 1
@@ -116,17 +116,20 @@ HTTP/1.1 201 Created
 ```json
 {
   "id": 1,
-  "name": "홍길동",
   "date": "2021-07-01",
-  "time": {
+  "member": {
     "id": 1,
-    "time": "10:00"
+    "name": "홍길동"
+  },
+  "time": {
+    "id": 2,
+    "startAt": "14:00"
   },
   "theme": {
     "id": 1,
     "name": "테마1",
     "description": "테마1 설명",
-    "thumbnail": "테마1 섬네일"
+    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
   }
 }
 ```
