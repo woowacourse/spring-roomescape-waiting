@@ -96,6 +96,6 @@ public class ReservationRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/admin/reservations/{id}")
     public void deleteReservation(@PathVariable long id) {
-        reservationService.deleteReservation(id);
+        reservationService.deleteConfirmedReservation(id);
     }
 }

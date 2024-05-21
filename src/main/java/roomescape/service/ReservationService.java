@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,13 +83,6 @@ public class ReservationService {
         return new ReservationResponse(reservation);
     }
 
-    private Reservation generateReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
-        if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
-            return new Reservation(member, theme, date, time, WAITING);
-        }
-        return new Reservation(member, theme, date, time, CONFIRMED);
-    }
-
     public void deleteReservationWaiting(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         if (!reservationRepository.existsByIdAndMemberAndStatus(id, member, WAITING)) {
@@ -97,11 +91,16 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public void deleteReservation(long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new ReservationNotFoundException();
-        }
+    public void deleteConfirmedReservation(long id) {
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
+        Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime(),
+                WAITING
+        );
+        first.ifPresent(value -> value.updateStatus(CONFIRMED));
     }
 
     private void validatePreviousDate(LocalDate date, ReservationTime time) {
@@ -114,6 +113,13 @@ public class ReservationService {
         if (reservationRepository.existsByMemberAndThemeAndDateAndTime(member, theme, date, time)) {
             throw new ReservationDuplicatedException();
         }
+    }
+
+    private Reservation generateReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
+        if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
+            return new Reservation(member, theme, date, time, WAITING);
+        }
+        return new Reservation(member, theme, date, time, CONFIRMED);
     }
 
     private Specification<Reservation> getSearchSpecification(ReservationSearchParams request) {

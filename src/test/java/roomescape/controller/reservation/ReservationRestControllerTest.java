@@ -118,7 +118,7 @@ class ReservationRestControllerTest {
 
         List<ReservationResponse> actualResponse = RestAssured.given().log().all()
                 .cookie("token", adminToken)
-                .when().get("/admin/reservations")
+                .when().get("/admin/reservations/confirmed")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
@@ -130,7 +130,7 @@ class ReservationRestControllerTest {
                 new ThemeResponse(1L, "공포", "공포는 무서워", "hi.jpg"),
                 "2100-08-05",
                 new ReservationTimeResponse(1L, "10:00"),
-                "RESERVED"
+                "CONFIRMED"
         );
 
         assertThat(actualResponse)

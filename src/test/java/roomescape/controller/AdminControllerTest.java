@@ -69,11 +69,22 @@ class AdminControllerTest {
 
     @DisplayName("어드민 예약 관리 페이지 호출 테스트")
     @Test
-    void admin_reservation_page() {
+    void admin_confirmed_reservation_page() {
         RestAssured.given().log().all()
                 .redirects().follow(false)
                 .cookie("token", adminToken)
-                .when().get("/admin/reservation")
+                .when().get("/admin/reservation/confirmed")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("어드민 예약 대기 관리 페이지 호출 테스트")
+    @Test
+    void admin_waiting_reservation_page() {
+        RestAssured.given().log().all()
+                .redirects().follow(false)
+                .cookie("token", adminToken)
+                .when().get("/admin/reservation/waiting")
                 .then().log().all()
                 .statusCode(200);
     }

@@ -25,6 +25,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
+import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservation.ReservationWaitingNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
@@ -213,16 +214,33 @@ class ReservationServiceTest {
                 .isThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L));
     }
 
-    @DisplayName("예약을 정상적으로 삭제한다.")
+    @DisplayName("삭제하려는 예약이 DB에 존재하지 않으면 예외를 발생시킨다.")
     @Test
-    void success_delete_reservation() {
-        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
+    void throw_exception_when_delete_not_exists_reservation() {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        reservationRepository.save(reservation);
 
-        assertThatNoException()
-                .isThrownBy(() -> reservationService.deleteReservation(reservation.getId()));
+        assertThatThrownBy(() -> reservationService.deleteConfirmedReservation(1L))
+                .isInstanceOf(ReservationNotFoundException.class);
+    }
+
+    @DisplayName("예약을 정상적으로 삭제하고 만약 대기중인 예약이 존재하면 가장 우선 대기중인 예약을 확정 상태로 변경한다.")
+    @Test
+    void success_delete_reservation_with_change_status_waiting_reservation_to_confirmed() {
+        Member another = new Member("t1@t1.com", "123", "재즈", "MEMBER");
+        memberRepository.save(another);
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        Reservation reservation1 = new Reservation(member, theme, date, time, CONFIRMED);
+        Reservation reservation2 = new Reservation(another, theme, date, time, WAITING);
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+
+        reservationService.deleteConfirmedReservation(1L);
+        Reservation reservation = reservationRepository.findById(2L).get();
+
+        assertThat(reservation.getReservationStatus()).isEqualTo(CONFIRMED);
     }
 }

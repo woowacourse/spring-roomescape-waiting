@@ -2,6 +2,8 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -26,11 +28,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                                                  LocalDate date,
                                                  ReservationTime reservationTime);
 
-    boolean existsByThemeAndDateAndTime(Theme theme,
-                                        LocalDate date,
-                                        ReservationTime reservationTime);
+    boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 
     boolean existsByIdAndMemberAndStatus(long id, Member member, ReservationStatus reservationStatus);
+
+    Optional<Reservation> findFirstByThemeAndDateAndTimeAndStatus(Theme theme,
+                                                                  LocalDate date,
+                                                                  ReservationTime reservationTime,
+                                                                  ReservationStatus reservationStatus);
+
+    @EntityGraph(attributePaths = {"theme", "time"})
+    Optional<Reservation> findById(long id);
 
     @Query("""
             SELECT new roomescape.repository.dto.ReservationRankResponse

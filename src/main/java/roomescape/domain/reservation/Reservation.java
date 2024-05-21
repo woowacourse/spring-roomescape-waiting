@@ -48,6 +48,10 @@ public class Reservation {
     protected Reservation() {
     }
 
+    public void updateStatus(ReservationStatus reservationStatus) {
+        this.status = reservationStatus;
+    }
+
     public Long getId() {
         return id;
     }
