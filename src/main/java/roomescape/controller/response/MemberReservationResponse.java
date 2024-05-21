@@ -5,7 +5,9 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationStatus;
 
 public class MemberReservationResponse {
 
@@ -21,7 +23,7 @@ public class MemberReservationResponse {
         this.theme = reservation.getTheme().getName();
         this.date = reservation.getDate();
         this.time = reservation.getTime().getStartAt();
-        this.status = "예약";
+        this.status = mapStatus(reservation.getStatus());
     }
 
     public Long getReservationId() {
@@ -42,5 +44,17 @@ public class MemberReservationResponse {
 
     public String getStatus() {
         return status;
+    }
+
+    public String mapStatus(ReservationStatus status) {
+        switch (status) {
+            case ACCEPT -> {
+                return "예약";
+            }
+            case PENDING -> {
+                return "대기";
+            }
+            default -> throw new NotFoundException("%s 상태를 표현하는 로직이 존재하지 않습니다.".formatted(status.name()));
+        }
     }
 }
