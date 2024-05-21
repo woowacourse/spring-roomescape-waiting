@@ -124,17 +124,17 @@ class AdminEndToEndTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(7));
+                .body("size()", is(9));
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/admin/reservations/7")
+                .when().delete("/admin/reservations/9")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().delete("/admin/reservations/7")
+                .when().delete("/admin/reservations/9")
                 .then().log().all()
                 .statusCode(400);
     }

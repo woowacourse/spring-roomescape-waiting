@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
-import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
@@ -53,7 +52,8 @@ class ReservationServiceTest {
 
         final List<ReservationRankResponse> expected = List.of(
                 new ReservationRankResponse(5L, "가을", date.minusDays(7), LocalTime.of(15, 0), 1),
-                new ReservationRankResponse(6L, "가을", date.plusDays(3), LocalTime.of(18, 0), 1)
+                new ReservationRankResponse(6L, "가을", date.plusDays(3), LocalTime.of(18, 0), 1),
+                new ReservationRankResponse(8L, "가을", date.plusDays(4), LocalTime.of(18, 0), 2)
         );
 
         assertThat(reservationsByMember).isEqualTo(expected);
@@ -62,20 +62,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 대기 목록을 조회한다.")
     void findAllWaiting() {
-        //given
-        //TODO 테스트 인서트 문 수정
-        final LocalDate now = LocalDate.now();
-        final CreateReservationRequest request1 = new CreateReservationRequest(1L, 3L, now.plusDays(3), 4L);
-        final CreateReservationRequest request2 = new CreateReservationRequest(2L, 3L, now.plusDays(3), 4L);
-        reservationService.addReservation(request1);
-        reservationService.addReservation(request2);
-
-        //when
         final List<Reservation> allWaiting = reservationService.findAllWaiting();
-        final List<Reservation> expected = List.of(
-                new Reservation(7L, null, null, null, null),
-                new Reservation(8L, null, null, null, null)
-        );
+        final List<Reservation> expected = List.of(new Reservation(8L, null, null, null, null));
 
         //then
         assertThat(allWaiting).isEqualTo(expected);

@@ -22,4 +22,6 @@ VALUES (1, CURRENT_DATE - 3, 1, 1),
        (1, CURRENT_DATE - 1, 2, 2),
        (2, CURRENT_DATE - 1, 1, 2),
        (3, CURRENT_DATE - 7, 1, 3),
-       (3, CURRENT_DATE + 3, 4, 3);
+       (3, CURRENT_DATE + 3, 4, 3),
+       (2, CURRENT_DATE + 4, 4, 3),
+       (3, CURRENT_DATE + 4, 4, 3);
