@@ -31,10 +31,10 @@ public class ReservationWaitCreateService {
 
     @Transactional
     public ReservationWait create(ReservationWaitSaveRequest request, Member member) {
-        ReservationTime reservationTime = getReservationTime(request.timeId());
+        ReservationTime reservationTime = getReservationTime(request.time());
         ReservationWait reservationWait = request.toEntity(
                 reservationTime,
-                getTheme(request.themeId()),
+                getTheme(request.theme()),
                 member);
         validateDateIsFuture(request.date(), reservationTime);
         return reservationWaitRepository.save(reservationWait);

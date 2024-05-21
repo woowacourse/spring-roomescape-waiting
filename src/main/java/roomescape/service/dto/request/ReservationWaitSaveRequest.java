@@ -8,8 +8,8 @@ import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 
 public record ReservationWaitSaveRequest(@NotNull(message = "예약 날짜를 입력해주세요.") LocalDate date,
-                                         @NotNull(message = "예약 시간을 입력해주세요.") Long timeId,
-                                         @NotNull(message = "예약 테마를 입력해주세요.") Long themeId) {
+                                         @NotNull(message = "예약 시간을 입력해주세요.") Long time,
+                                         @NotNull(message = "예약 테마를 입력해주세요.") Long theme) {
 
     public ReservationWait toEntity(ReservationTime reservationTime, Theme theme, Member member) {
         return new ReservationWait(member, date, reservationTime, theme);

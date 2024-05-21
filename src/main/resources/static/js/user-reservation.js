@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderTheme(themes) {
     const themeSlots = document.getElementById('theme-slots');
     themeSlots.innerHTML = '';
+  console.log(themes)
     themes.forEach(theme => {
         const name = theme.name;
         const themeId = theme.id;
@@ -50,9 +51,6 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) {
-            div.classList.add('disabled');
-        }
     }
     return div;
 }
@@ -190,10 +188,7 @@ function onWaitButtonClick() {
       time: selectedTimeId
     };
 
-    /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
-     */
-    fetch('', {
+    fetch('/reservations/wait', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

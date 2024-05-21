@@ -44,4 +44,20 @@ class ReservationWaitApiControllerTest extends BaseControllerTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
+    @Test
+    @DisplayName("예약 대기 삭제를 정상적으로 수행한다.")
+    void reservationDelete_Success() {
+        jdbcTemplate.update(
+                "INSERT INTO member (name, email, password, `role`) VALUES ('사용자1', 'user@wooteco.com', '1234', 'USER')");
+        jdbcTemplate.update(
+                "INSERT INTO reservation_wait (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE + INTERVAL '1' DAY , 1, 1)");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", TokenGenerator.makeUserToken())
+                .when().delete("/reservations/wait/{reservationWaitId}", 1)
+                .then().log().all()
+                .statusCode(204);
+    }
 }
