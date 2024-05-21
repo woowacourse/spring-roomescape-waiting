@@ -15,7 +15,7 @@ import java.time.LocalTime;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseDateTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,6 +67,10 @@ public class Reservation {
         }
     }
 
+    public boolean sameDate(LocalDate otherDate) {
+        return date.equals(otherDate);
+    }
+
     public Long getId() {
         return id;
     }
@@ -93,6 +97,10 @@ public class Reservation {
 
     public LocalTime getStartAt() {
         return reservationTime.getStartAt();
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public String getStatusDisplayName() {

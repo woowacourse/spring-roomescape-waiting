@@ -28,5 +28,6 @@ CREATE TABLE IF NOT EXISTS reservation (
     member_id BIGINT NOT NULL,
     time_id  BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL default CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );

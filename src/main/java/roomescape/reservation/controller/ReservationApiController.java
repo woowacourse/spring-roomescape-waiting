@@ -51,11 +51,21 @@ public class ReservationApiController {
     }
 
     @PostMapping(path = {"/reservations", "/admin/reservations"})
-    public ResponseEntity<ReservationResponse> createMemberReservation(
+    public ResponseEntity<ReservationResponse> saveReservation(
             @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember
     ) {
-        ReservationResponse reservationResponse = reservationService.save(reservationSaveRequest, loginMember);
+        ReservationResponse reservationResponse = reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
+
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
+    }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<ReservationResponse> saveReservationWaiting(
+            @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember
+    ) {
+        ReservationResponse reservationResponse = reservationService.saveReservationWaiting(reservationSaveRequest, loginMember);
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
     }

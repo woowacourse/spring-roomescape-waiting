@@ -20,10 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
+import roomescape.auth.dto.LoginMember;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
-import roomescape.auth.dto.LoginMember;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.ReservationTime;
@@ -65,15 +65,14 @@ class ReservationServiceTest {
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember))
+        assertThatThrownBy(() -> reservationService.saveReservationSuccess(reservationSaveRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("중복된 예약이 있다면 예외가 발생한다.")
+    @DisplayName("예약 성공 상태의 중복된 예약이 있다면 예외가 발생한다.")
     @Test
-    void duplicateReservationExceptionTest() {
-        Theme theme = themeRepository.save(
-                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+    void validateDuplicatedReservationSuccess() {
+        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
@@ -82,11 +81,31 @@ class ReservationServiceTest {
         LocalDate localDate = LocalDate.now();
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
-        reservationService.save(reservationSaveRequest, loginMember);
+        reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
+
+        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(), reservationTime.getId());
+        assertThatThrownBy(() -> reservationService.saveReservationSuccess(duplicateRequest, loginMember))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("동일한 회원이 예약 대기 상태의 중복된 예약을 할 경우 예외가 발생한다.")
+    @Test
+    void validateDuplicatedReservationWaiting() {
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+
+        LocalDate localDate = LocalDate.now();
+        LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
+        reservationService.saveReservationWaiting(reservationSaveRequest, loginMember);
 
         ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(),
                 reservationTime.getId());
-        assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMember))
+        assertThatThrownBy(() -> reservationService.saveReservationWaiting(duplicateRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

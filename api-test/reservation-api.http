@@ -16,7 +16,18 @@ POST http://localhost:8080/reservations
 Content-Type: application/json
 
 {
-  "date": "2024-05-20",
+  "date": "2024-05-26",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 사용자 예약 대기 추가 API
+
+POST http://localhost:8080/reservations/waiting
+Content-Type: application/json
+
+{
+  "date": "2024-05-26",
   "timeId": 1,
   "themeId": 1
 }

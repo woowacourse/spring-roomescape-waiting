@@ -43,6 +43,10 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
+    public boolean sameThemeId(Long otherThemeId) {
+        return id.equals(otherThemeId);
+    }
+
     public Long getId() {
         return id;
     }

@@ -36,6 +36,10 @@ public class ReservationTime {
         }
     }
 
+    public boolean sameTimeId(Long otherTimeId) {
+        return id.equals(otherTimeId);
+    }
+
     public Long getId() {
         return id;
     }

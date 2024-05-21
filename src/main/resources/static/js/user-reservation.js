@@ -191,14 +191,11 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('', {
+        fetch('/reservations/waiting', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -206,19 +203,23 @@ function onWaitButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation waiting failed');
+                if (!response.ok) {
+                    return response.json().then(errorResponse => {
+                        throw new Error(JSON.stringify(errorResponse));
+                    })
+                }
                 return response.json();
             })
             .then(data => {
-                alert('Reservation waiting successful!');
-                window.location.href = "/";
+                const message = `${data.date} 날짜로 ${data.theme.name} 테마가 ${data.time.startAt}에 예약 대기되었습니다.`;
+                alert(message);
+                location.reload();
             })
             .catch(error => {
-                alert("An error occurred while making the reservation waiting.");
-                console.error(error);
+                alert(error.message);
             });
     } else {
-        alert("Please select a date, theme, and time before making a reservation waiting.");
+        alert("예약날짜, 테마, 예약시간을 모두 선택해주세요.");
     }
 }
 

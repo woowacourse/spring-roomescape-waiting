@@ -137,9 +137,37 @@ public class ReservationRepositoryTest {
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
-    @DisplayName("이미 저장된 예약일 경우 true를 반환한다.")
+    @DisplayName("예약 대기 상태로 저장된 동일한 예약이 있을 경우 true를 반환한다.")
     @Test
-    void existReservationTest() {
+    void existsByMemberIdAndDateAndReservationTimeStartAtAndStatusIsWaiting() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        Theme theme = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.WAIT));
+
+        boolean exist = reservationRepository.existsByMemberIdAndDateAndReservationTimeStartAtAndStatus(
+                member.getId(),
+                savedReservation.getDate(),
+                savedReservation.getStartAt(),
+                Status.WAIT
+        );
+
+        assertThat(exist).isTrue();
+    }
+
+    @DisplayName("예약 완료 상태로 저장된 동일한 예약이 있을 경우 true를 반환한다.")
+    @Test
+    void existsByDateAndReservationTimeStartAtAndStatusIsSuccess() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
         Theme theme = themeRepository.save(
@@ -155,8 +183,11 @@ public class ReservationRepositoryTest {
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAt(savedReservation.getDate(),
-                savedReservation.getStartAt());
+        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+                savedReservation.getDate(),
+                savedReservation.getStartAt(),
+                Status.SUCCESS
+        );
 
         assertThat(exist).isTrue();
     }

@@ -1,14 +1,16 @@
 package roomescape.reservation.service;
 
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginMember;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waitings;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -37,15 +39,23 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse save(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
-        Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember);
-        validateDuplicateReservation(reservation);
+    public ReservationResponse saveReservationSuccess(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.SUCCESS);
+        validateDuplicatedReservationSuccess(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation createValidatedReservation(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+    public ReservationResponse saveReservationWaiting(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember) {
+        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.WAIT);
+        validateDuplicatedReservationWaiting(reservation, loginMember);
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        return ReservationResponse.toResponse(savedReservation);
+    }
+
+    private Reservation createValidatedReservationOfStatus(ReservationSaveRequest reservationSaveRequest, LoginMember loginMember, Status status) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -55,12 +65,31 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return reservationSaveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
+        return reservationSaveRequest.toReservation(member, theme, reservationTime, status);
     }
 
-    private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(), reservation.getStartAt())) {
+    private void validateDuplicatedReservationSuccess(Reservation reservation) {
+        boolean existsReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+                    reservation.getDate(),
+                    reservation.getStartAt(),
+                    reservation.getStatus()
+            );
+
+        if (existsReservation) {
             throw new IllegalArgumentException("중복된 예약이 있습니다.");
+        }
+    }
+
+    private void validateDuplicatedReservationWaiting(Reservation reservation, LoginMember loginMember) {
+        boolean existsReservation = reservationRepository.existsByMemberIdAndDateAndReservationTimeStartAtAndStatus(
+                loginMember.id(),
+                reservation.getDate(),
+                reservation.getStartAt(),
+                reservation.getStatus()
+        );
+
+        if (existsReservation) {
+            throw new IllegalArgumentException("대기 상태로 등록된 예약입니다.");
         }
     }
 
@@ -78,10 +107,19 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findAllByMemberId(loginMember.id())
-                .stream()
-                .map(MemberReservationResponse::toResponse)
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
+
+        List<Reservation> waitList = waitingReservations.stream()
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
+
+        Waitings waitings = new Waitings(waitList);
+
+        return reservationRepository.findAllByMemberId(loginMember.id()).stream()
+                .map(reservation -> MemberReservationResponse.toResponse(
+                        reservation,
+                        waitings.findMemberRank(reservation, loginMember.id())
+                )).toList();
     }
 
     public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
