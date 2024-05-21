@@ -38,13 +38,15 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponse> reservaionList() {
-        return reservationService.findReservations();
+    public ResponseEntity<List<ReservationResponse>> reservaionList() {
+        return ResponseEntity.ok(reservationService.findReservations());
     }
 
     @GetMapping("/mine")
-    public List<MyReservationResponse> myReservationList(MemberProfileInfo memberProfileInfo) {
-        return reservationService.findReservationByMemberId(memberProfileInfo.id());
+    public ResponseEntity<List<MyReservationResponse>> myReservationList(MemberProfileInfo memberProfileInfo) {
+        List<MyReservationResponse> reservationsByMemberId = reservationService.findReservationByMemberId(
+                memberProfileInfo.id());
+        return ResponseEntity.ok(reservationsByMemberId);
     }
 
     @GetMapping("/times/{themeId}")
