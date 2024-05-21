@@ -1,10 +1,12 @@
 package roomescape.auth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 
 import java.nio.charset.StandardCharsets;
@@ -52,10 +54,14 @@ public class JwtTokenProvider {
     }
 
     private Claims parseJwt(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException exception) {
+            throw new UnauthorizedException("이미 만료된 토큰입니다.");
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.service.TokenCookieService;
+import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -82,6 +83,7 @@ class AdminReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -116,6 +118,7 @@ class AdminReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("status", ReservationStatus.CONFIRMATION);
 
         // when
         String detailMessage = RestAssured.given().log().all()

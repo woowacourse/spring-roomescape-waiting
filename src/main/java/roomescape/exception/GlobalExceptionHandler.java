@@ -43,6 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        exception.printStackTrace();
         String message = exception.getBindingResult()
                 .getFieldError()
                 .getDefaultMessage();
@@ -69,7 +70,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {IllegalArgumentException.class, Exception.class})
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException() {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(Exception e) {
+        e.printStackTrace();
         ErrorResponse data = new ErrorResponse("서버에 오류가 발생했습니다.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(data);
     }

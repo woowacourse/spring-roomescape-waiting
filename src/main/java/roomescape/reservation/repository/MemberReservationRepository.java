@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
 
-    Optional<MemberReservation> findByMemberAndReservation(Member member, Reservation reservation);
+    Optional<MemberReservation> findByMemberAndReservationAndStatus(Member member, Reservation reservation, ReservationStatus status);
 
     List<MemberReservation> findByMemberId(Long memberId);
 

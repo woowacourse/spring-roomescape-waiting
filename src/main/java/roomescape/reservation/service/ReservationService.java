@@ -8,6 +8,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
@@ -87,9 +88,14 @@ public class ReservationService {
     }
 
     private void validateDuplicated(MemberReservation memberReservation) {
-        Optional<MemberReservation> existsMemberReservation = memberReservationRepository.findByMemberAndReservation(
+        if (memberReservation.getStatus().isWaiting()) {
+            return;
+        }
+
+        Optional<MemberReservation> existsMemberReservation = memberReservationRepository.findByMemberAndReservationAndStatus(
                 memberReservation.getMember(),
-                memberReservation.getReservation()
+                memberReservation.getReservation(),
+                ReservationStatus.CONFIRMATION
         );
 
         existsMemberReservation.ifPresent((duplicated) -> {
