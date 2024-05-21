@@ -105,7 +105,7 @@ public class ReservationService {
 
     private void rejectUnauthorizedCancel(MemberInfo memberInfo, Reservation reservation) {
         if (reservation.isNotOwner(memberInfo.id())) {
-            throw new CancelReservationException();
+            throw new CancelReservationException("다른 회원의 예약을 취소할 수 없습니다.");
         }
     }
 }

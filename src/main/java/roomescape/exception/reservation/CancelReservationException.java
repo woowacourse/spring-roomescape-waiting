@@ -7,4 +7,8 @@ public class CancelReservationException extends CustomException {
     public CancelReservationException() {
         super("예약을 취소할 수 없습니다.", HttpStatus.BAD_REQUEST);
     }
+
+    public CancelReservationException(String message) {
+        super(message, HttpStatus.BAD_REQUEST);
+    }
 }

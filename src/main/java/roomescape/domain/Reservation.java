@@ -52,7 +52,7 @@ public class Reservation {
     }
 
     public boolean isNotOwner(Long id) {
-        return this.member.getId().equals(id);
+        return !this.member.getId().equals(id);
     }
 
     public void cancel() {
