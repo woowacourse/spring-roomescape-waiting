@@ -45,4 +45,8 @@ public class WaitingService {
         return waitingRepository.findAllByReservationInfoOrderByCreatedDateAsc(waiting.getReservationInfo())
                 .indexOf(waiting) + 1;
     }
+
+    public void deleteWaiting(final long id) {
+        waitingRepository.deleteById(id);
+    }
 }
