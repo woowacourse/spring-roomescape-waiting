@@ -14,6 +14,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.exception.DeletingException;
+import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
 import roomescape.service.exception.UserDeleteReservationException;
@@ -57,18 +58,27 @@ public class ReservationService {
                 condition.themeId(), condition.memberId());
     }
 
-    //TODO 같은 사람이 예약, 예약대기 하면 안될듯...?
     public Reservation addReservation(final CreateReservationRequest request) {
         final ReservationTime time = reservationTimeRepository.fetchById(request.timeId());
         final Theme theme = themeRepository.fetchById(request.themeId());
         final Member member = memberRepository.fetchById(request.memberId());
+        final LocalDate date = request.date();
 
-        final Reservation reservation = new Reservation(null, member, request.date(), time, theme);
+        final Reservation reservation = new Reservation(null, member, date, time, theme);
 
         final LocalDateTime reservationDateTime = reservation.getDate().atTime(time.getStartAt());
         validateBeforeDay(reservationDateTime);
+        validateReservation(member, theme, time, date);
 
         return reservationRepository.save(reservation);
+    }
+
+    private void validateReservation(final Member member, final Theme theme, final ReservationTime time, final LocalDate date) {
+        final boolean bookedAlready = reservationRepository
+                .existsByMemberAndThemeAndTimeAndDate(member, theme, time, date);
+        if (bookedAlready) {
+            throw new DuplicateReservationException("같은 테마, 날짜, 시간으로 예약이 존재합니다.");
+        }
     }
 
     public void deleteReservation(final long id) {
@@ -77,7 +87,6 @@ public class ReservationService {
     }
 
     public void deleteWaitReservation(final long reservationId, final long memberId) {
-        //TODO 이 id가 예약 대기인지 확인을 해야함.
         final Reservation fetchReservation = reservationRepository.fetchById(reservationId);
 
         if (!Objects.equals(memberId, fetchReservation.getMember().getId())) {

@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
+import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
 import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.exception.DeletingException;
+import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.UserDeleteReservationException;
 
@@ -100,5 +102,32 @@ class ReservationServiceTest {
         final long memberId = 1L;
         assertThatThrownBy(() -> reservationService.deleteWaitReservation(reservationId, memberId))
                 .isInstanceOf(UserDeleteReservationException.class);
+    }
+
+    @Test
+    @DisplayName("멤버는 같은 날짜, 테마, 시간에 대해 하나의 예약만 가능하다")
+    void duplicateReservationInfo() {
+        //given
+        final LocalDate date = LocalDate.now().plusDays(10);
+        final CreateReservationRequest request = new CreateReservationRequest(3L, 2L, date, 1L);
+
+        //when && then
+        reservationService.addReservation(request);
+        assertThatThrownBy(() -> reservationService.addReservation(request))
+                .isInstanceOf(DuplicateReservationException.class);
+    }
+
+    @Test
+    @DisplayName("다른 멤버가 같은 날짜, 테마, 시간 예약을 할 수 있다.")
+    void addReservation() {
+        //given
+        final LocalDate date = LocalDate.now().plusDays(10);
+        final CreateReservationRequest request1 = new CreateReservationRequest(3L, 2L, date, 1L);
+        final CreateReservationRequest request2 = new CreateReservationRequest(2L, 2L, date, 1L);
+
+        //when && then
+        reservationService.addReservation(request1);
+        assertThatCode(() -> reservationService.addReservation(request2))
+                .doesNotThrowAnyException();
     }
 }

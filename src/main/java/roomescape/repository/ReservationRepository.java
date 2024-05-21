@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -32,6 +34,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(long themeId);
 
     boolean existsByIdBeforeAndThemeIdAndTimeIdAndDate(long id, long themeId, long timeId, LocalDate date);
+
+    boolean existsByMemberAndThemeAndTimeAndDate(Member member, Theme theme, ReservationTime time, LocalDate date);
 
     @Query("""
             SELECT r.theme FROM Reservation r
