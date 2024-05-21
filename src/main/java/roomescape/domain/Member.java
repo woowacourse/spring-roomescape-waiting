@@ -35,6 +35,10 @@ public class Member {
         this(id, member.getName(), member.getRole(), member.email, member.password);
     }
 
+    public Member(Name name, Role role, Email email, Password password) {
+        this(null, name, role, email, password);
+    }
+
     public Member(Long id, Name name, Role role, Email email, Password password) {
         this.id = id;
         this.name = name;

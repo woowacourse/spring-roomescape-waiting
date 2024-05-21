@@ -30,7 +30,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             GROUP BY r.theme
             ORDER BY themeCount DESC
             LIMIT :limit""")
-    List<Theme> findAndOrderByPopularity(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+    List<Theme> findAndOrderByPopularity(@Param("startDate") LocalDate startDate,
+                                         @Param("endDate") LocalDate endDate,
                                          @Param("limit") int limit);
 
     boolean existsByTimeId(long timeId);
