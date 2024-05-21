@@ -43,8 +43,8 @@ class MemberReservationTest {
                 .extract().cookie("token");
     }
 
-    @Test
     @DisplayName("동일한 예약이 존재하지 않는 상황에, 예약 요청을 보내면, resolved 예약된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noReservation_then_addReservation() {
         // given
@@ -64,8 +64,8 @@ class MemberReservationTest {
                 .body("status", equalTo("RESERVED"));
     }
 
-    @Test
     @DisplayName("동일한 예약이 존재하는 상황에, 예약 요청을 보내면, 예약 대기 상태가 된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_reservationExists_then_addWaitingReservation() {
         // given
@@ -97,8 +97,8 @@ class MemberReservationTest {
                 .body("status", equalTo("WAITING"));
     }
 
-    @Test
     @DisplayName("내가 예약한 상태에서, 예약 요청을 보내면, 예약이 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myReservationExists_then_rejectReservation() {
         // given
@@ -127,8 +127,8 @@ class MemberReservationTest {
                 .statusCode(400);
     }
 
-    @Test
     @DisplayName("내가 예약 대기한 상태에서, 예약 요청을 보내면, 예약이 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myWaitingReservationExists_then_rejectReservation() {
         // given
@@ -167,8 +167,8 @@ class MemberReservationTest {
                 .statusCode(400);
     }
 
-    @Test
     @DisplayName("예약 대기를 취소한 상태에서, 예약 대기 요청을 보내면, 예약 대기된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_canceledReservation_then_addReservation() {
         // given
@@ -212,8 +212,8 @@ class MemberReservationTest {
                 .body("status", equalTo("WAITING"));
     }
 
-    @Test
     @DisplayName("다른 사람의 예약 대기가 존재하는 상태에서, 내가 다른 사람의 예약 대기 취소 요청을 보내면, 요청은 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_anotherWaitingReservationExists_then_canNotDeleteOthersWaitingReservation() {
         // given
@@ -244,8 +244,8 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-    @Test
     @DisplayName("뒤에 예약 대기가 존재하는 상태에서, 예약 대기를 취소하고 다시 예약 요청을 보내면, 예약 대기 상태가 된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_canceledWaitingReservation_then_addWaitingReservation() {
         // given
@@ -296,8 +296,8 @@ class MemberReservationTest {
                 .body("status", equalTo("WAITING"));
     }
 
-    @Test
     @DisplayName("이미 지난 시간에 대한 예약 요청을 보내면, 예약이 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql"})
     void when_pastTimeReservation_then_rejectReservation() {
         // given
@@ -316,9 +316,8 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
-    @Test
     @DisplayName("존재하지 않는 시간에 대한 예약 요청을 보내면, 예약이 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql"})
     void when_noTimeReservation_then_rejectReservation() {
         // given
@@ -337,9 +336,8 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
-    @Test
     @DisplayName("존재하지 않는 테마에 대한 예약 요청을 보내면, 예약이 거절된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/times.sql"})
     void when_noThemeReservation_then_rejectReservation() {
         // given
@@ -358,31 +356,8 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
-    @Test
-    @DisplayName("존재하지 않는 회원에 대한 예약 요청을 보내면, 예약이 거절된다")
-    @Sql(value = {"/test-data/themes.sql", "/test-data/times.sql"})
-    void when_noMemberReservation_then_rejectReservation() {
-        // given
-        Long themeId = 1L;
-        Long timeId = 1L;
-        Long memberId = 100L;
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
-                themeId, tomorrow, timeId);
-
-        // when, then
-        given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(400);
-    }
-
-    @Disabled
-    @Test
     @DisplayName("예약이 존재하지 않는 상황에서, 예약을 취소 요청을 보내면, 요청을 무시한다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noReservation_then_throwException() {
         // given
@@ -392,15 +367,13 @@ class MemberReservationTest {
         given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .when().delete("/reservations/" + reservationId)
-                .then().log().all().statusCode(204);
+                .then().log().all().statusCode(400);
     }
 
-    @Disabled
+    @DisplayName("과거 예약에 대해 취소 요청을 보내면, 요청을 무시한다")
     @Test
-    @DisplayName("과거 resolved 예약에 대해 취소 요청을 보내면, 요청을 무시한다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/past-reservations.sql"})
-    void when_pastTimeReservation_then_nothingHappens() {
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_cancelPastTimeReservation_then_nothingHappens() {
         // given
         Long themeId = 1L;
         Long timeId = 1L;
@@ -450,29 +423,24 @@ class MemberReservationTest {
         // 지난 예약과 예약 대기 상태가 조회되지 않는지 확인하는 로직이 필요하다
     }
 
-    @Disabled
     @Test
-    @DisplayName("내 waiting 예약이 존재해야만, waiting 예약을 삭제할 수 있다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/waiting-reservations.sql"})
+    @DisplayName("내 예약 대기가 존재하는 경우에, 예약 대기 삭제 요청을 하면, 삭제된다")
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myWaitingReservationExists_then_deleteWaitingReservation() {
         // given
         Long themeId = 1L;
         Long timeId = 1L;
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
-                themeId, tomorrow, timeId);
 
         // when, then
         given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().delete("/reservations/1?waiting=true")
-                .then().log().all().statusCode(204);
+                .when().delete("/reservations/" + 1)
+                .then().log().all().statusCode(400);
     }
 
-    @Disabled
+    @DisplayName("내 예약 대기가 존재하지 않으면, 예약 대기를 삭제할 수 없다")
     @Test
-    @DisplayName("내 waiting 예약이 존재하지 않으면, waiting 예약을 삭제할 수 없다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_noWaitingReservation_then_canNotDeleteWaitingReservation() {
         // given
@@ -485,15 +453,13 @@ class MemberReservationTest {
         // when, then
         given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().delete("/reservations/1?waiting=true")
+                .when().delete("/reservations/" + 1)
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
+    @DisplayName("예약으로 전환된 상태면, 예약 취소 요청하면, 거절된다")
     @Test
-    @DisplayName("resolved 예약으로 전환되면, pending 예약 취소 요청을 할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/reservations-details.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_reservationStatusChangedIntoResolved_then_canNotDeleteWaitingReservation() {
         // given
         Long themeId = 1L;
@@ -519,20 +485,18 @@ class MemberReservationTest {
         // when, then
         given().log().all()
                 .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
-                .when().delete("/reservations/1?waiting=false")
+                .when().delete("/admin/reservations/" + 1)
                 .then().log().all().statusCode(204);
 
         given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().delete("/reservations/1?waiting=true")
+                .when().delete("/reservations/" + 1)
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
+    @DisplayName("예약 대기가 존재하는 상태에서, 해당 예약 대기에 취소 요청을 보내면, 요청이 거절된다")
     @Test
-    @DisplayName("waiting 예약에 대해, resolved 예약 취소 요청을 할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/waiting-reservations.sql"})
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_waitingReservationExists_then_canNotDeleteResolvedReservation() {
         // given
         Long themeId = 1L;
