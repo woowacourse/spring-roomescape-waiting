@@ -17,6 +17,7 @@ import roomescape.global.auth.annotation.Admin;
 import roomescape.global.auth.annotation.Auth;
 import roomescape.global.auth.annotation.MemberId;
 import roomescape.global.dto.response.ApiResponse;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -37,8 +38,8 @@ public class ReservationController {
     @Admin
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<ReservationsResponse> getAllReservations() {
-        return ApiResponse.success(reservationService.findAllReservations());
+    public ApiResponse<ReservationsResponse> getAllReservationsByStatus(@RequestParam final ReservationStatus status) {
+        return ApiResponse.success(reservationService.findReservationsByStatus(status));
     }
 
     @Auth
@@ -92,5 +93,24 @@ public class ReservationController {
         reservationService.removeReservationById(reservationId, memberId);
 
         return ApiResponse.success();
+    }
+
+    @Auth
+    @DeleteMapping("/reservations/waitings/{reservationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ApiResponse<Void> removeWaitingReservation(
+            @MemberId final Long memberId,
+            @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("reservationId") final Long reservationId
+    ) {
+        reservationService.removeWaitingReservationById(reservationId, memberId);
+
+        return ApiResponse.success();
+    }
+
+    @Admin
+    @GetMapping("/reservations/waitings")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<ReservationsResponse> getFirstOrderWaitingReservations() {
+        return ApiResponse.success(reservationService.findFirstOrderWaitingReservations());
     }
 }

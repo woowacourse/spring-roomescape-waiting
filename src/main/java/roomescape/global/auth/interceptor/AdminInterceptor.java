@@ -13,7 +13,6 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 
 @Component
@@ -58,7 +57,7 @@ public class AdminInterceptor implements HandlerInterceptor {
     }
 
     private boolean checkRole(final Member member) {
-        if (member.isRole(Role.ADMIN)) {
+        if (member.isAdmin()) {
             return true;
         }
         throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,

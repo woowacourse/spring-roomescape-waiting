@@ -33,12 +33,25 @@
       <li class="nav-item">
         <a class="nav-link" href="/admin/time">Time</a>
       </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+          <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+          <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
+        </div>
+      </li>
     </ul>
   </div>
 </nav>
 
+<!-- TODO: 예약 대기자 정보 조회 -->
 <div class="content-container">
-  <h2 class="content-container-title">방탈출 예약 페이지</h2>
+  <h2 class="content-container-title">방탈출 어드민</h2>
   <div class="table-header">
     <button id="add-button" class="btn btn-custom mb-2 float-right">예약 추가</button>
   </div>
@@ -48,8 +61,10 @@
     <tr>
       <th>예약번호</th>
       <th>예약자</th>
+      <th>테마</th>
       <th>날짜</th>
       <th>시간</th>
+      <th></th>
       <th></th>
     </tr>
     </thead>
@@ -57,7 +72,8 @@
     </tbody>
   </table>
 </div>
+</div>
 
-<script src="/js/reservation.js"></script>
+<script src="/js/reservation-waiting.js"></script>
 </body>
 </html>

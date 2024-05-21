@@ -8,7 +8,6 @@ import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
@@ -58,10 +57,21 @@ public class ReservationService {
         this.themeService = themeService;
     }
 
-    public ReservationsResponse findAllReservations() {
-        List<ReservationResponse> response = reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
+    @Transactional(readOnly = true)
+    public ReservationsResponse findReservationsByStatus(final ReservationStatus status) {
+        List<MemberReservation> memberReservations = memberReservationRepository.findAllByStatus(status);
+        List<ReservationResponse> response = memberReservations.stream()
+                .map(memberReservation -> ReservationResponse.from(memberReservation.getReservation()))
+                .toList();
+        return new ReservationsResponse(response);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationsResponse findFirstOrderWaitingReservations() {
+        List<MemberReservation> waitingMemberReservations = memberReservationRepository.findAllByStatus(ReservationStatus.WAITING);
+        List<ReservationResponse> response = waitingMemberReservations.stream()
+                .filter(MemberReservation::isFirstWaitingOrder)
+                .map(memberReservation -> ReservationResponse.from(memberReservation.getReservation()))
                 .toList();
 
         return new ReservationsResponse(response);
@@ -93,46 +103,96 @@ public class ReservationService {
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
+    //TODO: @Transactional 필요한 곳에 전부 설정
+    @Transactional
     public void removeReservationById(final Long reservationId, final Long requestMemberId) {
         Member member = memberService.findMemberById(requestMemberId);
         Reservation reservation = findReservationById(reservationId);
-        MemberReservation memberReservation = findMemberReservationByReservationAndMember(reservation, member);
+        MemberReservation memberReservation = findMemberReservationByReservation(reservation);
 
         Long reservationMemberId = reservation.getMember().getId();
 
-        if (member.isRole(Role.ADMIN) || reservationMemberId.equals(requestMemberId)) {
+        if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
             memberReservationRepository.deleteById(memberReservation.getId());
             reservationRepository.deleteById(reservation.getId());
+            changeOrdersStatus(reservation);
         } else {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
-                    "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다.");
+                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [reservationId: %d, memberReservationId: %d]"
+                            , reservationId, memberReservation.getId()));
         }
     }
 
-    private MemberReservation findMemberReservationByReservationAndMember(final Reservation reservation, final Member member) {
-        return memberReservationRepository.findByReservationAndMember(reservation, member)
+    private void changeOrdersStatus(final Reservation reservation) {
+        List<MemberReservation> waitingReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
+        for (MemberReservation waitingReservation : waitingReservations) {
+            waitingReservation.increaseOrder();
+            if (waitingReservation.isReserveOrder()) {
+                waitingReservation.changeStatusToReserve();
+            }
+        }
+    }
+
+    public void removeWaitingReservationById(final Long reservationId, final Long memberId) {
+        Member member = memberService.findMemberById(memberId);
+        Reservation reservation = findReservationById(reservationId);
+        MemberReservation memberReservation = findMemberReservationByReservation(reservation);
+
+        Long reservationMemberId = reservation.getMember().getId();
+
+        if (member.isAdmin() || reservationMemberId.equals(memberId)) {
+            memberReservationRepository.deleteById(memberReservation.getId());
+            reservationRepository.deleteById(reservation.getId());
+            changeWaitingOrdersStatus(reservation);
+        } else {
+            throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
+                    String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [reservationId: %d, memberReservationId: %d]"
+                            , reservationId, memberReservation.getId()));
+        }
+    }
+
+    private void changeWaitingOrdersStatus(final Reservation reservation) {
+        List<MemberReservation> waitingReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
+        for (MemberReservation waitingReservation : waitingReservations) {
+            if (!waitingReservation.isReserved()) {
+                waitingReservation.increaseOrder();
+            }
+        }
+    }
+
+    private MemberReservation findMemberReservationByReservation(final Reservation reservation) {
+        return memberReservationRepository.findByReservation(reservation)
                 .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_RESERVATION_NOT_FOUND,
                         ErrorType.MEMBER_RESERVATION_NOT_FOUND.getDescription()));
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime requestTime = reservationTimeService.findTimeById(request.timeId());
+        ReservationTime time = reservationTimeService.findTimeById(request.timeId());
         Theme theme = themeService.findThemeById(request.themeId());
         Member member = memberService.findMemberById(memberId);
+        List<MemberReservation> alreadyBookedReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(time, request.date(), theme);
+        long order = alreadyBookedReservations.size();
 
-        validateDateAndTime(request.date(), requestTime, LocalDateTime.now());
-        validateDuplication(request, requestTime, theme, member);
+        validateDateAndTime(request.date(), time, LocalDateTime.now());
+        validateDuplication(request, time, theme, member);
+        validateCanReserve(request, order);
 
-        Reservation savedReservation = reservationRepository.save(request.toEntity(requestTime, theme, member));
-        memberReservationRepository.save(new MemberReservation(savedReservation, member, request.status()));
+        Reservation savedReservation = reservationRepository.save(request.toEntity(time, theme, member));
+        memberReservationRepository.save(new MemberReservation(savedReservation, member, request.status(), order));
         return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateCanReserve(final ReservationRequest request, final long order) {
+        if (request.status().isReserved() && order > 0) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "이미 예약 정보가 존재하여 '예약'할 수 없습니다. '예약 대기'로 요청해주세요.");
+        }
     }
 
     private void validateDuplication(final ReservationRequest request, final ReservationTime requestTime, final Theme theme, final Member member) {
         if (request.status() == ReservationStatus.RESERVED) {
             validateReservationDuplicate(request.date(), requestTime, theme);
         } else if (request.status() == ReservationStatus.WAITING) {
-            validateReservationWaitingDuplicate(member, request.date(), requestTime, theme);
+            validateMemberReservationDuplicate(member, request.date(), requestTime, theme);
         }
     }
 
@@ -167,7 +227,7 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationWaitingDuplicate(final Member member, final LocalDate requestDate, final ReservationTime time, final Theme theme) {
+    private void validateMemberReservationDuplicate(final Member member, final LocalDate requestDate, final ReservationTime time, final Theme theme) {
         Optional<MemberReservation> memberReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(
                 member, time, requestDate, theme);
 
@@ -188,7 +248,7 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
-    @Transactional(readOnly = true)
+    // TODO: 코드 메서드 분리, 날짜, 시간 순서로 정렬
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         Member member = memberService.findMemberById(memberId);
         List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
@@ -196,22 +256,10 @@ public class ReservationService {
         List<MemberReservationResponse> responses = new ArrayList<>();
         for (MemberReservation memberReservation : reservations) {
             if (!memberReservation.isReserved()) {
-                ReservationTime reservationTime = memberReservation.getReservation().getReservationTime();
-                Theme theme = memberReservation.getReservation().getTheme();
-                LocalDate date = memberReservation.getReservation().getDate();
-
-                List<MemberReservation> memberReservationsOnThemeAndDateTime = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservationTime, date, theme);
-                long order = 0;
-                for (MemberReservation alreadyBookedReservation : memberReservationsOnThemeAndDateTime) {
-                    if (memberReservation.getId().equals(alreadyBookedReservation.getId())) {
-                        break;
-                    }
-                    order++;
-                }
-                responses.add(MemberReservationResponse.ofMemberReservationAndOrder(memberReservation, order));
+                responses.add(MemberReservationResponse.fromEntity(memberReservation));
                 continue;
             }
-            responses.add(MemberReservationResponse.from(memberReservation));
+            responses.add(MemberReservationResponse.fromEntity(memberReservation));
         }
         return new MemberReservationsResponse(responses);
     }

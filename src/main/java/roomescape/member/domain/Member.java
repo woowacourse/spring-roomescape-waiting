@@ -65,8 +65,8 @@ public class Member {
         }
     }
 
-    public boolean isRole(final Role role) {
-        return this.role == role;
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 
     public boolean hasRole() {

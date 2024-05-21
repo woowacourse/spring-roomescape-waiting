@@ -51,7 +51,7 @@ public class MemberReservation {
 
     private void validateNotNull() {
         if (reservation == null || member == null || status == null) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "회원 예약(MemberReservation) 생성에 null이 입력되었습니다.");
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약 대기(MemberReservation) 생성에 null이 입력되었습니다.");
         }
     }
 
@@ -59,8 +59,12 @@ public class MemberReservation {
         this.order = order.increase();
     }
 
-    public boolean isFirstOrder() {
-        return order.isFirst();
+    public boolean isReserveOrder() {
+        return order.isReserveOrder();
+    }
+
+    public boolean isFirstWaitingOrder() {
+        return order.isFirstWaitingOrder();
     }
 
     public boolean isReserved() {

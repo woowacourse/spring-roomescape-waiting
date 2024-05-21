@@ -40,6 +40,4 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             WHERE mr.status = :status
             """)
     List<MemberReservation> findAllByStatus(ReservationStatus status);
-
-    List<MemberReservation> findByStatus(ReservationStatus status);
 }

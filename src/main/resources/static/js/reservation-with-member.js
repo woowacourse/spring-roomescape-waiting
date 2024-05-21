@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(RESERVATION_API_ENDPOINT + '?status=RESERVED')
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -180,7 +180,7 @@ function deleteRow(event) {
   const reservationId = row.cells[0].textContent;
 
   requestDelete(reservationId)
-      .then(() => row.remove())
+      .then(() => window.location.reload())
       .catch(error => console.error('Error:', error));
 }
 
@@ -225,7 +225,7 @@ function requestDelete(id) {
 
   return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
-        if (response.status !== 204) throw new Error('Delete failed');
+        if (response.status != 204) throw new Error('Delete failed');
       });
 }
 

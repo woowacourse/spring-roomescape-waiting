@@ -7,4 +7,8 @@ public enum ReservationStatus {
     public boolean isReserved() {
         return this == RESERVED;
     }
+
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
 }
