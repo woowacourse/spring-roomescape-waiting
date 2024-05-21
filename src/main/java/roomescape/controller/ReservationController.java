@@ -30,7 +30,7 @@ public class ReservationController {
 
     @PostMapping("/pending")
     public ResponseEntity<ReservationResponse> createPendingReservation(LoginMember loginMember,
-                                                                  @Valid @RequestBody ReservationRequest request) {
+                                                                        @Valid @RequestBody ReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         ReservationResponse reservationResponse = reservationService.createPending(loginMember, request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
