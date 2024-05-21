@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
     document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
@@ -50,9 +51,6 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        // if (booked) {
-        //     div.classList.add('disabled');
-        // }
     }
     return div;
 }
@@ -194,14 +192,11 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('', {
+        fetch('/reservations/wait', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -213,8 +208,9 @@ function onWaitButtonClick() {
                 return response.json();
             })
             .then(data => {
-                alert('Reservation waiting successful!');
-                window.location.href = "/";
+                const message = `${data.date} 날짜로 ${data.theme.name} 테마가 ${data.time.startAt}에 예약대기 되었습니다.`;
+                alert(message);
+                location.reload();
             })
             .catch(error => {
                 alert("An error occurred while making the reservation waiting.");

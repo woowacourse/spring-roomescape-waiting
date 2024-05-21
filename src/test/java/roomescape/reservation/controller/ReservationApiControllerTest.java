@@ -111,6 +111,38 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .header("Location", "/reservations/1");
     }
 
+    @DisplayName("회원이 예약 대기를 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
+    @Test
+    void saveMemberWaitingReservation() throws JsonProcessingException {
+        saveMemberAsKaki();
+        saveThemeAsHorror();
+        saveReservationTimeAsTen();
+
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .contentType(ContentType.JSON)
+                .body(objectMapper.writeValueAsString(reservationSaveRequest))
+                .accept(ContentType.JSON)
+                .when()
+                .post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .header("Location", "/reservations/1");
+
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .contentType(ContentType.JSON)
+                .body(objectMapper.writeValueAsString(reservationSaveRequest))
+                .accept(ContentType.JSON)
+                .when()
+                .post("/reservations/wait")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .header("Location", "/reservations/wait/2");
+    }
+
     @DisplayName("예약을 성공적으로 제거하면 204 응답을 받는다.")
     @Test
     void delete() {

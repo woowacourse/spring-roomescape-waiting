@@ -2,17 +2,17 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
+import static roomescape.util.Fixture.HORROR_THEME;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.HOUR_10;
 import static roomescape.util.Fixture.JOJO_EMAIL;
 import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.LOGIN_JOJO;
+import static roomescape.util.Fixture.MEMBER_JOJO;
+import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,11 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
 import roomescape.auth.dto.LoginMember;
 import roomescape.config.DatabaseCleaner;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -65,28 +64,48 @@ class ReservationServiceTest {
         LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember))
+        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, loginMember, Status.SUCCESS))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("중복된 예약이 있다면 예외가 발생한다.")
+    @DisplayName("예약 시, 중복된 예약이 있다면 예외가 발생한다.")
     @Test
     void duplicateReservationExceptionTest() {
-        Theme theme = themeRepository.save(
-                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        // given
+        Theme theme = themeRepository.save(HORROR_THEME);
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        memberRepository.save(MEMBER_JOJO);
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        // when
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(
+                TODAY,
+                theme.getId(),
+                reservationTime.getId()
+        );
+        reservationService.save(reservationSaveRequest, LOGIN_JOJO, Status.SUCCESS);
 
-        memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        // then
+        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, LOGIN_JOJO, Status.SUCCESS))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 
-        LocalDate localDate = LocalDate.now();
-        LoginMember loginMember = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
-        reservationService.save(reservationSaveRequest, loginMember);
+    @DisplayName("예약 대기 시, 저장된 예약이 없다면 예외가 발생한다.")
+    @Test
+    void waitingReservationWithNotSavedReservationExceptionTest() {
+        // given
+        Theme theme = themeRepository.save(HORROR_THEME);
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        memberRepository.save(MEMBER_JOJO);
 
-        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(),
-                reservationTime.getId());
-        assertThatThrownBy(() -> reservationService.save(duplicateRequest, loginMember))
+        // when
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(
+                TODAY,
+                theme.getId(),
+                reservationTime.getId()
+        );
+
+        // then
+        assertThatThrownBy(() -> reservationService.save(reservationSaveRequest, LOGIN_JOJO, Status.WAIT))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -33,6 +33,17 @@ Content-Type: application/json
   "memberId": 1
 }
 
+### 사용자 예약 대기 추가 API
+
+POST http://localhost:8080/reservations/wait
+Content-Type: application/json
+
+{
+  "date": "2024-05-11",
+  "timeId": 1,
+  "themeId": 1
+}
+
 ### 예약 삭제 API
 
 DELETE http://localhost:8080/reservations/1

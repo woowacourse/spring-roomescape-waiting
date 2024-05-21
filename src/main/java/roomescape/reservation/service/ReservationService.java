@@ -42,10 +42,11 @@ public class ReservationService {
     @Transactional
     public ReservationResponse save(
             ReservationSaveRequest reservationSaveRequest,
-            LoginMember loginMember
+            LoginMember loginMember,
+            Status status
     ) {
-        Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember);
-        validateUniqueReservation(reservation);
+        Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember, status);
+        validateReservationWithStatus(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.toResponse(savedReservation);
@@ -53,7 +54,8 @@ public class ReservationService {
 
     private Reservation createValidatedReservation(
             ReservationSaveRequest reservationSaveRequest,
-            LoginMember loginMember
+            LoginMember loginMember,
+            Status status
     ) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
@@ -64,13 +66,21 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return reservationSaveRequest.toReservation(member, theme, reservationTime, Status.SUCCESS);
+        return reservationSaveRequest.toReservation(member, theme, reservationTime, status);
     }
 
-    private void validateUniqueReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(),
-                reservation.getStartAt())) {
-            throw new IllegalArgumentException("중복된 예약이 있습니다.");
+    private void validateReservationWithStatus(Reservation reservation) {
+        Status reservationStatus = reservation.getStatus();
+        boolean existReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndTheme( // TODO : reservationTime ID로 중복 검사
+                reservation.getDate(),
+                reservation.getStartAt(),
+                reservation.getTheme()
+        );
+        if (reservationStatus.isSuccess() && existReservation) {
+            throw new IllegalArgumentException("중복된 예약이 있습니다. 예약 대기를 걸어주세요.");
+        }
+        if (reservationStatus.isWait() && !existReservation) {
+            throw new IllegalArgumentException("추가된 예약이 없습니다. 예약을 추가해 주세요.");
         }
     }
 

@@ -108,6 +108,10 @@ public class Reservation {
         return reservationTime.getStartAt();
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     public String getStatusDisplayName() {
         return status.getDisplayName();
     }
