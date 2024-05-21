@@ -23,7 +23,12 @@ public class Member {
     public Member() {
     }
 
-    public Member(final String name, final String email, final String password, final Role role) {
+    public Member(
+            final String name,
+            final String email,
+            final String password,
+            final Role role
+    ) {
         this(null, name, email, password, role);
     }
 
@@ -31,7 +36,13 @@ public class Member {
         this(id, member.name, member.email, member.password, member.role);
     }
 
-    public Member(final Long id, final String name, final String email, final String password, final Role role) {
+    public Member(
+            final Long id,
+            final String name,
+            final String email,
+            final String password,
+            final Role role
+    ) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -48,8 +59,8 @@ public class Member {
         }
     }
 
-    public boolean isRole(final Role role) {
-        return this.role == role;
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 
     public Long getId() {
@@ -75,11 +86,11 @@ public class Member {
     @Override
     public String toString() {
         return "Member{" +
-                "id=" + id +
-                ", name=" + name +
-                ", email=" + email +
-                ", password=" + password +
-                ", role=" + role +
-                '}';
+               "id=" + id +
+               ", name=" + name +
+               ", email=" + email +
+               ", password=" + password +
+               ", role=" + role +
+               '}';
     }
 }

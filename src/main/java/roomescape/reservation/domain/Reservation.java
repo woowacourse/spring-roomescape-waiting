@@ -38,15 +38,33 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member) {
+    public Reservation(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme,
+            final Member member
+    ) {
         this(null, date, reservationTime, theme, member, ReservationStatus.RESERVED);
     }
 
-    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
+    public Reservation(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme,
+            final Member member,
+            final ReservationStatus status
+    ) {
         this(null, date, reservationTime, theme, member, status);
     }
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final Member member, final ReservationStatus status) {
+    public Reservation(
+            final Long id,
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme,
+            final Member member,
+            final ReservationStatus status
+    ) {
         this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;

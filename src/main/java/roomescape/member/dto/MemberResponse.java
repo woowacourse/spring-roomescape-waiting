@@ -6,7 +6,6 @@ public record MemberResponse(
         Long id,
         String name
 ) {
-
     public static MemberResponse fromEntity(final Member member) {
         return new MemberResponse(member.getId(), member.getName());
     }

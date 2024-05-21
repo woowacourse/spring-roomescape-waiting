@@ -20,7 +20,10 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ReservationRepository reservationRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -50,7 +53,7 @@ public class ReservationTimeService {
     private void validateTimeDuplication(final ReservationTimeRequest reservationTimeRequest) {
         List<ReservationTime> duplicateReservationTimes = reservationTimeRepository.findByStartAt(reservationTimeRequest.startAt());
 
-        if (duplicateReservationTimes.size() > 0) {
+        if (!duplicateReservationTimes.isEmpty()) {
             throw new DataDuplicateException(ErrorType.TIME_DUPLICATED,
                     String.format("이미 존재하는 예약 시간(ReservationTime) 입니다. [startAt: %s]", reservationTimeRequest.startAt()));
         }
@@ -59,10 +62,12 @@ public class ReservationTimeService {
     public void removeTimeById(final Long id) {
         ReservationTime reservationTime = findTimeById(id);
         List<Reservation> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);
-        if (usingTimeReservations.size() > 0) {
+
+        if (!usingTimeReservations.isEmpty()) {
             throw new AssociatedDataExistsException(ErrorType.TIME_IS_USED_CONFLICT,
                     String.format("해당 예약 시간(ReservationTime) 에 예약이 존재하여 시간을 삭제할 수 없습니다. [timeId: %d]", id));
         }
+
         reservationTimeRepository.deleteById(id);
     }
 }

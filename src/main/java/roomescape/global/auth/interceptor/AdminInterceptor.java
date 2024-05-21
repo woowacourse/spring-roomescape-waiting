@@ -3,6 +3,7 @@ package roomescape.global.auth.interceptor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -12,7 +13,6 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 
 @Component
@@ -28,37 +28,52 @@ public class AdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
+    public boolean preHandle(
+            final HttpServletRequest request,
+            final HttpServletResponse response,
+            final Object handler
+    )
             throws Exception {
-        if (!(handler instanceof HandlerMethod)) {
-            return true;
-        }
-        final HandlerMethod handlerMethod = (HandlerMethod) handler;
-        final Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
-        if (adminAnnotation == null) {
+        if (isHandlerIrrelevantWithAdmin(handler)) {
             return true;
         }
 
-        final String cookieHeader = request.getHeader("Cookie");
-        if (cookieHeader != null) {
-            for (final Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(ACCESS_TOKEN_COOKIE_NAME)) {
-                    final String accessToken = cookie.getValue();
-                    final Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
+        final Cookie token = getToken(request);
 
-                    final Member member = memberService.findMemberById(memberId);
-                    return checkRole(member);
-                }
-            }
-        }
-        throw new UnauthorizedException(ErrorType.INVALID_TOKEN, "JWT 토큰이 존재하지 않거나 유효하지 않습니다.");
-    }
+        final Long memberId = jwtHandler.getMemberIdFromToken(token.getValue());
 
-    private boolean checkRole(final Member member) {
-        if (member.isRole(Role.ADMIN)) {
+        final Member member = memberService.findMemberById(memberId);
+
+        if (member.isAdmin()) {
             return true;
         }
+
         throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
                 String.format("회원 권한이 존재하지 않아 접근할 수 없습니다. [memberId: %d, Role: %s]", member.getId(), member.getRole()));
+    }
+
+    private Cookie getToken(final HttpServletRequest request) {
+        validateCookieHeader(request);
+
+        Cookie[] cookies = request.getCookies();
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(ACCESS_TOKEN_COOKIE_NAME))
+                .findAny()
+                .orElseThrow(() -> new UnauthorizedException(ErrorType.INVALID_TOKEN, "JWT 토큰이 존재하지 않습니다."));
+    }
+
+    private void validateCookieHeader(final HttpServletRequest request) {
+        final String cookieHeader = request.getHeader("Cookie");
+        if (cookieHeader == null) {
+            throw new UnauthorizedException(ErrorType.INVALID_TOKEN, "쿠키가 존재하지 않습니다");
+        }
+    }
+
+    private boolean isHandlerIrrelevantWithAdmin(final Object handler) {
+        if (!(handler instanceof final HandlerMethod handlerMethod)) {
+            return true;
+        }
+        final Admin adminAnnotation = handlerMethod.getMethodAnnotation(Admin.class);
+        return adminAnnotation == null;
     }
 }

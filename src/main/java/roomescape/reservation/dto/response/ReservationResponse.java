@@ -7,10 +7,12 @@ import roomescape.theme.dto.ThemeResponse;
 
 import java.time.LocalDate;
 
-public record ReservationResponse(Long id, LocalDate date,
-                                  @JsonProperty("member") MemberResponse member,
-                                  @JsonProperty("time") ReservationTimeResponse time,
-                                  @JsonProperty("theme") ThemeResponse theme) {
+public record ReservationResponse(
+        Long id, LocalDate date,
+        @JsonProperty("member") MemberResponse member,
+        @JsonProperty("time") ReservationTimeResponse time,
+        @JsonProperty("theme") ThemeResponse theme
+) {
 
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(

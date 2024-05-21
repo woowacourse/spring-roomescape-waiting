@@ -76,7 +76,11 @@ public class AuthController {
         addTokenToCookie("refreshToken", tokenInfo.refreshToken(), response);
     }
 
-    private void addTokenToCookie(final String cookieName, final String token, final HttpServletResponse response) {
+    private void addTokenToCookie(
+            final String cookieName,
+            final String token,
+            final HttpServletResponse response
+    ) {
         final Cookie cookie = new Cookie(cookieName, token);
         cookie.setHttpOnly(true);
 

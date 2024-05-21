@@ -25,7 +25,7 @@ public class JwtHandler {
     public TokenDto createToken(final Long memberId) {
         final Date date = new Date();
         final Date accessTokenExpiredAt = new Date(date.getTime() + accessTokenExpireTime);
-        final Date refreshTokenExpiredAt = new Date(date.getTime() + accessTokenExpireTime);
+        final Date refreshTokenExpiredAt = new Date(date.getTime() + refreshTokenExpireTime);
 
         final String accessToken = Jwts.builder()
                 .claim("memberId", memberId)
@@ -43,7 +43,7 @@ public class JwtHandler {
         return new TokenDto(accessToken, refreshToken);
     }
 
-    public Long getMemberIdFromTokenWithValidate(final String token) {
+    public Long getMemberIdFromToken(final String token) {
         validateToken(token);
 
         return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token)

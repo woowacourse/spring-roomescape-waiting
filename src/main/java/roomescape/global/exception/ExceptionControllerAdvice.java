@@ -34,10 +34,11 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMessageNotReadableException(final HttpMessageNotReadableException e) {
         logger.error(e.getMessage(), e);
-        return ErrorResponse.of(ErrorType.INVALID_REQUEST_DATA_TYPE, ErrorType.INVALID_REQUEST_DATA_TYPE.getDescription());
+        return ErrorResponse.of(ErrorType.INVALID_REQUEST_DATA_TYPE,
+                ErrorType.INVALID_REQUEST_DATA_TYPE.getDescription());
     }
 
-    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         logger.error(e.getMessage(), e);
@@ -65,9 +66,7 @@ public class ExceptionControllerAdvice {
         return ErrorResponse.of(ErrorType.METHOD_NOT_ALLOWED, ErrorType.METHOD_NOT_ALLOWED.getDescription());
     }
 
-    @ExceptionHandler(value = {
-            DataDuplicateException.class, AssociatedDataExistsException.class
-    })
+    @ExceptionHandler(value = {DataDuplicateException.class, AssociatedDataExistsException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflictException(final CustomException e) {
         logger.error(e.getMessage(), e);

@@ -7,7 +7,11 @@ public class UnauthorizedException extends CustomException {
         super(errorType, message);
     }
 
-    public UnauthorizedException(final ErrorType errorType, final String message, final Throwable cause) {
+    public UnauthorizedException(
+            final ErrorType errorType,
+            final String message,
+            final Throwable cause
+    ) {
         super(errorType, message, cause);
     }
 }
