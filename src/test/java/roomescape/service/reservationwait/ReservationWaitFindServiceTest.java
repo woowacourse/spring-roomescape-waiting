@@ -50,6 +50,22 @@ class ReservationWaitFindServiceTest extends BaseServiceTest {
     }
 
     @Test
+    @DisplayName("예약 대기 된 모든 목록을 조회한다.")
+    void findAllReservationWaits() {
+        Member member = memberRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        Theme theme = themeRepository.findById(1L).get();
+        reservationWaitRepository.save(new ReservationWait(member, LocalDate.now().plusDays(1L), time, theme));
+        Member member2 = memberRepository.save(new Member(new MemberName("사용자2"),
+                new MemberEmail("user2@wooteco.com"),
+                new MemberPassword("1234"),
+                Role.USER));
+        reservationWaitRepository.save(new ReservationWait(member2, LocalDate.now().plusDays(1L), time, theme));
+
+        assertThat(reservationWaitFindService.findReservationWaits()).hasSize(2);
+    }
+
+    @Test
     @DisplayName("사용자 아이디로 예약 대기 된 목록을 찾는다.")
     void findUserReservationWaits() {
         Member member = memberRepository.findById(1L).get();
