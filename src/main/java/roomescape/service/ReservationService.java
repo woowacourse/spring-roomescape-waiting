@@ -5,7 +5,6 @@ import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,7 +15,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.exception.member.MemberNotFoundException;
-import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.repository.MemberRepository;
@@ -74,13 +72,13 @@ public class ReservationService {
         Member member = memberRepository.findByEmail(createInfo.getEmail()).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.fetchById(createInfo.getThemeId());
         ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
-        validatePreviousDate(date, time);
         validateDuplicatedReservation(member, theme, date, time);
-        Reservation reservation = reservationRepository.save(generateReservation(theme, date, time, member));
+        Reservation reservation = generateReservation(member, theme, date, time);
+        reservationRepository.save(reservation);
         return new ReservationResponse(reservation);
     }
 
-    public void cancelWaitingReservation(String email, long id) {
+    public void cancelWaitingReservationByMember(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
                 .orElseThrow(ReservationNotFoundException::new);
@@ -99,14 +97,9 @@ public class ReservationService {
         first.ifPresent(value -> value.updateStatus(CONFIRMED));
     }
 
-    public void deleteWaitingReservation(long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    private void validatePreviousDate(LocalDate date, ReservationTime time) {
-        if (date.atTime(time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new DateTimePassedException();
-        }
+    public void cancelWaitingReservationByAdmin(long id) {
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        reservation.updateStatus(CANCELED);
     }
 
     private void validateDuplicatedReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
@@ -115,7 +108,7 @@ public class ReservationService {
         }
     }
 
-    private Reservation generateReservation(Theme theme, LocalDate date, ReservationTime time, Member member) {
+    private Reservation generateReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {
         if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
             return new Reservation(member, theme, date, time, WAITING);
         }

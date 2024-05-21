@@ -11,7 +11,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.member.Member;
+import roomescape.exception.reservation.DateTimePassedException;
 
 @Entity
 public class Reservation {
@@ -38,6 +40,7 @@ public class Reservation {
     private ReservationStatus status;
 
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
+        validateDateTimeHasPassed(date, time);
         this.member = member;
         this.theme = theme;
         this.date = date;
@@ -46,6 +49,12 @@ public class Reservation {
     }
 
     protected Reservation() {
+    }
+
+    private void validateDateTimeHasPassed(LocalDate date, ReservationTime time) {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new DateTimePassedException();
+        }
     }
 
     public void updateStatus(ReservationStatus reservationStatus) {
