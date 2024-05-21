@@ -12,24 +12,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        e.printStackTrace();
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse("[Request Error] " + e.getMessage()));
     }
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException e) {
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("[Authorization Error] " + e.getMessage()));
     }
 
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException e) {
+        e.printStackTrace();
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse("[Data Access Error] " + e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        e.printStackTrace();
         return ResponseEntity.internalServerError()
                 .body(new ErrorResponse("[Server Error] " + e.getMessage()));
     }
