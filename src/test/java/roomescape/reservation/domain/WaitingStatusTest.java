@@ -19,23 +19,23 @@ class WaitingStatusTest {
                 .isInstanceOf(DomainValidationException.class);
     }
 
-    @DisplayName("예약 대기 번호는 음수일 수 없다")
+    @DisplayName("예약 대기 번호는 양수여야 한다")
     @ParameterizedTest
-    @ValueSource(ints = {-1, -2, -3, -4})
+    @ValueSource(ints = {0, -1, -2, -3, -4})
     void should_waiting_number_positive(int negativeWaitingNumber) {
         assertThatThrownBy(() -> new WaitingStatus(negativeWaitingNumber))
                 .isInstanceOf(DomainValidationException.class);
     }
 
-    @DisplayName("예약 대기 번호가 0인 경우는 예약이 완료된 상태이다")
+    @DisplayName("예약 대기 번호가 1인 경우는 예약이 완료된 상태이다")
     @Test
     void should_waiting_number_zero_is_reserved_status() {
-        assertThat(new WaitingStatus(0).isWaiting()).isFalse();
+        assertThat(new WaitingStatus(1).isWaiting()).isFalse();
     }
 
     @DisplayName("예약 대기 랭크를 올리면 예약 대기 순서가 1 감소한다")
     @Test
     void should_decrease_waiting_number_when_rank_up() {
-        assertThat(new WaitingStatus(1).rankUp()).isEqualTo(new WaitingStatus(0));
+        assertThat(new WaitingStatus(2).rankUp()).isEqualTo(new WaitingStatus(1));
     }
 }

@@ -5,7 +5,7 @@ import roomescape.global.exception.DomainValidationException;
 
 public class WaitingStatus {
 
-    private static final int RESERVED = 0;
+    private static final int RESERVED = 1;
     private static final int MAX_WAITING = 5;
 
     private int waitingNumber;
@@ -23,13 +23,13 @@ public class WaitingStatus {
     }
 
     private void validate(int waitingNumber) {
-        validateNotNegative(waitingNumber);
+        validatePositive(waitingNumber);
         validateRange(waitingNumber);
     }
 
-    private void validateNotNegative(int waitingNumber) {
-        if (waitingNumber < 0) {
-            throw new DomainValidationException("예약 대기 번호는 음수일 수 없습니다" + " 대기 번호: " + waitingNumber);
+    private void validatePositive(int waitingNumber) {
+        if (waitingNumber <= 0) {
+            throw new DomainValidationException("예약 대기 번호는 0이거나 음수일 수 없습니다" + " 대기 번호: " + waitingNumber);
         }
     }
 
@@ -40,7 +40,7 @@ public class WaitingStatus {
     }
 
     public boolean isWaiting() {
-        return waitingNumber != 0;
+        return waitingNumber != RESERVED;
     }
 
     public WaitingStatus rankUp() {
