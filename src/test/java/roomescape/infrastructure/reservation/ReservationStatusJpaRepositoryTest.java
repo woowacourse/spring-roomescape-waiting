@@ -106,4 +106,20 @@ class ReservationStatusJpaRepositoryTest {
         assertThat(exists).isTrue();
     }
 
+    @Test
+    @DisplayName("예약된 모든 정보를 가져온다.")
+    void getAllBooked() {
+        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
+        LocalDate date = LocalDate.of(2024, 12, 25);
+        for (int day = 1; day <= 10; day++) {
+            LocalDateTime createdAt = LocalDateTime.of(2023, 1, day, 12, 0);
+            Reservation reservation = new Reservation(member, date, time, theme, createdAt);
+            entityManager.persist(new ReservationStatus(reservation, BookStatus.BOOKED));
+        }
+
+        List<Reservation> bookedReservations = reservationStatusRepository.findAllBookedReservations();
+        assertThat(bookedReservations).hasSize(10);
+    }
 }

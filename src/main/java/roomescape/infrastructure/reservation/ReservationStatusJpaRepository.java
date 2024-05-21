@@ -80,6 +80,14 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
                 .toList();
     }
 
+    @Override
+    default List<Reservation> findAllWaitingReservations() {
+        return findAllByStatus(BookStatus.WAITING)
+                .stream()
+                .map(ReservationStatus::getReservation)
+                .toList();
+    }
+
     List<ReservationStatus> findAllByStatus(BookStatus status);
 
     @Override

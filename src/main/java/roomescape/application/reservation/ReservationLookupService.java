@@ -55,4 +55,11 @@ public class ReservationLookupService {
                     return ReservationStatusResponse.of(reservation, waitingCount);
                 }).toList();
     }
+
+    public List<ReservationResponse> findAllWaitingReservations() {
+        return reservationStatusRepository.findAllWaitingReservations()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }
