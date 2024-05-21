@@ -26,7 +26,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     @Query("select mr as memberReservation, " +
             "(select count(*) from MemberReservation as cmr " +
-            "where cmr.reservation.id = mr.reservation.id and cmr.createdAt > mr.createdAt) as rank " +
+            "where cmr.reservation.id = mr.reservation.id and cmr.status = 'WAITING' and cmr.createdAt < mr.createdAt) as rank " +
             "from MemberReservation mr " +
             "where mr.status = 'WAITING' and mr.member.id = :memberId"
     )
