@@ -78,7 +78,6 @@ public class ReservationRestController {
             @RequestParam(name = "theme", required = false) Long themeId,
             @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
             @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
-
         ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo, CONFIRMED);
         return reservationService.searchConfirmedReservations(request);
     }

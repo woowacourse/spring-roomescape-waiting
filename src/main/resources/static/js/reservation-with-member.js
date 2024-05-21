@@ -63,12 +63,23 @@ function fetchMembers() {
     requestRead("/admin/members")
         .then(data => {
             membersOptions.push(...data);
-            populateSelect('member', membersOptions, 'name');
+            populateSelectMember('member', membersOptions, 'name');
         })
         .catch(error => console.error('Error fetching member:', error));
 }
 
 function populateSelect(selectId, options, textProperty) {
+    const select = document.getElementById(selectId);
+    options.forEach(optionData => {
+        const option = document.createElement('option');
+        console.log(option);
+        option.value = optionData.id;
+        option.textContent = optionData[textProperty];
+        select.appendChild(option);
+    });
+}
+
+function populateSelectMember(selectId, options, textProperty) {
     const select = document.getElementById(selectId);
     options.forEach(optionData => {
         const option = document.createElement('option');
@@ -192,7 +203,7 @@ function applyFilter(event) {
     event.preventDefault();
 
     const themeId = document.getElementById('theme').value;
-    const memberId = document.getElementById('member').value;
+    const member = document.getElementById('member').value;
     const dateFrom = document.getElementById('date-from').value;
     const dateTo = document.getElementById('date-to').value;
 
@@ -200,7 +211,7 @@ function applyFilter(event) {
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    fetch(`/admin/reservations/confirmed?member=${memberId}&theme=${themeId}&start-date=${dateFrom}&end-date=${dateTo}`, { // 예약 검색 API 호출
+    fetch(`/admin/reservations/confirmed?member=${member}&theme=${themeId}&start-date=${dateFrom}&end-date=${dateTo}`, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

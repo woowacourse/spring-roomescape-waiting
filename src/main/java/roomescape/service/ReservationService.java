@@ -125,7 +125,7 @@ public class ReservationService {
             root.fetch("theme");
             root.fetch("time");
 
-            if (request.getEmail() != null) {
+            if (request.getEmail() != null && !request.getEmail().isBlank()) {
                 predicates.add(builder.equal(root.get("member").get("email"), request.getEmail()));
             }
             if (request.getThemeId() != null) {
