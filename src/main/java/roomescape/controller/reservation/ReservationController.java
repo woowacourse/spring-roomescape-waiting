@@ -54,7 +54,7 @@ public class ReservationController {
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation reservation = saveRequest.toModel(memberResponse, themeResponse, reservationTimeResponse);
+        final Reservation reservation = saveRequest.toReservation(memberResponse, themeResponse, reservationTimeResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservation));
     }
 
@@ -71,6 +71,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
-        return ResponseEntity.ok(reservationService.findMyReservations(loginMember));
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(loginMember);
+        return ResponseEntity.ok(myReservations);
     }
 }

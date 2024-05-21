@@ -4,10 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
@@ -21,8 +22,7 @@ import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
 import static roomescape.TestFixture.THEME_HORROR;
 
-@Transactional
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DataJpaTest
 class ReservationRepositoryTest {
 
     @Autowired
@@ -37,6 +37,9 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private TestEntityManager testEntityManager;
+
     private Member member;
     private ReservationTime reservationTime;
     private Theme theme;
@@ -47,14 +50,15 @@ class ReservationRepositoryTest {
         member = memberRepository.save(MEMBER_BROWN());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
         theme = themeRepository.save(THEME_HORROR());
-        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme));
+        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.RESERVED));
+        testEntityManager.clear();
     }
 
     @Test
     @DisplayName("예약을 저장한다.")
     void save() {
         // given
-        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme);
+        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme, ReservationStatus.RESERVED);
 
         // when
         final Reservation actual = reservationRepository.save(reservation);

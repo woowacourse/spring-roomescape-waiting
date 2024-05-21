@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.TestFixture;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
@@ -49,9 +50,9 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void create() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         given(reservationRepository.save(reservation))
-                .willReturn(new Reservation(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme()));
+                .willReturn(new Reservation(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED));
 
         // when
         final ReservationResponse response = reservationService.create(reservation);
@@ -65,7 +66,7 @@ class ReservationServiceTest {
     void throwExceptionWhenCreateDuplicatedReservation() {
         // given
         final Theme theme = THEME_HORROR(1L);
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme, ReservationStatus.RESERVED);
         given(reservationRepository.countByDateAndTime_IdAndTheme_Id(DATE_MAY_EIGHTH, RESERVATION_TIME_SIX().getId(), theme.getId()))
                 .willReturn(1);
 
@@ -78,8 +79,8 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAllReservations() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), THEME_DETECTIVE());
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), THEME_DETECTIVE(), ReservationStatus.RESERVED);
         given(reservationRepository.findAll())
                 .willReturn(List.of(reservation1, reservation2));
 
@@ -106,8 +107,8 @@ class ReservationServiceTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), THEME_HORROR());
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
         final ReservationFilterParam reservationFilterParam = new ReservationFilterParam(
                 1L, 1L, LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")
         );

@@ -19,7 +19,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
@@ -28,7 +28,6 @@ public class ReservationService {
                 reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId()
         );
         validateDuplicatedReservation(count);
-        reservation.toReserved();
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 

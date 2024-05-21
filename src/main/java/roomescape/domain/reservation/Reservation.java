@@ -45,14 +45,14 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
         validateDate(date);
         this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.WAITING;
+        this.status = status;
     }
 
     private void validateDate(final LocalDate date) {
@@ -63,10 +63,6 @@ public class Reservation {
 
     public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
         return this.time.equals(time) && this.date.equals(date);
-    }
-
-    public void toReserved() {
-        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getReservationTimeId() {
@@ -109,8 +105,8 @@ public class Reservation {
         return theme;
     }
 
-    public String getStatus() {
-        return status.getValue();
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override

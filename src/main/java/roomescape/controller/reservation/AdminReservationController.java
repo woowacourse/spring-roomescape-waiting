@@ -47,7 +47,7 @@ public class AdminReservationController {
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());
 
-        final Reservation reservation = request.toModel(memberResponse, themeResponse, reservationTimeResponse);
+        Reservation reservation = request.toReservation(memberResponse, themeResponse, reservationTimeResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.create(reservation));
     }
 
