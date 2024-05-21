@@ -67,9 +67,9 @@ public class ReservationRestController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/reservations/waiting/{id}")
-    public void deleteReservationWaiting(@AuthenticationPrincipal LoginMember loginMember,
+    public void deleteWaitingReservation(@AuthenticationPrincipal LoginMember loginMember,
                                          @PathVariable long id) {
-        reservationService.deleteReservationWaiting(loginMember.getEmail(), id);
+        reservationService.deleteWaitingReservation(loginMember.getEmail(), id);
     }
 
     @GetMapping("/admin/reservations/confirmed")

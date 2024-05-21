@@ -183,7 +183,7 @@ class ReservationServiceTest {
     @DisplayName("대기 상태인 예약 삭제 시 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_delete_reservation_waiting_not_saved_reservation_id() {
-        assertThatThrownBy(() -> reservationService.deleteReservationWaiting("t1@t1.com", 1L))
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservation("t1@t1.com", 1L))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -196,7 +196,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L))
+        assertThatThrownBy(() -> reservationService.deleteWaitingReservation("tt@tt.com", 1L))
                 .isInstanceOf(ReservationWaitingNotFoundException.class);
     }
 
@@ -211,7 +211,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         assertThatNoException()
-                .isThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L));
+                .isThrownBy(() -> reservationService.deleteWaitingReservation("tt@tt.com", 1L));
     }
 
     @DisplayName("삭제하려는 예약이 DB에 존재하지 않으면 예외를 발생시킨다.")
