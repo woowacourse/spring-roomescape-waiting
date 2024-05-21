@@ -91,10 +91,9 @@ class ReservationServiceTest {
     @DisplayName("동일한 회원이 예약 대기 상태의 중복된 예약을 할 경우 예외가 발생한다.")
     @Test
     void validateDuplicatedReservationWaiting() {
-        Theme theme = themeRepository.save(
-                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
@@ -103,9 +102,25 @@ class ReservationServiceTest {
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember);
 
-        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(localDate, theme.getId(),
-                reservationTime.getId());
-        assertThatThrownBy(() -> reservationService.saveReservationWaiting(duplicateRequest, loginMember))
+        assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("동일한 회원이 예약 후 해당 예약에 연달아 대기를 걸 경우 예외가 발생한다.")
+    @Test
+    void validateReservationWaitingAfterReservation() {
+        themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+
+        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+
+        LocalDate localDate = LocalDate.now();
+        LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(localDate, 1L, 1L);
+        reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
+
+        assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

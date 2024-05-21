@@ -33,9 +33,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate dateTo
     );
 
+    @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
     List<Reservation> findAllByStatus(Status status);
 
+    @EntityGraph(attributePaths = {"reservationTime"})
     boolean existsByDateAndReservationTimeStartAtAndStatus(LocalDate date, LocalTime startAt, Status status);
 
-    boolean existsByMemberIdAndDateAndReservationTimeStartAtAndStatus(Long memberId, LocalDate date, LocalTime startAt, Status status);
+    @Query("""
+           select r.status from Reservation r
+           join ReservationTime rt on r.reservationTime.id = rt.id
+           where r.member.id = :memberId and r.date = :date and rt.startAt = :startAt
+            """)
+    List<Status> findStatusesByMemberIdAndDateAndReservationTimeStartAt(Long memberId, LocalDate date, LocalTime startAt);
 }

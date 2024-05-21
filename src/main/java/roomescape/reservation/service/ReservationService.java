@@ -81,15 +81,14 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservationWaiting(Reservation reservation, LoginMember loginMember) {
-        boolean existsReservation = reservationRepository.existsByMemberIdAndDateAndReservationTimeStartAtAndStatus(
+        List<Status> statuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
                 loginMember.id(),
                 reservation.getDate(),
-                reservation.getStartAt(),
-                reservation.getStatus()
+                reservation.getStartAt()
         );
 
-        if (existsReservation) {
-            throw new IllegalArgumentException("대기 상태로 등록된 예약입니다.");
+        if (statuses.contains(Status.SUCCESS) || statuses.contains(Status.WAIT)) {
+            throw new IllegalArgumentException("예약이 완료되었거나, 대기 상태로 등록된 예약입니다.");
         }
     }
 

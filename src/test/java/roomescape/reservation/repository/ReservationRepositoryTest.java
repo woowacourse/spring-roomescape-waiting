@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
 import static roomescape.util.Fixture.HOUR_10;
@@ -11,6 +12,7 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -137,9 +139,9 @@ public class ReservationRepositoryTest {
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
-    @DisplayName("예약 대기 상태로 저장된 동일한 예약이 있을 경우 true를 반환한다.")
+    @DisplayName("회원 아이디, 날짜, 시간 조간에 해당하는 예약의 상태들을 조회한다.")
     @Test
-    void existsByMemberIdAndDateAndReservationTimeStartAtAndStatusIsWaiting() {
+    void findStatusesByMemberIdAndDateAndReservationTimeStartAt() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
         Theme theme = themeRepository.save(
@@ -152,22 +154,21 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.WAIT));
 
-        boolean exist = reservationRepository.existsByMemberIdAndDateAndReservationTimeStartAtAndStatus(
+        List<Status> statuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
                 member.getId(),
-                savedReservation.getDate(),
-                savedReservation.getStartAt(),
-                Status.WAIT
+                TODAY,
+                reservationTime.getStartAt()
         );
 
-        assertThat(exist).isTrue();
+        assertThat(statuses).containsExactly(Status.SUCCESS, Status.WAIT);
     }
 
-    @DisplayName("예약 완료 상태로 저장된 동일한 예약이 있을 경우 true를 반환한다.")
+    @DisplayName("예약 상태 별로 동일한 예약이 있을 경우 true를 반환한다.")
     @Test
-    void existsByDateAndReservationTimeStartAtAndStatusIsSuccess() {
+    void existsByDateAndReservationTimeStartAtAndStatus() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
 
         Theme theme = themeRepository.save(
@@ -183,13 +184,22 @@ public class ReservationRepositoryTest {
         Reservation savedReservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
 
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+        boolean success = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
                 savedReservation.getDate(),
                 savedReservation.getStartAt(),
                 Status.SUCCESS
         );
 
-        assertThat(exist).isTrue();
+        boolean waiting = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+                savedReservation.getDate(),
+                savedReservation.getStartAt(),
+                Status.WAIT
+        );
+
+        assertAll(
+                () -> assertThat(success).isTrue(),
+                () -> assertThat(waiting).isFalse()
+        );
     }
 
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
