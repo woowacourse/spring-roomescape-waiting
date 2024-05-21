@@ -49,8 +49,4 @@ public class AuthService {
         Long memberId = jwtHandler.getMemberIdFromTokenWithNotValidate(accessToken);
         return jwtHandler.createToken(memberId);
     }
-
-    public TokenDto logout() {
-        return jwtHandler.createLogoutToken();
-    }
 }
