@@ -11,6 +11,10 @@ public enum ReservationStatus {
         this.name = name;
     }
 
+    public boolean isPending() {
+        return PENDING.equals(this);
+    }
+
     public String getName() {
         return name;
     }

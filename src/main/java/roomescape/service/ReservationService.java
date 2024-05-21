@@ -6,12 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRank;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.ReservationFilterRequest;
 import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.ReservationFilterRequest;
+import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.MemberRepository;
@@ -90,8 +91,8 @@ public class ReservationService {
 
     public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
         Member member = getMemberById(loginMember.id());
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
+        List<ReservationRank> reservationRanks = reservationRepository.findReservationRanksWithMember(member);
+        return reservationRanks.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
     }
