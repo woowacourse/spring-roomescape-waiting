@@ -7,7 +7,7 @@ import roomescape.waiting.domain.Waiting;
 
 public record WaitingResponse(
         Long id,
-        String memberDate,
+        String memberName,
         String themeName,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
