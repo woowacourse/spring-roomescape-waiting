@@ -188,4 +188,21 @@ class WaitingServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("[ERROR] 현재 이름(배키)으로 예약된 예약 대기 내역이 이미 존재합니다.");
     }
+
+    @DisplayName("모든 예약 대기를 반환한다")
+    @Test
+    void should_return_all_waiting() {
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        waitingRepository.save(new Waiting(1L, now(), reservationTime, theme1, member));
+        waitingRepository.save(new Waiting(2L, now(), reservationTime, theme2, member));
+
+        List<Waiting> reservations = waitingRepository.findAll();
+
+        assertThat(reservations).hasSize(2);
+    }
 }

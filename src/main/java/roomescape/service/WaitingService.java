@@ -89,4 +89,8 @@ public class WaitingService {
                         new NotFoundException("해당 id:[%s] 값으로 예약된 예약 대기 내역이 존재하지 않습니다.".formatted(memberId)));
         return waitingRepository.findWaitingWithRankByMemberId(member.getId());
     }
+
+    public List<Waiting> findAllWaiting() {
+        return waitingRepository.findAll();
+    }
 }
