@@ -119,7 +119,7 @@ function checkDateAndThemeAndTime() {
     const selectedTimeElement = document.querySelector('.time-slot.active');
     const reserveButton = document.getElementById("reserve-button");
     const waitButton = document.getElementById("wait-button");
-    
+
     if (selectedDate && selectedThemeElement && selectedTimeElement) {
         if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
             // 선택된 시간이 이미 예약된 경우
@@ -141,14 +141,12 @@ function onReservationButtonClick() {
     const selectedDate = document.getElementById("datepicker").value;
     const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
-    // const name = document.getElementById('user-name').value;
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
-            name: name
         };
 
         fetch('/reservations', {
@@ -191,14 +189,14 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch('/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -211,7 +209,7 @@ function onWaitButtonClick() {
             })
             .then(data => {
                 alert('Reservation waiting successful!');
-                window.location.href = "/";
+                location.reload();
             })
             .catch(error => {
                 alert("An error occurred while making the reservation waiting.");
