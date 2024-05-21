@@ -2,6 +2,7 @@ package roomescape.domain.member;
 
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import roomescape.exception.BadRequestException;
 
 @Embeddable
 public class MemberPassword {
@@ -22,7 +23,7 @@ public class MemberPassword {
 
     private void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 반드시 입력되어야 합니다.");
+            throw new BadRequestException("비밀번호는 반드시 입력되어야 합니다.");
         }
     }
 
@@ -45,12 +46,5 @@ public class MemberPassword {
     @Override
     public int hashCode() {
         return Objects.hashCode(password);
-    }
-
-    @Override
-    public String toString() {
-        return "MemberPassword{" +
-                "password='" + password + '\'' +
-                '}';
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import roomescape.exception.BadRequestException;
 
 class MemberTest {
 
@@ -15,7 +16,7 @@ class MemberTest {
     @NullAndEmptySource
     void throw_exception_when_email_null_input(String email) {
         assertThatThrownBy(() -> new Member(email, "123", "영이", "ADMIN"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일은 반드시 입력되어야 합니다.");
     }
 
@@ -25,7 +26,7 @@ class MemberTest {
         String email = "woowahansjdaksldajlfdskjf@dasodjaslkdjlas.com";
 
         assertThatThrownBy(() -> new Member(email, "1234", "영이", "ADMIN"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일 길이는 30글자까지 가능합니다.");
     }
 
@@ -34,7 +35,7 @@ class MemberTest {
     @NullAndEmptySource
     void throw_exception_when_name_null_input(String name) {
         assertThatThrownBy(() -> new Member("hi@hi.com", "123", name, "ADMIN"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이름은 반드시 입력되어야 합니다.");
     }
 
@@ -44,12 +45,11 @@ class MemberTest {
         String name = "jazzjjangyoungijjangjjang";
 
         assertThatThrownBy(() -> new Member("hi@hi.com", "1234", name, "ADMIN"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이름 길이는 15글자까지 가능합니다.");
     }
 
-
-    @DisplayName("유효한 시간 입력 시 정상 생성된다.")
+    @DisplayName("회원이 정상 생성된다.")
     @Test
     void create_success() {
         assertThatNoException()

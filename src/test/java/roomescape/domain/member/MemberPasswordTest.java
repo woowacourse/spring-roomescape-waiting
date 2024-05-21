@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.exception.BadRequestException;
 
 class MemberPasswordTest {
 
@@ -15,7 +16,7 @@ class MemberPasswordTest {
     @NullAndEmptySource
     void throw_exception_when_null_input(String password) {
         assertThatThrownBy(() -> new MemberPassword(password))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("비밀번호는 반드시 입력되어야 합니다.");
     }
 

@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import roomescape.exception.BadRequestException;
 
 @Entity
 public class Member {
@@ -49,19 +50,19 @@ public class Member {
 
     private void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 반드시 입력되어야 합니다.");
+            throw new BadRequestException("이메일은 반드시 입력되어야 합니다.");
         }
         if (email.length() > 30) {
-            throw new IllegalArgumentException("이메일 길이는 30글자까지 가능합니다.");
+            throw new BadRequestException("이메일 길이는 30글자까지 가능합니다.");
         }
     }
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 반드시 입력되어야 합니다.");
+            throw new BadRequestException("이름은 반드시 입력되어야 합니다.");
         }
         if (name.length() > 15) {
-            throw new IllegalArgumentException("이름 길이는 15글자까지 가능합니다.");
+            throw new BadRequestException("이름 길이는 15글자까지 가능합니다.");
         }
     }
 
