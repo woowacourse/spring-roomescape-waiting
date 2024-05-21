@@ -1,10 +1,10 @@
-package roomescape.theme.repository;
+package roomescape.reservation.repository;
 
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.theme.model.Theme;
+import roomescape.reservation.model.Theme;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 

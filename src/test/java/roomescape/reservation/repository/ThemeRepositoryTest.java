@@ -1,4 +1,4 @@
-package roomescape.theme.repository;
+package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -16,9 +16,10 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.model.Theme;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.JpaRepositoryTest;
 
 @JpaRepositoryTest

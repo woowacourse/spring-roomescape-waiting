@@ -1,8 +1,8 @@
-package roomescape.theme.dto.request;
+package roomescape.reservation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import roomescape.theme.model.Theme;
+import roomescape.reservation.model.Theme;
 
 public record CreateThemeRequest(
         @NotBlank(message = "테마 명은 공백 문자가 불가능합니다.")

@@ -1,15 +1,15 @@
-package roomescape.reservationtime.service;
+package roomescape.reservation.service;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.dto.request.CreateReservationTimeRequest;
-import roomescape.reservationtime.dto.response.CreateReservationTimeResponse;
-import roomescape.reservationtime.dto.response.FindReservationTimeResponse;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservation.dto.request.CreateReservationTimeRequest;
+import roomescape.reservation.dto.response.CreateReservationTimeResponse;
+import roomescape.reservation.dto.response.FindReservationTimeResponse;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {

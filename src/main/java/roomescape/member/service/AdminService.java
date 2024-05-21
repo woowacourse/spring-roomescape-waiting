@@ -8,10 +8,10 @@ import roomescape.member.dto.response.CreateReservationResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.model.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class AdminService {

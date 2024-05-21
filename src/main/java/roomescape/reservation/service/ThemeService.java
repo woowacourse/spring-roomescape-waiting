@@ -1,16 +1,16 @@
-package roomescape.theme.service;
+package roomescape.reservation.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.theme.dto.request.CreateThemeRequest;
-import roomescape.theme.dto.response.CreateThemeResponse;
-import roomescape.theme.dto.response.FindPopularThemesResponse;
-import roomescape.theme.dto.response.FindThemeResponse;
-import roomescape.theme.model.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.dto.request.CreateThemeRequest;
+import roomescape.reservation.dto.response.CreateThemeResponse;
+import roomescape.reservation.dto.response.FindPopularThemesResponse;
+import roomescape.reservation.dto.response.FindThemeResponse;
+import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ThemeService {

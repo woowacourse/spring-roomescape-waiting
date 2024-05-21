@@ -18,10 +18,10 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.model.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 
 @IntegrationTest

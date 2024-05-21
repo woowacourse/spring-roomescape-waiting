@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import roomescape.member.domain.Member;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservationtime.model.ReservationTime;
-import roomescape.theme.model.Theme;
+import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.Theme;
 
 public class ReservationFixture {
 

@@ -11,7 +11,6 @@ import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservationtime.model.ReservationTime;
 
 class ReservationTest {
 
