@@ -2,6 +2,7 @@ package roomescape.service.reservation.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.service.schedule.dto.ReservationTimeResponse;
 import roomescape.service.theme.dto.ThemeResponse;
@@ -11,15 +12,18 @@ public record ReservationWaitingResponse(
         String name,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul") LocalDate date,
         ReservationTimeResponse time,
-        ThemeResponse theme
-) {
+        ThemeResponse theme,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        LocalDateTime createdAt
+        ) {
     public ReservationWaitingResponse(ReservationWaiting waiting) {
         this(
                 waiting.getId(),
                 waiting.getMemberName(),
                 waiting.getDate(),
                 new ReservationTimeResponse(waiting.getReservationTime()),
-                new ThemeResponse(waiting.getTheme())
+                new ThemeResponse(waiting.getTheme()),
+                waiting.getCreatedAt()
         );
     }
 }

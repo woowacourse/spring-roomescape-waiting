@@ -1,6 +1,7 @@
 package roomescape.service.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,7 @@ class ReservationWaitingServiceTest {
         assertions.assertThat(response.time().id()).isEqualTo(reservationTime.getId());
         assertions.assertThat(response.theme().id()).isEqualTo(theme.getId());
         assertions.assertThat(response.theme().id()).isEqualTo(theme.getId());
+        assertions.assertThat(response.createdAt()).isBefore(LocalDateTime.now());
         assertions.assertAll();
     }
 }
