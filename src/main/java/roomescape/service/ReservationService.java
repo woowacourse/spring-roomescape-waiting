@@ -12,8 +12,8 @@ import roomescape.repository.ReservationRepository;
 
 import java.util.List;
 
-@Service
 @Transactional
+@Service
 public class ReservationService {
 
     private static final int MAX_RESERVATIONS_PER_TIME = 1;
