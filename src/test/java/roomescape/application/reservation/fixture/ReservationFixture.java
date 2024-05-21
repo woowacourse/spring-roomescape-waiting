@@ -32,9 +32,6 @@ public class ReservationFixture {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
     private ReservationStatusRepository reservationStatusRepository;
 
     @Autowired

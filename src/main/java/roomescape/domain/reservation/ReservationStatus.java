@@ -36,10 +36,6 @@ public class ReservationStatus {
         this.status = BookStatus.BOOKED;
     }
 
-    public boolean isOwnedBy(long memberId) {
-        return reservation.isNotOwnedBy(memberId);
-    }
-
     public boolean isBooked() {
         return status == BookStatus.BOOKED;
     }

@@ -9,8 +9,6 @@ public interface ReservationStatusRepository {
 
     ReservationStatus getById(long id);
 
-    void deleteById(Long id);
-
     Optional<ReservationStatus> findFirstWaiting(Reservation reservation);
 
     long getWaitingCount(Reservation reservation);
