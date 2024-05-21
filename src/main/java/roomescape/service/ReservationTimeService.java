@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.BadRequestException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ReservationAvailabilityTimeRequest;
@@ -51,7 +52,8 @@ public class ReservationTimeService {
     public List<ReservationAvailabilityTimeResponse> findReservationAvailabilityTimes(
             ReservationAvailabilityTimeRequest timeRequest) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByThemeId(timeRequest.themeId());
+        List<Reservation> reservations = reservationRepository.findByThemeId(timeRequest.themeId())
+                .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
 
         return reservationTimes.stream()
                 .map(reservationTime -> {

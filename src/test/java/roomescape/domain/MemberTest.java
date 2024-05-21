@@ -3,9 +3,12 @@ package roomescape.domain;
 import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.ADMIN_NAME;
 import static roomescape.TestFixture.ADMIN_PASSWORD;
+import static roomescape.TestFixture.MEMBER_BROWN;
+import static roomescape.TestFixture.RESERVATION_TIME_10AM;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;

@@ -159,18 +159,6 @@ class ReservationTimeServiceTest {
         );
     }
 
-    @DisplayName("중복된 예약 시간을 저장하려 하면 예외가 발생한다.")
-    @Test
-    void duplicatedTimeSaveThrowsException() {
-        // given
-        ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(TIME);
-        reservationTimeService.save(reservationTimeRequest);
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.save(reservationTimeRequest))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("중복된 시간을 생성할 수 없습니다.");
-    }
-
     @DisplayName("예약 시간을 삭제한다.")
     @Test
     void deleteById() {

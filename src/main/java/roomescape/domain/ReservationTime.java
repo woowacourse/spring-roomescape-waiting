@@ -6,7 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.Optional;
 import roomescape.exception.BadRequestException;
 
 @Entity
