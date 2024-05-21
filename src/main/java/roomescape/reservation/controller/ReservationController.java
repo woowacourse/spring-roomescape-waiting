@@ -34,7 +34,7 @@ public class ReservationController {
 
     @GetMapping("/accounts")
     public List<MyReservationResponse> findMyReservations(LoggedInMember member) {
-        return service.findReservations(member.id());
+        return service.findMyReservations(member.id());
     }
 
     @PostMapping

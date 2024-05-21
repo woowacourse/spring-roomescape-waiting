@@ -1,11 +1,13 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingRequest;
@@ -14,7 +16,6 @@ import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class WaitingService {
-
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
@@ -25,6 +26,18 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
+    }
+
+    public List<MyReservationResponse> findWaitings(Long memberId) {
+        return waitingRepository.findByMemberId(memberId)
+                .stream()
+                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
+                .toList();
+    }
+
+    private Long countOrderOfWaiting(Waiting waiting) {
+        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
+                waiting.getReservation(), waiting.getCreatedAt());
     }
 
     public WaitingResponse createWaiting(WaitingRequest request, Long requestMemberId) {
@@ -50,7 +63,7 @@ public class WaitingService {
 
     private void validateIsAvailable(Waiting waiting) {
         if (waiting.isBefore(LocalDateTime.now())) {
-            throw new BadArgumentRequestException("예약 대기는 현재 날짜 이후이어야 합니다.");
+            throw new BadArgumentRequestException("예약 대기는 현재 시간 이후이어야 합니다.");
         }
         if (isAlreadyWaited(waiting.getReservation(), waiting.getMember())) {
             throw new BadArgumentRequestException("이미 예약 했습니다.");

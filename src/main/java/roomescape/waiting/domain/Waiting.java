@@ -54,4 +54,8 @@ public class Waiting {
     public Member getMember() {
         return member;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
