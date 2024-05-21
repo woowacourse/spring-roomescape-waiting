@@ -16,7 +16,9 @@ import roomescape.controller.dto.CreateReservationResponse;
 import roomescape.controller.dto.FindReservationResponse;
 import roomescape.controller.dto.FindReservationStandbyResponse;
 import roomescape.controller.dto.SearchReservationFilterRequest;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.global.argumentresolver.AuthenticationPrincipal;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -65,6 +67,12 @@ public class AdminReservationController {
             .map(FindReservationStandbyResponse::from)
             .toList();
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/standby/{id}")
+    public ResponseEntity<Void> deleteStandby(@PathVariable Long id, @AuthenticationPrincipal Member member) {
+        reservationService.deleteStandby(id, member);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")

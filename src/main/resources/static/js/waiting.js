@@ -27,10 +27,10 @@ function render(data) {
     row.insertCell(3).textContent = date;          // 예약 날짜
     row.insertCell(4).textContent = startAt;       // 시작 시간
 
-    // const actionCell = row.insertCell(row.cells.length);
+    const actionCell = row.insertCell(row.cells.length);
     //
     // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-    // actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
+    actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteWaiting));
   });
 }
 //
@@ -51,27 +51,23 @@ function render(data) {
 //   }).then(() => location.reload());
 // }
 //
-// function deny(event) {
-//   const row = event.target.closest('tr');
-//   const id = row.cells[0].textContent;
-//
-//   /*
-//   [4단계] 예약 대기 목록 관리 기능
-//         예약 대기 거절 API 호출
-//    */
-//   const endpoint = '' + id;
-//   return fetch(endpoint, {
-//     method: ''
-//   }).then(response => {
-//     if (response.status === 200) return;
-//     throw new Error('Delete failed');
-//   }).then(() => location.reload());
-// }
-//
-// function createActionButton(label, className, eventListener) {
-//   const button = document.createElement('button');
-//   button.textContent = label;
-//   button.classList.add('btn', className, 'mr-2');
-//   button.addEventListener('click', eventListener);
-//   return button;
-// }
+function deleteWaiting(event) {
+  const row = event.target.closest('tr');
+  const id = row.cells[0].textContent;
+
+  const endpoint = '/admin/reservations/standby/' + id;
+  return fetch(endpoint, {
+    method: 'DELETE'
+  }).then(response => {
+    if (response.status === 204) return;
+    throw new Error('Delete failed');
+  }).then(() => location.reload());
+}
+
+function createActionButton(label, className, eventListener) {
+  const button = document.createElement('button');
+  button.textContent = label;
+  button.classList.add('btn', className, 'mr-2');
+  button.addEventListener('click', eventListener);
+  return button;
+}
