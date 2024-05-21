@@ -30,11 +30,12 @@ public class ReservationWaiting {
     public ReservationWaiting() {
     }
 
-    public ReservationWaiting(Member member, ReservationDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public ReservationWaiting(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        this(null, now, member, date, time, theme);
     }
 
-    public ReservationWaiting(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+    public ReservationWaiting(Long id, LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        validateDateTime(now, date, time);
         this.member = member;
         this.id = id;
         this.date = date;
@@ -42,12 +43,11 @@ public class ReservationWaiting {
         this.theme = theme;
     }
 
-    public static ReservationWaiting create(LocalDateTime now, Member member, ReservationDate date, ReservationTime time, Theme theme) {
+    private static void validateDateTime(final LocalDateTime now, final ReservationDate date, final ReservationTime time) {
         LocalDateTime waitingDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
         if (waitingDateTime.isBefore(now)) {
             throw new IllegalArgumentException(String.format("지나간 시간에 대한 에약 대기는 생성할 수 없습니다. (dateTime: %s)", waitingDateTime));
         }
-        return new ReservationWaiting(member, date, time, theme);
     }
 
     public boolean hasSameMemberWith(Reservation reservation) {

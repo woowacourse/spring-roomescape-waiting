@@ -10,6 +10,7 @@ import roomescape.domain.*;
 import roomescape.infrastructure.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -63,8 +64,9 @@ class ReservationAndReservationWaitingServiceTest {
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         ReservationDate date = new ReservationDate(LocalDate.now().plusDays(2).toString());
+        LocalDateTime createdDateTime = LocalDateTime.now().minusMonths(2);
         Reservation reservation = reservationRepository.save(new Reservation(reservedMember, date, time, theme));
-        ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(waitingMember, date, time, theme));
+        ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, date, time, theme));
 
         reservationAndWaitingService.deleteIfNoWaitingOrUpdateReservation(reservation.getId());
 

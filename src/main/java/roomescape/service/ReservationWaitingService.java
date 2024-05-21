@@ -49,7 +49,7 @@ public class ReservationWaitingService {
         Theme theme = themeRepository.findById(request.timeId())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 대기 생성 실패: 테마를 찾을 수 없습니다 (id: %d)", request.themeId())));
 
-        return ReservationWaiting.create(LocalDateTime.now(), member, date, time, theme);
+        return new ReservationWaiting(LocalDateTime.now(), member, date, time, theme);
     }
 
     private void validateWaiting(ReservationWaiting waiting) {

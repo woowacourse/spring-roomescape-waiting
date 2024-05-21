@@ -14,6 +14,7 @@ import roomescape.service.response.ReservationWaitingWithRankAppResponse;
 import roomescape.web.exception.AuthorizationException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,7 +123,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(otherMember, new ReservationDate(date), time, theme));
-        reservationWaitingRepository.save(new ReservationWaiting(member, new ReservationDate(date), time, theme));
+        reservationWaitingRepository.save(new ReservationWaiting(LocalDateTime.now(), member, new ReservationDate(date), time, theme));
 
         WaitingAppRequest request = new WaitingAppRequest(date, time.getId(), theme.getId(), member.getId());
 
@@ -155,11 +156,12 @@ class ReservationWaitingServiceTest {
                 .map(memberRepository::save)
                 .toList();
         String date = LocalDate.now().minusDays(1).toString();
+        LocalDateTime createdDateTime = LocalDateTime.now().minusMonths(2);
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(savedMembers.get(0), new ReservationDate(date), time, theme));
-        reservationWaitingRepository.save(new ReservationWaiting(savedMembers.get(1), new ReservationDate(date), time, theme));
-        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(savedMembers.get(2), new ReservationDate(date), time, theme));
+        reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(1), new ReservationDate(date), time, theme));
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, savedMembers.get(2), new ReservationDate(date), time, theme));
 
         List<ReservationWaitingWithRankAppResponse> waitingWithRankAppResponses = reservationWaitingService.findWaitingWithRankByMemberId(savedMembers.get(2).getId());
 
@@ -174,10 +176,11 @@ class ReservationWaitingServiceTest {
         Member reservedMember = memberRepository.save(members.get(0));
         Member waitingMember = memberRepository.save(members.get(1));
         String date = LocalDate.now().minusDays(1).toString();
+        LocalDateTime createdDateTime = LocalDateTime.now().minusMonths(2);
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
-        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(waitingMember, new ReservationDate(date), time, theme));
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, new ReservationDate(date), time, theme));
 
         reservationWaitingService.deleteMemberWaiting(waitingMember.getId(), savedWaiting.getId());
 
@@ -201,10 +204,11 @@ class ReservationWaitingServiceTest {
         Member reservedMember = memberRepository.save(members.get(0));
         Member waitingMember = memberRepository.save(members.get(1));
         String date = LocalDate.now().minusDays(1).toString();
+        LocalDateTime createdDateTime = LocalDateTime.now().minusMonths(2);
         Theme theme = themeRepository.save(VALID_THEME);
         ReservationTime time = reservationTimeRepository.save(VALID_RESERVATION_TIME);
         reservationRepository.save(new Reservation(reservedMember, new ReservationDate(date), time, theme));
-        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(waitingMember, new ReservationDate(date), time, theme));
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, new ReservationDate(date), time, theme));
 
         assertThatThrownBy(() ->
                 reservationWaitingService.deleteMemberWaiting(reservedMember.getId(), savedWaiting.getId()))
