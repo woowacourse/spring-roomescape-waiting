@@ -8,6 +8,7 @@ import roomescape.member.domain.Member;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -67,4 +68,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.status = :status
             """)
     List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
+
+    Optional<Reservation> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 }

@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.contentOf;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION;
@@ -199,6 +198,27 @@ class ReservationServiceTest extends ServiceTest {
         // when & then
         assertThatCode(() -> reservationService.deleteReservation(reservation.getId()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하면 첫 번째 대기 예약 상태가 예약 중으로 바뀐다.")
+    void deleteAndChangeToBooking() {
+        // given
+        Reservation reservationInBooking = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
+        Reservation reservationInWaiting = reservationService.create(new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme, WAITING));
+
+        // when
+        reservationService.deleteReservation(reservationInBooking.getId());
+
+        // then
+        List<Reservation> changedBookings = reservationService.findReservationsInBookingByMember(tommy);
+        List<WaitingReservation> changedWaitings = reservationService.findWaitingReservationsWithPreviousCountByMember(tommy);
+        assertSoftly(softly -> {
+            softly.assertThat(changedBookings).hasSize(1)
+                    .extracting(Reservation::getId)
+                    .contains(reservationInWaiting.getId());
+            softly.assertThat(changedWaitings).hasSize(0);
+        });
     }
 
     @Test

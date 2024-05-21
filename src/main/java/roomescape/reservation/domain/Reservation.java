@@ -78,6 +78,10 @@ public class Reservation {
         return this.status == status;
     }
 
+    public void updateStatus(ReservationStatus status) {
+        this.status = status;
+    }
+
     public String getMemberName() {
         return member.getName();
     }

@@ -15,6 +15,7 @@ import roomescape.reservation.domain.WaitingReservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -86,6 +87,11 @@ public class ReservationService {
         Reservation reservation = findByIdIfNotPresentThrowException(id);
         validateReservationStatus(reservation, ReservationStatus.BOOKING);
         reservationRepository.deleteById(id);
+
+        Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndTheme(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        firstWaitingReservation.ifPresent(waitingReservation ->
+                waitingReservation.updateStatus(ReservationStatus.BOOKING));
     }
 
     @Transactional
