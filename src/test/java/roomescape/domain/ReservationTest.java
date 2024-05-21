@@ -17,13 +17,11 @@ class ReservationTest {
     @Test
     void create() {
         assertThatCode(
-                () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
-                        ReservationStatus.getFirstReservationStatus()))
+                () -> new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME))
                 .doesNotThrowAnyException();
 
         assertThatCode(
-                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME,
-                        ReservationStatus.getFirstReservationStatus()))
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, VALID_THEME))
                 .doesNotThrowAnyException();
 
     }
@@ -32,8 +30,7 @@ class ReservationTest {
     @Test
     void create_WithNullDate() {
         assertThatThrownBy(
-                () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME,
-                        ReservationStatus.getFirstReservationStatus()))
+                () -> new Reservation(VALID_MEMBER, null, VALID_RESERVATION_TIME, VALID_THEME))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -41,8 +38,7 @@ class ReservationTest {
     @Test
     void create_WithNullTime() {
         assertThatThrownBy(
-                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME,
-                        ReservationStatus.getFirstReservationStatus()))
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, null, VALID_THEME))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -50,8 +46,7 @@ class ReservationTest {
     @Test
     void create_WithNullTheme() {
         assertThatThrownBy(
-                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null,
-                        ReservationStatus.getFirstReservationStatus()))
+                () -> new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE, VALID_RESERVATION_TIME, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -62,7 +57,7 @@ class ReservationTest {
                 VALID_MEMBER,
                 new ReservationDate("1900-01-01"),
                 VALID_RESERVATION_TIME,
-                VALID_THEME, ReservationStatus.getFirstReservationStatus());
+                VALID_THEME);
 
         assertThat(reservation.isPast()).isTrue();
     }

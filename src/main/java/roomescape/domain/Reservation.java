@@ -22,30 +22,24 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
-    @Embedded
-    private ReservationStatus reservationStatus;
 
     protected Reservation() {
     }
 
-    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus reservationStatus) {
-        this(null, member, date, time, theme, reservationStatus);
+    public Reservation(Member member, ReservationDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme,
-                       ReservationStatus reservationStatus) {
+    public Reservation(Long id, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        validateStatus(reservationStatus);
         this.member = member;
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.reservationStatus = reservationStatus;
     }
 
     private void validateMember(Member member) {
@@ -72,18 +66,8 @@ public class Reservation {
         }
     }
 
-    private void validateStatus(ReservationStatus reservationStatus) {
-        if (reservationStatus == null) {
-            throw new IllegalArgumentException("예약 상태는 비어있을 수 없습니다.");
-        }
-    }
-
     public boolean isPast() {
         return date.isBeforeNow() || date.isToday() && time.isBeforeNow();
-    }
-
-    public void decreasePriority() {
-        reservationStatus = reservationStatus.updateDecreasedPriorityStatus();
     }
 
     public Long getId() {
@@ -104,9 +88,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return reservationStatus;
     }
 }

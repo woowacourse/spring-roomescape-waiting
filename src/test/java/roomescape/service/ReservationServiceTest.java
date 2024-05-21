@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.MemberRepository;
@@ -73,7 +72,7 @@ class ReservationServiceTest {
                         VALID_MEMBER,
                         VALID_RESERVATION_DATE,
                         VALID_RESERVATION_TIME,
-                        VALID_THEME, ReservationStatus.getFirstReservationStatus())
+                        VALID_THEME)
                 );
 
         ReservationAppRequest request = new ReservationAppRequest(VALID_RESERVATION_DATE.getDate().toString(), timeId,
@@ -84,8 +83,8 @@ class ReservationServiceTest {
                 reservation.getMember().getName().getName(),
                 reservation.getReservationDate(),
                 ReservationTimeAppResponse.from(reservation.getReservationTime()),
-                ThemeAppResponse.from(reservation.getTheme()),
-                reservation.getStatus());
+                ThemeAppResponse.from(reservation.getTheme())
+        );
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -161,8 +160,7 @@ class ReservationServiceTest {
     @Test
     void findByMemberId() {
         Reservation memberReservation = new Reservation(1L, VALID_MEMBER, VALID_RESERVATION_DATE,
-                VALID_RESERVATION_TIME, VALID_THEME,
-                ReservationStatus.getFirstReservationStatus());
+                VALID_RESERVATION_TIME, VALID_THEME);
         when(reservationRepository.findAllByMemberId(memberId))
                 .thenReturn(List.of(memberReservation));
 

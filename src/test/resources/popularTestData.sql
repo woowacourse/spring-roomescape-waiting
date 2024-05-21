@@ -14,8 +14,8 @@ VALUES ('theme1', 'desc1',
        ('theme3', 'desc3',
         'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id, status, priority)
-VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1, 'RESERVED', 0),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 2, 1, 'RESERVED', 0),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 2, 'RESERVED', 0),
-       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2, 'RESERVED', 0);
+INSERT INTO reservation(date, time_id, theme_id, member_id)
+VALUES (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 1, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 2, 1),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 1, 3, 2),
+       (TIMESTAMPADD(WEEK, -1, CURRENT_DATE), 2, 3, 2);

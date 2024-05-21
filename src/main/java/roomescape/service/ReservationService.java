@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.MemberRepository;
@@ -43,8 +42,7 @@ public class ReservationService {
         ReservationTime time = findTime(request.timeId());
         Theme theme = findTheme(request.themeId());
         validateDuplication(date, request.timeId(), request.themeId());
-        Reservation reservation = new Reservation(member, date, time, theme,
-                ReservationStatus.getFirstReservationStatus());
+        Reservation reservation = new Reservation(member, date, time, theme);
         validatePastReservation(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
