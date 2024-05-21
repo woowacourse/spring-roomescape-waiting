@@ -41,10 +41,7 @@ public class ReservationController {
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @AuthenticationPrincipal Member member) {
         List<Reservation> memberReservations = reservationService.findMemberReservations(member);
-        List<MemberReservationResponse> responses =
-                memberReservations.stream()
-                        .map(MemberReservationResponse::new)
-                        .toList();
+        List<MemberReservationResponse> responses = MemberReservationResponse.of(memberReservations);
         return ResponseEntity.ok(responses);
     }
 
