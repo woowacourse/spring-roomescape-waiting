@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,14 +34,15 @@ public class Reservation {
     private ReservationTime time;
 
     @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
+    @Column(name = "reservation_status")
+    private ReservationStatus status;
 
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.reservationStatus = status;
+        this.status = status;
     }
 
     protected Reservation() {
@@ -83,6 +85,6 @@ public class Reservation {
     }
 
     public ReservationStatus getReservationStatus() {
-        return reservationStatus;
+        return status;
     }
 }

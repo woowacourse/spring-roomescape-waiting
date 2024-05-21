@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import jakarta.persistence.criteria.Predicate;
@@ -50,7 +50,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllReservations(ReservationSearchParams request) {
+    public List<ReservationResponse> searchConfirmedReservations(ReservationSearchParams request) {
         Specification<Reservation> specification = getSearchSpecification(request);
         return reservationRepository.findAll(specification)
                 .stream()
@@ -59,8 +59,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationWaitingResponse> findAllReservationWaitings() {
-        return reservationRepository.findReservationByReservationStatus(WAITING);
+    public List<ReservationWaitingResponse> findAllWaitingReservations() {
+        return reservationRepository.findReservationByStatus(WAITING);
     }
 
     @Transactional(readOnly = true)
@@ -86,14 +86,14 @@ public class ReservationService {
         if (reservationRepository.existsByThemeAndDateAndTime(theme, date, time)) {
             return new Reservation(member, theme, date, time, WAITING);
         }
-        return new Reservation(member, theme, date, time, RESERVED);
+        return new Reservation(member, theme, date, time, CONFIRMED);
     }
 
     public void deleteReservationWaiting(String email, long id) {
         if (!memberRepository.existsByEmail(email)) {
             throw new MemberNotFoundException();
         }
-        if (!reservationRepository.existsByIdAndReservationStatus(id, WAITING)) {
+        if (!reservationRepository.existsByIdAndStatus(id, WAITING)) {
             throw new ReservationWaitingNotFoundException();
         }
         reservationRepository.deleteById(id);
@@ -136,6 +136,9 @@ public class ReservationService {
             }
             if (request.getDateTo() != null) {
                 predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getDateTo()));
+            }
+            if (request.getStatus() != null) {
+                predicates.add(builder.equal(root.get("status"), request.getStatus()));
             }
             return builder.and(predicates.toArray(new Predicate[0]));
         });

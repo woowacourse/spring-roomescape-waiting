@@ -11,7 +11,7 @@ public class AdminController {
         return "admin/index";
     }
 
-    @GetMapping("/admin/reservation/reserved")
+    @GetMapping("/admin/reservation/confirmed")
     public String reservationPage() {
         return "admin/reservation-new";
     }

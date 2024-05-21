@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(RESERVATION_API_ENDPOINT + '/confirmed')
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -200,7 +200,7 @@ function applyFilter(event) {
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    fetch(`/admin/reservations?member=${memberId}&theme=${themeId}&start-date=${dateFrom}&end-date=${dateTo}`, { // 예약 검색 API 호출
+    fetch(`/admin/reservations/confirmed?member=${memberId}&theme=${themeId}&start-date=${dateFrom}&end-date=${dateTo}`, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

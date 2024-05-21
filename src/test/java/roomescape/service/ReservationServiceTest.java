@@ -4,7 +4,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import io.restassured.RestAssured;
@@ -77,7 +77,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         themeRepository.save(theme);
         reservationTimeRepository.save(time);
-        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationService.findReservationsByMemberEmail("t1@t1.com"))
@@ -127,7 +127,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
@@ -144,7 +144,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
         ReservationCreate reservationDto = new ReservationCreate("t1@t1.com", 1L, "2025-11-30", 1L);
@@ -163,7 +163,7 @@ class ReservationServiceTest {
         ReservationCreate reservationDto = new ReservationCreate("tt@tt.com", 1L, "2025-11-30", 1L);
         ReservationResponse actual = reservationService.createReservation(reservationDto);
 
-        assertThat(actual.getReservationStatus()).isEqualTo(RESERVED.toString());
+        assertThat(actual.getReservationStatus()).isEqualTo(CONFIRMED.toString());
     }
 
     @DisplayName("예약을 정상적으로 생성한다.")
@@ -192,7 +192,7 @@ class ReservationServiceTest {
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
-        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> reservationService.deleteReservationWaiting("tt@tt.com", 1L))
@@ -216,7 +216,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 정상적으로 삭제한다.")
     @Test
     void success_delete_reservation() {
-        Reservation reservation = new Reservation(member, theme, date, time, RESERVED);
+        Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);

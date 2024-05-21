@@ -1,5 +1,7 @@
 package roomescape.controller.reservation;
 
+import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
+
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -70,20 +72,20 @@ public class ReservationRestController {
         reservationService.deleteReservationWaiting(loginMember.getEmail(), id);
     }
 
-    @GetMapping("/admin/reservations")
-    public List<ReservationResponse> findReservations(
+    @GetMapping("/admin/reservations/confirmed")
+    public List<ReservationResponse> searchConfirmedReservations(
             @RequestParam(name = "member", required = false) String email,
             @RequestParam(name = "theme", required = false) Long themeId,
             @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
             @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
 
-        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo);
-        return reservationService.findAllReservations(request);
+        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo, CONFIRMED);
+        return reservationService.searchConfirmedReservations(request);
     }
 
     @GetMapping("/admin/reservations/waiting")
-    public List<ReservationWaitingResponse> findReservationWaitings() {
-        return reservationService.findAllReservationWaitings();
+    public List<ReservationWaitingResponse> findAllWaitingReservations() {
+        return reservationService.findAllWaitingReservations();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
