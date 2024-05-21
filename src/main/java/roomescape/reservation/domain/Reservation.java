@@ -82,6 +82,10 @@ public class Reservation {
         return waitingStatus.isWaiting();
     }
 
+    public boolean isReservedBy(Long memberId) {
+        return member.getId().equals(memberId);
+    }
+
     public int getWaitingNumber() {
         return waitingStatus.getWaitingNumber();
     }

@@ -43,4 +43,11 @@ public class ReservationFixture {
             TOMORROW,
             RESERVATION_TIME_11_00_ID_2,
             THEME_1);
+
+    public static final Reservation MEMBER_ID_1_RESERVATION = new Reservation(
+            1L,
+            MemberFixture.MEMBER_ID_1,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1);
 }
