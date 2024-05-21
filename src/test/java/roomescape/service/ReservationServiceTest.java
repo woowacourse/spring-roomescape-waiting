@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.PastTimeReservationException;
@@ -46,6 +47,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유효한 값을 입력하면 예외를 발생하지 않는다")
+    @Transactional
     void create_reservation() {
         final long timeId = reservationTimeRepository.save(ReservationTime.from("10:00"))
                 .getId();
@@ -61,6 +63,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("중복 예약 이면 예외를 발생한다.")
+    @Transactional
     void throw_exception_when_duplicate_reservationTime() {
         final long timeId = reservationTimeRepository.save(ReservationTime.from("10:00"))
                 .getId();
@@ -94,6 +97,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("테마,멤버,날짜 범위에 맞는 예약을 검색한다.")
+    @Transactional
     void search_reservation_with_theme_member_and_date() {
         final Long timeId = reservationTimeRepository.save(ReservationTime.from("10:00"))
                 .getId();

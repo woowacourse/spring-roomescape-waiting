@@ -45,7 +45,7 @@ public class ThemeService {
     }
 
     public void deleteTheme(final long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByReservationInfoThemeId(id)) {
             throw new ExistReservationException(THEME, id);
         }
         if (themeRepository.deleteReservationTimeById(id) == 0) {

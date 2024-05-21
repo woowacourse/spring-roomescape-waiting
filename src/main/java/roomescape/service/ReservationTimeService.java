@@ -6,7 +6,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.ExistReservationException;
 import roomescape.exception.NotExistException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationInfoRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.input.AvailableReservationTimeInput;
 import roomescape.service.dto.input.ReservationTimeInput;
@@ -22,9 +22,9 @@ import static roomescape.exception.ExceptionDomainType.RESERVATION_TIME;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationInfoRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationInfoRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }

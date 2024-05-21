@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
@@ -14,10 +15,7 @@ import roomescape.exception.ExistReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.*;
 import roomescape.service.dto.input.AvailableReservationTimeInput;
 import roomescape.service.dto.input.ReservationTimeInput;
 import roomescape.service.dto.output.AvailableReservationTimeOutput;
@@ -35,6 +33,8 @@ class ReservationTimeServiceTest {
     ReservationTimeService sut;
     @Autowired
     ReservationRepository reservationRepository;
+    @Autowired
+    ReservationInfoRepository reservationInfoRepository;
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
@@ -75,13 +75,13 @@ class ReservationTimeServiceTest {
         final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-
-        reservationRepository.save(ReservationInfo.from(
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from(
                 "2024-04-30",
                 reservationTime,
-                theme,
-                member
+                theme
         ));
+
+        reservationRepository.save(new Reservation(member, reservationInfo));
         final long reservationTimeId = reservationTime.getId();
 
         assertThatThrownBy(() -> sut.deleteReservationTime(reservationTimeId))
@@ -104,7 +104,13 @@ class ReservationTimeServiceTest {
         final ReservationTime time2 = reservationTimeRepository.save(ReservationTime.from("11:00"));
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-        reservationRepository.save(ReservationInfo.from("2025-01-01", time1, theme, member));
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from(
+                "2025-01-01",
+                time1,
+                theme
+        ));
+
+        reservationRepository.save(new Reservation(member, reservationInfo));
 
 
         final List<AvailableReservationTimeOutput> actual = sut.getAvailableTimes(
