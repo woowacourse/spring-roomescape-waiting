@@ -20,8 +20,10 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -39,7 +41,7 @@ class ReservationBookingServiceTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationStatusRepository reservationStatusRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -65,7 +67,11 @@ class ReservationBookingServiceTest {
                 time.getId(),
                 theme.getId()
         );
-        reservationRepository.save(request.toReservation(member, time, theme, LocalDateTime.now(clock)));
+        reservationStatusRepository.save(
+                new ReservationStatus(
+                        request.toReservation(member, time, theme, LocalDateTime.now(clock)),
+                        BookStatus.BOOKED)
+        );
 
         assertThatCode(() -> reservationBookingService.bookReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -79,7 +85,7 @@ class ReservationBookingServiceTest {
         Member member = reservation.getMember();
         reservationBookingService.cancelReservation(member.getId(), reservation.getId());
 
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationStatusRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -101,7 +107,7 @@ class ReservationBookingServiceTest {
         Member savedAdmin = memberRepository.save(admin);
         reservationBookingService.cancelReservation(savedAdmin.getId(), reservation.getId());
 
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationStatusRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();
     }
 

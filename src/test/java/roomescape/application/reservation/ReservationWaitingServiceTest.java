@@ -106,4 +106,31 @@ class ReservationWaitingServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 예약했거나 대기한 항목입니다.");
     }
+
+    @Test
+    @DisplayName("대기 인원이 가득 찼을 때 대기 요청하는 경우 예외를 발생한다.")
+    void fullWaitingList() {
+        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
+        LocalDate date = LocalDate.parse("2023-01-01");
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member pk = memberRepository.save(MemberFixture.createMember("피케이"));
+        ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        reservationStatusRepository.save(new ReservationStatus(
+                new Reservation(pk, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0)),
+                BookStatus.BOOKED
+        ));
+        for (int count = 1; count <= 5; count++) {
+            Member m = memberRepository.save(MemberFixture.createMember("name" + count));
+            reservationStatusRepository.save(new ReservationStatus(
+                    new Reservation(m, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0)),
+                    BookStatus.WAITING
+            ));
+        }
+
+        assertThatThrownBy(() -> reservationWaitingService.enqueueWaitingList(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("대기 인원이 초과되었습니다.");
+    }
+
 }

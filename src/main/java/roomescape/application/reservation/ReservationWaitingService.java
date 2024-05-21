@@ -13,6 +13,8 @@ import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class ReservationWaitingService {
+    private static final long MAX_WAITING_COUNT = 5;
+
     private final ReservationService reservationService;
     private final ReservationStatusRepository reservationStatusRepository;
 
@@ -32,6 +34,9 @@ public class ReservationWaitingService {
                 new ReservationStatus(reservation, BookStatus.WAITING)
         );
         long waitingCount = reservationStatusRepository.getWaitingCount(status.getReservation());
+        if (waitingCount > MAX_WAITING_COUNT) {
+            throw new IllegalArgumentException("대기 인원이 초과되었습니다.");
+        }
         return new ReservationWaitingResponse(
                 ReservationResponse.from(reservation),
                 waitingCount

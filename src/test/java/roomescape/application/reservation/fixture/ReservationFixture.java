@@ -9,8 +9,11 @@ import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -32,6 +35,9 @@ public class ReservationFixture {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private ReservationStatusRepository reservationStatusRepository;
+
+    @Autowired
     private Clock clock;
 
     public Reservation saveReservation() {
@@ -45,6 +51,8 @@ public class ReservationFixture {
                 theme,
                 LocalDateTime.now(clock)
         );
-        return reservationRepository.save(reservation);
+        return reservationStatusRepository.save(
+                new ReservationStatus(reservation, BookStatus.BOOKED)
+        ).getReservation();
     }
 }
