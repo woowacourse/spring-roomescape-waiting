@@ -57,6 +57,10 @@ public class Reservation {
         this.state = state;
     }
 
+    public boolean isOwner(Member member) {
+        return this.member.equals(member);
+    }
+
     public Long getTimeId() {
         return time.getId();
     }
