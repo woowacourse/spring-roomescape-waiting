@@ -4,7 +4,7 @@ create table if not exists member
     email    varchar(50) not null,
     name     varchar(20) not null,
     password varchar(64) not null,
-    role varchar(10) not null,
+    role     varchar(10) not null,
     primary key (id)
 );
 
@@ -40,8 +40,8 @@ create table if not exists reservation
 
 create table if not exists reservation_status
 (
-    reservation_id   bigint not null,
-    status           varchar(20) not null,
+    reservation_id bigint      not null,
+    status         varchar(20) not null,
     primary key (reservation_id),
     foreign key (reservation_id) references reservation (id)
 );
