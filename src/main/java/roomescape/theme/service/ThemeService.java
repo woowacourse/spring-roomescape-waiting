@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRankResponse;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ThemeService {

@@ -3,13 +3,16 @@ package roomescape.member.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
 import roomescape.member.domain.Member;
 
 @DataJpaTest
@@ -83,5 +86,4 @@ class MemberRepositoryTest {
         // Then
         assertThat(memberRepository.findById(targetMember.getId())).isEmpty();
     }
-
 }

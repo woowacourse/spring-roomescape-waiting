@@ -7,22 +7,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import roomescape.member.domain.Member;
 
 @SpringBootTest
 class JwtTokenProviderTest {
 
-    private long validityInMilliseconds = 360000L;
-
-    private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider("test-secret-key", validityInMilliseconds);
-
     private static final String USER_NAME = "도비";
     private static final String USER_TEST_COM = "user@test.com";
     private static final String USER_PASSWORD = "pass";
     private static final Member TEST_MEMBER = new Member(1L, USER_NAME, USER_TEST_COM, USER_PASSWORD);
+    private final long validityInMilliseconds = 360000L;
+    private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider("test-secret-key", validityInMilliseconds);
 
     @Test
     @DisplayName("토큰을 생성하고, 토큰의 유효성을 검증하며, 페이로드를 반환한다")

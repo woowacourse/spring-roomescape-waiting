@@ -65,7 +65,7 @@ public class Member {
         if (this == o) return true;
         if (!(o instanceof Member member)) return false;
 
-        if(id == null || member.id == null) {
+        if (id == null || member.id == null) {
             return Objects.equals(email, member.email);
         }
         return Objects.equals(id, member.id);
@@ -73,7 +73,7 @@ public class Member {
 
     @Override
     public int hashCode() {
-        if(id == null) return Objects.hash(email);
+        if (id == null) return Objects.hash(email);
         return Objects.hash(id);
     }
 

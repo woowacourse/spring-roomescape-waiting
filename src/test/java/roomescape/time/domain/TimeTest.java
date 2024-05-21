@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalTime;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import roomescape.exception.BadRequestException;
 
 class TimeTest {
@@ -27,14 +29,14 @@ class TimeTest {
     @DisplayName("운영 시간보다 빠르거나, 끝나는 시간보다 늦을 경우 예외가 발생한다.")
     void validation_ShouldThrowException_WhenStartAtIsNotOpeningHour() {
         assertAll(() -> {
-                assertThatThrownBy(() -> new Time(LocalTime.of(7, 59)))
-                        .isInstanceOf(BadRequestException.class)
-                        .hasMessage("운영 시간 외의 예약 시간 요청입니다.");
+                    assertThatThrownBy(() -> new Time(LocalTime.of(7, 59)))
+                            .isInstanceOf(BadRequestException.class)
+                            .hasMessage("운영 시간 외의 예약 시간 요청입니다.");
 
-                assertThatThrownBy(() -> new Time(LocalTime.of(23, 1)))
-                        .isInstanceOf(BadRequestException.class)
-                        .hasMessage("운영 시간 외의 예약 시간 요청입니다.");
-            }
+                    assertThatThrownBy(() -> new Time(LocalTime.of(23, 1)))
+                            .isInstanceOf(BadRequestException.class)
+                            .hasMessage("운영 시간 외의 예약 시간 요청입니다.");
+                }
         );
     }
 

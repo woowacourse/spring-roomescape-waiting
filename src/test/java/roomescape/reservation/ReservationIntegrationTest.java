@@ -3,7 +3,6 @@ package roomescape.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,21 +18,14 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.Time;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/data-test.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationIntegrationTest {
-
-    private static final Member MEMBER = new Member(1L, "켬미", "aaa@naver.com", "1111");
-    private static final Time TIME = new Time(1L, LocalTime.of(10, 0));
-    private static final Theme THEME = new Theme(1L, "Harry Potter", "해리포터와 도비", "thumbnail.jpg");
 
     @LocalServerPort
     private int port;
@@ -50,7 +42,6 @@ class ReservationIntegrationTest {
     @Nested
     @DisplayName("사용자 로그인-조회-예약 생성-삭제 시나리오 테스트")
     class ReservationManagement {
-
         @Test
         @DisplayName("예약 목록을 읽을 수 있다.")
         void readReservations() {

@@ -22,7 +22,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import roomescape.exception.AuthorizationExpiredException;
 import roomescape.member.dto.MemberProfileInfo;
 import roomescape.member.security.service.MemberAuthService;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationRequest;
 
 public class ReservationArgumentResolver implements HandlerMethodArgumentResolver {
