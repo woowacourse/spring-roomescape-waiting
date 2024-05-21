@@ -40,14 +40,14 @@ class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
     }
 
-    @DisplayName("날짜와 시간, 그리고 테마를 기반으로 예약이 존재하는지 확인할 수 있다")
+    @DisplayName("날짜와 시간, 그리고 테마를 기반으로 예약을 조회할 수 있다")
     @Test
     void should_check_existence_of_reservation_when_date_and_theme_and_time_is_given() {
         assertAll(
                 () -> assertThat(
-                        reservationRepository.countByDateAndTimeAndTheme(TOMORROW, 1L, 1L)).isEqualTo(1),
+                        reservationRepository.findByDateAndTimeAndTheme(TOMORROW, 1L, 1L)).hasSize(1),
                 () -> assertThat(
-                        reservationRepository.countByDateAndTimeAndTheme(YESTERDAY, 1L, 1L)).isZero()
+                        reservationRepository.findByDateAndTimeAndTheme(YESTERDAY, 1L, 1L)).hasSize(0)
         );
     }
 }

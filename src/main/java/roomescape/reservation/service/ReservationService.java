@@ -65,13 +65,13 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        int sameReservationCount = reservationRepository.countByDateAndTimeAndTheme(
+        List<Reservation> sameReservations = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
                 request.timeId(),
                 request.themeId()
         );
 
-        WaitingStatus waitingStatus = new WaitingStatus(sameReservationCount + 1);
+        WaitingStatus waitingStatus = new WaitingStatus(sameReservations.size() + 1);
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 

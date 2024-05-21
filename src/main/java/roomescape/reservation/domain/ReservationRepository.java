@@ -25,13 +25,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByMemberId(Long memberId);
 
     @Query("""
-            SELECT COUNT(r)
+            SELECT r
             FROM Reservation AS r
+            JOIN FETCH r.member 
             WHERE r.date.value = :date
             AND r.time.id = :timeId
             AND r.theme.id = :themeId        
             """)
-    int countByDateAndTimeAndTheme(@Param("date") LocalDate date,
-                                   @Param("timeId") Long timeId,
-                                   @Param("themeId") Long themeId);
+    List<Reservation> findByDateAndTimeAndTheme(@Param("date") LocalDate date,
+                                                @Param("timeId") Long timeId,
+                                                @Param("themeId") Long themeId);
 }
