@@ -16,7 +16,7 @@ import roomescape.helper.DatabaseInitializer;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @ActiveProfiles("test")
-public abstract class ServiceTest {
+abstract class ServiceTest {
     @Autowired
     protected DatabaseCleaner databaseCleaner;
 
