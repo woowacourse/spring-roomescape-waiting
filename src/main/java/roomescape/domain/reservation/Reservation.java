@@ -43,7 +43,7 @@ public class Reservation {
         validatePastReservation(LocalDate.parse(rawDate), time);
     }
 
-    public Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
+    private Reservation(Long id, Member Member, String rawDate, ReservationTime time, Theme theme,
         ReservationStatus status) {
         this.id = id;
         this.member = Member;
