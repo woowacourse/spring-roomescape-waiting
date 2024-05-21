@@ -37,4 +37,8 @@ public class AuthService {
             throw new InvalidTokenException("유효하지 않은 토큰입니다.");
         }
     }
+
+    public boolean isValidToken(final String token) {
+        return jwtTokenProvider.validateToken(token);
+    }
 }

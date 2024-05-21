@@ -1,6 +1,7 @@
 package roomescape.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -29,10 +30,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                        final NativeWebRequest webRequest,
                                        final WebDataBinderFactory binderFactory) {
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        final String token = TokenExtractor.fromRequest(request);
-        if (token == null) {
-            return null;
-        }
-        return new LoginMember(authService.findMemberIdByToken(token));
+        final Optional<String> token = TokenExtractor.fromRequest(request);
+        return token.map(authService::findMemberIdByToken)
+                .map(LoginMember::new)
+                .orElse(null);
     }
 }

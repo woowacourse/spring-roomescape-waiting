@@ -3,6 +3,7 @@ package roomescape.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,11 +31,12 @@ public class UserPageController {
 
     @GetMapping("/login")
     public String showLoginPage(HttpServletRequest request) {
-        String token = TokenExtractor.fromRequest(request);
-        if (token == null || !tokenProvider.validateToken(token)) {
-            return "/login";
+        Optional<String> token = TokenExtractor.fromRequest(request);
+        final boolean isValidToken = token.filter(tokenProvider::validateToken).isPresent();
+        if (isValidToken) {
+            return showPopularThemePage();
         }
-        return showPopularThemePage();
+        return "/login";
     }
 
     @PostMapping("/logout")
