@@ -1,10 +1,6 @@
 package roomescape.service;
 
-import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
 import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION;
-import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
-import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
@@ -19,18 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.BaseEntity;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.service.finder.MemberFinder;
+import roomescape.service.finder.ReservationFinder;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationResponseMapper;
 
@@ -38,47 +31,26 @@ import roomescape.service.mapper.ReservationResponseMapper;
 @Transactional
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
     private final ReservationWaitingRepository waitingRepository;
+    private final ReservationFinder reservationFinder;
+    private final MemberFinder memberFinder;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository, ReservationWaitingRepository waitingRepository) {
+                              ReservationWaitingRepository waitingRepository,
+                              ReservationFinder reservationFinder, MemberFinder memberFinder) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
         this.waitingRepository = waitingRepository;
+        this.reservationFinder = reservationFinder;
+        this.memberFinder = memberFinder;
     }
 
     public ReservationResponse save(ReservationRequest reservationRequest) {
-        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Member member = memberRepository.findById(reservationRequest.memberId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation beforeSave = new Reservation(
-                member,
-                reservationRequest.date(),
-                requestedTime,
-                requestedTheme
-        );
+        Reservation beforeSave = reservationFinder.createWhenNotExists(reservationRequest);
 
-        validateDuplicateReservation(requestedTime, requestedTheme, beforeSave.getDate());
         validatePastTimeReservation(beforeSave);
 
         Reservation saved = reservationRepository.save(beforeSave);
         return toResponse(saved);
-    }
-
-    private void validateDuplicateReservation(ReservationTime requestedTime, Theme requestedTheme, LocalDate date) {
-        boolean isDuplicate = reservationRepository.existsByThemeAndDateAndTime(requestedTheme, date, requestedTime);
-        if (isDuplicate) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
-        }
     }
 
     private void validatePastTimeReservation(Reservation beforeSave) {
@@ -128,8 +100,7 @@ public class ReservationService {
     }
 
     private boolean canDelete(long requestMemberId, long reservationId) {
-        Member requestMember = memberRepository.findById(requestMemberId)
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
+        Member requestMember = memberFinder.findById(requestMemberId);
         boolean isReservationMember = reservationRepository.findById(reservationId)
                 .stream()
                 .map(Reservation::getReservationMember)

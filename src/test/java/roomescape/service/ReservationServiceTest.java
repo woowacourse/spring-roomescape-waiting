@@ -25,6 +25,8 @@ import roomescape.repository.CollectionReservationWaitingRepository;
 import roomescape.repository.CollectionThemeRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
+import roomescape.service.finder.MemberFinder;
+import roomescape.service.finder.ReservationFinder;
 
 class ReservationServiceTest {
     private ReservationService reservationService;
@@ -41,13 +43,11 @@ class ReservationServiceTest {
         memberRepository = new CollectionMemberRepository();
         waitingRepository = new CollectionReservationWaitingRepository();
         reservationRepository = new CollectionReservationRepository();
-        reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                memberRepository,
-                waitingRepository
-        );
+        ReservationFinder reservationFinder = new ReservationFinder(reservationRepository, reservationTimeRepository,
+                memberRepository, themeRepository);
+        MemberFinder memberFinder = new MemberFinder(memberRepository);
+        reservationService = new ReservationService(reservationRepository, waitingRepository, reservationFinder,
+                memberFinder);
     }
 
     @Test
@@ -82,7 +82,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("중복된 예약 시도시 실패하는지 확인")
     void saveFailWhenDuplicateReservation() {
-        reservationService = initServiceWithMember();
+        initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
 
@@ -93,24 +93,21 @@ class ReservationServiceTest {
                 .hasMessage(ExceptionType.DUPLICATE_RESERVATION.getMessage());
     }
 
-    private ReservationService initServiceWithMember() {
+    private void initServiceWithMember() {
         memberRepository = new CollectionMemberRepository(List.of(DEFAULT_MEMBER, DEFAULT_ADMIN));
         waitingRepository = new CollectionReservationWaitingRepository();
         reservationRepository = new CollectionReservationRepository();
-        reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                memberRepository,
-                waitingRepository
-        );
-        return reservationService;
+        ReservationFinder reservationFinder = new ReservationFinder(reservationRepository, reservationTimeRepository,
+                memberRepository, themeRepository);
+        MemberFinder memberFinder = new MemberFinder(memberRepository);
+        reservationService = new ReservationService(reservationRepository, waitingRepository, reservationFinder,
+                memberFinder);
     }
 
     @Test
     @DisplayName("이미 지나간 시간에 예약 시도시 실패하는지 확인")
     void saveFailWhenPastTime() {
-        reservationService = initServiceWithMember();
+        initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
         ReservationRequest reservationRequestWithPastDate = new ReservationRequest(LocalDate.now().minusDays(1),
@@ -124,7 +121,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("자신의 예약이 아니고 관리자가 아닌 경우 지울 수 없는지 확인")
     void delete() {
-        reservationService = initServiceWithMember();
+        initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
 
@@ -141,7 +138,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("관리자는 다른 사람의 예약도 삭제할 수 있는지 확인")
     void deleteSuccessWhenAdmin() {
-        reservationService = initServiceWithMember();
+        initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
 
@@ -153,7 +150,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약이 취소된 경우 우선순위가 가장 높은 예약 대기가 예약이 되는지 확인")
     void changeReservationWhenDeletedReservationHasWaiting() {
-        reservationService = initServiceWithMember();
+        initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
 

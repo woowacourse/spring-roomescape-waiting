@@ -1,9 +1,6 @@
 package roomescape.service;
 
 import static roomescape.exception.ExceptionType.DUPLICATE_WAITING;
-import static roomescape.exception.ExceptionType.NOT_FOUND_MEMBER;
-import static roomescape.exception.ExceptionType.NOT_FOUND_RESERVATION_TIME;
-import static roomescape.exception.ExceptionType.NOT_FOUND_THEME;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
@@ -13,52 +10,37 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Role;
-import roomescape.domain.Theme;
 import roomescape.dto.LoginMemberReservationResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.service.finder.MemberFinder;
+import roomescape.service.finder.ReservationFinder;
 import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationWaitingResponseMapper;
 
 @Service
 public class ReservationWaitingService {
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final MemberRepository memberRepository;
-    private final ThemeRepository themeRepository;
     private final ReservationWaitingRepository waitingRepository;
+    private final ReservationFinder reservationFinder;
+    private final MemberFinder memberFinder;
 
-    public ReservationWaitingService(ReservationRepository reservationRepository,
-                                     ReservationTimeRepository reservationTimeRepository,
-                                     MemberRepository memberRepository,
-                                     ThemeRepository themeRepository, ReservationWaitingRepository waitingRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.memberRepository = memberRepository;
-        this.themeRepository = themeRepository;
+    public ReservationWaitingService(ReservationWaitingRepository waitingRepository,
+                                     ReservationFinder reservationFinder,
+                                     MemberFinder memberFinder) {
         this.waitingRepository = waitingRepository;
+        this.reservationFinder = reservationFinder;
+        this.memberFinder = memberFinder;
     }
 
-    //Todo Reservation 서비스와 Waiting Service 사이에 중복 제거 => 추가적인 계층 분리?
     public ReservationWaitingResponse save(ReservationRequest reservationRequest) {
-        ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
-        Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
-        Member waitingMember = memberRepository.findById(reservationRequest.memberId())
-                .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation reservation = reservationRepository.findByThemeAndDateAndTime(requestedTheme,
-                        reservationRequest.date(), requestedTime)
-                .orElseThrow(() -> new RoomescapeException(WAITING_WITHOUT_RESERVATION));
+        Reservation reservation = reservationFinder.findByReservationRequest(reservationRequest,
+                () -> new RoomescapeException(WAITING_WITHOUT_RESERVATION));
+        Member waitingMember = memberFinder.findById(reservationRequest.memberId());
+
         validatePastTimeReservation(reservation);
         validateDuplicateWaiting(reservation, waitingMember);
 
@@ -105,9 +87,7 @@ public class ReservationWaitingService {
     }
 
     private boolean canDelete(long memberId, long waitingId) {
-        Role role = memberRepository.findById(memberId)
-                .map(Member::getRole)
-                .orElse(Role.MEMBER);
+        Role role = memberFinder.findById(memberId).getRole();
         return Role.ADMIN.equals(role) || waitingRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationWaiting::getId)
                 .anyMatch(id -> id == waitingId);
