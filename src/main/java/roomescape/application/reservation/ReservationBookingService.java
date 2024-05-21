@@ -6,16 +6,21 @@ import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.role.RoleRepository;
+import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class ReservationBookingService {
     private final ReservationService reservationService;
     private final ReservationRepository reservationRepository;
+    private final RoleRepository roleRepository;
 
     public ReservationBookingService(ReservationService reservationService,
-                                     ReservationRepository reservationRepository) {
+                                     ReservationRepository reservationRepository,
+                                     RoleRepository roleRepository) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Transactional
@@ -26,5 +31,16 @@ public class ReservationBookingService {
         }
         Reservation reservation = reservationService.create(request);
         return ReservationResponse.from(reservation);
+    }
+
+
+    @Transactional
+    public void cancelReservation(long memberId, long id) {
+        Reservation reservation = reservationRepository.getById(id);
+        if (roleRepository.isAdminByMemberId(memberId) || reservation.isOwnedBy(memberId)) {
+            reservationRepository.deleteById(reservation.getId());
+            return;
+        }
+        throw new UnAuthorizedException();
     }
 }
