@@ -11,6 +11,7 @@ import roomescape.domain.Waiting;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
@@ -21,15 +22,17 @@ import roomescape.service.dto.response.WaitingResponse;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public WaitingService(final WaitingRepository waitingRepository,
+    public WaitingService(final WaitingRepository waitingRepository, final ReservationRepository reservationRepository,
                           final ReservationTimeRepository reservationTimeRepository,
                           final ThemeRepository themeRepository,
                           final MemberRepository memberRepository) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -44,6 +47,9 @@ public class WaitingService {
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
 
         if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(), theme)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
+        }
+        if (reservationRepository.existsByMemberAndTimeAndDate(member, reservationTime, reservationRequest.date())) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         validateIsPastTime(reservationRequest.date(), reservationTime);
