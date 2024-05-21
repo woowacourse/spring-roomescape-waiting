@@ -23,7 +23,7 @@ public class MemberAcceptanceTest extends AcceptanceTest {
     void findAllMembers() {
         // given
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when
@@ -48,7 +48,7 @@ public class MemberAcceptanceTest extends AcceptanceTest {
     void findAllMembersWithoutAuthority() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when

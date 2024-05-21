@@ -91,7 +91,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     void checkAuthInformation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         // when

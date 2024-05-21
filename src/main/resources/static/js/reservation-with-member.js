@@ -1,5 +1,5 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(ADMIN_RESERVATION_API_ENDPOINT)
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -192,7 +192,7 @@ function applyFilter(event) {
   const fromDate = document.getElementById('date-from').value;
   const toDate = document.getElementById('date-to').value;
 
-  fetch(`${RESERVATION_API_ENDPOINT}/searching?themeId=${themeId}&memberId=${memberId}&fromDate=${fromDate}&toDate=${toDate}`, {
+  fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/searching?themeId=${themeId}&memberId=${memberId}&fromDate=${fromDate}&toDate=${toDate}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -211,7 +211,7 @@ function requestCreate(reservation) {
     body: JSON.stringify(reservation)
   };
 
-  return fetch('/admin' + RESERVATION_API_ENDPOINT, requestOptions)
+  return fetch(ADMIN_RESERVATION_API_ENDPOINT, requestOptions)
       .then(response => {
         if (response.status === 201) return response.json();
         throw new Error('Create failed');
@@ -223,7 +223,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+  return fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });

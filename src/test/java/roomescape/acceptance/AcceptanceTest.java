@@ -31,7 +31,6 @@ import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.ADMIN_NAME;
 import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
-import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TEST_PASSWORD;
 import static roomescape.TestFixture.THEME_THUMBNAIL;
@@ -39,7 +38,6 @@ import static roomescape.TestFixture.WOOTECO_THEME_DESCRIPTION;
 import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.member.domain.Role.ADMIN;
 import static roomescape.member.domain.Role.USER;
-import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 @Sql("/test-schema.sql")
 @ActiveProfiles(value = "test")
@@ -110,8 +108,8 @@ public abstract class AcceptanceTest {
         return new Member(response.id(), response.name(), response.email(), request.password(), ADMIN);
     }
 
-    protected String createTestToken(Member member) {
-        LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
+    protected String createTestToken(String email) {
+        LoginRequest request = new LoginRequest(email, TEST_PASSWORD);
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)

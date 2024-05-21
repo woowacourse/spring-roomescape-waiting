@@ -6,9 +6,7 @@ import io.restassured.http.Cookie;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import roomescape.global.dto.ErrorResponse;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -17,40 +15,21 @@ import roomescape.reservation.dto.response.ReservationResponse;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
-    @Test
-    @DisplayName("예약 목록을 조회한다.")
-    void findReservations() {
-        // given & when
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .extract();
-        List<ReservationResponse> reservationResponses = Arrays.stream(response.as(ReservationResponse[].class))
-                .toList();
-
-        // then
-        assertSoftly(softly -> {
-            checkHttpStatusOk(softly, response);
-            softly.assertThat(reservationResponses).hasSize(0);
-        });
-    }
 
     @Test
     @DisplayName("예약을 추가한다.")
     void createOneReservation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
@@ -80,7 +59,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void createWaitingReservation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
@@ -113,7 +92,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void createDuplicatedReservation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
@@ -144,7 +123,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void createInvalidWaitingReservation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
@@ -174,7 +153,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void createInvalidReservation() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
@@ -203,7 +182,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     void createReservationWithNotExistingTime() {
         // given
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Long notExistingTimeId = 1L;
         Long themeId = createTestTheme();
 
@@ -228,46 +207,6 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         });
     }
 
-    @TestFactory
-    @DisplayName("예약을 추가하고 삭제한다.")
-    Stream<DynamicTest> createThenDeleteReservation() {
-        return Stream.of(
-                dynamicTest("예약을 하나 생성한다.", this::createOneReservation),
-                dynamicTest("예약이 하나 생성된 예약 목록을 조회한다.", () -> findReservationsWithSize(1)),
-                dynamicTest("예약을 하나 삭제한다.", this::deleteOneReservation),
-                dynamicTest("예약 목록을 조회한다.", () -> findReservationsWithSize(0))
-        );
-    }
-
-    void deleteOneReservation() {
-        // given & when
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .extract();
-
-        // then
-        checkHttpStatusNoContent(response);
-    }
-
-    void findReservationsWithSize(int size) {
-        // given & when
-        ExtractableResponse<Response> response = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .extract();
-        List<ReservationResponse> reservationResponses = Arrays.stream(response.as(ReservationResponse[].class))
-                .toList();
-
-        // then
-        assertSoftly(softly -> {
-            checkHttpStatusOk(softly, response);
-            softly.assertThat(reservationResponses).hasSize(size)
-                    .extracting(ReservationResponse::id)
-                    .isNotNull();
-        });
-    }
-
     @Test
     @DisplayName("사용자의 예약 목록을 조회한다.")
     void findMyReservations() {
@@ -275,7 +214,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);

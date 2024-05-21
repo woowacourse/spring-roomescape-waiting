@@ -21,8 +21,12 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.AdminReservationSaveRequest;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,6 +37,7 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.WOOTECO_THEME;
+import static roomescape.TestFixture.WOOTECO_THEME_NAME;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 
 @WebMvcTest(
@@ -81,5 +86,81 @@ class AdminReservationControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$.time.id").value(1L))
                 .andExpect(jsonPath("$.time.startAt").value(MIA_RESERVATION_TIME.toString()))
                 .andExpect(jsonPath("$.date").value(MIA_RESERVATION_DATE.toString()));
+    }
+
+    @Test
+    @DisplayName("예약 목록 GET 요청 시 상태코드 200을 반환한다.")
+    void findReservations() throws Exception {
+        // given
+        ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
+
+        BDDMockito.given(reservationService.findAll())
+                .willReturn(List.of(expectedReservation));
+
+        // when & then
+        mockMvc.perform(get("/admin/reservations").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].memberName").value(MIA_NAME))
+                .andExpect(jsonPath("$[0].time.id").value(1L))
+                .andExpect(jsonPath("$[0].time.startAt").value(MIA_RESERVATION_TIME.toString()))
+                .andExpect(jsonPath("$[0].theme.name").value(WOOTECO_THEME_NAME))
+                .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()));
+    }
+
+    @Test
+    @DisplayName("사용자, 테마, 예약 날짜로 예약 목록 검색 요청 시 상태코드 200을 반환한다.")
+    void findReservationsByMemberIdAndThemeIdAndDateBetween() throws Exception {
+        // given
+        ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
+        Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
+
+        BDDMockito.given(reservationService.findReservationsByMemberIdAndThemeIdAndDateBetween(anyLong(), anyLong(), any(), any()))
+                .willReturn(List.of(expectedReservation));
+
+        // when & then
+        mockMvc.perform(get("/admin/reservations/searching")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("memberId", String.valueOf(1))
+                        .param("themeId", String.valueOf(1))
+                        .param("fromDate", MIA_RESERVATION_DATE.toString())
+                        .param("toDate", MIA_RESERVATION_DATE.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].memberName").value(MIA_NAME))
+                .andExpect(jsonPath("$[0].time.id").value(1L))
+                .andExpect(jsonPath("$[0].time.startAt").value(MIA_RESERVATION_TIME.toString()))
+                .andExpect(jsonPath("$[0].theme.name").value(WOOTECO_THEME_NAME))
+                .andExpect(jsonPath("$[0].date").value(MIA_RESERVATION_DATE.toString()));
+    }
+
+    @Test
+    @DisplayName("사용자, 테마, 예약 날짜로 예약 목록 검색 요청 시 검색 조건이 하나라도 없다면 상태코드 400을 반환한다.")
+    void findReservationsByMemberIdAndThemeIdAndDateBetweenNotExistingAllParams() throws Exception {
+        // when & then
+        mockMvc.perform(get("/admin/reservations/searching")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("memberId", String.valueOf(1))
+                        .param("themeId", String.valueOf(1))
+                        .param("toDate", MIA_RESERVATION_DATE.toString()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    @DisplayName("예약 DELETE 요청 시 상태코드 204를 반환한다.")
+    void deleteReservation() throws Exception {
+        // given
+        BDDMockito.willDoNothing()
+                .given(reservationService)
+                .delete(anyLong());
+
+        // when & then
+        mockMvc.perform(delete("/admin/reservations/{id}", anyLong())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 }

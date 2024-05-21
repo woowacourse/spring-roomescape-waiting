@@ -22,7 +22,7 @@ class ViewTest extends AcceptanceTest {
     @DisplayName("어드민 예약 페이지를 조회한다.")
     void getAdminReservationPage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -45,7 +45,7 @@ class ViewTest extends AcceptanceTest {
     @DisplayName("일반 사용자 권한으로 어드민 예약 페이지를 조회한다.")
     void getAdminReservationPageWithoutAuthority() {
         Member member = createTestMember();
-        String token = createTestToken(member);
+        String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -59,7 +59,7 @@ class ViewTest extends AcceptanceTest {
     @DisplayName("어드민 시간 관리 페이지를 조회한다.")
     void getTimePage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -73,7 +73,7 @@ class ViewTest extends AcceptanceTest {
     @DisplayName("어드민 테마 관리 페이지를 조회한다.")
     void getThemePage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
@@ -105,7 +105,7 @@ class ViewTest extends AcceptanceTest {
     @DisplayName("사용자 예약 목록 페이지를 조회한다.")
     void getMyReservationsPage() {
         Member admin = createTestAdmin();
-        String token = createTestToken(admin);
+        String token = createTestToken(admin.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
         RestAssured.given().log().all()
