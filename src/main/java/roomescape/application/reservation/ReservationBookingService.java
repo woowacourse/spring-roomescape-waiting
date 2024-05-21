@@ -37,13 +37,12 @@ public class ReservationBookingService {
         return ReservationResponse.from(reservation);
     }
 
-
     @Transactional
     public void cancelReservation(long memberId, long id) {
         if (reservationService.hasNoAccessToReservation(memberId, id)) {
             throw new UnAuthorizedException();
         }
-        reservationStatusRepository.deleteById(id);
-        reservationRepository.deleteById(id);
+        ReservationStatus reservationStatus = reservationStatusRepository.getById(id);
+        reservationStatus.cancelBooking();
     }
 }

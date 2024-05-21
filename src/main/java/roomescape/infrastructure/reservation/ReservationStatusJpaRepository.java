@@ -72,6 +72,16 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
     );
 
     @Override
+    default List<Reservation> findAllBookedReservations() {
+        return findAllByStatus(BookStatus.BOOKED)
+                .stream()
+                .map(ReservationStatus::getReservation)
+                .toList();
+    }
+
+    List<ReservationStatus> findAllByStatus(BookStatus status);
+
+    @Override
     default ReservationStatus getById(long id) {
         return findById(id).orElseThrow(() -> new NoSuchElementException("예약 정보를 찾을 수 없습니다."));
     }

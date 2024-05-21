@@ -18,4 +18,6 @@ public interface ReservationStatusRepository {
     List<ReservationStatus> findActiveReservationStatusesByMemberId(long memberId);
 
     boolean existsAlreadyWaitingOrBooked(Reservation reservation);
+
+    List<Reservation> findAllBookedReservations();
 }

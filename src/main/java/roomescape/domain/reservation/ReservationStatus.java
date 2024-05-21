@@ -53,6 +53,10 @@ public class ReservationStatus {
     }
 
     public void cancelWaiting() {
-        this.status = BookStatus.WAITING_CANCELLED;
+        status = BookStatus.WAITING_CANCELLED;
+    }
+
+    public void cancelBooking() {
+        status = BookStatus.BOOKING_CANCELLED;
     }
 }

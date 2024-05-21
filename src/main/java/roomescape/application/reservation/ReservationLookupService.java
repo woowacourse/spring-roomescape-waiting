@@ -39,8 +39,8 @@ public class ReservationLookupService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
+    public List<ReservationResponse> findAllBookedReservations() {
+        return reservationStatusRepository.findAllBookedReservations()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

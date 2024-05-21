@@ -59,7 +59,7 @@ class ReservationLookupServiceTest {
     @DisplayName("모든 예약을 조회한다.")
     void shouldReturnReservationResponsesWhenReservationsExist() {
         reservationFixture.saveReservation();
-        List<ReservationResponse> reservationResponses = reservationLookupService.findAll();
+        List<ReservationResponse> reservationResponses = reservationLookupService.findAllBookedReservations();
         assertThat(reservationResponses).hasSize(1);
     }
 
