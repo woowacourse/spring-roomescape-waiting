@@ -13,6 +13,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.dto.member.MemberResponse;
+import roomescape.service.helper.Encryptor;
 
 @Service
 @Transactional
@@ -20,23 +21,28 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final JwtManager jwtManager;
+    private final Encryptor encryptor;
 
-    public MemberService(MemberRepository memberRepository, JwtManager jwtManager) {
+    public MemberService(MemberRepository memberRepository, JwtManager jwtManager, Encryptor encryptor) {
         this.memberRepository = memberRepository;
         this.jwtManager = jwtManager;
+        this.encryptor = encryptor;
     }
 
     public void signup(MemberCreateRequest request) {
         if (memberRepository.existsByEmail(request.getEmail())) {
             throw new EmailDuplicatedException();
         }
-        memberRepository.save(request.toMember());
+        MemberPassword encryptPassword = encryptor.encryptPassword(request.getPassword());
+        Member member = new Member(request.getEmail(), encryptPassword, request.getName());
+        memberRepository.save(member);
     }
 
     @Transactional(readOnly = true)
     public String login(MemberLoginRequest request) {
         Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(UnauthorizedEmailException::new);
-        MemberPassword requestPassword = new MemberPassword(request.getPassword());
+        MemberPassword requestPassword = encryptor.encryptPassword(request.getPassword());
+        System.out.println(requestPassword.toString());
         if (member.isMismatchedPassword(requestPassword)) {
             throw new UnauthorizedPasswordException();
         }

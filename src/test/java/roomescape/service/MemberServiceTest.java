@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberPassword;
 import roomescape.exception.member.EmailDuplicatedException;
 import roomescape.exception.member.UnauthorizedEmailException;
 import roomescape.exception.member.UnauthorizedPasswordException;
@@ -23,6 +24,7 @@ import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.MemberRepository;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
+import roomescape.service.helper.Encryptor;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,
@@ -44,6 +46,9 @@ class MemberServiceTest {
 
     @Autowired
     private JwtManager jwtManager;
+
+    @Autowired
+    private Encryptor encryptor;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -97,7 +102,8 @@ class MemberServiceTest {
     @DisplayName("로그인이 정상적으로 완료되고 토큰을 발급한다.")
     @Test
     void success_login() {
-        Member savedMember = memberRepository.save(member3);
+        MemberPassword encryptPassword = encryptor.encryptPassword("125");
+        Member savedMember = memberRepository.save(new Member("t3@t3.com", encryptPassword, "영이"));
         String expectedToken = jwtManager.generateToken(savedMember);
         MemberLoginRequest requestDto = new MemberLoginRequest("t3@t3.com", "125");
 

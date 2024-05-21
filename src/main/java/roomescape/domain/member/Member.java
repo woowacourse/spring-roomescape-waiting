@@ -36,8 +36,8 @@ public class Member {
         this(email, new MemberPassword(password), name, Role.getRole(role));
     }
 
-    public Member(String email, String password, String name) {
-        this(email, new MemberPassword(password), name, Role.MEMBER);
+    public Member(String email, MemberPassword password, String name) {
+        this(email, password, name, Role.MEMBER);
     }
 
     protected Member() {
@@ -79,5 +79,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public String password() {
+        return password.getPassword();
     }
 }

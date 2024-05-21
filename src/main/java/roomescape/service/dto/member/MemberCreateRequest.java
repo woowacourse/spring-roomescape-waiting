@@ -3,7 +3,6 @@ package roomescape.service.dto.member;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
-import roomescape.domain.member.Member;
 
 public class MemberCreateRequest {
 
@@ -24,10 +23,6 @@ public class MemberCreateRequest {
         this.email = email;
         this.password = password;
         this.name = name;
-    }
-
-    public Member toMember() {
-        return new Member(email, password, name);
     }
 
     public String getEmail() {
