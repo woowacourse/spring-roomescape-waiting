@@ -85,7 +85,7 @@ Location: reservations/{id}
 **Request**
 
 ```http request
-DELETE /reservations/1 HTTP/1.1
+DELETE admin/reservations/1 HTTP/1.1
 ```
 
 **Response**
@@ -330,6 +330,50 @@ Content-Type: application/json
         "date": "2024-03-01",
         "time": "14:00",
         "status": "예약"
+    }
+]
+```
+
+<br>
+
+### 예약 대기 삭제
+
+**request**
+
+```http request
+DELETE /reservations/wait/{id} HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+```
+
+**response**
+
+```
+HTTP/1.1 204
+```
+
+<br>
+
+### 예약 대기 전체 조회
+
+**request**
+
+```http request
+GET /admin/waiting-all HTTP/1.1
+```
+
+**response**
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id":8,
+        "name":"재즈",
+        "theme":"가을",
+        "date":"2024-05-25",
+        "time":"18:00:00"
     }
 ]
 ```
