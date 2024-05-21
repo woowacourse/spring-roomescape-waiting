@@ -36,19 +36,11 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("예약 대기를 생성한다.")
     void createWaitingTest() {
-        long themeId = fixture.createTheme(new ThemeRequest("테마명", "테마 설명", "url")).id();
+        long themeId = fixture.createTheme(new ThemeRequest("name", "desc", "url")).id();
         long timeId = fixture.createReservationTime(10, 0).id();
         fixture.registerMember(new MemberRegisterRequest("name", "email@mail.com", "12341234"));
-        String reservationToken = fixture.loginAndGetToken("email@mail.com", "12341234");
-
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId);
-        RestAssured.given().log().all()
-                .cookie("token", reservationToken)
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+        String token = fixture.loginAndGetToken("email@mail.com", "12341234");
+        fixture.createReservation(token, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
 
         fixture.registerMember(new MemberRegisterRequest("test", "test@mail.com", "12341234"));
         String waitingToken = fixture.loginAndGetToken("test@mail.com", "12341234");
@@ -78,6 +70,28 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().delete("/reservations/{id}", response.id())
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("사용자가 예약 대기를 삭제한다.")
+    void deleteWaiting() {
+        long themeId = fixture.createTheme(new ThemeRequest("name", "desc", "url")).id();
+        long timeId = fixture.createReservationTime(10, 0).id();
+
+        fixture.registerMember(new MemberRegisterRequest("name", "email@mail.com", "12341234"));
+        String reservationToken = fixture.loginAndGetToken("email@mail.com", "12341234");
+        fixture.createReservation(reservationToken, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
+
+        fixture.registerMember(new MemberRegisterRequest("test", "test@mail.com", "12341234"));
+        String waitingToken = fixture.loginAndGetToken("test@mail.com", "12341234");
+        ReservationResponse response = fixture.createWaiting(waitingToken, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
+
+
+        RestAssured.given().log().all()
+                .cookie("token", waitingToken)
+                .when().delete("/reservations/waiting/{id}", response.id())
                 .then().log().all()
                 .statusCode(204);
     }

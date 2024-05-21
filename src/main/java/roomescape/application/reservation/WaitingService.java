@@ -3,6 +3,7 @@ package roomescape.application.reservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.domain.member.Member;
@@ -11,8 +12,10 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.role.RoleRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
+import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class WaitingService {
@@ -20,17 +23,21 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final RoleRepository roleRepository;
     private final Clock clock;
 
     public WaitingService(ReservationRepository reservationRepository, WaitingRepository waitingRepository,
-                          MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository, Clock clock) {
+                          MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository,
+                          RoleRepository roleRepository, Clock clock) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.roleRepository = roleRepository;
         this.clock = clock;
     }
 
+    @Transactional
     public ReservationResponse create(ReservationRequest reservationRequest) {
         Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(reservationRequest.date(),
                 reservationRequest.timeId(), reservationRequest.themeId());
@@ -73,5 +80,15 @@ public class WaitingService {
         if (waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), reservationRequest.memberId())) {
             throw new IllegalArgumentException("동일한 예약 대기는 생성이 불가합니다.");
         }
+    }
+
+    @Transactional
+    public void deleteById(long memberId, long id) {
+        Waiting waiting = waitingRepository.getById(id);
+        if (roleRepository.isAdminByMemberId(memberId) || waiting.isOwnedBy(memberId)) {
+            waitingRepository.deleteById(waiting.getId());
+            return;
+        }
+        throw new UnAuthorizedException();
     }
 }

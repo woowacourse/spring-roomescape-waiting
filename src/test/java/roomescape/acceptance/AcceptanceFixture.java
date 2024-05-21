@@ -89,4 +89,15 @@ public class AcceptanceFixture {
                 .extract()
                 .as(ReservationResponse.class);
     }
+
+    public ReservationResponse createWaiting(String token, ReservationRequest request) {
+        return RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .extract()
+                .as(ReservationResponse.class);
+    }
 }

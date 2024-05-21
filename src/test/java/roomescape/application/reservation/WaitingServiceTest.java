@@ -56,6 +56,7 @@ class WaitingServiceTest {
     private ReservationTime time;
     private Theme theme;
     private Member member;
+    private Reservation reservation;
 
     @BeforeEach
     void setData() {
@@ -63,7 +64,7 @@ class WaitingServiceTest {
         time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         theme = themeRepository.save(new Theme("themeName", "desc", "url"));
         member = memberRepository.save(MemberFixture.createMember("아루"));
-        reservationRepository.save(new Reservation(member, date, time, theme, LocalDateTime.now(clock)));
+        reservation = reservationRepository.save(new Reservation(member, date, time, theme, LocalDateTime.now(clock)));
     }
 
     @Test
@@ -125,5 +126,15 @@ class WaitingServiceTest {
                 .hasMessage("동일한 예약 대기는 생성이 불가합니다.");
     }
 
+    @Test
+    @DisplayName("예약 대기 삭제 요청시 예약이 존재하면 예약 대기를 삭제한다.")
+    void deleteWaiting() {
+        Member newMember = memberRepository.save(MemberFixture.createMember("시소"));
+        Waiting waiting = waitingRepository.save(new Waiting(reservation, newMember, LocalDateTime.now(clock)));
 
+        waitingService.deleteById(newMember.getId(), waiting.getId());
+
+        List<Waiting> waitings = waitingRepository.findAll();
+        assertThat(waitings).isEmpty();
+    }
 }
