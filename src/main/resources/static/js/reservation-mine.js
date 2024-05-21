@@ -17,7 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
             reservation.status = "예약";
         });
         waitings.forEach(waiting => {
-            waiting.status = (waiting.order) + "번째 예약대기";
+            if (waiting.isDenied) {
+                waiting.status = "예약대기 거절";
+            } else {
+                waiting.status = (waiting.order) + "번째 예약대기";
+            }
         });
         const combinedData = [...reservations, ...waitings];
         render(combinedData);
