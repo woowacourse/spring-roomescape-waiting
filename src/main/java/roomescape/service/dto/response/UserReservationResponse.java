@@ -1,9 +1,10 @@
 package roomescape.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import roomescape.domain.Reservation;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.Reservation;
 
 public record UserReservationResponse(Long reservationId,
                                       String theme,
@@ -16,6 +17,6 @@ public record UserReservationResponse(Long reservationId,
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
-                "예약");
+                reservation.getReservationStatus().getStatus());
     }
 }
