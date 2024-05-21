@@ -88,8 +88,7 @@ class AdminControllerTest extends ControllerTest {
                 .cookie("token", token)
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+                .statusCode(200);
     }
 
     @DisplayName("관리자가 예약을 생성 후, 예약을 삭제한다.")

@@ -60,22 +60,22 @@ VALUES ('관리자', 'admin@roomescape.com', '$2a$10$pebanHuZMA0tfsogsWhgHOruvQQ
 
 -- 예약 목록 추가
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (1, 1, CURRENT_TIME(), '예약');
+VALUES (1, 1, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (1, 3, CURRENT_TIME(), '예약');
+VALUES (1, 3, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (1, 7, CURRENT_TIME(), '예약');
+VALUES (1, 7, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (2, 2, CURRENT_TIME(), '예약');
+VALUES (2, 2, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (2, 4, CURRENT_TIME(), '예약');
+VALUES (2, 4, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (2, 8, CURRENT_TIME(), '예약');
+VALUES (2, 8, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 3, CURRENT_TIME(), '예약');
+VALUES (3, 3, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 5, CURRENT_TIME(), '예약');
+VALUES (3, 5, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 6, CURRENT_TIME(), '예약');
+VALUES (3, 6, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 7, CURRENT_TIME(), '예약');
+VALUES (3, 7, CURRENT_TIME(), 'BOOKED');

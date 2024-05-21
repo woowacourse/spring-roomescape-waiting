@@ -10,7 +10,10 @@ import static roomescape.fixture.ThemeFixture.getTheme1;
 import static roomescape.fixture.ThemeFixture.getTheme2;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +25,8 @@ import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.controller.dto.MyReservationResponse;
-import roomescape.reservation.controller.dto.ReservationQueryRequest;
-import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservation.controller.dto.ReservationResponse;
-import roomescape.reservation.domain.MemberReservation;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.controller.dto.*;
+import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -256,7 +253,7 @@ class ReservationServiceTest extends ServiceTest {
         );
     }
 
-    @DisplayName("중복된 예약이 존재한다")
+    @DisplayName("앞선 예약이 있는 경우 예약을 대기한다")
     @Test
     void existSameReservation() {
         //given
@@ -265,10 +262,24 @@ class ReservationServiceTest extends ServiceTest {
         Member tacan = getMemberTacan();
 
         Reservation reservation1 = reservationRepository.save(reservation);
-        memberReservationRepository.save(new MemberReservation(choco, reservation));
+        MemberReservation save = memberReservationRepository.save(new MemberReservation(choco, reservation));
+
         //when
+        ReservationResponse memberReservation1 = reservationService.createMemberReservation(new MemberReservationRequest(
+                tacan.getId(),
+                reservation.getDate().format(DateTimeFormatter.ISO_DATE),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(
+                )));
+        List<MemberReservation> allByMember = memberReservationRepository.findAllByMember(tacan);
+        MemberReservation addedMemberReservation = allByMember
+                .stream()
+                .filter(memberReservation -> Objects.equals(memberReservation.getReservation().getId(), reservation.getId()))
+                .findAny()
+                .get();
 
         //then
+        assertThat(addedMemberReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
 }

@@ -93,9 +93,8 @@ class ReservationTimeServiceTest extends ServiceTest {
         ReservationTime time = reservationTimeRepository.save(getNoon());
         Theme theme = themeRepository.save(getTheme1());
         Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme));
-
         //when & then
-        assertThatThrownBy(() -> reservationTimeService.delete(reservation.getId()))
+        assertThatThrownBy(() -> reservationTimeService.delete(getNoon().getId()))
                 .isInstanceOf(BadRequestException.class);
     }
 
