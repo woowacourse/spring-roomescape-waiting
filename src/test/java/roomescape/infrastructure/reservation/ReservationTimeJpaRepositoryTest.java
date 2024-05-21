@@ -17,7 +17,7 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.TimeSlot;
 
 @DataJpaTest
-class JpaReservationTimeRepositoryTest {
+class ReservationTimeJpaRepositoryTest {
 
     @PersistenceContext
     private EntityManager entityManager;
