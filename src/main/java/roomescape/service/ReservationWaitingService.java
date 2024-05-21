@@ -48,6 +48,7 @@ public class ReservationWaitingService {
         this.waitingRepository = waitingRepository;
     }
 
+    //Todo Reservation 서비스와 Waiting Service 사이에 중복 제거 => 추가적인 계층 분리?
     public ReservationWaitingResponse save(ReservationRequest reservationRequest) {
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
