@@ -76,6 +76,10 @@ public class Reservation {
         return member;
     }
 
+    public ReservationStatus getStatus() {
+        return status;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.member.domain.Role.ADMIN;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.BEFORE_ONE_DAYS_DATE;
@@ -65,7 +66,20 @@ class ReservationServiceTest {
 
         Reservation reservation = reservationService.addReservation(reservationAddRequest);
 
-        assertThat(reservation).isNotNull();
+        assertThat(reservation.getStatus()).isEqualTo(RESERVED);
+    }
+
+    @DisplayName("예약대기가 가능합니다.")
+    @Test
+    void should_reserve_waiting() {
+        fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
+        fakeThemeRepository.save(DUMMY_THEME);
+        fakeMemberRepository.save(MEMBER_MEMBER);
+        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+
+        Reservation reservation = reservationService.addWaitingReservation(reservationAddRequest);
+
+        assertThat(reservation.getStatus()).isEqualTo(WAITING);
     }
 
     @DisplayName("존재 하지 않는 멤버로 예약 시 예외를 발생합니다.")
@@ -94,7 +108,7 @@ class ReservationServiceTest {
 
     @DisplayName("존재하지 않는 예약시각으로 예약 시 예외가 발생합니다.")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_reserve_non_exist_time() {
+    void should_throw_exception_when_reserve_non_exist_time() {
         fakeThemeRepository.save(DUMMY_THEME);
         fakeMemberRepository.save(ADMIN_MEMBER);
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(AFTER_TWO_DAYS_DATE, 1L, 1L, 1L);
@@ -106,7 +120,7 @@ class ReservationServiceTest {
 
     @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
     @Test
-    void should_throw_ClientIllegalArgumentException_when_reserve_date_and_time_duplicated() {
+    void should_throw_exception_when_reserve_date_and_time_duplicated() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "dummy", "description", "url");
         Member member = new Member(1L, "dummy", "dummy", "dummy", ADMIN);
@@ -119,6 +133,23 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(conflictRequest))
                 .isInstanceOf(EscapeApplicationException.class)
                 .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+    }
+
+    @DisplayName("멤버 id와 예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
+    @Test
+    void should_throw_exception_when_reserve_waiting_with_member_id_and_date_and_time_duplicated() {
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
+        Theme theme = new Theme(1L, "dummy", "description", "url");
+        Member member = new Member(1L, "dummy", "dummy", "dummy", ADMIN);
+        Reservation reservation = new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, member, RESERVED,
+                TIMESTAMP_BEFORE_ONE_YEAR);
+        fakeReservationRepository.save(reservation);
+
+        ReservationAddRequest conflictRequest = new ReservationAddRequest(AFTER_ONE_DAYS_DATE, 1L, 1L, 1L);
+
+        assertThatThrownBy(() -> reservationService.addWaitingReservation(conflictRequest))
+                .isInstanceOf(EscapeApplicationException.class)
+                .hasMessage("겹치는 예약대기 또는 예약은 할 수 없습니다.");
     }
 
     @DisplayName("date가 현재날짜 보다 이전이면 예약시 예외가 발생한다")
