@@ -13,7 +13,7 @@ import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-class AdminPageTest {
+class AdminPageControllerTest {
 
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
@@ -71,6 +71,16 @@ class AdminPageTest {
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().get("/admin/theme")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("waiting 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_when_GetWaitingPage_then_statusCodeIsOkay() {
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(200);
     }
