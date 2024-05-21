@@ -28,7 +28,7 @@ class AdminPageControllerTest {
 
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("admin123", "admin@email.com"))
+                .body(new LoginRequest("admin@email.com", "admin123"))
                 .when().post("/login")
                 .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }

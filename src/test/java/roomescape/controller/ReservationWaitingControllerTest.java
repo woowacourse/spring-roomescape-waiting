@@ -50,7 +50,7 @@ class ReservationWaitingControllerTest {
 
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest@email.com"))
+                .body(new LoginRequest("guest@email.com", "guest123"))
                 .when().post("/login")
                 .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }

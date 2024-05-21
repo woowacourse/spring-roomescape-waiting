@@ -49,7 +49,7 @@ class ReservationControllerTest {
 
         token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest@email.com"))
+                .body(new LoginRequest("guest@email.com", "guest123"))
                 .when().post("/login")
                 .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
     }
@@ -156,7 +156,7 @@ class ReservationControllerTest {
 
         String wrongToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest2@email.com"))
+                .body(new LoginRequest("guest2@email.com", "guest123"))
                 .when().post("/login")
                 .then().log().all().extract().cookie(AuthConstants.AUTH_COOKIE_NAME);
 
