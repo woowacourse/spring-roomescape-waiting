@@ -165,7 +165,6 @@ class ReservationTest extends AcceptanceTest {
         );
     }
 
-
     @DisplayName("올바르지 않은 날짜 형식으로 입력시 예외처리")
     @Test
     void invalidDateFormat() {

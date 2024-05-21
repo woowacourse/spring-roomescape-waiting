@@ -130,17 +130,13 @@ class ReservationServiceTest {
     @DisplayName("예약 삭제 테스트")
     @Test
     void deleteReservation() {
-        List<Reservation> reservations = List.of(
-                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme),
-                new Reservation(member, LocalDate.of(2999, 12, 13), reservationTime, theme));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.of(2999, 12, 12), reservationTime, theme));
 
-        reservationRepository.saveAll(reservations);
-
-        reservationService.deleteReservation(1L);
+        reservationService.deleteReservation(reservation.getId());
 
         List<Reservation> findReservations = reservationRepository.findAll();
-
-        assertThat(findReservations).hasSize(1);
+        assertThat(findReservations).isEmpty();
     }
 
     @DisplayName("예약이 삭제되면 첫번째 예약 대기는 예약으로 전환된다.")
@@ -169,7 +165,7 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("사용자별 모든 예약 조회 테스트")
+    @DisplayName("사용자별 모든 예약 조회 테스트")   // TODO
     @Test
     void findAllByMemberId() {
         ReservationTime reservationTime1 = reservationTimeRepository.save(

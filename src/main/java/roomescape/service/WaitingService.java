@@ -64,7 +64,7 @@ public class WaitingService {
     private void validateIsPastTime(LocalDate date, ReservationTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
-            throw new CustomException(ExceptionCode.PAST_TIME_SLOT_RESERVATION);
+            throw new CustomException(ExceptionCode.PAST_TIME_SLOT_WAITING);
         }
     }
 

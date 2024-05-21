@@ -8,6 +8,7 @@ public enum ExceptionCode {
     NOT_FOUND_USER("사용자를 찾을 수 없습니다."),
     TIME_IN_USE("이미 해당 시간에 예약이 존재하여 삭제할 수 없습니다."),
     PAST_TIME_SLOT_RESERVATION("이미 지나간 시점을 예약할 수 없습니다."),
+    PAST_TIME_SLOT_WAITING("이미 지나간 시점을 예약 대기할 수 없습니다."),
     DUPLICATE_RESERVATION("동일한 시간에 중복 예약을 할 수 없습니다."),
     DUPLICATE_WAITING("동일한 시간에 중복 예약 대기를 할 수 없습니다."),
     NO_AUTHENTICATION_INFO("권한 정보가 없는 토큰입니다."),
