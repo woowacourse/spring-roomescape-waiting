@@ -44,5 +44,7 @@ public class ReservationBookingService {
         }
         ReservationStatus reservationStatus = reservationStatusRepository.getById(id);
         reservationStatus.cancelBooking();
+        reservationStatusRepository.findFirstWaiting(reservationStatus.getReservation())
+                .ifPresent(ReservationStatus::book);
     }
 }
