@@ -12,6 +12,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
 
@@ -43,8 +44,8 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> getReservationsByMember(final LoginMember member) {
-        return reservationRepository.findAllByMemberId(member.id());
+    public List<ReservationRankResponse> getMyReservation(final LoginMember member) {
+        return reservationRepository.findMyReservation(member.id());
     }
 
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {

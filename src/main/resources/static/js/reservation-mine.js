@@ -15,10 +15,10 @@ function render(data) {
   data.forEach(item => {
     const row = tableBody.insertRow();
 
-    const theme = item.themeName;
+    const theme = item.name;
     const date = item.date;
     const time = item.time;
-    const status = item.status;
+    const status = item.rank === 1 ? "예약" : (item.rank - 1) + '번째 예약대기'
 
 
     row.insertCell(0).textContent = theme;

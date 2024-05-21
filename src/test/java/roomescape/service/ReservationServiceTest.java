@@ -10,9 +10,11 @@ import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Role;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.exception.InvalidSearchDateException;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,11 +48,12 @@ class ReservationServiceTest {
     @DisplayName("자신의 예약 목록을 조회한다.")
     void getReservationsByMember() {
         final LoginMember member = new LoginMember(3L, "제제", Role.USER);
-        final List<Reservation> reservationsByMember = reservationService.getReservationsByMember(member);
+        final List<ReservationRankResponse> reservationsByMember = reservationService.getMyReservation(member);
+        final LocalDate date = LocalDate.now();
 
-        final List<Reservation> expected = List.of(
-                new Reservation(5L, null, null, null, null),
-                new Reservation(6L, null, null, null, null)
+        final List<ReservationRankResponse> expected = List.of(
+                new ReservationRankResponse(5L, "가을", date.minusDays(7), LocalTime.of(15, 0), 1),
+                new ReservationRankResponse(6L, "가을", date.plusDays(3), LocalTime.of(18, 0), 1)
         );
 
         assertThat(reservationsByMember).isEqualTo(expected);
