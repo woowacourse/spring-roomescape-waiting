@@ -89,6 +89,20 @@ class ReservationRepositoryImplTest extends RepositoryTest {
         assertThat(reservationRepository.existByDateAndTimeIdAndThemeId(AFTER_THREE_DAYS_DATE, 1L, 1L)).isFalse();
     }
 
+    @DisplayName("멤버 ID와 예약날짜와 예약 시간 ID와 테마 ID가 동일한 경우를 알 수 있습니다.")
+    @Test
+    void should_return_true_when_member_id_and_reservation_date_and_time_id_and_theme_id_equal() {
+        assertThat(reservationRepository.existByMemberIdAndDateAndTimeIdAndThemeId(1L, AFTER_TWO_DAYS_DATE, 1L,
+                1L)).isTrue();
+    }
+
+    @DisplayName("멤버 ID와 예약날짜와 예약 시간 ID와 테마 ID가 동일하지 않은 경우를 알 수 있습니다.")
+    @Test
+    void should_return_false_when_member_id_and_reservation_date_and_time_id_and_theme_id_not_equal() {
+        assertThat(reservationRepository.existByMemberIdAndDateAndTimeIdAndThemeId(2L, AFTER_TWO_DAYS_DATE, 1L,
+                1L)).isFalse();
+    }
+
     @DisplayName("예약날짜와 테마Id로 예약목록을 불러올 수 있습니다.")
     @Test
     void should_find_reservations_by_date_and_theme_id() {
