@@ -57,4 +57,10 @@ public class AuthService {
             throw new AuthenticationException();
         }
     }
+
+    public Cookie expireCookie(Cookie[] cookies) {
+        Cookie cookie = findCookieIfExist(cookies);
+        cookie.setMaxAge(0);
+        return cookie;
+    }
 }

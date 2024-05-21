@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,5 +45,11 @@ public class MemberController {
     public ResponseEntity<List<Member>> getAllMembers() {
         List<Member> members = memberService.findAllMembers();
         return ResponseEntity.ok(members);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        response.addCookie(authService.expireCookie(request.getCookies()));
+        return ResponseEntity.ok().build();
     }
 }
