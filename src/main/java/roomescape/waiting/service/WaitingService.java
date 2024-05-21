@@ -7,7 +7,6 @@ import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingRequest;
@@ -28,16 +27,11 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public List<MyReservationResponse> findWaitings(Long memberId) {
-        return waitingRepository.findByMemberId(memberId)
+    public List<WaitingResponse> findWaitings() {
+        return waitingRepository.findAll()
                 .stream()
-                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
+                .map(WaitingResponse::from)
                 .toList();
-    }
-
-    private Long countOrderOfWaiting(Waiting waiting) {
-        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
-                waiting.getReservation(), waiting.getCreatedAt());
     }
 
     public WaitingResponse createWaiting(WaitingRequest request, Long requestMemberId) {
@@ -52,7 +46,7 @@ public class WaitingService {
 
     private Reservation findReservation(WaitingRequest request) {
         return reservationRepository.findByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId())
+                        request.date(), request.timeId(), request.themeId())
                 .orElseThrow(() -> new BadArgumentRequestException("아직 예약되지 않았습니다."));
     }
 
@@ -73,6 +67,10 @@ public class WaitingService {
     private boolean isAlreadyWaited(Reservation reservation, Member member) {
         return reservation.getMember().equals(member)
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
+    }
+
+    public void deleteWaiting(Long id) {
+        waitingRepository.deleteById(id);
     }
 
     public void deleteWaiting(Long waitingId, Long requestMemberId) {

@@ -7,19 +7,17 @@ import roomescape.waiting.domain.Waiting;
 
 public record WaitingResponse(
         Long id,
+        String memberDate,
         String themeName,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
-        String status) {
-
-    private static final String DEFAULT_STATUS = "예약 대기 중";
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
+                waiting.getMember().getName(),
                 waiting.getReservation().getTheme().getName(),
                 waiting.getReservation().getDate(),
-                waiting.getReservation().getTime().getStartAt(),
-                DEFAULT_STATUS);
+                waiting.getReservation().getTime().getStartAt());
     }
 }
