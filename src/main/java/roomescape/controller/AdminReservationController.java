@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationFilterRequest;
-import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
@@ -26,7 +26,7 @@ public class AdminReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createAdminReservation(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createAdminReservation(@Valid @RequestBody AdminReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         ReservationResponse reservationResponse = reservationService.create(request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))

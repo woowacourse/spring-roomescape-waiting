@@ -30,13 +30,13 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme) {
+    public Reservation(Long id, Member member, LocalDate date, TimeSlot time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.BOOKING;
+        this.status = status;
     }
 
     public void validatePast(LocalDateTime now) {

@@ -16,7 +16,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.TokenRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -57,8 +57,8 @@ class AdminReservationTest {
     @DisplayName("reservation 페이지에 새로운 예약 정보를 추가, 조회, 삭제할 수 있다.")
     @Test
     void given_when_saveAndDeleteReservations_then_statusCodeIsOkay() {
-        ReservationRequest request =
-                new ReservationRequest(1L, LocalDate.parse("2999-12-31"), 1L, 1L);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, LocalDate.parse("2999-12-31"), 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -85,8 +85,8 @@ class AdminReservationTest {
     @DisplayName("등록되지 않은 시간으로 예약하는 경우 400 오류를 반환한다.")
     @Test
     void given_when_saveNotExistTimeId_then_statusCodeIsBadRequest() {
-        ReservationRequest request =
-                new ReservationRequest(1L, LocalDate.parse("2999-12-31"), 500L, 1L);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, LocalDate.parse("2999-12-31"), 500L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -101,8 +101,8 @@ class AdminReservationTest {
     @ParameterizedTest
     @ValueSource(strings = {"2011-02-09", "1123-12-12"})
     void given_when_savePastDate_then_statusCodeIsBadRequest(String invalidDate) {
-        ReservationRequest request =
-                new ReservationRequest(1L, LocalDate.parse(invalidDate), 1L, 1L);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, LocalDate.parse(invalidDate), 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -117,8 +117,8 @@ class AdminReservationTest {
     @DisplayName("날짜가 비어있는 채 예약한다면 400 오류를 반환한다.")
     @Test
     void given_when_saveNullDate_then_statusCodeIsBadRequest() {
-        ReservationRequest request =
-                new ReservationRequest(1L, null, 1L, 1L);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, null, 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -133,8 +133,8 @@ class AdminReservationTest {
     @DisplayName("시간이 비어있는 채 예약하는 경우 400 오류를 반환한다.")
     @Test
     void given_when_saveInvalidTimeId_then_statusCodeIsBadRequest() {
-        ReservationRequest request =
-                new ReservationRequest(1L, LocalDate.parse("2100-05-05"), null, 1L);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, LocalDate.parse("2100-05-05"), null, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -149,8 +149,8 @@ class AdminReservationTest {
     @DisplayName("테마가 비어있는 채 예약하는 경우 400 오류를 반환한다.")
     @Test
     void given_when_saveInvalidThemeId_then_statusCodeIsBadRequest() {
-        ReservationRequest request =
-                new ReservationRequest(1L, LocalDate.parse("2100-05-05"), 1L, null);
+        AdminReservationRequest request =
+                new AdminReservationRequest(1L, LocalDate.parse("2100-05-05"), 1L, null);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

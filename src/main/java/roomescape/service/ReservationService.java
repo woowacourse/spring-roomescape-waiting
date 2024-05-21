@@ -9,9 +9,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.MemberReservationRequest;
-import roomescape.dto.request.ReservationFilterRequest;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.ReservationFilterRequest;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.MemberRepository;
@@ -55,24 +55,35 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(ReservationRequest request, LocalDateTime now) {
+    public ReservationResponse create(AdminReservationRequest request, LocalDateTime now) {
         Member member = getMemberById(request.memberId());
         TimeSlot timeSlot = getTimeSlotById(request.timeId());
         Theme theme = getThemeById(request.themeId());
         Reservation reservation = request.toEntity(member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(request.date(), timeSlot, theme);
+        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
 
-    public ReservationResponse create(LoginMember loginMember, MemberReservationRequest request, LocalDateTime now) {
+    public ReservationResponse create(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
         Member member = getMemberById(loginMember.id());
         TimeSlot timeSlot = getTimeSlotById(request.timeId());
         Theme theme = getThemeById(request.themeId());
-        Reservation reservation = request.toEntity(member, timeSlot, theme);
+        Reservation reservation = request.toBookingEntity(member, timeSlot, theme);
         reservation.validatePast(now);
-        validateDuplicatedReservation(request.date(), timeSlot, theme);
+        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
+        Reservation createdReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(createdReservation);
+    }
+
+    public ReservationResponse createPending(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
+        Member member = getMemberById(loginMember.id());
+        TimeSlot timeSlot = getTimeSlotById(request.timeId());
+        Theme theme = getThemeById(request.themeId());
+        Reservation reservation = request.toPendingEntity(member, timeSlot, theme);
+        reservation.validatePast(now);
+        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
     }
@@ -89,9 +100,9 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, timeSlot, theme)) {
-            throw new IllegalArgumentException("예약이 종료되었습니다");
+    private void validateDuplicatedReservation(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
+        if (reservationRepository.existsByMemberAndDateAndTimeAndTheme(member, date, timeSlot, theme)) {
+            throw new IllegalArgumentException("이미 예약을 시도 하였습니다.");
         }
     }
 

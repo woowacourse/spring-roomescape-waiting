@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.MemberReservationRequest;
+import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -28,9 +28,18 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @PostMapping("/pending")
+    public ResponseEntity<ReservationResponse> createPendingReservation(LoginMember loginMember,
+                                                                  @Valid @RequestBody ReservationRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        ReservationResponse reservationResponse = reservationService.createPending(loginMember, request, now);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
+                .body(reservationResponse);
+    }
+
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservationByClient(LoginMember loginMember,
-                                                                         @Valid @RequestBody MemberReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createReservation(LoginMember loginMember,
+                                                                 @Valid @RequestBody ReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         ReservationResponse reservationResponse = reservationService.create(loginMember, request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
