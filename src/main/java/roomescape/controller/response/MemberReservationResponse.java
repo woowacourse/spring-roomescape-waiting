@@ -11,7 +11,7 @@ import roomescape.model.ReservationStatus;
 
 public class MemberReservationResponse {
 
-    private Long reservationId;
+    private Long id;
     private String theme;
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
@@ -19,15 +19,15 @@ public class MemberReservationResponse {
     private String status;
 
     public MemberReservationResponse(Reservation reservation) {
-        this.reservationId = reservation.getId();
+        this.id = reservation.getId();
         this.theme = reservation.getTheme().getName();
         this.date = reservation.getDate();
         this.time = reservation.getTime().getStartAt();
         this.status = mapStatus(reservation.getStatus());
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public Long getId() {
+        return id;
     }
 
     public String getTheme() {

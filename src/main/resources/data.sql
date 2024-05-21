@@ -27,3 +27,6 @@ INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CUR
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CURRENT_DATE -3, 4, 2, 1, 'ACCEPT');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CURRENT_DATE -1, 3, 2, 1, 'ACCEPT');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CURRENT_DATE -1, 1, 3, 2, 'ACCEPT');
+
+INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CURRENT_DATE, 1, 1, 1, 'ACCEPT');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (CURRENT_DATE, 1, 1, 1, 'PENDING');
