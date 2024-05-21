@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.DataDuplicateException;
@@ -12,12 +13,12 @@ import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
@@ -27,7 +28,6 @@ import roomescape.reservation.dto.response.ReservationTimeInfoResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
 
 @Service
@@ -35,7 +35,6 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationTimeService reservationTimeService;
-    private final ThemeRepository themeRepository;
     private final MemberService memberService;
     private final ThemeService themeService;
 
@@ -43,14 +42,12 @@ public class ReservationService {
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ReservationTimeService reservationTimeService,
-            final ThemeRepository themeRepository,
             final MemberService memberService,
             final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationTimeService = reservationTimeService;
-        this.themeRepository = themeRepository;
         this.memberService = memberService;
         this.themeService = themeService;
     }
@@ -95,7 +92,7 @@ public class ReservationService {
         final Reservation reservation = findReservationById(reservationId);
         final Long reservationMemberId = reservation.getMember().getId();
 
-        if (member.isRole(Role.ADMIN) || reservationMemberId.equals(requestMemberId)) {
+        if (member.isAdmin() || reservationMemberId.equals(requestMemberId)) {
             reservationRepository.deleteById(reservation.getId());
             return;
         }
@@ -146,10 +143,7 @@ public class ReservationService {
         if (requestDate.isBefore(today)) {
             return true;
         }
-        if (requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime)) {
-            return true;
-        }
-        return false;
+        return requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime);
     }
 
     private void validateReservationDuplicate(
@@ -173,14 +167,37 @@ public class ReservationService {
             final LocalDate dateFrom,
             final LocalDate dateTo
     ) {
-        final Member member = memberService.findMemberById(memberId);
-        final Theme theme = themeService.findThemeById(themeId);
+        Specification<Reservation> specification = getReservationSpecification(dateFrom, dateTo, themeId, memberId);
 
-        final List<ReservationResponse> response = reservationRepository.searchWith(theme, member, dateFrom, dateTo)
+        final List<ReservationResponse> response = reservationRepository.findAll(specification)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
+
         return new ReservationsResponse(response);
+    }
+
+    private Specification<Reservation> getReservationSpecification(
+            final LocalDate dateFrom,
+            final LocalDate dateTo,
+            final Long themeId,
+            final Long memberId
+    ) {
+        Specification<Reservation> specification = (root, query, criteriaBuilder) -> null;
+        if (themeId != null) {
+            specification = specification.and(ReservationSpecification.withTheme(themeService.findThemeById(themeId)));
+        }
+        if (memberId != null) {
+            specification = specification.and(
+                    ReservationSpecification.withMember(memberService.findMemberById(memberId)));
+        }
+        if (dateFrom != null) {
+            specification = specification.and(ReservationSpecification.withDateFrom(dateFrom));
+        }
+        if (dateTo != null) {
+            specification = specification.and(ReservationSpecification.withDateTo(dateTo));
+        }
+        return specification;
     }
 
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {

@@ -16,27 +16,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     List<Reservation> findByReservationTime(ReservationTime reservationTime);
 
-    List<Reservation> findByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
-
-    default List<Reservation> searchWith(Theme theme, Member member, LocalDate dateFrom, LocalDate dateTo) {
-        return this.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (theme != null) {
-                predicates.add(cb.equal(root.get("theme"), theme));
-            }
-            if (member != null) {
-                predicates.add(cb.equal(root.get("member"), member));
-            }
-            if (dateFrom != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), dateFrom));
-            }
-            if (dateTo != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("date"), dateTo));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
-    }
-
+    List<Reservation> findByReservationTimeAndDateAndTheme(
+            ReservationTime reservationTime,
+            LocalDate date,
+            Theme theme
+    );
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
     List<Reservation> findByMember(Member member);
