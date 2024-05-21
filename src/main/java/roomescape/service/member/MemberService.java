@@ -1,6 +1,7 @@
 package roomescape.service.member;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
@@ -11,6 +12,7 @@ import roomescape.service.member.dto.MemberResponse;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;

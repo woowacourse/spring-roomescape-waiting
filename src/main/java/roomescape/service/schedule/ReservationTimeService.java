@@ -2,6 +2,7 @@ package roomescape.service.schedule;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationDetail;
 import roomescape.domain.reservation.ReservationDetailRepository;
 import roomescape.domain.reservation.ReservationRepository;
@@ -17,6 +18,7 @@ import roomescape.service.schedule.dto.ReservationTimeResponse;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -30,6 +32,7 @@ public class ReservationTimeService {
         this.reservationDetailRepository = reservationDetailRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeCreateRequest reservationTimeCreateRequest) {
         validateDuplicated(reservationTimeCreateRequest);
         ReservationTime reservationTime = reservationTimeRepository.save(
@@ -49,6 +52,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(long id) {
         validateByReservation(id);
         reservationTimeRepository.deleteById(id);
