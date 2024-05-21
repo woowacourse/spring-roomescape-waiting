@@ -27,7 +27,7 @@ public class AdminReservationController {
     }
 
     @GetMapping("/search")
-    public List<ReservationResponse> findReservationsInCondition(
+    public ResponseEntity<List<ReservationResponse>> findReservationsInCondition(
             @RequestParam("themeId") long themeId,
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
@@ -35,7 +35,8 @@ public class AdminReservationController {
     ) {
         ReservationConditionSearchRequest request
                 = new ReservationConditionSearchRequest(memberId, themeId, dateFrom, dateTo);
-        return reservationService.findReservationsByConditions(request);
+        List<ReservationResponse> response = reservationService.findReservationsByConditions(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
