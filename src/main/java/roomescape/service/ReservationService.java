@@ -9,7 +9,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithWaiting;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
@@ -17,7 +16,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.MyReservationResponse;
@@ -27,21 +25,21 @@ import roomescape.service.dto.response.ReservationResponse;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingService waitingService;
 
-    public ReservationService(ReservationRepository reservationRepository, final WaitingRepository waitingRepository,
+    public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               ThemeRepository themeRepository,
-                              MemberRepository memberRepository
+                              MemberRepository memberRepository, final WaitingService waitingService
     ) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingService = waitingService;
     }
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, Long memberId) {
@@ -76,8 +74,8 @@ public class ReservationService {
     public List<ReservationResponse> findAllReservationsByCondition(ReservationConditionRequest condition) {
         Theme findTheme = getTheme(condition.themeId());
         Member findMember = getMember(condition.memberId());
-        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(
-                findTheme, findMember, condition.dateFrom(), condition.dateTo());
+        List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDateBetween(findTheme,
+                findMember, condition.dateFrom(), condition.dateTo());
 
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -85,24 +83,13 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByMemberId(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        Member member = getMember(id);
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-
-        List<Waiting> waitings = waitingRepository.findAllByMember(member);
-        List<WaitingWithRank> waitingWithRanks = waitings.stream()
-                .map(waiting -> {
-                    Long rank = waitingRepository.countAllByDateAndTimeAndThemeAndIdLessThanEqual(
-                            waiting.getDate(),
-                            waiting.getTime(),
-                            waiting.getTheme(),
-                            waiting.getId());
-                    return new WaitingWithRank(waiting, rank);
-                })
-                .toList();
+        List<WaitingWithRank> waitingWithRanks = waitingService.findAllWithRankByMember(member);
 
         List<ReservationWithWaiting> reservationWithWaitings = ReservationWithWaiting.of(reservations,
                 waitingWithRanks);
+
         return reservationWithWaitings.stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -113,17 +100,7 @@ public class ReservationService {
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
 
         reservationRepository.deleteById(id);
-        if (waitingRepository.existsByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
-            convertFirstWaitingToReservation(reservation);
-        }
-    }
-
-    private void convertFirstWaitingToReservation(final Reservation reservation) {
-        Waiting waiting = waitingRepository.findFirstByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())
-                .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
-
-        waitingRepository.delete(waiting);
-        reservationRepository.save(new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+        waitingService.convertFirstWaitingToReservation(reservation);
     }
 
     private Theme getTheme(Long id) {

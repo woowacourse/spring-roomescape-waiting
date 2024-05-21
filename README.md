@@ -46,9 +46,8 @@
   - [x] TODO: [4단계] 주석을 찾아 수정합니다.
 
 ## 리팩토링 목록
-- [x] 같은 날짜, 시간에 예약 내역이 있으면 동일 날짜, 시간에 다른 테마 예약 및 대기 제한
-- [ ] WaitingResponse 경량화
-- [ ] mine 컨트롤러 분리
+- [x] reservationService에서 waiting 관련 로직 분리
+- [ ] mine 컨트롤러 분리, reservation/mine -> /mine으로 고민
 - [ ] 테스트 추가
 - [ ] 내 예약 조회 접근 권한 
 - [ ] email, password에 대한 검증

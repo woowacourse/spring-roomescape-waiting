@@ -5,9 +5,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
@@ -75,5 +77,32 @@ public class WaitingService {
 
     public void deleteWaiting(final Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    public List<WaitingWithRank> findAllWithRankByMember(final Member member) {
+        List<Waiting> waitings = waitingRepository.findAllByMember(member);
+        return waitings.stream()
+                .map(waiting -> {
+                    Long rank = waitingRepository.countAllByDateAndTimeAndThemeAndIdLessThanEqual(
+                            waiting.getDate(),
+                            waiting.getTime(),
+                            waiting.getTheme(),
+                            waiting.getId());
+                    return new WaitingWithRank(waiting, rank);
+                })
+                .toList();
+    }
+
+    public void convertFirstWaitingToReservation(final Reservation reservation) {
+        if (waitingRepository.existsByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme())) {
+            Waiting waiting = waitingRepository.findFirstByDateAndTimeAndTheme(
+                            reservation.getDate(),
+                            reservation.getTime(),
+                            reservation.getTheme())
+                    .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
+
+            waitingRepository.delete(waiting);
+            reservationRepository.save(new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+        }
     }
 }
