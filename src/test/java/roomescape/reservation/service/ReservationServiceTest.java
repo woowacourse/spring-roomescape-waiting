@@ -62,7 +62,7 @@ class ReservationServiceTest {
     @Test
     void readReservations() {
         // given
-        Mockito.when(reservationRepository.findAll())
+        Mockito.when(reservationRepository.findAllFetchJoin())
                 .thenReturn(List.of(Fixtures.reservationFixture));
 
         // when
@@ -110,7 +110,7 @@ class ReservationServiceTest {
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(reservation.date()).isEqualTo(date);
         softAssertions.assertThat(reservation.member().name()).isEqualTo(name);
-        softAssertions.assertThat(reservation.time().getStartAt()).isEqualTo(LocalTime.of(10, 10));
+        softAssertions.assertThat(reservation.time().startAt()).isEqualTo(LocalTime.of(10, 10));
         softAssertions.assertAll();
     }
 
@@ -137,7 +137,7 @@ class ReservationServiceTest {
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(reservation.date()).isEqualTo(date);
         softAssertions.assertThat(reservation.member().name()).isEqualTo(name);
-        softAssertions.assertThat(reservation.time().getStartAt()).isEqualTo(LocalTime.of(10, 10));
+        softAssertions.assertThat(reservation.time().startAt()).isEqualTo(LocalTime.of(10, 10));
         softAssertions.assertAll();
     }
 
