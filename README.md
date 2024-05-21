@@ -19,15 +19,15 @@
       "time": "10:00",
       "status": "예약"
       },
-- [ ] 예약 대기 기능
-  - [ ] 예약 대기 요청 기능 API
-    - POST /reservations-waiting
+- [x] 예약 대기 기능
+  - [x] 예약 대기 요청 기능 API
+    - POST /reservations/waiting
     - cookie: token
     - {
       "date": "2024-03-01",
       "themId": 1,
       "timeId": 1
       }
-  - [ ] 예약 대기 취소 기능 API
-    - DELETE /reservations-waiting/1
-  - [ ] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함
+  - [x] 예약 대기 취소 기능 API
+    - DELETE /reservations/waiting/1
+  - [x] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함

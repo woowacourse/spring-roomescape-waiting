@@ -15,14 +15,14 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        const theme = 'theme';
-        const date = 'date';
-        const time = 'time';
-        const status = 'status';
+        const theme = item.theme.name;
+        const date = item.date;
+        const time = item.time.startAt;
+        const status = item.status;
 
-        row.insertCell(0).textContent = theme;
-        row.insertCell(1).textContent = date;
-        row.insertCell(2).textContent = time;
+        row.insertCell(0).textContent = theme
+        row.insertCell(1).textContent = date
+        row.insertCell(2).textContent = time
         row.insertCell(3).textContent = status;
 
         /*
@@ -47,7 +47,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `reservations/waiting/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
