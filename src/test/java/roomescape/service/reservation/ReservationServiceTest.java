@@ -4,8 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -212,6 +214,24 @@ class ReservationServiceTest {
 
         //then
         assertThat(reservationService.findAll()).isEmpty();
+    }
+
+    @DisplayName("관리자가 예약을 삭제하고, 예약 대기가 있다면 가장 우선순위가 높은 예약 대기를 예약으로 전환한다.")
+    @Test
+    void deleteThenUpdateReservation() {
+        //given
+        Reservation reservation = new Reservation(admin, reservationDetail, ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(member, reservationDetail, ReservationStatus.WAITING);
+        Reservation reservation3 = new Reservation(anotherMember, reservationDetail, ReservationStatus.WAITING);
+        Reservation target = reservationRepository.save(reservation);
+        Reservation nextReserved = reservationRepository.save(reservation2);
+        reservationRepository.save(reservation3);
+
+        //when
+        reservationService.deleteById(target.getId());
+
+        //then
+        assertThat(nextReserved.isReserved()).isTrue();
     }
 
     @DisplayName("관리자가 과거 예약을 삭제하려고 하면 예외가 발생한다.")

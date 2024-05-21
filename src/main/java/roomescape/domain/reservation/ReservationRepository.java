@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.schedule.ReservationDate;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @Query("""
@@ -28,4 +30,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDetailThemeId(long themeId);
 
     boolean existsByDetailScheduleTimeId(long timeId);
+
+    Optional<Reservation> findFirstByDetailIdOrderByCreatedAt(long detailId);
 }

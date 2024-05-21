@@ -78,4 +78,12 @@ public class Reservation {
     public boolean isReserved() {
         return status.isReserved();
     }
+
+    public ReservationDetail getDetail() {
+        return detail;
+    }
+
+    public void reserved() {
+        this.status = ReservationStatus.RESERVED;
+    }
 }

@@ -1,6 +1,7 @@
 package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.*;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -39,11 +41,13 @@ public class ReservationService {
         this.reservationDetailRepository = reservationDetailRepository;
     }
 
+    @Transactional
     public ReservationResponse createAdminReservation(AdminReservationRequest adminReservationRequest) {
         return createReservation(adminReservationRequest.timeId(), adminReservationRequest.themeId(),
                 adminReservationRequest.memberId(), adminReservationRequest.date());
     }
 
+    @Transactional
     public ReservationResponse createMemberReservation(ReservationRequest reservationRequest, long memberId) {
         return createReservation(reservationRequest.timeId(), reservationRequest.themeId(), memberId,
                 reservationRequest.date());
@@ -99,9 +103,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(long id) {
-        reservationRepository.findById(id).ifPresent(this::validateScheduleIfReserved);
-        reservationRepository.deleteById(id);
+        reservationRepository.findById(id).ifPresent(reservation -> {
+            validateScheduleIfReserved(reservation);
+            reservationRepository.deleteById(id);
+            updateReservation(reservation.getDetail().getId());
+        });
     }
 
     private void validateScheduleIfReserved(Reservation reservation) {
@@ -110,6 +118,12 @@ public class ReservationService {
         }
     }
 
+    private void updateReservation(long detailId) {
+        reservationRepository.findFirstByDetailIdOrderByCreatedAt(detailId)
+                .ifPresent(Reservation::reserved);
+    }
+
+    @Transactional
     public void deleteWaitingById(long reservationId, long memberId) {
         reservationRepository.findById(reservationId)
                 .ifPresent(reservation -> {

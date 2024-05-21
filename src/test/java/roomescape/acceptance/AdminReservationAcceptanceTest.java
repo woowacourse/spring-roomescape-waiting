@@ -123,7 +123,7 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
 
     @DisplayName("이미 일정이 지난 예약을 삭제할 수 없다.")
     @TestFactory
-    @Sql(value = {"/truncate.sql", "/insert-past-reservation.sql"})
+    @Sql(value = {"/truncate-with-admin-and-guest.sql", "/insert-past-reservation.sql"})
     Stream<DynamicTest> cannotDeletePastReservation() {
         return Stream.of(
                 DynamicTest.dynamicTest("관리자가 일정이 지난 예약을 삭제하려고 하면 예외가 발생한다.", () -> {
@@ -132,7 +132,7 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
                             .cookie("token", adminToken)
                             .when().delete("/admin/reservations/" + reservationId)
                             .then().log().all()
-                            .assertThat().statusCode(400).body("message", is("이미 지난 예약(대기)은 삭제할 수 없습니다."));
+                            .assertThat().statusCode(400).body("message", is("이미 지난 예약은 삭제할 수 없습니다."));
                 })
         );
     }
