@@ -26,7 +26,7 @@ class AdminPageControllerTest {
 
     @DisplayName("관리자가 아닌 멤버는 관리자 페이지를 열 수 없다.")
     @ParameterizedTest
-    @CsvSource({"/admin", "/admin/reservation", "/admin/time", "/admin/theme"})
+    @CsvSource({"/admin", "/admin/reservation", "/admin/time", "/admin/theme", "admin/waiting"})
     void loadAdminPage_whenUserLogin(String path) {
         Cookies cookies = makeUserCookie();
 
@@ -51,7 +51,7 @@ class AdminPageControllerTest {
 
     @DisplayName("관리자는 관리자 페이지를 열 수 있다.")
     @ParameterizedTest
-    @CsvSource({"/admin", "/admin/reservation", "/admin/time", "/admin/theme"})
+    @CsvSource({"/admin", "/admin/reservation", "/admin/time", "/admin/theme", "admin/waiting"})
     void loadAdminPage_whenAdminLogin(String path) {
         Cookies cookies = makeAdminCookie();
 

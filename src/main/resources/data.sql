@@ -27,3 +27,8 @@ INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (3, CURRENT_DATE - 2, 2, 2);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, CURRENT_DATE + 1, 1, 2);
+
+INSERT INTO waiting (reservation_id, member_id, created_at)
+VALUES (4, 3, '2024-05-20 12:10:00.000');
+INSERT INTO waiting (reservation_id, member_id, created_at)
+VALUES (4, 4, '2024-05-20 12:20:00.000');
