@@ -137,7 +137,7 @@ public class ReservationControllerTest {
         void getMembersReservationTest() {
             RestAssured.given().log().all()
                     .cookie("token", token)
-                    .when().get("/member/reservations")
+                    .when().get("/reservations/mine")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(10));
