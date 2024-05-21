@@ -50,7 +50,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<MemberResponse> findAllMemberNames() {
+    public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::new)
                 .toList();

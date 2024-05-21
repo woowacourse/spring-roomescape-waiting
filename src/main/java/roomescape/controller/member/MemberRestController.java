@@ -1,7 +1,11 @@
 package roomescape.controller.member;
 
+import static roomescape.global.Constants.TOKEN_NAME;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,11 +18,6 @@ import roomescape.service.MemberService;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberLoginRequest;
 import roomescape.service.dto.member.MemberResponse;
-
-import java.net.URI;
-import java.util.List;
-
-import static roomescape.global.Constants.TOKEN_NAME;
 
 @RestController
 public class MemberRestController {
@@ -53,6 +52,6 @@ public class MemberRestController {
 
     @GetMapping("/admin/members")
     public List<MemberResponse> findAllMembers() {
-        return memberService.findAllMemberNames();
+        return memberService.findAllMembers();
     }
 }
