@@ -1,7 +1,7 @@
 package roomescape.service.dto.response.reservationTime;
 
 import java.util.List;
-import roomescape.domain.ReservationStatuses;
+import roomescape.domain.reservation.ReservationStatuses;
 
 public record ReservationStatusResponses(List<ReservationStatusResponse> reservationStatuses) {
 

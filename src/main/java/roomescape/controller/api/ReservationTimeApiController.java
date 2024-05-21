@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.api.validator.IdPositive;
-import roomescape.domain.ReservationStatuses;
+import roomescape.domain.reservation.ReservationStatuses;
 import roomescape.domain.ReservationTime;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
 import roomescape.service.dto.response.reservationTime.ReservationStatusResponses;

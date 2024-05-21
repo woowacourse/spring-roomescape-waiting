@@ -2,7 +2,6 @@ package roomescape.service.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.domain.ReservationWaitStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,10 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWait;
-import roomescape.domain.ReservationWaitStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;

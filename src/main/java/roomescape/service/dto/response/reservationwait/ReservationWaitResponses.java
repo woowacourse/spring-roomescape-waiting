@@ -1,7 +1,7 @@
 package roomescape.service.dto.response.reservationwait;
 
 import java.util.List;
-import roomescape.domain.ReservationWait;
+import roomescape.domain.reservationwait.ReservationWait;
 
 public record ReservationWaitResponses(List<ReservationWaitResponse> reservationWaits) {
 

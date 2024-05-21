@@ -1,13 +1,13 @@
 package roomescape.service.reservationwait;
 
-import static roomescape.domain.ReservationWaitStatus.WAITING;
+import static roomescape.domain.reservationwait.ReservationWaitStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWait;
+import roomescape.domain.reservationwait.ReservationWait;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.exception.InvalidRequestException;

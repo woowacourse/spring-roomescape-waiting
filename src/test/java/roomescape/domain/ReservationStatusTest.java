@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationStatuses;
 
 class ReservationStatusTest {
 

@@ -1,7 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import java.util.ArrayList;
 import java.util.List;
+import roomescape.domain.ReservationTime;
 
 public class ReservationStatuses {
 

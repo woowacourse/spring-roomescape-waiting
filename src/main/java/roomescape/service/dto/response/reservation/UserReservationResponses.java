@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWaitWithRank;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationwait.ReservationWaitWithRank;
 
 public record UserReservationResponses(List<UserReservationResponse> reservations) {
 

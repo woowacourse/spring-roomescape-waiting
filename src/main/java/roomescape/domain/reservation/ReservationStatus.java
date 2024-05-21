@@ -1,6 +1,7 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import java.util.Objects;
+import roomescape.domain.ReservationTime;
 
 public class ReservationStatus {
 

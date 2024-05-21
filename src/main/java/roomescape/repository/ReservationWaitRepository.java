@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.domain.ReservationWait;
-import roomescape.domain.ReservationWaitStatus;
-import roomescape.domain.ReservationWaitWithRank;
+import roomescape.domain.reservationwait.ReservationWait;
+import roomescape.domain.reservationwait.ReservationWaitStatus;
+import roomescape.domain.reservationwait.ReservationWaitWithRank;
 
 public interface ReservationWaitRepository extends JpaRepository<ReservationWait, Long> {
     Optional<ReservationWait> findFirstByDateAndThemeIdAndTimeIdAndStatusOrderById(LocalDate date, long themeId, long timeId, ReservationWaitStatus status);
@@ -15,7 +15,7 @@ public interface ReservationWaitRepository extends JpaRepository<ReservationWait
     List<ReservationWait> findAllByStatus(ReservationWaitStatus reservationWaitStatus);
 
     @Query("""
-            SELECT new roomescape.domain.ReservationWaitWithRank(
+            SELECT new roomescape.domain.reservationwait.ReservationWaitWithRank(
                 w,
                 (SELECT COUNT(w2)
                 FROM ReservationWait w2

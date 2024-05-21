@@ -2,9 +2,9 @@ package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWait;
-import roomescape.domain.ReservationWaitStatus;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationwait.ReservationWait;
+import roomescape.domain.reservationwait.ReservationWaitStatus;
 import roomescape.exception.InvalidRequestException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitRepository;
