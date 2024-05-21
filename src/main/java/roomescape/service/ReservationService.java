@@ -80,7 +80,14 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserReservationResponse> findAllReservationAndWaiting(Long memberId, LocalDate date) {
+    public List<WaitingResponse> findAllWaiting() {
+        return waitingRepository.findAllReadOnly().stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserReservationResponse> findMyAllReservationAndWaiting(Long memberId, LocalDate date) {
         Member member = findMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
 
@@ -123,13 +130,6 @@ public class ReservationService {
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
-    }
-
-    @Transactional(readOnly = true)
-    public List<WaitingResponse> findAllWaiting() {
-        return waitingRepository.findAllReadOnly().stream()
-                .map(WaitingResponse::from)
-                .toList();
     }
 }
 

@@ -152,7 +152,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
     @Test
     void findAllMyReservations() {
         // given // when
-        List<UserReservationResponse> allUserReservation = reservationService.findAllReservationAndWaiting(1L, LocalDate.parse("2024-05-30"));
+        List<UserReservationResponse> allUserReservation = reservationService.findMyAllReservationAndWaiting(1L, LocalDate.parse("2024-05-30"));
 
         // then
         assertThat(allUserReservation).hasSize(3)

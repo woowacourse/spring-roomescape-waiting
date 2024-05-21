@@ -51,7 +51,7 @@ public class ReservationController {
             @Login LoginMember member,
             @RequestParam LocalDate date
     ){
-        List<UserReservationResponse> reservationResponses = reservationService.findAllReservationAndWaiting(member.id(), date);
+        List<UserReservationResponse> reservationResponses = reservationService.findMyAllReservationAndWaiting(member.id(), date);
         return ResponseEntity.ok(reservationResponses);
     }
 
