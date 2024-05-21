@@ -18,15 +18,15 @@ public class Member {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "member_name", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "member_name"))
     private MemberName memberName;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "email"))
     private Email email;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "password"))
     private Password password;
 
     @Enumerated(EnumType.STRING)

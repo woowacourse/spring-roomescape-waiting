@@ -16,7 +16,7 @@ public class Theme {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "theme_name", nullable = false))
+    @AttributeOverride(name = "value", column = @Column(name = "theme_name"))
     private ThemeName themeName;
 
     private String description;
