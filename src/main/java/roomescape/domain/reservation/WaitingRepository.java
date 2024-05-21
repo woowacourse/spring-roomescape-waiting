@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -47,4 +48,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("select count(w) from Waiting w where w.reservation = :reservation and w.id <= :id")
     Long countRank(Reservation reservation, Long id);
+
+    @EntityGraph(attributePaths = {"reservation"})
+    List<Waiting> findByReservation_Slot_DateAfter(LocalDate parse);
 }

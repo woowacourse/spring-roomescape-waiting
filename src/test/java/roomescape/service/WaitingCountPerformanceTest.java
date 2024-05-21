@@ -112,4 +112,33 @@ class WaitingCountPerformanceTest {
         long diffTime = afterTime - beforeTime;
         System.out.println("실행 시간(ms): " + diffTime);
     }
+
+    @DisplayName("필요데이터 전부 가져오고 count")
+    @Test
+    void applicationCount() {
+        // given
+        Member member = memberRepository.findById(2L).get();
+        long beforeTime = System.currentTimeMillis();
+
+        // when
+        List<Waiting> waitings = waitingRepository.findByReservation_Slot_DateAfter(LocalDate.parse("2024-06-01"));
+
+        List<Waiting> myWaitings = waitings.stream()
+                                           .filter(waiting -> waiting.isMember(member))
+                                           .toList();
+
+        List<WaitingWithRank> results = myWaitings.stream()
+                .map(w1 -> {
+                    Long rank = waitings.stream()
+                            .filter(w2 -> w2.getReservation().equals(w1.getReservation()) && w2.getId() <= w1.getId())
+                            .count();
+                    return new WaitingWithRank(w1, rank);
+                })
+                .toList();
+
+        // then
+        long afterTime = System.currentTimeMillis();
+        long diffTime = afterTime - beforeTime;
+        System.out.println("실행 시간(ms): " + diffTime);
+    }
 }
