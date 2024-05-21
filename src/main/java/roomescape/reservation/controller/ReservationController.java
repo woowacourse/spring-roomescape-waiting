@@ -11,19 +11,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.MemberReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -37,13 +41,24 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<WaitingResponse> addWaiting(
+            @RequestBody ReservationRequest reservationRequest,
+            MemberRequest memberRequest
+    ) {
+        WaitingResponse waitingResponse = waitingService.addWaiting(reservationRequest, memberRequest);
+
+        return ResponseEntity.created(URI.create("/reservations/waiting/" + waitingResponse.id()))
+                .body(waitingResponse);
+    }
+
     @GetMapping
     public List<ReservationResponse> findReservations() {
         return reservationService.findReservations();
     }
 
     @GetMapping("/mine")
-    public List<MemberReservationResponse> findReservationsByMember(MemberRequest memberRequest) {
+    public List<MemberReservationWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
         return reservationService.findReservationsByMember(memberRequest.toMember());
     }
 

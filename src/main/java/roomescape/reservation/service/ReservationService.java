@@ -12,7 +12,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.MemberReservationWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -112,10 +112,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findReservationsByMember(Member member) {
+    public List<MemberReservationWaitingResponse> findReservationsByMember(Member member) {
         return reservationRepository.findByMember(member)
                 .stream()
-                .map(MemberReservationResponse::new)
+                .map(MemberReservationWaitingResponse::new)
                 .toList();
     }
 
