@@ -40,7 +40,6 @@ public class AdminReservationController {
                 .body(ReservationResponse.from(reservation));
     }
 
-    //TODO 만들 기능 중에 예약 대기는 시간이 지나면 자동으로 취소
     @GetMapping("/admin/waiting-all")
     public List<WaitingReservationResponse> getWaitingReservations() {
         final List<Reservation> reservations = reservationService.findAllWaiting();
