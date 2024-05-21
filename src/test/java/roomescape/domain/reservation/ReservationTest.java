@@ -25,8 +25,7 @@ class ReservationTest {
                         ReservationDate.from("2024-04-03"),
                         ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
-                        MemberFixture.getDomain(),
-                        ReservationStatus.COMPLETE
+                        MemberFixture.getDomain()
                 ))
                 .doesNotThrowAnyException();
     }
@@ -35,7 +34,7 @@ class ReservationTest {
     @DisplayName("id, 문자열들 을 통해 도메인을 생성한다.")
     void create_with_factory_method() {
         assertThatCode(() ->
-                Reservation.fromComplete(
+                Reservation.from(
                         "2024-04-03",
                         ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(),
@@ -45,9 +44,9 @@ class ReservationTest {
 
     private static Stream<Arguments> maskingDateAndTime() {
         return Stream.of(
-                Arguments.arguments(Reservation.fromComplete("2024-04-01", ReservationTime.from("10:00"),
+                Arguments.arguments(Reservation.from("2024-04-01", ReservationTime.from("10:00"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain())),
-                Arguments.arguments(Reservation.fromComplete("2024-04-02", ReservationTime.from("09:59"),
+                Arguments.arguments(Reservation.from("2024-04-02", ReservationTime.from("09:59"),
                         ThemeFixture.getDomain(), MemberFixture.getDomain()))
         );
     }

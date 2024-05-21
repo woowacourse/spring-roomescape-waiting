@@ -92,7 +92,7 @@ class ThemeServiceTest {
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-        reservationRepository.save(Reservation.fromComplete(
+        reservationRepository.save(Reservation.from(
                 "2024-04-30",
                 reservationTime,
                 theme,
@@ -116,19 +116,19 @@ class ThemeServiceTest {
         final ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
-        reservationRepository.save(Reservation.fromComplete(
+        reservationRepository.save(Reservation.from(
                 "2024-06-01",
                 reservationTime,
                 theme,
                 member
         ));
-        reservationRepository.save(Reservation.fromComplete(
+        reservationRepository.save(Reservation.from(
                 "2024-06-02",
                 reservationTime,
                 theme,
                 member
         ));
-        reservationRepository.save(Reservation.fromComplete(
+        reservationRepository.save(Reservation.from(
 
                 "2024-06-03",
                 reservationTime,

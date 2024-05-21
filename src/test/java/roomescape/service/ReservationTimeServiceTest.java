@@ -76,14 +76,15 @@ class ReservationTimeServiceTest {
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
 
-        reservationRepository.save(Reservation.fromComplete(
+        reservationRepository.save(Reservation.from(
                 "2024-04-30",
                 reservationTime,
                 theme,
                 member
         ));
+        final long reservationTimeId = reservationTime.getId();
 
-        assertThatThrownBy(() -> sut.deleteReservationTime(reservationTime.getId()))
+        assertThatThrownBy(() -> sut.deleteReservationTime(reservationTimeId))
                 .isInstanceOf(ExistReservationException.class);
     }
 
@@ -103,7 +104,7 @@ class ReservationTimeServiceTest {
         final ReservationTime time2 = reservationTimeRepository.save(ReservationTime.from("11:00"));
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
         final Member member = memberRepository.save(MemberFixture.getDomain());
-        reservationRepository.save(Reservation.fromComplete("2025-01-01", time1, theme, member));
+        reservationRepository.save(Reservation.from("2025-01-01", time1, theme, member));
 
 
         final List<AvailableReservationTimeOutput> actual = sut.getAvailableTimes(

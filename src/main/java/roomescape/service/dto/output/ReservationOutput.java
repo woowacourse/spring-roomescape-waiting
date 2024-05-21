@@ -5,7 +5,7 @@ import roomescape.domain.reservation.Reservation;
 import java.util.List;
 
 public record ReservationOutput(long id, ThemeOutput theme, String date, ReservationTimeOutput time,
-                                MemberOutput member, String reservationStatus) {
+                                MemberOutput member) {
 
     public static ReservationOutput toOutput(final Reservation reservation) {
         return new ReservationOutput(
@@ -14,9 +14,7 @@ public record ReservationOutput(long id, ThemeOutput theme, String date, Reserva
                 reservation.getDate()
                         .asString(),
                 ReservationTimeOutput.toOutput(reservation.getTime()),
-                MemberOutput.toOutput(reservation.getMember()),
-                reservation.getReservationStatus()
-                        .getValue()
+                MemberOutput.toOutput(reservation.getMember())
         );
     }
 

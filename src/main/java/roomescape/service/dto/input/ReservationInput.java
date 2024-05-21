@@ -8,6 +8,6 @@ import roomescape.domain.user.Member;
 public record ReservationInput(String date, Long timeId, Long themeId, Long memberId) {
 
     public Reservation toReservation(final ReservationTime time, final Theme theme, final Member member) {
-        return Reservation.fromComplete(date, time, theme, member);
+        return Reservation.from(date, time, theme, member);
     }
 }

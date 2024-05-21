@@ -55,6 +55,11 @@ public class ReservationAcceptanceTest {
                 });
             }
 
+            /**
+             * Given 날짜,시간,테마가 똑같은 예약이 존재해야 한다.
+             * When 똑같은 예약 정보를 가지고 예약을 다시 생성한다.
+             * Then 409 코드를 반환한다.
+             */
             @Test
             @DisplayName("날짜,시간,테마가 똑같은 예약이 있다면 409를 반환한다.")
             void it_returns_409_with_duplicate_reservation_reservationTime_date_theme() {
@@ -152,6 +157,16 @@ public class ReservationAcceptanceTest {
             @Test
             @DisplayName("200과 응답을 반환한다.")
             void it_returns_200_and_response() {
+                //A 가 예약을 생성한다.
+                // 예약을 생성할떄 문제가 생기는건? -> TDD 테스트 (
+
+                //-> 스텝의 검증은 TDD
+
+                //B 가 예약을 생성한다
+
+                // 맨마지막에 하는 것만 해도 낫배드
+
+
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
                 final String token = 멤버_로그인();

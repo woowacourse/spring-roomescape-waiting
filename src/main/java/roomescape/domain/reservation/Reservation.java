@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "reservation", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"date", "time_id","theme_id"})
+        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
 })
 public class Reservation {
 
@@ -28,27 +28,19 @@ public class Reservation {
     private Theme theme;
     @ManyToOne
     private Member member;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
 
     protected Reservation() {
     }
 
-    public Reservation(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus reservationStatus) {
+    public Reservation(final ReservationDate date, final ReservationTime time, final Theme theme, final Member member) {
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.reservationStatus = reservationStatus;
     }
 
-
-    public static Reservation fromComplete(final String date, final ReservationTime time, final Theme theme, final Member member) {
-        return Reservation.from(date, time, theme, member, ReservationStatus.COMPLETE);
-    }
-
-    private static Reservation from(final String date, final ReservationTime time, final Theme theme, final Member member, final ReservationStatus status) {
-        return new Reservation(ReservationDate.from(date), time, theme, member, status);
+    public static Reservation from(final String date, final ReservationTime time, final Theme theme, final Member member) {
+        return new Reservation(ReservationDate.from(date), time, theme, member);
     }
 
     public Long getId() {
@@ -73,10 +65,6 @@ public class Reservation {
 
     public String getLocalDateTimeFormat() {
         return parseLocalDateTime().toString();
-    }
-
-    public ReservationStatus getReservationStatus() {
-        return reservationStatus;
     }
 
     public boolean isBefore(final LocalDate localDate, final LocalTime localTime) {
@@ -112,7 +100,6 @@ public class Reservation {
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +
-                ", reservationStatus=" + reservationStatus +
                 '}';
     }
 }
