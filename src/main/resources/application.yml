@@ -13,9 +13,14 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
-
 security:
   jwt:
     token:
       secret-key: YzbMlPH7Bt4HXEjizwC2RxFtcWGLxSgZKDt9XOZm0IAyUv3yD5rth1sf7fw9NRFWgIe3aOeYgTEaMBYOd7iE4jIvS1f5SEaMJDUrI
       expire-length: 3600000
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          interceptor: TRACE
