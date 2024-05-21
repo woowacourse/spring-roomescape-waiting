@@ -2,8 +2,6 @@ package roomescape.domain.reservation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,32 +36,35 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status;
-
     public Reservation() {
     }
 
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, ReservationStatus status) {
-        validateDate(date);
+//        validateDate(date);
         this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
-    private void validateDate(final LocalDate date) {
-        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
-            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
-    }
+//    private void validateDate(final LocalDate date) {
+//        if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
+//            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+//        }
+//    }
 
     public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
         return this.time.equals(time) && this.date.equals(date);
     }
+
+    public boolean isNotReservedBy(Member member) {
+        return this.member != member;
+    }
+
+//    public boolean isWaiting() {
+//        return this.status == ReservationStatus.WAITING;
+//    }
 
     public Long getReservationTimeId() {
         return time.getId();
@@ -105,13 +106,9 @@ public class Reservation {
         return theme;
     }
 
-    public ReservationStatus getStatus() {
-        return status;
-    }
-
-    public boolean isNotReservedBy(Member member) {
-        return this.member != member;
-    }
+//    public ReservationStatus getStatus() {
+//        return status;
+//    }
 
     @Override
     public boolean equals(Object o) {

@@ -15,6 +15,7 @@ import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationsResponse;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
@@ -23,6 +24,7 @@ import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitingService;
 
 import java.util.List;
 
@@ -32,15 +34,18 @@ public class ReservationController {
 
     private final MemberService memberService;
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
     public ReservationController(final MemberService memberService,
                                  final ReservationService reservationService,
+                                 final WaitingService waitingService,
                                  final ReservationTimeService reservationTimeService,
                                  final ThemeService themeService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
     }
@@ -71,7 +76,9 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(loginMember);
-        return ResponseEntity.ok(myReservations);
+        final List<MyReservationResponse> myReservations = reservationService.findMyReservations(loginMember.id());
+        final List<MyReservationResponse> myWaitings = waitingService.findMyWaitings(loginMember.id());
+        final List<MyReservationResponse> responses = MyReservationsResponse.combine(myReservations, myWaitings);
+        return ResponseEntity.ok(responses);
     }
 }

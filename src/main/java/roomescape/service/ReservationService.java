@@ -3,11 +3,11 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.WaitingRepository;
 
 import java.util.List;
 
@@ -18,9 +18,11 @@ public class ReservationService {
     private static final int MAX_RESERVATIONS_PER_TIME = 1;
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository) {
+    public ReservationService(final ReservationRepository reservationRepository, final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse create(final Reservation reservation) {
@@ -63,8 +65,8 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
-        final List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+    public List<MyReservationResponse> findMyReservations(final Long id) {
+        final List<Reservation> reservations = reservationRepository.findByMember_Id(id);
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
