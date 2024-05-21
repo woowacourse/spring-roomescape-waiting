@@ -358,7 +358,7 @@ HTTP/1.1 204
 **request**
 
 ```http request
-GET /admin/waiting-all HTTP/1.1
+GET /admin/waitings HTTP/1.1
 ```
 
 **response**

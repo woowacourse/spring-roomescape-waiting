@@ -40,7 +40,7 @@ public class AdminReservationController {
                 .body(ReservationResponse.from(reservation));
     }
 
-    @GetMapping("/admin/waiting-all")
+    @GetMapping("/admin/waitings")
     public List<WaitingReservationResponse> getWaitingReservations() {
         final List<Reservation> reservations = reservationService.findAllWaiting();
         return reservations.stream()
