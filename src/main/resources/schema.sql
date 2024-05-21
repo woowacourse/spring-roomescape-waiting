@@ -31,6 +31,7 @@ CREATE TABLE reservation
     reservation_time_id BIGINT                                                             NOT NULL,
     theme_id            BIGINT                                                             NOT NULL,
     reservation_status  varchar(255) check (reservation_status in ('RESERVED', 'WAITING')) NOT NULL,
+    UNIQUE (date, member_id, reservation_time_id, theme_id),
     PRIMARY KEY (id),
     CONSTRAINT fk_member FOREIGN KEY (member_id) REFERENCES member (id),
     CONSTRAINT fk_reservation_time FOREIGN KEY (reservation_time_id) REFERENCES reservation_time (id),

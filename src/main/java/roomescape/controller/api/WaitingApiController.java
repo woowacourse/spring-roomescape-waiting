@@ -1,7 +1,10 @@
 package roomescape.controller.api;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +15,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.reservation.ReservationCreateService;
+import roomescape.service.reservation.ReservationDeleteService;
 
 import java.net.URI;
 
@@ -19,10 +23,13 @@ import java.net.URI;
 public class WaitingApiController {
 
     private final ReservationCreateService reservationCreateService;
+    private final ReservationDeleteService reservationDeleteService;
 
 
-    public WaitingApiController(ReservationCreateService reservationCreateService) {
+    public WaitingApiController(ReservationCreateService reservationCreateService,
+                                ReservationDeleteService reservationDeleteService) {
         this.reservationCreateService = reservationCreateService;
+        this.reservationDeleteService = reservationDeleteService;
     }
 
     @PostMapping("/waiting")
