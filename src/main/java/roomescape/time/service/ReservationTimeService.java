@@ -8,7 +8,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.ReservationTimeCreateRequest;
 import roomescape.time.repository.ReservationTimeRepository;
-import roomescape.time.dto.ReservationTimeResponse;
+import roomescape.time.dto.TimeBookedResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,13 +27,13 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponse createTime(ReservationTimeCreateRequest request) {
+    public TimeBookedResponse createTime(ReservationTimeCreateRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
 
         validateDuplicated(reservationTime);
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.from(savedReservationTime);
+        return TimeBookedResponse.from(savedReservationTime);
     }
 
     private void validateDuplicated(ReservationTime reservationTime) {
@@ -43,13 +43,13 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationTimeResponse> readReservationTimes() {
+    public List<TimeBookedResponse> readReservationTimes() {
         return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeResponse::from)
+                .map(TimeBookedResponse::from)
                 .toList();
     }
 
-    public List<ReservationTimeResponse> readReservationTimes(LocalDate date, Long themeId) {
+    public List<TimeBookedResponse> readReservationTimes(LocalDate date, Long themeId) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         Set<Long> alreadyBookedTimes = reservations.stream()
                 .map(reservation -> reservation.getTime().getId())
@@ -60,15 +60,15 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private ReservationTimeResponse createTimeResponse(ReservationTime time, Set<Long> alreadyBookedTimes) {
+    private TimeBookedResponse createTimeResponse(ReservationTime time, Set<Long> alreadyBookedTimes) {
         boolean alreadyBooked = alreadyBookedTimes.contains(time.getId());
-        return ReservationTimeResponse.of(time, alreadyBooked);
+        return TimeBookedResponse.of(time, alreadyBooked);
     }
 
-    public ReservationTimeResponse readReservationTime(Long id) {
+    public TimeBookedResponse readReservationTime(Long id) {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 시간입니다."));
-        return ReservationTimeResponse.from(reservationTime);
+        return TimeBookedResponse.from(reservationTime);
     }
 
     public void deleteTime(Long id) {

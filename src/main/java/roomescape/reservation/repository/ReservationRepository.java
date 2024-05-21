@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
 
 import java.time.LocalDate;
@@ -8,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    @Query("SELECT DISTINCT r FROM Reservation r LEFT JOIN FETCH r.member LEFT JOIN FETCH r.theme LEFT JOIN FETCH r.time")
+    List<Reservation> findAllFetchJoin();
 
     List<Reservation> findByDateBetween(LocalDate start, LocalDate end);
 

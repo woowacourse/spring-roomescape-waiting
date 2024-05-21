@@ -3,7 +3,7 @@ package roomescape.time.controller;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import roomescape.time.dto.ReservationTimeCreateRequest;
-import roomescape.time.dto.ReservationTimeResponse;
+import roomescape.time.dto.TimeBookedResponse;
 import roomescape.time.service.ReservationTimeService;
 
 import java.time.LocalDate;
@@ -20,12 +20,12 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public List<ReservationTimeResponse> readTimes() {
+    public List<TimeBookedResponse> readTimes() {
         return reservationTimeService.readReservationTimes();
     }
 
     @GetMapping(params = {"date", "themeId"})
-    public List<ReservationTimeResponse> readTimes(
+    public List<TimeBookedResponse> readTimes(
             @RequestParam(value = "date") LocalDate date,
             @RequestParam(value = "themeId") Long themeId
     ) {
@@ -33,13 +33,13 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/{id}")
-    public ReservationTimeResponse readTime(@PathVariable Long id) {
+    public TimeBookedResponse readTime(@PathVariable Long id) {
         return reservationTimeService.readReservationTime(id);
 
     }
 
     @PostMapping
-    public ReservationTimeResponse createTime(@Valid @RequestBody ReservationTimeCreateRequest request) {
+    public TimeBookedResponse createTime(@Valid @RequestBody ReservationTimeCreateRequest request) {
         return reservationTimeService.createTime(request);
     }
 

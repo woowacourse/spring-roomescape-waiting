@@ -12,7 +12,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.ReservationTimeCreateRequest;
-import roomescape.time.dto.ReservationTimeResponse;
+import roomescape.time.dto.TimeBookedResponse;
 import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
@@ -53,7 +53,7 @@ class ReservationTimeServiceTest {
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt);
 
         // when
-        ReservationTimeResponse reservationTime = reservationTimeService.createTime(request);
+        TimeBookedResponse reservationTime = reservationTimeService.createTime(request);
 
         // then
         assertThat(reservationTime.startAt())
@@ -82,7 +82,7 @@ class ReservationTimeServiceTest {
                 .thenReturn(Optional.of(reservationTimeFixture));
 
         // when
-        ReservationTimeResponse reservationTime = reservationTimeService.readReservationTime(id);
+        TimeBookedResponse reservationTime = reservationTimeService.readReservationTime(id);
 
         // then
         assertThat(reservationTime.startAt())
@@ -97,7 +97,7 @@ class ReservationTimeServiceTest {
                 .thenReturn(List.of(reservationTimeFixture));
 
         // when
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes(null, null);
+        List<TimeBookedResponse> reservationTimes = reservationTimeService.readReservationTimes(null, null);
 
         // then
         assertThat(reservationTimes.size()).isEqualTo(1);
@@ -115,11 +115,11 @@ class ReservationTimeServiceTest {
                 .thenReturn(List.of(reservationTimeFixture));
 
         // when
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes(date, themeId);
+        List<TimeBookedResponse> reservationTimes = reservationTimeService.readReservationTimes(date, themeId);
 
         // then
         assertThat(reservationTimes).hasSize(1);
-        assertThat(reservationTimes).contains(ReservationTimeResponse.of(reservationTimeFixture, true));
+        assertThat(reservationTimes).contains(TimeBookedResponse.of(reservationTimeFixture, true));
     }
 
     @DisplayName("예약 시간 서비스는 id에 맞는 시간을 삭제한다.")

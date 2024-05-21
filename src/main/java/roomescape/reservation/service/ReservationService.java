@@ -103,7 +103,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> readReservations() {
-        return reservationRepository.findAll().stream()
+        return reservationRepository.findAllFetchJoin().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
