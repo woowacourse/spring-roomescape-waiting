@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ class UserReservationControllerTest {
             """);
 
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "2060-01-01", 1L, 1L);
+            1L, LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -77,7 +78,8 @@ class UserReservationControllerTest {
             VALUES (2, '2060-01-01', '2024-01-01', 1, 1, 'RESERVED');
             """);
 
-        CreateUserReservationStandbyRequest request = new CreateUserReservationStandbyRequest("2060-01-01", 1L, 1L);
+        CreateUserReservationStandbyRequest request = new CreateUserReservationStandbyRequest(
+            LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -141,7 +143,7 @@ class UserReservationControllerTest {
             """);
 
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "2060-01-01", 2L, 1L);
+            1L, LocalDate.parse("2060-01-01"), 2L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -162,7 +164,7 @@ class UserReservationControllerTest {
             """);
 
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "2060-01-01", 1L, 2L);
+            1L, LocalDate.parse("2060-01-01"), 1L, 2L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -185,7 +187,7 @@ class UserReservationControllerTest {
             """);
 
         CreateReservationRequest request = new CreateReservationRequest(
-            1L, "2060-01-01", 1L, 1L);
+            1L, LocalDate.parse("2060-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)
@@ -204,7 +206,7 @@ class UserReservationControllerTest {
             INSERT INTO theme(name, description, thumbnail) VALUES ('t1', 'd1', 'https://test.com/test.jpg');
             """);
 
-        CreateReservationRequest request = new CreateReservationRequest(1L, "2000-01-01", 1L, 1L);
+        CreateReservationRequest request = new CreateReservationRequest(1L, LocalDate.parse("2000-01-01"), 1L, 1L);
 
         RestAssured.given().log().all()
             .cookie("token", userToken)

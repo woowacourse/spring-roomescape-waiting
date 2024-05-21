@@ -1,14 +1,16 @@
 package roomescape.controller.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public record CreateReservationRequest(
     @NotNull(message = "null일 수 없습니다.")
     Long memberId,
 
-    @NotBlank(message = "null이거나 비어있을 수 없습니다.")
-    String date,
+    @NotNull(message = "null일 수 없습니다.")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    LocalDate date,
 
     @NotNull(message = "null일 수 없습니다.")
     Long timeId,

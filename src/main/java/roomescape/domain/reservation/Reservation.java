@@ -13,10 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
-import roomescape.global.exception.RoomescapeException;
 
 @Table(name = "reservation")
 @Entity
@@ -55,29 +53,21 @@ public class Reservation {
     @Column(name = "status")
     private ReservationStatus status;
 
-    public Reservation(Member Member, String rawDate, LocalDateTime createdAt, ReservationTime time, Theme theme, ReservationStatus status) {
-        this(null, Member, rawDate, createdAt, time, theme, status);
+    public Reservation(Member Member, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme,
+        ReservationStatus status) {
+        this(null, Member, date, createdAt, time, theme, status);
     }
 
-    public Reservation(Long id, Member Member, String rawDate, LocalDateTime createdAt,
+    public Reservation(Long id, Member Member, LocalDate date, LocalDateTime createdAt,
         ReservationTime time, Theme theme, ReservationStatus status) {
 
-        validate(rawDate);
         this.id = id;
         this.member = Member;
-        this.date = LocalDate.parse(rawDate);
+        this.date = date;
         this.createdAt = createdAt;
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    private void validate(String rawDate) {
-        try {
-            LocalDate.parse(rawDate);
-        } catch (DateTimeParseException e) {
-            throw new RoomescapeException("잘못된 날짜 형식입니다.");
-        }
     }
 
     protected Reservation() {

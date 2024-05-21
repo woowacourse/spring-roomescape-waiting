@@ -41,20 +41,20 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Reservation reserve(Long memberId, String rawDate, Long timeId, Long themeId) {
-        return save(memberId, rawDate, timeId, themeId, RESERVED);
+    public Reservation reserve(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        return save(memberId, date, timeId, themeId, RESERVED);
     }
 
-    public Reservation standby(Long memberId, String rawDate, Long timeId, Long themeId) {
-        return save(memberId, rawDate, timeId, themeId, STANDBY);
+    public Reservation standby(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        return save(memberId, date, timeId, themeId, STANDBY);
     }
 
-    private Reservation save(Long memberId, String rawDate, Long timeId, Long themeId, ReservationStatus status) {
+    private Reservation save(Long memberId, LocalDate date, Long timeId, Long themeId, ReservationStatus status) {
         Member member = findMember(memberId);
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
         LocalDateTime createdAt = LocalDateTime.now();
-        Reservation reservation = new Reservation(member, rawDate, createdAt, time, theme, status);
+        Reservation reservation = new Reservation(member, date, createdAt, time, theme, status);
 
         validatePastReservation(reservation.getDate(), time);
 
