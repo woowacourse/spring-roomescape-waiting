@@ -98,4 +98,8 @@ public class Reservation {
     public Theme getTheme() {
         return theme;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
