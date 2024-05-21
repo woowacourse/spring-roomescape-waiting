@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
@@ -16,18 +18,22 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.Time;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"theme_id", "time_id", "date"})
+})
 public class Reservation {
     private static final String status = "예약";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Time time;
+    @Column(nullable = false)
     private LocalDate date;
 
     public Reservation() {
