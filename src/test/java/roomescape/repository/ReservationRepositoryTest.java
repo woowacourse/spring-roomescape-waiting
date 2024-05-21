@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AvailableReservationTimeSearch;
@@ -50,7 +49,7 @@ class ReservationRepositoryTest {
         member = memberRepository.save(MEMBER_BROWN());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
         theme = themeRepository.save(THEME_HORROR());
-        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.RESERVED));
+        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme));
         testEntityManager.clear();
     }
 
@@ -58,7 +57,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 저장한다.")
     void save() {
         // given
-        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme, ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme);
 
         // when
         final Reservation actual = reservationRepository.save(reservation);

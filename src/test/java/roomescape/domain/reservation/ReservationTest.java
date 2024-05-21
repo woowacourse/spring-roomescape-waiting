@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.DATE_MAY_NINTH;
 import static roomescape.TestFixture.MEMBER_MIA;
@@ -21,13 +20,6 @@ import static roomescape.TestFixture.START_AT_SIX;
 import static roomescape.TestFixture.THEME_HORROR;
 
 class ReservationTest {
-
-    private static Stream<LocalDate> invalidLocalDate() {
-        return Stream.of(
-                LocalDate.now(),
-                LocalDate.now().minusDays(1L)
-        );
-    }
 
     private static Stream<Arguments> reservationsAndExpectedResult() {
         return Stream.of(
@@ -39,16 +31,8 @@ class ReservationTest {
     @Test
     @DisplayName("예약이 생성된다.")
     void createReservation() {
-        assertThatCode(() -> new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED))
+        assertThatCode(() -> new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR()))
                 .doesNotThrowAnyException();
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidLocalDate")
-    @DisplayName("예약 날짜가 현재 날짜 이후가 아닌 경우 예외가 발생한다.")
-    void throwExceptionWhenInvalidDate(final LocalDate invalidDate) {
-        assertThatThrownBy(() -> new Reservation(MEMBER_MIA(), invalidDate, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
@@ -56,7 +40,7 @@ class ReservationTest {
     @DisplayName("예약이 동일한 예약 시간을 갖는지 확인한다.")
     void hasSameDateTime(final LocalDate date, final String time, final boolean expectedResult) {
         // given
-        final Reservation reservation = new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
 
         // when
         final boolean actual = reservation.hasSameDateTime(date, new ReservationTime(time));

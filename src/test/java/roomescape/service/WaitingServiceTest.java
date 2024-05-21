@@ -14,7 +14,7 @@ class WaitingServiceTest {
 
     @Test
     void checkOwn() {
-        assertThatThrownBy(() -> waitingService.checkOwn(1L, 10L))
+        assertThatThrownBy(() -> waitingService.cancel(1L, 10L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
