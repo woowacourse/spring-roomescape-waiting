@@ -111,7 +111,7 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> readReservations() {
-        return memberReservationRepository.findAll().stream()
+        return memberReservationRepository.findByStatus(ReservationStatus.CONFIRMATION).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }

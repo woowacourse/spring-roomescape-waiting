@@ -65,11 +65,11 @@ class ReservationServiceTest {
         this.date = LocalDate.now().plusMonths(6);
     }
 
-    @DisplayName("예약 서비스는 예약들을 조회한다.")
+    @DisplayName("예약 서비스는 예약 확정 상태인 예약들을 조회한다.")
     @Test
     void readReservations() {
         // given
-        Mockito.when(memberReservationRepository.findAll())
+        Mockito.when(memberReservationRepository.findByStatus(ReservationStatus.CONFIRMATION))
                 .thenReturn(List.of(Fixtures.memberReservationFixture));
 
         // when
