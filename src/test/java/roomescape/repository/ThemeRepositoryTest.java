@@ -29,7 +29,10 @@ class ThemeRepositoryTest {
     void findPopular() {
         jdbcTemplate.update("""
             INSERT INTO member(name, email, password, role)
-            VALUES ('러너덕', 'user@a.com', '123a!', 'USER');
+            VALUES ('러너덕', 'user@a.com', '123a!', 'USER'),
+                   ('안돌', 'andol@a.com', '123a!', 'USER'),
+                   ('제이', 'jay@a.com', '123a!', 'USER'),
+                   ('포비', 'poby@a.com', '123a!', 'USER');
                         
             INSERT INTO theme(name, description, thumbnail)
             VALUES ('테마1', 'd1', 'https://test.com/test1.jpg'),
@@ -63,6 +66,9 @@ class ThemeRepositoryTest {
                    
                    (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-01', 1, 5, 'RESERVED'),
                    (1, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-01', 2, 5, 'RESERVED'),
+                   (2, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-02', 2, 5, 'STANDBY'),
+                   (3, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-03', 2, 5, 'STANDBY'),
+                   (4, TIMESTAMPADD(DAY, -8, CURRENT_DATE), '2024-01-04', 2, 5, 'STANDBY'),
                    
                    (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), '2024-01-01', 1, 1, 'RESERVED'),
                    (1, TIMESTAMPADD(DAY, -9, CURRENT_DATE), '2024-01-01', 2, 1, 'RESERVED'),

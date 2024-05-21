@@ -20,7 +20,8 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             th.thumbnail AS thumbnail,
             COUNT(r.theme_id) AS count
         FROM theme AS th
-        LEFT JOIN reservation AS r ON th.id = r.theme_id AND r.reserved_date BETWEEN :start AND :end
+        LEFT JOIN reservation AS r
+            ON th.id = r.theme_id AND r.status = 'RESERVED' AND r.reserved_date BETWEEN :start AND :end
         GROUP BY th.id
         ORDER BY count DESC
         LIMIT :themeCount
