@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static roomescape.domain.reservation.ReservationStatus.CANCELED;
 import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
@@ -20,7 +21,6 @@ import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
-import roomescape.exception.reservation.ReservationWaitingNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -83,17 +83,16 @@ public class ReservationService {
         return new ReservationResponse(reservation);
     }
 
-    public void deleteWaitingReservation(String email, long id) {
+    public void cancelWaitingReservation(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        if (!reservationRepository.existsByIdAndMemberAndStatus(id, member, WAITING)) {
-            throw new ReservationWaitingNotFoundException();
-        }
-        reservationRepository.deleteById(id);
+        Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
+                .orElseThrow(ReservationNotFoundException::new);
+        reservation.updateStatus(CANCELED);
     }
 
-    public void deleteConfirmedReservation(long id) {
+    public void cancelConfirmedReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
-        reservationRepository.deleteById(id);
+        reservation.updateStatus(CANCELED);
         Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
                 reservation.getTheme(),
                 reservation.getDate(),

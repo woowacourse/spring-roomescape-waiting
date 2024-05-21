@@ -69,7 +69,7 @@ public class ReservationRestController {
     @DeleteMapping("/reservations/waiting/{id}")
     public void deleteWaitingReservation(@AuthenticationPrincipal LoginMember loginMember,
                                          @PathVariable long id) {
-        reservationService.deleteWaitingReservation(loginMember.getEmail(), id);
+        reservationService.cancelWaitingReservation(loginMember.getEmail(), id);
     }
 
     @GetMapping("/admin/reservations/confirmed")
@@ -96,7 +96,7 @@ public class ReservationRestController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/admin/reservations/{id}")
     public void deleteConfirmedReservation(@PathVariable long id) {
-        reservationService.deleteConfirmedReservation(id);
+        reservationService.cancelConfirmedReservation(id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -26,7 +26,6 @@ import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.DateTimePassedException;
 import roomescape.exception.reservation.ReservationDuplicatedException;
 import roomescape.exception.reservation.ReservationNotFoundException;
-import roomescape.exception.reservation.ReservationWaitingNotFoundException;
 import roomescape.exception.reservation.TimeNotFoundException;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.repository.MemberRepository;
@@ -183,7 +182,7 @@ class ReservationServiceTest {
     @DisplayName("대기 상태인 예약 삭제 시 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_delete_reservation_waiting_not_saved_reservation_id() {
-        assertThatThrownBy(() -> reservationService.deleteWaitingReservation("t1@t1.com", 1L))
+        assertThatThrownBy(() -> reservationService.cancelWaitingReservation("t1@t1.com", 1L))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -196,8 +195,8 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.deleteWaitingReservation("tt@tt.com", 1L))
-                .isInstanceOf(ReservationWaitingNotFoundException.class);
+        assertThatThrownBy(() -> reservationService.cancelWaitingReservation("tt@tt.com", 1L))
+                .isInstanceOf(ReservationNotFoundException.class);
     }
 
 
@@ -211,7 +210,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         assertThatNoException()
-                .isThrownBy(() -> reservationService.deleteWaitingReservation("tt@tt.com", 1L));
+                .isThrownBy(() -> reservationService.cancelWaitingReservation("tt@tt.com", 1L));
     }
 
     @DisplayName("삭제하려는 예약이 DB에 존재하지 않으면 예외를 발생시킨다.")
@@ -221,7 +220,7 @@ class ReservationServiceTest {
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
 
-        assertThatThrownBy(() -> reservationService.deleteConfirmedReservation(1L))
+        assertThatThrownBy(() -> reservationService.cancelConfirmedReservation(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -238,7 +237,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
 
-        reservationService.deleteConfirmedReservation(1L);
+        reservationService.cancelConfirmedReservation(1L);
         Reservation reservation = reservationRepository.findById(2L).get();
 
         assertThat(reservation.getReservationStatus()).isEqualTo(CONFIRMED);
