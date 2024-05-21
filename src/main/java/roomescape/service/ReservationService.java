@@ -122,13 +122,15 @@ public class ReservationService {
     }
 
     public void deleteById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, RESERVED)
             .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않아 삭제할 수 없습니다."));
+
         delete(reservation);
     }
 
-    public void deleteStandby(Long reservationId, Member member) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+    public void deleteStandby(Long id, Member member) {
+        reservationRepository.existsById(id);
+        Reservation reservation = reservationRepository.findByIdAndStatus(id, STANDBY)
             .orElseThrow(() -> new RoomescapeException("예약대기가 존재하지 않아 삭제할 수 없습니다."));
 
         if (member.isNotAdmin() && reservation.isNotReservedBy(member)) {
