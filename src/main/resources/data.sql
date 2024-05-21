@@ -25,7 +25,9 @@ VALUES ('09:00'),
 INSERT INTO member (name, email, password, role)
 VALUES ('aaa', '111@aaa.com', 'asd', 'USER'),
        ('teco', 'admin@gmail.com', 'asd', 'ADMIN'),
-       ('potato', 'user@gmail.com', 'asd', 'USER');
+       ('potato', 'user@gmail.com', 'asd', 'USER'),
+       ('potato1', 'user2@gmail.com', 'asd', 'USER'),
+       ('potato2', 'user3@gmail.com', 'asd', 'USER');
 
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES (TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 1),
@@ -48,6 +50,8 @@ VALUES (TIMESTAMPADD(DAY, -1, CURRENT_DATE), 1, 1, 1),
        (TIMESTAMPADD(DAY, 1, CURRENT_DATE), 1, 1, 3),
        (TIMESTAMPADD(DAY, 3, CURRENT_DATE), 1, 1, 1);
 
-INSERT INTO waiting(date, time_id, theme_id, member_id)
-VALUES (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 3),
-       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 2);
+INSERT INTO reservation_waiting(date, time_id, theme_id, member_id, is_denied)
+VALUES (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 3, FALSE),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 1, FALSE),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 4, FALSE),
+       (TIMESTAMPADD(DAY, 2, CURRENT_DATE), 1, 1, 2, FALSE);
