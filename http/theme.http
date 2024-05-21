@@ -1,0 +1,18 @@
+### 테마 목록 조회 API
+GET {{base-url}}/themes
+
+### 인기 테마 목록 조회 API
+GET {{base-url}}/themes/popular
+
+### 테마 추가 API (접근 권한: 관리자)
+POST {{base-url}}/themes
+Content-Type: application/json
+
+{
+  "name": "레벨2 탈출",
+  "description": "우테코 레벨2를 탈출하는 내용입니다.",
+  "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+}
+
+### 테마 삭제 API (접근 권한: 관리자)
+DELETE {{base-url}}/themes/1
