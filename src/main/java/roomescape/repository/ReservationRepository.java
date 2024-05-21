@@ -3,11 +3,15 @@ package roomescape.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationInfo;
 
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    boolean existsByReservationInfoId(Long reservationInfoId);
+    boolean existsByReservationInfo(ReservationInfo reservationInfo);
+    default boolean notExistsByReservationInfo(final ReservationInfo reservationInfo) {
+        return !existsByReservationInfo(reservationInfo);
+    }
 
     boolean existsByReservationInfoThemeId(Long themeId);
 

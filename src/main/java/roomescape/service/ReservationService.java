@@ -32,7 +32,7 @@ public class ReservationService {
 
     public ReservationOutput createReservation(final ReservationInput input) {
         final ReservationInfo reservationInfo = reservationInfoCreateValidator.validateReservationInput(input.parseReservationInfoInput());
-        if (reservationRepository.existsByReservationInfoId(reservationInfo.getId())) {
+        if (reservationRepository.existsByReservationInfo(reservationInfo)) {
             throw new AlreadyExistsException(RESERVATION, reservationInfo.getLocalDateTimeFormat());
         }
         final Member member = memberRepository.getById(input.memberId());

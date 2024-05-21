@@ -5,6 +5,7 @@ import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Member;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.output.WaitingOutput;
@@ -15,11 +16,13 @@ import java.util.List;
 public class WaitingService {
     private final MemberRepository memberRepository;
     private final ReservationInfoCreateValidator reservationInfoCreateValidator;
+    private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public WaitingService(final MemberRepository memberRepository, final ReservationInfoCreateValidator reservationInfoCreateValidator, final WaitingRepository waitingRepository) {
+    public WaitingService(final MemberRepository memberRepository, final ReservationInfoCreateValidator reservationInfoCreateValidator, final ReservationRepository reservationRepository, final WaitingRepository waitingRepository) {
         this.memberRepository = memberRepository;
         this.reservationInfoCreateValidator = reservationInfoCreateValidator;
+        this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
     }
 
@@ -29,6 +32,9 @@ public class WaitingService {
 
         if (waitingRepository.existsByMemberAndReservationInfo(member, reservationInfo)) {
             throw new IllegalArgumentException(String.format("%s는 %s에 대한 대기가 이미 존재합니다.", member.getName(), reservationInfo.getLocalDateTimeFormat()));
+        }
+        if (reservationRepository.notExistsByReservationInfo(reservationInfo)) {
+            throw new IllegalArgumentException(String.format("%s에 대한 예약이 없습니다.",reservationInfo));
         }
         final Waiting waiting = waitingRepository.save(new Waiting(member, reservationInfo));
         return WaitingOutput.toOutput(waiting, getOrderWaitingByReservationInfo(waiting));
