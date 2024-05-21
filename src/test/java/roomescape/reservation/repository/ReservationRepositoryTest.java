@@ -36,7 +36,7 @@ class ReservationRepositoryTest {
     @DisplayName("멤버 ID를 조건으로 예약을 조회할 수 있다")
     @Test
     void should_find_reservations_by_member_id() {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(1L);
+        List<Reservation> reservations = reservationRepository.findByMemberId(1L);
         assertThat(reservations).hasSize(1);
     }
 
@@ -45,9 +45,9 @@ class ReservationRepositoryTest {
     void should_check_existence_of_reservation_when_date_and_theme_and_time_is_given() {
         assertAll(
                 () -> assertThat(
-                        reservationRepository.countByDateValueAndTime_IdAndTheme_Id(TOMORROW, 1L, 1L)).isEqualTo(1),
+                        reservationRepository.countByDateAndTimeAndTheme(TOMORROW, 1L, 1L)).isEqualTo(1),
                 () -> assertThat(
-                        reservationRepository.countByDateValueAndTime_IdAndTheme_Id(YESTERDAY, 1L, 1L)).isZero()
+                        reservationRepository.countByDateAndTimeAndTheme(YESTERDAY, 1L, 1L)).isZero()
         );
     }
 }

@@ -22,7 +22,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                     @Param("dateTo") LocalDate dateTo);
 
     @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByMember_Id(Long memberId);
+    List<Reservation> findByMemberId(Long memberId);
 
-    int countByDateValueAndTime_IdAndTheme_Id(LocalDate date, Long timeId, Long themeId);
+    @Query("""
+            SELECT COUNT(r)
+            FROM Reservation AS r
+            WHERE r.date.value = :date
+            AND r.time.id = :timeId
+            AND r.theme.id = :themeId        
+            """)
+    int countByDateAndTimeAndTheme(@Param("date") LocalDate date,
+                                   @Param("timeId") Long timeId,
+                                   @Param("themeId") Long themeId);
 }

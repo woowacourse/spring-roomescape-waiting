@@ -51,7 +51,7 @@ public class ReservationService {
     }
 
     public List<MemberReservation> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findByMember_Id(memberId)
+        return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MemberReservation::new)
                 .toList();
@@ -65,7 +65,7 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
-        int reservationCount = reservationRepository.countByDateValueAndTime_IdAndTheme_Id(request.date(),
+        int reservationCount = reservationRepository.countByDateAndTimeAndTheme(request.date(),
                 request.timeId(),
                 request.themeId());
         if (reservationCount > 0) {
