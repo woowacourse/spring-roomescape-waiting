@@ -20,8 +20,8 @@ import roomescape.member.service.MemberService;
 @RestController
 @RequestMapping("/login")
 public class MemberLoginController {
-    private final MemberService memberService;
     private final MemberAuthService memberAuthService;
+    private final MemberService memberService;
 
     public MemberLoginController(MemberAuthService memberAuthService, MemberService memberService) {
         this.memberAuthService = memberAuthService;
