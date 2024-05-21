@@ -3,6 +3,7 @@ package roomescape.application.reservation.dto.response;
 import java.time.LocalDate;
 import roomescape.application.member.dto.response.MemberResponse;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.waiting.Waiting;
 
 public record ReservationResponse(long id,
                                   MemberResponse member,
@@ -17,6 +18,16 @@ public record ReservationResponse(long id,
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
+        );
+    }
+
+    public static ReservationResponse from(Waiting waiting) {
+        return new ReservationResponse(
+                waiting.getId(),
+                MemberResponse.from(waiting.getMember()),
+                waiting.getReservation().getDate(),
+                ReservationTimeResponse.from(waiting.getReservation().getTime()),
+                ThemeResponse.from(waiting.getReservation().getTheme())
         );
     }
 }

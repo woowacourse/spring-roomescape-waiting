@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
@@ -21,9 +22,11 @@ import roomescape.presentation.auth.LoginMemberId;
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -43,6 +46,14 @@ public class ReservationController {
                                                       @RequestBody @Valid ReservationRequest request) {
         ReservationResponse response = reservationService.create(request.withMemberId(memberId));
         URI location = URI.create("/reservations/" + response.id());
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createWaiting(@LoginMemberId long memberId,
+                                                      @RequestBody @Valid ReservationRequest request) {
+        ReservationResponse response = waitingService.create(request.withMemberId(memberId));
+        URI location = URI.create("/reservations/waiting/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 

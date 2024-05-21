@@ -17,6 +17,8 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
+    Reservation findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
     @Query("""
             select r from Reservation as r
             where (:memberId is null or r.member.id = :memberId)

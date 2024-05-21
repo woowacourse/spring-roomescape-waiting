@@ -34,6 +34,36 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    @DisplayName("예약 대기를 생성한다.")
+    void createWaitingTest() {
+        long themeId = fixture.createTheme(new ThemeRequest("테마명", "테마 설명", "url")).id();
+        long timeId = fixture.createReservationTime(10, 0).id();
+        fixture.registerMember(new MemberRegisterRequest("name", "email@mail.com", "12341234"));
+        String reservationToken = fixture.loginAndGetToken("email@mail.com", "12341234");
+
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId);
+        RestAssured.given().log().all()
+                .cookie("token", reservationToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        fixture.registerMember(new MemberRegisterRequest("test", "test@mail.com", "12341234"));
+        String waitingToken = fixture.loginAndGetToken("test@mail.com", "12341234");
+
+        ReservationRequest waitingRequest = new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId);
+        RestAssured.given().log().all()
+                .cookie("token", waitingToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @Test
     @DisplayName("관리자가 예약을 삭제한다.")
     void deleteReservation() {
         long themeId = fixture.createTheme(new ThemeRequest("name", "desc", "url")).id();
