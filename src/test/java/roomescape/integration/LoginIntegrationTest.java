@@ -44,7 +44,7 @@ class LoginIntegrationTest extends IntegrationTest {
     @DisplayName("인증 정보 조회 API")
     class LoginCheck {
         @Test
-        void 토큰으로_로그인한_사용자_정보를_조회할_수_있다() {
+        void 쿠키에_토큰을_담아_로그인한_사용자_정보를_조회할_수_있다() {
             LoginCheckResponse response = RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
                     .when().get("/login/check")
@@ -55,7 +55,7 @@ class LoginIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 토큰이_존재하지_않으면_예외가_발생한다() {
+        void 쿠키에_토큰이_존재하지_않으면_예외가_발생한다() {
             RestAssured.given().log().all()
                     .when().get("/login/check")
                     .then().log().all()
@@ -63,7 +63,7 @@ class LoginIntegrationTest extends IntegrationTest {
         }
 
         @Test
-        void 토큰이_유효하지_않으면_예외가_발생한다() {
+        void 쿠키의_토큰이_유효하지_않으면_예외가_발생한다() {
             RestAssured.given().log().all()
                     .header("Cookie", "token=asdfadsfcx.safsdf.scdsafd")
                     .when().get("/login/check")
@@ -76,7 +76,7 @@ class LoginIntegrationTest extends IntegrationTest {
     @DisplayName("로그아웃 API")
     class Logout {
         @Test
-        void 토큰으로_로그아웃_할_수_있다() {
+        void 쿠키에_토큰을_담아_로그아웃_할_수_있다() {
             RestAssured.given().log().all()
                     .cookies(cookieProvider.createCookies())
                     .when().post("/logout")
