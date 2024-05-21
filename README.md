@@ -106,7 +106,7 @@ CREATE TABLE reservation_wait
 
 - [x] 어드민 예약 대기 목록 조회 view (`/admin/reservation/wait`)
 - [x] 어드민 예약 대기 목록 조회(`/admin/reservations/wait`)
-- [ ] 어드민 예약 대기 취소
+- [x] 어드민 예약 대기 취소
 - [ ] 어드민 예약 대기 승인
     - [ ] 자동 승인
         - [ ] 예약 취소가 발생하는 경우 예약 대기가 있을 때 우선순위에 따라 자동으로 예약

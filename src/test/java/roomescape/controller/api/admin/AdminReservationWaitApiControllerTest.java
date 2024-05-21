@@ -45,4 +45,18 @@ class AdminReservationWaitApiControllerTest extends BaseControllerTest {
                 .statusCode(200)
                 .body("reservationWaits.size()", is(2));
     }
+
+    @Test
+    @DisplayName("관리자가 예약 대기 목록 조회를 정상적으로 수행한다.")
+    void deleteReservationWaits_Success() {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_wait (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE + INTERVAL '1' DAY , 1, 1)");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
