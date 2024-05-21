@@ -32,4 +32,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDetailScheduleTimeId(long timeId);
 
     Optional<Reservation> findFirstByDetailIdOrderByCreatedAt(long detailId);
+
+    List<Reservation> findAllByStatus(ReservationStatus status);
 }

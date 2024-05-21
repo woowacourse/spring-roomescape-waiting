@@ -53,7 +53,6 @@ public class ReservationService {
                 reservationRequest.date());
     }
 
-    //TODO : n번째 예약 대기
     private ReservationResponse createReservation(long timeId, long themeId, long memberId, LocalDate date) {
         ReservationDate reservationDate = ReservationDate.of(date);
         ReservationTime reservationTime = findTimeById(timeId);
@@ -95,12 +94,6 @@ public class ReservationService {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.RESERVED;
-    }
-
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll().stream()
-                .map(ReservationResponse::new)
-                .toList();
     }
 
     @Transactional
@@ -150,5 +143,17 @@ public class ReservationService {
         ReservationDate dateTo = ReservationDate.of(reservationFilterRequest.dateTo());
         return reservationRepository.findBy(reservationFilterRequest.memberId(), reservationFilterRequest.themeId(),
                 dateFrom, dateTo).stream().map(ReservationResponse::new).toList();
+    }
+
+    public List<ReservationResponse> findAllReservations() {
+        return reservationRepository.findAllByStatus(ReservationStatus.RESERVED).stream()
+                .map(ReservationResponse::new)
+                .toList();
+    }
+
+    public List<ReservationResponse> findAllWaitings() {
+        return reservationRepository.findAllByStatus(ReservationStatus.WAITING).stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 }

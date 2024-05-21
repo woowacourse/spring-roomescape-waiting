@@ -53,9 +53,12 @@
     }
   ```
 
-### 모든 예약 조회
+### 모든 예약/예약 대기 조회 - 어드민
 - http method: GET
-- uri: /reservations
+- uri: /reservations?waiting={isWaiting}
+  - isWaiting: 조회 종류
+  - false(default): 예약
+  - true: 예약 대기
   - response
     ```
     HTTP/1.1 200 
@@ -80,7 +83,8 @@
               "name": "lini",
               "email": "lini@email.com",
               "role": "GUEST"
-            }
+            },
+            "status": "예약"
         }
     ]
     ```
@@ -116,7 +120,8 @@
             "name": "lini",
             "email": "lini@email.com",
             "role": "GUEST"
-          }
+          },
+          "status": "예약"
       }
   ]
   ```

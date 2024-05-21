@@ -4,10 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -158,12 +156,23 @@ class ReservationServiceTest {
                 .hasMessage("이미 예약(대기) 상태입니다.");
     }
 
-    @DisplayName("모든 예약(대기) 내역을 조회한다.")
+    @DisplayName("모든 예약 내역을 조회한다.")
     @Test
     @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-reservation.sql"})
-    void findAllExceptPastReservation() {
+    void findAllReservations() {
         //when
-        List<ReservationResponse> reservations = reservationService.findAll();
+        List<ReservationResponse> reservations = reservationService.findAllReservations();
+
+        //then
+        assertThat(reservations).hasSize(3);
+    }
+
+    @DisplayName("모든 예약 대기 내역을 조회한다.")
+    @Test
+    @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-waiting.sql"})
+    void findAllWaitings() {
+        //when
+        List<ReservationResponse> reservations = reservationService.findAllWaitings();
 
         //then
         assertThat(reservations).hasSize(3);
@@ -213,7 +222,7 @@ class ReservationServiceTest {
         reservationService.deleteById(target.getId());
 
         //then
-        assertThat(reservationService.findAll()).isEmpty();
+        assertThat(reservationService.findAllReservations()).isEmpty();
     }
 
     @DisplayName("관리자가 예약을 삭제하고, 예약 대기가 있다면 가장 우선순위가 높은 예약 대기를 예약으로 전환한다.")
