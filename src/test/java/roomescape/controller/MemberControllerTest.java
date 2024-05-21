@@ -34,11 +34,22 @@ class MemberControllerTest {
     @DisplayName("모든 사용자 조회 성공 테스트 - 사용자 총 3명")
     @Test
     void findAllMembers() {
-        //when&then
+        // when&then
         RestAssured.given().log().all()
                 .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
                 .when().get("/members")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(2));
+    }
+
+    @DisplayName("사용자 예약/예약 대기 목록 조회 테스트")
+    @Test
+    void testMethod() {
+        // when & then
+        RestAssured.given().log().all()
+                .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
+                .when().get("/members/reservations")
+                .then().log().all()
+                .assertThat().statusCode(200);
     }
 }

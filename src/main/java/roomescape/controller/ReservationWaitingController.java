@@ -26,9 +26,8 @@ public class ReservationWaitingController {
             @RequestBody @Valid ReservationRequest waitingRequest,
             @LoginMemberId long memberId
     ) {
-        ReservationWaitingResponse resepone = reservationWaitingService.create(waitingRequest, memberId);
-
-        return ResponseEntity.created(URI.create("/reservations/waiting/" + resepone.id()))
-                .body(resepone);
+        ReservationWaitingResponse response = reservationWaitingService.create(waitingRequest, memberId);
+        return ResponseEntity.created(URI.create("/reservations/waiting/" + response.id()))
+                .body(response);
     }
 }

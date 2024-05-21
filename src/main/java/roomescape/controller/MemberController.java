@@ -25,6 +25,6 @@ public class MemberController {
 
     @GetMapping("/reservations")
     public List<MemberReservationResponse> findReservations(@LoginMemberId long memberId) {
-        return memberService.findReservations(memberId);
+        return memberService.findReservations(memberId);  // TODO: reservationService 로 옮기기
     }
 }
