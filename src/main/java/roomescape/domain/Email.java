@@ -14,13 +14,13 @@ public class Email {
             "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,})$");
     private String value;
 
+    protected Email() {
+
+    }
+
     public Email(String value) {
         validateEmail(value);
         this.value = value;
-    }
-
-    public Email() {
-
     }
 
     private void validateEmail(String email) {

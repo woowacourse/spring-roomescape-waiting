@@ -28,7 +28,7 @@ public class Member {
     @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(long id, Member member) {

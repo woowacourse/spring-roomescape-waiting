@@ -12,7 +12,7 @@ public class Password {
     public static final int MIN_PASSWORD_LENGTH = 8;
     private String value;
 
-    public Password() {
+    protected Password() {
     }
 
     public Password(String value) {

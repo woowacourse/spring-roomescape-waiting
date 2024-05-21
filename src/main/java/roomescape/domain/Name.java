@@ -10,13 +10,13 @@ import roomescape.exception.RoomescapeException;
 public class Name {
     private String value;
 
+    protected Name() {
+
+    }
+
     public Name(String value) {
         validateValue(value);
         this.value = value;
-    }
-
-    public Name() {
-
     }
 
     private void validateValue(String value) {

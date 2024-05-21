@@ -35,6 +35,10 @@ public class Reservation implements Comparable<Reservation> {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
+    protected Reservation() {
+
+    }
+
     public Reservation(long id, Reservation reservationBeforeSave) {
         this(id,
                 reservationBeforeSave.date,
@@ -58,10 +62,6 @@ public class Reservation implements Comparable<Reservation> {
         this.theme = theme;
         this.member = member;
         this.status = ReservationStatus.BOOKED;
-    }
-
-    public Reservation() {
-
     }
 
     private void validateTheme(Theme theme) {
