@@ -6,16 +6,16 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
 public record ReservationWaitingResponse(
-        int rank,
+        long id,
         String name,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "kk:mm")
         LocalTime time
 ) {
-    public static ReservationWaitingResponse of(final Reservation reservation, final int rank) {
+    public static ReservationWaitingResponse from(final Reservation reservation) {
         return new ReservationWaitingResponse(
-                rank,
+                reservation.getId(),
                 reservation.getMember().getNameValue(),
                 reservation.getTheme().getThemeNameValue(),
                 reservation.getDate(),

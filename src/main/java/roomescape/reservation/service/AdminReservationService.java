@@ -96,11 +96,8 @@ public class AdminReservationService {
     public List<ReservationWaitingResponse> getAllWaitings() {
         return reservationRepository.findByStatus(Status.PENDING)
                 .stream()
-                .map(reservation -> ReservationWaitingResponse.of(
-                        reservation,
-                        reservationService.countWaitingRank(reservation)
-                ))
-                .sorted(Comparator.comparingInt(ReservationWaitingResponse::rank))
+                .map(ReservationWaitingResponse::from)
+                .sorted(Comparator.comparingLong(ReservationWaitingResponse::id))
                 .toList();
     }
 }
