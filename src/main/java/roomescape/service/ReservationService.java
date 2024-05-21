@@ -135,7 +135,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findAll() {
-        return reservationRepository.findAllByStatus(RESERVED);
+        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(RESERVED);
     }
 
     @Transactional(readOnly = true)
@@ -143,7 +143,8 @@ public class ReservationService {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetween(themeId, memberId, dateFrom, dateTo);
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateIsBetweenOrderByDateAscTimeStartAtAsc(
+            themeId, memberId, dateFrom, dateTo);
     }
 
     @Transactional(readOnly = true)
@@ -158,6 +159,6 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllStandby() {
-        return reservationRepository.findAllByStatus(STANDBY);
+        return reservationRepository.findAllByStatusOrderByDateAscTimeStartAtAsc(STANDBY);
     }
 }

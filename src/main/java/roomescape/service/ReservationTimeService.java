@@ -46,13 +46,13 @@ public class ReservationTimeService {
 
     @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
-        return reservationTimeRepository.findAll();
+        return reservationTimeRepository.findAllByOrderByStartAtAsc();
     }
 
     @Transactional(readOnly = true)
     public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
         List<Reservation> reservations =
-            reservationRepository.findAllByDateAndThemeId(date, themeId);
+            reservationRepository.findAllByDateAndThemeIdOrderByTimeStartAtAsc(date, themeId);
 
         List<ReservationTime> reservedTimes = reservations.stream()
             .map(Reservation::getTime)

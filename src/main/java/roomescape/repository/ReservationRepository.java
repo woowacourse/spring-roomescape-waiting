@@ -23,12 +23,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findByIdAndStatus(Long id, ReservationStatus status);
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndThemeIdOrderByTimeStartAtAsc(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetween(
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateIsBetweenOrderByDateAscTimeStartAtAsc(
         Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findAllByStatus(ReservationStatus status);
+    List<Reservation> findAllByStatusOrderByDateAscTimeStartAtAsc(ReservationStatus status);
 
     List<Reservation> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId);
 
@@ -45,6 +45,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         )
         FROM Reservation r
         WHERE r.member.id = :memberId
+        ORDER BY
+            r.date ASC,
+            r.time.startAt ASC
         """)
     List<ReservationWithRank> findReservationsWithRankByMemberId(Long memberId);
 }
