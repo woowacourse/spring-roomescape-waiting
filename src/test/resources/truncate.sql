@@ -1,5 +1,5 @@
 set referential_integrity false;
-truncate table waiting;
+truncate table reservation_status;
 truncate table reservation;
 truncate table theme;
 truncate table reservation_time;

@@ -10,7 +10,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "waiting")
+@Table(name = "reservation_status")
 public class ReservationStatus {
 
     @Id
