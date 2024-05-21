@@ -32,15 +32,15 @@ public class WaitingApiController {
         this.reservationDeleteService = reservationDeleteService;
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<ReservationResponse> addWaiting(@RequestBody @Valid ReservationSaveRequest request,
                                                           @AuthenticatedMember Member member) {
         Reservation newReservation = reservationCreateService.createReservation(request, member, ReservationStatus.WAITING);
-        return ResponseEntity.created(URI.create("/waiting/" + newReservation.getId()))
+        return ResponseEntity.created(URI.create("/waitings/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
 
-    @DeleteMapping("/waiting/{id}")
+    @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable
                                             @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
         reservationDeleteService.deleteReservation(id);
