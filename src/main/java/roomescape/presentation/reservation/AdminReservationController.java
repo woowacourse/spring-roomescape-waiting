@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationBookingService;
-import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.ReservationLookupService;
 import roomescape.application.reservation.dto.request.ReservationFilterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
@@ -20,12 +20,12 @@ import roomescape.application.reservation.dto.response.ReservationResponse;
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final ReservationService reservationService;
+    private final ReservationLookupService reservationLookupService;
     private final ReservationBookingService reservationBookingService;
 
-    public AdminReservationController(ReservationService reservationService,
+    public AdminReservationController(ReservationLookupService reservationLookupService,
                                       ReservationBookingService reservationBookingService) {
-        this.reservationService = reservationService;
+        this.reservationLookupService = reservationLookupService;
         this.reservationBookingService = reservationBookingService;
     }
 
@@ -42,7 +42,7 @@ public class AdminReservationController {
                                                                   @RequestParam(required = false) LocalDate startDate,
                                                                   @RequestParam(required = false) LocalDate endDate) {
         ReservationFilterRequest request = new ReservationFilterRequest(memberId, themeId, startDate, endDate);
-        List<ReservationResponse> responses = reservationService.findByFilter(request);
+        List<ReservationResponse> responses = reservationLookupService.findByFilter(request);
         return ResponseEntity.ok(responses);
     }
 }

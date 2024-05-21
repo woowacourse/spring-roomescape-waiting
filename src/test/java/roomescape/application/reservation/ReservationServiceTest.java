@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
-import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.fixture.ReservationFixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
@@ -28,7 +27,6 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @ServiceTest
-@Import(ReservationFixture.class)
 class ReservationServiceTest {
 
     @Autowired
@@ -45,9 +43,6 @@ class ReservationServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationFixture reservationFixture;
 
     @Test
     @DisplayName("정상적인 예약 요청을 받아서 저장한다.")
@@ -116,14 +111,6 @@ class ReservationServiceTest {
         assertThatCode(() -> reservationService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
-    }
-
-    @Test
-    @DisplayName("모든 예약을 조회한다.")
-    void shouldReturnReservationResponsesWhenReservationsExist() {
-        reservationFixture.saveReservation();
-        List<ReservationResponse> reservationResponses = reservationService.findAll();
-        assertThat(reservationResponses).hasSize(1);
     }
 
     @Test

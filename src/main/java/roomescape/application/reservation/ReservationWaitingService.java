@@ -25,11 +25,10 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationWaitingResponse enqueueWaitingList(ReservationRequest request) {
         Reservation reservation = reservationService.create(request);
-        ReservationStatus reservationStatus = new ReservationStatus(reservation, BookStatus.WAITING);
-        reservationStatusRepository.save(reservationStatus);
-        long waitingCount = reservationStatusRepository.getWaitingCount(
-                reservation.getTheme(), reservation.getDate(), reservation.getTime(), reservation.getCreatedAt()
+        ReservationStatus status = reservationStatusRepository.save(
+                new ReservationStatus(reservation, BookStatus.WAITING)
         );
+        long waitingCount = reservationStatusRepository.getWaitingCount(status.getReservation());
         return new ReservationWaitingResponse(
                 ReservationResponse.from(reservation),
                 waitingCount

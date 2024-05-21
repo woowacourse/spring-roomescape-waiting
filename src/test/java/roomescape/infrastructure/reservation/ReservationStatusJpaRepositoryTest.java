@@ -7,6 +7,8 @@ import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,15 +72,15 @@ class ReservationStatusJpaRepositoryTest {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
         LocalDate date = LocalDate.of(2024, 12, 25);
+        List<Reservation> reservations = new ArrayList<>();
         for (int day = 1; day <= 10; day++) {
             LocalDateTime createdAt = LocalDateTime.of(2023, 1, day, 12, 0);
             Reservation reservation = new Reservation(member, date, time, theme, createdAt);
             entityManager.persist(new ReservationStatus(reservation, BookStatus.WAITING));
+            reservations.add(reservation);
         }
 
-        long waitingCount = reservationStatusRepository.getWaitingCount(
-                theme, date, time, LocalDateTime.of(2023, 1, 5, 12, 0)
-        );
+        long waitingCount = reservationStatusRepository.getWaitingCount(reservations.get(4));
 
         assertThat(waitingCount).isEqualTo(4);
     }

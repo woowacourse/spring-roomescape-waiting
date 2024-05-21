@@ -2,14 +2,9 @@ package roomescape.application.reservation;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.reservation.dto.request.ReservationFilterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
-import roomescape.application.reservation.dto.response.ReservationResponse;
-import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -18,7 +13,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.infrastructure.reservation.ReservationSpec;
 
 @Service
 public class ReservationService {
@@ -47,34 +41,6 @@ public class ReservationService {
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
         return reservationRepository.save(reservation);
-    }
-
-    public List<ReservationResponse> findByFilter(ReservationFilterRequest request) {
-        Specification<Reservation> specification = ReservationSpec.where()
-                .equalsMemberId(request.memberId())
-                .equalsThemeId(request.themeId())
-                .greaterThanOrEqualsStartDate(request.startDate())
-                .lessThanOrEqualsEndDate(request.endDate())
-                .build();
-
-        return reservationRepository.findAll(specification)
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
-                .stream()
-                .map(ReservationStatusResponse::from)
-                .toList();
     }
 
     public boolean hasNoAccessToReservation(long memberId, long reservationId) {

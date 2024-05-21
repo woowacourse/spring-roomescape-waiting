@@ -1,7 +1,6 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface ReservationStatusRepository {
@@ -14,5 +13,5 @@ public interface ReservationStatusRepository {
 
     Optional<ReservationStatus> findFirstWaitingBy(Theme theme, LocalDate date, ReservationTime time);
 
-    long getWaitingCount(Theme theme, LocalDate date, ReservationTime time, LocalDateTime createdAt);
+    long getWaitingCount(Reservation reservation);
 }

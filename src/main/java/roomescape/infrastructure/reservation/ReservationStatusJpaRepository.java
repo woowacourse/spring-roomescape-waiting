@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.reservation.BookStatus;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationStatusRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -26,14 +27,17 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
     );
 
     @Override
-    default long getWaitingCount(Theme theme, LocalDate date, ReservationTime time, LocalDateTime createdAt) {
-        return countByReservationThemeAndReservationDateAndReservationTimeAndStatusAndReservationCreatedAtLessThan(
-                theme, date, time, BookStatus.WAITING, createdAt
+    default long getWaitingCount(Reservation reservation) {
+        return countByReservationThemeAndReservationDateAndReservationTimeAndReservationCreatedAtLessThan(
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getCreatedAt()
         );
     }
 
-    long countByReservationThemeAndReservationDateAndReservationTimeAndStatusAndReservationCreatedAtLessThan(
-            Theme theme, LocalDate date, ReservationTime time, BookStatus status, LocalDateTime createdAt
+    long countByReservationThemeAndReservationDateAndReservationTimeAndReservationCreatedAtLessThan(
+            Theme theme, LocalDate date, ReservationTime time, LocalDateTime createdAt
     );
 
     @Override

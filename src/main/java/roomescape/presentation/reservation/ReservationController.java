@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationBookingService;
-import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.ReservationLookupService;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
@@ -21,24 +21,24 @@ import roomescape.presentation.auth.LoginMemberId;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationService reservationService;
+    private final ReservationLookupService reservationLookupService;
     private final ReservationBookingService reservationBookingService;
 
-    public ReservationController(ReservationService reservationService,
+    public ReservationController(ReservationLookupService reservationLookupService,
                                  ReservationBookingService reservationBookingService) {
-        this.reservationService = reservationService;
+        this.reservationLookupService = reservationLookupService;
         this.reservationBookingService = reservationBookingService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> responses = reservationService.findAll();
+        List<ReservationResponse> responses = reservationLookupService.findAll();
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/me")
     public ResponseEntity<List<ReservationStatusResponse>> findMyReservations(@LoginMemberId long memberId) {
-        List<ReservationStatusResponse> responses = reservationService.findAllByMemberId(memberId);
+        List<ReservationStatusResponse> responses = reservationLookupService.getReservationStatusesByMemberId(memberId);
         return ResponseEntity.ok(responses);
     }
 
