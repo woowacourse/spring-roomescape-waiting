@@ -167,9 +167,8 @@ class MemberReservationTest {
                 .statusCode(400);
     }
 
-    @Disabled
     @Test
-    @DisplayName("예약을 취소한 상태에서, 예약 요청을 보내면, 예약된다")
+    @DisplayName("예약 대기를 취소한 상태에서, 예약 대기 요청을 보내면, 예약 대기된다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_canceledReservation_then_addReservation() {
         // given
@@ -180,30 +179,69 @@ class MemberReservationTest {
                 themeId, tomorrow, timeId);
 
         given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when().post("/reservations")
+                .then().log().all().statusCode(201)
+                .body("status", equalTo("RESERVED"));
+
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
-                .then().log().all().statusCode(201);
+                .then().log().all().statusCode(201)
+                .body("status", equalTo("WAITING"));
 
         // when
         given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
-                .when().delete("/reservations")
+                .when().delete("/reservations/" + 2)
                 .then().log().all().statusCode(204);
 
-        Response response = given().log().all()
+        // then
+        given().log().all()
                 .cookie("token", getToken("mangcho@woowa.net", "password"))
                 .contentType("application/json")
                 .body(requestBody)
                 .when().post("/reservations")
                 .then().log().all().statusCode(201)
-                .extract().response();
+                .body("status", equalTo("WAITING"));
+    }
 
-        // then
-        // 예약 상태인지 확인하는 로직이 필요하다
+    @Test
+    @DisplayName("다른 사람의 예약 대기가 존재하는 상태에서, 내가 다른 사람의 예약 대기 취소 요청을 보내면, 요청은 거절된다")
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_anotherWaitingReservationExists_then_canNotDeleteOthersWaitingReservation() {
+        // given
+        Long themeId = 1L;
+        Long timeId = 1L;
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
+                themeId, tomorrow, timeId);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when().post("/reservations")
+                .then().log().all().statusCode(201);
+
+        given().log().all()
+                .cookie("token", getToken("picachu@woowa.net", "password"))
+                .contentType("application/json")
+                .body(requestBody)
+                .when().post("/reservations")
+                .then().log().all().statusCode(201);
+
+        // when, then
+        given().log().all()
+                .cookie("token", getToken("mangcho@woowa.net", "password"))
+                .when().delete("/reservations/2")
+                .then().log().all().statusCode(400);
     }
 
     @Disabled
@@ -438,33 +476,6 @@ class MemberReservationTest {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
                 themeId, tomorrow, timeId);
-
-        // when, then
-        given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().delete("/reservations/1?waiting=true")
-                .then().log().all().statusCode(400);
-    }
-
-    @Disabled
-    @Test
-    @DisplayName("다른 사람의 waiting 예약을 삭제할 수 없다")
-    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/waiting-reservations.sql"})
-    void when_anotherWaitingReservationExists_then_canNotDeleteOthersWaitingReservation() {
-        // given
-        Long themeId = 1L;
-        Long timeId = 1L;
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d}",
-                themeId, tomorrow, timeId);
-
-        given().log().all()
-                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
-                .contentType("application/json")
-                .body(requestBody)
-                .when().post("/reservations")
-                .then().log().all().statusCode(201);
 
         // when, then
         given().log().all()

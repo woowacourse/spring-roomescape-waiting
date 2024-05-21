@@ -2,6 +2,7 @@ package roomescape.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -9,9 +10,17 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDetail;
 import roomescape.domain.Status;
+import roomescape.exception.reservation.NotFoundReservationException;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
     Reservation save(Reservation reservation);
+
+    default Reservation getById(Long id) {
+        return findById(id)
+                .orElseThrow(NotFoundReservationException::new);
+    }
+
+    Optional<Reservation> findById(Long id);
 
     List<Reservation> findAll();
 
@@ -29,7 +38,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             @Param("memberId") Long memberId, @Param("themeId") Long themeId
     );
 
-    boolean existsByDetailAndMember(ReservationDetail detail, Member member);
+    boolean existsByDetailAndMemberAndStatusNot(ReservationDetail detail, Member member, Status status);
 
     boolean existsByDetailAndStatus(ReservationDetail reservationDetail, Status status);
 }

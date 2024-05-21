@@ -16,8 +16,10 @@ import roomescape.domain.repository.ReservationDetailRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.exception.reservation.CancelReservationException;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
+import roomescape.service.dto.request.member.MemberInfo;
 import roomescape.service.dto.request.reservation.ReservationRequest;
 import roomescape.service.dto.request.reservation.ReservationSearchCond;
 import roomescape.service.dto.response.reservation.ReservationResponse;
@@ -56,7 +58,7 @@ public class ReservationService {
     }
 
     private void rejectDuplicateReservation(ReservationDetail detail, Member member) {
-        if (reservationRepository.existsByDetailAndMember(detail, member)) {
+        if (reservationRepository.existsByDetailAndMemberAndStatusNot(detail, member, Status.CANCELED)) {
             throw new DuplicatedReservationException();
         }
     }
@@ -95,8 +97,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
-        ReservationDetail reservationDetail = reservationDetailRepository.getById(id);
-        reservationDetailRepository.delete(reservationDetail);
+    public void cancelReservation(Long reservationId, MemberInfo memberInfo) {
+        Reservation reservation = reservationRepository.getById(reservationId);
+        rejectUnauthorizedCancel(memberInfo, reservation);
+        reservation.cancel();
+    }
+
+    private void rejectUnauthorizedCancel(MemberInfo memberInfo, Reservation reservation) {
+        if (reservation.isNotOwner(memberInfo.id())) {
+            throw new CancelReservationException();
+        }
     }
 }

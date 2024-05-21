@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import roomescape.exception.reservation.CancelReservationException;
 
 @Entity
 @Getter
@@ -48,5 +49,16 @@ public class Reservation {
 
     public Reservation(Member member, ReservationDetail detail, Status status) {
         this(null, member, detail, status, null);
+    }
+
+    public boolean isNotOwner(Long id) {
+        return this.member.getId().equals(id);
+    }
+
+    public void cancel() {
+        if (this.status == Status.RESERVED) {
+            throw new CancelReservationException();
+        }
+        this.status = Status.CANCELED;
     }
 }
