@@ -21,7 +21,7 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.UserReservationRequest;
 import roomescape.infrastructure.auth.JwtProvider;
 
-@Sql("/reservation-api-test-data.sql")
+@Sql("/member-theme-time-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationApiTest {
@@ -34,7 +34,7 @@ class ReservationApiTest {
 
     @Test
     void 사용자_예약_추가() {
-        Cookie cookieByUserLogin = getCookieByLogin(port, "test@email.com", "123456");
+        Cookie cookieByUserLogin = getCookieByLogin(port, "ted@email.com", "123456");
         String userAccessToken = cookieByUserLogin.getValue();
         String userId = jwtProvider.getSubject(userAccessToken);
 

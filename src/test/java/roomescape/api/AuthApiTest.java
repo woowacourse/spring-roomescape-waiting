@@ -23,7 +23,7 @@ import roomescape.infrastructure.auth.JwtProvider;
 @Sql("/member-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class AuthApiTest {
+class AuthApiTest {
 
     private static final String NAME = "테드";
     private static final String EMAIL = "test@email.com";
@@ -50,7 +50,7 @@ public class AuthApiTest {
 
         assertAll(
                 () -> assertThat(jwtProvider.isValidateToken(token)).isTrue(),
-                () -> assertThat(userId).isEqualTo(1)
+                () -> assertThat(userId).isEqualTo(2)
         );
     }
 

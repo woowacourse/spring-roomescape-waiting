@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.time.ReservationTime;
 
-@Sql("/repository-test-data.sql")
+@Sql("/reset-data.sql")
 @DataJpaTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationTimeRepositoryTest {

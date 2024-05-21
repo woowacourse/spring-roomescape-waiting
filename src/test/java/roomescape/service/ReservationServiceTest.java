@@ -18,7 +18,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 
-@Sql("/reservation-service-test-data.sql")
+@Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationServiceTest {
@@ -64,12 +64,13 @@ class ReservationServiceTest {
     void 날짜와_시간대와_테마가_모두_동일한_예약을_추가할_경우_예외_발생() {
         //given
         ReservationRequest reservationRequest1 = new ReservationRequest(
-                LocalDate.now().plusDays(1), 1L, 1L, 1L);
+                LocalDate.now().plusDays(3), 1L, 1L, 1L);
         reservationService.addReservation(reservationRequest1);
 
         //when, then
         ReservationRequest reservationRequest2 = new ReservationRequest(
-                LocalDate.now().plusDays(1), 1L, 1L, 2L);
+                LocalDate.now().plusDays(3), 1L, 1L, 2L);
+
         assertThatThrownBy(() -> reservationService.addReservation(reservationRequest2))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -119,9 +120,8 @@ class ReservationServiceTest {
         List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(reservationFilter);
 
         //then
-        boolean isAllMatch = reservationResponses.stream()
-                .allMatch(response -> response.member().id() == filteringUserId);
-        assertThat(isAllMatch).isTrue();
+        assertThat(reservationResponses).isNotEmpty()
+                .allMatch(r -> r.member().id().equals(filteringUserId));
     }
 
     @Sql("/reservation-filter-api-test-data.sql")
@@ -141,12 +141,11 @@ class ReservationServiceTest {
         List<ReservationResponse> reservationResponses = reservationService.getReservationsByFilter(reservationFilter);
 
         //then
-        boolean isAllMatch = reservationResponses.stream()
-                .allMatch(response ->
-                        response.theme().id() == filteringThemeId &&
-                        (response.date().isEqual(startDate) || response.date().isAfter(startDate)) &&
-                        (response.date().isEqual(endDate) || response.date().isBefore(endDate))
-                );
-        assertThat(isAllMatch).isTrue();
+        assertThat(reservationResponses).isNotEmpty()
+                .allMatch(r ->
+                r.theme().id().equals(filteringThemeId) &&
+                (r.date().isEqual(startDate) || r.date().isAfter(startDate)) &&
+                (r.date().isEqual(endDate) || r.date().isBefore(endDate))
+        );
     }
 }

@@ -16,7 +16,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 
-@Sql("/theme-service-test-data.sql")
+@Sql("/popular-theme-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ThemeServiceTest {
@@ -83,7 +83,7 @@ class ThemeServiceTest {
         List<ThemeResponse> popularThemes = themeService.getPopularThemes();
 
         //then
-        assertThat(popularThemes).hasSize(0);
+        assertThat(popularThemes).isEmpty();
     }
 
     void deleteAllReservation() {

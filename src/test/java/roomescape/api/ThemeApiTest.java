@@ -15,7 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.theme.ThemeRequest;
 
-@Sql("/theme-api-test-data.sql")
+@Sql("/reset-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ThemeApiTest {
@@ -87,7 +87,7 @@ class ThemeApiTest {
                 .statusCode(204);
     }
 
-    @Sql("/theme-service-test-data.sql")
+    @Sql("/popular-theme-test-data.sql")
     @Test
     void 인기_테마_조회() {
         given().log().all()

@@ -16,7 +16,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 
-@Sql("/reservation-time-api-test-data.sql")
+@Sql("/member-theme-time-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationTimeApiTest {
@@ -35,8 +35,8 @@ class ReservationTimeApiTest {
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(201)
-                .header("Location", "/times/1")
-                .body("id", equalTo(1))
+                .header("Location", "/times/3")
+                .body("id", equalTo(3))
                 .body("startAt", equalTo(reservationTimeRequest.startAt().toString()));
     }
 
@@ -47,10 +47,10 @@ class ReservationTimeApiTest {
 
         RestAssured.given().log().all()
                 .port(port)
-                .when().get("/times/1")
+                .when().get("/times/3")
                 .then().log().all()
                 .statusCode(200)
-                .body("id", equalTo(1))
+                .body("id", equalTo(3))
                 .body("startAt", equalTo(reservationTimeRequest.startAt().toString())
                 );
     }
@@ -65,13 +65,13 @@ class ReservationTimeApiTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(3));
     }
 
-    @Sql("/reservation-time-service-test-data.sql")
+    @Sql("/all-test-data.sql")
     @Test
     void 예약_가능한_시간_조회() {
-        String targetDay = LocalDate.now().plusDays(1).toString();
+        String targetDay = LocalDate.now().plusDays(2).toString();
 
         RestAssured.given().log().all()
                 .port(port)
@@ -94,7 +94,7 @@ class ReservationTimeApiTest {
     }
 
     private ReservationTimeRequest createReservationTimeRequest() {
-        return new ReservationTimeRequest(LocalTime.parse("11:00"));
+        return new ReservationTimeRequest(LocalTime.parse("12:00"));
     }
 
     private void addReservationTime(final ReservationTimeRequest reservationTimeRequest) {

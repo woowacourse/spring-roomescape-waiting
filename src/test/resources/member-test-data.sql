@@ -5,5 +5,6 @@ TRUNCATE TABLE theme RESTART IDENTITY;
 TRUNCATE TABLE member RESTART IDENTITY;
 SET REFERENTIAL_INTEGRITY TRUE;
 
-INSERT INTO member(name, email, password, role) VALUES
-('테드', 'test@email.com', '1450575459', 'USER');
+INSERT INTO member(name, email, password, role)
+VALUES ('어드민', 'admin@email.com', '1450575459', 'ADMIN'),
+       ('테드', 'test@email.com', '1450575459', 'USER');

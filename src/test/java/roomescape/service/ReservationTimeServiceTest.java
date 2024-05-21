@@ -17,7 +17,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 
-@Sql("/reservation-time-service-test-data.sql")
+@Sql("/all-test-data.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationTimeServiceTest {
@@ -71,11 +71,7 @@ class ReservationTimeServiceTest {
                 1L
         );
 
-        List<Long> availableTimeIds = availableTimes.stream()
-                .map(ReservationTimeResponse::id)
-                .toList();
-
         //then
-        assertThat(availableTimeIds).containsExactlyInAnyOrder(3L, 5L);
+        assertThat(availableTimes).extracting(ReservationTimeResponse::id).containsOnly(3L);
     }
 }
