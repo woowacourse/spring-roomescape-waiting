@@ -17,7 +17,9 @@ public class ThemeRequest {
     }
 
     private void validate(String name, String description, String thumbnail) {
-        if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
+        if (name == null || name.isBlank() ||
+                description == null || description.isBlank() ||
+                thumbnail == null || thumbnail.isBlank()) {
             throw new InvalidRequestBodyException();
         }
     }

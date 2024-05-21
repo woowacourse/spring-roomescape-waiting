@@ -29,7 +29,9 @@ public class ReservationRequest {
     }
 
     public void validate(String date, String timeId, String themeId) {
-        if (date == null || timeId == null || themeId == null) {
+        if (date == null || date.isBlank() ||
+                timeId == null || timeId.isBlank() ||
+                themeId == null || themeId.isBlank()) {
             throw new InvalidRequestBodyException();
         }
         try {

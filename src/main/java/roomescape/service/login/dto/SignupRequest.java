@@ -20,7 +20,9 @@ public class SignupRequest {
     }
 
     private void validate(String email, String password, String name) {
-        if (email.isBlank() || password.isBlank() || name.isBlank()) {
+        if (email == null || email.isBlank() ||
+                password == null || password.isBlank() ||
+                name == null || name.isBlank()) {
             throw new InvalidRequestBodyException();
         }
     }
