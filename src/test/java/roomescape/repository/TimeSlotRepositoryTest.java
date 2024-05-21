@@ -1,50 +1,43 @@
 package roomescape.repository;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
+@DataJpaTest
 class TimeSlotRepositoryTest {
-
-    @LocalServerPort
-    private int port;
 
     @Autowired
     private TimeSlotRepository timeSlotRepository;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @DisplayName("해당 startAt과 동일한 시간대가 이미 존재하는지 확인한다.")
+    @DisplayName("해당 startAt과 동일한 시간대가 존재한다면 true를 반환한다.")
     @Test
-    void existsByStartAt() {
+    void existsByStartAt_isTrue() {
         //given
         LocalTime alreadyExistingTime = LocalTime.of(0, 0);
+
+        //when
+        boolean isTimeSlotExists_true = timeSlotRepository.existsByStartAt(alreadyExistingTime);
+
+        //then
+        assertThat(isTimeSlotExists_true).isTrue();
+    }
+
+    @DisplayName("해당 startAt과 동일한 시간대가 존재하지 않으면 false를 반환한다.")
+    @Test
+    void existsByStartAt_isFalse() {
+        //given
         LocalTime notExistingTime = LocalTime.of(23, 59);
 
-        // when
-        boolean isTimeSlotExists_true = timeSlotRepository.existsByStartAt(alreadyExistingTime);
+        //when
         boolean isTimeSlotExists_false = timeSlotRepository.existsByStartAt(notExistingTime);
 
-        assertAll(
-                ()-> assertThat(isTimeSlotExists_true).isTrue(),
-                ()-> assertThat(isTimeSlotExists_false).isFalse()
-        );
+        //then
+        assertThat(isTimeSlotExists_false).isFalse();
     }
 }

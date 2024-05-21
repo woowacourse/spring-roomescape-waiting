@@ -1,14 +1,9 @@
 package roomescape.repository;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.*;
 
 import java.time.LocalDate;
@@ -16,15 +11,10 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location=classpath:/application.properties"})
+@DataJpaTest
 class ReservationRepositoryTest {
 
-    @LocalServerPort
-    private int port;
     private final Member adminMember =
             new Member((long) 1, "어드민", "testDB@email.com", "1234", Role.ADMIN);
     private final Member userMember =
@@ -42,11 +32,6 @@ class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @DisplayName("member를 기준으로 해당 member의 모든 예약 목록을 조회한다.")
     @Test
@@ -80,44 +65,65 @@ class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
     }
 
-    @DisplayName("해당 theme에 예약이 존재하는지 확인한다.")
+    @DisplayName("해당 theme에 예약이 존재하면 true를 반환한다.")
     @Test
-    void existsByTheme() {
+    void existsByTheme_isTrue() {
         //given, when
         boolean isReservationExistsAtThemeOne = reservationRepository.existsByTheme(themeOne);
+
+        //then
+        assertThat(isReservationExistsAtThemeOne).isTrue();
+    }
+
+    @DisplayName("해당 theme에 예약이 존재하지 않으면 false를 반환한다.")
+    @Test
+    void existsByTheme_isFalse() {
+        //given, when
         boolean isReservationExistsAtThemeTwo = reservationRepository.existsByTheme(themeTwo);
 
-        assertAll(
-                ()-> assertThat(isReservationExistsAtThemeOne).isTrue(),
-                ()-> assertThat(isReservationExistsAtThemeTwo).isFalse()
-        );
+        //then
+        assertThat(isReservationExistsAtThemeTwo).isFalse();
     }
 
-    @DisplayName("해당 time에 예약이 존재하는지 확인한다.")
+    @DisplayName("해당 time에 예약이 존재하면 true를 반환한다.")
     @Test
-    void existsByTime() {
+    void existsByTime_isTrue() {
         //given, when
         boolean isReservationExistsAtTimeOne = reservationRepository.existsByTime(timeOne);
-        boolean isReservationExistsAtTimeTwo = reservationRepository.existsByTime(timeTwo);
 
-        assertAll(
-                ()-> assertThat(isReservationExistsAtTimeOne).isTrue(),
-                ()-> assertThat(isReservationExistsAtTimeTwo).isFalse()
-        );
+        //then
+        assertThat(isReservationExistsAtTimeOne).isTrue();
     }
 
-    @DisplayName("해당 date와 theme와 time에 해당하는 예약이 존재하는지 확인한다.")
+    @DisplayName("해당 time에 예약이 존재하지 않으면 false를 반환한다.")
     @Test
-    void existsByDateAndTimeAndTheme() {
+    void existsByTime_isFalse() {
+        //given, when
+        boolean isReservationExistsAtTimeTwo = reservationRepository.existsByTime(timeTwo);
+
+        //then
+       assertThat(isReservationExistsAtTimeTwo).isFalse();
+    }
+
+    @DisplayName("해당 date와 theme와 time에 해당하는 예약이 존재하면 true를 반환한다.")
+    @Test
+    void existsByDateAndTimeAndTheme_isTrue() {
         //given, when
         boolean isReservationExists_true = reservationRepository
                 .existsByDateAndTimeAndTheme(fromDate, timeOne, themeOne);
-        boolean isReservationExists_false = reservationRepository
+
+        //then
+        assertThat(isReservationExists_true).isTrue();
+    }
+
+    @DisplayName("해당 date와 theme와 time에 해당하는 예약이 존재하지 않으면 false를 반환한다.")
+    @Test
+    void existsByDateAndTimeAndTheme_isFalse() {
+        //given, when
+       boolean isReservationExists_false = reservationRepository
                 .existsByDateAndTimeAndTheme(fromDate, timeTwo, themeTwo);
 
-        assertAll(
-                ()-> assertThat(isReservationExists_true).isTrue(),
-                ()-> assertThat(isReservationExists_false).isFalse()
-        );
+        //then
+        assertThat(isReservationExists_false).isFalse();
     }
 }
