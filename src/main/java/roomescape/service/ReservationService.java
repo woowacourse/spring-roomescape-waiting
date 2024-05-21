@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -44,7 +45,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Member member = findMemberById(reservationSaveRequest.memberId());
         ReservationSlot slot = reservationSlotService.findSlot(reservationSaveRequest.toSlotRequest());
