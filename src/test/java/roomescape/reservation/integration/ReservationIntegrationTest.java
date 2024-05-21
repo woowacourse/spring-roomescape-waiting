@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
@@ -15,8 +16,52 @@ import roomescape.reservation.dto.ReservationRequest;
 class ReservationIntegrationTest extends IntegrationTest {
 
     @Test
-    @DisplayName("정상적인 요청에 대하여 예약을 정상적으로 등록, 조회, 삭제한다.")
-    void adminReservationPageWork() {
+    @DisplayName("예약을 정상적으로 조회한다.")
+    void reservationList() {
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(3));
+    }
+
+    @Test
+    @DisplayName("예약을 정상적으로 저장한다.")
+    void reservationSave() {
+        Token token = tokenProvider.getAccessToken(1);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(TODAY.plusDays(1), 2L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("이미 예약한 방탈출을 대기하는 경우 에러가 발생한다.")
+    void duplicateReservationWaiting() {
+        Token token = tokenProvider.getAccessToken(1);
+        ResponseCookie cookie = CookieProvider.setCookieFrom(token);
+
+        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(2024, 4, 30), 1L, 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie.toString())
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 정상적으로 저장한다.")
+    void reservationWaitingSave() {
         Token token = tokenProvider.getAccessToken(1);
         ResponseCookie cookie = CookieProvider.setCookieFrom(token);
 
@@ -26,26 +71,18 @@ class ReservationIntegrationTest extends IntegrationTest {
                 .contentType(ContentType.JSON)
                 .cookie(cookie.toString())
                 .body(reservationRequest)
-                .when().post("/reservations")
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201);
+    }
 
+    @Test
+    @DisplayName("예약을 정상적으로 삭제한다.")
+    void reservationDelete() {
         RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(4));
-
-        RestAssured.given().log().all()
-                .when().delete("/reservations/3")
+                .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
-
-        RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3));
     }
 
     @Test

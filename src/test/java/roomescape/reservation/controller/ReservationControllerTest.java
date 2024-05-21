@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.member.domain.Member;
 import roomescape.model.ControllerTest;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.service.ReservationService;
@@ -33,7 +34,7 @@ class ReservationControllerTest extends ControllerTest {
     private final Reservation reservation = Reservation.of(TOMORROW,
             Time.from(LocalTime.of(10, 0)),
             Theme.of("polla", "폴라 방탈출", "이미지~"),
-            Member.of("polla@gmail.com", "password99"));
+            Member.of("polla@gmail.com", "password99"), ReservationStatus.RESERVED);
     private final String expectedStartAt = "10:00:00";
 
     @Autowired

@@ -14,7 +14,7 @@ public interface TimeRepository extends Repository<Time, Long> {
 
     Optional<Time> findByStartAt(LocalTime startAt);
 
-    Optional<Time> findById(Long id);
+    Optional<Time> findById(long id);
 
-    void deleteById(Long timeId);
+    void deleteById(long timeId);
 }
