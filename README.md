@@ -41,7 +41,7 @@
 
 ### 4단계
 
-- [ ] GET `/admin/waiting` 요청 시 `/admin/waiting.html`을 반환합니다.
+- [x] GET `/admin/waiting` 요청 시 `/admin/waiting.html`을 반환합니다.
 - [ ] 어드민에서 예약 대기 관리 기능을 구현하세요.
     - [ ] 어드민은 예약 대기 목록을 조회할 수 있다.
     - [ ] 어드민은 예약 대기를 취소시킬 수 있다.
