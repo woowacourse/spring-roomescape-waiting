@@ -1,4 +1,4 @@
-package roomescape.exception.model;
+package roomescape.exception;
 
 import org.springframework.http.HttpStatus;
 
@@ -15,6 +15,7 @@ public class RoomEscapeException extends RuntimeException {
         return exceptionCode.getHttpStatus();
     }
 
+    @Override
     public String getMessage() {
         return exceptionCode.getMessage();
     }

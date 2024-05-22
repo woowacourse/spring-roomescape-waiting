@@ -4,13 +4,13 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.exception.model.RoomEscapeException;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.exception.RoomEscapeException;
+import roomescape.registration.reservation.domain.Reservation;
+import roomescape.registration.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.exception.model.ReservationTimeExceptionCode;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Service

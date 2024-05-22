@@ -7,8 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.model.RoomEscapeException;
-import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.exception.RoomEscapeException;
+import roomescape.exception.model.ReservationTimeExceptionCode;
 
 @Entity
 public class ReservationTime {

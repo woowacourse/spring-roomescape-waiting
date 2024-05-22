@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.model.RoomEscapeException;
-import roomescape.member.exception.MemberExceptionCode;
+import roomescape.exception.RoomEscapeException;
+import roomescape.exception.model.MemberExceptionCode;
+import roomescape.member.domain.MemberRole;
 
 class MemberRoleTest {
 

@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.model.RoomEscapeException;
-import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.exception.RoomEscapeException;
+import roomescape.exception.model.ReservationTimeExceptionCode;
 
 class ReservationTimeTest {
 

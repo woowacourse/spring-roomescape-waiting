@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.dto.ReservationWaitingResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.registration.dto.RegistrationInfo;
+import roomescape.registration.reservation.service.ReservationService;
 
 @RestController
 public class MemberController {
@@ -26,7 +26,8 @@ public class MemberController {
     }
 
     @GetMapping("/member/reservations")
-    public List<ReservationWaitingResponse> memberReservationList(@LoginMemberId long id) {
+    public List<RegistrationInfo> memberReservationList(@LoginMemberId long id) {
+
         return reservationService.findMemberReservations(id);
     }
 }

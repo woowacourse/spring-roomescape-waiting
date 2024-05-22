@@ -1,7 +1,7 @@
-package roomescape.member.exception;
+package roomescape.exception.model;
 
 import org.springframework.http.HttpStatus;
-import roomescape.exception.model.ExceptionCode;
+import roomescape.exception.ExceptionCode;
 
 public enum MemberExceptionCode implements ExceptionCode {
 

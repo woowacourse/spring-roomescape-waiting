@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.auth.annotation.Auth;
-import roomescape.member.role.MemberRole;
+import roomescape.member.domain.MemberRole;
 
 @Controller
 @Auth(roles = MemberRole.ADMIN)

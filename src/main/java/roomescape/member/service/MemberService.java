@@ -2,13 +2,13 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberLoginCheckResponse;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.exception.MemberExceptionCode;
+import roomescape.exception.model.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.role.MemberRole;
+import roomescape.member.domain.MemberRole;
 
 @Service
 public class MemberService {

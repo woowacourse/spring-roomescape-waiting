@@ -13,14 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.role.MemberRole;
+import roomescape.member.domain.MemberRole;
 import roomescape.vo.Name;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.registration.reservation.domain.Reservation;
+import roomescape.registration.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeExceptionCode;
+import roomescape.exception.model.ThemeExceptionCode;
 import roomescape.reservationtime.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)

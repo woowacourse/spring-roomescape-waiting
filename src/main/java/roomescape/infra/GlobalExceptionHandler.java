@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.exception.global.GlobalExceptionCode;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

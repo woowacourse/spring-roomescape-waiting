@@ -3,7 +3,7 @@ package roomescape.vo;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.regex.Pattern;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.exception.global.NameExceptionCode;
 
 @Embeddable

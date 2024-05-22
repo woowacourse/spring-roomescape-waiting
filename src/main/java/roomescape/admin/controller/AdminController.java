@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
 import roomescape.auth.annotation.Auth;
-import roomescape.member.role.MemberRole;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.member.domain.MemberRole;
+import roomescape.registration.reservation.dto.ReservationResponse;
+import roomescape.registration.reservation.service.ReservationService;
 
 @RestController
 @Auth(roles = MemberRole.ADMIN)

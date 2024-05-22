@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.registration.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,22 +6,22 @@ import org.springframework.stereotype.Service;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.ReservationFilterRequest;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.exception.MemberExceptionCode;
+import roomescape.exception.model.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
-import roomescape.reservation.dto.ReservationWaitingResponse;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeExceptionCode;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.registration.dto.RegistrationInfo;
+import roomescape.registration.reservation.domain.Reservation;
+import roomescape.registration.reservation.dto.ReservationRequest;
+import roomescape.registration.reservation.dto.ReservationResponse;
+import roomescape.registration.reservation.dto.ReservationTimeAvailabilityResponse;
+import roomescape.registration.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.exception.ReservationTimeExceptionCode;
+import roomescape.exception.model.ReservationTimeExceptionCode;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.exception.model.ThemeExceptionCode;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
@@ -31,8 +31,11 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
+                              MemberRepository memberRepository)
+    {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -92,11 +95,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationWaitingResponse> findMemberReservations(long id) {
+    public List<RegistrationInfo> findMemberReservations(long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-                .map(ReservationWaitingResponse::from)
+                .map(RegistrationInfo::from)
                 .toList();
     }
 

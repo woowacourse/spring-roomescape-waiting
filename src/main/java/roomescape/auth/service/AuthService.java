@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.domain.Token;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.provider.model.TokenProvider;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.member.exception.MemberExceptionCode;
+import roomescape.exception.model.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
 
 @Service

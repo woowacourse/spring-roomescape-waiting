@@ -1,9 +1,9 @@
-package roomescape.reservation.repository;
+package roomescape.registration.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.repository.Repository;
-import roomescape.reservation.domain.Reservation;
+import roomescape.registration.reservation.domain.Reservation;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
 

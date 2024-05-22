@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.registration.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,9 +10,9 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.model.RoomEscapeException;
+import roomescape.exception.model.ReservationExceptionCode;
+import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.exception.ReservationExceptionCode;
 import roomescape.theme.domain.Theme;
 import roomescape.reservationtime.domain.ReservationTime;
 
