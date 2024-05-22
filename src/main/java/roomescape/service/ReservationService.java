@@ -80,6 +80,14 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    public List<MemberReservation> findMemberReservations(Member member) {
+        return reservationRepository.findMemberReservation(member.getId());
+    }
+
+    public List<Reservation> findWaitingReservations() {
+        return reservationRepository.findAllReservationByStatus(PENDING);
+    }
+
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
@@ -96,10 +104,6 @@ public class ReservationService {
         if (countReservation > 0) {
             throw new DuplicatedException("이미 해당 시간에 예약이 존재합니다.");
         }
-    }
-
-    public List<MemberReservation> findMemberReservations(Member member) {
-        return reservationRepository.findMemberReservation(member.getId());
     }
 
     private void validateDuplicatedPendingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {

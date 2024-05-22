@@ -31,7 +31,7 @@ class ReservationIntegrationTest {
                 .assertThat()
                 .statusCode(200)
                 .and()
-                .body("size()", equalTo(6));
+                .body("size()", equalTo(8));
     }
 
     @DisplayName("예약을 검색한다.")
@@ -131,6 +131,22 @@ class ReservationIntegrationTest {
                 .assertThat()
                 .statusCode(201)
                 .header("Location", response -> equalTo("/reservations/" + response.path("id")));
+    }
+
+    @DisplayName("관리자는 대기상태의 예약을 조회할 수 있다.")
+    @Test
+    void should_find_waiting_reservations() {
+        String cookie = createCookie("2222", "pobi@email.com");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .body("size()", equalTo(2));
     }
 
     private String createCookie(String password, String email) {

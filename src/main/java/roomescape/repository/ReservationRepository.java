@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import roomescape.model.Member;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationStatus;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.service.dto.MemberReservation;
@@ -60,5 +61,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             WHERE m.id = :memberId
             """)
     List<MemberReservation> findMemberReservation(@Param("memberId") Long memberId);
+
+    List<Reservation> findAllReservationByStatus(ReservationStatus status);
 
 }

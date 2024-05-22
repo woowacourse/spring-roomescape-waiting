@@ -323,4 +323,28 @@ class ReservationServiceTest {
 
         assertThat(reservations).hasSize(2);
     }
+
+    @DisplayName("모든 예약 대기 목록을 반환한다.")
+    @Test
+    void should_find_all_waiting_reservations() {
+        LocalDate date = now().plusDays(2);
+
+        Theme theme1 = themeRepository.findById(1L).get();
+        Theme theme2 = themeRepository.findById(2L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        Member member = memberRepository.findById(1L).orElseThrow();
+
+        reservationRepository.save(new Reservation(1L, date, PENDING, reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now(), PENDING, reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(3L, date, ACCEPT, reservationTime, theme2, member));
+
+        List<Reservation> waitingReservations = reservationService.findWaitingReservations();
+
+        assertSoftly(assertions -> {
+            assertions.assertThat(waitingReservations).hasSize(2);
+            assertions.assertThat(waitingReservations).extracting("status")
+                    .containsExactly(PENDING, PENDING);
+        });
+    }
 }
