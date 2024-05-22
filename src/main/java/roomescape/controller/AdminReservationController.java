@@ -56,4 +56,10 @@ public class AdminReservationController {
         List<ReservationWaitingResponse> totalWaiting = reservationWaitingService.findAll();
         return ResponseEntity.ok().body(totalWaiting);
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> refuseReservationWaiting(@PathVariable("id") long waitingId) {
+        reservationWaitingService.deleteById(waitingId);
+        return ResponseEntity.noContent().build();
+    }
 }

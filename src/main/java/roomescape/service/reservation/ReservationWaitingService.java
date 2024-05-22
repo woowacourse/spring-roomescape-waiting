@@ -91,10 +91,14 @@ public class ReservationWaitingService {
         }
     }
 
+    public void deleteById(long waitingId) {
+        reservationWaitingRepository.deleteById(waitingId);
+    }
+
     public void deleteById(long waitingId, long memberId) {
         reservationWaitingRepository.findById(waitingId)
                 .ifPresent(waiting -> validateAuthority(waiting, memberId));
-        reservationWaitingRepository.deleteById(waitingId);
+        deleteById(waitingId);
     }
 
     private void validateAuthority(ReservationWaiting waiting, long memberId) {
