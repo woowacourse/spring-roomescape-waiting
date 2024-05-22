@@ -8,30 +8,34 @@ import roomescape.domain.reservation.ReservationTime;
 public class WaitingReservationResponse {
 
     private final long id;
-    private final String name;
+    private final String memberName;
     private final String theme;
     private final String date;
     private final String startAt;
 
     @JsonCreator(mode = Mode.PROPERTIES)
-    public WaitingReservationResponse(long id, String name, String theme, String date, String startAt) {
+    public WaitingReservationResponse(long id, String memberName, String theme, String date, String startAt) {
         this.id = id;
-        this.name = name;
+        this.memberName = memberName;
         this.theme = theme;
         this.date = date;
         this.startAt = startAt;
     }
 
-    public WaitingReservationResponse(long id, String name, String theme, LocalDate date, ReservationTime startAt) {
-        this(id, name, theme, date.toString(), startAt.getStartAt().toString());
+    public WaitingReservationResponse(long id,
+                                      String memberName,
+                                      String theme,
+                                      LocalDate date,
+                                      ReservationTime startAt) {
+        this(id, memberName, theme, date.toString(), startAt.getStartAt().toString());
     }
 
     public long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getMemberName() {
+        return memberName;
     }
 
     public String getTheme() {
