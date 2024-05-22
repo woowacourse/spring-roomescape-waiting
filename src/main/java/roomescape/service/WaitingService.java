@@ -69,8 +69,7 @@ public class WaitingService {
     public void deleteWaiting(final long id, final long memberId) {
         final Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotExistException(WAITING, id));
-        if (waiting.getMember()
-                .isEqualId(memberId)) {
+        if (waiting.isEqualMemberId(memberId)) {
             waitingRepository.deleteById(id);
             return;
         }

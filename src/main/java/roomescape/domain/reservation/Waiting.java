@@ -28,13 +28,17 @@ public class Waiting {
 
     }
 
+    public Waiting(final Member member, final ReservationInfo reservationInfo) {
+        this.member = member;
+        this.reservationInfo = reservationInfo;
+    }
+
     public Reservation toReservation() {
         return new Reservation(member, reservationInfo);
     }
 
-    public Waiting(final Member member, final ReservationInfo reservationInfo) {
-        this.member = member;
-        this.reservationInfo = reservationInfo;
+    public boolean isEqualMemberId(final long memberId){
+        return this.member.isEqualId(memberId);
     }
 
     public Long getId() {
