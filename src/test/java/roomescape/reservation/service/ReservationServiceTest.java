@@ -111,7 +111,6 @@ class ReservationServiceTest {
     void should_throw_exception_when_request_with_past_date() {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(MEMBER_ID_1));
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(RESERVATION_TIME_10_00_ID_1));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(THEME_1));
 
         assertThatThrownBy(
                 () -> reservationService.saveMemberReservation(1L,
@@ -122,7 +121,6 @@ class ReservationServiceTest {
     @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약이 미리 존재하는 경우 예외가 발생한다")
     @Test
     void should_throw_exception_when_reserve_date_and_time_and_theme_duplicated() {
-        when(memberRepository.findById(1L)).thenReturn(Optional.of(MEMBER_ID_1));
         when(reservationRepository.existsByDateValueAndTimeIdAndThemeId(TOMORROW, 1L, 1L)).thenReturn(true);
 
         assertThatThrownBy(

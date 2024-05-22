@@ -51,8 +51,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, Status.RESERVED);
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
+        this(null, member, date, time, theme, status);
     }
 
     public Reservation(Long id, Reservation reservation) {
@@ -62,12 +62,8 @@ public class Reservation {
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                Status.RESERVED
+                reservation.getStatus()
         );
-    }
-
-    public boolean isDateBefore(LocalDate target) {
-        return date.isBefore(target);
     }
 
     public Long getId() {

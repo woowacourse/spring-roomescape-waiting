@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DuplicateSaveException;
@@ -10,6 +12,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.MemberReservationStatusResponse;
 import roomescape.reservation.dto.ReservationResponse;
@@ -58,27 +61,32 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
-
-        return saveMemberReservation(member, request);
-    }
-
-    public ReservationResponse saveMemberReservation(Member member, MemberReservationAddRequest request) {
         if (reservationRepository.existsByDateValueAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId())) {
-            throw new DuplicateSaveException("중복되는 예약이 존재합니다");
+            throw new DuplicateSaveException("중복되는 예약이 존재합니다.");
         }
 
-        ReservationTime reservationTime = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
-
-        Reservation reservation = request.toReservation(member, reservationTime, theme);
-        if (reservation.isDateBefore(LocalDate.now())) {
-            throw new IllegalReservationDateException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
-        }
+        Reservation reservation = makeReservationForSave(memberId, request);
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
+    }
+
+    private Reservation makeReservationForSave(Long memberId, MemberReservationAddRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
+        ReservationTime reservationTime = getReservationTime(request.timeId());
+        validateReservingPastTime(request.date(), reservationTime.getStartAt());
+        Theme theme = getTheme(request.themeId());
+        return new Reservation(member, request.date(), reservationTime, theme, Status.RESERVED);
+    }
+
+    private void validateReservingPastTime(LocalDate date, LocalTime time) {
+        LocalDate nowDate = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalTime nowTime = LocalTime.now(ZoneId.of("Asia/Seoul"));
+        if (date.isBefore(nowDate) || (date.isEqual(nowDate) && time.isBefore(nowTime))) {
+            throw new IllegalReservationDateException(
+                    nowDate + " " + nowTime + ": 예약 날짜와 시간은 현재 보다 이전일 수 없습니다");
+        }
     }
 
     private ReservationTime getReservationTime(long timeId) {
