@@ -3,6 +3,7 @@ TRUNCATE TABLE reservation RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 TRUNCATE TABLE member RESTART IDENTITY;
+TRUNCATE TABLE waiting RESTART IDENTITY;
 SET REFERENTIAL_INTEGRITY TRUE;
 
 INSERT INTO member(name, email, password, role) VALUES
@@ -18,3 +19,6 @@ INSERT INTO reservation_time (start_at) VALUES
 INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES
     (CURRENT_DATE() - INTERVAL '1' DAY, 1, 1, 1),
     (CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 1);
+
+INSERT INTO waiting (reservation_id, member_id) VALUES
+    (2, 2);
