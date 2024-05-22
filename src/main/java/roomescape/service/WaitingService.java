@@ -3,11 +3,13 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
@@ -19,21 +21,32 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(final WaitingRepository waitingRepository,
-                          final MemberRepository memberRepository) {
+                          final MemberRepository memberRepository,
+                          final ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationResponse create(final Waiting waiting) {
         validateDate(waiting.getDate());
-        boolean duplicated = waitingRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(
+        final boolean duplicated = waitingRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(
                 waiting.getDate(), waiting.getTimeId(), waiting.getThemeId(), waiting.getMemberId());
         if (duplicated) {
             throw new IllegalArgumentException("이미 예약 대기가 있습니다.");
         }
-        Waiting saved = waitingRepository.save(waiting);
+
+        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+                waiting.getDate(), waiting.getTimeId(), waiting.getThemeId());
+        if (isReserved) {
+            final Waiting saved = waitingRepository.save(waiting);
+            return ReservationResponse.from(saved);
+        }
+        final Reservation reservation = waiting.toReservation();
+        final Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
     }
 

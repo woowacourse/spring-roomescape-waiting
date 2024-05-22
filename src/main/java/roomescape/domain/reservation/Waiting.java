@@ -47,6 +47,10 @@ public class Waiting {
         this.theme = theme;
     }
 
+    public Reservation toReservation() {
+        return new Reservation(member, date, time, theme);
+    }
+
     public boolean isNotReservedBy(Member member) {
         return this.member != member;
     }

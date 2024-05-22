@@ -79,15 +79,15 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("동일 시간대의 예약 건수를 조회한다.")
+    @DisplayName("동일 시간대의 예약이 존재한다면 참이다.")
     void countByDateAndTime() {
         // when
-        final int actual = reservationRepository.countByDateAndTime_IdAndTheme_Id(
+        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
                 DATE_MAY_EIGHTH, reservationTime.getId(), theme.getId()
         );
 
         // then
-        assertThat(actual).isEqualTo(1);
+        assertThat(isReserved).isTrue();
     }
 
     @Test

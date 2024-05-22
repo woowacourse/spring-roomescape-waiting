@@ -7,7 +7,6 @@ import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,35 +15,28 @@ import java.util.List;
 @Transactional
 public class ReservationService {
 
-    private static final int MAX_RESERVATIONS_PER_TIME = 1;
-
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository, final WaitingRepository waitingRepository) {
+    public ReservationService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse create(final Reservation reservation) {
         validateDate(reservation.getDate());
 
-        final int count = reservationRepository.countByDateAndTime_IdAndTheme_Id(
-                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId()
-        );
-        validateDuplicatedReservation(count);
-        return ReservationResponse.from(reservationRepository.save(reservation));
+        final boolean isReserved = reservationRepository.existsByDateAndTime_IdAndTheme_Id(
+                reservation.getDate(), reservation.getReservationTimeId(), reservation.getThemeId());
+        if (isReserved) {
+            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
+        }
+
+        final Reservation saved = reservationRepository.save(reservation);
+        return ReservationResponse.from(saved);
     }
 
     private void validateDate(final LocalDate date) {
         if (LocalDate.now().isAfter(date) || LocalDate.now().equals(date)) {
             throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
-    }
-
-    private void validateDuplicatedReservation(final int count) {
-        if (count >= MAX_RESERVATIONS_PER_TIME) {
-            throw new IllegalArgumentException("해당 시간대에 예약이 모두 찼습니다.");
         }
     }
 

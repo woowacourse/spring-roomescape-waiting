@@ -83,8 +83,8 @@ class ReservationServiceTest {
         // given
         final Theme theme = THEME_COMIC(1L);
         final Reservation reservation = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
-        given(reservationRepository.countByDateAndTime_IdAndTheme_Id(DATE_MAY_EIGHTH, RESERVATION_TIME_SIX().getId(), theme.getId()))
-                .willReturn(1);
+        given(reservationRepository.existsByDateAndTime_IdAndTheme_Id(DATE_MAY_EIGHTH, RESERVATION_TIME_SIX().getId(), theme.getId()))
+                .willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(reservation))
