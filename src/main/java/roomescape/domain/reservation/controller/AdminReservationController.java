@@ -43,4 +43,11 @@ public class AdminReservationController {
         List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
         return ResponseEntity.ok(reservationResponses);
     }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservationList() {
+        List<Reservation> reservations = reservationService.findWaitingReservations();
+        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
+        return ResponseEntity.ok(reservationResponses);
+    }
 }

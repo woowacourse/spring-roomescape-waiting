@@ -53,57 +53,25 @@
 </nav>
 
 <div class="content-container">
-    <h2 class="content-container-title">방탈출 예약 페이지</h2>
-    <div class="d-flex">
-        <div class="table-container flex-grow-1 mr-3">
-            <div class="table-header d-flex justify-content-end">
-                <button id="add-button" class="btn btn-custom mb-2">예약 추가</button>
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>예약번호</th>
-                    <th>예약자</th>
-                    <th>테마</th>
-                    <th>날짜</th>
-                    <th>시간</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody id="table-body">
-                </tbody>
-            </table>
-        </div>
-        <div class="filter-section ml-3">
-            <form id="filter-form">
-                <div class="form-group">
-                    <label for="member">예약자</label>
-                    <select type="text" id="member" name="member" class="form-control">
-                        <option style="display:none"></option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="theme">테마</label>
-                    <select type="text" id="theme" name="theme" class="form-control">
-                        <option style="display:none"></option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="date-from">From</label>
-                    <input type="date" id="date-from" name="date-from" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label for="date-to">To</label>
-                    <input type="date" id="date-to" name="date-to" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary float-right">적용</button>
-            </form>
-        </div>
-    </div>
+    <h2 class="content-container-title">예약 대기 관리 페이지</h2>
+    <div class="table-container"/>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">예약대기 번호</th>
+            <th scope="col">예약자</th>
+            <th scope="col">테마</th>
+            <th scope="col">날짜</th>
+            <th scope="col">시간</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
 </div>
 
-
 <script src="/js/user-scripts.js"></script>
-<script src="/js/reservation-with-member.js"></script>
+<script src="/js/waiting.js"></script>
 </body>
 </html>

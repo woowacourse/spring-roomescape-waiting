@@ -30,6 +30,9 @@ insert into reservation(date, time_id, theme_id, member_id, status, reservation_
 values ('2024-05-13', '1', '1', '1', 'RESERVED', '2024-04-10 10:35');
 
 insert into reservation(date, time_id, theme_id, member_id, status, reservation_timestamp)
+values ('2024-05-13', '1', '1', '2', 'WAITING', '2024-04-11 10:35');
+
+insert into reservation(date, time_id, theme_id, member_id, status, reservation_timestamp)
 values ('2024-05-07', '2', '1', '1', 'RESERVED', '2024-04-10 10:35');
 
 insert into reservation(date, time_id, theme_id, member_id, status, reservation_timestamp)

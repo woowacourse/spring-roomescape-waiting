@@ -31,6 +31,9 @@ public class AdminReservationControllerTest extends ControllerTest {
         jdbcTemplate.update(
                 "insert into reservation (date, time_id, theme_id, member_id,  status, reservation_timestamp) values(?,?,?,?,?,?)"
                 , AFTER_TWO_DAYS_DATE, 1, 1, 1, "RESERVED", TIMESTAMP_BEFORE_ONE_YEAR);
+        jdbcTemplate.update(
+                "insert into reservation (date, time_id, theme_id, member_id,  status, reservation_timestamp) values(?,?,?,?,?,?)"
+                , AFTER_TWO_DAYS_DATE, 1, 1, 1, "WAITING", TIMESTAMP_BEFORE_ONE_YEAR);
     }
 
     @AfterEach
@@ -52,5 +55,18 @@ public class AdminReservationControllerTest extends ControllerTest {
                 .when().post("admin/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @DisplayName("어드민은 예약 대기목록을 조회할 수 있다(200 OK)")
+    @Test
+    void should_get_waiting_reservations() {
+        String cookie = getAdminCookie();
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .when().get("reservations/waiting")
+                .then().log().all()
+                .statusCode(200);
     }
 }
