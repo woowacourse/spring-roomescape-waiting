@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 
 @DataJpaTest
@@ -41,20 +42,20 @@ class ReservationRepositoryTest {
 
     @Test
     void earliestRegisteredWaiting() {
-        Optional<Long> waitingId = reservationRepository.findEarliestRegisteredWaiting(
+        Optional<Reservation> waiting = reservationRepository.findEarliestRegisteredWaiting(
                 LocalDate.parse("2024-12-23"), 2, 3, Status.PENDING
         );
 
-        assertTrue(waitingId.isPresent());
-        assertThat(waitingId.get()).isEqualTo(4);
+        assertTrue(waiting.isPresent());
+        assertThat(waiting.get().getId()).isEqualTo(4);
     }
 
     @Test
     void earliestRegisteredWaitingWhenDoesNotHaveWaiting() {
-        Optional<Long> waitingId = reservationRepository.findEarliestRegisteredWaiting(
+        Optional<Reservation> waiting = reservationRepository.findEarliestRegisteredWaiting(
                 LocalDate.parse("2024-12-23"), 1, 1, Status.PENDING
         );
 
-        assertTrue(waitingId.isEmpty());
+        assertTrue(waiting.isEmpty());
     }
 }

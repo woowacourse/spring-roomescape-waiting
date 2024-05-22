@@ -53,7 +53,7 @@ class AdminReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(6));
     }
 
     @DisplayName("권한이 없는 사용자가 예약을 생성하려는 경우 실패한다.")
