@@ -45,7 +45,12 @@ public class ReservationService {
     }
 
     public List<Reservation> getReservations() {
-        return reservationRepository.findAll();
+        final Set<ReservationInfo> preReservations = new HashSet<>();
+
+        return reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> preReservations.add(ReservationInfo.from(reservation)))
+                .toList();
     }
 
     public List<ReservationRankResponse> getMyReservation(final LoginMember member) {
