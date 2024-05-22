@@ -28,4 +28,6 @@ public interface ReservationRepository {
     boolean existByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
     List<Reservation> findByStatus(ReservationStatus status);
+
+    Reservation findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId);
 }

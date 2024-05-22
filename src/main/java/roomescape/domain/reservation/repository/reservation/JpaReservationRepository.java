@@ -17,6 +17,9 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByMemberIdAndDateValueAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
+    Reservation findTop1ByDateValueAndThemeIdAndTimeIdAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                                ReservationStatus status);
+
     List<Reservation> findByDateValueAndThemeId(LocalDate date, Long themeId);
 
     @Query("""

@@ -1,5 +1,7 @@
 package roomescape.domain.reservation.repository.reservation;
 
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -67,5 +69,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findByStatus(ReservationStatus status) {
         return jpaReservationRepository.findByStatus(status);
+    }
+
+    @Override
+    public Reservation findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.findTop1ByDateValueAndThemeIdAndTimeIdAndStatus(date, timeId, themeId, WAITING);
     }
 }

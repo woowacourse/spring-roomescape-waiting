@@ -7,6 +7,7 @@ import static roomescape.fixture.LocalDateFixture.AFTER_ONE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_THREE_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.AFTER_TWO_DAYS_DATE;
 import static roomescape.fixture.LocalDateFixture.TODAY;
+import static roomescape.fixture.MemberFixture.ADMIN_MEMBER;
 import static roomescape.fixture.MemberFixture.MEMBER_MEMBER;
 import static roomescape.fixture.MemberFixture.NULL_ID_DUMMY_MEMBER;
 import static roomescape.fixture.MemberFixture.NULL_ID_MEMBER;
@@ -164,5 +165,24 @@ class ReservationRepositoryImplTest extends RepositoryTest {
         int waitingSize = reservationRepository.findByStatus(RESERVED).size();
 
         assertThat(waitingSize).isOne();
+    }
+
+    @DisplayName("같은 테마,날짜,시간에 대한 예약대기목록에서 제일 첫번째 예약대기를 찾을 수 있다.")
+    @Test
+    void should_find_top1_waiting_reservation() {
+        Reservation saveWaitingReservation1 = reservationRepository.save(
+                new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, WAITING,
+                        LocalDateTime.now().minusHours(1)));
+        Reservation saveWaitingReservation2 = reservationRepository.save(
+                new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, ADMIN_MEMBER, WAITING,
+                        LocalDateTime.now()));
+        Long timeId = saveWaitingReservation1.getTime().getId();
+        Long themeId = saveWaitingReservation1.getTheme().getId();
+
+        Reservation topWaitingReservation = reservationRepository.findTopWaitingReservationBy(AFTER_ONE_DAYS_DATE,
+                timeId, themeId);
+
+        assertThat(topWaitingReservation).isEqualTo(saveWaitingReservation1);
+
     }
 }

@@ -1,9 +1,11 @@
 package roomescape.domain.reservation.service;
 
 import static roomescape.domain.member.domain.Role.MEMBER;
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,23 @@ public class FakeReservationRepository implements ReservationRepository {
                 .anyMatch(reservation -> reservation.getTime().getId().equals(timeId) && reservation.getDate()
                         .equals(date)
                         && reservation.getTheme().getId().equals(themeId));
+    }
+
+    @Override
+    public Reservation findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId) {
+        return reservations.values().stream()
+                .filter(reservation -> reservation.getTime().getId().equals(timeId)
+                        && reservation.getDate().equals(date)
+                        && reservation.getTheme().getId().equals(themeId)
+                        && reservation.getStatus() == WAITING)
+                .sorted(new Comparator<Reservation>() {
+                    @Override
+                    public int compare(Reservation o1, Reservation o2) {
+                        return o1.getReservationTimestamp().compareTo(o2.getReservationTimestamp());
+                    }
+                })
+                .findFirst()
+                .get();
     }
 
     @Override
