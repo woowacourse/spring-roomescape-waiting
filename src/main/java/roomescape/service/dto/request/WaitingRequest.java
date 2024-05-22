@@ -7,7 +7,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 
-public record UserWaitingRequest(
+public record WaitingRequest(
         @NotNull(message = "날짜를 입력해주세요.")
         LocalDate date,
         @NotNull(message = "테마 ID를 입력해주세요.")

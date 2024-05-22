@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.infrastructure.MemberId;
 import roomescape.service.WaitingService;
-import roomescape.service.dto.request.UserWaitingRequest;
+import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.WaitingResponse;
 
 @RestController
@@ -27,10 +27,10 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> postReservationWaiting(
-            @RequestBody @Valid UserWaitingRequest userWaitingRequest,
+            @RequestBody @Valid WaitingRequest waitingRequest,
             @MemberId Long id
     ) {
-        WaitingResponse waitingResponse = waitingService.createReservationWaiting(userWaitingRequest, id);
+        WaitingResponse waitingResponse = waitingService.createWaiting(waitingRequest, id);
         URI location = UriComponentsBuilder.newInstance()
                 .path("/waitings/{id}")
                 .buildAndExpand(waitingResponse.id())

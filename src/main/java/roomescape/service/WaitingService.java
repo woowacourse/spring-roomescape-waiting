@@ -14,7 +14,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.request.UserWaitingRequest;
+import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.WaitingResponse;
 
 @Service
@@ -37,14 +37,18 @@ public class WaitingService {
     }
 
 
-    public WaitingResponse createReservationWaiting(UserWaitingRequest userWaitingRequest, Long memberId) {
+    public WaitingResponse createWaiting(WaitingRequest waitingRequest, Long memberId) {
         Member member = getMember(memberId);
-        ReservationTime reservationTime = getReservationTime(userWaitingRequest.timeId());
-        Theme theme = getTheme(userWaitingRequest.themeId());
+        ReservationTime reservationTime = getReservationTime(waitingRequest.timeId());
+        Theme theme = getTheme(waitingRequest.themeId());
 
-        validateIsPastTime(userWaitingRequest.date(), reservationTime);
+        validateIsPastTime(waitingRequest.date(), reservationTime);
 
-        Waiting waiting = userWaitingRequest.toEntity(member, reservationTime, theme);
+        if (waitingRepository.existsWaitingByDateAndAndThemeAndMember(waitingRequest.date(), theme, member)) {
+            throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
+        }
+
+        Waiting waiting = waitingRequest.toEntity(member, reservationTime, theme);
         Waiting savedReservation = waitingRepository.save(waiting);
         return WaitingResponse.from(savedReservation);
     }
