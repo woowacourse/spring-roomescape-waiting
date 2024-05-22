@@ -51,21 +51,15 @@ public class MemberReservation {
     }
 
     public void validateDuplicated(MemberReservation other) {
-        if (!reservation.equals(other.reservation)) {
-            return;
-        }
+        if (reservation.equals(other.reservation)) {
+            if (member.equals(other.member)) {
+                throw new BadRequestException("이미 예약한 테마입니다.");
+            }
 
-        if (member.equals(other.member)) {
-            throw new BadRequestException("이미 예약한 테마입니다.");
+            if (status.isNotWaiting()) {
+                throw new BadRequestException("다른 사용자가 이미 예약한 테마입니다.");
+            }
         }
-
-        if (status.isNotWaiting()) {
-            throw new BadRequestException("다른 사용자가 이미 예약한 테마입니다.");
-        }
-    }
-
-    public boolean isWaitingNotStatus() {
-        return status.isNotWaiting();
     }
 
     public void validateWaitingReservation() {
@@ -74,20 +68,20 @@ public class MemberReservation {
         }
     }
 
-    public void validateRankCanConfirm(Long waitingRank) {
-        if (waitingRank.equals(CAN_CONFIRM_RANK)) {
-            return;
-        }
+    public boolean isWaitingNotStatus() {
+        return status.isNotWaiting();
+    }
 
-        throw new BadRequestException("예약 대기는 순서대로 승인할 수 있습니다.");
+    public void validateRankCanConfirm(Long waitingRank) {
+        if (!waitingRank.equals(CAN_CONFIRM_RANK)) {
+            throw new BadRequestException("예약 대기는 순서대로 승인할 수 있습니다.");
+        }
     }
 
     public void validateIsOwner(LoginMember loginMember) {
-        if (member.getId().equals(loginMember.id())) {
-            return;
+        if (!member.getId().equals(loginMember.id())) {
+            throw new ForbiddenException("본인의 예약 대기만 삭제할 수 있습니다.");
         }
-
-        throw new ForbiddenException("본인의 예약 대기만 삭제할 수 있습니다.");
     }
 
     public Long getId() {
