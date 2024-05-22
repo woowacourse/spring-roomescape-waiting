@@ -40,7 +40,7 @@ public class ThemeController {
     public ApiResponse<ThemesResponse> getTop10Themes(
             @NotNull(message = "날짜는 null일 수 없습니다.") final LocalDate today
     ) {
-        return ApiResponse.success(themeService.getTop10Themes(today));
+        return ApiResponse.success(themeService.findTop10Themes(today));
     }
 
     @Admin

@@ -30,7 +30,7 @@ public class ThemeService {
         return new ThemesResponse(response);
     }
 
-    public ThemesResponse getTop10Themes(final LocalDate today) {
+    public ThemesResponse findTop10Themes(final LocalDate today) {
         LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);
         Pageable pageable = Pageable.ofSize(10);
