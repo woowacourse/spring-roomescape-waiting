@@ -1,9 +1,7 @@
 package roomescape.infrastructure.reservation;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.NoSuchElementException;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.reservation.Reservation;
@@ -22,9 +20,6 @@ public interface ReservationJpaRepository extends
 
     @Override
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
-
-    @Override
-    List<Reservation> findAll(Specification<Reservation> specification);
 
     @Override
     default Reservation getById(long id) {
