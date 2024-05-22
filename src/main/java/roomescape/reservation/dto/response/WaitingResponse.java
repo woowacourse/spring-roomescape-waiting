@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 
-public record WaitingResponse (
+public record WaitingResponse(
         Long id,
         MemberResponse member,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,

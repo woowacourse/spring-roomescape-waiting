@@ -112,11 +112,11 @@ public class Reservation {
         return status;
     }
 
-    public String getStatusDisplayName() {
-        return status.getDisplayName();
-    }
-
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getStatusDisplayName() {
+        return status.getDisplayName();
     }
 }

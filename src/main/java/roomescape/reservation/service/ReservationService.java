@@ -85,20 +85,10 @@ public class ReservationService {
         duplicatedReservation.ifPresent(ReservationService::throwExceptionByStatus);
     }
 
-    private static void throwExceptionByStatus(Reservation memberReservation) {
-        Status status = memberReservation.getStatus();
-
-        if (status.isWait()) {
-            throw new IllegalArgumentException("이미 회원이 예약 대기한 내역이 있습니다.");
-        }
-        if (status.isSuccess()) {
-            throw new IllegalArgumentException("이미 회원이 예약한 내역이 있습니다.");
-        }
-    }
-
     private void validateReservationWithStatus(Reservation reservation) {
         Status reservationStatus = reservation.getStatus();
-        boolean existReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndTheme( // TODO : reservationTime ID로 중복 검사
+        boolean existReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndTheme(
+                // TODO : reservationTime ID로 중복 검사
                 reservation.getDate(),
                 reservation.getStartAt(),
                 reservation.getTheme()
@@ -118,6 +108,17 @@ public class ReservationService {
         return ReservationResponse.toResponse(reservation);
     }
 
+    private static void throwExceptionByStatus(Reservation memberReservation) {
+        Status status = memberReservation.getStatus();
+
+        if (status.isWait()) {
+            throw new IllegalArgumentException("이미 회원이 예약 대기한 내역이 있습니다.");
+        }
+        if (status.isSuccess()) {
+            throw new IllegalArgumentException("이미 회원이 예약한 내역이 있습니다.");
+        }
+    }
+
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll()
                 .stream()
@@ -134,7 +135,10 @@ public class ReservationService {
                 .toList();
     }
 
-    private MemberReservationResponse createMemberReservationResponse(Reservation reservation, List<WaitingWithRank> waitingWithRanks) {
+    private MemberReservationResponse createMemberReservationResponse(
+            Reservation reservation,
+            List<WaitingWithRank> waitingWithRanks
+    ) {
         if (reservation.getStatus().isWait()) {
             WaitingWithRank waitingWithRank = waitingWithRanks.stream()
                     .filter(waiting -> Objects.equals(waiting.getWaiting().getId(), reservation.getId()))

@@ -39,7 +39,7 @@ import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 
 @DataJpaTest
-public class ReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
