@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
 public record MemberReservationResponse(
+        long id,
         LocalDate date,
         @JsonFormat(pattern = "kk:mm")
         LocalTime startAt,
@@ -15,6 +16,7 @@ public record MemberReservationResponse(
 
     public static MemberReservationResponse from(final Reservation reservation) {
         return new MemberReservationResponse(
+                reservation.getId(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getThemeNameValue(),
