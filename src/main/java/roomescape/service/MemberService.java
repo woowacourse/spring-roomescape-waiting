@@ -39,7 +39,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void withdrawal(Long memberId) {
+    public void deleteMember(Long memberId) {
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(IllegalArgumentException::new);
 

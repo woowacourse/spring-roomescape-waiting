@@ -70,13 +70,13 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("회원정보를 삭제할 수 있다")
-    void withdrawal_ShouldRemovePersistence() {
+    void deleteMember_ShouldRemovePersistence() {
         // given
         Member member = new Member("name", "email", "password");
         Member savedMember = memberRepository.save(member);
 
         // when
-        memberService.withdrawal(savedMember.getId());
+        memberService.deleteMember(savedMember.getId());
 
         // then
         Assertions.assertThat(memberRepository.findAll()).isEmpty();
