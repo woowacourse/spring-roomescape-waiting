@@ -2,7 +2,6 @@ package roomescape.controller.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -13,7 +12,6 @@ import roomescape.service.dto.MemberInfo;
 import roomescape.util.CookieManager;
 import roomescape.util.TokenManager;
 
-@Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
