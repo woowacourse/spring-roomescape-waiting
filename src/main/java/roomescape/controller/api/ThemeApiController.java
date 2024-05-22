@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.api.validator.IdPositive;
+import roomescape.service.dto.validator.IdPositive;
 import roomescape.domain.Theme;
 import roomescape.service.dto.request.ThemeSaveRequest;
 import roomescape.service.dto.response.theme.ThemeResponse;
