@@ -5,12 +5,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingRanks;
+import roomescape.domain.reservation.WaitingRank;
 import roomescape.domain.reservation.slot.ReservationSlot;
 
 public record UserReservationResponse(
@@ -38,23 +36,20 @@ public record UserReservationResponse(
                 );
         }
 
-        public static Stream<UserReservationResponse> waitingsToResponseStream(WaitingRanks waitingRanks) {
-                Map<Waiting, Integer> waitingRankMap = waitingRanks.getWaitingRanks();
-
-                return waitingRankMap.entrySet().stream()
+        public static Stream<UserReservationResponse> waitingsToResponseStream(List<WaitingRank> waitingRanks) {
+                return waitingRanks.stream()
                         .map(UserReservationResponse::createByWaiting);
         }
 
-        private static UserReservationResponse createByWaiting(Entry<Waiting, Integer> waitingRank) {
-                Waiting waiting = waitingRank.getKey();
-                ReservationSlot slot = waiting.getReservation().getSlot();
-
+        private static UserReservationResponse createByWaiting(WaitingRank waitingRank) {
+                Waiting waiting = waitingRank.waiting();
+                ReservationSlot slot = waiting.getSlot();
                 return new UserReservationResponse(
                         waiting.getId(),
                         slot.getTheme().getName(),
                         slot.getDate(),
                         slot.getTime().getStartAt(),
-                        waitingRank.getValue() + "번째 " +ReservationStatus.WAIT.getValue()
+                        waitingRank.rank() + "번째 " +ReservationStatus.WAIT.getValue()
                 );
         }
 

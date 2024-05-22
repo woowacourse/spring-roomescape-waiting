@@ -11,6 +11,7 @@ import java.util.Objects;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.slot.ReservationSlot;
 
 @Entity
 @Where(clause = "is_deleted = false")
@@ -47,10 +48,6 @@ public class Waiting {
         return this.member.equals(member);
     }
 
-    public boolean isPriority(Waiting other) {
-        return this.reservation.equals(other.reservation) && this.id < other.id;
-    }
-
     public boolean isMemberId(Long id) {
         return member.getId().equals(id);
     }
@@ -65,6 +62,10 @@ public class Waiting {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public ReservationSlot getSlot() {
+        return reservation.getSlot();
     }
 
     @Override

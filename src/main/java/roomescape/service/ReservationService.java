@@ -12,7 +12,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingRanks;
+import roomescape.domain.reservation.WaitingRank;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.slot.ReservationSlot;
@@ -46,7 +46,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Member member = findMemberById(reservationSaveRequest.memberId());
         ReservationSlot slot = reservationSlotService.findSlot(reservationSaveRequest.toSlotRequest());
@@ -92,8 +92,7 @@ public class ReservationService {
         Member member = findMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMemberAndSlot_DateGreaterThanEqual(member, date);
 
-        List<Waiting> waitings = waitingRepository.findByReservation_Slot_DateGreaterThanEqual(date);
-        WaitingRanks waitingRanks = WaitingRanks.of(waitings, member);
+        List<WaitingRank> waitingRanks = waitingRepository.findRankByMemberAndDateGreaterThanEqual(member, date);
 
         return Stream.concat(
                         UserReservationResponse.reservationsToResponseStream(reservations),
