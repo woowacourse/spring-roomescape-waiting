@@ -25,6 +25,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationWithWaiting;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.domain.ThemeRepository;
@@ -62,10 +63,11 @@ class ReservationServiceTest {
     @DisplayName("특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
     @Test
     void should_return_response_when_my_reservations_requested_all() {
-        when(reservationRepository.findByMemberId(1L)).thenReturn(List.of(MEMBER_ID_1_RESERVATION));
+        when(reservationRepository.findByMemberIdWithWaiting(1L)).thenReturn(
+                List.of(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1L)));
 
-        assertThat(reservationService.findAllByMemberWithStatus(1L))
-                .containsExactly(new MemberReservation(MEMBER_ID_1_RESERVATION, 1));
+        assertThat(reservationService.findAllByMemberWithWaitingStatus(1L))
+                .containsExactly(new MemberReservation(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1L)));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")

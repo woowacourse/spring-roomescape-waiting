@@ -7,16 +7,14 @@ import roomescape.reservation.domain.Reservation;
 public record WaitingResponse(
 
         Long id,
-        int waitingNumber,
         String memberName,
         String themeName,
         LocalDate reservationDate,
         LocalTime reservationTime
 ) {
-    public WaitingResponse(Reservation reservation, int waitingNumber) {
+    public WaitingResponse(Reservation reservation) {
         this(
                 reservation.getId(),
-                waitingNumber,
                 reservation.getMemberName(),
                 reservation.getThemeName(),
                 reservation.getDate(),

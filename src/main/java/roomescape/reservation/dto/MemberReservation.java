@@ -2,7 +2,7 @@ package roomescape.reservation.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationWithWaiting;
 
 public record MemberReservation(
         Long id,
@@ -11,17 +11,17 @@ public record MemberReservation(
         LocalTime time,
         String status) {
 
-    public MemberReservation(Reservation reservation, int waitingNumber) {
+    public MemberReservation(ReservationWithWaiting reservation) {
         this(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                statusMessage(waitingNumber)
+                reservation.getReservationId(),
+                reservation.getThemeName(),
+                reservation.getReservationDate(),
+                reservation.getStartAt(),
+                statusMessage(reservation.getWaitingNumber())
         );
     }
 
-    private static String statusMessage(int waitingNumber) {
+    private static String statusMessage(Long waitingNumber) {
         if (waitingNumber > 1) {
             return waitingNumber + "번째 예약 대기";
         }

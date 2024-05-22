@@ -49,28 +49,16 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservation> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findByMemberId(memberId)
+    public List<MemberReservation> findAllByMemberWithWaitingStatus(Long memberId) {
+        return reservationRepository.findByMemberIdWithWaiting(memberId)
                 .stream()
-                .map(reservation -> new MemberReservation(reservation, calculateReservationWaitingNumber(reservation)))
+                .map(MemberReservation::new)
                 .toList();
-    }
-
-    public int calculateReservationWaitingNumber(Reservation reservation) {
-        List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getThemeId()
-        );
-
-        return (int) reservations.stream()
-                .filter(other -> other.isWaitingOrderHigherThan(reservation))
-                .count() + 1;
     }
 
     public List<WaitingResponse> findReservationsOnWaiting() {
         return reservationRepository.findReservationOnWaiting().stream()
-                .map(reservation -> new WaitingResponse(reservation, calculateReservationWaitingNumber(reservation)))
+                .map(WaitingResponse::new)
                 .toList();
     }
 

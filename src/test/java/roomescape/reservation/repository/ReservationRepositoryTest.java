@@ -15,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationWithWaiting;
 
 // 예약: 멤버 1번, 내일, 첫번째 시간, 테마 1번, 예약 완료);
 // 예약: 멤버 2번, 내일, 두번째 시간, 테마 2번, 예약 완료);
@@ -36,7 +37,7 @@ class ReservationRepositoryTest {
     @DisplayName("멤버 ID를 조건으로 예약을 조회할 수 있다")
     @Test
     void should_find_reservations_by_member_id() {
-        List<Reservation> reservations = reservationRepository.findByMemberId(1L);
+        List<ReservationWithWaiting> reservations = reservationRepository.findByMemberIdWithWaiting(1L);
         assertThat(reservations).hasSize(1);
     }
 

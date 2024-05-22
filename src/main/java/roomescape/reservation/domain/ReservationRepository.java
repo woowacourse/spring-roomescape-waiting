@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,8 +20,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                     @Param("dateFrom") LocalDate dateFrom,
                                                     @Param("dateTo") LocalDate dateTo);
 
-    @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByMemberId(Long memberId);
+    @Query("""
+            SELECT new roomescape.reservation.domain.ReservationWithWaiting(
+                r1,(SELECT COUNT(r2) + 1
+                     FROM Reservation AS r2
+                     WHERE r2.date = r1.date
+                     AND r2.theme = r1.theme
+                     AND r2.time = r1.time
+                     AND r1.id > r2.id))
+            FROM Reservation AS r1
+            WHERE r1.member.id = :memberId
+            """)
+    List<ReservationWithWaiting> findByMemberIdWithWaiting(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT r
@@ -39,14 +48,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r1
             FROM Reservation AS r1
-            WHERE EXISTS (
-                SELECT r2
-                FROM Reservation AS r2
-                WHERE r2.date = r1.date
-                AND r2.theme = r1.theme
-                AND r2.time = r1.time
-                AND r1.id > r2.id
-            )
+            WHERE (SELECT COUNT(r2)
+                     FROM Reservation AS r2
+                     WHERE r2.date = r1.date
+                     AND r2.theme = r1.theme
+                     AND r2.time = r1.time
+                     AND r1.id > r2.id) > 0
             """)
     List<Reservation> findReservationOnWaiting();
+
+
 }
