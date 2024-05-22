@@ -70,6 +70,10 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberWaitingReservation(Long memberId, MemberReservationAddRequest request) {
+        if (reservationRepository.existsByDateValueAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
+                request.themeId(), memberId)) {
+            throw new DuplicateSaveException("이미 회원님이 대기하고 있는 예약이 존재합니다.");
+        }
         return saveMemberReservation(memberId, request, Status.WAITING);
     }
 
