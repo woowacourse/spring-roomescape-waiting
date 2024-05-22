@@ -45,6 +45,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse create(final WaitingRequest waitingRequest) {
+        validateExistingReservation(waitingRequest);
         validateDuplicatedReservation(waitingRequest);
         validateDuplicatedWaiting(waitingRequest);
         final ReservationTime reservationTime = getReservationTime(waitingRequest);
@@ -56,17 +57,24 @@ public class WaitingService {
         return WaitingResponse.from(savedWaiting);
     }
 
+    private void validateExistingReservation(final WaitingRequest waitingRequest) {
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(waitingRequest.date(), waitingRequest.timeId(),
+                waitingRequest.themeId())) {
+            throw new ReservationFailException("해당 시간의 예약이 없습니다. 예약을 진행하세요.");
+        }
+    }
+
     private void validateDuplicatedReservation(final WaitingRequest waitingRequest) {
         if (reservationRepository.existsByDateAndTimeIdAndMemberId(waitingRequest.date(), waitingRequest.timeId(),
                 waitingRequest.memberId())) {
-            throw new ReservationFailException("이미 해당 시간에 예약된 내역이 있습니다..");
+            throw new ReservationFailException("해당 시간에 예약된 내역이 있습니다.");
         }
     }
 
     private void validateDuplicatedWaiting(final WaitingRequest waitingRequest) {
         if (waitingRepository.existsByDateAndTimeIdAndMemberId(waitingRequest.date(), waitingRequest.timeId(),
                 waitingRequest.memberId())) {
-            throw new ReservationFailException("이미 해당 시간에 예약 대기중인 내역이 있습니다..");
+            throw new ReservationFailException("해당 시간에 예약 대기중인 내역이 있습니다.");
         }
     }
 

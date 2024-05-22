@@ -29,7 +29,7 @@ class ReservationRepositoryTest {
     @Test
     void given_when_findAll_then_returnReservations() {
         //given, when, then
-        assertThat(reservationRepository.findAll()).hasSize(8);
+        assertThat(reservationRepository.findAll()).hasSize(10);
     }
 
     @DisplayName("Db에 예약 정보를 저장한다.")
@@ -102,6 +102,6 @@ class ReservationRepositoryTest {
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when, then
-        assertThat(reservationRepository.findByMember(member)).hasSize(7);
+        assertThat(reservationRepository.findByMember(member)).hasSize(9);
     }
 }

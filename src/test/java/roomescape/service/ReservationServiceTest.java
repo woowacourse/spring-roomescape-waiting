@@ -38,7 +38,7 @@ class ReservationServiceTest {
     @DisplayName("예약 목록을 반환한다.")
     void given_when_findEntireReservationList_then_returnReservationResponses() {
         //when, then
-        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(8);
+        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(10);
     }
 
     @Test
@@ -126,7 +126,7 @@ class ReservationServiceTest {
         //when
         final List<ReservationsMineResponse> reservationsByMember = service.findReservationsByMember(member);
         //then
-        assertThat(reservationsByMember).hasSize(7);
+        assertThat(reservationsByMember).hasSize(9);
     }
 
     @Test
