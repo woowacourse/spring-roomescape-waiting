@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
         })
-        .then(render)
+        .then(data => render(data.responses))
         .catch(error => console.error('Error fetching reservations:', error));
 });
 

@@ -2,7 +2,7 @@ const THEME_API_ENDPOINT = '/themes';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
-        .then(renderTheme)
+        .then(data => renderTheme(data.responses))
         .catch(error => console.error('Error fetching times:', error));
 
     flatpickr("#datepicker", {
@@ -66,7 +66,7 @@ function checkDate() {
         timeSlots.innerHTML = '';
 
         requestRead(THEME_API_ENDPOINT)
-            .then(renderTheme)
+            .then(date => renderTheme(date.responses))
             .catch(error => console.error('Error fetching times:', error));
     }
 }
@@ -93,7 +93,7 @@ function fetchAvailableTimes(date, themeId) {
     }).then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
-    }).then(renderAvailableTimes)
+    }).then(data => renderAvailableTimes(data.responses))
         .catch(error => console.error("Error fetching available times:", error));
 }
 

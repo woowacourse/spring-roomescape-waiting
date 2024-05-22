@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
   requestRead(RESERVATION_API_ENDPOINT)
-      .then(render)
+      .then(data => render(data.responses))
       .catch(error => console.error('Error fetching reservations:', error));
 
   fetchTimes();
@@ -208,7 +208,7 @@ function applyFilter(event) {
   }).then(response => {
     if (response.ok) return response.json();
     throw new Error('Read failed');
-  }).then(render)
+  }).then(data => render(data.responses))
       .catch(error => console.error("Error fetching available times:", error));
 }
 
