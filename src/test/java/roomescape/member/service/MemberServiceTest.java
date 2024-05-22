@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
-import static roomescape.InitialMemberFixture.MEMBER_4;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 
 import java.util.ArrayList;
@@ -30,8 +30,8 @@ class MemberServiceTest {
         expected.add(new MemberIdNameResponse(MEMBER_1));
         expected.add(new MemberIdNameResponse(MEMBER_2));
         expected.add(new MemberIdNameResponse(MEMBER_3));
-        expected.add(new MemberIdNameResponse(MEMBER_4));
         expected.add(new MemberIdNameResponse(NO_RESERVATION_MEMBER));
+        expected.add(new MemberIdNameResponse(ADMIN));
 
         List<MemberIdNameResponse> found = memberService.findMembersIdAndName();
 

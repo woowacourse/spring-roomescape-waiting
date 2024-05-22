@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
-import static roomescape.InitialMemberFixture.MEMBER_4;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 
@@ -30,7 +30,7 @@ class MemberRepositoryTest {
     void findAll() {
         Iterable<Member> found = memberRepository.findAll();
 
-        assertThat(found).containsExactly(MEMBER_1, MEMBER_2, MEMBER_3, MEMBER_4, NO_RESERVATION_MEMBER);
+        assertThat(found).containsExactly(MEMBER_1, MEMBER_2, MEMBER_3, NO_RESERVATION_MEMBER, ADMIN);
     }
 
     @Test

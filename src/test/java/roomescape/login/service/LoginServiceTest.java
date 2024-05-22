@@ -2,9 +2,9 @@ package roomescape.login.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_4;
 import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
 
 import javax.naming.AuthenticationException;
@@ -51,7 +51,7 @@ class LoginServiceTest {
     @Test
     @DisplayName("로그인에 성공하면 토큰을 발행한다.")
     void getTokenIfLoginSucceeds() throws AuthenticationException {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), ADMIN.getEmail().email());
 
         TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);
 

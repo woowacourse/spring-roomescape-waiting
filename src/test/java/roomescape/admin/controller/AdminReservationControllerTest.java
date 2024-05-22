@@ -1,9 +1,9 @@
 package roomescape.admin.controller;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
-import static roomescape.InitialMemberFixture.MEMBER_4;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
 
 import io.restassured.RestAssured;
@@ -72,7 +72,7 @@ class AdminReservationControllerTest {
     @Test
     @DisplayName("관리자가 예약 요칭 시, 요청 Body에 담긴 정보를 바탕으로 예약을 추가한다.")
     void AdminAddReservationFromRequestBody() {
-        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_4.getEmail().email());
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), ADMIN.getEmail().email());
 
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
