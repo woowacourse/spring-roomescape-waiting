@@ -1,5 +1,9 @@
 INSERT INTO member (name, email, password, role)
-VALUES ('a1', 'a1@email.com', 'a1', 'ADMIN');
+VALUES ('a1', 'a1@email.com', 'a1', 'ADMIN'),
+       ('a2', 'a2@email.com', 'a2', 'ADMIN'),
+       ('a3', 'a3@email.com', 'a3', 'ADMIN'),
+       ('a4', 'a4@email.com', 'a4', 'ADMIN'),
+       ('a5', 'a5@email.com', 'a5', 'ADMIN');
 
 
 INSERT INTO reservation_time (start_at)
@@ -111,3 +115,10 @@ VALUES ('2024-04-25', 1, 1, 1),
        ('2024-04-25', 1, 10, 12),
        ('2024-04-25', 1, 11, 12),
        ('2024-04-25', 1, 12, 12);
+
+INSERT INTO waiting (date, member_id, time_id, theme_id)
+VALUES ('2024-04-25', 1, 1, 1),
+       ('2024-04-25', 2, 1, 1),
+       ('2024-04-25', 3, 1, 1),
+       ('2024-04-25', 4, 1, 1),
+       ('2024-04-25', 5, 1, 1);
