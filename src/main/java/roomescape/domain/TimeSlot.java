@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 public class TimeSlot {
@@ -26,6 +27,10 @@ public class TimeSlot {
     public boolean isBefore(LocalDateTime dateTime) {
         LocalTime currentTime = LocalTime.of(dateTime.getHour(), dateTime.getMinute());
         return startAt.isBefore(currentTime);
+    }
+
+    public boolean isSame(TimeSlot other) {
+        return Objects.equals(id, other.id);
     }
 
     public Long getId() {

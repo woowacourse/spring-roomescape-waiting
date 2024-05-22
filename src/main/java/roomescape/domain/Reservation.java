@@ -50,6 +50,10 @@ public class Reservation {
         this.status = ReservationStatus.BOOKING;
     }
 
+    public boolean isSameTime(TimeSlot other) {
+        return time.isSame(other);
+    }
+
     public Long getId() {
         return id;
     }
