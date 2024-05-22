@@ -19,8 +19,10 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-        ReservationRepository reservationRepository) {
+    public ReservationTimeService(
+        ReservationTimeRepository reservationTimeRepository,
+        ReservationRepository reservationRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -47,8 +49,7 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
-    public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date,
-        Long themeId) {
+    public List<FindTimeAndAvailabilityDto> findAllWithBookAvailability(LocalDate date, Long themeId) {
         List<Reservation> reservations =
             reservationRepository.findAllByDateAndThemeId(new Date(date.toString()), themeId);
 

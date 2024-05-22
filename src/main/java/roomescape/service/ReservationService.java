@@ -71,8 +71,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> findAllBy(Long themeId, Long memberId, LocalDate dateFrom,
-        LocalDate dateTo) {
+    public List<Reservation> findAllBy(
+        Long themeId,
+        Long memberId,
+        LocalDate dateFrom,
+        LocalDate dateTo
+    ) {
         if (dateFrom.isAfter(dateTo)) {
             throw new RoomescapeException("날짜 조회 범위가 올바르지 않습니다.");
         }
