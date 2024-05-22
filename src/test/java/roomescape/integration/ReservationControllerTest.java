@@ -282,6 +282,68 @@ public class ReservationControllerTest {
                     .statusCode(204);
         }
 
+        @DisplayName("관리자는 예약 대기를 삭제할 수 있다.")
+        @Test
+        void deleteReservationWaitingByAdminTest() {
+            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com","1234");
+            memberRepository.save(testMember);
+            String newToken = JWT_GENERATOR.generateWith(
+                    Map.of(
+                            "id", testMember.getId(),
+                            "name", testMember.getName(),
+                            "role", testMember.getRole().getTokenValue()
+                    )
+            );
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", newToken)
+                    .contentType(ContentType.JSON)
+                    .body(Map.of(
+                            "date", reservation7.getDate().toString(),
+                            "timeId", reservation7.getReservationTime().getId(),
+                            "themeId", reservation7.getTheme().getId()))
+                    .post("/reservations-waiting")
+                    .then().log().all()
+                    .statusCode(201);
+
+            RestAssured.given().log().all()
+                    .when().cookie("token", newToken)
+                    .delete("/admin/reservations-waiting/11")
+                    .then().log().all()
+                    .statusCode(204);
+        }
+
+        @DisplayName("관리자는 모든 예약 대기를 조회할 수 있다.")
+        @Test
+        void getReservationWaitingTest() {
+            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com","1234");
+            memberRepository.save(testMember);
+            String newToken = JWT_GENERATOR.generateWith(
+                    Map.of(
+                            "id", testMember.getId(),
+                            "name", testMember.getName(),
+                            "role", testMember.getRole().getTokenValue()
+                    )
+            );
+            RestAssured.given().log().all()
+                    .when()
+                    .cookie("token", newToken)
+                    .contentType(ContentType.JSON)
+                    .body(Map.of(
+                            "date", reservation7.getDate().toString(),
+                            "timeId", reservation7.getReservationTime().getId(),
+                            "themeId", reservation7.getTheme().getId()))
+                    .post("/reservations-waiting")
+                    .then().log().all()
+                    .statusCode(201);
+
+            RestAssured.given().log().all()
+                    .when().cookie("token", newToken)
+                    .get("/admin/reservations-waiting")
+                    .then().log().all()
+                    .statusCode(200).body("size()", is(1));
+        }
+
         @DisplayName("날짜를 이용해서 검색할 수 있다.")
         @Test
         void searchWithDateTest() {

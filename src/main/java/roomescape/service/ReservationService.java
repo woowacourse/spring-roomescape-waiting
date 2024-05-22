@@ -18,6 +18,7 @@ import roomescape.domain.LoginMember;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Reservations;
 import roomescape.domain.Waiting;
+import roomescape.dto.AdminReservationDetailResponse;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
@@ -33,7 +34,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -90,6 +91,7 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
     }
 
+
     private Reservation getReservation(long memberId, ReservationRequest reservationRequest, ReservationStatus reservationStatus) {
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
@@ -110,8 +112,8 @@ public class ReservationService {
         return reservation;
     }
 
-    public List<ReservationResponse> findAll() {
-        Reservations reservations = new Reservations(reservationRepository.findAll());
+    public List<ReservationResponse> findAllReservations() {
+        Reservations reservations = new Reservations(reservationRepository.findAllByStatus(ReservationStatus.BOOKED));
         return reservations.getReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -120,12 +122,12 @@ public class ReservationService {
     public List<ReservationResponse> searchReservation(Long themeId, Long memberId, LocalDate dateFrom,
                                                        LocalDate dateTo) {
         Reservations reservations = new Reservations(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
-        return reservations.getReservations().stream()
+        return reservations.booked().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public void delete(long reservationId) {
+    public void deleteById(long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
 
@@ -138,12 +140,26 @@ public class ReservationService {
                                 reservation.getReservationTime(),
                                 reservation.getTheme(),
                                 reservation.getCreatedAt())))
+                .filter(waiting -> !waiting.isOver())
                 .toList();
         return ReservationDetailResponse.of(reservations, waitings);
     }
 
-    @Transactional
-    public void deleteById(LoginMember loginMember, long id) {
+    public void deleteByMemberIdAndId(LoginMember loginMember, long id) {
         reservationRepository.deleteByMemberIdAndId(loginMember.getId(), id);
+    }
+
+    public List<AdminReservationDetailResponse> findAllWaitingReservations() {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
+        return reservations.stream()
+                .map(reservation ->
+                        new Waiting(reservation, reservationRepository.findAndCountWaitingNumber(
+                                reservation.getDate(),
+                                reservation.getReservationTime(),
+                                reservation.getTheme(),
+                                reservation.getCreatedAt())))
+                .filter(waiting -> !waiting.isOver())
+                .map(AdminReservationDetailResponse::from)
+                .toList();
     }
 }

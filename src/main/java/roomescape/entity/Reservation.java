@@ -118,6 +118,10 @@ public class Reservation extends BaseEntity implements Comparable<Reservation> {
         return this.theme.equals(reservation.theme);
     }
 
+    public void confirm(){
+        this.status = ReservationStatus.BOOKED;
+    }
+
     @Override
     public int compareTo(Reservation other) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());

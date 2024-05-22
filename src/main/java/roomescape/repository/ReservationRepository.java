@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import roomescape.domain.ReservationStatus;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
@@ -46,4 +47,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("time") ReservationTime time,
             @Param("theme") Theme theme,
             @Param("createdAt") LocalDateTime localDateTime);
+
+    List<Reservation> findAllByStatus(ReservationStatus status);
 }

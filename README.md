@@ -33,7 +33,7 @@
 
 - [x] 예약 대기 생성/조회/삭제 기능 추가
 
-- [ ] 예약 대기 관리 조회/삭제 기능 추가
+- [x] 예약 대기 관리 조회/삭제 기능 추가
 
 # API 명세
 
@@ -476,6 +476,61 @@
 ### request
 
 > DELETE /reservations-waiting/1 HTTP/1.1
+
+### response
+
+> HTTP/1.1 204
+
+## 예약 대기 관리 조회 기능
+
+### request
+
+> GET /admin/reservations-waiting HTTP/1.1
+>
+> cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+>
+> host: localhost:8080
+
+### response
+
+> HTTP/1.1 200
+> Content-Type: application/json
+
+``` json
+[
+  {
+    "id": 1,
+    "waitingNumber": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "예약"
+  },
+  {
+    "id": 2,
+    "waitingNumber": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "예약"
+  },
+  {
+    "id": 2,
+    "waitingNumber": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "예약"
+  }
+]
+```
+
+
+## 예약 대기 관리 삭제 기능
+
+### request
+
+> DELETE /admin/reservations-waiting/1 HTTP/1.1
 
 ### response
 

@@ -31,6 +31,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.Reservations;
 import roomescape.domain.Role;
 import roomescape.domain.Waiting;
+import roomescape.dto.AdminReservationDetailResponse;
 import roomescape.dto.ReservationDetailResponse;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
@@ -60,6 +61,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+
     private ReservationTime defaultTime = new ReservationTime(LocalTime.of(0, 0));
     private Theme defaultTheme = new Theme("name", "description", "thumbnail");
 
@@ -132,31 +134,53 @@ class ReservationServiceTest {
                 .hasMessage(NOT_FOUND_THEME.getMessage());
     }
 
-    @DisplayName("예약이 여러 개 존재하는 경우 모든 예약을 조회할 수 있다.")
+    @DisplayName("관리자는 예약이 여러 개 존재하는 경우 모든 예약을 조회할 수 있다.")
     @Test
-    void findAllTest() {
+    void findAllReservationsTest() {
         //given
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
                 member, ReservationStatus.BOOKED));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
                 member, ReservationStatus.BOOKED));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(3), defaultTime, defaultTheme,
-                member, ReservationStatus.BOOKED));
+                member, ReservationStatus.WAITING));
         reservationRepository.save(new Reservation(LocalDate.now().plusDays(4), defaultTime, defaultTheme,
                 member, ReservationStatus.BOOKED));
 
         //when
-        List<ReservationResponse> reservationResponses = reservationService.findAll();
+        List<ReservationResponse> reservationResponses = reservationService.findAllReservations();
 
         //then
-        assertThat(reservationResponses).hasSize(4);
+        assertThat(reservationResponses).hasSize(3);
+    }
+
+    @DisplayName("관리자는 예약 대기가 여러 개 존재하는 경우 모든 예약 대기를 조회할 수 있다.")
+    @Test
+    void findAllWaitingReservationsTest() {
+        //given
+        Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
+        memberRepository.save(testMember);
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                testMember, ReservationStatus.BOOKED));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                member, ReservationStatus.WAITING));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
+                testMember, ReservationStatus.BOOKED));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), defaultTime, defaultTheme,
+                member, ReservationStatus.WAITING));
+
+        //when
+        List<AdminReservationDetailResponse> reservationResponses = reservationService.findAllWaitingReservations();
+
+        //then
+        assertThat(reservationResponses).hasSize(2);
     }
 
     @DisplayName("특정 사용자의 예약이 여러 개 존재하는 경우 모든 예약을 조회할 수 있다.")
     @Test
-    void findAllByMemberId() {
+    void findAllReservationsByMemberId() {
         //given
-        Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+        Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
         Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
                 testMember, ReservationStatus.BOOKED);
@@ -184,9 +208,9 @@ class ReservationServiceTest {
 
     @DisplayName("특정 사용자가 자신의 예약 대기를 취소할 수 있다.")
     @Test
-    void deleteById() {
+    void deleteReservationWaiting() {
         //given
-        Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+        Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
         memberRepository.save(testMember);
         Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
                 testMember, ReservationStatus.BOOKED);
@@ -196,9 +220,53 @@ class ReservationServiceTest {
         reservationRepository.save(reservation2);
 
         //when
-        reservationService.deleteById(loginMember, 2);
+        reservationService.deleteByMemberIdAndId(loginMember, 2);
         //then
         assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of());
+    }
+
+    @DisplayName("관리자는 예약 대기를 취소할 수 있다.")
+    @Test
+    void deleteReservationWaitingByAdmin() {
+        //given
+        Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
+        memberRepository.save(testMember);
+        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                testMember, ReservationStatus.BOOKED);
+        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                member, ReservationStatus.WAITING);
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+
+        //when
+        reservationService.deleteById(2);
+        //then
+        assertThat(reservationService.findAllByMemberId(1L)).isEqualTo(List.of());
+    }
+
+
+    @DisplayName("관리자가 예약을 삭제 시 다음 순번의 예약 대기가 예약된다.")
+    @Test
+    void reservationWaitingByAdmin() {
+        //given
+        Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
+        memberRepository.save(testMember);
+        Reservation reservation1 = new Reservation(1L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                testMember, ReservationStatus.BOOKED);
+        Reservation reservation2 = new Reservation(2L, LocalDate.now().plusDays(1), defaultTime, defaultTheme,
+                member, ReservationStatus.WAITING);
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+
+        //when
+        reservationRepository.deleteById(1L);
+        List<AdminReservationDetailResponse> waitingResponses = reservationService.findAllWaitingReservations();
+        List<ReservationResponse> bookedResponses = reservationService.findAllReservations();
+        //then
+        assertAll(
+                () -> assertThat(waitingResponses).isEqualTo(List.of()),
+                () -> assertThat(bookedResponses.size()).isEqualTo(1)
+        );
     }
 
     @DisplayName("예약이 하나 존재하는 경우")
@@ -238,7 +306,7 @@ class ReservationServiceTest {
         @Test
         void deleteReservationTest() {
             //when
-            reservationService.delete(1L);
+            reservationService.deleteById(1L);
 
             //then
             assertThat(new Reservations(reservationRepository.findAll()).getReservations()).isEmpty();
@@ -247,7 +315,7 @@ class ReservationServiceTest {
         @DisplayName("존재하지 않는 예약에 대한 삭제 요청은 정상 요청으로 간주한다.")
         @Test
         void deleteNotExistReservationNotThrowsException() {
-            assertThatCode(() -> reservationService.delete(2L))
+            assertThatCode(() -> reservationService.deleteById(2L))
                     .doesNotThrowAnyException();
         }
     }

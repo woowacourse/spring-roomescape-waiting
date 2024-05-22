@@ -28,6 +28,12 @@ public class Reservations {
                 .toList();
     }
 
+    public List<Reservation> booked(){
+        return reservations.stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.BOOKED)
+                .toList();
+    }
+
     public List<Reservation> getReservations() {
         return Collections.unmodifiableList(reservations);
     }
