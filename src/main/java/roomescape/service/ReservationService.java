@@ -120,7 +120,7 @@ public class ReservationService {
         Waiting foundWaiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 대기입니다."));
 
-        if (loginMember.isUser() && foundWaiting.isMemberId(loginMember.id())) {
+        if (loginMember.isUser() && foundWaiting.isNotMemberId(loginMember.id())) {
             throw new AuthorizationException();
         }
 

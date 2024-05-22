@@ -48,8 +48,8 @@ public class Waiting {
         return this.member.equals(member);
     }
 
-    public boolean isMemberId(Long id) {
-        return member.getId().equals(id);
+    public boolean isNotMemberId(Long id) {
+        return !member.getId().equals(id);
     }
 
     public Long getId() {
