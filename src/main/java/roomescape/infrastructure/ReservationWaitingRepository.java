@@ -30,15 +30,5 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
             """)
     List<ReservationWaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
 
-    @Query("""
-                SELECT w
-                FROM ReservationWaiting w
-                WHERE w.date = :date
-                AND w.time.id = :timeId
-                AND w.theme.id = :themeId
-                AND w.isDenied = FALSE
-                ORDER BY w.id
-                LIMIT 1
-            """)
-    Optional<ReservationWaiting> findByDateAndTimeIdAndThemeIdOrderById(ReservationDate date, Long timeId, Long themeId);
+    Optional<ReservationWaiting> findTopByDateAndTimeIdAndThemeIdOrderById(ReservationDate date, Long timeId, Long themeId);
 }
