@@ -16,7 +16,6 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.MyReservationInfo;
-import roomescape.waiting.service.WaitingHistoryService;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,16 +23,13 @@ public class MemberReservationService {
     private final ReservationRepository reservationRepository;
     private final MemberReservationRepository memberReservationRepository;
     private final ReservationCommonService reservationCommonService;
-    private final WaitingHistoryService waitingHistoryService;
 
     public MemberReservationService(ReservationRepository reservationRepository,
                                     MemberReservationRepository memberReservationRepository,
-                                    ReservationCommonService reservationCommonService,
-                                    WaitingHistoryService waitingHistoryService) {
+                                    ReservationCommonService reservationCommonService) {
         this.reservationRepository = reservationRepository;
         this.memberReservationRepository = memberReservationRepository;
         this.reservationCommonService = reservationCommonService;
-        this.waitingHistoryService = waitingHistoryService;
     }
 
 
@@ -78,7 +74,8 @@ public class MemberReservationService {
         MemberReservation memberReservation = reservationCommonService.getMemberReservation(memberReservationId);
         Member member = reservationCommonService.getMember(authInfo.getId());
         reservationCommonService.delete(member, memberReservation);
-        waitingHistoryService.createHistory(memberReservation.getReservation());
+        memberReservationRepository.updateStatusBy(ReservationStatus.APPROVED, memberReservation.getReservation(),
+                ReservationStatus.PENDING, 1);
     }
 
     @Transactional

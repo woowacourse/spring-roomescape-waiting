@@ -12,10 +12,15 @@ import static roomescape.fixture.ThemeFixture.getTheme2;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ErrorType;
@@ -38,16 +43,11 @@ import roomescape.util.ServiceTest;
 
 @DisplayName("사용자 예약 로직 테스트")
 class MemberReservationServiceTest extends ServiceTest {
-    @Autowired
-    ReservationRepository reservationRepository;
-    @Autowired
-    ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    ThemeRepository themeRepository;
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Autowired
     MemberRepository memberRepository;
-    @Autowired
-    MemberReservationRepository memberReservationRepository;
     @Autowired
     MemberReservationService memberReservationService;
     ReservationTime time;
@@ -244,5 +244,29 @@ class MemberReservationServiceTest extends ServiceTest {
 
         //then
         assertThat(myReservations).hasSize(2);
+    }
+
+    @DisplayName("기존 예약이 삭제 될 경우, 대기하는 다음 예약이 자동으로 승인된다.")
+    @Test
+    void changeToApprove() {
+        //given
+        Member memberClover = memberRepository.save(getMemberClover());
+
+        Reservation reservation = reservationRepository.save(getNextDayReservation(time, theme1));
+        MemberReservation firstReservation = memberReservationRepository.save(
+                new MemberReservation(memberChoco, reservation, ReservationStatus.APPROVED));
+        MemberReservation waitingReservation = memberReservationRepository.save(
+                new MemberReservation(memberClover, reservation, ReservationStatus.PENDING));
+
+        entityManager.clear();
+        entityManager.flush();
+        
+        //when
+        memberReservationService.deleteMemberReservation(AuthInfo.from(memberChoco), firstReservation.getId());
+
+        //then
+        assertThat(memberReservationRepository.findById(waitingReservation.getId())).isNotNull();
+        assertThat(memberReservationRepository.findById(waitingReservation.getId()).get()
+                .getReservationStatus()).isEqualTo(ReservationStatus.APPROVED);
     }
 }

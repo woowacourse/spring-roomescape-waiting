@@ -19,6 +19,8 @@ logging:
   level:
     org.springframework:
       jdbc: DEBUG
+      transaction:
+        interceptor: trace
 
 security:
   jwt:

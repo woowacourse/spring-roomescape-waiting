@@ -34,7 +34,6 @@ import roomescape.reservation.domain.repository.dto.MyReservationProjection;
 import roomescape.reservation.service.dto.MemberReservationCreate;
 import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ServiceTest;
-import roomescape.waiting.service.WaitingReservationService;
 
 @DisplayName("예약 대기 로직 테스트")
 class WaitingReservationServiceTest extends ServiceTest {

@@ -20,7 +20,7 @@ import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.dto.MemberReservationCreate;
-import roomescape.waiting.service.WaitingReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 @RestController
 @RequestMapping("/admin")

@@ -37,7 +37,7 @@ import roomescape.reservation.service.dto.ReservationTimeCreate;
 import roomescape.reservation.service.dto.ThemeCreate;
 import roomescape.reservation.service.dto.WaitingCreate;
 import roomescape.util.ControllerTest;
-import roomescape.waiting.service.WaitingReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 @DisplayName("관리자 페이지 테스트")
 class AdminControllerTest extends ControllerTest {
