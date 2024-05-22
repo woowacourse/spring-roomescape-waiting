@@ -36,9 +36,9 @@ public class ReservationController {
                 memberRequest.getTimeId(),
                 memberRequest.getThemeId());
 
-        final ReservationResponse result = reservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
-                .body(result);
+        final ReservationResponse response = reservationService.create(request);
+        return ResponseEntity.created(URI.create("/reservations/" + response.getId()))
+                .body(response);
     }
 
     @GetMapping

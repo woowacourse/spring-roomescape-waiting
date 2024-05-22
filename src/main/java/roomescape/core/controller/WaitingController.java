@@ -33,9 +33,9 @@ public class WaitingController {
                 request.getTimeId(),
                 request.getThemeId());
 
-        final WaitingResponse result = waitingService.create(waitingRequest);
-        return ResponseEntity.created(URI.create("/waitings/" + result.getId()))
-                .body(result);
+        final WaitingResponse response = waitingService.create(waitingRequest);
+        return ResponseEntity.created(URI.create("/waitings/" + response.getId()))
+                .body(response);
     }
 
     @GetMapping

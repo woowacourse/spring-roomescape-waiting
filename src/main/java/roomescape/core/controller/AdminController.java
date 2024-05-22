@@ -48,9 +48,9 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationAsAdmin(
             @Valid @RequestBody final ReservationRequest request) {
-        final ReservationResponse result = adminReservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + result.getId()))
-                .body(result);
+        final ReservationResponse response = adminReservationService.create(request);
+        return ResponseEntity.created(URI.create("/reservations/" + response.getId()))
+                .body(response);
     }
 
     @GetMapping("/time")

@@ -75,10 +75,10 @@ public class MemberController {
 
     @PostMapping("/members")
     public ResponseEntity<MemberResponse> signupProcess(@RequestBody final MemberRequest request) {
-        final MemberResponse result = memberService.create(request);
+        final MemberResponse response = memberService.create(request);
 
-        return ResponseEntity.created(URI.create("/members/" + result.getId()))
-                .body(result);
+        return ResponseEntity.created(URI.create("/members/" + response.getId()))
+                .body(response);
     }
 
     @GetMapping("/members")
