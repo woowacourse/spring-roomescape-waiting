@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
@@ -64,5 +65,17 @@ public class WaitingService {
 
     public List<Waiting> findWaitingByMember(LoginMember member) {
         return waitingRepository.findByMemberId(member.getId());
+    }
+
+    public void deleteWaiting(long id) {
+        validateExistence(id);
+        waitingRepository.deleteById(id);
+    }
+
+    private void validateExistence(long id) {
+        boolean isNotExist = !waitingRepository.existsById(id);
+        if (isNotExist) {
+            throw new NotFoundException("[ERROR] 존재하지 않는 예약 대기입니다.");
+        }
     }
 }

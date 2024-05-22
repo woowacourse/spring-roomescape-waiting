@@ -5,6 +5,8 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -123,7 +125,7 @@ class WaitingControllerTest {
                 .statusCode(201)
                 .header("Location", "/reservations/waiting/" + (INITIAL_WAITING_COUNT + 1));
 
-        assertThat(countAllReservations()).isEqualTo(INITIAL_WAITING_COUNT + 1);
+        assertThat(countAll()).isEqualTo(INITIAL_WAITING_COUNT + 1);
     }
 
     @DisplayName("자신의 예약 대기 목록을 조회한다.")
@@ -142,7 +144,37 @@ class WaitingControllerTest {
         assertThat(responses).hasSize(15);
     }
 
-    private Integer countAllReservations() {
+    @DisplayName("존재하는 예약 대기라면 예약 대기를 삭제할 수 있다.")
+    @Test
+    void should_delete_reservation_waiting_when_reservation_waiting_exist() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/1")
+                .then().log().all()
+                .statusCode(204);
+
+        assertThat(countAll()).isEqualTo(INITIAL_WAITING_COUNT - 1);
+    }
+
+    @DisplayName("예약 대기 삭제 - id가 1 미만일 경우 예외를 반환한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "-1", "-999"})
+    void should_throw_exception_when_delete_by_invalid_id(String id) {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/" + id)
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("예약 대기 삭제 - id가 null일 경우 매퍼를 찾지 못하여 404 예외를 반환한다.")
+    @Test
+    void should_throw_exception_when_delete_by_id_null() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    private Integer countAll() {
         return jdbcTemplate.queryForObject("SELECT count(id) from waiting", Integer.class);
     }
 }

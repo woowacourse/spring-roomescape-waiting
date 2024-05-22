@@ -1,6 +1,8 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ReservationRequest;
@@ -31,6 +33,12 @@ public class WaitingController {
         return ResponseEntity
                 .created(URI.create("/reservations/waiting/" + waiting.getId()))
                 .body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/mine")
