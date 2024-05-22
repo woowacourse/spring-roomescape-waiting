@@ -49,6 +49,10 @@ public class Reservation {
         this(null, date, reservationTime, theme, member);
     }
 
+    public Reservation(Waiting waiting) {
+        this(waiting.getDate(), waiting.getReservationTime(), waiting.getTheme(), waiting.getMember());
+    }
+
     private void validateNotNull(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         if (date == null || reservationTime == null || theme == null || member == null) {
             throw new IllegalArgumentException("Reservation의 date, reservationTime, theme, member는 null일 수 없습니다.");

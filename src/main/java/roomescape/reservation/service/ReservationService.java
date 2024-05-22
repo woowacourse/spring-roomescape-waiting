@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
@@ -12,32 +13,38 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
 
+    //TODO: 이렇게 의존관계를 많이 두는게 최선인지 고민해보기
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository ReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = ReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse addReservation(
@@ -120,7 +127,22 @@ public class ReservationService {
                 .toList();
     }
 
+    // TODO: 메서드 분리
     public void deleteReservation(Long id) {
+        Reservation reservation = reservationRepository.getById(id);
+
         reservationRepository.deleteById(id);
+
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme()
+        );
+
+        if (firstWaiting.isPresent()) {
+            Waiting waiting = firstWaiting.get();
+            waitingRepository.deleteById(waiting.getId());
+            reservationRepository.save(new Reservation(waiting));
+        }
     }
 }

@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.member.domain.Member;
@@ -18,6 +19,10 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
             Theme theme,
             Member member
     );
+
+    Optional<Waiting> findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(LocalDate date,
+                                                                            ReservationTime reservationTime,
+                                                                            Theme theme);
 
     @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
             "    w, " +

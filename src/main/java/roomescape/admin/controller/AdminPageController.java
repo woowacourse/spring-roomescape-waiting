@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.WaitingService;
 
 @Controller
 @RequestMapping("/admin")
