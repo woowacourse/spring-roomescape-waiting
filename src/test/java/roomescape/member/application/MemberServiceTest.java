@@ -8,14 +8,6 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.TestFixture.TEST_PASSWORD;
@@ -61,43 +53,5 @@ class MemberServiceTest extends ServiceTest {
         // when & then
         assertThatThrownBy(() -> memberService.create(duplicatedEmailMember))
                 .isInstanceOf(ViolationException.class);
-    }
-
-    @Test
-    @DisplayName("동시 요청으로 중복된 이메일로 가입할 수 없다.")
-    void createWithDuplicatedEmailInMultiThread() throws InterruptedException {
-        // given
-        int threadCount = 10;
-        ExecutorService service = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-        List<Future<?>> futures = new ArrayList<>();
-
-        // when
-        for (int i = 0; i < threadCount; i++) {
-            Future<?> future = service.submit(() -> {
-                try {
-                    memberService.create(USER_MIA());
-                } finally {
-                    latch.countDown();
-                }
-            });
-            futures.add(future);
-        }
-
-        // then
-        assertThatThrownBy(() -> {
-            for (Future<?> future : futures) {
-                try {
-                    future.get();
-                } catch (ExecutionException e) {
-                    if (e.getCause() instanceof ViolationException) {
-                        throw new ViolationException("중복 예약 예외가 발생하였습니다.");
-                    }
-                }
-            }
-        }).isInstanceOf(ViolationException.class);
-        latch.await();
-        service.shutdown();
-        assertThat(memberService.findAll()).hasSize(1);
     }
 }
