@@ -25,6 +25,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
         on w.member = :member
         and w.reservation.slot.date >= :date
         and w.reservation = w2.reservation
+        join fetch w.reservation
+        join fetch w.reservation.slot.time
+        join fetch w.reservation.slot.theme
         where w2.id <= w.id
         group by w.reservation
     """)
