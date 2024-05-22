@@ -17,8 +17,8 @@ import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
 import roomescape.service.dto.theme.ThemeRequest;
+import roomescape.service.dto.time.ReservationTimeRequest;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

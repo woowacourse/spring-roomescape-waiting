@@ -26,7 +26,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeRequest;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

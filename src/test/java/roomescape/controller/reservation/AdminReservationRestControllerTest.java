@@ -23,10 +23,10 @@ import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.reservation.ReservationResponse;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
+import roomescape.service.dto.time.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

@@ -19,11 +19,11 @@ import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
 import roomescape.service.dto.member.MemberCreateRequest;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.time.AvailableTimeResponse;
 import roomescape.service.dto.time.AvailableTimeResponses;
+import roomescape.service.dto.time.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

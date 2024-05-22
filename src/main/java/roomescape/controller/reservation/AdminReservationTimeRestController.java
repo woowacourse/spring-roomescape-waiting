@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
+import roomescape.service.dto.time.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 @RestController
 public class AdminReservationTimeRestController {

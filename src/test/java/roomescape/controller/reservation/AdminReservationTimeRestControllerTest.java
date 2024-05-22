@@ -14,7 +14,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeRequest;
 
 @TestExecutionListeners(value = {
         DatabaseCleanupListener.class,

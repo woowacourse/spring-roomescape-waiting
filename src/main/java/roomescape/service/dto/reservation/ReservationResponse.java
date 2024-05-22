@@ -3,6 +3,7 @@ package roomescape.service.dto.reservation;
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.theme.ThemeResponse;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 public class ReservationResponse {
 

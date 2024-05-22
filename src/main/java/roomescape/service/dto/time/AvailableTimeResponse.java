@@ -1,7 +1,5 @@
 package roomescape.service.dto.time;
 
-import roomescape.service.dto.reservation.ReservationTimeResponse;
-
 public class AvailableTimeResponse {
 
     private final ReservationTimeResponse timeResponseDto;

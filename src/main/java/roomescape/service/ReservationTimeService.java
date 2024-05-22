@@ -9,11 +9,11 @@ import roomescape.exception.reservation.TimeDuplicatedException;
 import roomescape.exception.reservation.TimeUsingException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.service.dto.reservation.ReservationTimeRequest;
-import roomescape.service.dto.reservation.ReservationTimeResponse;
 import roomescape.service.dto.time.AvailableTimeRequest;
 import roomescape.service.dto.time.AvailableTimeResponse;
 import roomescape.service.dto.time.AvailableTimeResponses;
+import roomescape.service.dto.time.ReservationTimeRequest;
+import roomescape.service.dto.time.ReservationTimeResponse;
 
 @Service
 @Transactional
