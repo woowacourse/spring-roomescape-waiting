@@ -62,7 +62,7 @@ public class MemberReservation {
         }
     }
 
-    public void validateWaitingReservation() {
+    public void validateWaitingStatus() {
         if (isNotWaitingStatus()) {
             throw new BadRequestException("해당 예약은 대기 상태가 아닙니다.");
         }
@@ -72,10 +72,14 @@ public class MemberReservation {
         return status.isNotWaiting();
     }
 
-    public void validateRankCanConfirm(Long waitingRank) {
-        if (!waitingRank.equals(CAN_CONFIRM_RANK)) {
+    public void validateRankConfirm(Long waitingRank) {
+        if (!canConfirm(waitingRank)) {
             throw new BadRequestException("예약 대기는 순서대로 승인할 수 있습니다.");
         }
+    }
+
+    private boolean canConfirm(Long waitingRank) {
+        return waitingRank.equals(CAN_CONFIRM_RANK);
     }
 
     public void validateIsOwner(LoginMember loginMember) {

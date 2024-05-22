@@ -31,7 +31,7 @@ public class WaitingReservationService {
     @Transactional(rollbackFor = Exception.class)
     public void confirmWaitingReservation(Long id) {
         MemberReservation memberReservation = findMemberReservationById(id);
-        memberReservation.validateWaitingReservation();
+        memberReservation.validateWaitingStatus();
 
         Reservation reservation = memberReservation.getReservation();
         validateConfirmReservationExists(reservation);
@@ -56,6 +56,6 @@ public class WaitingReservationService {
         Long waitingRank = memberReservationRepository.countByReservationAndCreatedAtBefore(
                 reservation, memberReservation.getCreatedAt()
         );
-        memberReservation.validateRankCanConfirm(waitingRank);
+        memberReservation.validateRankConfirm(waitingRank);
     }
 }
