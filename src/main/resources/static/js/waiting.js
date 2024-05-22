@@ -26,44 +26,5 @@ function render(data) {
         row.insertCell(2).textContent = theme;         // 테마명
         row.insertCell(3).textContent = date;          // 예약 날짜
         row.insertCell(4).textContent = startAt;       // 시작 시간
-
-        const actionCell = row.insertCell(row.cells.length);
-
-        actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-        actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
-}
-
-function approve(event) {
-    const row = event.target.closest('tr');
-    const id = row.cells[0].textContent;
-
-    const endpoint = `/admin/reservations/waiting/${id}`;
-    return fetch(endpoint, {
-        method: 'PATCH'
-    }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
-}
-
-function deny(event) {
-    const row = event.target.closest('tr');
-    const id = row.cells[0].textContent;
-    
-    const endpoint = `/reservations/${id}`;
-    return fetch(endpoint, {
-        method: 'DELETE'
-    }).then(response => {
-        if (response.status === 200) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
-}
-
-function createActionButton(label, className, eventListener) {
-    const button = document.createElement('button');
-    button.textContent = label;
-    button.classList.add('btn', className, 'mr-2');
-    button.addEventListener('click', eventListener);
-    return button;
 }

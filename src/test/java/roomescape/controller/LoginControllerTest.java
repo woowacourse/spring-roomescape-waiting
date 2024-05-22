@@ -43,7 +43,6 @@ class LoginControllerTest {
                 .statusCode(200);
     }
 
-
     @DisplayName("인증 정보를 확인한다.")
     @Test
     void given_emailPassword_when_checkMember_then_statusCodeIsOk() {

@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,25 +23,14 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @DisplayName("예약 대기를 예약으로 전환한다.")
+    @DisplayName("예약을 삭제하면 예약 대기 1번째가 자동으로 예약된다.")
     @Test
-    void bookPendingReservation() {
-        //given
-        reservationRepository.deleteById(1L);
-
+    void delete() {
         //when
-        reservationService.bookPendingReservation(2L);
-        Reservation result = reservationRepository.findById(2L).orElseThrow();
+        reservationService.delete(1L);
+        Reservation reservation = reservationRepository.getReservationBy(2L);
 
         //then
-        assertThat(result.getStatus()).isEqualTo(ReservationStatus.BOOKING);
-    }
-
-    @DisplayName("예약 대기를 예약으로 전환시 BOOKING이 존재하면 예외가 발생한다.")
-    @Test
-    void bookingPendingReservationWhenAlreadyHasBooking() {
-        //when
-        assertThatThrownBy(() -> reservationService.bookPendingReservation(13L))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.BOOKING);
     }
 }

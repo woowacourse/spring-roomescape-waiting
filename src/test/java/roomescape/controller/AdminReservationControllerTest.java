@@ -188,22 +188,4 @@ class AdminReservationControllerTest {
                 .statusCode(200)
                 .body("size()", is(10));
     }
-
-    @DisplayName("예약 대기를 예약으로 전환하면 204 NO Content를 반환한다.")
-    @Test
-    void bookPendingReservations() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .when().delete("/reservations/{id}", 1)
-                .then().log().all()
-                .statusCode(204);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies("token", accessToken)
-                .when().patch("/admin/reservations/waiting/{id}", 13)
-                .then().log().all()
-                .statusCode(204);
-    }
 }

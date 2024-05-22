@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -110,25 +111,14 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    public void bookPendingReservation(Long id) {
         Reservation reservation = reservationRepository.getReservationBy(id);
-        validateAlreadyBooked(reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        reservation.updateStatusBooked();
-    }
-
-    private void validateAlreadyBooked(LocalDate date, TimeSlot timeSlot, Theme theme) {
-        boolean hasAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeAndStatusIs(
-                date,
-                timeSlot,
-                theme,
-                ReservationStatus.BOOKING
-        );
-        if (hasAlreadyBooked) {
-            throw new IllegalArgumentException("예약이 존재하여 변경할 수 없습니다.");
+        if (!reservation.getStatus().isPending()) {
+            Optional<Reservation> pendingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
+                    reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.PENDING);
+            pendingReservation.ifPresentOrElse(Reservation::updateStatusBooked, () -> {
+            });
         }
+        reservationRepository.deleteById(id);
     }
 
     private void validateDuplicatedReservation(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {

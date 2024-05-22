@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,11 +43,5 @@ public class AdminReservationController {
     @GetMapping("/reservations/waiting")
     public ResponseEntity<List<ReservationResponse>> findPendingReservations() {
         return ResponseEntity.ok(reservationService.findAllPending());
-    }
-
-    @PatchMapping("/reservations/waiting/{id}")
-    public ResponseEntity<Void> bookPendingReservation(@PathVariable Long id) {
-        reservationService.bookPendingReservation(id);
-        return ResponseEntity.noContent().build();
     }
 }

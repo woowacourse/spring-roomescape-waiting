@@ -31,13 +31,9 @@ class ReservationRepositoryTest {
                 .filter(reservationRank -> reservationRank.getReservation().getStatus().isPending())
                 .map(ReservationRank::getRank)
                 .toList();
-
-        System.out.println(pendingRanks);
-
         assertAll(
                 () -> assertThat(reservationRanksWithMember).hasSize(9),
                 () -> assertThat(pendingRanks).hasSize(3)
         );
-
     }
 }
