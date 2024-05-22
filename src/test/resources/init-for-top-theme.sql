@@ -1,47 +1,13 @@
-drop table if exists reservation;
-drop table if exists reservation_time;
-drop table if exists member;
-drop table if exists theme;
-
-CREATE TABLE reservation_time
-(
-    id   BIGINT       NOT NULL AUTO_INCREMENT,
-    start_at VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE theme
-(
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    thumbnail VARCHAR(255),
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE member
-(
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE reservation
-(
-    id   BIGINT       NOT NULL AUTO_INCREMENT,
-    date VARCHAR(255) NOT NULL,
-    member_id BIGINT NOT NULL,
-    time_id BIGINT NOT NULL,
-    theme_id BIGINT NOT NULL,
-    status VARCHAR(255),
-    PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
-    FOREIGN KEY (member_id) REFERENCES member (id)
-);
+SET REFERENTIAL_INTEGRITY FALSE;
+TRUNCATE TABLE reservation;
+ALTER TABLE  reservation ALTER COLUMN id RESTART;
+TRUNCATE TABLE reservation_time;
+ALTER TABLE  reservation_time ALTER COLUMN id RESTART;
+TRUNCATE TABLE member;
+ALTER TABLE  member ALTER COLUMN id RESTART;
+TRUNCATE TABLE theme;
+ALTER TABLE  theme ALTER COLUMN id RESTART;
+SET REFERENTIAL_INTEGRITY TRUE;
 
 insert into theme (name, description, thumbnail)
 values  ('name1',
