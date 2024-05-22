@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.PopularThemes;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.PopularThemeResponse;
-import roomescape.reservation.dto.ThemeCreateRequest;
-import roomescape.reservation.dto.ThemeResponse;
+import roomescape.reservation.dto.request.ThemeCreateRequest;
+import roomescape.reservation.dto.response.PopularThemeResponse;
+import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 

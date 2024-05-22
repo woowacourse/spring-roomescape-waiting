@@ -23,8 +23,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.config.ControllerConfig;
-import roomescape.reservation.dto.TimeCreateRequest;
-import roomescape.reservation.dto.TimeResponse;
+import roomescape.reservation.dto.request.TimeCreateRequest;
+import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 @WebMvcTest(ReservationTimeApiController.class)
