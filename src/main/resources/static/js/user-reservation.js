@@ -182,7 +182,7 @@ function onWaitButtonClick() {
       status: "WAITING"
     };
 
-    fetch('/reservations', {
+    fetch('/waitings', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

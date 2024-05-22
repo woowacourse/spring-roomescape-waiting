@@ -3,7 +3,6 @@ package roomescape.controller.reservation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.service.ReservationService;
 import roomescape.service.WaitingService;
 
 import java.util.List;
@@ -12,22 +11,20 @@ import java.util.List;
 @RestController
 public class AdminWaitingController {
 
-    private final ReservationService reservationService;
     private final WaitingService waitingService;
 
-    public AdminWaitingController(final ReservationService reservationService, final WaitingService waitingService) {
-        this.reservationService = reservationService;
+    public AdminWaitingController(final WaitingService waitingService) {
         this.waitingService = waitingService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservationWaitings() {
-        return ResponseEntity.ok(reservationService.findReservationWaitings());
+        return ResponseEntity.ok(waitingService.findReservationWaitings());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> approveReservationWaiting(@PathVariable final Long id) {
-        reservationService.approveReservationWaiting(id);
+        waitingService.approveReservationWaiting(id);
         return ResponseEntity.ok().build();
     }
 

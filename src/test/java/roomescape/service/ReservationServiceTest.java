@@ -21,7 +21,6 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -177,55 +176,5 @@ class ReservationServiceTest {
                 () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
                 () -> assertThat(actual.get(0).getRank()).isEqualTo(1L)
         );
-    }
-
-    @Test
-    @DisplayName("예약 대기 목록을 조회한다.")
-    void findReservationWaitings() {
-        // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
-        given(reservationRepository.findByStatus(ReservationStatus.WAITING))
-                .willReturn(List.of(reservation));
-
-        // when
-        final List<ReservationResponse> actual = reservationService.findReservationWaitings();
-
-        // then
-        assertThat(actual).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("예약 대기를 승인한다.")
-    void approveReservationWaiting() {
-        // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
-        given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
-        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
-                waiting.getTime(), ReservationStatus.RESERVED))
-                .willReturn(false);
-
-        // when
-        reservationService.approveReservationWaiting(waiting.getId());
-
-        // then
-        assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-    }
-
-    @Test
-    @DisplayName("이미 예약이 있는 상태에서 승인을 할 경우 예외가 발생한다.")
-    void throwExceptionWhenAlreadyExistsReservation() {
-        // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH),
-                RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
-        given(reservationRepository.findById(waiting.getId())).willReturn(Optional.of(waiting));
-        given(reservationRepository.existsByThemeAndDateAndTimeAndStatus(waiting.getTheme(), waiting.getDate(),
-                waiting.getTime(), ReservationStatus.RESERVED))
-                .willReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.approveReservationWaiting(waiting.getId()))
-                .isInstanceOf(IllegalStateException.class);
     }
 }

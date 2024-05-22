@@ -101,38 +101,4 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         assertGetResponseWithLogin(MEMBER_MIA_EMAIL, "/reservations/mine", 200);
     }
-    
-    @Test
-    @DisplayName("예약 대기 목록을 성공적으로 조회하면 200을 응답한다.")
-    void respondOkWhenFindReservationWaitings() {
-        saveReservationWaiting();
-
-        assertGetResponseWithLogin(ADMIN_EMAIL, "/admin/reservations", 200);
-    }
-
-    @Test
-    @DisplayName("예약 대기를 성공적으로 승인하면 200을 응답한다.")
-    void respondOkWhenApproveReservationWaiting() {
-        final Long id = saveReservationWaiting();
-        final String accessToken = getAccessToken(ADMIN_EMAIL);
-
-        RestAssured.given().log().all()
-                .cookie("token", accessToken)
-                .when().put("/admin/waitings/" + id)
-                .then().log().all()
-                .statusCode(200);
-    }
-
-    @Test
-    @DisplayName("예약 대기를 성공적으로 거절하면 204를 응답한다.")
-    void responseNoContentWhenRejectReservationWaiting() {
-        final Long waitingId = saveReservationWaiting();
-        final String accessToken = getAccessToken(ADMIN_EMAIL);
-
-        RestAssured.given().log().all()
-                .cookie("token", accessToken)
-                .when().delete("/admin/waitings/" + waitingId)
-                .then().log().all()
-                .statusCode(204);
-    }
 }
