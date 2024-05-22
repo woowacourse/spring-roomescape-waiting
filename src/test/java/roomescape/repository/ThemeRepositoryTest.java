@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.TestFixture;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemePopularFilter;
 
@@ -16,8 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.THEME_DETECTIVE;
-import static roomescape.TestFixture.THEME_HORROR;
 
 @Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,14 +29,14 @@ class ThemeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        theme = themeRepository.save(THEME_DETECTIVE());
+        theme = themeRepository.save(TestFixture.THEME_ANIME());
     }
 
     @Test
     @DisplayName("테마를 저장한다.")
     void save() {
         // given
-        final Theme theme = THEME_HORROR();
+        final Theme theme = TestFixture.THEME_COMIC();
 
         // when
         final Theme actual = themeRepository.save(theme);

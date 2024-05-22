@@ -14,12 +14,12 @@ import roomescape.dto.theme.ThemeSaveRequest;
 
 import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
-import static roomescape.TestFixture.MEMBER_MIA_EMAIL;
+import static roomescape.TestFixture.MEMBER_CAT_EMAIL;
 import static roomescape.TestFixture.MEMBER_PASSWORD;
 import static roomescape.TestFixture.START_AT_SIX;
-import static roomescape.TestFixture.THEME_HORROR_DESCRIPTION;
-import static roomescape.TestFixture.THEME_HORROR_NAME;
-import static roomescape.TestFixture.THEME_HORROR_THUMBNAIL;
+import static roomescape.TestFixture.THEME_COMIC_DESCRIPTION;
+import static roomescape.TestFixture.THEME_COMIC_NAME;
+import static roomescape.TestFixture.THEME_COMIC_THUMBNAIL;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class AcceptanceTest {
@@ -49,7 +49,7 @@ abstract class AcceptanceTest {
 
     protected Long saveTheme() {
         final ThemeSaveRequest request
-                = new ThemeSaveRequest(THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
+                = new ThemeSaveRequest(THEME_COMIC_NAME, THEME_COMIC_DESCRIPTION, THEME_COMIC_THUMBNAIL);
 
         Integer id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -66,7 +66,7 @@ abstract class AcceptanceTest {
     protected Long saveReservation() {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_CAT_EMAIL);
         final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
         Integer id = RestAssured.given().log().all()

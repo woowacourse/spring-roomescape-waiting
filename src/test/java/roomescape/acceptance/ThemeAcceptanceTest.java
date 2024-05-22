@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.dto.theme.ThemeSaveRequest;
 
-import static roomescape.TestFixture.*;
+import static roomescape.TestFixture.THEME_COMIC_DESCRIPTION;
+import static roomescape.TestFixture.THEME_COMIC_NAME;
+import static roomescape.TestFixture.THEME_COMIC_THUMBNAIL;
 
 class ThemeAcceptanceTest extends AcceptanceTest {
 
@@ -12,7 +14,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("테마를 성공적으로 생성하면 201을 응답한다.")
     void respondCreatedWhenCreateTheme() {
         final ThemeSaveRequest request
-                = new ThemeSaveRequest(THEME_HORROR_NAME, THEME_HORROR_DESCRIPTION, THEME_HORROR_THUMBNAIL);
+                = new ThemeSaveRequest(THEME_COMIC_NAME, THEME_COMIC_DESCRIPTION, THEME_COMIC_THUMBNAIL);
 
         assertCreateResponse(request, "/themes", 201);
     }

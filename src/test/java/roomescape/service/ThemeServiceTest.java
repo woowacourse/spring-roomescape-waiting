@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static roomescape.TestFixture.THEME_DETECTIVE;
-import static roomescape.TestFixture.THEME_HORROR;
+import static roomescape.TestFixture.THEME_ANIME;
+import static roomescape.TestFixture.THEME_COMIC;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -35,7 +35,7 @@ class ThemeServiceTest {
     @DisplayName("테마를 생성한다.")
     void create() {
         // given
-        final Theme expectedTheme = THEME_HORROR(1L);
+        final Theme expectedTheme = THEME_COMIC(1L);
 
         given(themeRepository.save(any())).willReturn(expectedTheme);
 
@@ -50,7 +50,7 @@ class ThemeServiceTest {
     @DisplayName("테마 목록을 조회한다.")
     void findAll() {
         // given
-        final List<Theme> expectedThemes = List.of(THEME_HORROR(1L));
+        final List<Theme> expectedThemes = List.of(THEME_COMIC(1L));
 
         given(themeRepository.findAll()).willReturn(expectedThemes);
 
@@ -58,7 +58,7 @@ class ThemeServiceTest {
         final List<ThemeResponse> actual = themeService.findAll();
 
         // then
-        final ThemeResponse expectedResponse = ThemeResponse.from(THEME_HORROR(1L));
+        final ThemeResponse expectedResponse = ThemeResponse.from(THEME_COMIC(1L));
         assertThat(actual).hasSize(1)
                 .containsExactly(expectedResponse);
     }
@@ -67,7 +67,7 @@ class ThemeServiceTest {
     @DisplayName("Id로 테마를 조회한다.")
     void findById() {
         // given
-        final Theme expectedTheme = THEME_HORROR(1L);
+        final Theme expectedTheme = THEME_COMIC(1L);
 
         given(themeRepository.findById(anyLong())).willReturn(Optional.of(expectedTheme));
 
@@ -96,7 +96,7 @@ class ThemeServiceTest {
     @DisplayName("테마를 삭제한다.")
     void deleteById() {
         // given
-        final Theme theme = THEME_HORROR(1L);
+        final Theme theme = THEME_COMIC(1L);
 
         given(themeRepository.findById(anyLong())).willReturn(Optional.of(theme));
 
@@ -121,15 +121,15 @@ class ThemeServiceTest {
     @DisplayName("인기 테마 목록을 조회한다.")
     void findAllPopular() {
         // given
-        final List<Theme> expectedThemes = List.of(THEME_HORROR(1L), THEME_DETECTIVE(2L));
+        final List<Theme> expectedThemes = List.of(THEME_COMIC(1L), THEME_ANIME(2L));
         given(themeRepository.findPopularThemesBy(any(), any())).willReturn(expectedThemes);
 
         // when
         final List<ThemeResponse> actual = themeService.findPopularThemes();
 
         // then
-        final ThemeResponse expectedTheme1 = ThemeResponse.from(THEME_HORROR(1L));
-        final ThemeResponse expectedTheme2 = ThemeResponse.from(THEME_DETECTIVE(2L));
+        final ThemeResponse expectedTheme1 = ThemeResponse.from(THEME_COMIC(1L));
+        final ThemeResponse expectedTheme2 = ThemeResponse.from(THEME_ANIME(2L));
         assertThat(actual).hasSize(2)
                 .containsExactly(expectedTheme1, expectedTheme2);
     }

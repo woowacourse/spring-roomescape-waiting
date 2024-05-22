@@ -30,15 +30,13 @@ import static roomescape.TestFixture.ADMIN;
 import static roomescape.TestFixture.ADMIN_NAME;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.DATE_MAY_NINTH;
-import static roomescape.TestFixture.MEMBER_MIA;
 import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
 import static roomescape.TestFixture.START_AT_SEVEN;
 import static roomescape.TestFixture.START_AT_SIX;
-import static roomescape.TestFixture.THEME_DETECTIVE;
-import static roomescape.TestFixture.THEME_DETECTIVE_NAME;
-import static roomescape.TestFixture.THEME_HORROR;
-import static roomescape.TestFixture.THEME_HORROR_NAME;
+import static roomescape.TestFixture.THEME_ANIME_NAME;
+import static roomescape.TestFixture.THEME_COMIC;
+import static roomescape.TestFixture.THEME_COMIC_NAME;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -59,7 +57,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 생성한다.")
     void create() {
         // given
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC());
         given(reservationRepository.save(reservation))
                 .willReturn(new Reservation(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme()));
 
@@ -75,7 +73,7 @@ class ReservationServiceTest {
     @MethodSource("invalidLocalDate")
     @DisplayName("예약 날짜가 현재 날짜 이후가 아닌 경우 예외가 발생한다.")
     void throwExceptionWhenInvalidDate(final LocalDate invalidDate) {
-        assertThatThrownBy(() -> reservationService.create(new Reservation(MEMBER_MIA(), invalidDate, RESERVATION_TIME_SIX(), THEME_HORROR())))
+        assertThatThrownBy(() -> reservationService.create(new Reservation(TestFixture.MEMBER_CAT(), invalidDate, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC())))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -83,8 +81,8 @@ class ReservationServiceTest {
     @DisplayName("동일한 테마, 날짜, 시간에 예약이 초과된 경우 예외가 발생한다.")
     void throwExceptionWhenCreateDuplicatedReservation() {
         // given
-        final Theme theme = THEME_HORROR(1L);
-        final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
+        final Theme theme = THEME_COMIC(1L);
+        final Reservation reservation = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), theme);
         given(reservationRepository.countByDateAndTime_IdAndTheme_Id(DATE_MAY_EIGHTH, RESERVATION_TIME_SIX().getId(), theme.getId()))
                 .willReturn(1);
 
@@ -97,8 +95,8 @@ class ReservationServiceTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAllReservations() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), THEME_DETECTIVE());
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC());
+        final Reservation reservation2 = new Reservation(ADMIN(), DATE_MAY_EIGHTH, RESERVATION_TIME_SEVEN(), TestFixture.THEME_ANIME());
         given(reservationRepository.findAll())
                 .willReturn(List.of(reservation1, reservation2));
 
@@ -109,7 +107,7 @@ class ReservationServiceTest {
         assertAll(() -> {
             assertThat(reservations).hasSize(2)
                     .extracting(ReservationResponse::name)
-                    .containsExactly(TestFixture.MEMBER_MIA_NAME, ADMIN_NAME);
+                    .containsExactly(TestFixture.MEMBER_CAT_NAME, ADMIN_NAME);
             assertThat(reservations).extracting(ReservationResponse::date)
                     .containsExactly(DATE_MAY_EIGHTH, DATE_MAY_EIGHTH);
             assertThat(reservations).extracting(ReservationResponse::time)
@@ -117,7 +115,7 @@ class ReservationServiceTest {
                     .containsExactly(START_AT_SIX, START_AT_SEVEN);
             assertThat(reservations).extracting(ReservationResponse::theme)
                     .extracting(ReservedThemeResponse::name)
-                    .containsExactly(THEME_HORROR_NAME, THEME_DETECTIVE_NAME);
+                    .containsExactly(THEME_COMIC_NAME, THEME_ANIME_NAME);
         });
     }
 
@@ -125,8 +123,8 @@ class ReservationServiceTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // given
-        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), THEME_HORROR());
-        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), THEME_HORROR());
+        final Reservation reservation1 = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_EIGHTH, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC());
+        final Reservation reservation2 = new Reservation(TestFixture.MEMBER_CAT(), DATE_MAY_NINTH, RESERVATION_TIME_SIX(), TestFixture.THEME_COMIC());
         final ReservationFilterParam reservationFilterParam = new ReservationFilterParam(
                 1L, 1L, LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")
         );
@@ -142,13 +140,13 @@ class ReservationServiceTest {
         assertAll(() -> {
             assertThat(reservations).hasSize(2)
                     .extracting(ReservationResponse::name)
-                    .containsExactly(TestFixture.MEMBER_MIA_NAME, TestFixture.MEMBER_MIA_NAME);
+                    .containsExactly(TestFixture.MEMBER_CAT_NAME, TestFixture.MEMBER_CAT_NAME);
             assertThat(reservations).extracting(ReservationResponse::time)
                     .extracting(ReservationTimeResponse::startAt)
                     .containsExactly(START_AT_SIX, START_AT_SIX);
             assertThat(reservations).extracting(ReservationResponse::theme)
                     .extracting(ReservedThemeResponse::name)
-                    .containsExactly(THEME_HORROR_NAME, THEME_HORROR_NAME);
+                    .containsExactly(THEME_COMIC_NAME, THEME_COMIC_NAME);
         });
     }
 

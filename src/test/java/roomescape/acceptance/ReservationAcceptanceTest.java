@@ -8,7 +8,7 @@ import roomescape.dto.reservation.ReservationSaveRequest;
 
 import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
-import static roomescape.TestFixture.MEMBER_MIA_EMAIL;
+import static roomescape.TestFixture.MEMBER_CAT_EMAIL;
 
 class ReservationAcceptanceTest extends AcceptanceTest {
 
@@ -19,7 +19,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final Long themeId = saveTheme();
         final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId);
 
-        assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 201);
+        assertCreateResponseWithToken(request, MEMBER_CAT_EMAIL, "/reservations", 201);
     }
 
     @Test
@@ -39,7 +39,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final Long themeId = saveTheme();
         final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, 0L, themeId);
 
-        assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
+        assertCreateResponseWithToken(request, MEMBER_CAT_EMAIL, "/reservations", 400);
     }
 
     @Test
@@ -49,7 +49,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         final Long timeId = saveReservationTime();
         final MemberReservationSaveRequest request = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, 0L);
 
-        assertCreateResponseWithToken(request, MEMBER_MIA_EMAIL, "/reservations", 400);
+        assertCreateResponseWithToken(request, MEMBER_CAT_EMAIL, "/reservations", 400);
     }
 
     @Test
@@ -64,7 +64,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("테마, 사용자, 예약 날짜로 예약 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFilteredFindReservations() {
         saveReservation();
-        final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
+        final String accessToken = getAccessToken(MEMBER_CAT_EMAIL);
 
         RestAssured.given().log().all()
                 .queryParam("themeId", 1L)

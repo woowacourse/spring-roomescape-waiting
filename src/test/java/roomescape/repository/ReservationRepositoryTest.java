@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.TestFixture;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -19,7 +20,6 @@ import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.DATE_MAY_NINTH;
 import static roomescape.TestFixture.MEMBER_BROWN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
-import static roomescape.TestFixture.THEME_HORROR;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -48,7 +48,7 @@ class ReservationRepositoryTest {
     void setUp() {
         member = memberRepository.save(MEMBER_BROWN());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
-        theme = themeRepository.save(THEME_HORROR());
+        theme = themeRepository.save(TestFixture.THEME_COMIC());
         reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme));
         testEntityManager.clear();
     }
