@@ -27,7 +27,8 @@ public class WaitingService {
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
-    public WaitingService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository,
+    public WaitingService(ReservationRepository reservationRepository,
+                          ReservationTimeRepository reservationTimeRepository,
                           ThemeRepository themeRepository,
                           MemberRepository memberRepository,
                           WaitingRepository waitingRepository
@@ -45,22 +46,30 @@ public class WaitingService {
         ReservationTime reservationTime = getReservationTime(waitingRequest.timeId());
         Theme theme = getTheme(waitingRequest.themeId());
 
-        validateIsPastTime(waitingRequest.date(), reservationTime);
-
-        if (waitingRepository.existsWaitingByDateAndAndThemeAndMember(waitingRequest.date(), theme, member)) {
-            throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
-        }
-
-        if (reservationRepository.existsByTimeAndDateAndThemeAndMember(reservationTime, waitingRequest.date(), theme, member)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
-        }
+        validateIsWaitingInThePast(waitingRequest.date(), reservationTime);
+        validateMemberWaitingAlreadyExist(waitingRequest.date(), theme, member);
+        validateMemberReservationAlreadyExist(waitingRequest.date(), reservationTime, theme, member);
 
         Waiting waiting = waitingRequest.toEntity(member, reservationTime, theme);
         Waiting savedReservation = waitingRepository.save(waiting);
         return WaitingResponse.from(savedReservation);
     }
 
-    private void validateIsPastTime(LocalDate date, ReservationTime time) {
+    private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
+        if (waitingRepository.existsWaitingByDateAndAndThemeAndMember(date, theme, member)) {
+            throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
+        }
+    }
+
+    private void validateMemberReservationAlreadyExist(LocalDate date, ReservationTime reservationTime, Theme theme,
+                                                       Member member) {
+        if (reservationRepository.existsByTimeAndDateAndThemeAndMember(reservationTime, date, theme,
+                member)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void validateIsWaitingInThePast(LocalDate date, ReservationTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
             throw new CustomException(ExceptionCode.PAST_TIME_SLOT_RESERVATION);

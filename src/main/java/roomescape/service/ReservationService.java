@@ -10,7 +10,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
@@ -49,24 +48,28 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        // 해당 시간에 이미 예약이 존재시 불가능
-        if (reservationRepository.existsByDateAndTimeAndTheme(reservationRequest.date(), reservationTime, theme)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
-        }
-        // 과거 시간 예약 불가능
-        validateIsPastTime(reservationRequest.date(), reservationTime);
-
-        // 해당 회원이 해당 날짜, 테마에 예약이 존재시 다른 예약 시간으로 예약 불가능
-        if (reservationRepository.existsByDateAndThemeAndMember(reservationRequest.date(), theme, member)) {
-            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
-        }
+        validateIsTimeSlotAlreadyReserved(reservationRequest.date(), reservationTime, theme);
+        validateIsReservationInThePast(reservationRequest.date(), reservationTime);
+        validateMemberAlreadyReservedThemeOnDate(reservationRequest.date(), theme, member);
 
         Reservation reservation = reservationRequest.toEntity(member, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateIsPastTime(LocalDate date, ReservationTime time) {
+    private void validateMemberAlreadyReservedThemeOnDate(LocalDate date, Theme theme, Member member) {
+        if (reservationRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void validateIsTimeSlotAlreadyReserved(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void validateIsReservationInThePast(LocalDate date, ReservationTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
             throw new CustomException(ExceptionCode.PAST_TIME_SLOT_RESERVATION);
@@ -94,14 +97,13 @@ public class ReservationService {
     public List<MyReservationResponse> findAllByMemberId(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
 
-        List<MyReservationResponse> reservationResponses = new java.util.ArrayList<>(reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList());
+        List<MyReservationResponse> reservationResponses = new java.util.ArrayList<>(
+                reservationRepository.findAllByMember(member).stream()
+                        .map(MyReservationResponse::from)
+                        .toList());
 
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(id);
-        List<MyReservationResponse> waitingResponses = waitingWithRanks.stream()
+        List<MyReservationResponse> waitingResponses = waitingRepository.findWaitingsWithRankByMemberId(id).stream()
                 .map(MyReservationResponse::from)
                 .toList();
 
@@ -114,14 +116,18 @@ public class ReservationService {
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
 
         Optional<Waiting> waiting = waitingRepository.findFirstByDateAndThemeAndTime(
-
                 reservation.getDate(), reservation.getTheme(),
                 reservation.getTime());
-        if (waiting.isPresent()) {
-        waiting.ifPresent(waitingRepository::delete);
-        reservationRepository.save(waiting.get().toReservation());
-        }
+        convertFirstWaitingToReservation(waiting);
+
         reservationRepository.deleteById(id);
+    }
+
+    private void convertFirstWaitingToReservation(Optional<Waiting> waiting) {
+        if (waiting.isPresent()) {
+            waiting.ifPresent(waitingRepository::delete);
+            reservationRepository.save(waiting.get().toReservation());
+        }
     }
 
     private Theme getTheme(Long id) {
