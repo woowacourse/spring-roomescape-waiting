@@ -10,12 +10,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.codehaus.groovy.classgen.asm.AssertionWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
+import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
@@ -136,5 +139,24 @@ class WaitingServiceTest {
 
         List<Waiting> waitings = waitingRepository.findAll();
         assertThat(waitings).isEmpty();
+    }
+
+    @Test
+    @DisplayName("모든 예약 대기를 생성 순서에 따라 조회한다.")
+    void readAllWaiting() {
+        Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
+        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+
+        Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
+        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+
+        List<ReservationStatusResponse> reservationResponses1 = waitingService.findAllByMemberId(member1.getId());
+        List<ReservationStatusResponse> reservationResponses2 = waitingService.findAllByMemberId(member2.getId());
+        assertAll(
+                () -> assertThat(reservationResponses1.size()).isEqualTo(1),
+                () -> assertThat(reservationResponses2.size()).isEqualTo(1),
+                () -> assertThat(reservationResponses1.get(0).status()).contains("2번째"),
+                () -> assertThat(reservationResponses2.get(0).status()).contains("1번째")
+        );
     }
 }

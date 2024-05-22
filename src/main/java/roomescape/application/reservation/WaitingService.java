@@ -2,10 +2,15 @@ package roomescape.application.reservation;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
@@ -90,5 +95,22 @@ public class WaitingService {
             return;
         }
         throw new UnAuthorizedException();
+    }
+
+    public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
+        List<Waiting> waitings = waitingRepository.findAllByMemberIdOrderByCreatedAtAsc(memberId);
+        return waitings.stream()
+                .map(this::makeReservationStatus)
+                .collect(Collectors.toList());
+
+    }
+
+    private ReservationStatusResponse makeReservationStatus(Waiting waiting) {
+        if(waiting.getWaitingStatus().isWaiting()) {
+            List<Waiting> sameReservationWaitings =
+                    waitingRepository.findByReservationIdOrderByCreatedAtAsc(waiting.getReservation().getId());
+            return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + 1);
+        }
+       return ReservationStatusResponse.from(waiting);
     }
 }

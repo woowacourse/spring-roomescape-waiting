@@ -2,7 +2,10 @@ package roomescape.presentation.reservation;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +40,13 @@ public class ReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<List<ReservationStatusResponse>> findMyReservations(@LoginMemberId long memberId) {
-        List<ReservationStatusResponse> responses = reservationService.findAllByMemberId(memberId);
-        return ResponseEntity.ok(responses);
+        List<ReservationStatusResponse> reservationResponses = reservationService.findAllByMemberId(memberId);
+        List<ReservationStatusResponse> waitingResponses = waitingService.findAllByMemberId(memberId);
+
+        return ResponseEntity.ok(
+                Stream.concat(reservationResponses.stream(), waitingResponses.stream())
+                .collect(Collectors.toList())
+        );
     }
 
     @PostMapping

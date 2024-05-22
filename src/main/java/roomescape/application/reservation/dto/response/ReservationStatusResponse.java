@@ -2,13 +2,16 @@ package roomescape.application.reservation.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingStatus;
 
 public record ReservationStatusResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,
@@ -24,6 +27,32 @@ public record ReservationStatusResponse(
                 reservation.getDate(),
                 time.getStartAt(),
                 status.getStatus()
+        );
+    }
+
+    public static ReservationStatusResponse from(Waiting waiting) {
+        Theme theme = waiting.getReservation().getTheme();
+        ReservationTime time = waiting.getReservation().getTime();
+        WaitingStatus status = waiting.getWaitingStatus();
+        return new ReservationStatusResponse(
+                waiting.getId(),
+                theme.getName(),
+                waiting.getReservation().getDate(),
+                time.getStartAt(),
+                status.getStatus()
+        );
+    }
+
+    public static ReservationStatusResponse of(Waiting waiting, int index) {
+        Theme theme = waiting.getReservation().getTheme();
+        ReservationTime time = waiting.getReservation().getTime();
+        WaitingStatus status = waiting.getWaitingStatus();
+        return new ReservationStatusResponse(
+                waiting.getId(),
+                theme.getName(),
+                waiting.getReservation().getDate(),
+                time.getStartAt(),
+                index + "번째 " + status.getStatus()
         );
     }
 }

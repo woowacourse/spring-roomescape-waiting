@@ -11,6 +11,10 @@ public enum WaitingStatus {
         this.status = status;
     }
 
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
+
     public String getStatus() {
         return status;
     }
