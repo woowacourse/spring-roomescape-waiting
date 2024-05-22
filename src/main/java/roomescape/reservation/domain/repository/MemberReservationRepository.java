@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +27,8 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<MemberReservation> findBy(Long memberId, Long themeId, LocalDate startDate, LocalDate endDate);
 
     List<MemberReservation> findAllByMember(Member member);
+
+    List<MemberReservation> findAllByStatus(ReservationStatus status);
 
     @Query("""
     SELECT count(*)

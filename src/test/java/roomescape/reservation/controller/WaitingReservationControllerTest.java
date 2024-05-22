@@ -8,16 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.service.TokenProvider;
 import roomescape.fixture.MemberReservationFixture;
-import roomescape.fixture.ReservationFixture;
-import roomescape.fixture.ReservationTimeFixture;
-import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.util.ControllerTest;
 
 import java.time.format.DateTimeFormatter;
