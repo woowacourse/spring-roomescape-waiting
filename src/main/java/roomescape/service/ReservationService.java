@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
@@ -17,7 +16,9 @@ import roomescape.domain.reservation.WaitingRanks;
 import roomescape.domain.reservation.WaitingRepository;
 import roomescape.domain.reservation.dto.ReservationReadOnly;
 import roomescape.domain.reservation.slot.ReservationSlot;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.RoomEscapeBusinessException;
+import roomescape.service.dto.LoginMember;
 import roomescape.service.dto.ReservationBookedResponse;
 import roomescape.service.dto.ReservationConditionRequest;
 import roomescape.service.dto.ReservationResponse;
@@ -54,7 +55,6 @@ public class ReservationService {
         if (reservation.isPresent()) {
             Reservation foundReservation = reservation.get();
             Waiting waiting = foundReservation.addWaiting(member);
-
             waitingRepository.save(waiting);
             return ReservationResponse.createByWaiting(waiting);
         }
@@ -117,16 +117,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelWaiting(Long id) {
+    public void cancelWaiting(Long id, LoginMember loginMember) {
         Waiting foundWaiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 대기입니다."));
 
-        waitingRepository.delete(foundWaiting);
-    }
+        if (loginMember.isUser() && foundWaiting.isMemberId(loginMember.id())) {
+            throw new AuthorizationException();
+        }
 
-    @Transactional(readOnly = true)
-    public Long findMemberIdByWaitingId(Long waitingId) {
-        return waitingRepository.findMemberIdById(waitingId);
+        waitingRepository.delete(foundWaiting);
     }
 
     private Member findMemberById(Long memberId) {

@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.UserReservationSaveRequest;
-import roomescape.service.dto.ReservationStatus;
-import roomescape.exception.AuthorizationException;
 import roomescape.infrastructure.Login;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.LoginMember;
 import roomescape.service.dto.ReservationResponse;
 import roomescape.service.dto.ReservationSaveRequest;
+import roomescape.service.dto.ReservationStatus;
 import roomescape.service.dto.UserReservationResponse;
 
 @RestController
@@ -57,12 +56,7 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> cancelWaiting(@Login LoginMember member, @PathVariable Long id) {
-        Long memberId = reservationService.findMemberIdByWaitingId(id);
-        if (member.isUser() && member.isNotSameId(memberId)) {
-            throw new AuthorizationException();
-        }
-
-        reservationService.cancelWaiting(id);
+        reservationService.cancelWaiting(id, member);
         return ResponseEntity.noContent().build();
     }
 }

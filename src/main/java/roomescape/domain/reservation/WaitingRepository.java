@@ -9,9 +9,6 @@ import roomescape.domain.reservation.dto.WaitingReadOnly;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    @Query("select w.member.id from Waiting w where w.id = :id")
-    Long findMemberIdById(Long id);
-
     @Query("""
             select new roomescape.domain.reservation.dto.WaitingReadOnly(
             w.id,
