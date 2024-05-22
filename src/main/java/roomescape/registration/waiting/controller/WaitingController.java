@@ -21,7 +21,6 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-    // 예약 대기 버튼을 누르면 이 메서드가 실행된다.
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> createWaiting(@RequestBody WaitingRequest waitingRequest,
                                                          @LoginMemberId long memberId) {
@@ -30,7 +29,6 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(waiting);
     }
 
-    // 해당 uri로 검색하면 이 메서드가 실행된다
     @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> waitingList() {
         List<WaitingResponse> waitings = waitingService.findWaitings();
