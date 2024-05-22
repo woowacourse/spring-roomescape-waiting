@@ -27,7 +27,7 @@
 
 -[ ] 관리자 예약 대기 관리 기능
     - [x] 관리자 예약 대기 관리 페이지 추가
-    - [ ] 전체 예약 대기 목록 조회
+    - [x] 전체 예약 대기 목록 조회
     - [ ] 예약 대기 취소
 - [ ] 예약 대기 승인
     - [ ] 예약 취소가 발생하면 우선순위에 따라 자동으로 예약으로 전환
@@ -115,4 +115,29 @@ cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvb
 
 ```http request
 HTTP/1.1 204
+```
+
+### 관리자 전체 예약 대기 목록 조회
+
+#### request
+```http request
+GET/admin/waitings
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTcxNjM3MTA4NiwiZXhwIjoxNzE2Mzc0Njg2fQ.4PoyEWxALi18Z7Hz3XBxwFqFuANGnudm3OTc4BrpLFY
+```
+
+#### response
+```http request
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "memberName": "wedge",
+        "theme": "레벨1 탈출",
+        "date": "2024-04-30",
+        "time": "10:00",
+        "status": "예약대기"
+    }
+]
 ```

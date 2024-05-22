@@ -102,4 +102,10 @@ public class WaitingService {
         }
         waitingRepository.deleteById(waitingId);
     }
+
+    public List<WaitingResponse> findEntireWaitingList() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
 }
