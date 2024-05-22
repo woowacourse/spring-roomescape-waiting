@@ -38,64 +38,57 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(final ReservationRequest request) {
-        final Member member = getMember(request);
-        final ReservationTime reservationTime = getReservationTime(request);
-        final Theme theme = getTheme(request);
-        final Reservation reservation = new Reservation(
-                member, request.getDate(), reservationTime, theme, Status.BOOKED, LocalDateTime.now());
-
-        validateDuplicatedReservation(reservation);
-        reservation.validateDateAndTime();
-
-        final Reservation savedReservation = reservationRepository.save(reservation);
-
-        return new ReservationResponse(savedReservation.getId(), savedReservation);
+        return createReservation(request, Status.BOOKED);
     }
 
     @Transactional
     public ReservationResponse createWaiting(final ReservationRequest request) {
+        return createReservation(request, Status.STANDBY);
+    }
+
+    private ReservationResponse createReservation(final ReservationRequest request, final Status status) {
         final Member member = getMember(request);
         final ReservationTime reservationTime = getReservationTime(request);
         final Theme theme = getTheme(request);
         final Reservation reservation = new Reservation(
-                member, request.getDate(), reservationTime, theme, Status.STANDBY, LocalDateTime.now());
+                member, request.getDate(), reservationTime, theme, status, LocalDateTime.now());
 
-        validateDuplicatedMemberWaiting(reservation);
+        validateDuplicateReservation(status, reservation);
         reservation.validateDateAndTime();
 
         final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation.getId(), savedReservation);
     }
 
-    private Theme getTheme(ReservationRequest request) {
-        return themeRepository.findById(request.getThemeId())
-                .orElseThrow(IllegalArgumentException::new);
-    }
-
-    private ReservationTime getReservationTime(ReservationRequest request) {
-        return reservationTimeRepository.findById(request.getTimeId())
-                .orElseThrow(IllegalArgumentException::new);
-    }
-
-    private Member getMember(ReservationRequest request) {
+    private Member getMember(final ReservationRequest request) {
         return memberRepository.findById(request.getMemberId())
                 .orElseThrow(IllegalArgumentException::new);
     }
 
-    private void validateDuplicatedReservation(final Reservation reservation) {
-        final Integer reservationCount = reservationRepository.countByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
-        if (reservationCount > 0) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
-        }
+    private ReservationTime getReservationTime(final ReservationRequest request) {
+        return reservationTimeRepository.findById(request.getTimeId())
+                .orElseThrow(IllegalArgumentException::new);
     }
 
-    private void validateDuplicatedMemberWaiting(final Reservation reservation) {
-        final Integer waitingCount = reservationRepository.countByMemberAndDateAndTimeAndTheme(
-                reservation.getMember(), reservation.getDate(), reservation.getReservationTime(), reservation.getTheme()
-        );
-        if (waitingCount > 0) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약 대기 내역이 존재합니다.");
+    private Theme getTheme(final ReservationRequest request) {
+        return themeRepository.findById(request.getThemeId())
+                .orElseThrow(IllegalArgumentException::new);
+    }
+
+    private void validateDuplicateReservation(final Status status, final Reservation reservation) {
+        int count = 0;
+        if (status == Status.BOOKED) {
+            count = reservationRepository.countByDateAndTimeAndTheme(
+                    reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
+        }
+        if (status == Status.STANDBY) {
+            count = reservationRepository.countByMemberAndDateAndTimeAndTheme(
+                    reservation.getMember(), reservation.getDate(), reservation.getReservationTime(),
+                    reservation.getTheme()
+            );
+        }
+        if (count > 0) {
+            throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
         }
     }
 
@@ -138,7 +131,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private void updateReservationStatus(Long id) {
+    private void updateReservationStatus(final Long id) {
         Reservation delete = reservationRepository.findReservationById(id);
         List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeOrderByCreateAtAsc(
                 delete.getDate(), delete.getReservationTime(), delete.getTheme());
