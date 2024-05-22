@@ -190,7 +190,7 @@ function onWaitButtonClick() {
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('/reservations', {
+    fetch('/waitings', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
