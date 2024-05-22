@@ -35,7 +35,10 @@ public class ReservationService {
     @Transactional
     public Reservation create(Reservation reservation) {
         validateReservationDate(reservation);
-        validateReservationTimeSlot(reservation);
+        List<Reservation> reservationsInSameTime = reservationRepository.findAllByDateAndTimeAndThemeWithMember(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        validateDuplicatedReservation(reservation, reservationsInSameTime);
+        validateReservationCapacity(reservation, reservationsInSameTime);
         return reservationRepository.save(reservation);
     }
 
@@ -46,13 +49,21 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationTimeSlot(Reservation reservation) {
-        boolean existReservationInSameTime = reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        if (existReservationInSameTime && reservation.isBooking()) {
+    private void validateDuplicatedReservation(Reservation reservation, List<Reservation> reservationsInSameTime) {
+        boolean existDuplicatedReservation = reservationsInSameTime.stream()
+                .map(Reservation::getMember)
+                .anyMatch(reservation::hasSameOwner);
+        if (existDuplicatedReservation) {
+            throw new ViolationException("동일한 사용자의 중복된 예약입니다.");
+        }
+    }
+
+    private void validateReservationCapacity(Reservation reservation, List<Reservation> reservationsInSameTime) {
+        int countInSameTime = reservationsInSameTime.size();
+        if (countInSameTime > 0 && reservation.isBooking()) {
             throw new ViolationException("해당 시간대에 예약이 모두 찼습니다.");
         }
-        if (!existReservationInSameTime && reservation.isWaiting()) {
+        if (countInSameTime == 0 && reservation.isWaiting()) {
             throw new ViolationException("해당 시간대에 예약이 가능합니다. 대기 말고 예약을 해주세요.");
         }
     }

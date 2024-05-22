@@ -82,6 +82,11 @@ public class Reservation {
         this.status = status;
     }
 
+    public boolean hasSameOwner(Member member) {
+        Long otherId = member.getId();
+        return this.member.getId().equals(otherId);
+    }
+
     public String getMemberName() {
         return member.getName();
     }

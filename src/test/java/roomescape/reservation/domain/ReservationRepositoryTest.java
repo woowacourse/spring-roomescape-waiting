@@ -9,13 +9,16 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.HORROR_THEME;
+import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
+import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
 import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.TestFixture.USER_MIA;
@@ -64,20 +67,6 @@ class ReservationRepositoryTest extends RepositoryTest {
 
         // then
         assertThat(savedReservation.getId()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("동일 시간대의 예약이 존재하는지 조회한다.")
-    void existByDateAndTimeIdAndThemeId() {
-        // given
-        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
-
-        // when
-        boolean existByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeAndTheme(
-                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
-
-        // then
-        assertThat(existByDateAndTimeIdAndThemeId).isTrue();
     }
 
     @Test
@@ -197,5 +186,43 @@ class ReservationRepositoryTest extends RepositoryTest {
         assertThat(waitingReservations).hasSize(2)
                 .extracting(WaitingReservation::getPreviousCount)
                 .contains(0L, 1L);
+    }
+
+    @Test
+    @DisplayName("동일한 날짜, 시간, 테마의 첫 번째 예약을 조회한다.")
+    void findFirstByDateAndTimeAndTheme() {
+        // given
+        Reservation firstReservation = reservationRepository.save(
+                new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING));
+        Reservation secondReservation = reservationRepository.save(
+                new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING));
+
+        // when
+        Optional<Reservation> foundReservation = reservationRepository.findFirstByDateAndTimeAndTheme(
+                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
+
+        // then
+        Long expectedReservationId = firstReservation.getId();
+        Long actualReservationId = foundReservation.get().getId();
+        assertThat(actualReservationId).isEqualTo(expectedReservationId);
+    }
+
+    @Test
+    @DisplayName("동일한 날짜, 시간, 테마의 모든 예약을 사용자와 함께 조회한다.")
+    void findAllByDateAndTimeAndThemeWithMember() {
+        // given
+        reservationRepository.saveAll(List.of(
+                new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING),
+                new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING)
+        ));
+
+        // when
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeWithMember(
+                MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
+
+        // then
+        assertThat(reservations).hasSize(2)
+                .extracting(Reservation::getMemberName)
+                .contains(MIA_NAME, TOMMY_NAME);
     }
 }

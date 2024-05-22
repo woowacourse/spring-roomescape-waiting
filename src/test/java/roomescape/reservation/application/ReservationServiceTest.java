@@ -102,7 +102,7 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     @DisplayName("동일한 테마, 날짜, 시간에 한 팀만 예약할 수 있다.")
-    void createDuplicatedReservation() {
+    void createWithOverflowCapacity() {
         // given
         reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
 
@@ -142,6 +142,17 @@ class ReservationServiceTest extends ServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(invalidWaitingReservation))
+                .isInstanceOf(ViolationException.class);
+    }
+
+    @Test
+    @DisplayName("사용자는 중복된 예약을 할 수 없다.")
+    void createDuplicatedReservation() {
+        // given
+        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, BOOKING));
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia, WAITING)))
                 .isInstanceOf(ViolationException.class);
     }
 

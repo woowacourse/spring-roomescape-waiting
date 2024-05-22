@@ -40,8 +40,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMemberAndStatusWithDetails(@Param(value = "member") Member member,
                                                           @Param(value = "status") ReservationStatus status);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
     int countByTime(ReservationTime time);
 
     @Query("""
@@ -70,4 +68,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByStatusWithDetails(@Param(value = "status") ReservationStatus status);
 
     Optional<Reservation> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.member
+            WHERE r.date = :date AND r.time = :time AND r.theme = :theme
+            """)
+    List<Reservation> findAllByDateAndTimeAndThemeWithMember(@Param(value = "date") LocalDate date,
+                                                             @Param(value = "time") ReservationTime time,
+                                                             @Param(value = "theme") Theme theme);
 }
