@@ -94,7 +94,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
+        return reservationRepository.findAllByStatus(Status.BOOKED)
                 .stream()
                 .map(ReservationResponse::new)
                 .toList();
