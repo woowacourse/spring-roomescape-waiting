@@ -31,6 +31,13 @@ public class Waiting implements Comparable<Waiting> {
     protected Waiting() {
     }
 
+    public int getRank() {
+        if (reservation.hasWaiting(this)) {
+            return reservation.rank(this);
+        }
+        throw new IllegalStateException("대기 순서를 반환할 수 없습니다.");
+    }
+
     public boolean isSameReservationWaiting(Reservation otherReservation) {
         return this.reservation.getDate() == otherReservation.getDate()
                 && this.reservation.getTime().equals(otherReservation.getTime())

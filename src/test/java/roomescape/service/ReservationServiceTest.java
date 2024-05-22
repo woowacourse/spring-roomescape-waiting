@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.domain.ReservationStatus.RESERVED;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,6 +22,7 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
+import roomescape.service.dto.ReservationStatusMessageMapper;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.UserReservationResponse;
@@ -121,7 +123,7 @@ class ReservationServiceTest extends IntegrationTestSupport {
                 () -> assertThat(allUserReservation.get(0).date()).isEqualTo(reservationSaveRequest.date()),
                 () -> assertThat(allUserReservation.get(0).time()).isEqualTo(reservationResponse.time().startAt()),
                 () -> assertThat(allUserReservation.get(0).theme()).isEqualTo(reservationResponse.theme().name()),
-                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
+                () -> assertThat(allUserReservation.get(0).status()).isEqualTo(ReservationStatusMessageMapper.messageOf(RESERVED, 0))
         );
     }
 }

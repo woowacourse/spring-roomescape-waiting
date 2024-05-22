@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
 import roomescape.domain.ReservationStatus;
+import roomescape.service.dto.ReservationStatusMessageMapper;
 import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static roomescape.domain.ReservationStatus.RESERVED;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 
@@ -182,7 +184,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             () -> assertThat(userReservationResponses.get(0).theme()).isEqualTo("이름1"),
                             () -> assertThat(userReservationResponses.get(0).date()).isEqualTo(LocalDate.now()),
                             () -> assertThat(userReservationResponses.get(0).time()).isEqualTo(LocalTime.of(9, 0, 0)),
-                            () -> assertThat(userReservationResponses.get(0).status()).isEqualTo(ReservationStatus.RESERVED.getValue())
+                            () -> assertThat(userReservationResponses.get(0).status()).isEqualTo(ReservationStatusMessageMapper.messageOf(RESERVED,0))
                     );
                 }),
                 dynamicTest("존재하지 않는 시간으로 예약을 추가할 수 없다.", () -> {

@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -45,12 +46,16 @@ public class Member {
                 .anyMatch(waiting -> waiting.isSameReservationWaiting(otherWaiting.getReservation()));
     }
 
-    public void addWaiting(Waiting waiting){
+    public void addWaiting(Waiting waiting) {
         waitings.add(waiting);
     }
 
-    public void removeWaiting(Waiting waiting){
+    public void removeWaiting(Waiting waiting) {
         waitings.remove(waiting);
+    }
+
+    public List<Waiting> getWaitings() {
+        return waitings;
     }
 
     public Long getId() {
@@ -78,11 +83,11 @@ public class Member {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
         Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return id != null && Objects.equals(id, member.getId());
     }
 
     @Override

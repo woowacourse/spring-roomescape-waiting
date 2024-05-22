@@ -17,12 +17,14 @@ import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class ReservationService {
+    private static final int RESERVED_RANK = 0;
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -97,21 +99,40 @@ public class ReservationService {
     }
 
     public UserReservationResponses findAllUserReservation(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndDateGreaterThanEqual(
-                findMemberById(memberId),
+        Member user = findMemberById(memberId);
+        List<UserReservationResponse> waitingReservations = makeWaitingReservations(user);
+        List<UserReservationResponse> userReservationResponses = findUserReservations(findUserReservations(user));
+        return getAllUserReservations(userReservationResponses, waitingReservations);
+    }
+
+    private UserReservationResponses getAllUserReservations(
+            List<UserReservationResponse> reservations,
+            List<UserReservationResponse> waitingReservations
+    ) {
+        List<UserReservationResponse> allReservations = new ArrayList<>();
+        allReservations.addAll(reservations);
+        allReservations.addAll(waitingReservations);
+        return new UserReservationResponses(allReservations);
+    }
+
+    private List<UserReservationResponse> findUserReservations(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED, RESERVED_RANK))
+                .toList();
+    }
+
+    private List<UserReservationResponse> makeWaitingReservations(Member user) {
+        return user.getWaitings().stream()
+                .map(waiting -> UserReservationResponse.of(waiting.getReservation(), ReservationStatus.WAITING, waiting.getRank() + 1))
+                .toList();
+    }
+
+    private List<Reservation> findUserReservations(Member user) {
+        return reservationRepository.findByMemberAndDateGreaterThanEqual(
+                user,
                 LocalDate.now(),
                 dateAscAndTimeAsc()
         );
-
-        return makeUserReservationResponses(reservations);
-    }
-
-    private UserReservationResponses makeUserReservationResponses(List<Reservation> reservations) {
-        List<UserReservationResponse> userReservationResponses = reservations.stream()
-                .map(reservation -> UserReservationResponse.of(reservation, ReservationStatus.RESERVED))
-                .toList();
-
-        return new UserReservationResponses(userReservationResponses);
     }
 
     private Sort dateAscAndTimeAsc() {

@@ -50,11 +50,12 @@ public class WaitingService {
     private void validateReservationMember(Waiting waiting, Reservation alreadyBookedReservation){
         Member requestMember = waiting.getMember();
         Member alreadyBookedMember = alreadyBookedReservation.getMember();
-
+        System.out.println(requestMember.equals(alreadyBookedMember));
         if(requestMember.equals(alreadyBookedMember)){
             throw new RoomEscapeBusinessException("예약에 성공한 유저는 대기를 요청할 수 없습니다.");
         }
     }
+
     private void validateDuplicatedWaiting(Waiting waiting) {
         if(waiting.getMember().hasWaiting(waiting)){
             throw new RoomEscapeBusinessException("중복 예약 대기는 불가합니다.");

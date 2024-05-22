@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,10 +48,18 @@ public class Reservation {
         waitings.remove(waiting);
     }
 
-    public boolean hasWaiting() {
+    public boolean isEmptyWaitings() {
         return !waitings.isEmpty();
     }
 
+    public boolean hasWaiting(Waiting waiting){
+        return waitings.contains(waiting);
+    }
+
+    public int rank(Waiting waiting){
+        waitings.sort(Comparator.naturalOrder());
+        return waitings.indexOf(waiting);
+    }
 
     public Long getId() {
         return id;
