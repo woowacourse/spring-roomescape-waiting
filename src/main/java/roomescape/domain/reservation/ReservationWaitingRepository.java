@@ -3,6 +3,9 @@ package roomescape.domain.reservation;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.member.Member;
+import roomescape.domain.schedule.Schedule;
+import roomescape.domain.theme.Theme;
 
 public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
     @Query("""
@@ -18,4 +21,6 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
             FROM ReservationWaiting rw
             WHERE rw.member.id = :memberId""")
     List<WaitingWithRank> findWithRankByMemberId(long memberId);
+
+    boolean existsByMemberAndThemeAndSchedule(Member member, Theme theme, Schedule schedule);
 }

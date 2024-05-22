@@ -28,6 +28,7 @@ import roomescape.domain.schedule.ReservationTimeRepository;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationWaitingResponse;
@@ -50,8 +51,6 @@ class ReservationWaitingServiceTest {
     private Theme theme;
     private Member member;
     private String token;
-    @Autowired
-    private ReservationService reservationService;
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -85,6 +84,24 @@ class ReservationWaitingServiceTest {
         assertions.assertThat(response.theme().id()).isEqualTo(theme.getId());
         assertions.assertThat(response.createdAt()).isBefore(LocalDateTime.now());
         assertions.assertAll();
+    }
+
+    @DisplayName("예약 대기를 중복으로 등록하는 경우 예외가 발생한다.")
+    @Test
+    void throwsExceptionOnDuplicatedWaiting() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationRequest request = new ReservationRequest(
+                date, reservationTime.getId(), theme.getId()
+        );
+        reservationRepository.save(new Reservation(member, new Schedule(ReservationDate.of(date), reservationTime), theme, ReservationStatus.RESERVED));
+        reservationWaitingService.create(request, member.getId());
+
+        // when & then
+        long memberId = member.getId();
+        assertThatThrownBy(() -> reservationWaitingService.create(request, memberId))
+                .isInstanceOf(InvalidReservationException.class)
+                .hasMessage("이미 해당 테마에 예약 대기를 등록했습니다.");
     }
 
     @DisplayName("id로 등록된 예약 대기를 취소한다.")
