@@ -9,23 +9,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
-    private final CheckAdminInterceptor checkAdminInterceptor;
-
-    public WebMvcConfiguration(LoginMemberArgumentResolver loginMemberArgumentResolver,
-                               CheckAdminInterceptor checkAdminInterceptor) {
-        this.loginMemberArgumentResolver = loginMemberArgumentResolver;
-        this.checkAdminInterceptor = checkAdminInterceptor;
-    }
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(checkAdminInterceptor)
+        registry.addInterceptor(new CheckAdminInterceptor())
                 .addPathPatterns("/admin/**");
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(loginMemberArgumentResolver);
+        resolvers.add(new LoginMemberArgumentResolver());
     }
 }

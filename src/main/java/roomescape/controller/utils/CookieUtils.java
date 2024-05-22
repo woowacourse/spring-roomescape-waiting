@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.utils;
 
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ public class CookieUtils {
 
     private static final String AUTH_COOKIE_KEY = "token";
 
-    public ResponseCookie createCookie(String token, long maxAgeSeconds) {
+    public static ResponseCookie createCookie(String token, long maxAgeSeconds) {
         return ResponseCookie
                 .from(AUTH_COOKIE_KEY, token)
                 .maxAge(maxAgeSeconds)
@@ -20,7 +20,7 @@ public class CookieUtils {
                 .build();
     }
 
-    public String extractToken(Cookie[] cookies) {
+    public static String extractToken(Cookie[] cookies) {
         if (cookies == null) {
             throw new AuthorizationException();
         }

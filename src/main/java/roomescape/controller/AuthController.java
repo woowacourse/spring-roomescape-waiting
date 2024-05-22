@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.controller.request.LoginRequest;
 import roomescape.controller.response.LoginResponse;
+import roomescape.controller.utils.CookieUtils;
+import roomescape.controller.utils.TokenUtils;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
@@ -20,18 +22,16 @@ import roomescape.service.dto.MemberInfo;
 public class AuthController {
 
     private final AuthService authService;
-    private final CookieUtils cookieUtils;
 
-    public AuthController(AuthService authService, CookieUtils cookieUtils) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.cookieUtils = cookieUtils;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest loginRequest) {
         AuthDto authDto = AuthDto.from(loginRequest);
         String token = authService.createToken(authDto);
-        ResponseCookie cookie = cookieUtils.createCookie(token, 3600);
+        ResponseCookie cookie = CookieUtils.createCookie(token, 3600);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
@@ -40,15 +40,15 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<LoginResponse> checkLogin(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        String token = cookieUtils.extractToken(cookies);
-        MemberInfo loginMember = authService.checkToken(token);
+        String token = CookieUtils.extractToken(cookies);
+        MemberInfo loginMember = TokenUtils.parseToken(token);
         LoginResponse response = LoginResponse.from(loginMember);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
-        ResponseCookie cookie = cookieUtils.createCookie(null, 0);
+        ResponseCookie cookie = CookieUtils.createCookie(null, 0);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();

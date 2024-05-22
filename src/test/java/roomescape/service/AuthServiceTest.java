@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.controller.utils.TokenUtils;
 import roomescape.service.dto.AuthDto;
 import roomescape.service.dto.MemberInfo;
 
@@ -27,7 +28,7 @@ class AuthServiceTest {
 
         String accessToken = authService.createToken(authDto);
 
-        MemberInfo memberInfo = authService.checkToken(accessToken);
+        MemberInfo memberInfo = TokenUtils.parseToken(accessToken);
         assertAll(
                 () -> assertThat(accessToken).isNotBlank(),
                 () -> assertThat(memberInfo.getId()).isEqualTo(1L));
@@ -38,7 +39,7 @@ class AuthServiceTest {
     void should_check_login_state() {
         String token = authService.createToken(userDto);
 
-        MemberInfo loginMember = authService.checkToken(token);
+        MemberInfo loginMember = TokenUtils.parseToken(token);
 
         assertThat(loginMember.getId()).isEqualTo(1L);
     }
