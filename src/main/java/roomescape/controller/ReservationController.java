@@ -30,7 +30,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("/reservations")
+    @PostMapping(value = {"/reservations", "/reservations/waiting"})
     public ResponseEntity<ReservationResponse> saveReservation(
             @Login LoginMember member,
             @RequestBody @Valid UserReservationSaveRequest userReservationSaveRequest
