@@ -10,8 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.reservationwait.ReservationWait;
-import roomescape.domain.reservationwait.ReservationWaitStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
@@ -78,23 +76,6 @@ class ReservationCreateServiceTest extends BaseServiceTest {
         assertThatThrownBy(() -> reservationCreateService.create(request2, member))
                 .isInstanceOf(InvalidRequestException.class)
                 .hasMessage("해당 시간에 이미 예약된 테마입니다.");
-    }
-
-    @Test
-    @DisplayName("이미 예약 대기 중인 경우 예외가 발생한다.")
-    void checkAlreadyWait_Failure() {
-        Member member = memberRepository.findById(1L).get();
-        ReservationTime time = reservationTimeRepository.findById(1L).get();
-        Theme theme = themeRepository.findById(1L).get();
-        LocalDate date = LocalDate.now().plusDays(1L);
-        reservationWaitRepository.save(new ReservationWait(member, date, time, theme, ReservationWaitStatus.WAITING));
-
-        ReservationSaveRequest request = new ReservationSaveRequest(
-                date, 1L, 1L);
-
-        assertThatThrownBy(() -> reservationCreateService.create(request, member))
-                .isInstanceOf(InvalidRequestException.class)
-                .hasMessage("이미 예약 대기 중입니다.");
     }
 
     @Test
