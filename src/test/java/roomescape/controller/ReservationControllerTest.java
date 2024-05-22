@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class ReservationControllerTest {
         date = LocalDate.now().plusDays(1);
         timeId = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
                 .then().extract().response().jsonPath().getLong("id");
 

@@ -50,7 +50,7 @@ class ReservationTimeServiceTest {
     @Test
     void create() {
         //given
-        LocalTime startAt = LocalTime.now();
+        LocalTime startAt = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(startAt);
 
         //when
@@ -67,7 +67,7 @@ class ReservationTimeServiceTest {
     @Test
     void findAll() {
         //given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
 
         //when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
@@ -80,7 +80,7 @@ class ReservationTimeServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
         reservationTimeRepository.save(new ReservationTime(time));
 
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(time);
@@ -95,7 +95,7 @@ class ReservationTimeServiceTest {
     @Test
     void cannotDeleteTime() {
         //given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.MEMBER));
@@ -115,7 +115,7 @@ class ReservationTimeServiceTest {
     void findAvailableTimes() {
         //given
         LocalDate date = LocalDate.MAX;
-        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.SECONDS).truncatedTo(ChronoUnit.MINUTES);
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(
                 new ReservationTime(time.plusHours(5)));

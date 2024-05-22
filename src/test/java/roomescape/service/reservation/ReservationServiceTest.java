@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -56,7 +56,8 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        reservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
@@ -135,7 +136,8 @@ class ReservationServiceTest {
     @Test
     void findReservationsOf() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         Theme theme = themeRepository.save(
                 new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                         "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg")
@@ -171,10 +173,10 @@ class ReservationServiceTest {
 
     @DisplayName("예약 삭제 시 해당 일정과 테마에 대기가 등록돼 있다면 첫 번째 대기를 예약으로 승격한다.")
     @Test
-    @Transactional  // TODO: 제거 시 테스트 깨짐
     void convertWaitingToReservationWhenReservationCanceled() {
         // given
-        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        LocalDate date = LocalDate.now().plusDays(1);
+        Schedule schedule = new Schedule(ReservationDate.of(date), reservationTime);
         ReservationWaiting waiting = new ReservationWaiting(member, theme, schedule);
         ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);

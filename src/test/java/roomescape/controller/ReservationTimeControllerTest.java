@@ -8,6 +8,7 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class ReservationTimeControllerTest {
     void createReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
     }
@@ -43,7 +44,7 @@ class ReservationTimeControllerTest {
     @Test
     void createDuplicateTime() {
         //given
-        LocalTime time = LocalTime.now();
+        LocalTime time = LocalTime.now().truncatedTo(ChronoUnit.SECONDS);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new ReservationTimeCreateRequest(time))
@@ -61,7 +62,7 @@ class ReservationTimeControllerTest {
     @Test
     void findAllReservationTime() {
         //given
-        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now()))
+        RestAssured.given().contentType(ContentType.JSON).body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times");
 
         //when&then
@@ -75,7 +76,7 @@ class ReservationTimeControllerTest {
     void deleteReservationTimeById() {
         //given
         var id = RestAssured.given().contentType(ContentType.JSON)
-                .body(new ReservationTimeCreateRequest(LocalTime.now()))
+                .body(new ReservationTimeCreateRequest(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)))
                 .when().post("/times")
                 .then().log().all().extract().response().jsonPath().get("id");
 

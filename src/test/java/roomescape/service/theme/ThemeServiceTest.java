@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,7 +105,9 @@ class ThemeServiceTest {
     void cannotDeleteByReservation() {
         //given
         Theme theme = createTheme("레벨2 탈출");
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS))
+        );
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
         Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
         Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
@@ -125,7 +128,7 @@ class ThemeServiceTest {
         Theme theme2 = createTheme("레벨2 탈출");
         Theme theme3 = createTheme("레벨3 탈출");
 
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         Member member = memberRepository.save(new Member("member", "member@email.com", "member123", Role.MEMBER));
         Schedule schedule1 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(1)), reservationTime);
         Schedule schedule2 = new Schedule(ReservationDate.of(LocalDate.now().minusDays(7)), reservationTime);

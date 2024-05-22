@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +57,7 @@ class ReservationWaitingServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now().truncatedTo(ChronoUnit.SECONDS)));
         theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         member = memberRepository.save(new Member("pedro", "pedro@email.com", "pedro123", Role.MEMBER));
