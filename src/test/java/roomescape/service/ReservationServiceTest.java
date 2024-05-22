@@ -97,9 +97,9 @@ class ReservationServiceTest {
     void deleteWaitReservation() {
         final long waitReservationId = 8L;
         final long memberId = 3L;
-        final List<Reservation> beforeDeleting = reservationService.getReservations();
+        final List<Reservation> beforeDeleting = reservationService.findAllWaiting();
         reservationService.deleteWaitReservation(waitReservationId, memberId);
-        final List<Reservation> afterDeleting = reservationService.getReservations();
+        final List<Reservation> afterDeleting = reservationService.findAllWaiting();
 
         assertThat(afterDeleting).hasSize(beforeDeleting.size() - 1);
     }

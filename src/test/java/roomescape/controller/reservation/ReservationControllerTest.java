@@ -54,7 +54,7 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 조회")
+    @DisplayName("예약 조회 (예약 대기 제외)")
     void getReservations() {
         final List<ReservationResponse> reservations = reservationController.getReservations();
         final LocalDate today = LocalDate.now();
@@ -79,9 +79,6 @@ class ReservationControllerTest {
                         new AvailabilityTimeResponse(4L,
                                 "18:00", false), new ReservationThemeResponse("가을")),
                 new ReservationResponse(7L, new MemberResponse("재즈"), today.plusDays(4).toString(),
-                        new AvailabilityTimeResponse(4L,
-                                "18:00", false), new ReservationThemeResponse("가을")),
-                new ReservationResponse(8L, new MemberResponse("제제"), today.plusDays(4).toString(),
                         new AvailabilityTimeResponse(4L,
                                 "18:00", false), new ReservationThemeResponse("가을"))
         );
