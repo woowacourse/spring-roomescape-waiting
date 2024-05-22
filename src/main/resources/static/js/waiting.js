@@ -73,11 +73,11 @@ function deny(event) {
           예약 대기 거절 API 호출
      */
     // TODO: 아래 URL 맞나?
-    const endpoint = '/reservations/waitings/${id}';
+    const endpoint = `/reservations/waitings/${id}`;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }
