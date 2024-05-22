@@ -48,5 +48,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND r1.id > r2.id
             )
             """)
-    List<Reservation> findWaitings();
+    List<Reservation> findReservationOnWaiting();
 }

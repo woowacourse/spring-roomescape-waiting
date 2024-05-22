@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import roomescape.auth.infrastructure.JwtTokenProvider;
-import roomescape.global.exception.auth.AuthorizationException;
+import roomescape.global.exception.AuthorizationException;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.member.service.MemberService;
 

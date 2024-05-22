@@ -1,6 +1,4 @@
-package roomescape.global.exception.auth;
-
-import roomescape.global.exception.IllegalRequestException;
+package roomescape.global.exception;
 
 public class AuthorizationException extends IllegalRequestException {
 

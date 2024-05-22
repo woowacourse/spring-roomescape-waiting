@@ -11,8 +11,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.global.exception.auth.AuthenticationException;
-import roomescape.global.exception.auth.AuthorizationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

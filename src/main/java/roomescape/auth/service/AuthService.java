@@ -6,7 +6,7 @@ import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.infrastructure.Token;
-import roomescape.global.exception.auth.AuthenticationException;
+import roomescape.global.exception.AuthenticationException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;

@@ -3,7 +3,7 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 
 public class ReservationDate {
 
@@ -20,7 +20,7 @@ public class ReservationDate {
 
     public void validateNotNull(LocalDate value) {
         if (value == null) {
-            throw new DomainValidationException("예약 날짜는 필수 입니다");
+            throw new IllegalRequestException("예약 날짜는 필수 입니다");
         }
     }
 

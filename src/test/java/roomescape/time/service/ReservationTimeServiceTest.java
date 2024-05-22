@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.exception.DuplicateSaveException;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.dto.ReservationTimeResponse;
@@ -54,6 +54,6 @@ class ReservationTimeServiceTest {
         when(reservationTimeRepository.existsByStartAt(TIME_ADD_REQUEST_10_00.startAt())).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.saveReservationTime(TIME_ADD_REQUEST_10_00))
-                .isInstanceOf(DuplicateSaveException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 
 class MemberNameTest {
 
@@ -15,7 +15,7 @@ class MemberNameTest {
     @Test
     void should_throw_exception_when_name_is_null() {
         assertThatThrownBy(() -> new MemberName(null))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("이름이 공백문자로만 이루어진 경우 예외를 발생시킨다")
@@ -23,7 +23,7 @@ class MemberNameTest {
     @ValueSource(strings = {" ", "    ", "    "})
     void should_throw_exception_when_name_is_blank(String name) {
         assertThatThrownBy(() -> new MemberName(name))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("이름의 길이가 범위를 벗어나는 경우 예외를 발생시킨다")
@@ -31,7 +31,7 @@ class MemberNameTest {
     @ValueSource(strings = {"", "123456, 1234567"})
     void should_throw_exception_when_name_length_is_invalid(String name) {
         assertThatThrownBy(() -> new MemberName(name))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("유효한 이름은 생성 시 검증을 통과한다")

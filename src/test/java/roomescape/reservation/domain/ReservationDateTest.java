@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.time.fixture.DateTimeFixture;
 
 class ReservationDateTest {
@@ -15,7 +15,7 @@ class ReservationDateTest {
     @Test
     void should_throw_exception_when_value_is_null() {
         assertThatThrownBy(() -> new ReservationDate(null))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("정상적인 날짜로 생성 시 예외가 발생하지 않는다")

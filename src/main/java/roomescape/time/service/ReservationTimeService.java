@@ -3,7 +3,7 @@ package roomescape.time.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.DuplicateSaveException;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.dto.AvailableTimeResponse;
@@ -36,7 +36,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse saveReservationTime(ReservationTimeAddRequest reservationTimeAddRequest) {
         if (reservationTimeRepository.existsByStartAt(reservationTimeAddRequest.startAt())) {
-            throw new DuplicateSaveException("이미 존재하는 예약시간은 추가할 수 없습니다.");
+            throw new IllegalRequestException("이미 존재하는 예약시간은 추가할 수 없습니다.");
         }
         ReservationTime saved = reservationTimeRepository.save(reservationTimeAddRequest.toReservationTime());
         return new ReservationTimeResponse(saved);

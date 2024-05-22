@@ -20,9 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.IllegalRequestException;
-import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.reservation.domain.Reservation;
@@ -90,7 +88,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
-                .isInstanceOf(NoSuchRecordException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("존재하지 않은 테마로 예약 시 예외가 발생한다")
@@ -101,7 +99,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
-                .isInstanceOf(NoSuchRecordException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("현재보다 이전날짜로 예약 시 예외가 발생한다")
@@ -112,7 +110,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(THEME_1));
 
         assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, PAST_DATE_RESERVATION_REQUEST))
-                .isInstanceOf(DomainValidationException.class);
+                .isInstanceOf(IllegalRequestException.class);
     }
 
     @DisplayName("내 이름으로 진행되고 있는 예약이 이미 존재하는 경우 예약 대기를 할 수 없다")

@@ -1,7 +1,7 @@
 package roomescape.reservation.domain;
 
 import java.util.Objects;
-import roomescape.global.exception.DomainValidationException;
+import roomescape.global.exception.IllegalRequestException;
 
 public class WaitingStatus {
 
@@ -29,13 +29,13 @@ public class WaitingStatus {
 
     private void validatePositive(int waitingNumber) {
         if (waitingNumber <= 0) {
-            throw new DomainValidationException("예약 대기 번호는 0이거나 음수일 수 없습니다" + " 대기 번호: " + waitingNumber);
+            throw new IllegalRequestException("예약 대기 번호는 0이거나 음수일 수 없습니다" + " 대기 번호: " + waitingNumber);
         }
     }
 
     private void validateRange(int waitingNumber) {
         if (waitingNumber > MAX_WAITING) {
-            throw new DomainValidationException("예약 대기는 " + MAX_WAITING + "명까지 가능합니다 현재: " + MAX_WAITING + "명");
+            throw new IllegalRequestException("예약 대기는 " + MAX_WAITING + "명까지 가능합니다 현재: " + MAX_WAITING + "명");
         }
     }
 

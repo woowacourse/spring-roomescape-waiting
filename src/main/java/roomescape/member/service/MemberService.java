@@ -2,8 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.DuplicateSaveException;
-import roomescape.global.exception.NoSuchRecordException;
+import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -26,18 +25,18 @@ public class MemberService {
 
     public Member findById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new NoSuchRecordException("id: " + id + " 해당하는 회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new IllegalRequestException("id: " + id + " 해당하는 회원을 찾을 수 없습니다"));
     }
 
     public MemberResponse joinMember(JoinRequest joinRequest) {
         Email joinEmail = new Email(joinRequest.email());
         if (memberRepository.existsByEmail(joinEmail)) {
-            throw new DuplicateSaveException("중복되는 이메일의 회원이 존재합니다");
+            throw new IllegalRequestException("중복되는 이메일의 회원이 존재합니다");
         }
 
         MemberName joinMemberName = new MemberName(joinRequest.name());
         if (memberRepository.existsByMemberName(joinMemberName)) {
-            throw new DuplicateSaveException("중복되는 이름의 회원이 존재합니다");
+            throw new IllegalRequestException("중복되는 이름의 회원이 존재합니다");
         }
 
         Member member = joinRequest.toMember();

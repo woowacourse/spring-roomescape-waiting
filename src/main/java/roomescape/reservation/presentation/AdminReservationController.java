@@ -39,7 +39,7 @@ public class AdminReservationController {
 
     @GetMapping("/admin/reservations/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaitings() {
-        return ResponseEntity.ok(reservationService.findWaitings());
+        return ResponseEntity.ok(reservationService.findReservationsOnWaiting());
     }
 
     @DeleteMapping("/admin/reservations/waitings/{id}")

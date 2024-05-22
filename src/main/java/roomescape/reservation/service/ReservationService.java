@@ -3,9 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.IllegalRequestException;
-import roomescape.global.exception.NoSuchRecordException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -70,12 +68,12 @@ public class ReservationService {
                 .count() + 1;
     }
 
-    public List<WaitingResponse> findWaitings() {
-        return reservationRepository.findWaitings().stream()
+    public List<WaitingResponse> findReservationsOnWaiting() {
+        return reservationRepository.findReservationOnWaiting().stream()
                 .map(reservation -> new WaitingResponse(reservation, calculateReservationWaitingNumber(reservation)))
                 .toList();
     }
-    
+
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
         List<Reservation> earlierReservations = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
@@ -92,7 +90,7 @@ public class ReservationService {
         );
 
         if (reservation.isPast()) {
-            throw new DomainValidationException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
+            throw new IllegalRequestException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
         }
         if (earlierReservations.stream().anyMatch(earlierReservation -> earlierReservation.isReservedBy(memberId))) {
             throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
@@ -104,17 +102,17 @@ public class ReservationService {
 
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
+                .orElseThrow(() -> new IllegalRequestException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
     }
 
     private ReservationTime getReservationTime(long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchRecordException("해당하는 예약시간이 존재하지 않습니다 ID: " + timeId));
+                .orElseThrow(() -> new IllegalRequestException("해당하는 예약시간이 존재하지 않습니다 ID: " + timeId));
     }
 
     private Theme getTheme(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchRecordException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
+                .orElseThrow(() -> new IllegalRequestException("해당하는 테마가 존재하지 않습니다 ID: " + themeId));
     }
 
     public void removeReservation(long id) {
