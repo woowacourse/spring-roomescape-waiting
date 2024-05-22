@@ -22,7 +22,7 @@ import roomescape.service.exception.TimeNotFoundException;
 import roomescape.service.exception.TimeUsedException;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class TimeServiceTest {
 
     @Autowired

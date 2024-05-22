@@ -15,7 +15,7 @@ import roomescape.controller.member.dto.MemberLoginRequest;
 import roomescape.controller.reservation.dto.AdminCreateReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(value = "/fixture.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value = "/data.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 class AdminReservationControllerTest {
 
     @LocalServerPort
