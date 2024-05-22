@@ -45,6 +45,10 @@ public class Waiting implements Comparable<Waiting> {
         return reservation;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     @Override
     public int compareTo(Waiting o) {
         return createAt.compareTo(o.createAt);

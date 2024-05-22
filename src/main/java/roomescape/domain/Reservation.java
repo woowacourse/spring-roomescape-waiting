@@ -3,8 +3,9 @@ package roomescape.domain;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.PriorityQueue;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
@@ -21,7 +22,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
     @OneToMany(mappedBy = "reservation")
-    private PriorityQueue<Waiting> waitings = new PriorityQueue<>();
+    private List<Waiting> waitings = new ArrayList<>();
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;

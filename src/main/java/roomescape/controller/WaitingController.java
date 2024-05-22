@@ -10,6 +10,7 @@ import roomescape.auth.Login;
 import roomescape.service.WaitingService;
 import roomescape.service.dto.request.LoginMember;
 import roomescape.service.dto.request.WaitingRequest;
+import roomescape.service.dto.response.WaitingResponse;
 
 @RestController
 @RequestMapping("/waitings")
@@ -21,11 +22,11 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> saveWaiting(
+    public ResponseEntity<WaitingResponse> saveWaiting(
             @Login LoginMember member,
             @RequestBody @Valid WaitingRequest waitingRequest
     ){
-        waitingService.saveWaiting(waitingRequest);
-        return ResponseEntity.ok().build();
+        WaitingResponse waitingResponse = waitingService.saveWaiting(waitingRequest, member.id());
+        return ResponseEntity.ok(waitingResponse);
     }
 }

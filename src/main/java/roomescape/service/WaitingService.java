@@ -5,6 +5,10 @@ import roomescape.domain.*;
 import roomescape.domain.repository.*;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dto.request.WaitingRequest;
+import roomescape.service.dto.response.MemberResponse;
+import roomescape.service.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.dto.response.WaitingResponse;
 
 import java.time.LocalDateTime;
 
@@ -30,35 +34,38 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
-    public void saveWaiting(WaitingRequest waitingRequest) {
-
-        if (hasNoneReservation(waitingRequest)) {
-            saveReservation(waitingRequest);
-            return;
-        }
-
+    public WaitingResponse saveWaiting(WaitingRequest waitingRequest, long memberId) {
         Reservation alreadyBookedReservation = findReservation(waitingRequest);
-        Waiting waiting = createWaiting(waitingRequest);
+        Waiting waiting = createWaiting(waitingRequest, memberId);
+
+        validateDuplicatedWaiting(waiting);
+
         alreadyBookedReservation.addWaiting(waiting);
-        waitingRepository.save(waiting);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        return createWaitingResponse(savedWaiting);
     }
 
-    private void saveReservation(WaitingRequest waitingRequest) {
-        reservationRepository.save(createReservation(waitingRequest));
+    private void validateDuplicatedWaiting(Waiting waiting) {
+        if(waiting.getMember().hasWaiting(waiting)){
+            throw new RoomEscapeBusinessException("중복 예약 대기는 불가합니다.");
+        }
     }
 
-    private boolean hasNoneReservation(WaitingRequest waitingRequest) {
-        return reservationRepository.existsByDateAndTimeAndTheme(
-                waitingRequest.date(),
-                findTimeById(waitingRequest.timeId()),
-                findThemeById(waitingRequest.themeId())
+    private WaitingResponse createWaitingResponse(Waiting savedWaiting) {
+        return new WaitingResponse(
+                savedWaiting.getId(),
+                MemberResponse.from(savedWaiting.getMember()),
+                savedWaiting.getReservation().getDate(),
+                new ReservationTimeResponse(savedWaiting.getReservation().getTime()),
+                new ThemeResponse(savedWaiting.getReservation().getTheme())
         );
     }
 
-    private Waiting createWaiting(WaitingRequest waitingRequest) {
+    private Waiting createWaiting(WaitingRequest waitingRequest, long memberId) {
         return new Waiting(
                 LocalDateTime.now(),
-                findMemberById(waitingRequest.memberId()),
+                findMemberById(memberId),
                 findReservation(waitingRequest)
         );
     }
@@ -69,15 +76,6 @@ public class WaitingService {
                 findThemeById(waitingRequest.themeId()),
                 findTimeById(waitingRequest.timeId())
         ).orElseThrow(() -> new RoomEscapeBusinessException("예약이 없습니다"));
-    }
-
-    private Reservation createReservation(WaitingRequest waitingRequest) {
-        return new Reservation(
-                findMemberById(waitingRequest.memberId()),
-                waitingRequest.date(),
-                findTimeById(waitingRequest.timeId()),
-                findThemeById(waitingRequest.themeId())
-        );
     }
 
     private Member findMemberById(Long memberId) {
