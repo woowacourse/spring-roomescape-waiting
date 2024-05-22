@@ -36,5 +36,4 @@ public class AdminHandlerInterceptor implements HandlerInterceptor {
                 .findAny()
                 .orElseThrow(AuthenticationFailureException::new);
     }
-
 }
