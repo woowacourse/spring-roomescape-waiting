@@ -13,7 +13,6 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.WaitingReservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +28,6 @@ import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TOMMY_NAME;
 import static roomescape.TestFixture.TOMMY_RESERVATION;
-import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.TestFixture.TOMMY_RESERVATION_TIME;
 import static roomescape.TestFixture.USER_MIA;
 import static roomescape.TestFixture.USER_TOMMY;
@@ -224,8 +222,8 @@ class ReservationServiceTest extends ServiceTest {
         // then
         List<Reservation> changedBookings = reservationService.findReservationsInBookingByMember(tommy);
         assertThat(changedBookings).hasSize(1)
-                    .extracting(Reservation::getId)
-                    .contains(reservationInWaiting.getId());
+                .extracting(Reservation::getId)
+                .contains(reservationInWaiting.getId());
     }
 
     @Test

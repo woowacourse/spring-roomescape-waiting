@@ -235,7 +235,6 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
 
                     createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, adminToken, BOOKING);
                     createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, miaToken, WAITING);
-
                 }),
                 dynamicTest("예약을 삭제한다.", this::deleteOneReservation),
                 dynamicTest("예약 목록을 조회한다.", () -> findReservationsWithSize(1))

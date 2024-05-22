@@ -99,10 +99,10 @@ class ReservationTimeControllerTest extends ControllerTest {
     void createReservationTimeWithInvalidFormat() throws Exception {
         // given
         String invalidFormatRequest = """
-        {
-            "startAt": "invalid-time"
-        }
-        """;
+                {
+                    "startAt": "invalid-time"
+                }
+                """;
 
         // when & then
         mockMvc.perform(post("/times")
