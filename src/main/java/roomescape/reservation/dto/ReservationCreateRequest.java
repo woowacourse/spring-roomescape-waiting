@@ -11,7 +11,4 @@ public record ReservationCreateRequest(Long memberId,
                                        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                        Long timeId,
                                        Long themeId) {
-    public Reservation createReservation(Member member, ReservationTime time, Theme theme) {
-        return new Reservation(member, date, time, theme);
-    }
 }

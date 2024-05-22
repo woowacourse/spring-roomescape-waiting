@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadArgumentRequestException;
@@ -32,37 +33,22 @@ public class ReservationUpdateService {
     }
 
     public ReservationResponse createReservation(ReservationCreateRequest request) {
-        Member member = findMemberByMemberId(request.memberId());
-        ReservationTime time = findTimeByTimeId(request.timeId());
-        Theme theme = findThemeByThemeId(request.themeId());
-        Reservation reservation = request.createReservation(member, time, theme);
-
-        return createReservation(reservation);
+        Reservation reservation = makeReservation(
+                request.memberId(), request.date(), request.timeId(), request.themeId());
+        return saveReservation(reservation);
     }
 
     public ReservationResponse createReservation(ReservationCreateRequest request, Long memberId) {
+        Reservation reservation = makeReservation(
+                memberId, request.date(), request.timeId(), request.themeId());
+        return saveReservation(reservation);
+    }
+
+    private Reservation makeReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Member member = findMemberByMemberId(memberId);
-        ReservationTime time = findTimeByTimeId(request.timeId());
-        Theme theme = findThemeByThemeId(request.themeId());
-        Reservation reservation = request.createReservation(member, time, theme);
-
-        return createReservation(reservation);
-    }
-
-    private ReservationResponse createReservation(Reservation reservation) {
-        validateIsAfterFromNow(reservation);
-        Reservation createdReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(createdReservation);
-    }
-
-    private void validateIsAfterFromNow(Reservation reservation) {
-        if (reservation.isBefore(LocalDateTime.now())) {
-            throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
-        }
-    }
-
-    public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
+        ReservationTime time = findTimeByTimeId(timeId);
+        Theme theme = findThemeByThemeId(themeId);
+        return new Reservation(member, date, time, theme);
     }
 
     private Member findMemberByMemberId(Long memberId) {
@@ -78,5 +64,22 @@ public class ReservationUpdateService {
     private Theme findThemeByThemeId(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BadArgumentRequestException("해당 테마가 존재하지 않습니다."));
+    }
+
+    private ReservationResponse saveReservation(Reservation reservation) {
+        validateIsAfterFromNow(reservation);
+
+        Reservation createdReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(createdReservation);
+    }
+
+    private void validateIsAfterFromNow(Reservation reservation) {
+        if (reservation.isBefore(LocalDateTime.now())) {
+            throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
+        }
+    }
+
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
     }
 }
