@@ -147,4 +147,15 @@ class ReservationJpaRepositoryTest {
 
         assertThat(alreadyBooked).isEqualTo(false);
     }
+
+//    @Test
+//    @DisplayName("날짜, 시간, 테마가 같은 예약의 개수를 반환한다.")
+//    void countSameReservation() {
+//        int count = reservationJpaRepository.countByDateAndReservationTimeAndTheme(
+//                RESERVATION_1.getDate(),
+//                RESERVATION_1.getReservationTime(),
+//                RESERVATION_1.getTheme()
+//        );
+//        assertThat(count).isEqualTo(1);
+//    }
 }

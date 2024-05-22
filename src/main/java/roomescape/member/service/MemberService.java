@@ -7,13 +7,14 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
-import roomescape.member.domain.Email;
-import roomescape.member.domain.Member;
+import roomescape.member.domain.*;
 import roomescape.member.dto.MemberIdNameResponse;
 import roomescape.member.dto.MemberNameResponse;
 import roomescape.member.dto.MemberRequest;
+import roomescape.member.dto.SignUpRequest;
 import roomescape.member.repository.MemberJpaRepository;
 
 import javax.naming.AuthenticationException;
@@ -115,5 +116,20 @@ public class MemberService {
 
     public Member getById(Long memberId) {
         return memberJpaRepository.findById(memberId).orElseThrow(() -> new NotFoundException("id에 맞는 멤버가 없습니다. memberId = " + memberId));
+    }
+
+    public String signUp(SignUpRequest signUpRequest) {
+        if (memberJpaRepository.existsByEmail(new Email(signUpRequest.email()))) {
+            throw new DuplicationException("이미 존재하는 email 주소입니다.");
+        }
+        String encodedPassword = passwordEncoder.encode(signUpRequest.password());
+        Member member = new Member(
+                new Name(signUpRequest.name()),
+                new Email(signUpRequest.email()),
+                Role.USER,
+                new Password(encodedPassword)
+        );
+        Member savedMember = memberJpaRepository.save(member);
+        return parseToToken(savedMember);
     }
 }

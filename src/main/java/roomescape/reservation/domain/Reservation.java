@@ -27,7 +27,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {

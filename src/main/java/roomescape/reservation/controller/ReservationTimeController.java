@@ -29,21 +29,21 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public List<ReservationTimeResponse> findTimes() {
-        return reservationTimeService.findTimes();
+    public ResponseEntity<List<ReservationTimeResponse>> findTimes() {
+        return ResponseEntity.ok(reservationTimeService.findTimes());
     }
 
     @GetMapping("/available")
-    public List<ReservationTimeResponse> findTimesWithAlreadyBooked(
+    public ResponseEntity<List<ReservationTimeResponse>> findTimesWithAlreadyBooked(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
-        return reservationTimeService.findTimesWithAlreadyBooked(date, themeId);
+        return ResponseEntity.ok(reservationTimeService.findTimesWithAlreadyBooked(date, themeId));
     }
 
     @GetMapping("/{id}")
-    public ReservationTimeResponse getTime(@PathVariable Long id) {
-        return reservationTimeService.getTime(id);
+    public ResponseEntity<ReservationTimeResponse> getTime(@PathVariable Long id) {
+        return ResponseEntity.ok(reservationTimeService.getTime(id));
     }
 
     @DeleteMapping("/{id}")
