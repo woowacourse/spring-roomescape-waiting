@@ -45,15 +45,16 @@ function renderWaiting(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
+        const id = item.waitingId;
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        const waitingNumber = item.waitingNumber;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        row.insertCell(3).textContent = `${waitingNumber}` + '번째 대기';
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
@@ -64,7 +65,7 @@ function renderWaiting(data) {
         cancelButton.className = 'btn btn-danger';
         console.log(item);
         cancelButton.onclick = function () {
-            requestDeleteWaiting(item.waitingId).then(() => window.location.reload());
+            requestDeleteWaiting(id).then(() => window.location.reload());
         };
         cancelCell.appendChild(cancelButton);
     });

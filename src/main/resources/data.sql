@@ -26,6 +26,7 @@ INSERT INTO theme (name, description, thumbnail) VALUES ('감성', '감동적', 
 INSERT INTO member (name, role, email, password) values ( '몰리', 'USER', 'hihi@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '비밥', 'ADMIN', 'bibap@naver.com', 'hihi');
 INSERT INTO member (name, role, email, password) values ( '포비', 'ADMIN', 'test@naver.com', 'hihi');
+INSERT INTO member (name, role, email, password) values ( '로키', 'ADMIN', 'loki@naver.com', 'hihi');
 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-04-23', 1, 1);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
@@ -40,4 +41,15 @@ INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-05-03', 1, 4);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-06-30', 2, 5);
 
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-23', 1, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-04-23', 1, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 4, '2024-04-23', 1, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-24', 2, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-04-24', 2, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 4, '2024-04-24', 2, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-04-25', 3, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-25', 3, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 4, '2024-04-25', 3, 1);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-06-30', 2, 5);
 INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-06-30', 2, 5);
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id) values ( 4, '2024-06-30', 2, 5);

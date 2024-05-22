@@ -41,9 +41,10 @@ public class MemberService {
     }
 
     public List<FindWaitingResponse> getWaitingsByMember(AuthInfo authInfo) {
-        List<Waiting> waitings = waitingRepository.findAllByMemberId(authInfo.getMemberId());
-        return waitings.stream()
-                .map(FindWaitingResponse::from)
-                .toList();
+        return waitingRepository.findAllWaitingResponses(authInfo.getMemberId());
+//        List<Waiting> waitings = waitingRepository.findAllByMemberId(authInfo.getMemberId());
+//        return waitings.stream()
+//                .map(FindWaitingResponse::from)
+//                .toList();
     }
 }

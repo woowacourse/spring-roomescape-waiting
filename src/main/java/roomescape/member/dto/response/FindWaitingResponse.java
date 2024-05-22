@@ -9,13 +9,13 @@ public record FindWaitingResponse(Long waitingId,
                                   String theme,
                                   LocalDate date,
                                   LocalTime time,
-                                  String status) {
+                                  Long waitingNumber) {
     public static FindWaitingResponse from(final Waiting waiting) {
         return new FindWaitingResponse(
                 waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
                 waiting.getReservationTime().getStartAt(),
-                "대기");
+                1L);
     }
 }
