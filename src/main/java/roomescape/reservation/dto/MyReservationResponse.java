@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,

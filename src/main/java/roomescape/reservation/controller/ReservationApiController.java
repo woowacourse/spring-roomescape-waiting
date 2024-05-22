@@ -17,6 +17,7 @@ import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -44,7 +45,7 @@ public class ReservationApiController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping(path = {"/reservations", "/admin/reservations", "/reservations/waiting"})
+    @PostMapping(path = {"/reservations", "/admin/reservations"})
     public ResponseEntity<ReservationResponse> createMemberReservation(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
             @Login LoginMemberInToken loginMemberInToken
@@ -53,6 +54,13 @@ public class ReservationApiController {
         ReservationResponse reservationResponse = reservationService.findById(id);
 
         return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
+    }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<WaitingResponse>> findWaiting() {
+        List<WaitingResponse> waitingResponses = reservationService.findWaiting();
+
+        return ResponseEntity.ok(waitingResponses);
     }
 
     @DeleteMapping("/reservations/{id}")
