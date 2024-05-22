@@ -18,18 +18,22 @@ import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationDeleteUsecase;
 import roomescape.reservation.service.ReservationFindMineUsecase;
+import roomescape.reservation.service.ReservationFindService;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+    private final ReservationFindService findService;
     private final ReservationService service;
     private final ReservationDeleteUsecase deleteUsecase;
     private final ReservationFindMineUsecase findMineUsecase;
 
-    public ReservationController(ReservationService service,
+    public ReservationController(ReservationFindService findService,
+                                 ReservationService service,
                                  ReservationDeleteUsecase deleteUsecase,
                                  ReservationFindMineUsecase findMineUsecase) {
+        this.findService = findService;
         this.service = service;
         this.deleteUsecase = deleteUsecase;
         this.findMineUsecase = findMineUsecase;
@@ -37,7 +41,7 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> findReservations() {
-        return service.findReservations();
+        return findService.findReservations();
     }
 
     @GetMapping("/accounts")

@@ -12,17 +12,20 @@ import roomescape.waiting.service.WaitingService;
 @Component
 @Transactional
 public class ReservationDeleteUsecase {
-
+    private final ReservationFindService reservationFindService;
     private final ReservationService reservationService;
     private final WaitingService waitingService;
 
-    public ReservationDeleteUsecase(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationDeleteUsecase(ReservationFindService reservationFindService,
+                                    ReservationService reservationService,
+                                    WaitingService waitingService) {
+        this.reservationFindService = reservationFindService;
         this.reservationService = reservationService;
         this.waitingService = waitingService;
     }
 
     public void deleteReservation(Long reservationId) {
-        ReservationResponse reservation = reservationService.findReservation(reservationId);
+        ReservationResponse reservation = reservationFindService.findReservation(reservationId);
         validateIsAfterFromNow(reservation);
 
         Optional<WaitingResponse> highPriorityWaiting

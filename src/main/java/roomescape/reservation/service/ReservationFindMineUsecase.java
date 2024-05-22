@@ -3,23 +3,25 @@ package roomescape.reservation.service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.stereotype.Component;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.waiting.service.WaitingService;
 
+@Component
 public class ReservationFindMineUsecase {
     private static final Comparator<MyReservationResponse> RESERVATION_SORTING_COMPARATOR = Comparator.comparing(
             MyReservationResponse::date).thenComparing(MyReservationResponse::startAt);
 
-    private final ReservationService reservationService;
+    private final ReservationFindService reservationFindService;
     private final WaitingService waitingService;
 
-    public ReservationFindMineUsecase(ReservationService reservationService, WaitingService waitingService) {
-        this.reservationService = reservationService;
+    public ReservationFindMineUsecase(ReservationFindService reservationFindService, WaitingService waitingService) {
+        this.reservationFindService = reservationFindService;
         this.waitingService = waitingService;
     }
 
     public List<MyReservationResponse> findMyReservations(Long memberId) {
-        List<MyReservationResponse> reservations = reservationService.findReservationsByMemberId(memberId);
+        List<MyReservationResponse> reservations = reservationFindService.findReservationsByMemberId(memberId);
         List<MyReservationResponse> waitings = waitingService.findWaitingsByMemberId(memberId);
 
         return makeMyReservations(reservations, waitings);
