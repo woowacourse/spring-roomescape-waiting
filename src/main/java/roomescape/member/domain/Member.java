@@ -24,7 +24,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(String name, String email, String password) {
@@ -72,10 +72,6 @@ public class Member {
 
     public MemberRole getRole() {
         return role;
-    }
-
-    public void setRole(String role) {
-        this.role = MemberRole.valueOf(role);
     }
 
     @Override

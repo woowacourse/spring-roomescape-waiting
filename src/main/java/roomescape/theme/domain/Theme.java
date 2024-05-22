@@ -15,7 +15,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(String name, String description, String thumbnail) {
@@ -56,10 +56,6 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
 }

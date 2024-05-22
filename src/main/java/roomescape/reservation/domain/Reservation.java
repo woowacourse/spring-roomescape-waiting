@@ -28,7 +28,7 @@ public class Reservation {
     private Theme theme;
     private String status = "예약";
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, LocalDate date, Time time, Theme theme) {
@@ -84,18 +84,6 @@ public class Reservation {
 
     public String getStatus() {
         return status;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setTime(Time time) {
-        this.time = time;
-    }
-
-    public void setTheme(Theme theme) {
-        this.theme = theme;
     }
 
     public boolean isReservedAtPeriod(LocalDate start, LocalDate end) {
