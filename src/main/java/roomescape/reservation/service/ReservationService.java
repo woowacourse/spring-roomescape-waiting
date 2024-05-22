@@ -66,18 +66,23 @@ public class ReservationService {
             throw new DuplicateSaveException("중복되는 예약이 존재합니다.");
         }
 
-        Reservation reservation = makeReservationForSave(memberId, request);
-        Reservation saved = reservationRepository.save(reservation);
-        return new ReservationResponse(saved);
+        return saveMemberReservation(memberId, request, Status.RESERVED);
     }
 
-    private Reservation makeReservationForSave(Long memberId, MemberReservationAddRequest request) {
+    public ReservationResponse saveMemberWaitingReservation(Long memberId, MemberReservationAddRequest request) {
+        return saveMemberReservation(memberId, request, Status.WAITING);
+    }
+
+    private ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request, Status status) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchRecordException("ID: " + memberId + " 해당하는 회원을 찾을 수 없습니다"));
         ReservationTime reservationTime = getReservationTime(request.timeId());
         validateReservingPastTime(request.date(), reservationTime.getStartAt());
         Theme theme = getTheme(request.themeId());
-        return new Reservation(member, request.date(), reservationTime, theme, Status.RESERVED);
+
+        Reservation reservation = new Reservation(member, request.date(), reservationTime, theme, status);
+        Reservation saved = reservationRepository.save(reservation);
+        return new ReservationResponse(saved);
     }
 
     private void validateReservingPastTime(LocalDate date, LocalTime time) {
