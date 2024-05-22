@@ -63,8 +63,8 @@ public class WaitingService {
                 .toList();
     }
 
-    public void cancel(Long memberId, Long reservationId) {
-        Waiting waiting = waitingRepository.findById(reservationId)
+    public void cancel(Long memberId, Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new IllegalArgumentException(memberId + "에 해당하는 대기가 없습니다."));
 
         Member member = memberRepository.findById(memberId)
@@ -73,7 +73,7 @@ public class WaitingService {
         if (waiting.isNotReservedBy(member)) {
             throw new IllegalArgumentException("예약자가 일치하지 않습니다.");
         }
-        waitingRepository.deleteById(reservationId);
+        waitingRepository.deleteById(waitingId);
     }
 
     public List<ReservationResponse> findAllWaitings() {
@@ -91,5 +91,13 @@ public class WaitingService {
         final Reservation saved = reservationRepository.save(reservation);
         waitingRepository.deleteById(waitingId);
         return ReservationResponse.from(saved);
+    }
+
+    public void deny(Long waitingId) {
+        boolean exists = waitingRepository.existsById(waitingId);
+        if (!exists) {
+            throw new IllegalArgumentException("존재하지 않는 대기입니다.");
+        }
+        waitingRepository.deleteById(waitingId);
     }
 }
