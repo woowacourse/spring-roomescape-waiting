@@ -51,8 +51,9 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllBy(final ReservationFilterParam filterParam) {
-        final List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
-                filterParam.themeId(), filterParam.memberId(), filterParam.dateFrom(), filterParam.dateTo()
+        final List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetweenAndStatus(
+                filterParam.themeId(), filterParam.memberId(),
+                filterParam.dateFrom(), filterParam.dateTo(), ReservationStatus.RESERVED
         );
         return reservations.stream()
                 .map(ReservationResponse::from)

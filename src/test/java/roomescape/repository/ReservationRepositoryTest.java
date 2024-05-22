@@ -64,8 +64,9 @@ class ReservationRepositoryTest {
     @DisplayName("검색 조건에 따른 예약 목록을 조회한다.")
     void findAllByFilterParameter() {
         // when
-        final List<Reservation> actual = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
-                theme.getId(), member.getId(), LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_NINTH)
+        final List<Reservation> actual = reservationRepository.findByThemeIdAndMemberIdAndDateBetweenAndStatus(
+                theme.getId(), member.getId(),
+                LocalDate.parse(DATE_MAY_EIGHTH), LocalDate.parse(DATE_MAY_NINTH), ReservationStatus.RESERVED
         );
 
         // then

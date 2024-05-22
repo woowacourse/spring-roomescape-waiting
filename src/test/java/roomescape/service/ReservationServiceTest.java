@@ -111,8 +111,8 @@ class ReservationServiceTest {
         final ReservationFilterParam reservationFilterParam
                 = new ReservationFilterParam(1L, 1L,
                 LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"));
-        given(reservationRepository.findByThemeIdAndMemberIdAndDateBetween(1L, 1L,
-                LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28")))
+        given(reservationRepository.findByThemeIdAndMemberIdAndDateBetweenAndStatus(1L, 1L,
+                LocalDate.parse("2034-05-08"), LocalDate.parse("2034-05-28"), ReservationStatus.RESERVED))
                 .willReturn(List.of(reservation1, reservation2));
 
         // when

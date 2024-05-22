@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
@@ -17,7 +18,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByDateAndThemeId(final LocalDate date, final Long themeId);
 
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo);
+    @Query(
+            """
+            SELECT r FROM Reservation AS r
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+            AND (:memberId IS NULL OR r.member.id = :memberId)
+            AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+            AND (:dateTo IS NULL OR r.date <= :dateTo)
+            AND r.status = :status
+            """
+    )
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetweenAndStatus(
+            final Long themeId,
+            final Long memberId,
+            final LocalDate dateFrom,
+            final LocalDate dateTo,
+            final ReservationStatus status);
 
     List<Reservation> findByStatus(final ReservationStatus status);
 
