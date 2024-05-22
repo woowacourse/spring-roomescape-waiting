@@ -7,11 +7,7 @@ import static org.mockito.Mockito.when;
 import static roomescape.reservation.fixture.ReservationFixture.MEMBER_ID_1_RESERVATION;
 import static roomescape.reservation.fixture.ReservationFixture.PAST_DATE_RESERVATION_REQUEST;
 import static roomescape.reservation.fixture.ReservationFixture.RESERVATION_REQUEST_1;
-import static roomescape.reservation.fixture.ReservationFixture.RESERVED;
-import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_1;
 import static roomescape.reservation.fixture.ReservationFixture.SAVED_RESERVATION_2;
-import static roomescape.reservation.fixture.ReservationFixture.WAITING_2;
-import static roomescape.reservation.fixture.ReservationFixture.WAITING_3;
 import static roomescape.theme.fixture.ThemeFixture.THEME_1;
 import static roomescape.time.fixture.ReservationTimeFixture.RESERVATION_TIME_10_00_ID_1;
 
@@ -71,7 +67,7 @@ class ReservationServiceTest {
         when(reservationRepository.findByMemberId(1L)).thenReturn(List.of(MEMBER_ID_1_RESERVATION));
 
         assertThat(reservationService.findAllByMemberWithStatus(1L))
-                .containsExactly(new MemberReservation(MEMBER_ID_1_RESERVATION));
+                .containsExactly(new MemberReservation(MEMBER_ID_1_RESERVATION, 1));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")
@@ -128,17 +124,5 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
                 .isInstanceOf(IllegalRequestException.class);
-    }
-
-    @DisplayName("예약 단건을 삭제하는 경우 뒤의 대기번호들이 -1만큼 조정된다")
-    @Test
-    void should_delete_reservation_when_requested() {
-        when(reservationRepository.findByIdWithTimeAndTheme(any(Long.class)))
-                .thenReturn(Optional.of(SAVED_RESERVATION_1));
-        when(reservationRepository.findByDateAndTimeAndTheme(any(LocalDate.class), any(Long.class), any(Long.class)))
-                .thenReturn(List.of(RESERVED, WAITING_2, WAITING_3));
-
-        reservationService.removeReservation(WAITING_2.getId());
-        assertThat(WAITING_3.getWaitingNumber()).isEqualTo(2);
     }
 }

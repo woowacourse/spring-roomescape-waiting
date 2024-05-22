@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DomainValidationException;
 import roomescape.global.exception.IllegalRequestException;
@@ -55,16 +54,28 @@ public class ReservationService {
     public List<MemberReservation> findAllByMemberWithStatus(Long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
-                .map(MemberReservation::new)
+                .map(reservation -> new MemberReservation(reservation, calculateReservationWaitingNumber(reservation)))
                 .toList();
+    }
+
+    public int calculateReservationWaitingNumber(Reservation reservation) {
+        List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(
+                reservation.getDate(),
+                reservation.getTimeId(),
+                reservation.getThemeId()
+        );
+
+        return (int) reservations.stream()
+                .filter(other -> other.isWaitingOrderHigherThan(reservation))
+                .count() + 1;
     }
 
     public List<WaitingResponse> findWaitings() {
         return reservationRepository.findWaitings().stream()
-                .map(WaitingResponse::new)
+                .map(reservation -> new WaitingResponse(reservation, calculateReservationWaitingNumber(reservation)))
                 .toList();
     }
-
+    
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
         List<Reservation> earlierReservations = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
@@ -77,8 +88,7 @@ public class ReservationService {
                 getMember(memberId),
                 request.date(),
                 getReservationTime(request.timeId()),
-                getTheme(request.themeId()),
-                earlierReservations.size() + 1
+                getTheme(request.themeId())
         );
 
         if (reservation.isPast()) {
@@ -108,23 +118,6 @@ public class ReservationService {
     }
 
     public void removeReservation(long id) {
-        Optional<Reservation> deleteTarget = reservationRepository.findByIdWithTimeAndTheme(id);
-        if (deleteTarget.isEmpty()) {
-            return;
-        }
-
-        Reservation removedReservation = deleteTarget.get();
-
-        List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(
-                removedReservation.getDate(),
-                removedReservation.getTimeId(),
-                removedReservation.getThemeId()
-        );
-
-        reservations.stream()
-                .filter(reservation -> reservation.isWaitingRankLowerThan(removedReservation))
-                .forEach(Reservation::increaseWaitingRank);
-
         reservationRepository.deleteById(id);
     }
 }

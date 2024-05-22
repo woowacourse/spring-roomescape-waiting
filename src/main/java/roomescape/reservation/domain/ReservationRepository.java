@@ -47,10 +47,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByIdWithTimeAndTheme(@Param("id") Long id);
 
     @Query("""
-            SELECT r
-            FROM Reservation AS r
-            WHERE r.waitingStatus.waitingNumber > 1 
+            SELECT r1
+            FROM Reservation AS r1
+            WHERE EXISTS (
+                SELECT r2
+                FROM Reservation AS r2
+                WHERE r2.date = r1.date
+                AND r2.theme = r1.theme
+                AND r2.time = r1.time
+                AND r1.id > r2.id
+            )
             """)
     List<Reservation> findWaitings();
+
 
 }

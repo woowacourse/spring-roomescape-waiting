@@ -39,26 +39,20 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Embedded
-    @Column(nullable = false)
-    private WaitingStatus waitingStatus;
-
     public Reservation(Long id,
                        Member member,
                        ReservationDate date,
                        ReservationTime time,
-                       Theme theme,
-                       WaitingStatus waitingStatus) {
+                       Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.waitingStatus = waitingStatus;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, int waitingNumber) {
-        this(id, member, new ReservationDate(date), time, theme, new WaitingStatus(waitingNumber));
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(id, member, new ReservationDate(date), time, theme);
     }
 
     public Reservation(Long id, Reservation reservation) {
@@ -67,8 +61,7 @@ public class Reservation {
                 reservation.getMember(),
                 new ReservationDate(reservation.getDate()),
                 reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getWaitingStatus()
+                reservation.getTheme()
         );
     }
 
@@ -79,24 +72,16 @@ public class Reservation {
         return date.isPast();
     }
 
-    public boolean isWaiting() {
-        return waitingStatus.isWaiting();
-    }
-
     public boolean isReservedBy(Long memberId) {
         return member.getId().equals(memberId);
     }
 
     public boolean isWaitingRankLowerThan(Reservation other) {
-        return waitingStatus.isLower(other.waitingStatus);
+        return this.id > other.id;
     }
 
-    public void increaseWaitingRank() {
-        waitingStatus = waitingStatus.rankUp();
-    }
-
-    public int getWaitingNumber() {
-        return waitingStatus.getWaitingNumber();
+    public boolean isWaitingOrderHigherThan(Reservation other) {
+        return this.id < other.id;
     }
 
     public Long getId() {
@@ -139,10 +124,6 @@ public class Reservation {
         return theme.getName();
     }
 
-    public WaitingStatus getWaitingStatus() {
-        return waitingStatus;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -154,12 +135,11 @@ public class Reservation {
         Reservation that = (Reservation) o;
         return Objects.equals(id, that.id) && Objects.equals(member, that.member)
                 && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme) && Objects.equals(waitingStatus,
-                that.waitingStatus);
+                && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme, waitingStatus);
+        return Objects.hash(id, member, date, time, theme);
     }
 }

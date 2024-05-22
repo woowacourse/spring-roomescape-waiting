@@ -13,10 +13,10 @@ public record WaitingResponse(
         LocalDate reservationDate,
         LocalTime reservationTime
 ) {
-    public WaitingResponse(Reservation reservation) {
+    public WaitingResponse(Reservation reservation, int waitingNumber) {
         this(
                 reservation.getId(),
-                reservation.getWaitingNumber(),
+                waitingNumber,
                 reservation.getMemberName(),
                 reservation.getThemeName(),
                 reservation.getDate(),

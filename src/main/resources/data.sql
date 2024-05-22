@@ -15,13 +15,13 @@ VALUES ('안돌', 'andole@test.com', '123', 'MEMBER'),
        ('메이슨', 'mason@test.com', '123', 'MEMBER'),
        ('어드민', 'admin@test.com', '123', 'ADMIN');
 
-INSERT INTO reservation(member_id, date, time_id, theme_id, waiting_number)
-VALUES (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '1', 1),
-       (2, TIMESTAMPADD(DAY, -1, NOW()), '1', '1', 2),
-       (3, TIMESTAMPADD(DAY, -1, NOW()), '1', '1', 3),
-       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '1', 1),
-       (3, TIMESTAMPADD(DAY, -2, NOW()), '1', '2', 1),
-       (2, TIMESTAMPADD(DAY, -1, NOW()), '2', '1', 1),
-       (2, TIMESTAMPADD(DAY, -2, NOW()), '2', '2', 1);
+INSERT INTO reservation(member_id, date, time_id, theme_id)
+VALUES (1, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
+       (2, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
+       (3, TIMESTAMPADD(DAY, -1, NOW()), '1', '1'),
+       (1, TIMESTAMPADD(DAY, -1, NOW()), '3', '1'),
+       (3, TIMESTAMPADD(DAY, -2, NOW()), '1', '2'),
+       (2, TIMESTAMPADD(DAY, -1, NOW()), '2', '1'),
+       (2, TIMESTAMPADD(DAY, -2, NOW()), '2', '2');
 
 
