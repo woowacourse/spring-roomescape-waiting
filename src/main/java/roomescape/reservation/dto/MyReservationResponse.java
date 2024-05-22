@@ -9,11 +9,12 @@ public record MyReservationResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        String status,
+        Integer order
 ) {
 
-    public static MyReservationResponse toResponse(Reservation reservation) {
+    public static MyReservationResponse toResponse(Reservation reservation, int order) {
         return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(),
-                reservation.getTime().getStartAt(), reservation.getStatus().getStatus());
+                reservation.getTime().getStartAt(), reservation.getStatus().getStatus(), order);
     }
 }

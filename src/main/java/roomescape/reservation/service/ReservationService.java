@@ -7,7 +7,9 @@ import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waitings;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -37,14 +39,21 @@ public class ReservationService {
     }
 
     public Long save(ReservationCreateRequest reservationCreateRequest, LoginMemberInToken loginMemberInToken) {
-        Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken);
-        validateDuplicateReservation(reservation);
+        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(reservationCreateRequest.date(),
+                reservationCreateRequest.timeId(), reservationCreateRequest.themeId())) {
+            Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken,
+                    Status.WAITING);
+            return reservationRepository.save(reservation).getId();
+        }
+        ;
 
+        Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken, Status.SUCCESS);
         return reservationRepository.save(reservation).getId();
     }
 
     private Reservation getValidatedReservation(ReservationCreateRequest reservationCreateRequest,
-                                                LoginMemberInToken loginMemberInToken) {
+                                                LoginMemberInToken loginMemberInToken,
+                                                Status status) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -53,20 +62,13 @@ public class ReservationService {
 
         Member member = getValidatedMemberByRole(reservationCreateRequest, loginMemberInToken);
 
-        return reservationCreateRequest.toReservation(member, theme, reservationTime);
+        return reservationCreateRequest.toReservation(member, theme, reservationTime, status);
     }
 
     private Member getValidatedMemberByRole(ReservationCreateRequest reservationCreateRequest,
                                             LoginMemberInToken loginMemberInToken) {
         return memberRepository.findById(loginMemberInToken.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-    }
-
-    private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservation.getDate(), reservation.getTime()
-                .getStartAt())) {
-            throw new IllegalArgumentException("중복된 예약이 있습니다.");
-        }
     }
 
     public ReservationResponse findById(Long id) {
@@ -92,8 +94,12 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
+        List<Reservation> waitingReservation = reservationRepository.findAllByStatus(Status.WAITING);
+        Waitings waitings = new Waitings(waitingReservation);
+
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MyReservationResponse::toResponse)
+                .map(reservation -> MyReservationResponse.toResponse(reservation,
+                        waitings.findMemberRank(reservation, memberId)))
                 .toList();
     }
 

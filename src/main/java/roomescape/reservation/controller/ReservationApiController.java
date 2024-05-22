@@ -44,17 +44,16 @@ public class ReservationApiController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping(path = {"/reservations", "/admin/reservations"})
+    @PostMapping(path = {"/reservations", "/admin/reservations", "/reservations/waiting"})
     public ResponseEntity<ReservationResponse> createMemberReservation(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
             @Login LoginMemberInToken loginMemberInToken
     ) {
         Long id = reservationService.save(reservationCreateRequest, loginMemberInToken);
         ReservationResponse reservationResponse = reservationService.findById(id);
-        
+
         return ResponseEntity.created(URI.create("/reservations/" + id)).body(reservationResponse);
     }
-
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
