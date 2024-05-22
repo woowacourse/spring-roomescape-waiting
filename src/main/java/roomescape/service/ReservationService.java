@@ -6,6 +6,7 @@ import static roomescape.domain.reservation.ReservationStatus.REJECTED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
@@ -63,9 +64,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationRankResponse> findReservationsByMemberEmail(String email) {
+    public List<ReservationRankResponse> findMyReservations(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
-        return reservationRepository.findReservationRankByMember(member);
+        List<ReservationRankResponse> myReservations = reservationRepository.findReservationRankByMember(member);
+        Collections.sort(myReservations);
+        return myReservations;
     }
 
     public ReservationResponse createReservation(ReservationCreate createInfo) {

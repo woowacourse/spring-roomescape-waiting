@@ -80,7 +80,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.findReservationsByMemberEmail("t1@t1.com"))
+        assertThatThrownBy(() -> reservationService.findMyReservations("t1@t1.com"))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 

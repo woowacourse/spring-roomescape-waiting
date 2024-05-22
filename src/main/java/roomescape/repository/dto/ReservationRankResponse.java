@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.ReservationStatus;
 
-public class ReservationRankResponse {
+public class ReservationRankResponse implements Comparable<ReservationRankResponse> {
 
     private final long reservationId;
     private final String theme;
@@ -25,6 +25,14 @@ public class ReservationRankResponse {
         this.time = time;
         this.status = status.toString();
         this.waitingRank = waitingRank;
+    }
+
+    @Override
+    public int compareTo(ReservationRankResponse o) {
+        if (this.date.equals(o.date)) {
+            return this.time.compareTo(o.time);
+        }
+        return this.date.compareTo(o.date);
     }
 
     public long getReservationId() {

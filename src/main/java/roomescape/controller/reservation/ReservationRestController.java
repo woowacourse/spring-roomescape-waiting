@@ -29,7 +29,7 @@ public class ReservationRestController {
 
     @GetMapping("/reservations")
     public List<ReservationRankResponse> findReservations(@AuthenticationPrincipal LoginMember loginMember) {
-        return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
+        return reservationService.findMyReservations(loginMember.getEmail());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
