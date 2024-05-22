@@ -68,7 +68,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<MyReservationWithRankResponse> findMyReservations(final LoginMember loginMember) {
+    public List<MyReservationWithRankResponse> findMyReservationsAndWaitings(final LoginMember loginMember) {
         final List<MyReservationWithRankResponse> reservations = reservationRepository.findByMemberId(loginMember.id());
         return reservations;
     }

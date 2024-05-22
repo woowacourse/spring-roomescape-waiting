@@ -64,7 +64,8 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationWithRankResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
-        return ResponseEntity.ok(reservationService.findMyReservations(loginMember));
+    public ResponseEntity<List<MyReservationWithRankResponse>> findMyReservationsAndWaitings(
+            @AuthenticationPrincipal final LoginMember loginMember) {
+        return ResponseEntity.ok(reservationService.findMyReservationsAndWaitings(loginMember));
     }
 }
