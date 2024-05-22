@@ -9,7 +9,6 @@ import static roomescape.TestFixture.VALID_STRING_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

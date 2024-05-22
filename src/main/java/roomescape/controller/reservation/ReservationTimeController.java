@@ -28,7 +28,7 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeResponse>> findAll() { // 사용자
+    public ResponseEntity<List<ReservationTimeResponse>> findAll() {
         return ResponseEntity.ok(reservationTimeService.findAll());
     }
 
@@ -42,7 +42,7 @@ public class ReservationTimeController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<ReservationTimeResponse> create( // 어드민만
+    public ResponseEntity<ReservationTimeResponse> create(
             @Valid @RequestBody ReservationTimeRequest reservationTimeRequest)
     {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.save(reservationTimeRequest);
