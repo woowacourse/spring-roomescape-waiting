@@ -29,5 +29,5 @@ public interface ReservationRepository {
 
     List<Reservation> findByStatus(ReservationStatus status);
 
-    Reservation findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId);
 }

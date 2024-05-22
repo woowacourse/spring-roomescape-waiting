@@ -180,7 +180,7 @@ class ReservationRepositoryImplTest extends RepositoryTest {
         Long themeId = saveWaitingReservation1.getTheme().getId();
 
         Reservation topWaitingReservation = reservationRepository.findTopWaitingReservationBy(AFTER_ONE_DAYS_DATE,
-                timeId, themeId);
+                timeId, themeId).get();
 
         assertThat(topWaitingReservation).isEqualTo(saveWaitingReservation1);
 

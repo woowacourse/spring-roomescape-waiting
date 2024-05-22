@@ -1,5 +1,7 @@
 package roomescape.domain.reservation.domain.reservation;
 
+import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -89,6 +91,10 @@ public class Reservation {
 
     public LocalDateTime getReservationTimestamp() {
         return reservationTimestamp;
+    }
+
+    public Reservation changeStatusToReserved() {
+        return new Reservation(id, date.getValue(), time, theme, member, RESERVED, reservationTimestamp);
     }
 
     @Override

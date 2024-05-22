@@ -2,6 +2,7 @@ package roomescape.domain.reservation.repository.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.domain.reservation.Reservation;
@@ -17,8 +18,8 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByMemberIdAndDateValueAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
-    Reservation findTop1ByDateValueAndThemeIdAndTimeIdAndStatus(LocalDate date, Long timeId, Long themeId,
-                                                                ReservationStatus status);
+    Optional<Reservation> findTop1ByDateValueAndThemeIdAndTimeIdAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                                          ReservationStatus status);
 
     List<Reservation> findByDateValueAndThemeId(LocalDate date, Long themeId);
 

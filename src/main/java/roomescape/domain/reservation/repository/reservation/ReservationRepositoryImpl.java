@@ -72,7 +72,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Reservation findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findTopWaitingReservationBy(LocalDate date, Long timeId, Long themeId) {
         return jpaReservationRepository.findTop1ByDateValueAndThemeIdAndTimeIdAndStatus(date, timeId, themeId, WAITING);
     }
 }
