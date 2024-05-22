@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Reservation;
 import roomescape.domain.Status;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -29,11 +30,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"theme", "time"})
     List<Reservation> findAllByMemberId(long id);
 
-    @EntityGraph(attributePaths = "theme")
-    List<Reservation> findAllByStatusAndDateBetween(Status status, LocalDate from, LocalDate until);
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.theme
+            WHERE r.status = :status
+            AND r.date BETWEEN :from AND :until
+            """)
+    List<Reservation> findAllJoinThemeByStatusAndDateBetween(Status status, LocalDate from,
+                                                             LocalDate until);
 
-    @EntityGraph(attributePaths = "time")
-    List<Reservation> findAllByStatusAndDateAndThemeId(Status status, LocalDate date, long themeId);
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            WHERE r.status = :status
+            AND r.date = :date
+            AND r.theme.id = :themeId
+            """)
+    List<Reservation> findAllJoinTimeByStatusAndDateAndThemeId(Status status, LocalDate date,
+                                                               long themeId);
 
     Optional<Reservation> findFirstByTimeIdAndThemeIdAndDateAndStatus(Long timeId, Long themeId,
                                                                       LocalDate date,

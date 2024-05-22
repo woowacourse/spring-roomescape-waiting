@@ -47,7 +47,7 @@ public class TimeService {
             return List.of();
         }
         final List<Reservation> reservations = reservationRepository
-                .findAllByStatusAndDateAndThemeId(
+                .findAllJoinTimeByStatusAndDateAndThemeId(
                         Status.RESERVED, reservationDate, request.themeId());
         final Set<ReservationTime> bookedTimes = reservations.stream()
                 .map(Reservation::getTime)
