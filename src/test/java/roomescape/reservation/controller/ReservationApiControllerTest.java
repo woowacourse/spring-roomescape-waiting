@@ -187,4 +187,21 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
+
+    @DisplayName("예약 대기을 성공적으로 승인하면 204 응답을 받는다.")
+    @Test
+    void updateSuccess() {
+        saveMember(MEMBER_KAKI);
+        saveThemeAsHorror();
+        saveReservationTimeAsTen();
+        saveWaitReservationAsDateNow();
+
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .accept(ContentType.JSON)
+                .when()
+                .patch("/reservations/wait/{id}", 1L)
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
 }

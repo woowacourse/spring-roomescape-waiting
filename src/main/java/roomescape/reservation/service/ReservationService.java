@@ -168,4 +168,24 @@ public class ReservationService {
     public void delete(Long id) {
         reservationRepository.deleteById(id);
     }
+
+    @Transactional
+    public void updateSuccess(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("예약 내역이 없습니다."));
+        validateExistReservation(reservation);
+        reservation.setStatus(Status.SUCCESS);
+    }
+
+    private void validateExistReservation(Reservation reservation) {
+        boolean existReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndThemeAndStatus(
+                reservation.getDate(),
+                reservation.getStartAt(),
+                reservation.getTheme(),
+                Status.SUCCESS
+        );
+        if (existReservation) {
+            throw new IllegalArgumentException("이미 확정된 예약이 있습니다.");
+        }
+    }
 }

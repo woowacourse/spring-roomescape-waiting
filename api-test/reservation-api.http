@@ -51,3 +51,7 @@ GET http://localhost:8080/reservations/wait
 ### 예약 삭제 API
 
 DELETE http://localhost:8080/reservations/1
+
+### 예약 대기 승인 API
+
+PATCH http://localhost:8080/reservations/wait/1

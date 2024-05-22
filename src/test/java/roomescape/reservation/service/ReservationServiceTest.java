@@ -16,6 +16,7 @@ import static roomescape.util.Fixture.MEMBER_KAKI;
 import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
+import static roomescape.util.Fixture.TOMORROW;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -155,5 +156,35 @@ class ReservationServiceTest {
                 () -> assertThat(jojoReservations).hasSize(2),
                 () -> assertThat(jojoReservations).containsExactly(expectedSuccess, expectedWait)
         );
+    }
+
+    @DisplayName("예약 대기 승인 시, 확정된 예약이 없으면 예약 상태로 변경된다.")
+    @Test
+    void updateSuccessStatus() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+
+        Reservation waiting = reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, WAIT));
+        reservationService.updateSuccess(waiting.getId());
+
+        Reservation afterUpdate = reservationRepository.findById(waiting.getId()).get();
+
+        assertThat(afterUpdate.getStatus()).isEqualTo(SUCCESS);
+    }
+
+    @DisplayName("예약 대기 승인 시, 확정된 예약이 있으면 예외가 발생한다.")
+    @Test
+    void updateSuccessStatusWithDuplicatedReservation() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+        Member kaki = memberRepository.save(MEMBER_KAKI);
+
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme, reservationTime, SUCCESS));
+        Reservation waiting = reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, WAIT));
+
+        assertThatThrownBy(() -> reservationService.updateSuccess(waiting.getId()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
