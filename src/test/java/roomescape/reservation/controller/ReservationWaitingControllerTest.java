@@ -34,6 +34,19 @@ class ReservationWaitingControllerTest {
 
     @DisplayName("예약 대기 정보를 모두 조회한다.")
     @Test
+    void getReservationWaitingTest() {
+        // When & Then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", createAccessToken(1L, MemberRole.ADMIN))
+                .when().get("/admin/reservation-waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(6));
+    }
+
+    @DisplayName("인증된 사용자의 예약 대기 정보를 모두 조회한다.")
+    @Test
     void getMyReservationWaitingTest() {
         // When & Then
         RestAssured.given().log().all()

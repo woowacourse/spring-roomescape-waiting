@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.principal.AuthenticatedMember;
 import roomescape.reservation.dto.MyReservationWaitingResponse;
+import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.dto.SaveReservationWaitingRequest;
 import roomescape.reservation.dto.SaveReservationWaitingResponse;
 import roomescape.reservation.service.ReservationWaitingService;
@@ -24,6 +25,14 @@ public class ReservationWaitingController {
 
     public ReservationWaitingController(final ReservationWaitingService reservationWaitingService) {
         this.reservationWaitingService = reservationWaitingService;
+    }
+
+    @GetMapping("/admin/reservation-waiting")
+    public List<ReservationWaitingResponse> getAllReservationWaiting() {
+        return reservationWaitingService.getAllReservationWaiting()
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
     }
 
     @GetMapping("/reservation-waiting-mine")

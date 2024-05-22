@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.model.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationWaitingDto;
+import roomescape.reservation.dto.ReservationWaitingWithOrderDto;
 import roomescape.reservation.dto.SaveReservationWaitingRequest;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationTime;
@@ -38,10 +39,17 @@ public class ReservationWaitingService {
         this.reservationTimeService = reservationTimeService;
     }
 
-    public List<ReservationWaitingDto> getMyReservationWaiting(final Long memberId) {
+    public List<ReservationWaitingDto> getAllReservationWaiting() {
+        return reservationWaitingRepository.findAll()
+                .stream()
+                .map(ReservationWaitingDto::from)
+                .toList();
+    }
+
+    public List<ReservationWaitingWithOrderDto> getMyReservationWaiting(final Long memberId) {
         final List<ReservationWaiting> reservationWaiting = reservationWaitingRepository.findAllByMemberId(memberId);
         return reservationWaiting.stream()
-                .map(waiting -> ReservationWaitingDto.from(waiting, parseReservationWaitingOrder(waiting)))
+                .map(waiting -> ReservationWaitingWithOrderDto.from(waiting, parseReservationWaitingOrder(waiting)))
                 .toList();
     }
 

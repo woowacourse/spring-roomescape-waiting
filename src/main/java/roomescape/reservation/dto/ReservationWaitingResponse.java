@@ -11,17 +11,17 @@ public record ReservationWaitingResponse(
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
-    public static ReservationWaitingResponse from(final ReservationWaitingWithOrderDto reservationWaitingWithOrderDto) {
+    public static ReservationWaitingResponse from(final ReservationWaitingDto reservationWaitingDto) {
         return new ReservationWaitingResponse(
-                reservationWaitingWithOrderDto.id(),
+                reservationWaitingDto.id(),
                 new MemberResponse(
-                        reservationWaitingWithOrderDto.member().id(),
-                        reservationWaitingWithOrderDto.member().name().getValue(),
-                        reservationWaitingWithOrderDto.member().email().getValue()
+                        reservationWaitingDto.member().id(),
+                        reservationWaitingDto.member().name().getValue(),
+                        reservationWaitingDto.member().email().getValue()
                 ),
-                reservationWaitingWithOrderDto.date().getValue(),
-                ReservationTimeResponse.from(reservationWaitingWithOrderDto.time()),
-                ThemeResponse.from(reservationWaitingWithOrderDto.theme())
+                reservationWaitingDto.date().getValue(),
+                ReservationTimeResponse.from(reservationWaitingDto.time()),
+                ThemeResponse.from(reservationWaitingDto.theme())
         );
     }
 }

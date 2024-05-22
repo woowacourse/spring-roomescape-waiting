@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.reservation.dto.ReservationWaitingDto;
 import roomescape.reservation.dto.ReservationWaitingWithOrderDto;
 import roomescape.reservation.dto.SaveReservationWaitingRequest;
 
@@ -22,6 +23,16 @@ class ReservationWaitingServiceTest {
     private ReservationWaitingService reservationWaitingService;
 
     @DisplayName("사용자의 예약 대기 정보를 모두 조회한다.")
+    @Test
+    void getAllReservationWaitingTest() {
+        // When
+        final List<ReservationWaitingDto> myReservationWaiting = reservationWaitingService.getAllReservationWaiting();
+
+        // Then
+        assertThat(myReservationWaiting).hasSize(6);
+    }
+
+    @DisplayName("인증된 사용자의 예약 대기 정보를 모두 조회한다.")
     @Test
     void getMyReservationWaitingTest() {
         // Given
