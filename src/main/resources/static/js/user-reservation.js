@@ -178,13 +178,13 @@ function onReservationButtonClick() {
           if (response.status !== 201) {
             response.text().then(text => {
               alert('ERROR! ' + text);
-              throw new Error('Reservation failed');
+              throw new Error('예약 실패');
             });
           }
           return response.json();
         })
         .then(data => {
-          alert("예약되었습니다!");
+          alert("예약 되었습니다!");
           location.reload();
         })
         .catch(error => {
@@ -192,7 +192,7 @@ function onReservationButtonClick() {
           console.error(error);
         });
   } else {
-    alert("Please select a date, theme, and time before making a reservation.");
+    alert("예약을 신청하기 전 날짜, 테마, 시간을 모두 선택해 주세요.");
   }
 }
 
@@ -204,14 +204,14 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch('/waitings', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -219,19 +219,19 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) throw new Error('예약 대기 실패');
           return response.json();
         })
         .then(data => {
-          alert('Reservation waiting successful!');
+          alert('예약 대기가 성공하였습니다!');
           window.location.href = "/";
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
+          alert("예약 대기 생성 중 에러가 발생하였습니다.");
           console.error(error);
         });
   } else {
-    alert("Please select a date, theme, and time before making a reservation waiting.");
+    alert("예약 대기를 신청하기 전 날짜, 테마, 시간을 모두 선택해 주세요.");
   }
 }
 
