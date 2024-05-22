@@ -59,12 +59,12 @@ function requestDeleteWaiting(id) {
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
-        if (response !== 204) {
+        if (!response.ok) {
             return response.text().then(errorResponse => {
                 throw new Error(errorResponse);
             })
         }
-        return;
+        alert("예약 대기가 취소 되었습니다.")
     }).catch(error => {
         alert(error.message);
     });
@@ -73,14 +73,14 @@ function requestDeleteWaiting(id) {
 function requestDelete(id) {
     const endpoint = `${RESERVATION_API_ENDPOINT}/${id}`;
     return fetch(endpoint, {
-        method: 'DELETE'
+        method: 'POST'
     }).then(response => {
-        if (response !== 204) {
+        if (!response.ok) {
             return response.text().then(errorResponse => {
                 throw new Error(errorResponse);
             })
         }
-        return;
+        alert("예약이 취소 되었습니다.")
     }).catch(error => {
         alert(error.message);
     });

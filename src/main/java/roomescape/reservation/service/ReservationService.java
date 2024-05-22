@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -22,6 +23,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -147,10 +149,38 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        if (findById(id).date().equals(LocalDate.now())) {
+        reservationRepository.deleteById(id);
+    }
+
+    public void cancelById(Long id) {
+        Reservation canceledReservation = getCanceledReservation(id);
+        updateFirstWaitingReservation(canceledReservation);
+    }
+
+    private Reservation getCanceledReservation(Long id) {
+        Reservation successReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+        if (successReservation.getDate().equals(LocalDate.now())) {
             throw new IllegalArgumentException("당일 예약은 취소할 수 없습니다.");
         }
+        successReservation.updateStatus(Status.CANCEL);
 
-        reservationRepository.deleteById(id);
+        return successReservation;
+    }
+
+    private void updateFirstWaitingReservation(Reservation canceledReservation) {
+        List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT).stream()
+                .sorted(Comparator.comparing(Reservation::getDate)
+                        .thenComparing(Reservation::getStartAt)
+                        .thenComparing(Reservation::getCreatedAt))
+                .toList();
+
+        waitingReservations.stream()
+                .filter(reservation -> reservation.sameDate(canceledReservation.getDate()))
+                .filter(reservation -> reservation.sameThemeId(canceledReservation.getTheme().getId()))
+                .filter(reservation -> reservation.sameTimeId(canceledReservation.getTime().getId()))
+                .findFirst()
+                .ifPresent(reservation -> reservation.updateStatus(Status.SUCCESS));
     }
 }

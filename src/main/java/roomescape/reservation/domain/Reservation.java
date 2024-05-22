@@ -71,8 +71,20 @@ public class Reservation extends BaseDateTime {
         return date.equals(otherDate);
     }
 
+    public boolean sameThemeId(Long otherThemeId) {
+        return theme.sameThemeId(otherThemeId);
+    }
+
+    public boolean sameTimeId(Long otherTimeId) {
+        return reservationTime.sameTimeId(otherTimeId);
+    }
+
     public boolean isAfterToday() {
         return date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now());
+    }
+
+    public void updateStatus(Status status) {
+        this.status = status;
     }
 
     public Long getId() {

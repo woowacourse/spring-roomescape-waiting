@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import java.util.List;
 
 public class Waitings {
+
     private final List<Reservation> waitings;
 
     public Waitings(List<Reservation> waitings) {

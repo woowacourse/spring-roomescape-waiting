@@ -78,6 +78,13 @@ public class ReservationApiController {
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id())).body(reservationResponse);
     }
 
+    @PostMapping("/reservations/{id}")
+    public ResponseEntity<Void> cancel(@PathVariable("id") Long id) {
+        reservationService.cancelById(id);
+
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         reservationService.delete(id);

@@ -223,4 +223,28 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.delete(loginMember.id()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @DisplayName("확정된 예약을 취소하면 예약 상태가 CANCEL로 변경되고, 예약 대기자가 있다면 첫 번째 대기자가 예약 확정된다.")
+    @Test
+    void cancelById() {
+        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+
+        ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+
+        Member kaki = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour10, Status.SUCCESS);
+        Reservation reservation2 = new Reservation(jojo, TOMORROW, theme, hour10, Status.WAIT);
+
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
+
+        reservationService.cancelById(kaki.getId());
+        Reservation jojoReservation = reservationRepository.findById(jojo.getId()).get();
+
+        assertThat(jojoReservation.getStatus()).isEqualTo(Status.SUCCESS);
+    }
 }

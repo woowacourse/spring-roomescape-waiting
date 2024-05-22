@@ -32,6 +32,10 @@ Content-Type: application/json
   "themeId": 1
 }
 
+### 예약 취소 API
+
+POST http://localhost:8080/reservations/14
+
 ### 관리자 예약 추가 API
 
 POST http://localhost:8080/admin/reservations
@@ -43,6 +47,10 @@ Content-Type: application/json
   "timeId": 1,
   "memberId": 1
 }
+
+### 관리자 예약 대기 조회
+
+GET http://localhost:8080/admin/reservations/waiting
 
 ### 예약 삭제 API
 
