@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ControllerTest;
-import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 
 public class AdminReservationControllerTest extends ControllerTest {
 

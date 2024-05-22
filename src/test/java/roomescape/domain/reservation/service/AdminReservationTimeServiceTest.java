@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
+import roomescape.domain.reservation.dto.request.ReservationTimeAddRequest;
 import roomescape.global.exception.EscapeApplicationException;
 import roomescape.global.exception.NoMatchingDataException;
 
