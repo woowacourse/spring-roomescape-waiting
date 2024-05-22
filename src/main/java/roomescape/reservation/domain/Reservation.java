@@ -22,7 +22,6 @@ public class Reservation {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
-
     public Reservation() {
     }
 

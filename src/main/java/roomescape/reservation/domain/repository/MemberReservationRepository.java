@@ -27,7 +27,16 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
 
     List<MemberReservation> findAllByMember(Member member);
 
-    List<MemberReservation> findAllByReservation(Reservation reservation);
+    @Query("""
+    SELECT count(*)
+    FROM MemberReservation  mr
+    WHERE mr.reservation = 
+    (SELECT mr.reservation
+    FROM MemberReservation mr
+    WHERE mr.id = :memberReservationId)
+    AND mr.id < :memberReservationId
+    """)
+    int countWaitingMemberReservation(Long memberReservationId);
 
     boolean existsByReservation(Reservation reservation);
 

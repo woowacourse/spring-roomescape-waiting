@@ -74,10 +74,10 @@ VALUES (2, 4, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
 VALUES (2, 8, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 3, CURRENT_TIME(), 'BOOKED');
+VALUES (3, 3, DATEADD('HOUR', 1, CURRENT_DATE()), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
 VALUES (3, 5, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
 VALUES (3, 6, CURRENT_TIME(), 'BOOKED');
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
-VALUES (3, 7, CURRENT_TIME(), 'BOOKED');
+VALUES (3, 7, DATEADD('HOUR', 1, CURRENT_DATE()), 'BOOKED');

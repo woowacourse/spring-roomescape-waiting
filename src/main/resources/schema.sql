@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS member_reservation
     reservation_id BIGINT NOT NULL,
     created_time DATETIME NOT NULL,
     status VARCHAR(255),
-    waiting_order int,
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
     PRIMARY KEY (id)
