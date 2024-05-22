@@ -4,7 +4,8 @@ public enum ExceptionDomainType {
     RESERVATION("예약"),
     RESERVATION_TIME("예약 시간"),
     THEME("테마"),
-    MEMBER("멤버");
+    MEMBER("멤버"),
+    WAITING("대기");
     private final String message;
 
     ExceptionDomainType(final String message) {

@@ -130,4 +130,19 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> sut.createWaiting(input))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+    @Test
+    @DisplayName("대기자가 아니면 취소할 수 없다.")
+    void reservation_cancel_make_next_waiting_reservations() {
+        final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain("joyson5582@email.com"));
+        final Member member2 = memberRepository.save(MemberFixture.getDomain("alphaka@email.com"));
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-01", time, theme));
+        reservationRepository.save(new Reservation(member2,reservationInfo));
+        final WaitingOutput reservationOutputs =
+                sut.createWaiting(new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId()));
+
+        assertThatThrownBy(() -> sut.deleteWaiting(reservationOutputs.id(), member2.getId()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

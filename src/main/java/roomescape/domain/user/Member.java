@@ -33,6 +33,10 @@ public class Member {
         return new Member(new Name(name), new Email(email), new Password(password), role);
     }
 
+    public boolean isEqualId(final long memberId) {
+        return memberId == id;
+    }
+
     public boolean isNotEqualPassword(final String password) {
         return !this.password.isEqual(password);
     }

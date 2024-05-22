@@ -128,6 +128,22 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약자가 아니면 취소할 수 없다.")
+    void reservation_cancel_make_next_waiting_reservations() {
+        final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain("joyson5582@email.com"));
+        final Member member2 = memberRepository.save(MemberFixture.getDomain("alphaka@email.com"));
+
+        final ReservationOutput reservationOutputs =
+                sut.createReservation(new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId()));
+
+        assertThatThrownBy(() -> sut.deleteReservation(reservationOutputs.id(), member2.getId()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+
+    @Test
     @DisplayName("예약자가 취소하면 다음 대기자가 예약자가 된다.")
     void reservation_cancel_make_next_waiting_reservation() {
         final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
@@ -141,12 +157,14 @@ class ReservationServiceTest {
                 sut.createReservation(new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId()));
 
         waitingRepository.save(new Waiting(member2, reservationInfo));
-        sut.deleteReservation(reservationOutputs.id());
+        sut.deleteReservation(reservationOutputs.id(), member.getId());
 
         final var result = reservationRepository.findAllByMemberId(member2.getId())
                 .stream()
                 .anyMatch(reservation ->
-                        reservation.getMember().equals(member2) && reservation.getReservationInfo().equals(reservationInfo)
+                        reservation.getMember()
+                                .equals(member2) && reservation.getReservationInfo()
+                                .equals(reservationInfo)
                 );
 
         assertThat(result).isTrue();

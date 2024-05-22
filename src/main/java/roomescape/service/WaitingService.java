@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Member;
+import roomescape.exception.NotExistException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -11,6 +12,8 @@ import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.output.WaitingOutput;
 
 import java.util.List;
+
+import static roomescape.exception.ExceptionDomainType.WAITING;
 
 @Service
 public class WaitingService {
@@ -52,7 +55,12 @@ public class WaitingService {
                 .indexOf(waiting) + 1;
     }
 
-    public void deleteWaiting(final long id) {
-        waitingRepository.deleteById(id);
+    public void deleteWaiting(final long id,final long memberId) {
+        final Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(()->new NotExistException(WAITING,id));
+        if(waiting.getMember().isEqualId(memberId)){
+            waitingRepository.deleteById(id);
+        }
+        throw new IllegalArgumentException("현재 사용자의 대기가 아닙니다.");
     }
 }
