@@ -22,7 +22,7 @@ class WaitingApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 2L))
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().post("/waitings")
+                .when().post("/waiting")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -34,7 +34,7 @@ class WaitingApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 1L))
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().post("/waitings")
+                .when().post("/waiting")
                 .then().log().all()
                 .statusCode(400);
     }
