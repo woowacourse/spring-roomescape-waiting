@@ -52,4 +52,14 @@ class WaitingApiControllerTest {
                 .statusCode(200)
                 .body("size()", is(4));
     }
+
+    @Test
+    @DisplayName("예약 대기 삭제를 정상적으로 수행한다.")
+    void deleteWaiting() {
+        RestAssured.given().log().all()
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/admin/waitings/2")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
