@@ -46,6 +46,8 @@ function render(data) {
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '예약 취소';
             cancelButton.className = 'btn btn-danger';
+            cancelButton.style.backgroundColor = "#3265c1";
+            cancelButton.style.borderColor = "#3265c1";
             cancelButton.onclick = function () {
                 requestDelete(item.reservationId).then(() => window.location.reload());
             };

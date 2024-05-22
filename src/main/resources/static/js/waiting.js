@@ -1,3 +1,5 @@
+const RESERVATION_API_ENDPOINT = '/reservations'
+
 document.addEventListener('DOMContentLoaded', () => {
     fetch('/admin/reservations/waiting') // 내 예약 목록 조회 API 호출
         .then(response => {
@@ -34,7 +36,7 @@ function render(data) {
               예약 대기 승인/거절 버튼이 필요한 경우 활성화하여 사용
          */
         // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-        // actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
+        actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
 
@@ -63,13 +65,20 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = `${RESERVATION_API_ENDPOINT}/${id}`;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
+        if (!response.ok) {
+            return response.text().then(errorResponse => {
+                throw new Error(errorResponse);
+            })
+        }
+        alert("예약 대기가 취소 되었습니다.")
+        window.location.reload();
+    }).catch(error => {
+        alert(error.message);
+    });
 }
 
 function createActionButton(label, className, eventListener) {
