@@ -2,20 +2,28 @@ package roomescape.repository.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.reservation.ReservationStatus;
 
-public class ReservationRankResponse {
+public class ReservationRankStatusResponse {
 
     private final long reservationId;
     private final String theme;
     private final LocalDate date;
     private final LocalTime time;
+    private final String status;
     private final long waitingRank;
 
-    public ReservationRankResponse(long reservationId, String theme, LocalDate date, LocalTime time, long waitingRank) {
+    public ReservationRankStatusResponse(long reservationId,
+                                         String theme,
+                                         LocalDate date,
+                                         LocalTime time,
+                                         ReservationStatus status,
+                                         long waitingRank) {
         this.reservationId = reservationId;
         this.theme = theme;
         this.date = date;
         this.time = time;
+        this.status = status.toString();
         this.waitingRank = waitingRank;
     }
 
@@ -33,6 +41,10 @@ public class ReservationRankResponse {
 
     public LocalTime getTime() {
         return time;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public long getWaitingRank() {

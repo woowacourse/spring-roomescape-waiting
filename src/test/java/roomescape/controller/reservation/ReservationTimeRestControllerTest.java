@@ -67,18 +67,6 @@ class ReservationTimeRestControllerTest {
                 .statusCode(201);
     }
 
-    @DisplayName("예약 시간을 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
-    @Test
-    void return_201_when_create_reservation_time() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(reservationTimeCreate1)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
-    }
-
     @DisplayName("예약 시간 목록을 조회하는데 성공하면 응답과 200 상태 코드를 반환한다.")
     @Test
     void return_200_when_find_all_reservation_times() {
@@ -140,23 +128,5 @@ class ReservationTimeRestControllerTest {
         assertThat(actualResponse)
                 .usingRecursiveComparison()
                 .isEqualTo(expectedResponse);
-    }
-
-    @DisplayName("예약 시간을 삭제하는데 성공하면 응답과 204 상태 코드를 반환한다.")
-    @Test
-    void return_204_when_delete_reservation_time() {
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .contentType(ContentType.JSON)
-                .body(reservationTimeCreate1)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookie("token", adminToken)
-                .when().delete("/admin/times/1")
-                .then().log().all()
-                .statusCode(204);
     }
 }

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static roomescape.domain.reservation.ReservationStatus.CANCELED;
 import static roomescape.domain.reservation.ReservationStatus.CONFIRMED;
+import static roomescape.domain.reservation.ReservationStatus.REJECTED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.ReservationRankResponse;
+import roomescape.repository.dto.ReservationRankStatusResponse;
 import roomescape.repository.dto.ReservationWaitingResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
@@ -62,7 +63,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationRankResponse> findReservationsByMemberEmail(String email) {
+    public List<ReservationRankStatusResponse> findReservationsByMemberEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         return reservationRepository.findReservationRankByMember(member);
     }
@@ -78,16 +79,16 @@ public class ReservationService {
         return new ReservationResponse(reservation);
     }
 
-    public void cancelWaitingReservationByMember(String email, long id) {
+    public void memberCancelWaitingReservation(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
                 .orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(CANCELED);
     }
 
-    public void cancelConfirmedReservation(long id) {
+    public void adminRejectConfirmedReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
-        reservation.updateStatus(CANCELED);
+        reservation.updateStatus(REJECTED);
         Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
                 reservation.getTheme(),
                 reservation.getDate(),
@@ -97,9 +98,9 @@ public class ReservationService {
         first.ifPresent(value -> value.updateStatus(CONFIRMED));
     }
 
-    public void cancelWaitingReservationByAdmin(long id) {
+    public void adminRejectWaitingReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
-        reservation.updateStatus(CANCELED);
+        reservation.updateStatus(REJECTED);
     }
 
     private void validateDuplicatedReservation(Member member, Theme theme, LocalDate date, ReservationTime time) {

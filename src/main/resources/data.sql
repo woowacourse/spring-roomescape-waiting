@@ -14,9 +14,14 @@ values (1, '12:00'),
        (3, '20:00');
 
 INSERT INTO theme (id, name, description, thumbnail)
-values (1, '테마1', '테마1입니다', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-       (2, '테마2', '테마2입니다', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-       (3, '테마3', '테마3입니다', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+values (1, '스프링을 구해라', '지구 온난화로 인해 스프링이 사라지고 있습니다. 스프링을 구하지 못하면 당신은 서블릿 + JSP로 개발해야합니다.',
+        'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+       (2, '알고리즘 모르고리즘', '제한 시간안에 문제를 못풀면 영원히 탈출할 수 없습니다.',
+        'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+       (3, '자바를 자바라', '자바를 잡지 못하면 당신은 백엔드로써 자격이 없습니다. 프론트로 가게됩니다.',
+        'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+
+
 
 INSERT INTO reservation (id, member_id, theme_id, date, reservation_time_id, reservation_status)
 values (1, 1, 1, '2024-05-16', 2, 'CONFIRMED'),

@@ -5,7 +5,6 @@ import static roomescape.global.Constants.TOKEN_NAME;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,10 +47,5 @@ public class MemberRestController {
     @PostMapping("/members/logout")
     public void logout(HttpServletResponse response) {
         CookieUtils.deleteCookie(response, TOKEN_NAME);
-    }
-
-    @GetMapping("/admin/members")
-    public List<MemberResponse> findAllMembers() {
-        return memberService.findAllMembers();
     }
 }

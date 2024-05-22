@@ -182,7 +182,7 @@ class ReservationServiceTest {
     @DisplayName("대기 상태인 예약 삭제 시 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_delete_reservation_waiting_not_saved_reservation_id() {
-        assertThatThrownBy(() -> reservationService.cancelWaitingReservationByMember("t1@t1.com", 1L))
+        assertThatThrownBy(() -> reservationService.memberCancelWaitingReservation("t1@t1.com", 1L))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -195,7 +195,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date, time, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.cancelWaitingReservationByMember("tt@tt.com", 1L))
+        assertThatThrownBy(() -> reservationService.memberCancelWaitingReservation("tt@tt.com", 1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -210,7 +210,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         assertThatNoException()
-                .isThrownBy(() -> reservationService.cancelWaitingReservationByMember("tt@tt.com", 1L));
+                .isThrownBy(() -> reservationService.memberCancelWaitingReservation("tt@tt.com", 1L));
     }
 
     @DisplayName("삭제하려는 예약이 DB에 존재하지 않으면 예외를 발생시킨다.")
@@ -220,7 +220,7 @@ class ReservationServiceTest {
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
 
-        assertThatThrownBy(() -> reservationService.cancelConfirmedReservation(1L))
+        assertThatThrownBy(() -> reservationService.adminRejectConfirmedReservation(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -237,7 +237,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
 
-        reservationService.cancelConfirmedReservation(1L);
+        reservationService.adminRejectConfirmedReservation(1L);
         Reservation reservation = reservationRepository.findById(2L).get();
 
         assertThat(reservation.getReservationStatus()).isEqualTo(CONFIRMED);
