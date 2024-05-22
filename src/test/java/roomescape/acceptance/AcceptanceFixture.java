@@ -95,7 +95,7 @@ public class AcceptanceFixture {
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/reservations/waiting")
+                .when().post("/waiting")
                 .then().log().all()
                 .extract()
                 .as(ReservationResponse.class);

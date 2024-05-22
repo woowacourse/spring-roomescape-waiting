@@ -150,7 +150,7 @@
 
 ### Request
 
-- POST /reservations/waiting
+- POST /waiting
 - cookie: token={token}
 - content-type: application/json
 
@@ -195,7 +195,7 @@
 
 ### Request
 
-- DELETE /reservations/waiting/{id}
+- DELETE /waiting/{id}
 
 ### Response
 
@@ -454,7 +454,7 @@
 
 ### Request
 
-- GET admin/reservations/waiting
+- GET /waiting
 - cookie: token={token}
 - content-type: application/json
 - 
@@ -489,17 +489,3 @@
   }
 ]
 ```
-
----
-
-## 관리자 예약 대기 삭제
-
-### Request
-
-- DELETE admin/reservations/waiting/{id}
-
-### Response
-
-- 204 No Content
-
----

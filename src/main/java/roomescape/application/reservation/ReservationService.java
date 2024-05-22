@@ -77,7 +77,6 @@ public class ReservationService {
                 .map(ReservationStatusResponse::from)
                 .toList();
     }
-
     @Transactional
     public void deleteById(long memberId, long id) {
         Reservation reservation = reservationRepository.getById(id);

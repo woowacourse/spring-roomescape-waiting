@@ -5,9 +5,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +16,6 @@ import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.request.ReservationFilterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
-import roomescape.presentation.auth.LoginMemberId;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -46,18 +43,6 @@ public class AdminReservationController {
         ReservationFilterRequest request = new ReservationFilterRequest(memberId, themeId, startDate, endDate);
         List<ReservationResponse> responses = reservationService.findByFilter(request);
         return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/waiting")
-    public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
-        List<ReservationResponse> responses = waitingService.findAll();
-        return ResponseEntity.ok(responses);
-    }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteWaiting(@LoginMemberId long memberId, @PathVariable long id) {
-        waitingService.deleteById(memberId, id);
-        return ResponseEntity.noContent().build();
     }
 
 }
