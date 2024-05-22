@@ -22,5 +22,7 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
             "       AND w2.id < w.id))" +
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
-    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+    List<WaitingWithRank> findWaitingsWithRankByMemberId(long memberId);
+
+    void deleteById(long id);
 }

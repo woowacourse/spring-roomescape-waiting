@@ -56,4 +56,8 @@ public class WaitingService {
     public List<WaitingWithRank> findMemberWaitingWithRank(long memberId) {
         return waitingRepository.findWaitingsWithRankByMemberId(memberId);
     }
+
+    public void removeWaiting(long waitingId) {
+        waitingRepository.deleteById(waitingId);
+    }
 }
