@@ -27,25 +27,25 @@ public class TimeService {
     }
 
     public TimeSlotResponse create(TimeSlotRequest timeSlotRequest) {
-        validateDuplicatedTime(timeSlotRequest);
         TimeSlot timeSlot = timeSlotRequest.toEntity();
+        validateDuplicatedTime(timeSlot);
         TimeSlot createdTimeSlot = timeSlotRepository.save(timeSlot);
         return TimeSlotResponse.from(createdTimeSlot);
     }
 
     public void delete(Long id) {
-        validateExistReservation(id);
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(id);
+        validateExistReservation(timeSlot);
         timeSlotRepository.deleteById(id);
     }
 
-    private void validateDuplicatedTime(TimeSlotRequest timeSlotRequest) {
-        if (timeSlotRepository.existsByStartAt(timeSlotRequest.startAt())) {
+    private void validateDuplicatedTime(TimeSlot timeSlot) {
+        if (timeSlotRepository.existsByStartAt(timeSlot.getStartAt())) {
             throw new IllegalArgumentException("이미 등록된 시간입니다");
         }
     }
 
-    private void validateExistReservation(Long id) {
-        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(id);
+    private void validateExistReservation(TimeSlot timeSlot) {
         if (reservationRepository.existsByTime(timeSlot)) {
             throw new IllegalArgumentException("예약이 등록된 시간은 제거할 수 없습니다");
         }

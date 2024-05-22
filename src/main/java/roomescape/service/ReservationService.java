@@ -60,6 +60,14 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> findAllPending() {
+        List<Reservation> reservations =
+                reservationRepository.findAllByStatusOrderByDateAscTime(ReservationStatus.PENDING);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     public ReservationResponse create(AdminReservationRequest request, LocalDateTime now) {
         Member member = memberRepository.getMemberById(request.memberId());
         TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
@@ -69,14 +77,6 @@ public class ReservationService {
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(createdReservation);
-    }
-
-    public List<ReservationResponse> findAllPending() {
-        List<Reservation> reservations =
-                reservationRepository.findAllByStatusOrderByDateAscTime(ReservationStatus.PENDING);
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 
     public ReservationResponse create(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {

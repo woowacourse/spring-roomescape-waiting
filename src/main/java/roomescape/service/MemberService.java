@@ -35,15 +35,13 @@ public class MemberService {
 
     public LoginMember findLoginMemberByToken(String token) {
         String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        Member member = getMemberByEmail(email);
         return LoginMember.from(member);
     }
 
     public boolean hasAdminRole(String token) {
         String email = tokenGenerator.getPayload(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        Member member = getMemberByEmail(email);
         return member.isAdmin();
     }
 
@@ -52,5 +50,10 @@ public class MemberService {
                 .stream()
                 .map(MemberResponse::from)
                 .toList();
+    }
+
+    private Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
     }
 }

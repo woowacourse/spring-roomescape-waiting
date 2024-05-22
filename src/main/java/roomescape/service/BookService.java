@@ -35,9 +35,13 @@ public class BookService {
                 .map(timeSlot -> new BookResponse(
                         timeSlot.getStartAt(),
                         timeSlot.getId(),
-                        reservations.stream()
-                                .anyMatch(reservation -> reservation.getTime().getId().equals(timeSlot.getId()))
+                        isAlreadyBooked(timeSlot, reservations)
                 ))
                 .toList();
+    }
+
+    private boolean isAlreadyBooked(TimeSlot timeSlot, List<Reservation> reservations) {
+        return reservations.stream()
+                .anyMatch(reservation -> reservation.getTime().getId().equals(timeSlot.getId()));
     }
 }
