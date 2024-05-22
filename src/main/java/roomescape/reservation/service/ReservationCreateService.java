@@ -16,6 +16,8 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
+import java.time.LocalDate;
+
 @Service
 public class ReservationCreateService {
 
@@ -65,17 +67,24 @@ public class ReservationCreateService {
     }
 
     private Reservation findReservationOrSave(ReservationCreateRequest request) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())
-                .orElseGet(() -> {
-                            ReservationTime time = findReservationTimeById(request.timeId());
-                            Theme theme = findThemeById(request.themeId());
-                            return reservationRepository.save(new Reservation(request.date(), time, theme));
-                        }
-                );
+        Long timeId = request.timeId();
+        Long themeId = request.themeId();
+        LocalDate date = request.date();
+
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseGet(() -> createReservation(timeId, themeId, date));
+    }
+
+    private Reservation createReservation(Long timeId, Long themeId, LocalDate date) {
+        ReservationTime time = findReservationTimeById(timeId);
+        Theme theme = findThemeById(themeId);
+
+        Reservation reservation = new Reservation(date, time, theme);
+        return reservationRepository.save(reservation);
     }
 
     private void validateDuplicated(MemberReservation memberReservation) {
-        if (memberReservation.getStatus().isNotWaiting()) {
+        if (memberReservation.isWaitingNotStatus()) {
             validateNotWaitingReservation(memberReservation);
             return;
         }
@@ -86,16 +95,14 @@ public class ReservationCreateService {
     private void validateNotWaitingReservation(MemberReservation memberReservation) {
         memberReservationRepository.findByReservationAndStatus(
                         memberReservation.getReservation(),
-                        ReservationStatus.CONFIRMATION
-                )
+                        ReservationStatus.CONFIRMATION)
                 .ifPresent(memberReservation::validateDuplicated);
     }
 
     private void validateWaitingReservation(MemberReservation memberReservation) {
         memberReservationRepository.findByReservationAndMember(
                         memberReservation.getReservation(),
-                        memberReservation.getMember()
-                )
+                        memberReservation.getMember())
                 .ifPresent(memberReservation::validateDuplicated);
     }
 }
