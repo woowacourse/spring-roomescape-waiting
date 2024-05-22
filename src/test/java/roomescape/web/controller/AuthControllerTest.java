@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.service.AuthService;
+import roomescape.service.dto.request.member.LoginRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 import roomescape.service.security.JwtProvider;
-import roomescape.web.dto.request.member.LoginRequest;
-import roomescape.web.dto.response.member.MemberResponse;
 
 @WebMvcTest(controllers = AuthController.class)
 class AuthControllerTest {

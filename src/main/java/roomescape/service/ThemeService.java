@@ -14,8 +14,8 @@ import roomescape.domain.policy.WeeklyRankingPolicy;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.theme.ReservationReferencedThemeException;
-import roomescape.web.dto.request.theme.ThemeRequest;
-import roomescape.web.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.request.theme.ThemeRequest;
+import roomescape.service.dto.response.theme.ThemeResponse;
 
 @Service
 @Transactional(readOnly = true)

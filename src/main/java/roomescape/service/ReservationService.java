@@ -19,9 +19,9 @@ import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.web.dto.request.reservation.ReservationRequest;
-import roomescape.web.dto.request.reservation.ReservationSearchCond;
-import roomescape.web.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.request.reservation.ReservationRequest;
+import roomescape.service.dto.request.reservation.ReservationSearchCond;
+import roomescape.service.dto.response.reservation.ReservationResponse;
 
 @Service
 @Transactional(readOnly = true)

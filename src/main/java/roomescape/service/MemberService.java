@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.member.DuplicatedEmailException;
-import roomescape.web.dto.request.member.SignupRequest;
-import roomescape.web.dto.response.member.MemberResponse;
+import roomescape.service.dto.request.member.SignupRequest;
+import roomescape.service.dto.response.member.MemberResponse;
 
 @Service
 @Transactional(readOnly = true)

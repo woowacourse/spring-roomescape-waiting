@@ -13,8 +13,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.exception.member.AuthenticationFailureException;
+import roomescape.service.dto.request.member.MemberInfo;
 import roomescape.service.security.JwtProvider;
-import roomescape.web.dto.request.member.MemberInfo;
 
 @RequiredArgsConstructor
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {

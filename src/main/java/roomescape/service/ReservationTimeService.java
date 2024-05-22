@@ -14,9 +14,9 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.time.DuplicatedTimeException;
 import roomescape.exception.time.NotFoundTimeException;
 import roomescape.exception.time.ReservationReferencedTimeException;
-import roomescape.web.dto.request.time.ReservationTimeRequest;
-import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
-import roomescape.web.dto.response.time.ReservationTimeResponse;
+import roomescape.service.dto.request.time.ReservationTimeRequest;
+import roomescape.service.dto.response.time.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.time.ReservationTimeResponse;
 
 @Service
 @Transactional(readOnly = true)

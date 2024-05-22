@@ -24,9 +24,9 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.reservation.DuplicatedReservationException;
 import roomescape.exception.reservation.InvalidDateTimeReservationException;
-import roomescape.web.dto.request.reservation.ReservationRequest;
-import roomescape.web.dto.request.reservation.ReservationSearchCond;
-import roomescape.web.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.request.reservation.ReservationRequest;
+import roomescape.service.dto.request.reservation.ReservationSearchCond;
+import roomescape.service.dto.response.reservation.ReservationResponse;
 
 @Transactional
 @SpringBootTest

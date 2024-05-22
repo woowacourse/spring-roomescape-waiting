@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ThemeService;
-import roomescape.web.dto.request.theme.ThemeRequest;
-import roomescape.web.dto.response.theme.ThemeResponse;
+import roomescape.service.dto.request.theme.ThemeRequest;
+import roomescape.service.dto.response.theme.ThemeResponse;
 
 @RestController
 @RequestMapping("/themes")

@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationService;
-import roomescape.web.dto.request.member.MemberInfo;
-import roomescape.web.dto.request.reservation.ReservationRequest;
-import roomescape.web.dto.request.reservation.ReservationSearchCond;
-import roomescape.web.dto.request.reservation.UserReservationRequest;
-import roomescape.web.dto.response.reservation.ReservationResponse;
+import roomescape.service.dto.request.member.MemberInfo;
+import roomescape.service.dto.request.reservation.ReservationRequest;
+import roomescape.service.dto.request.reservation.ReservationSearchCond;
+import roomescape.service.dto.request.reservation.UserReservationRequest;
+import roomescape.service.dto.response.reservation.ReservationResponse;
 
 @RestController
 @RequestMapping("/reservations")

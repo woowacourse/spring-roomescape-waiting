@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.service.ReservationTimeService;
-import roomescape.web.dto.request.time.ReservationTimeRequest;
-import roomescape.web.dto.response.time.AvailableReservationTimeResponse;
-import roomescape.web.dto.response.time.ReservationTimeResponse;
+import roomescape.service.dto.request.time.ReservationTimeRequest;
+import roomescape.service.dto.response.time.AvailableReservationTimeResponse;
+import roomescape.service.dto.response.time.ReservationTimeResponse;
 
 @RestController
 @RequestMapping("/times")
