@@ -104,3 +104,20 @@ INSERT INTO reservation(member_id, status, date, time_id, theme_id)
 VALUES (1, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 2, NOW()) AS DATE), 4, 9);
 INSERT INTO reservation(member_id, status, date, time_id, theme_id)
 VALUES (5, 'RESERVATION', CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8);
+
+/**
+  Reservation Waiting
+ */
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (1, CAST(TIMESTAMPADD(DAY, 3, NOW()) AS DATE), 1, 10, CAST(TIMESTAMPADD(MINUTE, 2, CURRENT_TIMESTAMP()) AS DATETIME));
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (3, CAST(TIMESTAMPADD(DAY, 3, NOW()) AS DATE), 1, 10, CAST(TIMESTAMPADD(MINUTE, 3, CURRENT_TIMESTAMP()) AS DATETIME));
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (4, CAST(TIMESTAMPADD(DAY, 3, NOW()) AS DATE), 1, 10, CAST(TIMESTAMPADD(MINUTE, 5, CURRENT_TIMESTAMP()) AS DATETIME));
+
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (1, CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8, CAST(TIMESTAMPADD(MINUTE, 6, CURRENT_TIMESTAMP()) AS DATETIME));
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (3, CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8, CAST(TIMESTAMPADD(MINUTE, 50, CURRENT_TIMESTAMP()) AS DATETIME));
+INSERT INTO reservation_waiting(member_id, date, time_id, theme_id, created_at)
+VALUES (2, CAST(TIMESTAMPADD(DAY, 6, NOW()) AS DATE), 3, 8, CAST(TIMESTAMPADD(MINUTE, 1, CURRENT_TIMESTAMP()) AS DATETIME));

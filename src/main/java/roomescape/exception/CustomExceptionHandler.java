@@ -26,6 +26,13 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler
+    protected ResponseEntity<ErrorResponse> handleIllegalStateException(final IllegalStateException e) {
+        log.error(e.getMessage(), e);
+        return ResponseEntity.status(BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler
     protected ResponseEntity<ErrorResponse> handleNoSuchElementException(final NoSuchElementException e) {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(BAD_REQUEST)
