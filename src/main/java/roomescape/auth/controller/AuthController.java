@@ -38,4 +38,10 @@ public class AuthController {
         GetAuthInfoResponse getAuthInfoResponse = authService.getMemberAuthInfo(authInfo);
         return ResponseEntity.ok(getAuthInfoResponse);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse httpServletResponse) {
+        authorizationManager.removeAuthorization(httpServletResponse);
+        return ResponseEntity.noContent().build();
+    }
 }

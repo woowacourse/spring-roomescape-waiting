@@ -11,6 +11,8 @@ import roomescape.member.dto.response.FindReservationResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.response.FindMembersResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.waiting.dto.response.FindWaitingResponse;
+import roomescape.waiting.service.WaitingService;
 
 @RestController
 @RequestMapping("/members")
@@ -18,10 +20,14 @@ public class MemberController {
 
     private final MemberService memberService;
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public MemberController(final MemberService memberService, final ReservationService reservationService) {
+    public MemberController(final MemberService memberService,
+                            final ReservationService reservationService,
+                            final WaitingService waitingService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -32,5 +38,10 @@ public class MemberController {
     @GetMapping("/reservations")
     public ResponseEntity<List<FindReservationResponse>> getMembersWithReservations(@AuthenticationPrincipal AuthInfo authInfo) {
         return ResponseEntity.ok(reservationService.getReservationsByMember(authInfo));
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<FindWaitingResponse>> getWaitings(@AuthenticationPrincipal AuthInfo authInfo) {
+        return ResponseEntity.ok(waitingService.getWaitings(authInfo));
     }
 }

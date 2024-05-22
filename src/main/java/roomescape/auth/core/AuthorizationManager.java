@@ -8,4 +8,6 @@ public interface AuthorizationManager {
     String getAuthorization(HttpServletRequest httpServletRequest);
 
     void setAuthorization(HttpServletResponse httpServletResponse, final String token);
+
+    void removeAuthorization(HttpServletResponse httpServletResponse);
 }
