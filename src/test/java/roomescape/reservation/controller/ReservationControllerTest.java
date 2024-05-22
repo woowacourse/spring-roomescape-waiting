@@ -4,6 +4,9 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialReservationFixture.RESERVATION_2;
+import static roomescape.InitialReservationFixture.RESERVATION_4;
+import static roomescape.InitialWaitingFixture.INITIAL_WAITING_COUNT;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -60,6 +63,38 @@ class ReservationControllerTest {
     }
 
     @Test
+    @DisplayName("로그인 후 Waiting을 추가한다.")
+    void addWaiting() {
+        //given
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_1.getEmail().email());
+
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        ReservationRequest reservationRequest = new ReservationRequest(
+                RESERVATION_4.getDate(),
+                RESERVATION_4.getReservationTime().getId(),
+                RESERVATION_4.getTheme().getId()
+        );
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(INITIAL_WAITING_COUNT + 1))
+                .header("Location", String.format("/reservations/waitings/%d", INITIAL_WAITING_COUNT + 1));
+    }
+
+    @Test
     @DisplayName("Reservation을 삭제한다.")
     void deleteReservation() {
         //when
@@ -74,5 +109,15 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(INITIAL_RESERVATION_COUNT - 1));
+    }
+
+    @Test
+    @DisplayName("Waiting을 삭제한다.")
+    void deleteWaiting() {
+        //when
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waitings/1")
+                .then().log().all()
+                .statusCode(204);
     }
 }

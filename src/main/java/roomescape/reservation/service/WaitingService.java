@@ -74,4 +74,8 @@ public class WaitingService {
                 .map(ReservationOrWaitingResponse::new)
                 .toList();
     }
+
+    public void deleteWaiting(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }

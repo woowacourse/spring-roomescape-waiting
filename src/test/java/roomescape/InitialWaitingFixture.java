@@ -7,6 +7,7 @@ import roomescape.reservation.domain.Waiting;
 
 public class InitialWaitingFixture {
 
+    public static final int INITIAL_WAITING_COUNT = 1;
     public static Waiting WAITING_1 = new Waiting(
             1L,
             RESERVATION_1.getDate(),

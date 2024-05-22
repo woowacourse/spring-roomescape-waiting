@@ -5,6 +5,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.WaitingWithRank;
 
 public record ReservationOrWaitingResponse(
+        Long id,
         String themeName,
         String date,
         String reservationTime,
@@ -13,6 +14,7 @@ public record ReservationOrWaitingResponse(
 
     public ReservationOrWaitingResponse(Reservation reservation) {
         this(
+                reservation.getId(),
                 reservation.getTheme().getName().name(),
                 reservation.getDate(DateTimeFormatter.ISO_DATE),
                 reservation.getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
@@ -22,6 +24,7 @@ public record ReservationOrWaitingResponse(
 
     public ReservationOrWaitingResponse(WaitingWithRank waitingWithRank) {
         this(
+                waitingWithRank.waiting().getId(),
                 waitingWithRank.waiting().getTheme().getName().name(),
                 waitingWithRank.waiting().getDate(DateTimeFormatter.ISO_DATE),
                 waitingWithRank.waiting().getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),

@@ -42,14 +42,14 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> addWaiting(
             @RequestBody ReservationRequest reservationRequest,
             MemberRequest memberRequest
     ) {
         WaitingResponse waitingResponse = waitingService.addWaiting(reservationRequest, memberRequest);
 
-        return ResponseEntity.created(URI.create("/reservations/waiting/" + waitingResponse.id()))
+        return ResponseEntity.created(URI.create("/reservations/waitings/" + waitingResponse.id()))
                 .body(waitingResponse);
     }
 
@@ -79,6 +79,12 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
         reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
+        waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }
