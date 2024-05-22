@@ -108,7 +108,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("id에 맞는 예약을 삭제한다.")
     void deleteReservation() {
-        reservationService.deleteReservation(RESERVATION_1.getId());
+        reservationService.deleteReservation(RESERVATION_2.getId());
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(INITIAL_RESERVATION_COUNT - 1);

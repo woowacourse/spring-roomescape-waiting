@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
+import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
 import static roomescape.InitialWaitingFixture.WAITING_1;
@@ -77,7 +78,7 @@ class WaitingServiceTest {
                 RESERVATION_1.getReservationTime().getId(),
                 RESERVATION_1.getTheme().getId()
         );
-        MemberRequest memberRequest = new MemberRequest(MEMBER_3);
+        MemberRequest memberRequest = new MemberRequest(NO_RESERVATION_MEMBER);
 
         WaitingResponse waitingResponse = waitingService.addWaiting(reservationRequest, memberRequest);
 

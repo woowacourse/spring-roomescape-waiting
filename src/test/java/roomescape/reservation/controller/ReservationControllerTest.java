@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
+import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialReservationFixture.RESERVATION_4;
 import static roomescape.InitialWaitingFixture.INITIAL_WAITING_COUNT;
 
@@ -98,7 +99,7 @@ class ReservationControllerTest {
     void deleteReservation() {
         //when
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/reservations/" + RESERVATION_2.getId())
                 .then().log().all()
                 .statusCode(204);
 

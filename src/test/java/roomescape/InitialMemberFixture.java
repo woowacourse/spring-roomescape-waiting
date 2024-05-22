@@ -9,7 +9,7 @@ import roomescape.member.domain.Role;
 public class InitialMemberFixture {
 
     public static final Password COMMON_PASSWORD = new Password("password");
-    public static final int INITIAL_LOGIN_MEMBER_COUNT = 4;
+    public static final int INITIAL_LOGIN_MEMBER_COUNT = 5;
     public static final Member MEMBER_1 = new Member(
             1L,
             new Name("카고"),
@@ -39,8 +39,16 @@ public class InitialMemberFixture {
             COMMON_PASSWORD
     );
 
-    public static final Member NOT_SAVED_MEMBER = new Member(
+    public static final Member NO_RESERVATION_MEMBER = new Member(
             5L,
+            new Name("파랑"),
+            new Email("blue123@email.com"),
+            Role.USER,
+            COMMON_PASSWORD
+    );
+
+    public static final Member NOT_SAVED_MEMBER = new Member(
+            6L,
             new Name("네오"),
             new Email("neo123@email.com"),
             Role.USER,
