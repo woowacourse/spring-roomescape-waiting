@@ -6,11 +6,12 @@ import static roomescape.exception.ExceptionType.DUPLICATE_THEME;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
 import roomescape.domain.Duration;
-import roomescape.entity.Theme;
 import roomescape.domain.Themes;
 import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
+import roomescape.entity.Theme;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -44,7 +45,8 @@ public class ThemeService {
 
     public List<ThemeResponse> findAndOrderByPopularity(int count) {
         Duration lastWeek = Duration.ofLastWeek();
-        return reservationRepository.findAndOrderByPopularity(lastWeek.getStartDate(), lastWeek.getEndDate(), count).stream()
+        return reservationRepository.findAndOrderByPopularity(lastWeek.getStartDate(), lastWeek.getEndDate(), count)
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

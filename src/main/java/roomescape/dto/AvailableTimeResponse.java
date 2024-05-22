@@ -1,8 +1,9 @@
 package roomescape.dto;
 
 import java.time.LocalTime;
-import roomescape.entity.ReservationTime;
+
 import roomescape.domain.Reservations;
+import roomescape.entity.ReservationTime;
 
 public record AvailableTimeResponse(long id, LocalTime startAt, boolean isBooked) {
     public static AvailableTimeResponse of(ReservationTime reservationTime, Reservations reservations) {

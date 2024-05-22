@@ -13,7 +13,8 @@ import roomescape.domain.Role;
 
 @Entity
 public class Member {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
     private String name;
@@ -25,7 +26,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    protected Member(){
+    protected Member() {
 
     }
 

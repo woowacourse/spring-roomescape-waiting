@@ -38,7 +38,7 @@ public record ReservationDetailResponse(
 
     public static List<ReservationDetailResponse> of(Reservations reservations, List<Waiting> waitings) {
         List<ReservationDetailResponse> responses = new ArrayList<>();
-        for(Reservation reservation : reservations.getReservations()){
+        for (Reservation reservation : reservations.getReservations()) {
             ReservationDetailResponse response = waitings.stream()
                     .filter(waiting -> waiting.reservation().equals(reservation))
                     .findFirst()

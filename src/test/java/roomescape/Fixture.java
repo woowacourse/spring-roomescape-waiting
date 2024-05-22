@@ -1,8 +1,8 @@
 package roomescape;
 
 import roomescape.domain.LoginMember;
-import roomescape.entity.Member;
 import roomescape.domain.Role;
+import roomescape.entity.Member;
 
 public class Fixture {
     public static final LoginMember defaultLoginuser = new LoginMember(1L, "name", Role.USER);

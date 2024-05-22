@@ -3,12 +3,14 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,15 +20,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+
 import roomescape.Fixture;
 import roomescape.domain.ReservationStatus;
-import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
 import roomescape.domain.ReservationTimes;
-import roomescape.entity.Theme;
 import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
+import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -49,11 +52,13 @@ class ReservationTimeServiceTest {
     private MemberRepository memberRepository;
 
     Theme defaultTheme = new Theme("name", "description", "thumbnail");
+
     @BeforeEach
-    void setUp(){
+    void setUp() {
         defaultTheme = themeRepository.save(defaultTheme);
         memberRepository.save(Fixture.defaultMember);
     }
+
     @DisplayName("저장된 시간을 모두 조회할 수 있다.")
     @Test
     void findAllTest() {

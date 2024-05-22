@@ -2,15 +2,15 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+
 import static roomescape.exception.ExceptionType.DELETE_USED_TIME;
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION_TIME;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,13 +21,16 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.Fixture;
 import roomescape.domain.ReservationStatus;
+import roomescape.dto.AvailableTimeResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
-import roomescape.dto.AvailableTimeResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;

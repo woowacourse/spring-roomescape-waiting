@@ -2,15 +2,15 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+
 import static roomescape.exception.ExceptionType.DUPLICATE_RESERVATION;
 import static roomescape.exception.ExceptionType.NO_QUERY_PARAMETER;
 import static roomescape.exception.ExceptionType.PAST_TIME_RESERVATION;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,14 +21,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.Fixture;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
+import roomescape.dto.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
-import roomescape.dto.ReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -139,7 +142,7 @@ public class ReservationControllerTest {
         @Test
         void getMembersReservationTest() {
             RestAssured.given().log().all()
-                    .cookie("token",token)
+                    .cookie("token", token)
                     .when().get("/member/reservation")
                     .then().log().all()
                     .statusCode(200)
@@ -178,7 +181,7 @@ public class ReservationControllerTest {
         @DisplayName("예약 대기 하나를 생성할 수 있다.")
         @Test
         void createWaitingReservationTest() {
-            Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+            Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
             memberRepository.save(testMember);
             String newToken = JWT_GENERATOR.generateWith(
                     Map.of(
@@ -254,7 +257,7 @@ public class ReservationControllerTest {
         @DisplayName("예약 대기 하나를 삭제할 수 있다.")
         @Test
         void deleteWaitingReservationTest() {
-            Member testMember = new Member(2L, "test", Role.USER, "test@test.com","1234");
+            Member testMember = new Member(2L, "test", Role.USER, "test@test.com", "1234");
             memberRepository.save(testMember);
             String newToken = JWT_GENERATOR.generateWith(
                     Map.of(
@@ -285,7 +288,7 @@ public class ReservationControllerTest {
         @DisplayName("관리자는 예약 대기를 삭제할 수 있다.")
         @Test
         void deleteReservationWaitingByAdminTest() {
-            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com","1234");
+            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com", "1234");
             memberRepository.save(testMember);
             String newToken = JWT_GENERATOR.generateWith(
                     Map.of(
@@ -316,7 +319,7 @@ public class ReservationControllerTest {
         @DisplayName("관리자는 모든 예약 대기를 조회할 수 있다.")
         @Test
         void getReservationWaitingTest() {
-            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com","1234");
+            Member testMember = new Member(2L, "test", Role.ADMIN, "test@test.com", "1234");
             memberRepository.save(testMember);
             String newToken = JWT_GENERATOR.generateWith(
                     Map.of(

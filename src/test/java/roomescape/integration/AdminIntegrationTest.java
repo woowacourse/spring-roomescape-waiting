@@ -2,12 +2,11 @@ package roomescape.integration;
 
 import static org.hamcrest.Matchers.is;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +18,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Sql(value = "/clear.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)

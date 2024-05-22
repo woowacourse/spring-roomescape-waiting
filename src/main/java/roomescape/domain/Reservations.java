@@ -22,13 +22,13 @@ public class Reservations {
                 .anyMatch(reservation -> reservation.isReservationTimeOf(timeId));
     }
 
-    public List<Reservation> waiting(){
+    public List<Reservation> waiting() {
         return reservations.stream()
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
                 .toList();
     }
 
-    public List<Reservation> booked(){
+    public List<Reservation> booked() {
         return reservations.stream()
                 .filter(reservation -> reservation.getStatus() == ReservationStatus.BOOKED)
                 .toList();
