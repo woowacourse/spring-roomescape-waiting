@@ -13,6 +13,8 @@ import java.time.format.DateTimeParseException;
 
 @Entity
 public class Waiting {
+    protected static final String DATE_FORMAT_EXCEPTION_MESSAGE = "날짜 형식이 잘못되었습니다.";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,7 +48,7 @@ public class Waiting {
         try {
             return LocalDate.parse(date);
         } catch (final DateTimeParseException e) {
-            throw new IllegalArgumentException("날짜 형식이 잘못되었습니다.");
+            throw new IllegalArgumentException(DATE_FORMAT_EXCEPTION_MESSAGE);
         }
     }
 
