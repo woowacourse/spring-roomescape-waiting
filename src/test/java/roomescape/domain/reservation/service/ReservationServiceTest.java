@@ -183,32 +183,27 @@ class ReservationServiceTest {
     void should_know_bookable_times() {
         ReservationTime reservationTime = new ReservationTime(null, TEN_HOUR);
         Theme theme = new Theme(null, "테마1", "설명", "썸네일");
-        fakeReservationTimeRepository.save(reservationTime);
-        fakeReservationRepository.save(
-                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER, RESERVED,
-                        TIMESTAMP_BEFORE_ONE_YEAR));
+        ReservationTime savedTime = fakeReservationTimeRepository.save(reservationTime);
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
-                new BookableTimesRequest(AFTER_ONE_DAYS_DATE, 1L));
+                new BookableTimesRequest(AFTER_ONE_DAYS_DATE, savedTime.getId()));
 
-        assertThat(bookableTimes.get(0).alreadyBooked()).isTrue();
+        assertThat(bookableTimes.get(0).alreadyBooked()).isFalse();
     }
 
     @DisplayName("예약 불가능 시각을 알 수 있습니다.")
     @Test
     void should_know_not_bookable_times() {
-        ReservationTime reservationTime = new ReservationTime(null, TEN_HOUR);
-        Theme theme = new Theme(null, "테마1", "설명", "썸네일");
-        fakeReservationTimeRepository.save(reservationTime);
-        fakeReservationTimeRepository.save(new ReservationTime(1L, LocalTime.of(11, 0)));
+        fakeReservationTimeRepository.save(TEN_RESERVATION_TIME);
+        fakeThemeRepository.save(DUMMY_THEME);
         fakeReservationRepository.save(
-                new Reservation(null, AFTER_ONE_DAYS_DATE, reservationTime, theme, ADMIN_MEMBER, RESERVED,
+                new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, ADMIN_MEMBER, RESERVED,
                         TIMESTAMP_BEFORE_ONE_YEAR));
 
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
-                new BookableTimesRequest(AFTER_ONE_DAYS_DATE, 1L));
+                new BookableTimesRequest(AFTER_ONE_DAYS_DATE, DUMMY_THEME.getId()));
 
-        assertThat(bookableTimes.get(1).alreadyBooked()).isFalse();
+        assertThat(bookableTimes.get(0).alreadyBooked()).isTrue();
     }
 
     @DisplayName("없는 id의 예약을 삭제하면 예외를 발생합니다.")
