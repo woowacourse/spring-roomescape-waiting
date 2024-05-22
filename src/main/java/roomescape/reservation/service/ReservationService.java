@@ -59,19 +59,24 @@ public class ReservationService {
 
         List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
         for (Reservation reservation : reservations) {
-            String reservationStatus = reservation.getStatus().getValue();
-            if (reservation.isWaiting()) {
-                int reservationRank = reservationRepository.countWaitingRank(
-                        reservation.getDate(),
-                        reservation.getTime().getId(),
-                        reservation.getTheme().getId(),
-                        reservation.getId()
-                );
-                reservationStatus = reservationRank + "번째 " + reservationStatus;
-            }
+            String reservationStatus = parseReservationStatus(reservation);
             memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservation, reservationStatus));
         }
         return memberReservationStatusResponses;
+    }
+
+    private String parseReservationStatus(Reservation reservation) {
+        String reservationStatus = reservation.getStatus().getValue();
+        if (reservation.isWaiting()) {
+            int reservationRank = reservationRepository.countWaitingRank(
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId(),
+                    reservation.getId()
+            );
+            reservationStatus = reservationRank + "번째 " + reservationStatus;
+        }
+        return reservationStatus;
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
