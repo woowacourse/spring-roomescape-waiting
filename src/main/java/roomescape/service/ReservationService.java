@@ -21,6 +21,7 @@ import roomescape.repository.ThemeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 public class ReservationService {
@@ -115,7 +116,22 @@ public class ReservationService {
     public List<ReservationsMineResponse> findReservationsByMember(final Member member) {
         return reservationRepository.findByMember(member)
                 .stream()
-                .map(ReservationsMineResponse::from)
+                .map(reservation -> buildReservationMineResponse(reservation, member))
                 .toList();
+    }
+
+    private ReservationsMineResponse buildReservationMineResponse(final Reservation reservation, final Member member) {
+        if (reservation.getStatus() == ReservationStatus.WAITING) {
+            return ReservationsMineResponse.from(reservation, calculateWaitingNumber(reservation, member));
+        }
+        return ReservationsMineResponse.from(reservation, 0);
+    }
+
+    private Integer calculateWaitingNumber(final Reservation reservation, final Member member) {
+        final List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return IntStream.range(0, reservations.size())
+                .filter(index -> reservations.get(index).getMember().getId().equals(member.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ReservationFailException("대기중인 예약을 찾을 수 없습니다."));
     }
 }

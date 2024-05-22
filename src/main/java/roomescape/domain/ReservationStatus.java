@@ -10,7 +10,10 @@ public enum ReservationStatus {
         this.message = message;
     }
 
-    public String getMessage() {
+    public String getMessageWithRank(final Integer rank) {
+        if (this == WAITING) {
+            return "%d번째 예약대기".formatted(rank);
+        }
         return message;
     }
 }
