@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.dto.auth.LoginMember;
-import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationWithRankResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.repository.ReservationRepository;
@@ -68,11 +68,9 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
-        final List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
+    public List<MyReservationWithRankResponse> findMyReservations(final LoginMember loginMember) {
+        final List<MyReservationWithRankResponse> reservations = reservationRepository.findByMemberId(loginMember.id());
+        return reservations;
     }
 
     public List<ReservationResponse> findReservationWaitings() {

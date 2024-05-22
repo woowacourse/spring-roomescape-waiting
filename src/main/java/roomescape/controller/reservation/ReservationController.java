@@ -8,7 +8,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
 import roomescape.dto.reservation.MemberReservationSaveRequest;
-import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationWithRankResponse;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
@@ -64,7 +64,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
+    public ResponseEntity<List<MyReservationWithRankResponse>> findMyReservations(@AuthenticationPrincipal final LoginMember loginMember) {
         return ResponseEntity.ok(reservationService.findMyReservations(loginMember));
     }
 }

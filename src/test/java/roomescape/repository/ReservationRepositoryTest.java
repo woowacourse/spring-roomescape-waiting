@@ -12,11 +12,13 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.dto.reservation.MyReservationWithRankResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.*;
 
 @DataJpaTest
@@ -144,16 +146,19 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 사용자의 예약 목록을 조회한다.")
-    void findByMemberId() {
-        // given
+    @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
+    void findByReservationsMemberIdWithRank() {
         final Long memberId = member.getId();
+        reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.WAITING));
 
-        // when
-        final List<Reservation> actual = reservationRepository.findByMemberId(memberId);
+        final List<MyReservationWithRankResponse> actual = reservationRepository.findByMemberId(memberId);
 
-        // then
-        assertThat(actual).hasSize(1);
+        assertAll(
+                () -> assertThat(actual).hasSize(2),
+                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED.getValue()),
+                () -> assertThat(actual.get(1).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
+                () -> assertThat(actual.get(1).getRank()).isEqualTo(1L)
+        );
     }
     
     @ParameterizedTest

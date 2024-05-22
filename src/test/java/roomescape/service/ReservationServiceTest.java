@@ -12,7 +12,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.auth.LoginMember;
-import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationWithRankResponse;
 import roomescape.dto.reservation.ReservationFilterParam;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationTimeResponse;
@@ -164,14 +164,19 @@ class ReservationServiceTest {
         final LoginMember loginMember = new LoginMember(1L, MEMBER_MIA_NAME, MEMBER_MIA_EMAIL, Role.MEMBER);
         final Reservation reservation = new Reservation(TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
+        final MyReservationWithRankResponse response = new MyReservationWithRankResponse(reservation, 1L);
         given(reservationRepository.findByMemberId(loginMember.id()))
-                .willReturn(List.of(reservation));
+                .willReturn(List.of(response));
 
         // when
-        final List<MyReservationResponse> actual = reservationService.findMyReservations(loginMember);
+        final List<MyReservationWithRankResponse> actual = reservationService.findMyReservations(loginMember);
 
         // then
-        assertThat(actual).hasSize(1);
+        assertAll(
+                () -> assertThat(actual).hasSize(1),
+                () -> assertThat(actual.get(0).getStatus()).isEqualTo(ReservationStatus.WAITING.getValue()),
+                () -> assertThat(actual.get(0).getRank()).isEqualTo(1L)
+        );
     }
 
     @Test
