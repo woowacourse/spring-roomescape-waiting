@@ -6,6 +6,7 @@ import static roomescape.domain.reservation.domain.reservation.ReservationStatus
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.repository.MemberRepository;
@@ -127,10 +128,16 @@ public class ReservationService {
     }
 
     public void removeReservation(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
-            throw new NoMatchingDataException("해당 id를 가진 예약이 존재하지 않습니다.");
-        }
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NoMatchingDataException("해당 id를 가진 예약이 존재하지 않습니다."));
+
         reservationRepository.deleteById(id);
+
+        Optional<Reservation> topWaitingReservation = reservationRepository.findTopWaitingReservationBy(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+
+        topWaitingReservation.ifPresent(
+                waitingReservation -> reservationRepository.save(waitingReservation.changeStatusToReserved()));
     }
 
     public List<ReservationMineResponse> findReservationByMemberId(Long memberId) {

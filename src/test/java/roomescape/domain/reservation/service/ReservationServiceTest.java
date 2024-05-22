@@ -276,4 +276,22 @@ class ReservationServiceTest {
 
         assertThat(waitingReservations).hasSize(1);
     }
+
+    @DisplayName("예약 삭제 시 해당 예약과 관련된 예약대기가 예약으로 바뀐다.")
+    @Test
+    void should_change_waiting_reservation_to_reserved_reservation_when_delete_related_reservation() {
+        Reservation reservedReservation = new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME,
+                MEMBER_MEMBER, RESERVED, TIMESTAMP_BEFORE_ONE_YEAR);
+        Reservation waitingReservation = new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME,
+                ADMIN_MEMBER, WAITING, TIMESTAMP_BEFORE_ONE_YEAR);
+        Reservation savedReservedReservation = fakeReservationRepository.save(reservedReservation);
+        Reservation savedWaitingReservation = fakeReservationRepository.save(waitingReservation);
+
+        reservationService.removeReservation(savedReservedReservation.getId());
+        Reservation changedWaitingReservation = fakeReservationRepository.findById(savedWaitingReservation.getId())
+                .get();
+
+        assertThat(changedWaitingReservation.getStatus()).isEqualTo(RESERVED);
+    }
+
 }

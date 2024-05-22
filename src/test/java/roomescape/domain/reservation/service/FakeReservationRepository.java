@@ -1,6 +1,5 @@
 package roomescape.domain.reservation.service;
 
-import static roomescape.domain.member.domain.Role.MEMBER;
 import static roomescape.domain.reservation.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
@@ -11,13 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
-import roomescape.domain.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -60,23 +56,16 @@ public class FakeReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Long id = reservationAtomicLong.incrementAndGet();
 
-        ReservationTime reservationTime = reservation.getTime();
-        ReservationTime addReservationTime = new ReservationTime(reservationTimeAtomicLong.incrementAndGet(),
-                reservationTime.getStartAt());
+        Reservation addReservation = new Reservation(id, reservation.getDate(), reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getMember(), reservation.getStatus(), reservation.getReservationTimestamp());
 
-        Theme theme = reservation.getTheme();
-        Theme addTheme = new Theme(themeAtomicLong.incrementAndGet(), theme.getName(), theme.getDescription(),
-                theme.getDescription());
-
-        Member member = reservation.getMember();
-        Member addMember = new Member(memberAtomicLong.incrementAndGet(), member.getName(), member.getEmail(),
-                member.getPassword(), MEMBER);
-
-        Reservation addReservation = new Reservation(id, reservation.getDate(), addReservationTime, addTheme,
-                addMember, reservation.getStatus(), reservation.getReservationTimestamp());
-
-        reservations.put(id, addReservation);
-        return reservation;
+        if (reservations.containsKey(reservation.getId())) {
+            reservations.replace(reservation.getId(), addReservation);
+        } else {
+            reservations.put(id, addReservation);
+        }
+        return addReservation;
     }
 
     @Override
