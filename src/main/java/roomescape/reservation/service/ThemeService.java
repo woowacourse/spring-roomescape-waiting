@@ -6,18 +6,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.domain.PopularThemes;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
-
+    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+        this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
     }
 
@@ -50,11 +53,14 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<PopularThemeResponse> findThemesDescOfLastWeekCountOf(int limitCount) {
+    public MultipleResponses<PopularThemeResponse> findThemesDescOfLastWeekTopOf(int limitCount) {
         LocalDate dateFrom = LocalDate.now().minusWeeks(1);
-        List<Theme> themes = themeRepository.findThemesOfLastWeek(dateFrom);
+        List<Theme> themes = reservationRepository.findReservationsOfLastWeek(dateFrom).stream()
+                .map(Reservation::getTheme)
+                .toList();
+
         PopularThemes popularThemes = new PopularThemes(themes);
-        List<PopularThemeResponse> popularThemeResponses = popularThemes.findPopularThemesCountOf(limitCount).stream()
+        List<PopularThemeResponse> popularThemeResponses = popularThemes.findPopularThemesTopOf(limitCount).stream()
                 .map(PopularThemeResponse::toResponse)
                 .toList();
 

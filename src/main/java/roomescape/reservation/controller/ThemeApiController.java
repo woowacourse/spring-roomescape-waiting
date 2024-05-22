@@ -29,7 +29,7 @@ public class ThemeApiController {
     public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
             @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
     ) {
-        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekCountOf(limitCount);
+        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(limitCount);
 
         return ResponseEntity.ok(popularThemeResponses);
     }

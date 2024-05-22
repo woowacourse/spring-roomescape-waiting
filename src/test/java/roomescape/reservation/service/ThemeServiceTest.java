@@ -82,7 +82,7 @@ class ThemeServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @DisplayName("일주일 내에 예약된 인기 테마를 n개 만큼 조회한다.")
+    @DisplayName("일주일 내에 예약된 상위 n 인기 테마들을 조회한다.")
     @Test
     void findThemesDescOfLastWeekCountOf() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
@@ -110,7 +110,7 @@ class ThemeServiceTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
 
-        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekCountOf(2);
+        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(2);
 
         assertAll(
                 () -> assertThat(popularThemeResponses.responses().get(0).name()).isEqualTo("액션"),

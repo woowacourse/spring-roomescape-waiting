@@ -9,10 +9,8 @@ import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
-import static roomescape.util.Fixture.TOMORROW;
 
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -104,30 +102,6 @@ class ThemeRepositoryTest {
         boolean exist = !themeRepository.findThemesThatReservationReferById(theme.getId()).isEmpty();
 
         assertThat(exist).isTrue();
-    }
-
-    @DisplayName("n일 내에 예약된 테마를 조회한다.")
-    @Test
-    void findThemesOfLastWeek() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
-
-        Theme theme1 = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
-        );
-
-        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-
-        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, TOMORROW, theme1, reservationTime, Status.SUCCESS));
-
-        LocalDate dateFrom = LocalDate.now().minusWeeks(1);
-        List<Theme> themes = themeRepository.findThemesOfLastWeek(dateFrom);
-
-        assertThat(themes.size()).isEqualTo(1);
     }
 
     @DisplayName("id를 받아 삭제한다.")

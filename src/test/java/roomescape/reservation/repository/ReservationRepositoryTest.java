@@ -13,8 +13,10 @@ import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
+import static roomescape.util.Fixture.TOMORROW;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -133,6 +135,30 @@ public class ReservationRepositoryTest {
         List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(savedReservation.getDate(), theme.getId());
 
         assertThat(timeIds).containsExactly(reservationTime.getId());
+    }
+
+    @DisplayName("n일 내에 저장된 예약들을 조회한다.")
+    @Test
+    void findReservationsOfLastWeek() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+
+        Theme theme1 = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme1, reservationTime, Status.SUCCESS));
+
+        LocalDate dateFrom = LocalDate.now().minusWeeks(1);
+        List<Reservation> reservations = reservationRepository.findReservationsOfLastWeek(dateFrom);
+
+        assertThat(reservations.size()).isEqualTo(2);
     }
 
     @DisplayName("회원 아이디, 날짜, 시간 조간에 해당하는 예약의 상태들을 조회한다.")

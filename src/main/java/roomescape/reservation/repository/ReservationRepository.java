@@ -38,6 +38,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate dateTo
     );
 
+    @Query(value = """
+            select r
+            from Reservation r
+            join fetch Theme t
+            on t.id = r.theme.id
+            where r.date >= :dateFrom
+               """)
+    List<Reservation> findReservationsOfLastWeek(LocalDate dateFrom);
+
     @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
     List<Reservation> findAllByStatus(Status status);
 
