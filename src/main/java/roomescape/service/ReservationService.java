@@ -23,7 +23,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationRankStatusResponse;
-import roomescape.repository.dto.ReservationWaitingResponse;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -58,7 +58,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationWaitingResponse> findAllWaitingReservations() {
+    public List<WaitingReservationResponse> findAllWaitingReservations() {
         return reservationRepository.findReservationByStatus(WAITING);
     }
 

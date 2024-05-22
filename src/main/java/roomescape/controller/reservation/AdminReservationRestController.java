@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.AdminReservationRequest;
-import roomescape.repository.dto.ReservationWaitingResponse;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.reservation.ReservationResponse;
 import roomescape.service.dto.reservation.ReservationSearchParams;
@@ -40,7 +40,7 @@ public class AdminReservationRestController {
     }
 
     @GetMapping("/admin/reservations/waiting")
-    public List<ReservationWaitingResponse> findAllWaitingReservations() {
+    public List<WaitingReservationResponse> findAllWaitingReservations() {
         return reservationService.findAllWaitingReservations();
     }
 

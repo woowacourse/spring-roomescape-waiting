@@ -1,6 +1,6 @@
 package roomescape.controller.reservation;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -19,6 +19,7 @@ import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.global.JwtManager;
 import roomescape.repository.DatabaseCleanupListener;
+import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.member.MemberCreateRequest;
 import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.dto.reservation.ReservationResponse;
@@ -40,17 +41,20 @@ class AdminReservationRestControllerTest {
     @Autowired
     private JwtManager jwtManager;
 
-    private final Member member = new Member("t1@t1.com", "t1", "러너덕", "MEMBER");
+    private final Member member1 = new Member("t1@t1.com", "t1", "러너덕", "MEMBER");
+    private final Member member2 = new Member("t2@t2.com", "t2", "영이", "MEMBER");
     private final Member admin = new Member("tt@tt.com", "tt", "재즈", "ADMIN");
 
-    private String memberToken;
+    private String memberToken1;
+    private String memberToken2;
     private String adminToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         initializeMemberData();
-        memberToken = jwtManager.generateToken(member);
+        memberToken1 = jwtManager.generateToken(member1);
+        memberToken2 = jwtManager.generateToken(member2);
         adminToken = jwtManager.generateToken(admin);
 
         initializeTimesData();
@@ -58,11 +62,18 @@ class AdminReservationRestControllerTest {
     }
 
     private void initializeMemberData() {
-        MemberCreateRequest memberRequest = new MemberCreateRequest("t1@t1.com", "t1", "러너덕");
+        MemberCreateRequest memberRequest1 = new MemberCreateRequest("t1@t1.com", "t1", "러너덕");
+        MemberCreateRequest memberRequest2 = new MemberCreateRequest("t2@t2.com", "t2", "영이");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(memberRequest)
+                .body(memberRequest1)
+                .when().post("/members/signup")
+                .then().log().all()
+                .statusCode(201);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(memberRequest2)
                 .when().post("/members/signup")
                 .then().log().all()
                 .statusCode(201);
@@ -132,9 +143,53 @@ class AdminReservationRestControllerTest {
                 "CONFIRMED"
         );
 
-        assertThat(actualResponse)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(expectedResponse));
+        assertThat(actualResponse).usingRecursiveComparison().isEqualTo(List.of(expectedResponse));
+    }
+
+    @DisplayName("대기중인 예약 목록을 조회하는데 성공하면 응답과 200 상태코드를 반환한다.")
+    @Test
+    void return_200_when_find_all_waiting_reservations() {
+        MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
+                "2100-08-05", 1L);
+
+        RestAssured.given().log().all()
+                .cookie("token", memberToken1)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .cookie("token", memberToken2)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .cookie("token", adminToken)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        List<WaitingReservationResponse> actual = RestAssured.given().log().all()
+                .cookie("token", adminToken)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", WaitingReservationResponse.class);
+
+        List<WaitingReservationResponse> expected = List.of(
+                new WaitingReservationResponse(2L, "영이", "공포", "2100-08-05", "10:00"),
+                new WaitingReservationResponse(3L, "재즈", "공포", "2100-08-05", "10:00"));
+
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @DisplayName("어드민이 예약을 생성하는데 성공하면 응답과 201 상태 코드를 반환한다.")
@@ -159,7 +214,7 @@ class AdminReservationRestControllerTest {
                 "2100-08-05", 1L);
 
         Integer id = RestAssured.given().log().all()
-                .cookie("token", memberToken)
+                .cookie("token", memberToken1)
                 .contentType(ContentType.JSON)
                 .body(reservationCreate)
                 .when().post("/reservations")
@@ -172,6 +227,38 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .when().delete("/admin/reservations/" + id)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("어드민이 대기중인 예약을 삭제하는데 성공하면 응답과 204 상태코드를 반환한다.")
+    @Test
+    void return_204_when_delete_waiting_reservation() {
+        MemberReservationRequest reservationCreate = new MemberReservationRequest(1L,
+                "2100-08-05", 1L);
+
+        RestAssured.given().log().all()
+                .cookie("token", memberToken1)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        Integer id = RestAssured.given().log().all()
+                .cookie("token", adminToken)
+                .contentType(ContentType.JSON)
+                .body(reservationCreate)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .body()
+                .path("id");
+
+        RestAssured.given().log().all()
+                .cookie("token", adminToken)
+                .when().delete("/admin/reservations/waiting/" + id)
                 .then().log().all()
                 .statusCode(204);
     }

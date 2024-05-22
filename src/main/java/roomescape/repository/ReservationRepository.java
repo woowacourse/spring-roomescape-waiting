@@ -13,7 +13,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 import roomescape.repository.dto.ReservationRankStatusResponse;
-import roomescape.repository.dto.ReservationWaitingResponse;
+import roomescape.repository.dto.WaitingReservationResponse;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -48,10 +48,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     List<ReservationRankStatusResponse> findReservationRankByMember(Member member);
 
     @Query("""
-            SELECT new roomescape.repository.dto.ReservationWaitingResponse
+            SELECT new roomescape.repository.dto.WaitingReservationResponse
             (r.id, r.member.name, r.theme.name, r.date, r.time)
             FROM Reservation r
             WHERE r.status = :reservationStatus
             """)
-    List<ReservationWaitingResponse> findReservationByStatus(ReservationStatus reservationStatus);
+    List<WaitingReservationResponse> findReservationByStatus(ReservationStatus reservationStatus);
 }

@@ -27,4 +27,13 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @DisplayName("유저 자신의 예약 페이지 호출 테스트")
+    @Test
+    void user_my_reservation_page() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
