@@ -93,6 +93,7 @@ class WaitingServiceTest {
 
         assertThat(waitingsByMember).containsExactly(
                 new ReservationOrWaitingResponse(
+                        WAITING_1.getId(),
                         WAITING_1.getTheme().getName().name(),
                         WAITING_1.getDate(DateTimeFormatter.ISO_DATE),
                         WAITING_1.getReservationTime().getStartAt(DateTimeFormatter.ofPattern("HH:mm")),
