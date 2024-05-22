@@ -10,12 +10,16 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
     private Name name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password password;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -71,5 +75,16 @@ public class Member {
 
     public String getRole() {
         return role.getValue();
+    }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", name=" + name +
+                ", email=" + email +
+                ", password=" + password +
+                ", role=" + role +
+                '}';
     }
 }

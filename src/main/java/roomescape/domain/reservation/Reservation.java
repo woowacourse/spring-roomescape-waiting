@@ -9,8 +9,10 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Member member;
+
     @ManyToOne
     private ReservationInfo reservationInfo;
 
@@ -32,5 +34,14 @@ public class Reservation {
 
     public ReservationInfo getReservationInfo() {
         return reservationInfo;
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", member=" + member +
+                ", reservationInfo=" + reservationInfo +
+                '}';
     }
 }
