@@ -43,7 +43,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse create(final WaitingRequest request) {
-        final Waiting waiting = createWaiting(request);
+        final Waiting waiting = buildWaiting(request);
 
         validateDuplicatedReservation(waiting);
         validateDuplicateWaiting(waiting);
@@ -77,7 +77,7 @@ public class WaitingService {
         }
     }
 
-    private Waiting createWaiting(final WaitingRequest request) {
+    private Waiting buildWaiting(final WaitingRequest request) {
         final Member member = getMemberById(request.getMemberId());
         final ReservationTime reservationTime = getReservationTimeById(request.getTimeId());
         final Theme theme = getThemeById(request.getThemeId());
