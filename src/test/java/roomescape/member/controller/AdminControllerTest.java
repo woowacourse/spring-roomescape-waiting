@@ -2,8 +2,7 @@ package roomescape.member.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.fixture.MemberFixture.getMemberAdmin;
-import static roomescape.fixture.MemberFixture.getMemberChoco;
+import static roomescape.fixture.MemberFixture.*;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -17,9 +16,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.controller.dto.SignUpRequest;
+import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.service.TokenProvider;
+import roomescape.fixture.MemberFixture;
 import roomescape.member.controller.dto.MemberResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.ReservationResponse;
@@ -135,5 +138,33 @@ class AdminControllerTest extends ControllerTest {
                             .statusCode(204);
                 })
         );
+    }
+
+    @DisplayName("예약 대기 페이지에 접근한다.")
+    @Test
+    void waitingPage () {
+        //given
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/admin/reservation/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("관리자 접근이 없는 유저에 접근이 제한된다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/admin/reservations/", "/admin"})
+    void unauthorizedMember(String url) {
+        //given
+        String unauthorizedMemberToken = tokenProvider.createAccessToken(getMemberTacan().getEmail());
+
+        //when & then
+        RestAssured.given().log().all()
+                .cookie("token", unauthorizedMemberToken)
+                .when().get(url)
+                .then().log().all()
+                .statusCode(500);
     }
 }
