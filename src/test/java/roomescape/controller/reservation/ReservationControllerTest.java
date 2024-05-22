@@ -32,7 +32,7 @@ class ReservationControllerTest {
     @Test
     void user_my_reservation_page() {
         RestAssured.given().log().all()
-                .when().get("/reservation-mine")
+                .when().get("/my/reservation")
                 .then().log().all()
                 .statusCode(200);
     }
