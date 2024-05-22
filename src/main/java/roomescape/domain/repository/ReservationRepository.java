@@ -38,6 +38,18 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             @Param("memberId") Long memberId, @Param("themeId") Long themeId
     );
 
+    @Query(""" 
+            select new roomescape.domain.repository.ReservationWithRank(mine,
+                (select count(r) from Reservation r
+                where r.createdAt < mine.createdAt
+                and r.detail = mine.detail
+                and r.status in (roomescape.domain.Status.RESERVED, roomescape.domain.Status.WAITING)))
+            from Reservation mine
+            where mine.member.id = :memberId
+            and mine.status in (roomescape.domain.Status.RESERVED, roomescape.domain.Status.WAITING)
+            """)
+    List<ReservationWithRank> findWithRank(@Param("memberId") Long memberId);
+
     boolean existsByDetailAndMemberAndStatusNot(ReservationDetail detail, Member member, Status status);
 
     boolean existsByDetailAndStatus(ReservationDetail reservationDetail, Status status);

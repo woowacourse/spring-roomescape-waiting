@@ -92,24 +92,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<UserReservationResponse> findAllByMemberId(Long memberId) {
-        return null;
-    }
-
-    @Transactional
-    public void cancelReservation(Long reservationId, MemberInfo memberInfo) {
-        Reservation reservation = reservationRepository.getById(reservationId);
-        rejectUnauthorizedCancel(memberInfo, reservation);
-        reservation.cancel();
-    }
-
-    private void rejectUnauthorizedCancel(MemberInfo memberInfo, Reservation reservation) {
-        if (reservation.isNotOwner(memberInfo.id())) {
-            throw new CancelReservationException("다른 회원의 예약을 취소할 수 없습니다.");
-        }
-        if (reservation.isReserved()) {
-            throw new CancelReservationException("예약 취소는 어드민만 할 수 있습니다.");
-        }
+    public List<UserReservationResponse> findAllWithRank(Long memberId) {
+        return reservationRepository.findWithRank(memberId).stream()
+                .map(reservationWithRank -> UserReservationResponse.of(
+                        reservationWithRank.reservation(), reservationWithRank.rank()))
+                .toList();
     }
 
     @Transactional

@@ -2,9 +2,9 @@ package roomescape.acceptance;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -388,43 +388,41 @@ class MemberReservationTest {
                 .then().log().all().statusCode(400);
     }
 
-    @Disabled
+    @DisplayName("예약과 예약 대기가 모두 있는 상태에서, 모든 예약을 조회하면, 예약과 예약 대기를 모두 반환한다")
     @Test
-    @DisplayName("resolved 예약과 waiting 예약이 모두 있는 상태에서, 모든 예약을 조회하면, resolved 예약과 waiting 예약을 모두 반환한다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/reservations-details.sql", "/test-data/waiting-reservations.sql"})
+            "/test-data/reservations-details.sql", "/test-data/reservations.sql"})
     void when_getReservations_then_returnReservations() {
-        // when
-        Response response = given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().get("/reservations")
+        // when, then
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().get("/reservations-mine")
                 .then().log().all().statusCode(200)
-                .extract().response();
-
-        // then
-        // 예약과 예약 대기 상태가 적절한지 확인하는 로직이 필요하다
-        // 정렬과 페이징 처리가 필요하다
+                .assertThat()
+                .body("size()", is(11))
+                .body("findAll { it.status == '예약' }.size()", is(8))
+                .body("findAll { it.status == '1번째 예약' }.size()", is(3));
     }
 
     @Disabled
+    @DisplayName("과거의 예약과 예약 대기는 조회되지 않는다")
     @Test
-    @DisplayName("과거의 resolved 예약과 waiting 예약은 조회되지 않는다")
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
-            "/test-data/past-reservations.sql", "/test-data/past-waiting-reservations.sql"})
+            "/test-data/reservations-details.sql", "/test-data/reservations.sql", "/test-data/past-reservations.sql"})
     void when_getReservations_then_doesNotReturnPastReservations() {
-        // when
-        Response response = given().log().all()
-                .cookie("token", getToken("mangcho@woowa.net", "password"))
-                .when().get("/reservations")
+        // when, then
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().get("/reservations-mine")
                 .then().log().all().statusCode(200)
-                .extract().response();
-
-        // then
-        // 지난 예약과 예약 대기 상태가 조회되지 않는지 확인하는 로직이 필요하다
+                .assertThat()
+                .body("size()", is(11))
+                .body("findAll { it.status == '예약' }.size()", is(8))
+                .body("findAll { it.status == '1번째 예약' }.size()", is(3));
     }
 
-    @Test
     @DisplayName("내 예약 대기가 존재하는 경우에, 예약 대기 삭제 요청을 하면, 삭제된다")
+    @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
     void when_myWaitingReservationExists_then_deleteWaitingReservation() {
         // given
