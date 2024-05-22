@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.List;
 import java.util.Objects;
+import roomescape.system.exception.RoomescapeException;
 
 @Entity
 public class Theme {
@@ -53,6 +55,7 @@ public class Theme {
         return thumbnail.getUrl();
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -62,13 +65,18 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
-               && Objects.equals(description, theme.description) && Objects.equals(thumbnail,
-            theme.thumbnail);
+        return Objects.equals(id, theme.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnail);
+        return Objects.hash(id);
+    }
+
+    public void validateDuplication(List<Theme> others) {
+        if (others.stream()
+            .anyMatch(other -> name.equals(other.name))) {
+            throw new RoomescapeException("같은 이름의 테마가 이미 존재합니다.");
+        }
     }
 }

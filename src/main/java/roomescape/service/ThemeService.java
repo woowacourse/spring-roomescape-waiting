@@ -3,7 +3,6 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.theme.Name;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -27,14 +26,10 @@ public class ThemeService {
 
     public Theme save(String name, String description, String thumbnail) {
         Theme theme = new Theme(name, description, thumbnail);
-        validateDuplication(name);
-        return themeRepository.save(theme);
-    }
+        List<Theme> themes = themeRepository.findAll();
+        theme.validateDuplication(themes);
 
-    private void validateDuplication(String name) {
-        if (themeRepository.existsByName(new Name(name))) {
-            throw new RoomescapeException("같은 이름의 테마가 이미 존재합니다.");
-        }
+        return themeRepository.save(theme);
     }
 
     public void delete(Long id) {
