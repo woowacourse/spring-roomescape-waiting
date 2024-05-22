@@ -52,21 +52,6 @@ public class ReservationController {
         final CreateReservationDto reservationDto = new CreateReservationDto(
                 loginMember.id(), userRequest.themeId(), userRequest.date(),
                 userRequest.timeId(), Status.RESERVED);
-        return createReservation(reservationDto);
-    }
-
-    @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> addWaitingReservation(
-            @RequestBody @Valid final UserCreateReservationRequest userRequest,
-            @Valid final LoginMember loginMember) {
-        final CreateReservationDto reservationDto = new CreateReservationDto(
-                loginMember.id(), userRequest.themeId(), userRequest.date(),
-                userRequest.timeId(), Status.WAITING);
-        return createReservation(reservationDto);
-    }
-
-    public ResponseEntity<ReservationResponse> createReservation(
-            CreateReservationDto reservationDto) {
         final Reservation reservation = reservationService.addReservation(reservationDto);
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.getId())

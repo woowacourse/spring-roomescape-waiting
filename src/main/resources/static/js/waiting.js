@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 endpoint 설정
-     */
     fetch('/waiting') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
@@ -42,7 +38,7 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/waiting/' + id;
+    const endpoint = '/reservation/waiting/' + id;
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {
@@ -55,7 +51,7 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/reservations/' + id;
+    const endpoint = '/reservations/waiting/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
