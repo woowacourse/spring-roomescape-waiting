@@ -10,6 +10,7 @@ import roomescape.domain.theme.Theme;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -45,6 +46,26 @@ public class Reservation {
 
     public boolean isPast() {
         return detail.getSchedule().isBeforeNow();
+    }
+
+    public boolean isReserved() {
+        return status.isReserved();
+    }
+
+    public void reserved() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reservation other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Long getId() {

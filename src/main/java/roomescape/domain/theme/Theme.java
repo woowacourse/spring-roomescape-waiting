@@ -2,6 +2,8 @@ package roomescape.domain.theme;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 public class Theme {
     @Id
@@ -27,6 +29,18 @@ public class Theme {
         this.name = new ThemeName(name);
         this.description = new Description(description);
         this.thumbnail = new Thumbnail(thumbnail);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Theme other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Long getId() {
