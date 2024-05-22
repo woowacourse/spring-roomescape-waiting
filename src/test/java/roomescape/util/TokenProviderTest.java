@@ -1,5 +1,6 @@
 package roomescape.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,12 @@ class TokenProviderTest {
     MemberRepository memberRepository;
     @Autowired
     private TokenProvider tokenProvider;
+    @Autowired
+    DatabaseCleaner databaseCleaner;
+    @BeforeEach
+    void setUp() {
+        databaseCleaner.initialize();
+    }
 
     @Test
     @DisplayName("토큰을 생성하고,추출한다")
