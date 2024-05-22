@@ -168,7 +168,7 @@ class ReservationServiceTest {
                 .willReturn(List.of(response));
 
         // when
-        final List<MyReservationWithRankResponse> actual = reservationService.findMyReservations(loginMember);
+        final List<MyReservationWithRankResponse> actual = reservationService.findMyReservationsAndWaitings(loginMember);
 
         // then
         assertAll(

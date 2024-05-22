@@ -2,10 +2,12 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.auth.TokenRequest;
 import roomescape.dto.auth.TokenResponse;
 import roomescape.dto.reservation.ReservationSaveRequest;
@@ -15,6 +17,7 @@ import roomescape.dto.theme.ThemeSaveRequest;
 import static roomescape.TestFixture.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 abstract class AcceptanceTest {
 
     @LocalServerPort
@@ -106,11 +109,10 @@ abstract class AcceptanceTest {
                 .extract().as(TokenResponse.class).accessToken();
     }
 
-    protected void assertCreateResponseWithToken(final Object request, final String email,
-                                                 final String path, final int statusCode) {
+    protected ValidatableResponse assertPostResponseWithToken(final Object request, final String email,
+                                                              final String path, final int statusCode) {
         final String accessToken = getAccessToken(email);
-
-        RestAssured.given().log().all()
+        return RestAssured.given().log().all()
                 .cookie("token", accessToken)
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -119,8 +121,8 @@ abstract class AcceptanceTest {
                 .statusCode(statusCode);
     }
 
-    protected void assertCreateResponse(final Object request, final String path, final int statusCode) {
-        RestAssured.given().log().all()
+    protected ValidatableResponse assertPostResponse(final Object request, final String path, final int statusCode) {
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post(path)
@@ -128,18 +130,16 @@ abstract class AcceptanceTest {
                 .statusCode(statusCode);
     }
 
-    protected void assertGetResponse(final String path, final int statusCode) {
-        RestAssured.given().log().all()
+    protected ValidatableResponse assertGetResponse(final String path, final int statusCode) {
+        return RestAssured.given().log().all()
                 .when().get(path)
                 .then().log().all()
                 .statusCode(statusCode);
     }
 
-    protected void assertGetResponseWithLogin(final String email, final String path, final int statusCode) {
-        final String accessToken = getAccessToken(email);
-
-        RestAssured.given().log().all()
-                .cookie("token", accessToken)
+    protected ValidatableResponse assertGetResponseWithToken(final String token, final String path, final int statusCode) {
+        return RestAssured.given().log().all()
+                .cookie("token", token)
                 .when().get(path)
                 .then().log().all()
                 .statusCode(statusCode);

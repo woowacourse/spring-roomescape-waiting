@@ -1,13 +1,17 @@
 package roomescape.acceptance;
 
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.START_AT_SIX;
 
@@ -18,7 +22,10 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     void respondCreatedWhenCreateReservationTime() {
         final ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(START_AT_SIX);
 
-        assertCreateResponse(request, "/times", 201);
+        final ReservationTimeResponse response = assertPostResponse(request, "/times", 201)
+                .extract().as(ReservationTimeResponse.class);
+
+        assertThat(response.startAt()).isEqualTo(START_AT_SIX);
     }
 
     @ParameterizedTest
@@ -28,15 +35,16 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     void respondBadRequestWhenCreateInvalidReservationTime(final String invalidTime) {
         final ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(invalidTime);
 
-        assertCreateResponse(request, "/times", 400);
+        assertPostResponse(request, "/times", 400);
     }
 
     @Test
     @DisplayName("예약 시간 목록을 성공적으로 조회하면 200을 응답한다.")
     void respondOkWhenFindReservationTimes() {
-        saveReservationTime();
+        final JsonPath jsonPath = assertGetResponse("/times", 200)
+                .extract().response().jsonPath();
 
-        assertGetResponse("/times", 200);
+        assertThat(jsonPath.getString("startAt[0]")).isEqualTo("13:00");
     }
 
     @Test
@@ -50,7 +58,6 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간을 삭제하면 400을 응답한다.")
     void respondBadRequestWhenDeleteNotExistingReservationTime() {
-        saveReservationTime();
         final Long notExistingReservationTimeId = 0L;
 
         assertDeleteResponse("/times/", notExistingReservationTimeId, 400);
@@ -62,11 +69,17 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         final String date = DATE_MAY_EIGHTH;
         final Long themeId = saveTheme();
 
-        RestAssured.given().log().all()
+        final JsonPath jsonPath = RestAssured.given().log().all()
                 .queryParam("date", date)
                 .queryParam("themeId", themeId)
                 .when().get("/times/available")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .extract().response().jsonPath();
+
+        assertAll(() -> {
+            assertThat(jsonPath.getString("startAt[0]")).isEqualTo("13:00");
+            assertThat(jsonPath.getBoolean("isReserved[0]")).isEqualTo(false);
+        });
     }
 }
