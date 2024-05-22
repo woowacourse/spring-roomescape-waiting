@@ -208,21 +208,16 @@ class ReservationRepositoryTest extends RepositoryTest {
     }
 
     @Test
-    @DisplayName("동일한 날짜, 시간, 테마의 모든 예약을 사용자와 함께 조회한다.")
-    void findAllByDateAndTimeAndThemeWithMember() {
+    @DisplayName("동일 시간대의 예약이 존재하는지 조회한다.")
+    void existByDateAndTimeIdAndThemeId() {
         // given
-        reservationRepository.saveAll(List.of(
-                new Reservation(mia, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, WAITING),
-                new Reservation(tommy, MIA_RESERVATION_DATE, reservationTime, wootecoTheme, BOOKING)
-        ));
+        reservationRepository.save(MIA_RESERVATION(reservationTime, wootecoTheme, mia, BOOKING));
 
         // when
-        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeWithMember(
+        boolean existByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeAndTheme(
                 MIA_RESERVATION_DATE, reservationTime, wootecoTheme);
 
         // then
-        assertThat(reservations).hasSize(2)
-                .extracting(Reservation::getMemberName)
-                .contains(MIA_NAME, TOMMY_NAME);
+        assertThat(existByDateAndTimeIdAndThemeId).isTrue();
     }
 }

@@ -69,12 +69,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    @Query("""
-            SELECT r FROM Reservation r
-            JOIN FETCH r.member
-            WHERE r.date = :date AND r.time = :time AND r.theme = :theme
-            """)
-    List<Reservation> findAllByDateAndTimeAndThemeWithMember(@Param(value = "date") LocalDate date,
-                                                             @Param(value = "time") ReservationTime time,
-                                                             @Param(value = "theme") Theme theme);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 }
