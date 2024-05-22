@@ -139,4 +139,8 @@ public class ReservationService {
                 .map(ReservationMineResponse::from)
                 .toList();
     }
+
+    public List<Reservation> findWaitingReservations() {
+        return reservationRepository.findByStatus(WAITING);
+    }
 }

@@ -258,4 +258,22 @@ class ReservationServiceTest {
 
         assertThat(memberReservations).hasSize(1);
     }
+
+    @DisplayName("예약 대기 목록만을 불러올 수 있다.")
+    @Test
+    void should_find_waiting_list() {
+        fakeThemeRepository.save(DUMMY_THEME);
+        fakeMemberRepository.save(MEMBER_MEMBER);
+        fakeReservationRepository.save(
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, RESERVED,
+                        TIMESTAMP_BEFORE_ONE_YEAR)
+        );
+        fakeReservationRepository.save(
+                new Reservation(null, BEFORE_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, ADMIN_MEMBER, WAITING,
+                        TIMESTAMP_BEFORE_ONE_YEAR));
+
+        List<Reservation> waitingReservations = reservationService.findWaitingReservations();
+
+        assertThat(waitingReservations).hasSize(1);
+    }
 }

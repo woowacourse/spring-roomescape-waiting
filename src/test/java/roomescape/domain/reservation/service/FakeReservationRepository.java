@@ -1,8 +1,6 @@
 package roomescape.domain.reservation.service;
 
 import static roomescape.domain.member.domain.Role.MEMBER;
-import static roomescape.domain.reservation.domain.reservation.ReservationStatus.RESERVED;
-import static roomescape.fixture.TimestampFixture.TIMESTAMP_BEFORE_ONE_YEAR;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -73,7 +71,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 member.getPassword(), MEMBER);
 
         Reservation addReservation = new Reservation(id, reservation.getDate(), addReservationTime, addTheme,
-                addMember, RESERVED, TIMESTAMP_BEFORE_ONE_YEAR);
+                addMember, reservation.getStatus(), reservation.getReservationTimestamp());
 
         reservations.put(id, addReservation);
         return reservation;
