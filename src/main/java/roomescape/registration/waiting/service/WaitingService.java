@@ -7,6 +7,7 @@ import roomescape.exception.model.WaitingExceptionCode;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.registration.waiting.Waiting;
+import roomescape.registration.waiting.WaitingWithRank;
 import roomescape.registration.waiting.dto.WaitingRequest;
 import roomescape.registration.waiting.dto.WaitingResponse;
 import roomescape.registration.waiting.repository.WaitingRepository;
@@ -50,5 +51,9 @@ public class WaitingService {
         return waitings.stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    public List<WaitingWithRank> findMemberWaitingWithRank(long memberId) {
+        return waitingRepository.findWaitingsWithRankByMemberId(memberId);
     }
 }
