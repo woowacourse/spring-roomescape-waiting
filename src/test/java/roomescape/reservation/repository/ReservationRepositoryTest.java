@@ -8,7 +8,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRole;
-import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationStatus;
