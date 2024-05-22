@@ -13,15 +13,15 @@ import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
+import roomescape.member.domain.repository.MemberRepository;
 
 @Component
 public class AdminInterceptor implements HandlerInterceptor {
-    private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final JwtHandler jwtHandler;
 
-    public AdminInterceptor(final MemberService memberService, final JwtHandler jwtHandler) {
-        this.memberService = memberService;
+    public AdminInterceptor(MemberRepository memberRepository, final JwtHandler jwtHandler) {
+        this.memberRepository = memberRepository;
         this.jwtHandler = jwtHandler;
     }
 
@@ -46,7 +46,7 @@ public class AdminInterceptor implements HandlerInterceptor {
                 if (cookie.getName().equals(JwtHandler.ACCESS_TOKEN_HEADER_KEY)) {
                     String accessToken = cookie.getValue();
                     Long memberId = jwtHandler.getMemberIdFromTokenWithValidate(accessToken);
-                    Member member = memberService.findMemberById(memberId);
+                    Member member = memberRepository.getById(memberId);
                     checkRole(member);
 
                     return memberId;

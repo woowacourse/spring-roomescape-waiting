@@ -8,6 +8,7 @@ import roomescape.global.exception.model.ForbiddenException;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
@@ -25,7 +26,6 @@ import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,23 +39,21 @@ import java.util.Optional;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationTimeService reservationTimeService;
     private final ThemeRepository themeRepository;
     private final MemberReservationRepository memberReservationRepository;
+    private final MemberRepository memberRepository;
     private final MemberService memberService;
-    private final ThemeService themeService;
 
     public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository, ReservationTimeService reservationTimeService,
-                              final ThemeRepository themeRepository, MemberReservationRepository memberReservationRepository,
-                              final MemberService memberService, ThemeService themeService) {
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository, MemberReservationRepository memberReservationRepository, MemberRepository memberRepository,
+                              final MemberService memberService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationTimeService = reservationTimeService;
         this.themeRepository = themeRepository;
         this.memberReservationRepository = memberReservationRepository;
+        this.memberRepository = memberRepository;
         this.memberService = memberService;
-        this.themeService = themeService;
     }
 
     public ReservationsResponse findReservationsByStatus(final ReservationStatus status) {
@@ -78,7 +76,7 @@ public class ReservationService {
 
     public ReservationTimeInfosResponse findReservationsByDateAndThemeId(final LocalDate date, final Long themeId) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-        Theme theme = themeService.findThemeById(themeId);
+        Theme theme = themeRepository.getById(themeId);
         List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
 
         List<ReservationTimeInfoResponse> response = new ArrayList<>();
@@ -96,16 +94,10 @@ public class ReservationService {
         return new ReservationTimeInfosResponse(response);
     }
 
-    public Reservation findReservationById(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_NOT_FOUND,
-                        String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
-    }
-
     @Transactional
     public void removeReservationById(final Long reservationId, final Long requestMemberId) {
-        Member member = memberService.findMemberById(requestMemberId);
-        Reservation reservation = findReservationById(reservationId);
+        Member member = memberRepository.getById(requestMemberId);
+        Reservation reservation = reservationRepository.getById(reservationId);
         MemberReservation memberReservation = findMemberReservationByReservation(reservation);
 
         Long reservationMemberId = reservation.getMember().getId();
@@ -123,7 +115,7 @@ public class ReservationService {
 
     @Transactional
     public void approveWaitingReservation(final Long reservationId) {
-        Reservation reservation = findReservationById(reservationId);
+        Reservation reservation = reservationRepository.getById(reservationId);
         MemberReservation memberReservation = findMemberReservationByReservation(reservation);
         changeWaitingOrdersStatus(reservation);
 
@@ -142,8 +134,8 @@ public class ReservationService {
 
     @Transactional
     public void removeWaitingReservationById(final Long reservationId, final Long memberId) {
-        Member member = memberService.findMemberById(memberId);
-        Reservation reservation = findReservationById(reservationId);
+        Member member = memberRepository.getById(memberId);
+        Reservation reservation = reservationRepository.getById(reservationId);
         MemberReservation memberReservation = findMemberReservationByReservation(reservation);
 
         Long reservationMemberId = reservation.getMember().getId();
@@ -176,9 +168,9 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime time = reservationTimeService.findTimeById(request.timeId());
-        Theme theme = themeService.findThemeById(request.themeId());
-        Member member = memberService.findMemberById(memberId);
+        ReservationTime time = reservationTimeRepository.getById(request.timeId());
+        Theme theme = themeRepository.getById(request.themeId());
+        Member member = memberRepository.getById(memberId);
         List<MemberReservation> alreadyBookedReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(time, request.date(), theme);
         long order = alreadyBookedReservations.size();
 
@@ -248,8 +240,8 @@ public class ReservationService {
 
     public ReservationsResponse searchWith(
             final Long themeId, final Long memberId, final LocalDate dateFrom, final LocalDate dateTo) {
-        Member member = memberService.findMemberById(memberId);
-        Theme theme = themeService.findThemeById(themeId);
+        Member member = memberRepository.getById(memberId);
+        Theme theme = themeRepository.getById(themeId);
 
         List<ReservationResponse> response = reservationRepository.searchWith(theme, member, dateFrom, dateTo).stream()
                 .map(ReservationResponse::from)
@@ -258,7 +250,7 @@ public class ReservationService {
     }
 
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberRepository.getById(memberId);
         List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
 
         List<MemberReservationResponse> responses = new ArrayList<>();

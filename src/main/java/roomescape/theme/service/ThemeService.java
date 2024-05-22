@@ -3,8 +3,6 @@ package roomescape.theme.service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.error.ErrorType;
-import roomescape.global.exception.model.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeRequest;
@@ -21,12 +19,6 @@ public class ThemeService {
 
     public ThemeService(final ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-    }
-
-    public Theme findThemeById(final Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorType.THEME_NOT_FOUND,
-                        String.format("테마(Theme) 정보가 존재하지 않습니다. [themeId: %d]", id)));
     }
 
     public ThemesResponse findAllThemes() {

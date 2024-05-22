@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
-import roomescape.global.exception.model.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -25,12 +24,6 @@ public class ReservationTimeService {
     public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
-    }
-
-    public ReservationTime findTimeById(final Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ErrorType.RESERVATION_TIME_NOT_FOUND,
-                        String.format("예약 시간(ReservationTime) 정보가 존재하지 않습니다. [reservationTimeId: %d]", id)));
     }
 
     public ReservationTimesResponse findAllTimes() {
@@ -61,7 +54,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void removeTimeById(final Long id) {
-        ReservationTime reservationTime = findTimeById(id);
+        ReservationTime reservationTime = reservationTimeRepository.getById(id);
         List<Reservation> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);
         if (usingTimeReservations.size() > 0) {
             throw new AssociatedDataExistsException(ErrorType.TIME_IS_USED_CONFLICT,

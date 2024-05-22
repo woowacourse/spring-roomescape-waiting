@@ -15,9 +15,11 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
@@ -40,6 +42,8 @@ public class ReservationControllerTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private MemberReservationRepository memberReservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -90,15 +94,19 @@ public class ReservationControllerTest {
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         // when
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme, member));
+        Reservation reservation1 = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
+        Reservation reservation2 = reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
+        Reservation reservation3 = reservationRepository.save(new Reservation(LocalDate.now().plusDays(2), reservationTime, theme, member));
 
+        memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED, 0L));
+        memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED, 0L));
+        memberReservationRepository.save(new MemberReservation(reservation3, member, ReservationStatus.RESERVED, 0L));
+        
         // then
         RestAssured.given().log().all()
                 .port(port)
                 .header(new Header("Cookie", accessTokenCookie))
-                .when().get("/reservations")
+                .when().get("/reservations?status=RESERVED")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.reservations.size()", is(3));
@@ -146,6 +154,8 @@ public class ReservationControllerTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
+        memberReservationRepository.save(new MemberReservation(reservation, member, ReservationStatus.RESERVED, 0L));
+
 
         // when & then
         RestAssured.given().log().all()
@@ -168,6 +178,7 @@ public class ReservationControllerTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
 
         Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
+        memberReservationRepository.save(new MemberReservation(reservation, anotherMember, ReservationStatus.RESERVED, 0L));
 
         // when & then
         RestAssured.given().log().all()
@@ -190,6 +201,7 @@ public class ReservationControllerTest {
         Member anotherMember = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
 
         Reservation reservation = reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, anotherMember));
+        memberReservationRepository.save(new MemberReservation(reservation, anotherMember, ReservationStatus.RESERVED, 0L));
 
         // when & then
         RestAssured.given().log().all()

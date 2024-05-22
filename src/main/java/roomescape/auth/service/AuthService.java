@@ -10,16 +10,19 @@ import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 
 @Service
 @Transactional(readOnly = true)
 public class AuthService {
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
     private final JwtHandler jwtHandler;
 
-    public AuthService(final MemberService memberService, final JwtHandler jwtHandler) {
+    public AuthService(MemberService memberService, MemberRepository memberRepository, final JwtHandler jwtHandler) {
         this.memberService = memberService;
+        this.memberRepository = memberRepository;
         this.jwtHandler = jwtHandler;
     }
 
@@ -37,7 +40,7 @@ public class AuthService {
     }
 
     public LoginCheckResponse checkLogin(final Long memberId) {
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberRepository.getById(memberId);
 
         return new LoginCheckResponse(member.getName());
     }

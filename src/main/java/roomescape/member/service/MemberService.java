@@ -43,12 +43,6 @@ public class MemberService {
         return new MembersResponse(response);
     }
 
-    public Member findMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ErrorType.MEMBER_NOT_FOUND,
-                        ErrorType.MEMBER_NOT_FOUND.getDescription()));
-    }
-
     public Member findMemberByEmailAndPassword(final LoginRequest request) {
         Email email = new Email(request.email());
         Password password = new Password(request.password());
