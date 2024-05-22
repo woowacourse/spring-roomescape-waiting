@@ -128,7 +128,7 @@ public class ReservationService {
     }
 
     private Integer calculateWaitingNumber(final Reservation reservation, final Member member) {
-        final List<Reservation> reservations = reservationRepository.findByDateAndTimeAndTheme(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        final List<Reservation> reservations = reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         return IntStream.range(0, reservations.size())
                 .filter(index -> reservations.get(index).getMember().getId().equals(member.getId()))
                 .findFirst()

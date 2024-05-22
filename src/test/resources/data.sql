@@ -61,4 +61,8 @@ INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2099-04-30', 1, 1, 1, 'RESERVED');
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2999-04-30', 1, 1, 2, 'RESERVED');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2999-04-30', 1, 1, 1, 'WAITING');
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2999-04-30', 1, 1, 3, 'WAITING');
 

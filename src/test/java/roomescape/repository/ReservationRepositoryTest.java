@@ -123,7 +123,7 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.findByMember(member)).hasSize(7);
     }
 
-    @DisplayName("예약 날짜와 테마Id에 대한 예약을 조호할 수 있다.")
+    @DisplayName("예약 날짜와 테마Id에 대한 예약을 조회할 수 있다.")
     @Test
     void given_dateAndThemeId_When_findByDateAndThemeId_then_Reservations() {
         //given, when, then
@@ -131,4 +131,11 @@ class ReservationRepositoryTest {
                 .hasSize(2);
     }
 
+    @DisplayName("예약 날짜, 시간Id, 테마Id에 대한 예약을 조회할 수 있다.")
+    @Test
+    void given_dateAndTimeIdAndThemeId_When_findByDateAndTimeIdAndThemeId_then_Reservations() {
+        //given, when, then
+        assertThat(reservationRepository.findByDateAndTimeIdAndThemeId(LocalDate.parse("2999-04-30"), 1L, 1L))
+                .hasSize(2);
+    }
 }
