@@ -4,15 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.JOJO_EMAIL;
-import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.JOJO_PASSWORD;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
+import static roomescape.util.Fixture.TOMORROW;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -44,6 +43,9 @@ class ThemeRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     @DisplayName("id로 엔티티를 찾는다.")
     @Test
@@ -104,9 +106,9 @@ class ThemeRepositoryTest {
         assertThat(exist).isTrue();
     }
 
-    @DisplayName("n일 이후의 날짜를 기준으로 n개의 인기 테마를 조회한다.")
+    @DisplayName("n일 내에 예약된 테마를 조회한다.")
     @Test
-    void findTopTenThemesDescendingOfLastWeekTest() {
+    void findThemesOfLastWeek() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
         Theme theme1 = themeRepository.save(
@@ -117,28 +119,15 @@ class ThemeRepositoryTest {
                 )
         );
 
-        Theme theme2 = themeRepository.save(
-                new Theme(
-                        new ThemeName("액션"),
-                        new Description("액션 탈출"),
-                        THUMBNAIL
-                )
-        );
-
         Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
         reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme1, reservationTime, Status.SUCCESS));
 
-        LocalDate dateFrom = LocalDate.now(). minusWeeks(1);
-        List<Theme> themes = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, 2);
+        LocalDate dateFrom = LocalDate.now().minusWeeks(1);
+        List<Theme> themes = themeRepository.findThemesOfLastWeek(dateFrom);
 
-        assertAll(
-                () -> assertThat(themes.get(0).getName()).isEqualTo("액션"),
-                () -> assertThat(themes.size()).isEqualTo(2)
-        );
+        assertThat(themes.size()).isEqualTo(1);
     }
 
     @DisplayName("id를 받아 삭제한다.")

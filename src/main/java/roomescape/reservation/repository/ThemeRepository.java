@@ -20,9 +20,6 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             join Reservation r
             on t.id = r.theme.id
             where r.date >= :dateFrom
-            group by t.id
-            order by count(r) desc
-            limit :limitCount
                """)
-    List<Theme> findPopularThemesDescOfLastWeekForLimit(LocalDate dateFrom, int limitCount);
+    List<Theme> findThemesOfLastWeek(LocalDate dateFrom);
 }

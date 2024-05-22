@@ -1,16 +1,20 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.util.Fixture.HORROR_DESCRIPTION;
 import static roomescape.util.Fixture.HORROR_THEME_NAME;
 import static roomescape.util.Fixture.HOUR_10;
+import static roomescape.util.Fixture.JOJO_EMAIL;
+import static roomescape.util.Fixture.JOJO_NAME;
+import static roomescape.util.Fixture.JOJO_PASSWORD;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -28,6 +33,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
+import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -76,14 +82,52 @@ class ThemeServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @DisplayName("일주일 내에 예약된 인기 테마를 n개 만큼 조회한다.")
+    @Test
+    void findThemesDescOfLastWeekCountOf() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+
+        Theme theme1 = themeRepository.save(
+                new Theme(
+                        new ThemeName(HORROR_THEME_NAME),
+                        new Description(HORROR_DESCRIPTION),
+                        THUMBNAIL
+                )
+        );
+
+        Theme theme2 = themeRepository.save(
+                new Theme(
+                        new ThemeName("액션"),
+                        new Description("액션 탈출"),
+                        THUMBNAIL
+                )
+        );
+
+        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
+
+        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekCountOf(2);
+
+        assertAll(
+                () -> assertThat(popularThemeResponses.responses().get(0).name()).isEqualTo("액션"),
+                () -> assertThat(popularThemeResponses.responses()).hasSize(2)
+        );
+    }
+
     @DisplayName("이미 해당 테마로 예약 되있을 경우 삭제 시 예외가 발생한다.")
     @Test
     void deleteExceptionTest() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
-        Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member member = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.dto.MultipleResponses;
+import roomescape.reservation.domain.PopularThemes;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
@@ -49,10 +50,11 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<PopularThemeResponse> findThemesDescOfLastWeekForLimitCount(int limitCount) {
+    public MultipleResponses<PopularThemeResponse> findThemesDescOfLastWeekCountOf(int limitCount) {
         LocalDate dateFrom = LocalDate.now().minusWeeks(1);
-        List<Theme> popularTheme = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, limitCount);
-        List<PopularThemeResponse> popularThemeResponses = popularTheme.stream()
+        List<Theme> themes = themeRepository.findThemesOfLastWeek(dateFrom);
+        PopularThemes popularThemes = new PopularThemes(themes);
+        List<PopularThemeResponse> popularThemeResponses = popularThemes.findPopularThemesCountOf(limitCount).stream()
                 .map(PopularThemeResponse::toResponse)
                 .toList();
 
