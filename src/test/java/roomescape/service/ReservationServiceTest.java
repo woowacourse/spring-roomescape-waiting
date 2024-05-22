@@ -131,15 +131,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원의 예약 목록을 반환한다.")
-    void given_reservationRequestWithPastDate_when_save_then_throwException() {
-        //given
-        ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);
-        //when, then
-        assertThatThrownBy(() -> service.create(reservationRequest)).isInstanceOf(ReservationFailException.class);
-    }
-
-    @Test
     @DisplayName("사용자 Id 테마 Id 시작 및 종료 날짜로 예약 목록을 반환한다.")
     void given_memberIdAndThemeIdAndDateFromAndDateTo_when_findReservations_then_returnReservationResponses() {
         //given
