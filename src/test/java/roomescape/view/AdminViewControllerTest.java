@@ -76,4 +76,16 @@ class AdminViewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/theme"));
     }
+
+    @DisplayName("어드민 예약 대기 관리 페이지 요청을 처리할 수 있다")
+    @Test
+    void should_handle_admin_reservation_waiting_page_when_requested() throws Exception {
+        when(adminHandlerInterceptor.preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class),
+                any(Object.class)))
+                .thenReturn(true);
+
+        mockMvc.perform(get("/admin/waiting"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/waiting"));
+    }
 }
