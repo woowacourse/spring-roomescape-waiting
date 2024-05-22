@@ -45,4 +45,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.id = :id            
             """)
     Optional<Reservation> findByIdWithTimeAndTheme(@Param("id") Long id);
+
+    @Query("""
+            SELECT r
+            FROM Reservation AS r
+            WHERE r.waitingStatus.waitingNumber > 1 
+            """)
+    List<Reservation> findWaitings();
+
 }

@@ -14,6 +14,7 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -58,6 +59,11 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<WaitingResponse> findWaitings() {
+        return reservationRepository.findWaitings().stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
         List<Reservation> earlierReservations = reservationRepository.findByDateAndTimeAndTheme(

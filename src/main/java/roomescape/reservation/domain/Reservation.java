@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
@@ -102,19 +103,11 @@ public class Reservation {
         return id;
     }
 
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
     public Member getMember() {
         return member;
     }
 
-    public String getName() {
+    public String getMemberName() {
         return member.getName();
     }
 
@@ -126,8 +119,24 @@ public class Reservation {
         return time;
     }
 
+    public Long getTimeId() {
+        return time.getId();
+    }
+
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
     public Theme getTheme() {
         return theme;
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     public WaitingStatus getWaitingStatus() {
