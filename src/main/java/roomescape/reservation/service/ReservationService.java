@@ -132,7 +132,9 @@ public class ReservationService {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
         Waitings waitings = waitingReservations.stream()
-                .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                .sorted(Comparator.comparing(Reservation::getDate)
+                        .thenComparing(Reservation::getStartAt)
+                        .thenComparing(Reservation::getCreatedAt))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Waitings::new));
 
         List<MemberReservationResponse> memberReservationResponses = reservationRepository.findAllByMemberId(loginMember.id()).stream()
