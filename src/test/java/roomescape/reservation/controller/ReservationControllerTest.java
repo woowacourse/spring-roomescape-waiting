@@ -44,19 +44,12 @@ class ReservationControllerTest extends ControllerTest {
     WaitingReservationService waitingReservationService;
     @Autowired
     MemberReservationService memberReservationService;
-
     @Autowired
     ReservationTimeService reservationTimeService;
-
     @Autowired
     ThemeService themeService;
-
     @Autowired
     MemberService memberService;
-
-    @Autowired
-    TokenProvider tokenProvider;
-
     @Autowired
     AuthService authService;
 

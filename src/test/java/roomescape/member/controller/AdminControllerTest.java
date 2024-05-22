@@ -53,14 +53,10 @@ class AdminControllerTest extends ControllerTest {
     MemberService memberService;
     @Autowired
     AuthService authService;
-    @Autowired
-    TokenProvider tokenProvider;
-
-    String token;
 
     @BeforeEach
     void setUp() {
-        token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
+        adminToken = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
     }
 
     @DisplayName("예약 목록 조회에 성공한다.")
@@ -68,7 +64,7 @@ class AdminControllerTest extends ControllerTest {
     void getReservations() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -99,7 +95,7 @@ class AdminControllerTest extends ControllerTest {
 
                     //when & then
                     ReservationResponse reservationResponse = RestAssured.given().log().all()
-                            .cookie("token", token)
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(params)
                             .when().post("/admin/reservations")
@@ -114,7 +110,7 @@ class AdminControllerTest extends ControllerTest {
 
                     //when &then
                     RestAssured.given().log().all()
-                            .cookie("token", token)
+                            .cookie("token", adminToken)
                             .when().delete("/admin/reservations/" + reservationResponse.memberReservationId())
                             .then().log().all()
                             .statusCode(204);
@@ -156,7 +152,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
                 .when().post("/admin/waiting/approve/" + waiting.memberReservationId())
                 .then().log().all()
@@ -197,7 +193,7 @@ class AdminControllerTest extends ControllerTest {
 
         //when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
                 .when().post("/admin/waiting/deny/" + waiting.memberReservationId())
                 .then().log().all()

@@ -12,22 +12,13 @@ import roomescape.util.ControllerTest;
 
 @DisplayName("관리자 페이지 테스트")
 class AdminPageControllerTest extends ControllerTest {
-    @Autowired
-    TokenProvider tokenProvider;
-
-    String token;
-
-    @BeforeEach
-    void setUp() {
-        token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
-    }
 
     @DisplayName("관리자 메인 페이지 조회에 성공한다.")
     @Test
     void adminMainPage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/admin")
                 .then().log().all()
                 .statusCode(200);
@@ -38,7 +29,7 @@ class AdminPageControllerTest extends ControllerTest {
     void getAdminReservationPage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/admin/reservation")
                 .then().log().all()
                 .statusCode(200);
@@ -49,7 +40,7 @@ class AdminPageControllerTest extends ControllerTest {
     void getAdminReservationTimePage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/admin/time")
                 .then().log().all()
                 .statusCode(200);
@@ -60,7 +51,7 @@ class AdminPageControllerTest extends ControllerTest {
     void getAdminThemePage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/admin/theme")
                 .then().log().all()
                 .statusCode(200);
@@ -71,7 +62,7 @@ class AdminPageControllerTest extends ControllerTest {
     void getAdminWaitingPage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(200);

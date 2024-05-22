@@ -12,15 +12,6 @@ import roomescape.util.ControllerTest;
 
 @DisplayName("예약 페이지 테스트")
 class ReservationPageControllerTest extends ControllerTest {
-    @Autowired
-    TokenProvider tokenProvider;
-
-    String token;
-
-    @BeforeEach
-    void setUp() {
-        token = tokenProvider.createAccessToken(getMemberAdmin().getEmail());
-    }
 
     @DisplayName("기본 페이지 조회에 성공한다.")
     @Test
@@ -37,7 +28,7 @@ class ReservationPageControllerTest extends ControllerTest {
     void getReservationPage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/reservation")
                 .then().log().all()
                 .statusCode(200);
@@ -48,7 +39,7 @@ class ReservationPageControllerTest extends ControllerTest {
     void getMyReservationPage() {
         //given & when & then
         RestAssured.given().log().all()
-                .cookie("token", token)
+                .cookie("token", adminToken)
                 .when().get("/reservation-mine")
                 .then().log().all()
                 .statusCode(200);
