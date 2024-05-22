@@ -64,36 +64,37 @@
 
 ## API 명세서
 
-| HTTP Method | URI                                  | Description       | Request                                           | Response                                                             |
-|-------------|--------------------------------------|-------------------|---------------------------------------------------|----------------------------------------------------------------------|
-| GET         | `/`                                  | 주간 인기 테마 페이지      |                                                   | `templates/index.html`                                               |
-| GET         | `/admin`                             | 관리자 메인 페이지        |                                                   | `templates/admin/index.html`                                         |
-| GET         | `/admin/reservation`                 | 예약 관리 페이지         |                                                   | `templates/admin/reservation-new.html`                               |
-| GET         | `/admin/time`                        | 시간 관리 페이지         |                                                   | `templates/admin/time.html`                                          |
-| GET         | `/admin/theme`                       | 테마 관리 페이지         |                                                   | `templates/admin/theme.html`                                         |
-| GET         | `/reservation`                       | 사용자 예약 페이지        |                                                   | `templates/reservation.html`                                         |
-| GET         | `/reservations`                      | 예약 목록 조회          |                                                   | [List of ReservationsResponse](#List-of-ReservationResponse)         |
-| POST        | `/reservations`                      | 예약 추가             | [ReservationRequest](#ReservationRequest)         | [ReservationResponse](#ReservationResponse)                          |
-| DELETE      | `/reservations/{id}`                 | 예약 삭제             |                                                   | `HTTP/1.1 204`                                                       |
-| GET         | `/times`                             | 시간 목록 조회          |                                                   | [List of ReservationTimesResponse](#List-of-ReservationTimeResponse) |
-| GET         | `/times?date={date}&theme={themeId}` | 예약 가능 시간 목록 조회    |                                                   | [List of BookedTimeResponse](#List-of-BookedTimeResponse)            |
-| POST        | `/admin/times`                       | 시간 추가             | [ReservationTimeRequest](#ReservationTimeRequest) | [ReservationTimeResponse](#ReservationTimeResponse)                  |
-| DELETE      | `/admin/times/{id}`                  | 시간 삭제             |                                                   | `HTTP/1.1 204`                                                       |
-| GET         | `/themes`                            | 테마 목록 조회          |                                                   | [List of ThemeResponse](#List-of-ThemeResponse)                      |
-| GET         | `/themes/popular`                    | 주간 인기 테마 목록 조회    |                                                   | [List of ThemeResponse](#List-of-ThemeResponse)                      |
-| POST        | `/admin/themes`                      | 테마 추가             | [ThemeRequest](#ThemeRequest)                     | [ThemeResponse](#ThemeResponse)                                      |
-| DELETE      | `/admin/themes/{id}`                 | 테마 삭제             |                                                   | `HTTP/1.1 204`                                                       |
-| GET         | `/login`                             | 로그인 페이지           |                                                   | `templates/login.html`                                               |
-| POST        | `/login`                             | 로그인               | [TokenRequest](#TokenRequest)                     | `HTTP/1.1 200`                                                       |
-| GET         | `/login/check`                       | 로그인 확인            |                                                   | [MemberResponse](#MemberResponse)                                    |
-| GET         | `/signup`                            | 회원 가입 페이지         |                                                   | `templates/signup.html`                                              |
-| POST        | `/signup`                            | 회원 가입             | [MemberRequest](#MemberRequest)                   | [MemberResponse](#MemberResponse)                                    |
-| POST        | `/logout`                            | 로그아웃              |                                                   | `HTTP/1.1 200`                                                       |
-| GET         | `/members`                           | 회원 목록 조회          |                                                   | [List of MemberResponse](#List-of-MemberResponse)                    |
-| GET         | `/reservations/mine`                 | 로그인 회원의 예약 목록 조회  |                                                   | [List of MyReservationResponse](#List-of-MyReservationResponse)      |
-| GET         | `/reservations-mine`                 | 로그인 회원의 예약 목록 페이지 |                                                   | `templates/reservation-mine.html`                                    |
-
-| POST        | `/reservations/waiting`              | 예약 대기             | [MemberReservationRequest](#MemberReservationRequest)   | [ReservationResponse](#ReservationResponse)                          |
+| HTTP Method | URI                                  | Description       | Request                                               | Response                                                             |
+|-------------|--------------------------------------|-------------------|-------------------------------------------------------|----------------------------------------------------------------------|
+| GET         | `/`                                  | 주간 인기 테마 페이지      |                                                       | `templates/index.html`                                               |
+| GET         | `/admin`                             | 관리자 메인 페이지        |                                                       | `templates/admin/index.html`                                         |
+| GET         | `/admin/reservation`                 | 예약 관리 페이지         |                                                       | `templates/admin/reservation-new.html`                               |
+| GET         | `/admin/time`                        | 시간 관리 페이지         |                                                       | `templates/admin/time.html`                                          |
+| GET         | `/admin/theme`                       | 테마 관리 페이지         |                                                       | `templates/admin/theme.html`                                         |
+| GET         | `/reservation`                       | 사용자 예약 페이지        |                                                       | `templates/reservation.html`                                         |
+| GET         | `/reservations`                      | 예약 목록 조회          |                                                       | [List of ReservationsResponse](#List-of-ReservationResponse)         |
+| POST        | `/reservations`                      | 예약 추가             | [MemberReservationRequest](#MemberReservationRequest) | [ReservationResponse](#ReservationResponse)                          |
+| DELETE      | `/reservations/{id}`                 | 예약 삭제             |                                                       | `HTTP/1.1 204`                                                       |
+| GET         | `/times`                             | 시간 목록 조회          |                                                       | [List of ReservationTimesResponse](#List-of-ReservationTimeResponse) |
+| GET         | `/times?date={date}&theme={themeId}` | 예약 가능 시간 목록 조회    |                                                       | [List of BookedTimeResponse](#List-of-BookedTimeResponse)            |
+| POST        | `/admin/times`                       | 시간 추가             | [ReservationTimeRequest](#ReservationTimeRequest)     | [ReservationTimeResponse](#ReservationTimeResponse)                  |
+| DELETE      | `/admin/times/{id}`                  | 시간 삭제             |                                                       | `HTTP/1.1 204`                                                       |
+| GET         | `/themes`                            | 테마 목록 조회          |                                                       | [List of ThemeResponse](#List-of-ThemeResponse)                      |
+| GET         | `/themes/popular`                    | 주간 인기 테마 목록 조회    |                                                       | [List of ThemeResponse](#List-of-ThemeResponse)                      |
+| POST        | `/admin/themes`                      | 테마 추가             | [ThemeRequest](#ThemeRequest)                         | [ThemeResponse](#ThemeResponse)                                      |
+| DELETE      | `/admin/themes/{id}`                 | 테마 삭제             |                                                       | `HTTP/1.1 204`                                                       |
+| GET         | `/login`                             | 로그인 페이지           |                                                       | `templates/login.html`                                               |
+| POST        | `/login`                             | 로그인               | [TokenRequest](#TokenRequest)                         | `HTTP/1.1 200`                                                       |
+| GET         | `/login/check`                       | 로그인 확인            |                                                       | [MemberResponse](#MemberResponse)                                    |
+| GET         | `/signup`                            | 회원 가입 페이지         |                                                       | `templates/signup.html`                                              |
+| POST        | `/signup`                            | 회원 가입             | [MemberRequest](#MemberRequest)                       | [MemberResponse](#MemberResponse)                                    |
+| POST        | `/logout`                            | 로그아웃              |                                                       | `HTTP/1.1 200`                                                       |
+| GET         | `/members`                           | 회원 목록 조회          |                                                       | [List of MemberResponse](#List-of-MemberResponse)                    |
+| GET         | `/reservations/mine`                 | 로그인 회원의 예약 목록 조회  |                                                       | [List of MyReservationResponse](#List-of-MyReservationResponse)      |
+| GET         | `/reservations-mine`                 | 로그인 회원의 예약 목록 페이지 |                                                       | `templates/reservation-mine.html`                                    |
+| POST        | `/reservations/waiting`              | 예약 대기             | [MemberReservationRequest](#MemberReservationRequest) | [ReservationResponse](#ReservationResponse)                          |
+| GET         | `/reservations/waiting`              | 예약 대기 목록 조회       |                                                       | [ReservationResponse](#ReservationResponse)                          |
+| GET         | `/admin/waiting`                     | 예약 대기 관리 페이지      |                                                       | `templates/admin/waiting.html`                                       |
 ### ERD
 ![roomescape_waiting_erd](./roomescape_waiting_erd.png)
 
@@ -112,7 +113,6 @@
 ```
 HTTP/1.1 201 Created
 ```
-
 ```json
 {
   "id": 1,
