@@ -31,7 +31,6 @@ import roomescape.service.theme.dto.ThemeResponse;
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Sql("/truncate-with-guests.sql")
 class ThemeServiceTest {
-
     @Autowired
     private ThemeService themeService;
     @Autowired
