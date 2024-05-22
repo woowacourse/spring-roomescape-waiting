@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchBadRequestException(IllegalArgumentException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.warning(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(400)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
@@ -61,14 +61,14 @@ public class GlobalExceptionHandler {
             JwtException.class
     })
     public ResponseEntity<ProblemDetail> catchUnauthorizedException(Exception ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.warning(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(401)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage()));
     }
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchForbiddenException(ForbiddenException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.warning(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(403)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage()));
     }
@@ -78,14 +78,14 @@ public class GlobalExceptionHandler {
             NoSuchElementException.class
     })
     public ResponseEntity<ProblemDetail> catchNotFoundException(RuntimeException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.warning(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(404)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> catchConflictException(IllegalStateException ex) {
-        System.out.println(EXCEPTION_PREFIX + ex.getMessage());
+        logger.warning(EXCEPTION_PREFIX + ex.getMessage());
         return ResponseEntity.status(409)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage()));
     }
