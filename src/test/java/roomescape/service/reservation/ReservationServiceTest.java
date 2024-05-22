@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -56,7 +55,7 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         ReservationDate reservationDate = ReservationDate.of(LocalDate.now().plusDays(1));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10,0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         admin = memberRepository.save(new Member("admin", "admin@email.com", "admin123", Role.ADMIN));
@@ -241,7 +240,8 @@ class ReservationServiceTest {
         reservationService.deleteById(reservation.getId());
 
         //then
-        assertThat(reservation2.isReserved()).isTrue();
+        List<ReservationWithRank> reservations = reservationRepository.findWithRankingByMemberId(member.getId());
+        assertThat(reservations.get(0).getReservation().isReserved()).isTrue();
     }
 
     @DisplayName("관리자가 과거 예약을 삭제하려고 하면 예외가 발생한다.")

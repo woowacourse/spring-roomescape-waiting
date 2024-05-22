@@ -116,7 +116,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().body("status",is("1번째 예약 대기"));
+                            .assertThat().body("status",is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("모든 예약 대기 내역을 조회한다.", () -> {
                     RestAssured.given().log().all()
@@ -232,7 +232,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("1번째 예약 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
@@ -246,7 +246,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guest2Token)
                             .when().get("/members/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(200).body("[0].status", is("예약"));
+                            .assertThat().statusCode(200)
+                            .body("[0].reservationStatus.status", is("예약"))
+                            .body("[0].reservationStatus.rank", is(0));
                 }),
                 DynamicTest.dynamicTest("guest1이 다시 예약을 요청하면, 예약 대기로 생성된다.", () -> {
                     RestAssured.given().log().all()
@@ -255,7 +257,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("2번째 예약 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 })
         );
     }
@@ -280,7 +282,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("1번째 예약 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 })
         );
     }
@@ -330,7 +332,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("1번째 예약 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("admin이 guest1과 동일한 테마와 일정으로 예약을 요청하고, 2번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
@@ -339,7 +341,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("2번째 예약 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 취소한다.", () -> {
                     RestAssured.given().log().all()
@@ -353,7 +355,9 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guest2Token)
                             .when().get("/members/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(200).body("[0].status", is("예약"))
+                            .assertThat().statusCode(200)
+                            .body("[0].reservationStatus.status", is("예약"))
+                            .body("[0].reservationStatus.rank", is(0))
                             .extract().jsonPath().get("[0].reservationId");
                 }),
                 DynamicTest.dynamicTest("guest2가 예약 대기를 삭제하려고 하면, 이미 예약으로 전환되어서 예외가 발생한다", () -> {
@@ -386,7 +390,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .body(new ReservationRequest(date, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("1번째 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("guest2가 동일한 테마와 일정으로 다시 예약을 요청하면 예외가 발생한다.", () -> {
                     RestAssured.given().log().all()

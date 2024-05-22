@@ -24,7 +24,6 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
     private final ReservationDetailRepository reservationDetailRepository;
 
-    @Autowired
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
                                   ReservationRepository reservationRepository, ReservationDetailRepository reservationDetailRepository) {
         this.reservationTimeRepository = reservationTimeRepository;

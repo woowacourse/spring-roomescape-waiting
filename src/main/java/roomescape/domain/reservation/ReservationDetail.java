@@ -1,12 +1,14 @@
 package roomescape.domain.reservation;
 
 import jakarta.persistence.*;
+import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity
 public class ReservationDetail {
@@ -27,6 +29,18 @@ public class ReservationDetail {
     public ReservationDetail(Schedule schedule, Theme theme) {
         this.schedule = schedule;
         this.theme = theme;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReservationDetail other)) return false;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public Long getId() {

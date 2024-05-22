@@ -5,9 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.schedule.ReservationDate;
 
-import javax.swing.text.html.Option;
-import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findBy(@Param("memberId") Long memberId, @Param("themeId") Long themeId,
                              @Param("dateFrom") ReservationDate dateFrom, @Param("dateTo") ReservationDate dateTo);
 
-    List<Reservation> findByMemberId(long memberId);
-
     boolean existsByDetailIdAndMemberId(Long reservationDetailId, Long memberId);
 
     boolean existsByDetailIdAndStatus(Long reservationDetailId, ReservationStatus status);
@@ -34,4 +29,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findFirstByDetailIdOrderByCreatedAt(long detailId);
 
     List<Reservation> findAllByStatus(ReservationStatus status);
+
+    @Query("""
+            select new roomescape.domain.reservation.ReservationWithRank(r,
+            (select count(*) from Reservation as cr
+            where cr.detail.id = r.detail.id and cr.createdAt < r.createdAt))
+            from Reservation r
+            where r.member.id = :memberId
+            """)
+    List<ReservationWithRank> findWithRankingByMemberId(@Param("memberId") long memberId);
 }

@@ -98,15 +98,16 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(long id) {
-        reservationRepository.findById(id).ifPresent(reservation -> {
-            validateScheduleIfReserved(reservation);
-            reservationRepository.deleteById(id);
-            updateReservation(reservation.getDetail().getId());
-        });
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> {
+                    validateScheduleIfReserved(reservation);
+                    reservationRepository.deleteById(id);
+                    updateReservation(reservation.getDetail().getId());
+                });
     }
 
     private void validateScheduleIfReserved(Reservation reservation) {
-        if(reservation.isReserved() && reservation.isPast()){
+        if (reservation.isReserved() && reservation.isPast()) {
             throw new InvalidReservationException("이미 지난 예약은 삭제할 수 없습니다.");
         }
     }
@@ -127,7 +128,7 @@ public class ReservationService {
     }
 
     private void validateStatus(Reservation reservation) {
-        if(reservation.getMember().isGuest() && reservation.isReserved()){
+        if (reservation.getMember().isGuest() && reservation.isReserved()) {
             throw new InvalidReservationException("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요.");
         }
     }

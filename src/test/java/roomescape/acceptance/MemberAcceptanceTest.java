@@ -74,6 +74,7 @@ class MemberAcceptanceTest extends AcceptanceTest {
     @DisplayName("본인의 모든 예약과 예약 대기를 조회한다.")
     @TestFactory
     Stream<DynamicTest> showAllOwnReservationsAndWaitings() {
+        LocalDate anotherDate = LocalDate.now().plusWeeks(3);
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 새로운 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
@@ -94,27 +95,73 @@ class MemberAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("guest2가 새로운 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .cookie("token", guest1Token)
-                            .body(new ReservationRequest(LocalDate.MAX, timeId, themeId))
+                            .cookie("token", guest2Token)
+                            .body(new ReservationRequest(anotherDate, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201);
+                            .assertThat().statusCode(201).body("status", is("예약"));
                 }),
                 DynamicTest.dynamicTest("guest1이 guest2와 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
-                            .cookie("token", guest2Token)
-                            .body(new ReservationRequest(LocalDate.MAX, timeId, themeId))
+                            .cookie("token", guest1Token)
+                            .body(new ReservationRequest(anotherDate, timeId, themeId))
                             .when().post("/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(201).body("status", is("1번째 대기"));
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
                 }),
                 DynamicTest.dynamicTest("guest1이 본인의 예약 내역을 조회하면 2개 내역이 조회된다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", guest1Token)
                             .when().get("/members/reservations")
                             .then().log().all()
-                            .assertThat().statusCode(200).body("size()", is(2));
+                            .assertThat().statusCode(200).body("size()", is(2))
+                            .body("[0].reservationStatus.status", is("예약"))
+                            .body("[0].reservationStatus.rank", is(0))
+                            .body("[1].reservationStatus.status", is("예약대기"))
+                            .body("[1].reservationStatus.rank", is(1));
+                })
+        );
+    }
+
+    @DisplayName("예약이 취소되면 바로 다음 예약 대기가 예약으로 전환되며, 전환 후 예약 대기를 취소하려고 하면 예외가 발생한다.")
+    @TestFactory
+    Stream<DynamicTest> changeToReserved() {
+        return Stream.of(
+                DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", guest1Token)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().extract().body().jsonPath().get("id");
+                }),
+                DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", guest2Token)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
+                }),
+                DynamicTest.dynamicTest("admin이 guest1과 동일한 테마와 일정으로 예약을 요청하고, 2번째 예약 대기 상태로 생성된다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookie("token", adminToken)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(201).body("status", is("예약대기"));
+                }),
+                DynamicTest.dynamicTest("어드민이 본인의 예약 내역을 조회하면 2번째 예약 대기로 조회된다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guest1Token)
+                            .when().get("/members/reservations")
+                            .then().log().all()
+                            .assertThat().statusCode(200)
+                            .body("[0].reservationStatus.status", is("예약"))
+                            .body("[0].reservationStatus.rank", is(0));
                 })
         );
     }

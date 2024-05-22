@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithRank;
 import roomescape.exception.InvalidMemberException;
 import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.member.dto.MemberResponse;
@@ -34,7 +36,8 @@ public class MemberService {
     }
 
     public List<MemberReservationResponse> findReservations(long memberId) {
-        return reservationRepository.findByMemberId(memberId).stream()
+        List<ReservationWithRank> reservationWithRanks = reservationRepository.findWithRankingByMemberId(memberId);
+        return reservationWithRanks.stream()
                 .map(MemberReservationResponse::from)
                 .toList();
     }
