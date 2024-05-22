@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.MemberReservationRequest;
 import roomescape.controller.helper.AuthenticationPrincipal;
 import roomescape.controller.helper.LoginMember;
-import roomescape.repository.dto.ReservationRankStatusResponse;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
@@ -28,7 +28,7 @@ public class ReservationRestController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationRankStatusResponse> findReservations(@AuthenticationPrincipal LoginMember loginMember) {
+    public List<ReservationRankResponse> findReservations(@AuthenticationPrincipal LoginMember loginMember) {
         return reservationService.findReservationsByMemberEmail(loginMember.getEmail());
     }
 

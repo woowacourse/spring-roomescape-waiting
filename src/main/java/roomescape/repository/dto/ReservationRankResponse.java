@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.ReservationStatus;
 
-public class ReservationRankStatusResponse {
+public class ReservationRankResponse {
 
     private final long reservationId;
     private final String theme;
@@ -13,12 +13,12 @@ public class ReservationRankStatusResponse {
     private final String status;
     private final long waitingRank;
 
-    public ReservationRankStatusResponse(long reservationId,
-                                         String theme,
-                                         LocalDate date,
-                                         LocalTime time,
-                                         ReservationStatus status,
-                                         long waitingRank) {
+    public ReservationRankResponse(long reservationId,
+                                   String theme,
+                                   LocalDate date,
+                                   LocalTime time,
+                                   ReservationStatus status,
+                                   long waitingRank) {
         this.reservationId = reservationId;
         this.theme = theme;
         this.date = date;

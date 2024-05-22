@@ -22,7 +22,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.ReservationRankStatusResponse;
+import roomescape.repository.dto.ReservationRankResponse;
 import roomescape.repository.dto.WaitingReservationResponse;
 import roomescape.service.dto.reservation.ReservationCreate;
 import roomescape.service.dto.reservation.ReservationResponse;
@@ -63,7 +63,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationRankStatusResponse> findReservationsByMemberEmail(String email) {
+    public List<ReservationRankResponse> findReservationsByMemberEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         return reservationRepository.findReservationRankByMember(member);
     }
