@@ -241,7 +241,7 @@ host: localhost:8080
 
 ```
 HTTP/1.1 201
-Location: /reservation/{id}
+Location: /reservations/{id}
 ```
 </details>
 
@@ -272,7 +272,7 @@ host: localhost:8080
 
 ```
 HTTP/1.1 201
-Location: /reservation/{id}
+Location: /reservations/{id}
 ```
 </details>
 
@@ -287,6 +287,168 @@ Location: /reservation/{id}
 
 ```http request
 DELETE /reservations/{id} HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 204
+```
+
+---
+</details>
+
+
+## 예약 대기
+
+<details>
+<summary> 예약 대기 목록 조회 API </summary>
+
+### 예약 대기 목록 조회
+
+#### Request
+
+```http request
+GET /waitings HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "time": {
+            "id": 1,
+            "startAt": "10:00"
+        },
+        "theme": {
+            "id": 1,
+            "name": "레벨2 탈출",
+            "description": "우테코 레벨2를 탈출하는 내용입니다.",
+            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+        }
+    }
+]
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 대기 검색 API </summary>
+
+### 예약 대기 검색
+
+#### Request
+
+```http request
+GET /waitings/search?themeId=themeId&memberId=memberId&dateFrom=dateFrom&dateTo=dateTo HTTP/1.1
+```
+
+#### Response
+
+```
+HTTP/1.1 200 
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "name": "브라운",
+        "date": "2023-01-01",
+        "time": {
+            "id": 1,
+            "startAt": "10:00"
+        },
+        "theme": {
+            "id": 1,
+            "name": "레벨2 탈출",
+            "description": "우테코 레벨2를 탈출하는 내용입니다.",
+            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+        }
+    }
+]
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 대기 추가 - 사용자 API </summary>
+
+### 예약 대기 추가 - 사용자
+
+#### Request
+
+```http request
+POST /waitings HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+host: localhost:8080
+
+{
+    "date": "2023-08-05",
+    "timeId": 1,
+    "themeId": 1
+}
+```
+
+#### Response
+
+```
+HTTP/1.1 201
+Location: /waitings/{id}
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 대기 추가 - 관리자 API </summary>
+
+### 예약 대기 추가 - 관리자
+
+#### Request
+
+```http request
+POST /admin/waitings HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+host: localhost:8080
+
+{
+    "date": "2024-03-01",
+    "themeId": 1,
+    "timeId": 1,
+    "memberId": 1
+}
+```
+
+#### Response
+
+```
+HTTP/1.1 201
+Location: /waitings/{id}
+```
+</details>
+
+<br>
+
+<details>
+<summary> 예약 대기 취소 API </summary>
+
+### 예약 대기 취소
+
+#### Request
+
+```http request
+DELETE /waitings/{id} HTTP/1.1
 ```
 
 #### Response
