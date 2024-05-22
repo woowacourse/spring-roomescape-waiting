@@ -16,7 +16,7 @@ public record UserReservationResponse(
     public static UserReservationResponse from(Reservation reservation) {
         return new UserReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
+                reservation.getTheme().getThemeName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 "예약"

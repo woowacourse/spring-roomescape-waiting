@@ -35,7 +35,7 @@ class ThemeApiTest {
                 .statusCode(201)
                 .header("Location", "/themes/1")
                 .body("id", equalTo(1))
-                .body("name", equalTo(themeRequest.name()))
+                .body("themeName", equalTo(themeRequest.name()))
                 .body("description", equalTo(themeRequest.description()))
                 .body("thumbnail", equalTo(themeRequest.thumbnail()));
     }
@@ -53,7 +53,7 @@ class ThemeApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("id", equalTo(1))
-                .body("name", equalTo(themeRequest.name()))
+                .body("themeName", equalTo(themeRequest.name()))
                 .body("description", equalTo(themeRequest.description()))
                 .body("thumbnail", equalTo(themeRequest.thumbnail()));
     }

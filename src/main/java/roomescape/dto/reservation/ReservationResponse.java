@@ -42,7 +42,7 @@ public record ReservationResponse(
     private static ThemeResponse getThemeResponse(Theme theme) {
         return new ThemeResponse(
                 theme.getId(),
-                theme.getName(),
+                theme.getThemeName(),
                 theme.getDescription(),
                 theme.getThumbnail()
         );

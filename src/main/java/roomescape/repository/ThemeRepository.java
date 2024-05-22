@@ -6,5 +6,5 @@ import roomescape.domain.theme.ThemeName;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
-    boolean existsByName(ThemeName name);
+    boolean existsByThemeName(ThemeName name);
 }

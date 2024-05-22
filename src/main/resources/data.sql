@@ -1,4 +1,4 @@
-INSERT INTO theme (name, description, thumbnail) VALUES
+INSERT INTO theme (theme_name, description, thumbnail) VALUES
 ('블라인드', '아무것도 보이지 않는... 알 수 없는 장소로 잡혀온 당신, 희미한 빛사이로 들려오는 의문의 목소리를 따라 탈출하라!', 'https://postfiles.pstatic.net/MjAxOTA4MDJfMjQw/MDAxNTY0NzE0NTc5NzEz.HWRHs7Fs4z7RLwdMUzzwFE8OZ9NdycC9qAf2JruXJGQg.vhTopk-OUFx-WPPabFsqoolo8EqVBbg3Lq6xe14XIaQg.JPEG.qhfk1017/Pr_1532174669.jpg?type=w773'),
 ('거울의방', '친구들과 함께 등산을 하던 중 갑자기 내려진 폭우! 날씨는 어두워지고 멀리서 보이는 한줄기 빛! 그 빛줄기를 따라가니 작은 폐허가 한채 있다.​"그래 여기서 비를 피하자" "그런데 이 음산한 분위기는 뭐지?" 사방이 거울로 둘러싸인 이 곳에서 당신은 살아남을 수 있는가?', 'https://postfiles.pstatic.net/MjAxOTA4MDJfOTcg/MDAxNTY0NzE0NzIzMDYw.PmpjXxlTdLIfWbyrLfmIfziX4_QL7Scc92HMHSSoLrsg.Kk1qZ-frkdSv45CrvrZ5MSMOOfuD3QWgnMNo5GCa0bgg.JPEG.qhfk1017/thumb-14_6rGw7Jq47J2Y67Cp_500x707.jpg?type=w773'),
 ('B아파트13동1313호', '이야기가 끝나는 순간,공포가 현실이 된다.', 'https://postfiles.pstatic.net/MjAxOTA4MDJfMTA5/MDAxNTY0NzIyODgzMjAw.KanumeUHN9U3uyZYC8Zc4vLYEpSXuKXuGPcujpSEay4g.n9ZFxXE3w03lTub9q3Oon0J8rG3FwW0xYp3NYZ274IEg.PNG.qhfk1017/room_apt.png?type=w773'),

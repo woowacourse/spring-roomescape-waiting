@@ -65,7 +65,7 @@ public class ThemeService {
     }
 
     public void validateNameDuplicate(ThemeName name) {
-        if (themeRepository.existsByName(name)) {
+        if (themeRepository.existsByThemeName(name)) {
             throw new IllegalArgumentException(
                     "[ERROR] 동일한 이름의 테마가 존재해 등록할 수 없습니다.",
                     new Throwable("theme_name : " + name)

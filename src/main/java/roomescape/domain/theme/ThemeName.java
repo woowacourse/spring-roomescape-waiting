@@ -5,18 +5,18 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class ThemeName {
 
-    private String name;
+    private String themeName;
 
     protected ThemeName() {
     }
 
-    public ThemeName(String name) {
-        validateName(name);
-        this.name = name;
+    public ThemeName(String themeName) {
+        validateName(themeName);
+        this.themeName = themeName;
     }
 
-    public String getName() {
-        return name;
+    public String getThemeName() {
+        return themeName;
     }
 
     private void validateName(String name) {

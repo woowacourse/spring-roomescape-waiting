@@ -14,7 +14,7 @@ public class Theme {
     private Long id;
 
     @Embedded
-    private ThemeName name;
+    private ThemeName themeName;
 
     @Embedded
     private Description description;
@@ -25,13 +25,13 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(String name, String description, String thumbnail) {
-        this(null, name, description, thumbnail);
+    public Theme(String themeName, String description, String thumbnail) {
+        this(null, themeName, description, thumbnail);
     }
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    public Theme(Long id, String themeName, String description, String thumbnail) {
         this.id = id;
-        this.name = new ThemeName(name);
+        this.themeName = new ThemeName(themeName);
         this.description = new Description(description);
         this.thumbnail = new Thumbnail(thumbnail);
     }
@@ -40,8 +40,8 @@ public class Theme {
         return id;
     }
 
-    public String getName() {
-        return name.getName();
+    public String getThemeName() {
+        return themeName.getThemeName();
     }
 
     public String getDescription() {

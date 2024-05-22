@@ -4,7 +4,7 @@ import roomescape.domain.theme.Theme;
 
 public record ThemeResponse(
         Long id,
-        String name,
+        String themeName,
         String description,
         String thumbnail
 ) {
@@ -12,7 +12,7 @@ public record ThemeResponse(
     public static ThemeResponse from(Theme theme) {
         return new ThemeResponse(
                 theme.getId(),
-                theme.getName(),
+                theme.getThemeName(),
                 theme.getDescription(),
                 theme.getThumbnail()
         );

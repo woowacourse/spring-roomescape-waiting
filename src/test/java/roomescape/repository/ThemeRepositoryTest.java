@@ -23,7 +23,7 @@ class ThemeRepositoryTest {
         Theme saveedTheme = themeRepository.save(new Theme("테마명", "테마설명테마설명테마설명", "썸네일이미지"));
 
         //when
-        boolean result = themeRepository.existsByName(new ThemeName(saveedTheme.getName()));
+        boolean result = themeRepository.existsByThemeName(new ThemeName(saveedTheme.getThemeName()));
 
         //then
         assertThat(result).isTrue();
