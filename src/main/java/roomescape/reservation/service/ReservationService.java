@@ -44,6 +44,12 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    public ReservationResponse findReservation(Long id) {
+        return reservationRepository.findById(id)
+                .map(ReservationResponse::from)
+                .orElseThrow(() -> new BadArgumentRequestException("해당 예약을 찾을 수 없습니다."));
+    }
+
     public List<ReservationResponse> findReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -114,6 +120,16 @@ public class ReservationService {
         return ReservationResponse.from(createdReservation);
     }
 
+    private void validateIsAfterFromNow(Reservation reservation) {
+        if (reservation.isBefore(LocalDateTime.now())) {
+            throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
+        }
+    }
+
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
+    }
+
     private Member findMemberByMemberId(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new BadArgumentRequestException("해당 멤버가 존재하지 않습니다."));
@@ -127,32 +143,5 @@ public class ReservationService {
     private Theme findThemeByThemeId(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new BadArgumentRequestException("해당 테마가 존재하지 않습니다."));
-    }
-
-    @Transactional
-    public void deleteReservation(Long reservationId) {
-        Reservation reservation = findReservationById(reservationId);
-        validateIsAfterFromNow(reservation);
-        Optional<Waiting> highPriorityWaiting
-                = waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(reservationId);
-
-        if (highPriorityWaiting.isEmpty()) {
-            reservationRepository.deleteById(reservationId);
-            return;
-        }
-        Waiting waiting = highPriorityWaiting.get();
-        waiting.confirmReservation();
-        waitingRepository.delete(waiting);
-    }
-
-    private Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new BadArgumentRequestException("해당 예약이 존재하지 않습니다."));
-    }
-
-    private void validateIsAfterFromNow(Reservation reservation) {
-        if (reservation.isBefore(LocalDateTime.now())) {
-            throw new BadArgumentRequestException("예약은 현재 시간 이후여야 합니다.");
-        }
     }
 }

@@ -16,15 +16,18 @@ import roomescape.auth.dto.LoggedInMember;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.service.ReservationDeleteUsecase;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService service;
+    private final ReservationDeleteUsecase deleteUsecase;
 
-    public ReservationController(ReservationService service) {
+    public ReservationController(ReservationService service, ReservationDeleteUsecase deleteUsecase) {
         this.service = service;
+        this.deleteUsecase = deleteUsecase;
     }
 
     @GetMapping
@@ -51,6 +54,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable Long id) {
-        service.deleteReservation(id);
+        deleteUsecase.deleteReservation(id);
     }
 }

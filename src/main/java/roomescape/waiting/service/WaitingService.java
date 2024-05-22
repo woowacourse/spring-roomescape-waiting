@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
@@ -32,6 +33,16 @@ public class WaitingService {
                 .stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    public Optional<WaitingResponse> findHighPriorityWaiting(Long reservationId) {
+        return waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(reservationId)
+                .map(WaitingResponse::from);
+    }
+
+    private Waiting findWaiting(Long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new BadArgumentRequestException("해당 예약 대기가 존재하지 않습니다."));
     }
 
     public WaitingResponse createWaiting(WaitingRequest request, Long requestMemberId) {
@@ -69,6 +80,11 @@ public class WaitingService {
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
     }
 
+    public void confirmReservation(Long waitingId) {
+        Waiting waiting = findWaiting(waitingId);
+        waiting.confirmReservation();
+    }
+
     public void deleteWaiting(Long id) {
         waitingRepository.deleteById(id);
     }
@@ -78,11 +94,6 @@ public class WaitingService {
 
         validateIsOwner(waiting, requestMemberId);
         waitingRepository.delete(waiting);
-    }
-
-    private Waiting findWaiting(Long waitingId) {
-        return waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new BadArgumentRequestException("해당 예약 대기가 존재하지 않습니다."));
     }
 
     private void validateIsOwner(Waiting waiting, Long requestMemberId) {
