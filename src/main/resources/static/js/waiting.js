@@ -23,17 +23,19 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = item.waitingNumber;
+        const id = item.id;
+        const waitingNumber = item.waitingNumber;
         const name = item.memberName;
         const theme = item.themeName;
         const date = item.reservationDate;
         const startAt = item.reservationTime;
 
-        row.insertCell(0).textContent = id;            // 예약 대기 id
-        row.insertCell(1).textContent = name;          // 예약자명
-        row.insertCell(2).textContent = theme;         // 테마명
-        row.insertCell(3).textContent = date;          // 예약 날짜
-        row.insertCell(4).textContent = startAt;       // 시작 시간
+        row.insertCell(0).textContent = id             // 예약 아이디
+        row.insertCell(1).textContent = waitingNumber;            // 예약 대기 번호
+        row.insertCell(2).textContent = name;          // 예약자명
+        row.insertCell(3).textContent = theme;         // 테마명
+        row.insertCell(4).textContent = date;          // 예약 날짜
+        row.insertCell(5).textContent = startAt;       // 시작 시간
 
         const actionCell = row.insertCell(row.cells.length);
 
@@ -71,11 +73,11 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = '/admin/reservations/waitings/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }

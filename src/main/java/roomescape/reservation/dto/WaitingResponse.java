@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
 public record WaitingResponse(
+
+        Long id,
         int waitingNumber,
         String memberName,
         String themeName,
@@ -13,6 +15,7 @@ public record WaitingResponse(
 ) {
     public WaitingResponse(Reservation reservation) {
         this(
+                reservation.getId(),
                 reservation.getWaitingNumber(),
                 reservation.getMemberName(),
                 reservation.getThemeName(),
