@@ -14,6 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -54,6 +55,19 @@ public class Reservation {
         if (date == null || reservationTime == null || theme == null || member == null) {
             throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "예약(Reservation) 생성에 null이 입력되었습니다.");
         }
+    }
+
+    public boolean isPastThen(final LocalDateTime now) {
+        LocalDate today = now.toLocalDate();
+        LocalTime nowTime = now.toLocalTime();
+
+        if (this.date.isBefore(today)) {
+            return true;
+        }
+        if (this.date.isEqual(today) && reservationTime.isBefore(nowTime)) {
+            return true;
+        }
+        return false;
     }
 
     public Long getId() {

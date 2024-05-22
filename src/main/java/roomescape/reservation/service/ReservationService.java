@@ -183,58 +183,49 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateCanReserve(final ReservationRequest request, final long order) {
-        if (request.status().isReserved() && order > 0) {
-            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "이미 요청하신 날짜/테마/시간 에 예약 정보가 존재하여 예약할 수 없습니다. '예약 대기'로 요청해주세요.");
-        }
-    }
-
-    private void validateDuplication(final ReservationRequest request, final ReservationTime requestTime, final Theme theme, final Member member) {
-        if (request.status() == ReservationStatus.RESERVED) {
-            validateReservationDuplicate(request.date(), requestTime, theme);
-        } else if (request.status() == ReservationStatus.WAITING) {
-            validateMemberReservationDuplicate(member, request.date(), requestTime, theme);
-        }
-    }
-
-    private void validateDateAndTime(final LocalDate requestDate, final ReservationTime requestReservationTime, final LocalDateTime now) {
-        if (isReservationInPast(requestDate, requestReservationTime, now)) {
+    private void validateDateAndTime(final Reservation reservation, final LocalDateTime now) {
+        if (reservation.isPastThen(now)) {
             throw new ValidateException(ErrorType.RESERVATION_PERIOD_IN_PAST,
                     String.format("지난 날짜나 시간은 예약이 불가능합니다. [now: %s %s | request: %s %s]",
-                            now.toLocalDate(), now.toLocalTime(), requestDate, requestReservationTime.getStartAt()));
+                            now.toLocalDate(), now.toLocalTime(), reservation.getDate(), reservation.getStartAt()));
         }
     }
 
-    private boolean isReservationInPast(final LocalDate requestDate, final ReservationTime requestReservationTime, final LocalDateTime now) {
-        LocalDate today = now.toLocalDate();
-        LocalTime nowTime = now.toLocalTime();
-
-        if (requestDate.isBefore(today)) {
-            return true;
+    private void validateDuplication(final Reservation requestReservation, final ReservationStatus requestStatus) {
+        if (requestStatus.isReserved()) {
+            validateReservationDuplicate(requestReservation);
+        } else if (requestStatus.isWaiting()) {
+            validateMemberReservationDuplicate(requestReservation);
         }
-        if (requestDate.isEqual(today) && requestReservationTime.isBefore(nowTime)) {
-            return true;
-        }
-        return false;
     }
 
-    private void validateReservationDuplicate(final LocalDate requestDate, final ReservationTime time, final Theme theme) {
+    private void validateCanReserve(final Reservation requestReservation, final ReservationStatus requestReserveStatus, final long canReserveOrder) {
+        if (requestReserveStatus.isReserved() && canReserveOrder > 0) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
+                    String.format("이미 요청하신 날짜/테마/시간 에 예약 정보가 존재하여 예약할 수 없습니다. '예약 대기'로 요청해주세요. [values: %s/%s/%s]",
+                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
+        }
+    }
+
+    private void validateReservationDuplicate(final Reservation requestReservation) {
         Optional<Reservation> reservation = reservationRepository.findByReservationTimeAndDateAndTheme(
-                time, requestDate, theme);
+                requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme());
 
         if (reservation.isPresent()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_WAITING_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s/%s/%s]", requestDate, time, theme));
+                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s/%s/%s]",
+                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
         }
     }
 
-    private void validateMemberReservationDuplicate(final Member member, final LocalDate requestDate, final ReservationTime time, final Theme theme) {
+    private void validateMemberReservationDuplicate(final Reservation requestReservation) {
         Optional<MemberReservation> memberReservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(
-                member, time, requestDate, theme);
+                requestReservation.getMember(), requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme());
 
         if (memberReservation.isPresent()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약 또는 예약대기 중 입니다. [values: %s/%s/%s]", requestDate, time, theme));
+                    String.format("이미 해당 날짜/시간/테마에 예약 또는 예약대기 중 입니다. [values: %s/%s/%s]",
+                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
         }
     }
 
