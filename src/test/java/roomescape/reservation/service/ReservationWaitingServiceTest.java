@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.reservation.dto.ReservationWaitingDto;
+import roomescape.reservation.dto.ReservationWaitingWithOrderDto;
 import roomescape.reservation.dto.SaveReservationWaitingRequest;
 
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ class ReservationWaitingServiceTest {
         final Long memberId = 1L;
 
         // When
-        final List<ReservationWaitingDto> myReservationWaiting = reservationWaitingService.getMyReservationWaiting(memberId);
+        final List<ReservationWaitingWithOrderDto> myReservationWaiting = reservationWaitingService.getMyReservationWaiting(memberId);
 
         // Then
         assertAll(

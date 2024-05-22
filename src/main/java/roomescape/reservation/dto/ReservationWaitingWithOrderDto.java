@@ -4,7 +4,7 @@ import roomescape.member.dto.MemberDto;
 import roomescape.reservation.model.ReservationDate;
 import roomescape.reservation.model.ReservationWaiting;
 
-public record ReservationWaitingDto(
+public record ReservationWaitingWithOrderDto(
         Long id,
         int order,
         ReservationDate date,
@@ -12,8 +12,8 @@ public record ReservationWaitingDto(
         ThemeDto theme,
         MemberDto member
 ) {
-    public static ReservationWaitingDto from(ReservationWaiting reservationWaiting, int order) {
-        return new ReservationWaitingDto(
+    public static ReservationWaitingWithOrderDto from(ReservationWaiting reservationWaiting, int order) {
+        return new ReservationWaitingWithOrderDto(
                 reservationWaiting.getId(),
                 order,
                 reservationWaiting.getDate(),

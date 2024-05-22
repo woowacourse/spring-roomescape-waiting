@@ -10,7 +10,7 @@ public record MyReservationWaitingResponse(
         LocalTime time,
         int order
 ) {
-    public static MyReservationWaitingResponse from(final ReservationWaitingDto reservationWaiting) {
+    public static MyReservationWaitingResponse from(final ReservationWaitingWithOrderDto reservationWaiting) {
         return new MyReservationWaitingResponse(
                 reservationWaiting.id(),
                 reservationWaiting.theme().name().getValue(),
