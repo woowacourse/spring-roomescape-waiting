@@ -84,7 +84,7 @@ public class ReservationCreateService {
     }
 
     private void validateDuplicated(MemberReservation memberReservation) {
-        if (memberReservation.isWaitingNotStatus()) {
+        if (memberReservation.isNotWaitingStatus()) {
             validateNotWaitingReservation(memberReservation);
             return;
         }

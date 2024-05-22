@@ -63,12 +63,12 @@ public class MemberReservation {
     }
 
     public void validateWaitingReservation() {
-        if (isWaitingNotStatus()) {
+        if (isNotWaitingStatus()) {
             throw new BadRequestException("해당 예약은 대기 상태가 아닙니다.");
         }
     }
 
-    public boolean isWaitingNotStatus() {
+    public boolean isNotWaitingStatus() {
         return status.isNotWaiting();
     }
 
