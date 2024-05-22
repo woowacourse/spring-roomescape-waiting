@@ -69,6 +69,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("createdAt", "2024-01-01 12:00:00");
 
         // when
         String name = RestAssured.given().log().all()
@@ -156,6 +157,7 @@ class MemberReservationControllerTest {
         reservation.put("date", LocalDate.MAX);
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("createdAt", "2024-01-01 12:00:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

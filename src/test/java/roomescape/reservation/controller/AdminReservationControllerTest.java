@@ -82,6 +82,7 @@ class AdminReservationControllerTest {
         reservation.put("date", LocalDate.MAX.toString());
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+        reservation.put("createdAt", "2024-01-01 12:00:00");
 
         RestAssured.given()
                 .contentType(ContentType.JSON)

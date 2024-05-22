@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS reservation
     time_id   BIGINT,
     theme_id  BIGINT,
     status VARCHAR(255) NOT NULL DEFAULT 'CONFIRMATION',
+    created_at datetime NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
@@ -57,16 +58,16 @@ INSERT INTO reservation_time (start_at) VALUES ('14:00:00');
 INSERT INTO theme (name, description, thumbnail) VALUES ( '공포', '완전 무서운 테마', 'https://example.org' );
 INSERT INTO theme (name, description, thumbnail) VALUES ( '힐링', '완전 힐링되는 테마', 'https://example.org' );
 INSERT INTO theme (name, description, thumbnail) VALUES ( '힐링2', '완전 힐링되는 테마2', 'https://example.org' );
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 2, '2099-12-31', 1, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 1, '2099-12-31', 1, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 2, '2099-12-31', 1, 1, '2024-05-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 1, '2099-12-31', 1, 2, '2024-05-01 12:00:00');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 1, '2024-12-01', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 3, '2024-12-02', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 4, '2024-12-02', 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 5, '2024-12-03', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 6, '2024-12-04', 1, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 1, '2024-12-01', 1, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 3, '2024-12-02', 1, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 4, '2024-12-02', 2, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 5, '2024-12-03', 1, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 6, '2024-12-04', 1, 2, '2000-01-01 12:00:00');
 
 // 인기 테마 검증용
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 4, FORMATDATETIME(DATEADD('DAY', -3, NOW()), 'yyyy-MM-dd'), 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 5, FORMATDATETIME(DATEADD('DAY', -4, NOW()), 'yyyy-MM-dd'), 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES ( 6, FORMATDATETIME(DATEADD('DAY', -5, NOW()), 'yyyy-MM-dd'), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 4, FORMATDATETIME(DATEADD('DAY', -3, NOW()), 'yyyy-MM-dd'), 2, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 5, FORMATDATETIME(DATEADD('DAY', -4, NOW()), 'yyyy-MM-dd'), 1, 2, '2000-01-01 12:00:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, created_at) VALUES ( 6, FORMATDATETIME(DATEADD('DAY', -5, NOW()), 'yyyy-MM-dd'), 1, 1, '2000-01-01 12:00:00');
