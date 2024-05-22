@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -41,7 +42,8 @@ class ReservationRepositoryTest {
                 new Member("poke@test.com", new Password("password", "salt"), "poke", Role.USER),
                 LocalDate.parse("2099-01-11"),
                 new ReservationTime(1L, LocalTime.parse("10:00")),
-                new Theme(1L, "name", "description", "thumbnail"));
+                new Theme(1L, "name", "description", "thumbnail"),
+                ReservationStatus.RESERVED);
         //when
         final Reservation savedReservation = reservationRepository.save(expected);
         //then
@@ -60,9 +62,17 @@ class ReservationRepositoryTest {
         assertThat(afterSize).isEqualTo(initialSize - 1);
     }
 
+    @DisplayName("예약 날짜, 시간Id, 테마Id, 사용자Id 를 통해 중복 예약이 있는지 확인할 수 있다.")
+    @Test
+    void given_dateAndTimeIdAndThemeIdAndMemberId_when_isExist_then_getExistResult() {
+        //given, when, then
+        assertThat(reservationRepository
+                .existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate.parse("2024-05-01"), 3L, 2L, 1L)).isTrue();
+    }
+
     @DisplayName("예약 날짜, 시간Id, 테마Id를 통해 예약여부를 확인할 수 있다.")
     @Test
-    void given_when_isExist_then_getExistResult() {
+    void given_dateAndTimeIdAndThemeId_when_isExist_then_getExistResult() {
         //given, when, then
         assertThat(reservationRepository
                 .existsByDateAndTimeIdAndThemeId(LocalDate.parse("2024-05-01"), 3L, 2L)).isTrue();

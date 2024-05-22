@@ -2,8 +2,6 @@ package roomescape.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.AuthorizationExtractor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -50,7 +51,7 @@ class ClientReservationTest {
 
     @DisplayName("사용자 예약이 정상적으로 성공한다.")
     @Test
-    void given_reservationRequest_when_create_statusCodeIsOk() {
+    void given_reservationRequest_when_create_statusCodeIsCreated() {
         //given
         Map<String, String> params = new HashMap<>();
         params.put("date", "2099-01-01");
@@ -74,5 +75,71 @@ class ClientReservationTest {
                 .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @DisplayName("사용자 예약 등록 시 부적절한 값이 들어올 경우 400오류를 반환한다.")
+    @Test
+    void given_memberToken_when_createWithInvalidParam_then_statusCodeIsBadRequest() {
+        //given
+        Map<String, String> params = new HashMap<>();
+        params.put("date", "2099-01-01");
+        params.put("themeId", "1");
+        params.put("timeId", "-2");
+        //when, then
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("사용자 예약 등록 시 과거의 시간이 들어올 경우 400오류를 반환한다.")
+    @Test
+    void given_memberToken_when_createWithPastDate_then_statusCodeIsBadRequest() {
+        Map<String, String> params = new HashMap<>();
+        params.put("date", "1999-01-01");
+        params.put("theme", "3");
+        params.put("time", "2");
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("사용자 예약 등록 시 이미 같은 시간대에 예약이 등록되어 있을 경우 400 오류 반환")
+    @Test
+    void given_memberToken_when_createWithAlreadyReserved_then_statusCodeIsBadRequest() {
+        Map<String, String> params = new HashMap<>();
+        params.put("date", "2099-04-30");
+        params.put("themeId", "1");
+        params.put("timeId", "1");
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("다른 사용자가 이미 예약된 시간에 예약을 할 경우 예약이 성공한다.")
+    @Test
+    void given_differentMemberToken_when_createWaitWithAlreadyReserved_then_statusCodeIsCreated() {
+        Map<String, String> params = new HashMap<>();
+        params.put("date", "2099-04-30");
+        params.put("themeId", "1");
+        params.put("timeId", "1");
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken("user2@test.com"))
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
     }
 }

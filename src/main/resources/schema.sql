@@ -32,7 +32,7 @@ CREATE TABLE reservation
     time_id   BIGINT,
     theme_id  BIGINT,
     member_id BIGINT,
-    status    VARCHAR(255) check (status in ('RESERVED')),
+    status    VARCHAR(255) check (status in ('RESERVED','WAITING')),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),

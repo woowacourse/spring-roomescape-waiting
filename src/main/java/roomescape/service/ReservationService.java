@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
@@ -52,9 +53,16 @@ public class ReservationService {
         final Theme theme = getTheme(reservationRequest);
         final Member member = getMember(reservationRequest);
         validatePastDate(reservationRequest, reservationTime);
-        final Reservation reservation = new Reservation(member, reservationRequest.date(), reservationTime, theme);
+        final Reservation reservation = createReservation(reservationRequest, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    private Reservation createReservation(final ReservationRequest reservationRequest, final Member member, final ReservationTime reservationTime, final Theme theme) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
+            return new Reservation(member, reservationRequest.date(), reservationTime, theme, ReservationStatus.WAITING);
+        }
+        return new Reservation(member, reservationRequest.date(), reservationTime, theme, ReservationStatus.RESERVED);
     }
 
     private ReservationTime getReservationTime(final ReservationRequest reservationRequest) {
@@ -73,9 +81,10 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(final ReservationRequest reservationRequest) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationRequest.date(),
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(reservationRequest.date(),
                 reservationRequest.timeId(),
-                reservationRequest.themeId())) {
+                reservationRequest.themeId(),
+                reservationRequest.memberId())) {
             throw new ReservationFailException("이미 예약이 등록되어 있습니다.");
         }
     }
