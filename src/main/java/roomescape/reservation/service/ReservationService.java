@@ -27,18 +27,15 @@ import roomescape.waiting.repository.WaitingRepository;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              WaitingRepository waitingRepository,
                               MemberRepository memberRepository,
                               TimeRepository timeRepository,
                               ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -66,34 +63,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findMyReservations(Long memberId) {
-        List<MyReservationResponse> reservations = findReservationsByMemberId(memberId);
-        List<MyReservationResponse> waitings = findWaitingsByMemberId(memberId);
-
-        List<MyReservationResponse> response = new ArrayList<>();
-        response.addAll(reservations);
-        response.addAll(waitings);
-        response.sort(Comparator.comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::startAt));
-        return response;
-    }
-
-    private List<MyReservationResponse> findReservationsByMemberId(Long memberId) {
+    public List<MyReservationResponse> findReservationsByMemberId(Long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
-    }
-
-    private List<MyReservationResponse> findWaitingsByMemberId(Long memberId) {
-        return waitingRepository.findByMemberId(memberId)
-                .stream()
-                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
-                .toList();
-    }
-
-    private Long countOrderOfWaiting(Waiting waiting) {
-        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
-                waiting.getReservation(), waiting.getCreatedAt());
     }
 
     public ReservationResponse createReservation(ReservationCreateRequest request) {

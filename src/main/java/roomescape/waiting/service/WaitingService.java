@@ -8,6 +8,7 @@ import roomescape.exception.BadArgumentRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingRequest;
@@ -78,6 +79,19 @@ public class WaitingService {
     private boolean isAlreadyWaited(Reservation reservation, Member member) {
         return reservation.getMember().equals(member)
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
+    }
+
+    public List<MyReservationResponse> findWaitingsByMemberId(Long memberId) {
+        return waitingRepository.findByMemberId(memberId)
+                .stream()
+                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
+                .toList();
+
+    }
+
+    private Long countOrderOfWaiting(Waiting waiting) {
+        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
+                waiting.getReservation(), waiting.getCreatedAt());
     }
 
     public void confirmReservation(Long waitingId) {
