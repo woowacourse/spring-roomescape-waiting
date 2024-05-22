@@ -19,7 +19,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, Member member, ReservationTime time, Theme theme, ReservationStatus status) {
