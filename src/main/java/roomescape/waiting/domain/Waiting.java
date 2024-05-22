@@ -56,4 +56,29 @@ public class Waiting {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Waiting waiting = (Waiting) o;
+
+        return id.equals(waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Waiting{" +
+               "id=" + id +
+               ", reservation=" + reservation +
+               ", member=" + member +
+               ", createdAt=" + createdAt +
+               '}';
+    }
 }
