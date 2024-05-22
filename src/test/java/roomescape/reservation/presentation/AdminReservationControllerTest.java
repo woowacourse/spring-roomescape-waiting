@@ -16,6 +16,7 @@ import roomescape.member.application.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -48,6 +49,9 @@ import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 class AdminReservationControllerTest extends ControllerTest {
     @MockBean
     private ReservationService reservationService;
+
+    @MockBean
+    private WaitingReservationService waitingReservationService;
 
     @MockBean
     private MemberService memberService;

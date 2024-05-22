@@ -16,6 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -32,13 +33,16 @@ public class AdminReservationController {
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final WaitingReservationService waitingReservationService;
 
     public AdminReservationController(ReservationService reservationService, MemberService memberService,
-                                      ReservationTimeService reservationTimeService, ThemeService themeService) {
+                                      ReservationTimeService reservationTimeService, ThemeService themeService,
+                                      WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
         this.memberService = memberService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping
@@ -79,7 +83,7 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findWaitingReservations() {
-        List<Reservation> waitingReservations = reservationService.findWaitingReservations();
+        List<Reservation> waitingReservations = waitingReservationService.findWaitingReservations();
         return ResponseEntity.ok(waitingReservations.stream()
                 .map(ReservationResponse::from)
                 .toList());
@@ -87,7 +91,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id) {
-        reservationService.deleteWaitingReservationByAdmin(id);
+        waitingReservationService.deleteWaitingReservationByAdmin(id);
         return ResponseEntity.noContent().build();
     }
 }

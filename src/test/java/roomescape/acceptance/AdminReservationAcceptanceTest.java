@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.TestFixture.ADMIN_EMAIL;
+import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 
@@ -34,7 +35,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
         String token = createTestToken(admin.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Long memberID = createTestMember().getId();
+        Long memberID = createTestMember(MIA_EMAIL).getId();
 
         AdminReservationSaveRequest request = new AdminReservationSaveRequest(
                 MIA_RESERVATION_DATE, timeId, themeId, memberID);
@@ -64,7 +65,7 @@ public class AdminReservationAcceptanceTest extends AcceptanceTest {
         // given
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
 
         AdminReservationSaveRequest request = new AdminReservationSaveRequest(

@@ -21,7 +21,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자가 로그인한다.")
     void login() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         LoginRequest request = new LoginRequest(member.getEmail().getValue(), member.getPassword());
 
         // when
@@ -66,7 +66,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("틀린 비밀번호로 사용자가 로그인한다.")
     void loginWithInvalidPassword() {
         // given
-        createTestMember();
+        createTestMember(MIA_EMAIL);
         LoginRequest request = new LoginRequest(MIA_EMAIL, "invalid-password");
 
         // when
@@ -90,7 +90,7 @@ public class AuthAcceptanceTest extends AcceptanceTest {
     @DisplayName("사용자 인증 정보를 조회한다.")
     void checkAuthInformation() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 

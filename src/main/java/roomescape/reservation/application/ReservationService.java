@@ -11,7 +11,6 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeRepository;
-import roomescape.reservation.domain.WaitingReservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -83,57 +82,25 @@ public class ReservationService {
         return reservationRepository.findAllByMemberAndStatusWithDetails(member, ReservationStatus.BOOKING);
     }
 
-    public List<WaitingReservation> findWaitingReservationsWithPreviousCountByMember(Member member) {
-        return reservationRepository.findWaitingReservationsByMemberWithDetails(member);
-    }
-
-    public List<Reservation> findWaitingReservations() {
-        return reservationRepository.findAllByStatusWithDetails(ReservationStatus.WAITING);
-    }
-
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = findByIdIfNotPresentThrowException(id);
-        validateReservationStatus(reservation, ReservationStatus.BOOKING);
-        reservationRepository.deleteById(id);
+        reservationRepository.findById(id).ifPresent(reservation -> {
+            validateInBooking(reservation);
+            reservationRepository.delete(reservation);
+            approveFirstWaitingReservation(reservation);
+        });
+    }
 
+    private void validateInBooking(Reservation reservation) {
+        if (!reservation.isBooking()) {
+            throw new ViolationException("예약 상태가 예약 중이 아닙니다.");
+        }
+    }
+
+    private void approveFirstWaitingReservation(Reservation deletedReservation) {
         Optional<Reservation> firstWaitingReservation = reservationRepository.findFirstByDateAndTimeAndTheme(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme());
+                deletedReservation.getDate(), deletedReservation.getTime(), deletedReservation.getTheme());
         firstWaitingReservation.ifPresent(waitingReservation ->
                 waitingReservation.updateStatus(ReservationStatus.BOOKING));
-    }
-
-    @Transactional
-    public void deleteWaitingReservationByMember(Long reservationId, Member member) {
-        Reservation reservation = findByIdIfNotPresentThrowException(reservationId);
-        validateReservationStatus(reservation, ReservationStatus.WAITING);
-        validateOwnerShip(reservation, member);
-        reservationRepository.delete(reservation);
-    }
-
-    private void validateOwnerShip(Reservation reservation, Member member) {
-        Long memberId = member.getId();
-        Long ownerId = reservation.getMember().getId();
-        if (!memberId.equals(ownerId)) {
-            throw new ViolationException("본인의 예약 대기만 삭제할 수 있습니다.");
-        }
-    }
-
-    @Transactional
-    public void deleteWaitingReservationByAdmin(Long reservationId) {
-        Reservation reservation = findByIdIfNotPresentThrowException(reservationId);
-        validateReservationStatus(reservation, ReservationStatus.WAITING);
-        reservationRepository.delete(reservation);
-    }
-
-    private Reservation findByIdIfNotPresentThrowException(Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("해당 Id의 예약이 없습니다."));
-    }
-
-    private void validateReservationStatus(Reservation reservation, ReservationStatus status) {
-        if (!reservation.hasSameStatus(status)) {
-            throw new ViolationException("상태가 " + status + "인 예약이 아닙니다.");
-        }
     }
 }

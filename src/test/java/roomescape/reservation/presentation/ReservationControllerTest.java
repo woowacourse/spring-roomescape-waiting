@@ -23,6 +23,7 @@ import roomescape.global.exception.ViolationException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
+import roomescape.reservation.application.WaitingReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -65,6 +66,9 @@ class ReservationControllerTest extends ControllerTest {
 
     @MockBean
     private ReservationService reservationService;
+
+    @MockBean
+    private WaitingReservationService waitingReservationService;
 
     @MockBean
     private ReservationTimeService reservationTimeService;
@@ -289,7 +293,7 @@ class ReservationControllerTest extends ControllerTest {
 
         BDDMockito.given(reservationService.findReservationsInBookingByMember(any()))
                 .willReturn(List.of(expectedReservation));
-        BDDMockito.given(reservationService.findWaitingReservationsWithPreviousCountByMember(any()))
+        BDDMockito.given(waitingReservationService.findWaitingReservationsWithPreviousCountByMember(any()))
                 .willReturn(List.of(expectedWaitingReservation));
 
         // when & then
@@ -309,7 +313,7 @@ class ReservationControllerTest extends ControllerTest {
     void deleteMyWaitingReservation() throws Exception {
         // given
         BDDMockito.willDoNothing()
-                .given(reservationService)
+                .given(waitingReservationService)
                 .deleteWaitingReservationByMember(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then
@@ -324,7 +328,7 @@ class ReservationControllerTest extends ControllerTest {
     void deleteMyWaitingReservationWithoutOwnerShip() throws Exception {
         // given
         BDDMockito.willThrow(new ViolationException(TEST_ERROR_MESSAGE))
-                .given(reservationService)
+                .given(waitingReservationService)
                 .deleteWaitingReservationByMember(1L, STUBBED_LOGIN_MEMBER);
 
         // when & then

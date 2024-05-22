@@ -73,8 +73,8 @@ public abstract class AcceptanceTest {
                 .id();
     }
 
-    protected Member createTestMember() {
-        MemberJoinRequest request = new MemberJoinRequest(MIA_EMAIL, TEST_PASSWORD, MIA_NAME);
+    protected Member createTestMember(String email) {
+        MemberJoinRequest request = new MemberJoinRequest(email, TEST_PASSWORD, MIA_NAME);
         MemberResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)

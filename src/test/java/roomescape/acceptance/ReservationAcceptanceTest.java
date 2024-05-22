@@ -18,8 +18,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
+import static roomescape.TestFixture.TOMMY_EMAIL;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
@@ -29,7 +31,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약을 추가한다.")
     void createOneReservation() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -59,17 +61,18 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 대기를 추가한다.")
     void createWaitingReservation() {
         // given
-        Member member = createTestMember();
-        String token = createTestToken(member.getEmail().getValue());
+        Member mia = createTestMember(MIA_EMAIL);
+        Member tommy = createTestMember(TOMMY_EMAIL);
+        String miaToken = createTestToken(mia.getEmail().getValue());
+        String tommyToken = createTestToken(tommy.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
 
-        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
-        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, WAITING);
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, tommyToken, BOOKING);
 
         ReservationSaveRequest request = new ReservationSaveRequest(
                 MIA_RESERVATION_DATE, timeId, themeId, WAITING.getIdentifier());
-        Cookie cookie = new Cookie.Builder("token", token).build();
+        Cookie cookie = new Cookie.Builder("token", miaToken).build();
 
         // when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -92,7 +95,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservation() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -123,7 +126,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동시 요청으로 동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservationInMultiThread() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -165,7 +168,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("동일한 시간에 예약이 없을 때 예약 대기를 추가한다.")
     void createInvalidWaitingReservation() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -195,7 +198,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("예약 날짜가 없는 예약을 추가한다.")
     void createInvalidReservation() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
@@ -224,7 +227,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     @DisplayName("존재하지 않는 예약 시간에 예약을 추가한다.")
     void createReservationWithNotExistingTime() {
         // given
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Long notExistingTimeId = 1L;
         Long themeId = createTestTheme();
@@ -256,7 +259,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         // given
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 

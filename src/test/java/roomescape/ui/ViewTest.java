@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import roomescape.acceptance.AcceptanceTest;
 import roomescape.member.domain.Member;
 
+import static roomescape.TestFixture.MIA_EMAIL;
+
 class ViewTest extends AcceptanceTest {
 
     @Test
@@ -44,7 +46,7 @@ class ViewTest extends AcceptanceTest {
     @Test
     @DisplayName("일반 사용자 권한으로 어드민 예약 페이지를 조회한다.")
     void getAdminReservationPageWithoutAuthority() {
-        Member member = createTestMember();
+        Member member = createTestMember(MIA_EMAIL);
         String token = createTestToken(member.getEmail().getValue());
         Cookie cookie = new Cookie.Builder("token", token).build();
 
