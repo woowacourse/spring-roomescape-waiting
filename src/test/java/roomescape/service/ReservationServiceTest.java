@@ -6,16 +6,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.ReservationInfo;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.user.Member;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.PastTimeReservationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ThemeFixture;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.*;
 import roomescape.service.dto.input.ReservationInput;
 import roomescape.service.dto.input.ReservationSearchInput;
+import roomescape.service.dto.output.ReservationOutput;
 import roomescape.util.DatabaseCleaner;
 
 import java.time.LocalDate;
@@ -39,6 +42,12 @@ class ReservationServiceTest {
 
     @Autowired
     DatabaseCleaner databaseCleaner;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private ReservationInfoRepository reservationInfoRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -116,5 +125,30 @@ class ReservationServiceTest {
         assertThat(sut.searchReservation(new ReservationSearchInput(themeId, memberId,
                 LocalDate.parse("2024-05-01"), LocalDate.parse("2024-05-20"))))
                 .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("예약자가 취소하면 다음 대기자가 예약자가 된다.")
+    void reservation_cancel_make_next_waiting_reservation() {
+        final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain("joyson5582@email.com"));
+        final Member member2 = memberRepository.save(MemberFixture.getDomain("alphaka@email.com"));
+
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-01", time, theme));
+
+        final ReservationOutput reservationOutputs =
+                sut.createReservation(new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId()));
+
+        waitingRepository.save(new Waiting(member2, reservationInfo));
+        sut.deleteReservation(reservationOutputs.id());
+
+        final var result = reservationRepository.findAllByMemberId(member2.getId())
+                .stream()
+                .anyMatch(reservation ->
+                        reservation.getMember().equals(member2) && reservation.getReservationInfo().equals(reservationInfo)
+                );
+
+        assertThat(result).isTrue();
     }
 }

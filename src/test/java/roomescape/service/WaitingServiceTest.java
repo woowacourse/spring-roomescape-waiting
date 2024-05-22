@@ -47,7 +47,6 @@ class WaitingServiceTest {
     @BeforeEach
     void setUp() {
         databaseCleaner.initialize();
-
     }
 
     @Test
@@ -67,12 +66,13 @@ class WaitingServiceTest {
     void order_start_one() {
         final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
-        final Member member = memberRepository.save(MemberFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain("joyson558@gmail.com"));
+        final Member member1 = memberRepository.save(MemberFixture.getDomain("alphaka@email.com"));
 
-        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-01", time, theme));
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-05", time, theme));
         reservationRepository.save(new Reservation(member, reservationInfo));
 
-        final WaitingOutput output = sut.createWaiting(new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId()));
+        final WaitingOutput output = sut.createWaiting(new ReservationInput("2025-01-05", time.getId(), theme.getId(), member1.getId()));
 
         assertThat(output.order()).isOne();
     }
@@ -82,11 +82,13 @@ class WaitingServiceTest {
     void throw_exception_when_same_user_with_same_reservationInfo() {
         final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
         final Theme theme = themeRepository.save(ThemeFixture.getDomain());
-        final Member member = memberRepository.save(MemberFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain("joyson558@gmail.com"));
+        final Member member1 = memberRepository.save(MemberFixture.getDomain("alphaka@email.com"));
+
 
         final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-01", time, theme));
         reservationRepository.save(new Reservation(member, reservationInfo));
-        final ReservationInput input = new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId());
+        final ReservationInput input = new ReservationInput("2025-01-01", time.getId(), theme.getId(), member1.getId());
 
         sut.createWaiting(input);
 

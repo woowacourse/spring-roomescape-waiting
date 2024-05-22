@@ -28,6 +28,10 @@ public class Waiting {
 
     }
 
+    public Reservation toReservation() {
+        return new Reservation(member, reservationInfo);
+    }
+
     public Waiting(final Member member, final ReservationInfo reservationInfo) {
         this.member = member;
         this.reservationInfo = reservationInfo;
