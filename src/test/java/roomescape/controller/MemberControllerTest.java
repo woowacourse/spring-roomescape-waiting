@@ -21,7 +21,7 @@ class MemberControllerTest {
     private String adminToken;
 
     @BeforeEach
-    void init() {
+    void setUp() {
         RestAssured.port = port;
 
         adminToken = RestAssured.given().log().all()
@@ -44,7 +44,7 @@ class MemberControllerTest {
 
     @DisplayName("사용자 예약/예약 대기 목록 조회 테스트")
     @Test
-    void testMethod() {
+    void findMemberReservations() {
         // when & then
         RestAssured.given().log().all()
                 .cookie(AuthConstants.AUTH_COOKIE_NAME, adminToken)
