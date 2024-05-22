@@ -72,7 +72,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
             WHERE r.date = :date
             AND r.time.id = :timeId
             AND r.theme.id = :themeId
-            AND r.status = 'PENDING'
+            AND r.status = 'WAITING'
             """)
     List<Reservation> findWaitingReservationsByReservation(@Param("date") LocalDate date,
                                                            @Param("timeId") Long timeId,

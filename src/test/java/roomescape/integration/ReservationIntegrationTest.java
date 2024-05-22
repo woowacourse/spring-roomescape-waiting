@@ -117,7 +117,7 @@ class ReservationIntegrationTest {
 
     @DisplayName("대기상태의 예약을 추가할 수 있다.")
     @Test
-    void should_create_pending_reservation() {
+    void should_create_waiting_reservation() {
         String cookie = createCookie("1234", "sun@email.com");
         ReservationRequest request =
                 new ReservationRequest(LocalDate.of(2030, 8, 5), 6L, 10L);
@@ -126,7 +126,7 @@ class ReservationIntegrationTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .cookie(cookie)
-                .when().post("/reservations/pending")
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .assertThat()
                 .statusCode(201)

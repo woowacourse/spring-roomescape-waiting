@@ -54,10 +54,10 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
     }
 
-    @PostMapping("/reservations/pending")
-    public ResponseEntity<Reservation> createPendingReservation(@RequestBody ReservationRequest request,
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<Reservation> createWaitingReservation(@RequestBody ReservationRequest request,
                                                                 @AuthenticationPrincipal Member member) {
-        Reservation reservation = reservationService.addPendingReservation(request, member);
+        Reservation reservation = reservationService.addWaitingReservation(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservation);
     }
 

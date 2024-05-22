@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import static roomescape.model.ReservationStatus.PENDING;
+import static roomescape.model.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,9 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +35,6 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-
-    @PersistenceContext
-    EntityManager entityManager;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
@@ -70,11 +64,11 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public Reservation addPendingReservation(ReservationRequest request, Member member) {
-        validateDuplicatedPendingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
+    public Reservation addWaitingReservation(ReservationRequest request, Member member) {
+        validateDuplicatedWaitingReservation(request.date(), request.timeId(), request.themeId(), member.getId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
-        Reservation reservation = new Reservation(request.date(), PENDING, reservationTime, theme, member);
+        Reservation reservation = new Reservation(request.date(), WAITING, reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
 
@@ -92,7 +86,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findWaitingReservations() {
-        return reservationRepository.findAllReservationByStatus(PENDING);
+        return reservationRepository.findAllReservationByStatus(WAITING);
     }
 
     private void validateReservationDateTimeBeforeNow(LocalDate date, LocalTime time) {
@@ -113,7 +107,7 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedPendingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+    private void validateDuplicatedWaitingReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NoSuchElementException("예약 시간이 존재하지 않습니다."));
         Theme theme = findThemeByThemeId(themeId);

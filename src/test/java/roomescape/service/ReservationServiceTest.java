@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import static roomescape.model.ReservationStatus.ACCEPT;
-import static roomescape.model.ReservationStatus.PENDING;
+import static roomescape.model.ReservationStatus.WAITING;
 import static roomescape.model.Role.ADMIN;
 import static roomescape.model.Role.MEMBER;
 
@@ -127,30 +127,30 @@ class ReservationServiceTest {
 
     @DisplayName("사용자가 대기상태의 예약을 추가한다.")
     @Test
-    void should_add_pending_reservation_times_when_give_member_request() {
+    void should_add_waiting_reservation_times_when_give_member_request() {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
         LocalDate reservationDate = now().plusDays(2);
         ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
 
-        reservationService.addPendingReservation(request, member);
+        reservationService.addWaitingReservation(request, member);
 
         List<Reservation> allReservations = reservationRepository.findAll();
         assertSoftly(assertions -> {
             assertions.assertThat(allReservations).hasSize(1);
-            assertions.assertThat(allReservations).extracting("status").containsExactly(PENDING);
+            assertions.assertThat(allReservations).extracting("status").containsExactly(WAITING);
         });
     }
 
     @DisplayName("이미 예약대기를 걸어 놓은 사용자가 또 다시 예약을 하면 예외가 발생한다.")
     @Test
-    void should_throw_exception_when_user_add_duplicated_pending_reservation() {
+    void should_throw_exception_when_user_add_duplicated_waiting_reservation() {
         Member member = new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222");
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(11, 0));
         Theme theme = new Theme(1L, "name", "description", "thumbnail");
         LocalDate reservationDate = now().plusDays(2);
-        Reservation reservation = new Reservation(reservationDate, PENDING, reservationTime, theme, member);
+        Reservation reservation = new Reservation(reservationDate, WAITING, reservationTime, theme, member);
         memberRepository.save(member);
         reservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
@@ -158,7 +158,7 @@ class ReservationServiceTest {
 
         ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addPendingReservation(request, member))
+        assertThatThrownBy(() -> reservationService.addWaitingReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
                 .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
     }
@@ -178,7 +178,7 @@ class ReservationServiceTest {
 
         ReservationRequest request = new ReservationRequest(reservationDate, 1L, 1L);
 
-        assertThatThrownBy(() -> reservationService.addPendingReservation(request, member))
+        assertThatThrownBy(() -> reservationService.addWaitingReservation(request, member))
                 .isInstanceOf(DuplicatedException.class)
                 .hasMessage("[ERROR] 이미 예약을 했거나 예약 대기를 걸어놓았습니다.");
     }
@@ -249,9 +249,9 @@ class ReservationServiceTest {
         Reservation acceptedReservation =
                 new Reservation(1L, now(), ACCEPT, LocalDateTime.now().minusMinutes(1), time, theme, member1);
         Reservation waiting1 =
-                new Reservation(2L, now(), PENDING, LocalDateTime.now(), time, theme, member2);
+                new Reservation(2L, now(), WAITING, LocalDateTime.now(), time, theme, member2);
         Reservation waiting2 =
-                new Reservation(3L, now(), PENDING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
+                new Reservation(3L, now(), WAITING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
         reservationRepository.save(acceptedReservation);
         reservationRepository.save(waiting1);
         reservationRepository.save(waiting2);
@@ -261,7 +261,7 @@ class ReservationServiceTest {
         List<Reservation> reservations = reservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, PENDING);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
             assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
         });
     }
@@ -299,9 +299,9 @@ class ReservationServiceTest {
         Reservation acceptedReservation =
                 new Reservation(1L, now(), ACCEPT, LocalDateTime.now().minusMinutes(1), time, theme, member1);
         Reservation waiting1 =
-                new Reservation(2L, now(), PENDING, LocalDateTime.now(), time, theme, member2);
+                new Reservation(2L, now(), WAITING, LocalDateTime.now(), time, theme, member2);
         Reservation waiting2 =
-                new Reservation(3L, now(), PENDING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
+                new Reservation(3L, now(), WAITING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
         reservationRepository.save(acceptedReservation);
         reservationRepository.save(waiting1);
         reservationRepository.save(waiting2);
@@ -311,7 +311,7 @@ class ReservationServiceTest {
         List<Reservation> reservations = reservationRepository.findAll();
         SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(reservations).hasSize(2);
-            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, PENDING);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, WAITING);
             assertions.assertThat(reservations).extracting("id").containsExactly(1L, 3L);
         });
     }
@@ -421,8 +421,8 @@ class ReservationServiceTest {
         memberRepository.save(new Member(1L, "배키", MEMBER, "dmsgml@email.com", "2222"));
         Member member = memberRepository.findById(1L).orElseThrow();
 
-        reservationRepository.save(new Reservation(1L, date, PENDING, reservationTime, theme1, member));
-        reservationRepository.save(new Reservation(2L, now(), PENDING, reservationTime, theme2, member));
+        reservationRepository.save(new Reservation(1L, date, WAITING, reservationTime, theme1, member));
+        reservationRepository.save(new Reservation(2L, now(), WAITING, reservationTime, theme2, member));
         reservationRepository.save(new Reservation(3L, date, ACCEPT, reservationTime, theme2, member));
 
         List<Reservation> waitingReservations = reservationService.findWaitingReservations();
@@ -430,7 +430,7 @@ class ReservationServiceTest {
         assertSoftly(assertions -> {
             assertions.assertThat(waitingReservations).hasSize(2);
             assertions.assertThat(waitingReservations).extracting("status")
-                    .containsExactly(PENDING, PENDING);
+                    .containsExactly(WAITING, WAITING);
         });
     }
 }
