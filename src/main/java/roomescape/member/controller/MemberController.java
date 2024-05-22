@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.core.AuthenticationPrincipal;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.dto.response.FindReservationResponse;
+import roomescape.member.dto.response.FindWaitingResponse;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.response.FindMembersResponse;
 
@@ -27,7 +28,12 @@ public class MemberController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<FindReservationResponse>> getMembersWithReservations(@AuthenticationPrincipal AuthInfo authInfo) {
+    public ResponseEntity<List<FindReservationResponse>> getReservationsByMember(@AuthenticationPrincipal AuthInfo authInfo) {
         return ResponseEntity.ok(memberService.getReservationsByMember(authInfo));
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<FindWaitingResponse>> getWaitingsByMember(@AuthenticationPrincipal AuthInfo authInfo) {
+        return ResponseEntity.ok(memberService.getWaitingsByMember(authInfo));
     }
 }
