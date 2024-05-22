@@ -131,10 +131,11 @@ public class ReservationService {
 
                 reservation.getDate(), reservation.getTheme(),
                 reservation.getTime());
+        if (waiting.isPresent()) {
         waiting.ifPresent(waitingRepository::delete);
         reservationRepository.save(waiting.get().toReservation());
+        }
         reservationRepository.deleteById(id);
-
     }
 
     public void deleteWaiting(Long id) {
