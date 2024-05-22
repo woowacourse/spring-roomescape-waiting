@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.MemberReservationResponse;
@@ -29,8 +30,8 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        List<ReservationResponse> reservationResponses = reservationService.findAll();
+    public ResponseEntity<List<ReservationResponse>> findAll(@RequestParam(defaultValue = "SUCCESS") String status) {
+        List<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
 
         return ResponseEntity.ok(reservationResponses);
     }
