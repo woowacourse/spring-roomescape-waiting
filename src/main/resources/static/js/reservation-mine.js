@@ -11,20 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
 function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
-
     data.forEach(item => {
         const row = tableBody.insertRow();
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
         const status = item.status;
+        const rank = item.rank;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
 
         if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+            row.insertCell(3).textContent = rank + "번째 " + status;
+
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
@@ -34,6 +35,7 @@ function render(data) {
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
+            row.insertCell(3).textContent = status;
             row.insertCell(4).textContent = '';
         }
     });
