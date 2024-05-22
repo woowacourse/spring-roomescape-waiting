@@ -37,6 +37,21 @@ public class Reservation {
     protected Reservation() {
     }
 
+    public Reservation(Long id,
+                       LocalDate date,
+                       ReservationStatus status,
+                       LocalDateTime createdAt,
+                       ReservationTime time,
+                       Theme theme,
+                       Member member) {
+        this.id = id;
+        this.date = date;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.time = time;
+        this.theme = theme;
+        this.member = member;
+    }
 
     public Reservation(Long id,
                        LocalDate date,
@@ -44,12 +59,7 @@ public class Reservation {
                        ReservationTime time,
                        Theme theme,
                        Member member) {
-        this.id = id;
-        this.date = date;
-        this.status = status;
-        this.time = time;
-        this.theme = theme;
-        this.member = member;
+        this(id, date, status, null, time, theme, member);
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -90,6 +100,14 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void confirmReservation() {
+        this.status = ACCEPT;
+    }
+
+    public boolean isAcceptReservation() {
+        return status == ACCEPT;
     }
 
     @Override

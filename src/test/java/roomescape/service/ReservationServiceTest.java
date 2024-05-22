@@ -13,9 +13,11 @@ import static roomescape.model.Role.ADMIN;
 import static roomescape.model.Role.MEMBER;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -230,6 +232,90 @@ class ReservationServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[ERROR] 해당 id:[1000000] 값으로 예약된 내역이 존재하지 않습니다.");
     }
+
+    @DisplayName("승인된 예약을 삭제하면 제일 먼저 예약된 대기가 승인으로 바뀐다.")
+    @Test
+    void should_confirm_first_waiting_reservation_when_delete_waiting_reservation() {
+        Theme theme = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+
+        Member member1 = new Member(1L, "피케이", MEMBER, "pk@email.com", "1111");
+        Member member2 = new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222");
+        Member member3 = new Member(3L, "포비", MEMBER, "pobi@email.com", "3333");
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+        memberRepository.save(member3);
+
+        Reservation acceptedReservation =
+                new Reservation(1L, now(), ACCEPT, LocalDateTime.now().minusMinutes(1), time, theme, member1);
+        Reservation waiting1 =
+                new Reservation(2L, now(), PENDING, LocalDateTime.now(), time, theme, member2);
+        Reservation waiting2 =
+                new Reservation(3L, now(), PENDING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
+        reservationRepository.save(acceptedReservation);
+        reservationRepository.save(waiting1);
+        reservationRepository.save(waiting2);
+
+        reservationService.deleteReservation(1L);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(reservations).hasSize(2);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, PENDING);
+            assertions.assertThat(reservations).extracting("id").containsExactly(2L, 3L);
+        });
+    }
+
+    @DisplayName("승인된 예약을 삭제하고 이후 대기가 없으면 단순히 삭제만 한다.")
+    @Test
+    void should_only_remove_reservation_when_no_waiting_reservations() {
+        Theme theme = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+        Member member = new Member(1L, "피케이", MEMBER, "pk@email.com", "1111");
+        memberRepository.save(member);
+        Reservation reservation = new Reservation(1L, now(), ACCEPT, LocalDateTime.now(), time, theme, member);
+        reservationRepository.save(reservation);
+
+        reservationService.deleteReservation(1L);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        assertThat(reservations).isEmpty();
+    }
+
+
+    @DisplayName("예약 대기를 삭제할 때는 단순히 예약 대기만 삭제한다.")
+    @Test
+    void should_remove_reservation_with_no_change_when_delete_waiting_reservation() {
+        Theme theme = themeRepository.findById(1L).get();
+        ReservationTime time = reservationTimeRepository.findById(1L).get();
+
+        Member member1 = new Member(1L, "피케이", MEMBER, "pk@email.com", "1111");
+        Member member2 = new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222");
+        Member member3 = new Member(3L, "포비", MEMBER, "pobi@email.com", "3333");
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+        memberRepository.save(member3);
+
+        Reservation acceptedReservation =
+                new Reservation(1L, now(), ACCEPT, LocalDateTime.now().minusMinutes(1), time, theme, member1);
+        Reservation waiting1 =
+                new Reservation(2L, now(), PENDING, LocalDateTime.now(), time, theme, member2);
+        Reservation waiting2 =
+                new Reservation(3L, now(), PENDING, LocalDateTime.now().plusMinutes(1), time, theme, member3);
+        reservationRepository.save(acceptedReservation);
+        reservationRepository.save(waiting1);
+        reservationRepository.save(waiting2);
+
+        reservationService.deleteReservation(2L);
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(reservations).hasSize(2);
+            assertions.assertThat(reservations).extracting("status").containsExactly(ACCEPT, PENDING);
+            assertions.assertThat(reservations).extracting("id").containsExactly(1L, 3L);
+        });
+    }
+
 
     @DisplayName("존재하는 예약을 삭제하면 예외가 발생하지 않는다.")
     @Test

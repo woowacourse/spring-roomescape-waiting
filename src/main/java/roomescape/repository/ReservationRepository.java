@@ -64,4 +64,18 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findAllReservationByStatus(ReservationStatus status);
 
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN r.time t
+            JOIN r.theme th
+            WHERE r.date = :date
+            AND r.time.id = :timeId
+            AND r.theme.id = :themeId
+            AND r.status = 'PENDING'
+            """)
+    List<Reservation> findWaitingReservationsByReservation(@Param("date") LocalDate date,
+                                                           @Param("timeId") Long timeId,
+                                                           @Param("themeId") Long themeId);
+
 }

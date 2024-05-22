@@ -6,10 +6,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.request.ReservationRequest;
@@ -33,6 +38,9 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
@@ -74,8 +82,7 @@ public class ReservationService {
         validateDuplicatedReservation(request.date(), request.timeId(), request.themeId());
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = findThemeByThemeId(request.themeId());
-        Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(request.memberId())));
+        Member member = findMemberById(request.memberId());
         Reservation reservation = new Reservation(request.date(), reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
@@ -118,9 +125,33 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(long id) {
         validateExistReservation(id);
+        Reservation reservation = findReservationById(id);
+        if (reservation.isAcceptReservation()) {
+            List<Reservation> waitingReservations = findWaitingReservation(reservation);
+            confirmReservation(waitingReservations);
+        }
         reservationRepository.deleteById(id);
+    }
+
+    private Reservation findReservationById(long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약은 존재하지 않습니다.".formatted(id)));
+    }
+
+    private List<Reservation> findWaitingReservation(Reservation reservation) {
+        return reservationRepository.findWaitingReservationsByReservation(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId());
+    }
+
+    private void confirmReservation(List<Reservation> waitingReservations) {
+        waitingReservations.stream()
+                .min(Comparator.comparing(Reservation::getCreatedAt))
+                .ifPresent(Reservation::confirmReservation);
     }
 
     private void validateExistReservation(long id) {
@@ -144,6 +175,6 @@ public class ReservationService {
 
     private Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("아이디가 %s인 사용자가 존재하지 않습니다.".formatted(memberId)));
     }
 }
