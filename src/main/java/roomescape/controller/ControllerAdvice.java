@@ -32,7 +32,7 @@ public class ControllerAdvice {
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorMessageResponse(errorMessage.toString()));
+            .body(new ErrorMessageResponse(errorMessage));
     }
 
     @ExceptionHandler(RoomescapeException.class)
