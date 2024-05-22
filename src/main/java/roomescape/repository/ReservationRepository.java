@@ -25,7 +25,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByMemberAndDateAndTimeAndTheme(Member member, LocalDate date, TimeSlot timeSlot, Theme theme);
 
-    boolean existsByDateAndTimeAndThemeAndStatusIs(LocalDate date, TimeSlot timeSlot, Theme theme, ReservationStatus status);
+    boolean existsByDateAndTimeAndThemeAndStatusIs(LocalDate date, TimeSlot timeSlot, Theme theme,
+                                                   ReservationStatus status);
 
     @Query("""
             SELECT new roomescape.domain.ReservationRank(
