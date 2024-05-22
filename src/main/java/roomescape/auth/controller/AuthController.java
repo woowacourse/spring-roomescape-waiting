@@ -42,6 +42,7 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    @Auth
     @PostMapping("/logout")
     public ApiResponse<Void> logout(final HttpServletRequest request, final HttpServletResponse response) {
         TokenDto requestToken = getTokenFromCookie(request);
