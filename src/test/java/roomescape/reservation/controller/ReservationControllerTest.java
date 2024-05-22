@@ -53,7 +53,7 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("예약 정보를 잘 불러오는지 확인한다.")
     void findAllReservations() throws Exception {
         when(reservationService.findReservations())
-                .thenReturn(List.of(ReservationResponse.fromReservation(reservation)));
+                .thenReturn(List.of(ReservationResponse.from(reservation)));
 
         mockMvc.perform(get("/reservations"))
                 .andDo(print())

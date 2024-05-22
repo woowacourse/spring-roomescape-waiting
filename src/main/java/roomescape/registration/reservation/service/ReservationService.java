@@ -10,7 +10,6 @@ import roomescape.exception.RoomEscapeException;
 import roomescape.member.domain.Member;
 import roomescape.exception.model.MemberExceptionCode;
 import roomescape.member.repository.MemberRepository;
-import roomescape.registration.dto.RegistrationInfo;
 import roomescape.registration.reservation.domain.Reservation;
 import roomescape.registration.reservation.dto.ReservationRequest;
 import roomescape.registration.reservation.dto.ReservationResponse;
@@ -52,7 +51,7 @@ public class ReservationService {
 
         Reservation saveReservation = new Reservation(reservationRequest.date(), time, theme, member);
 
-        return ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
+        return ReservationResponse.from(reservationRepository.save(saveReservation));
     }
 
     public void addAdminReservation(AdminReservationRequest adminReservationRequest) {
@@ -64,7 +63,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(MemberExceptionCode.MEMBER_NOT_EXIST_EXCEPTION));
 
         Reservation saveReservation = new Reservation(adminReservationRequest.date(), time, theme, member);
-        ReservationResponse.fromReservation(reservationRepository.save(saveReservation));
+        ReservationResponse.from(reservationRepository.save(saveReservation));
     }
 
 
@@ -72,7 +71,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByOrderByDateAscTimeAsc();
 
         return reservations.stream()
-                .map(ReservationResponse::fromReservation)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -91,15 +90,15 @@ public class ReservationService {
 
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(filterInfo.getMemberId(),
                         filterInfo.getThemeId(), filterInfo.getFromDate(), filterInfo.getToDate()).stream()
-                .map(ReservationResponse::fromReservation)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<RegistrationInfo> findMemberReservations(long id) {
+    public List<ReservationResponse> findMemberReservations(long id) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
 
         return reservations.stream()
-                .map(RegistrationInfo::from)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
