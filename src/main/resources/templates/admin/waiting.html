@@ -33,29 +33,45 @@
       <li class="nav-item">
         <a class="nav-link" href="/admin/time">Time</a>
       </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/login">Login</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                 aria-haspopup="true" aria-expanded="false">
-                <img class="profile-image" src="/image/default-profile.png" alt="Profile">
-                <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
-              </div>
-            </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login">Login</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+          <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+          <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
+        </div>
+      </li>
     </ul>
   </div>
 </nav>
 
 <div class="content-container">
-  <h2 class="content-container-title">방탈출 어드민</h2>
+  <h2 class="content-container-title">예약 대기 관리 페이지</h2>
+  <div class="table-container"/>
+  <table class="table">
+    <thead>
+    <tr>
+      <th scope="col">예약대기 번호</th>
+      <th scope="col">예약자</th>
+      <th scope="col">테마</th>
+      <th scope="col">날짜</th>
+      <th scope="col">시간</th>
+      <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+  </table>
 </div>
 
 <script src="/js/user-scripts.js"></script>
+<script src="/js/waiting.js"></script>
 </body>
 </html>
