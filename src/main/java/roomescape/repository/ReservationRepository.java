@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.domain.Theme;
@@ -55,5 +56,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
              WHERE r.member.id = :memberId
              """)
     List<ReservationWaitingWithRank> findReservationWaitingWithRankByMemberId(@Param("memberId") long memberId);
+
+    List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);
 }
 

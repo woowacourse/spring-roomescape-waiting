@@ -11,6 +11,8 @@ import roomescape.util.TokenGenerator;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class WaitingApiControllerTest {
@@ -37,5 +39,17 @@ class WaitingApiControllerTest {
                 .when().post("/waiting")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("모든 예약 대기 목록을 가져온다.")
+    void selectWaitings() {
+        RestAssured.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().get("/admin/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(4));
     }
 }
