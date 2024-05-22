@@ -23,6 +23,12 @@ import roomescape.core.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
+    protected static final String MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 회원입니다.";
+    protected static final String TIME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약 시간입니다.";
+    protected static final String THEME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 테마입니다.";
+    protected static final String ALREADY_BOOKED_TIME_EXCEPTION_MESSAGE = "해당 시간에 이미 예약 내역이 존재합니다.";
+    protected static final String RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약입니다.";
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -63,24 +69,24 @@ public class ReservationService {
 
     private Member getMemberById(final Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     private ReservationTime getReservationTimeById(final Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(TIME_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     private Theme getThemeById(final Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(THEME_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     private void validateDuplicatedReservation(final Reservation reservation, final ReservationTime reservationTime) {
         final Integer reservationCount = reservationRepository.countByDateAndTimeAndTheme(
                 reservation.getDate(), reservationTime, reservation.getTheme());
         if (reservationCount > 0) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약 내역이 존재합니다.");
+            throw new IllegalArgumentException(ALREADY_BOOKED_TIME_EXCEPTION_MESSAGE);
         }
     }
 
@@ -134,7 +140,7 @@ public class ReservationService {
     @Transactional
     public void delete(final long id) {
         final Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE));
 
         reservationRepository.delete(reservation);
         changeFirstWaitingToReservation(reservation);

@@ -18,6 +18,12 @@ import roomescape.core.repository.WaitingRepository;
 
 @Service
 public class WaitingService {
+    public static final String BOOKED_TIME_WAITING_EXCEPTION_MESSAGE = "해당 시간에 이미 예약한 내역이 존재합니다. 예약 대기할 수 없습니다.";
+    public static final String WAITED_TIME_WAITING_EXCEPTION_MESSAGE = "해당 시간에 이미 예약 대기한 내역이 존재합니다. 예약 대기할 수 없습니다.";
+    public static final String MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 회원입니다.";
+    public static final String TIME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약 시간입니다.";
+    public static final String THEME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 테마입니다.";
+
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -54,7 +60,7 @@ public class WaitingService {
                 theme);
 
         if (reservationCount > 0) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약한 내역이 존재합니다. 예약 대기할 수 없습니다.");
+            throw new IllegalArgumentException(BOOKED_TIME_WAITING_EXCEPTION_MESSAGE);
         }
     }
 
@@ -67,7 +73,7 @@ public class WaitingService {
                 theme);
 
         if (isWaitingExist) {
-            throw new IllegalArgumentException("해당 시간에 이미 예약 대기한 내역이 존재합니다. 예약 대기할 수 없습니다.");
+            throw new IllegalArgumentException(WAITED_TIME_WAITING_EXCEPTION_MESSAGE);
         }
     }
 
@@ -81,17 +87,17 @@ public class WaitingService {
 
     private Member getMemberById(final Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     private ReservationTime getReservationTimeById(final Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(TIME_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     private Theme getThemeById(final Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new IllegalArgumentException(THEME_NOT_EXISTS_EXCEPTION_MESSAGE));
     }
 
     @Transactional(readOnly = true)

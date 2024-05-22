@@ -13,6 +13,10 @@ import roomescape.core.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
+    public static final String THEME_NAME_DUPLICATED_EXCEPTION_MESSAGE = "해당 이름의 테마가 이미 존재합니다.";
+    public static final String TIME_ZONE = "Asia/Seoul";
+    public static final String BOOKED_THEME_DELETE_EXCEPTION_MESSAGE = "예약 내역이 존재하는 테마는 삭제할 수 없습니다.";
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -33,7 +37,7 @@ public class ThemeService {
     private void validateDuplicatedName(final Theme theme) {
         final Integer themeCount = themeRepository.countByName(theme.getName());
         if (themeCount > 0) {
-            throw new IllegalArgumentException("해당 이름의 테마가 이미 존재합니다.");
+            throw new IllegalArgumentException(THEME_NAME_DUPLICATED_EXCEPTION_MESSAGE);
         }
     }
 
@@ -47,7 +51,7 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularTheme() {
-        final ZoneId kst = ZoneId.of("Asia/Seoul");
+        final ZoneId kst = ZoneId.of(TIME_ZONE);
         final LocalDate today = LocalDate.now(kst);
         final LocalDate lastWeek = today.minusWeeks(1);
 
@@ -63,7 +67,7 @@ public class ThemeService {
         final int reservationCount = reservationRepository.countByTheme(theme);
 
         if (reservationCount > 0) {
-            throw new IllegalArgumentException("예약 내역이 존재하는 테마는 삭제할 수 없습니다.");
+            throw new IllegalArgumentException(BOOKED_THEME_DELETE_EXCEPTION_MESSAGE);
         }
 
         themeRepository.deleteById(id);
