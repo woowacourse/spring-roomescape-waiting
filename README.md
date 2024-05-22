@@ -13,8 +13,8 @@
 
 ### 로그인 페이지
 - `/login` GET 요청 시 로그인 페이지를 응답한다.
-- 관리자 ID: `nyangin@email.com` / PW: `1234`
-- 사용자 ID: `mia@email.com` / PW: `1234` 
+  - 관리자 ID: `nyangin@email.com` / PW: `1234`
+  - 사용자 ID: `mia@email.com` / PW: `1234` 
 
 <hr>
 
@@ -34,7 +34,7 @@
     }
     ```
   |파라미터|타입|필수여부|설명|
-      |-----|---|------|---|
+  |-----|---|------|---|
   |token|String|true|사용자 인증 토큰|
 
   - `status` 필드는 `"RESERVED"`고정
@@ -105,26 +105,26 @@
 #### 예약 삭제
 - Request
     ```http
-      DELETE /reservations/{id} HTTP/1.1
+    DELETE /reservations/{id} HTTP/1.1
     ```
   | 파라미터 | 타입   |필수여부| 설명       |
     |-----|------|------|----------|
   | id  | Long |true| 예약 고유 id |
 - Response
     ```http
-      HTTP/1.1 204
+    HTTP/1.1 204
     ```
 
 #### 내 예약 목록 조회
 - Request
     ```http
-      GET /reservations/mine HTTP/1.1
+    GET /reservations/mine HTTP/1.1
     ```
 - Response
     ```http
-      HTTP/1.1 200
-      Content-Type: application/json
-      [
+    HTTP/1.1 200
+    Content-Type: application/json
+    [
         {
           "reservationId": 1,
           "theme": "호러",
@@ -141,7 +141,7 @@
           "status": "대기",
           "rank": 1
         }
-     ]
+    ]
     ```
   
 <br>
@@ -159,8 +159,8 @@
     ```
 - Response
     ```http 
-      HTTP/1.1 201
-      Content-Type: application/json
+    HTTP/1.1 201
+    Content-Type: application/json
     
       {
          "id": 1,
@@ -195,7 +195,7 @@
     DELETE /times/{id} HTTP/1.1
     ```
   | 파라미터 | 타입   |필수여부| 설명          |
-      |-----|------|------|-------------|
+  |-----|------|------|-------------|
   | id  | Long |true| 예약 시간 고유 id |
 - Response
     ```http
@@ -208,7 +208,7 @@
     GET /times/available?date={date}&themeId={themeId} HTTP/1.1
     ```
   | 파라미터 | 타입        |필수여부| 설명          |
-      |-----|-----------|------|-------------|
+  |-----|-----------|------|-------------|
   | date  | LocalDate |true| 예약 날짜       |
   | themeId  | Long      |true| 예약 시간 고유 id |
 
@@ -247,8 +247,8 @@
     ```
 - Response
     ```http  
-      HTTP/1.1 201
-      Content-Type: application/json
+    HTTP/1.1 201
+    Content-Type: application/json
     
       {
          "id": 1,
@@ -316,7 +316,7 @@
     DELETE /themes/{id} HTTP/1.1
     ```
   | 파라미터 | 타입   |필수여부| 설명       |
-      |-----|------|------|----------|
+  |-----|------|------|----------|
   | id  | Long |true| 테마 고유 id |
 - Response
     ```http
@@ -341,7 +341,7 @@
     ```
 
   |파라미터|타입|필수여부|설명|
-      |-----|---|------|---|
+  |-----|---|------|---|
   |token|String|true|사용자 인증 토큰|
   - `status` 필드는 `"WAITING"` 고정
 - Response
@@ -422,7 +422,7 @@
   HTTP/1.1 200 OK
   ```
   |파라미터|타입|필수여부|설명|
-      |-----|---|------|---|
+  |-----|---|------|---|
   |token|String|true|사용자 인증 토큰|
 
 <br>
@@ -595,11 +595,11 @@
     PUT /admin/waitings/{id} HTTP/1.1
     ```
    | 파라미터 | 타입   |필수여부| 설명          |
-        |-----|------|------|-------------|
+   |-----|------|------|-------------|
     | id  | Long |true| 예약 대기 고유 id |
 - Response
     ```http
-      HTTP/1.1 200
+    HTTP/1.1 200
     ```
 
 ####  예약 대기 거절
@@ -608,9 +608,9 @@
     DELETE /admin/waitings/{id} HTTP/1.1
     ```
   | 파라미터 | 타입   |필수여부| 설명          |
-          |-----|------|------|-------------|
+  |-----|------|------|-------------|
   | id  | Long |true| 예약 대기 고유 id |
 - Response
     ```http
-      HTTP/1.1 204
+    HTTP/1.1 204
     ```
