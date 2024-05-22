@@ -7,8 +7,7 @@ public record CreateReservationResponse(Long id,
                                         CreateMemberOfReservationResponse member,
                                         CreateThemeOfReservationResponse theme,
                                         LocalDate date,
-                                        CreateTimeOfReservationResponse time
-                                        ) {
+                                        CreateTimeOfReservationResponse time) {
     public static CreateReservationResponse from(final Reservation reservation) {
         return new CreateReservationResponse(reservation.getId(),
                 CreateMemberOfReservationResponse.from(reservation.getMember()),
