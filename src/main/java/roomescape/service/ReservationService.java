@@ -114,6 +114,15 @@ public class ReservationService {
     @Transactional
     public Reservation reserveWaitingReservation(final long id) {
         final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
+        final boolean reservationExists = reservationRepository
+                .existsByThemeIdAndTimeIdAndDateAndStatus(
+                        waitingReservation.getTheme().getId(),
+                        waitingReservation.getTime().getId(),
+                        waitingReservation.getDate(),
+                        Status.RESERVED);
+        if (reservationExists) {
+            throw new DuplicateReservationException("예약이 존재하여 승인할 수 없습니다.");
+        }
         waitingReservation.reserveWaiting();
         return waitingReservation;
     }
