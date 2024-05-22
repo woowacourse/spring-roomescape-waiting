@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
@@ -142,8 +142,8 @@ class ReservationRepositoryTest {
         assertThatThrownBy(() -> reservationRepository.getByDateAndReservationTimeIdAndThemeId(startDate,
                         reservationTime.getId(),
                         theme.getId()))
-                .isInstanceOf(InvalidDataAccessApiUsageException.class)
-                .hasMessage("2024-11-11의 timeId: 1, themeId: 1의 예약이 존재하지 않습니다.");
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("2024-11-11의 time: 1, theme: 1의 예약이 존재하지 않습니다.");
     }
 
     @Test

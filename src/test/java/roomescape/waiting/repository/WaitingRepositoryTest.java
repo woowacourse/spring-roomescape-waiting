@@ -2,6 +2,7 @@ package roomescape.waiting.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.JpaRepositoryTest;
 import roomescape.waiting.model.Waiting;
+import roomescape.waiting.model.WaitingWithRanking;
 
 @JpaRepositoryTest
 class WaitingRepositoryTest {
@@ -37,6 +39,28 @@ class WaitingRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Test
+    @DisplayName("해당하는 회원의 대기 정보와 해당 대기보다 일찍 저장된 데이터의 갯수를 조회한다.")
+    void findWaitingsWithRankByMemberId() {
+        // given
+        Member member = memberRepository.save(MemberFixture.getOne());
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.getOneWithMemberTimeTheme(member, reservationTime, theme));
+        Waiting waiting1 = waitingRepository.save(new Waiting(reservation, member));
+        Waiting waiting2 = waitingRepository.save(new Waiting(reservation, member));
+
+        // when
+        List<WaitingWithRanking> waitingsWithRankByMember = waitingRepository.findWaitingsWithRankByMember(member);
+
+        // then
+        assertThat(waitingsWithRankByMember.get(0).waiting()).isEqualTo(waiting1);
+        assertThat(waitingsWithRankByMember.get(0).ranking()).isZero();
+        assertThat(waitingsWithRankByMember.get(1).waiting()).isEqualTo(waiting2);
+        assertThat(waitingsWithRankByMember.get(1).ranking()).isEqualTo(1);
+    }
 
     @Test
     @DisplayName("해당하는 회원, 예약과 동일한 예약 대기가 존재한다면, 참을 반환한다.")

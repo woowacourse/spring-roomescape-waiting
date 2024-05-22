@@ -1,5 +1,6 @@
 package roomescape.waiting.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.common.exception.ForbiddenException;
@@ -9,6 +10,7 @@ import roomescape.reservation.model.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.dto.request.CreateWaitingRequest;
 import roomescape.waiting.dto.response.CreateWaitingResponse;
+import roomescape.waiting.dto.response.FindWaitingResponse;
 import roomescape.waiting.model.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -27,7 +29,6 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-
     public CreateWaitingResponse createWaiting(final AuthInfo authInfo,
                                                final CreateWaitingRequest createWaitingRequest) {
         Reservation reservation = reservationRepository.getByDateAndReservationTimeIdAndThemeId(
@@ -43,6 +44,14 @@ public class WaitingService {
             throw new IllegalArgumentException(
                     "memberId: " + memberId + " 회원이 reservationId: " + reservationId + "인 예약에 대해 이미 대기를 신청했습니다.");
         }
+    }
+
+    public List<FindWaitingResponse> getWaitings(final AuthInfo authInfo) {
+        Member member = memberRepository.getById(authInfo.getMemberId());
+        return waitingRepository.findWaitingsWithRankByMember(member)
+                .stream()
+                .map(FindWaitingResponse::of)
+                .toList();
     }
 
     public void deleteWaiting(final AuthInfo authInfo, final Long waitingId) {

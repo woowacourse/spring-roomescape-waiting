@@ -55,7 +55,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     default Reservation getByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() ->
-                new NoSuchElementException(date + "의 timeId: " + timeId + ", themeId: " + themeId + "의 예약이 존재하지 않습니다."));
+                new NoSuchElementException(date + "의 time: " + timeId + ", theme: " + themeId + "의 예약이 존재하지 않습니다."));
     }
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);

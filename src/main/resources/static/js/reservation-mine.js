@@ -1,12 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
-    fetch('/members/reservations')
+document.addEventListener('DOMContentLoaded', async () => {
+        const data = [
+            ...await getMyReservations(),
+            ...await getMyReservationWaiting()
+        ];
+        render(data);
+    });
+
+function getMyReservations() {
+    return fetch('/members/reservations') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
         })
-        .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
-});
+}
+
+function getMyReservationWaiting() {
+    return fetch('/members/waitings') // 내 예약 목록 조회 API 호출
+        .then(response => {
+            if (response.status === 200) return response.json();
+            throw new Error('Read failed');
+        })
+        .catch(error => console.error('Error fetching reservation waiting:', error));
+}
 
 function render(data) {
     const tableBody = document.getElementById('table-body');
@@ -44,10 +60,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-     */
-    const endpoint = '';
+    const endpoint = 'waitings/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

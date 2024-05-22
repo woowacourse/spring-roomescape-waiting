@@ -1,11 +1,13 @@
 package roomescape.waiting;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,26 +25,31 @@ import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 import roomescape.waiting.dto.request.CreateWaitingRequest;
+import roomescape.waiting.dto.response.FindWaitingResponse;
 import roomescape.waiting.model.Waiting;
+import roomescape.waiting.model.WaitingWithRanking;
 import roomescape.waiting.repository.WaitingRepository;
 
 @IntegrationTest
 class WaitingIntegrationTest {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private WaitingRepository waitingRepository;
+    WaitingIntegrationTest(final MemberRepository memberRepository,
+                           final ReservationTimeRepository reservationTimeRepository,
+                           final ThemeRepository themeRepository, final ReservationRepository reservationRepository,
+                           final WaitingRepository waitingRepository) {
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
+    }
 
     @LocalServerPort
     private int port;
@@ -103,7 +110,7 @@ class WaitingIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("2024-11-30의 timeId: 1, themeId: 1의 예약이 존재하지 않습니다."));
+                .body("detail", equalTo("2024-11-30의 time: 1, theme: 1의 예약이 존재하지 않습니다."));
     }
 
     @DisplayName("방탈출 예약 대기 요청 시 이미 회원에 대한 대기가 존재할 경우, 예외를 반환한다.")
@@ -112,7 +119,8 @@ class WaitingIntegrationTest {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.parse("2024-11-30"), reservationTime, theme));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2024-11-30"), reservationTime, theme));
 
         waitingRepository.save(new Waiting(reservation, member));
         CreateWaitingRequest createWaitingRequest = new CreateWaitingRequest(reservation.getDate(), 1L, 1L);
@@ -128,13 +136,42 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("memberId: 1 회원이 reservationId: 1인 예약에 대해 이미 대기를 신청했습니다."));
     }
 
+    @DisplayName("회원의 방탈출 예약 대기 정보 목록을 조회한다.")
+    @Test
+    void getWaitings() {
+        Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
+        Member otherMember = memberRepository.save(MemberFixture.getOne("otherMember@navv.com"));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2024-11-30"), reservationTime, theme));
+        Reservation otherReservation = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2025-01-30"), reservationTime, theme));
+
+        Waiting waiting1 = waitingRepository.save(new Waiting(reservation, otherMember));
+        Waiting waiting2 = waitingRepository.save(new Waiting(otherReservation, member));
+        Waiting waiting3 = waitingRepository.save(new Waiting(reservation, member));
+
+        List<FindWaitingResponse> findWaitingResponses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin(member))
+                .when().get("/members/waitings")
+                .then().log().all()
+
+                .statusCode(200).extract().jsonPath()
+                .getList(".", FindWaitingResponse.class);
+        assertTrue(findWaitingResponses.contains(FindWaitingResponse.of(new WaitingWithRanking(waiting2, 0L))));
+        assertTrue(findWaitingResponses.contains(FindWaitingResponse.of(new WaitingWithRanking(waiting3, 1L))));
+    }
+
     @DisplayName("방탈출 예약 대기를 삭제한다.")
     @Test
     void deleteWaiting() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
-        Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.parse("2024-11-30"), reservationTime, theme));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.parse("2024-11-30"), reservationTime, theme));
 
         waitingRepository.save(new Waiting(reservation, member));
 
