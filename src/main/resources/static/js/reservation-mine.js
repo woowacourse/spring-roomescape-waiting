@@ -15,6 +15,7 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
+        const id = item.id;
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
@@ -53,7 +54,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `/reservations/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
