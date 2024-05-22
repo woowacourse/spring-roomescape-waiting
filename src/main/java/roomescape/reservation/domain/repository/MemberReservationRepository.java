@@ -15,6 +15,12 @@ import java.util.Optional;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
 
+    @Query("""
+            SELECT mr
+            FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
+            WHERE mr.member = :member
+            ORDER BY r.date, rt.startAt ASC
+            """)
     List<MemberReservation> findByMember(final Member member);
 
     @Query("""

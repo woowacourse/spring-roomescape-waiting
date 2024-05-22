@@ -257,7 +257,6 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
-    // TODO: 코드 메서드 분리, 날짜, 시간 순서로 정렬
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         Member member = memberService.findMemberById(memberId);
         List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
