@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
+import static roomescape.InitialMemberFixture.MEMBER_3;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
@@ -22,6 +23,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -29,6 +31,8 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @Test
     @DisplayName("예약이 없는데 예약 대기를 신청하는 경우 예외가 발생한다.")
