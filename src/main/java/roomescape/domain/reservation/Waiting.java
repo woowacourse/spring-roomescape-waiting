@@ -55,6 +55,10 @@ public class Waiting {
         return id;
     }
 
+    public Long getMemberId() {
+        return member.getId();
+    }
+
     public String getMemberName() {
         return member.getNameString();
     }
@@ -67,12 +71,20 @@ public class Waiting {
         return time;
     }
 
+    public Long getTimeId() {
+        return time.getId();
+    }
+
     public LocalTime getStartAt() {
         return time.getStartAt();
     }
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
     }
 
     public String getThemeName() {

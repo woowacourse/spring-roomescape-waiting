@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -20,4 +21,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             FROM Waiting w 
             WHERE w.member.id = :memberId""")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    boolean existsByDateAndTime_IdAndTheme_IdAndMember_Id(LocalDate date, Long timeId, Long themeId, Long memberId);
 }

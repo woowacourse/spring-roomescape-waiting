@@ -28,6 +28,11 @@ public class WaitingService {
 
     public ReservationResponse create(final Waiting waiting) {
         validateDate(waiting.getDate());
+        boolean duplicated = waitingRepository.existsByDateAndTime_IdAndTheme_IdAndMember_Id(
+                waiting.getDate(), waiting.getTimeId(), waiting.getThemeId(), waiting.getMemberId());
+        if (duplicated) {
+            throw new IllegalArgumentException("이미 예약 대기가 있습니다.");
+        }
         Waiting saved = waitingRepository.save(waiting);
         return ReservationResponse.from(saved);
     }
