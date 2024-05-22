@@ -1,10 +1,14 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationWaiting;
 import roomescape.infrastructure.ReservationRepository;
 import roomescape.infrastructure.ReservationWaitingRepository;
+
+import java.util.Optional;
 
 @Service
 public class ReservationAndWaitingService {
@@ -17,16 +21,23 @@ public class ReservationAndWaitingService {
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
-    public void deleteIfNoWaitingOrUpdateReservation(Long reservationId) {
+    @Transactional
+    public void changeWaitingToReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("예약 삭제 실패: 존재하지 않는 예약입니다. (id: %d)", reservationId)));
-        reservationWaitingRepository.findTopByDateAndTimeIdAndThemeIdOrderById(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
-                .ifPresentOrElse(
-                        waiting -> convertWaitingToReservation(waiting, reservation),
-                        () -> reservationRepository.deleteById(reservationId));
+        findWaitingOfReservation(reservation).ifPresentOrElse(
+                waiting -> updateReservationByWaiting(waiting, reservation),
+                () -> deleteReservation(reservationId));
     }
 
-    private void convertWaitingToReservation(ReservationWaiting waiting, Reservation reservation) {
+    private Optional<ReservationWaiting> findWaitingOfReservation(Reservation reservation) {
+        ReservationDate date = reservation.getDate();
+        Long timeId = reservation.getTime().getId();
+        Long themeId = reservation.getTheme().getId();
+        return reservationWaitingRepository.findTopByDateAndTimeIdAndThemeIdOrderById(date, timeId, themeId);
+    }
+
+    private void updateReservationByWaiting(ReservationWaiting waiting, Reservation reservation) {
         Reservation changedReservation = new Reservation(reservation.getId(),
                 waiting.getMember(),
                 reservation.getDate(),
@@ -34,5 +45,9 @@ public class ReservationAndWaitingService {
                 reservation.getTheme());
         reservationRepository.save(changedReservation);
         reservationWaitingRepository.deleteById(waiting.getId());
+    }
+
+    private void deleteReservation(Long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 }

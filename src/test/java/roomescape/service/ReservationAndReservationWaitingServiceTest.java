@@ -48,7 +48,7 @@ class ReservationAndReservationWaitingServiceTest {
         String date = LocalDate.now().plusDays(2).toString();
         Reservation reservation = reservationRepository.save(new Reservation(member, new ReservationDate(date), time, theme));
 
-        reservationAndWaitingService.deleteIfNoWaitingOrUpdateReservation(reservation.getId());
+        reservationAndWaitingService.changeWaitingToReservation(reservation.getId());
 
         assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
     }
@@ -68,7 +68,7 @@ class ReservationAndReservationWaitingServiceTest {
         Reservation reservation = reservationRepository.save(new Reservation(reservedMember, date, time, theme));
         ReservationWaiting waiting = reservationWaitingRepository.save(new ReservationWaiting(createdDateTime, waitingMember, date, time, theme));
 
-        reservationAndWaitingService.deleteIfNoWaitingOrUpdateReservation(reservation.getId());
+        reservationAndWaitingService.changeWaitingToReservation(reservation.getId());
 
         Reservation updatedReservation = reservationRepository.findById(reservation.getId()).orElseThrow();
         assertAll(
