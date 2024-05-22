@@ -76,4 +76,8 @@ public class Reservation {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public Schedule getSchedule() {
+        return schedule;
+    }
 }

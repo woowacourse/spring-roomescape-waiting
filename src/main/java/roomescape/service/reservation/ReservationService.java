@@ -10,6 +10,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.domain.reservation.ReservationWaitingRepository;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
@@ -105,17 +106,39 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll().stream().map(ReservationResponse::new).toList();
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::new)
+                .toList();
     }
 
-    public void deleteById(long id) {
-        reservationRepository.deleteById(id);
+    public void deleteById(long reservationId) {
+        reservationRepository.findById(reservationId)
+                .ifPresent(this::cancelReservation);
+    }
+
+    private void cancelReservation(Reservation reservation) {
+        Member member = reservation.getMember();
+        Theme theme = reservation.getTheme();
+        Schedule schedule = reservation.getSchedule();
+        reservationRepository.delete(reservation);
+        reservationWaitingRepository.findTopByMemberAndThemeAndScheduleOrderByCreatedAt(member, theme, schedule)
+                .ifPresent(this::convertFirstPriorityWaitingToReservation);
+    }
+
+    private void convertFirstPriorityWaitingToReservation(ReservationWaiting waiting) {
+        Schedule schedule = waiting.getSchedule();
+        LocalDate date = schedule.getDate();
+        long timeId = schedule.getReservationTime().getId();
+        long themeId = waiting.getTheme().getId();
+        long memberId = waiting.getMember().getId();
+        createReservation(timeId, themeId, memberId, date);
+        reservationWaitingRepository.delete(waiting);
     }
 
     public void deleteById(long reservationId, long memberId) {
         reservationRepository.findById(reservationId)
                 .ifPresent(reservation -> validateAuthority(reservation, memberId));
-        reservationRepository.deleteById(reservationId);
+        deleteById(reservationId);
     }
 
     private void validateAuthority(Reservation reservation, long memberId) {

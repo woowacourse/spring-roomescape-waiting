@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
@@ -165,6 +167,29 @@ class ReservationServiceTest {
 
         //then
         assertThat(reservationService.findAll()).isEmpty();
+    }
+
+    @DisplayName("예약 삭제 시 해당 일정과 테마에 대기가 등록돼 있다면 첫 번째 대기를 예약으로 승격한다.")
+    @Test
+    @Transactional  // TODO: 제거 시 테스트 깨짐
+    void convertWaitingToReservationWhenReservationCanceled() {
+        // given
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.MAX), reservationTime);
+        ReservationWaiting waiting = new ReservationWaiting(member, theme, schedule);
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
+        Reservation reservation = new Reservation(member, schedule, theme, ReservationStatus.RESERVED);
+        Reservation target = reservationRepository.save(reservation);
+
+        // when
+        reservationService.deleteById(target.getId());
+
+        // then
+        long savedWaitingId = savedWaiting.getId();
+        long memberId = member.getId();
+        SoftAssertions assertions = new SoftAssertions();
+        assertions.assertThat(reservationWaitingRepository.findById(savedWaitingId)).isNotPresent();
+        assertions.assertThat(reservationRepository.findByMemberId(memberId)).hasSize(1);
+        assertions.assertAll();
     }
 
     @DisplayName("해당 테마와 일정으로 예약이 존재하면 예외를 발생시킨다.")

@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.member.Member;
@@ -23,4 +24,6 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
     List<WaitingWithRank> findWithRankByMemberId(long memberId);
 
     boolean existsByMemberAndThemeAndSchedule(Member member, Theme theme, Schedule schedule);
+
+    Optional<ReservationWaiting> findTopByMemberAndThemeAndScheduleOrderByCreatedAt(Member member, Theme theme, Schedule schedule);
 }
