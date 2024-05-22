@@ -49,7 +49,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservation> findAllByMemberWithWaitingStatus(Long memberId) {
+    public List<MemberReservation> findMemberReservationWithWaitingStatus(Long memberId) {
         return reservationRepository.findByMemberIdWithWaiting(memberId)
                 .stream()
                 .map(MemberReservation::new)

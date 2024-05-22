@@ -71,7 +71,8 @@ class ReservationControllerTest {
     @DisplayName("로그인한 특정 유저의 예약 목록을 읽는 요청을 처리할 수 있다")
     @Test
     void should_handle_read_my_reservations_request_when_requested() throws Exception {
-        when(reservationService.findAllByMemberWithWaitingStatus(any(Long.class))).thenReturn(Collections.emptyList());
+        when(reservationService.findMemberReservationWithWaitingStatus(any(Long.class))).thenReturn(
+                Collections.emptyList());
 
         mockMvc.perform(get("/reservations/my")
                         .cookie(new Cookie("mockCookie", "mockValue")))

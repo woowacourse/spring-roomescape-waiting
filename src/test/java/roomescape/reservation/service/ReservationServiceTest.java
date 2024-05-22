@@ -66,7 +66,7 @@ class ReservationServiceTest {
         when(reservationRepository.findByMemberIdWithWaiting(1L)).thenReturn(
                 List.of(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1L)));
 
-        assertThat(reservationService.findAllByMemberWithWaitingStatus(1L))
+        assertThat(reservationService.findMemberReservationWithWaitingStatus(1L))
                 .containsExactly(new MemberReservation(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1L)));
     }
 

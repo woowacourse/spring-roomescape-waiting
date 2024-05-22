@@ -47,7 +47,7 @@ public class ReservationController {
     @GetMapping("/reservations/my")
     public ResponseEntity<List<MemberReservation>> findMemberReservation(
             @Authenticated Accessor accessor) {
-        return ResponseEntity.ok(reservationService.findAllByMemberWithWaitingStatus(accessor.id()));
+        return ResponseEntity.ok(reservationService.findMemberReservationWithWaitingStatus(accessor.id()));
     }
 
     @PostMapping("/reservations")
