@@ -10,11 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.controller.request.WaitingRequest;
+import roomescape.controller.response.WaitingResponse;
 import roomescape.service.AuthService;
 import roomescape.service.dto.AuthDto;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -106,9 +108,9 @@ class WaitingControllerTest {
         waitingInsertActor.execute(parameters);
     }
 
-    @DisplayName("예약을 추가할 수 있다.")
+    @DisplayName("예약 대기를 추가할 수 있다.")
     @Test
-    void should_insert_reservation() {
+    void should_insert_reservation_waiting() {
         String token = authService.createToken(userDto); // TODO: can change to TokenManager.create()
         WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), 1L, 1L);
 
@@ -122,6 +124,22 @@ class WaitingControllerTest {
                 .header("Location", "/reservations/waiting/" + (INITIAL_WAITING_COUNT + 1));
 
         assertThat(countAllReservations()).isEqualTo(INITIAL_WAITING_COUNT + 1);
+    }
+
+    @DisplayName("자신의 예약 대기 목록을 조회한다.")
+    @Test
+    void should_find_reservations_of_member() {
+        String token = authService.createToken(userDto);
+
+        List<WaitingResponse> responses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/reservations/waiting/mine")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList(".", WaitingResponse.class);
+
+        assertThat(responses).hasSize(15);
     }
 
     private Integer countAllReservations() {

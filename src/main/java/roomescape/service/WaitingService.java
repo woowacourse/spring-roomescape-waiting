@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
 import roomescape.repository.MemberRepository;
@@ -12,6 +13,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,6 +36,7 @@ public class WaitingService {
 
     public Waiting saveWaiting(ReservationDto reservationDto) {
         // TODO: findById -> save vs save -> findById
+        // TODO: 검증 로직 추가
         ReservationTime time = findReservationTime(reservationDto);
         Theme theme = findTheme(reservationDto);
         Member member = findMember(reservationDto);
@@ -57,5 +60,9 @@ public class WaitingService {
         long memberId = reservationDto.getMemberId();
         Optional<Member> member = memberRepository.findById(memberId);
         return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+    }
+
+    public List<Waiting> findWaitingByMember(LoginMember member) {
+        return waitingRepository.findByMemberId(member.getId());
     }
 }

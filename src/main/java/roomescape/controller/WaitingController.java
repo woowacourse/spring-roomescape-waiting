@@ -2,10 +2,7 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ReservationRequest;
 import roomescape.controller.response.WaitingResponse;
 import roomescape.model.Waiting;
@@ -14,6 +11,7 @@ import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/reservations/waiting")
@@ -27,11 +25,20 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody ReservationRequest request, LoginMember member) {
-        ReservationDto reservationDto = ReservationDto.of(request, member);
+        ReservationDto reservationDto = ReservationDto.of(request, member); // TODO: DTO 분리?
         Waiting waiting = waitingService.saveWaiting(reservationDto);
         WaitingResponse response = WaitingResponse.from(waiting); // TODO: essential?
         return ResponseEntity
                 .created(URI.create("/reservations/waiting/" + waiting.getId()))
                 .body(response);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<WaitingResponse>> getReservationsOfMember(LoginMember member) {
+        List<Waiting> waiting = waitingService.findWaitingByMember(member);
+        List<WaitingResponse> response = waiting.stream()
+                .map(WaitingResponse::from)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 }
