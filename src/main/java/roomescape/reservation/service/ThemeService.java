@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
@@ -28,6 +29,7 @@ public class ThemeService {
         return ThemeResponse.toResponse(savedTheme);
     }
 
+    @Transactional(readOnly = true)
     public ThemeResponse findById(Long id) {
         Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
@@ -35,6 +37,7 @@ public class ThemeService {
         return ThemeResponse.toResponse(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         List<Theme> themes = themeRepository.findAll();
 
@@ -43,6 +46,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<PopularThemeResponse> findThemesDescOfLastWeekForLimitCount(int limitCount) {
         LocalDate dateFrom = LocalDate.now().minusWeeks(1);
         List<Theme> popularTheme = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, limitCount);

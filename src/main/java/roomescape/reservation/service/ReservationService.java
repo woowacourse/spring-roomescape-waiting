@@ -44,8 +44,10 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse saveReservationSuccess(ReservationSaveRequest reservationSaveRequest,
-                                                      LoginMember loginMember) {
+    public ReservationResponse saveReservationSuccess(
+            ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember
+    ) {
         Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.SUCCESS);
         validateDuplicatedReservationSuccess(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -53,8 +55,10 @@ public class ReservationService {
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    public ReservationResponse saveReservationWaiting(ReservationSaveRequest reservationSaveRequest,
-                                                      LoginMember loginMember) {
+    public ReservationResponse saveReservationWaiting(
+            ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember
+    ) {
         Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.WAIT);
         validateDuplicatedReservationWaiting(reservation, loginMember);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -62,8 +66,11 @@ public class ReservationService {
         return ReservationResponse.toResponse(savedReservation);
     }
 
-    private Reservation createValidatedReservationOfStatus(ReservationSaveRequest reservationSaveRequest,
-                                                           LoginMember loginMember, Status status) {
+    private Reservation createValidatedReservationOfStatus(
+            ReservationSaveRequest reservationSaveRequest,
+            LoginMember loginMember,
+            Status status
+    ) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -100,6 +107,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponse findById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
@@ -107,12 +115,14 @@ public class ReservationService {
         return ReservationResponse.toResponse(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
@@ -127,6 +137,7 @@ public class ReservationService {
                 )).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaitingResponse> findWaitingReservations() {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
@@ -139,6 +150,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                         request.themeId(),
