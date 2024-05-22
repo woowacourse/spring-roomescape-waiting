@@ -65,4 +65,13 @@ class ReservationTest {
         final Reservation sameCreateAtReservation = new Reservation(member, date, time, theme, Status.BOOKED, createAt);
         assertTrue(reservation.isEqualCreateAt(sameCreateAtReservation));
     }
+
+    @Test
+    @DisplayName("예약의 Status 상태를 변경할 수 있다.")
+    void setReservationStatus() {
+        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        final Reservation reservation = new Reservation(member, date, time, theme, Status.STANDBY, LocalDateTime.now());
+        reservation.approve();
+        assertThat(reservation.getStatus()).isEqualTo(Status.BOOKED);
+    }
 }

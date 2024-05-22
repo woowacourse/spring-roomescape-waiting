@@ -189,17 +189,22 @@ class ReservationControllerTest {
     void findLoginMemberReservation() {
         ValidatableResponse response = e2eTest.get("/reservations/mine", accessToken);
         response.statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 
     @Test
-    @DisplayName("예약 대기 요청 시, 나의 예약 목록의 예약 대기 상태에 대기 순번을 표시한다.")
+    @DisplayName("나의 예약 목록의 예약 대기 상태에 대기 순번을 표시한다.")
     void findReservationWaitingRank() {
-        String alreadyBookedDate = LocalDate.parse("2224-05-08").format(DateTimeFormatter.ISO_DATE);
-        MemberReservationRequest request = new MemberReservationRequest(alreadyBookedDate, 1L, 1L);
-        e2eTest.post(request, "/reservations/waiting", accessToken);
         ValidatableResponse response = e2eTest.get("/reservations/mine", accessToken);
-        response.body("status", is(List.of("예약", "1번째 예약대기")));
+        response.body("status", is(List.of("예약", "2번째 예약대기")));
+    }
+
+    @Test
+    @DisplayName("예약 대기를 요청한다.")
+    void createReservationWaiting() {
+        MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
+        ValidatableResponse response = e2eTest.post(request, "/reservations/waiting", accessToken);
+        response.statusCode(201);
     }
 
     @Test
@@ -209,5 +214,13 @@ class ReservationControllerTest {
         MemberReservationRequest request = new MemberReservationRequest(alreadyBookedDate, 1L, 1L);
         ValidatableResponse response = e2eTest.post(request, "/reservations/waiting", accessToken);
         response.statusCode(400);
+    }
+
+    @Test
+    @DisplayName("모든 예약 대기 목록을 조회한다.")
+    void findReservationWaiting() {
+        ValidatableResponse response = e2eTest.get("/reservations/waiting", accessToken);
+        response.statusCode(200)
+                .body("size()", is(2));
     }
 }

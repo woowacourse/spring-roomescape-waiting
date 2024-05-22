@@ -1,6 +1,7 @@
 INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'test@email.com', 'password', 'ADMIN'),
-       ('유저', 'user@email.com', 'password', 'USER');
+       ('유저', 'user@email.com', 'password', 'USER'),
+       ('릴리', 'lily@email.com', 'password', 'USER');
 
 INSERT INTO reservation_time (start_at)
 VALUES ('13:00'),
@@ -16,4 +17,6 @@ VALUES ('테마1', '테마1 설명', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461
 
 INSERT INTO reservation (date, member_id, time_id, theme_id, status, create_at)
 VALUES ('2024-05-07', 1, 1, 1, 'BOOKED', '2024-05-07T11:44:30.000000'),
-       ('2224-05-08', 2, 1, 1, 'BOOKED', '2024-05-07T11:44:30.000000');
+       ('2224-05-08', 2, 1, 1, 'BOOKED', '2024-05-07T11:44:30.000000'),
+       ('2224-05-08', 3, 1, 1, 'STANDBY', '2024-05-08T11:44:30.000000'),
+       ('2224-05-08', 1, 1, 1, 'STANDBY', '2024-05-09T11:44:30.000000');

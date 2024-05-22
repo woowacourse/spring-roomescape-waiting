@@ -184,4 +184,11 @@ class AdminControllerTest {
         ValidatableResponse failResponse = e2eTest.post(request, "/admin/reservations", accessToken);
         failResponse.statusCode(201);
     }
+
+    @Test
+    @DisplayName("예약 대기 관리 페이지로 이동한다.")
+    void moveToReservationWaitingManagePage() {
+        ValidatableResponse response = e2eTest.get("/admin/waiting", accessToken);
+        response.statusCode(200);
+    }
 }
