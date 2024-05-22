@@ -1,17 +1,16 @@
 package roomescape.controller.dto;
 
-import roomescape.system.exception.RoomescapeException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record CreateReservationRequest(Long memberId, String date, Long timeId, Long themeId) {
+public record CreateReservationRequest(
+    @NotNull(message = "멤버 id는 null을 허용하지 않습니다.")
+    Long memberId,
+    @NotBlank(message = "날짜 정보는 비어있을 수 없습니다.")
+    String date,
+    @NotNull(message = "예약 시간 id는 null을 허용하지 않습니다.")
+    Long timeId,
+    @NotNull(message = "테마 id는 null을 허용하지 않습니다.")
+    Long themeId) {
 
-    public CreateReservationRequest {
-        validate(memberId, date, timeId, themeId);
-    }
-
-    private void validate(Long memberId, String date, Long timeId, Long themeId) {
-        if (memberId == null || date == null || date.isBlank() || timeId == null
-            || themeId == null) {
-            throw new RoomescapeException("요청 필드는 비어있을 수 없습니다.");
-        }
-    }
 }

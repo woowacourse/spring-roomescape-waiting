@@ -1,16 +1,13 @@
 package roomescape.controller.dto;
 
-import roomescape.system.exception.RoomescapeException;
+import jakarta.validation.constraints.NotBlank;
 
-public record CreateThemeRequest(String name, String description, String thumbnail) {
+public record CreateThemeRequest(
+    @NotBlank(message = "테마 이름은 비어있을 수 없습니다.")
+    String name,
+    @NotBlank(message = "테마 설명은 비어있을 수 없습니다.")
+    String description,
+    @NotBlank(message = "테마 썸네일은 비어있을 수 없습니다.")
+    String thumbnail) {
 
-    public CreateThemeRequest {
-        validate(name, description, thumbnail);
-    }
-
-    private void validate(String name, String description, String thumbnail) {
-        if (name.isBlank() || description.isBlank() || thumbnail.isBlank()) {
-            throw new RoomescapeException("요청 필드는 비어있을 수 없습니다.");
-        }
-    }
 }
