@@ -11,6 +11,7 @@ import roomescape.domain.Waiting;
 import roomescape.handler.exception.CustomException;
 import roomescape.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
@@ -20,16 +21,18 @@ import roomescape.service.dto.response.WaitingResponse;
 @Service
 public class WaitingService {
 
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
-    public WaitingService(ReservationTimeRepository reservationTimeRepository,
+    public WaitingService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository,
                           ThemeRepository themeRepository,
                           MemberRepository memberRepository,
                           WaitingRepository waitingRepository
     ) {
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -46,6 +49,10 @@ public class WaitingService {
 
         if (waitingRepository.existsWaitingByDateAndAndThemeAndMember(waitingRequest.date(), theme, member)) {
             throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
+        }
+
+        if (reservationRepository.existsByTimeAndDateAndThemeAndMember(reservationTime, waitingRequest.date(), theme, member)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
 
         Waiting waiting = waitingRequest.toEntity(member, reservationTime, theme);
