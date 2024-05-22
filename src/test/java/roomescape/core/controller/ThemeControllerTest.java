@@ -19,9 +19,6 @@ import roomescape.utils.ReservationTimeRequestGenerator;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 class ThemeControllerTest {
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
-
     @LocalServerPort
     private int port;
 

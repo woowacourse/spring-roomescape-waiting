@@ -14,13 +14,14 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.member.MemberRequest;
 import roomescape.core.dto.member.MemberResponse;
+import roomescape.utils.TestFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 class MemberControllerTest {
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
+    private static final String EMAIL = TestFixture.getEmail();
+    private static final String PASSWORD = TestFixture.getPassword();
 
     @LocalServerPort
     private int port;

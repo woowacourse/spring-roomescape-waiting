@@ -4,8 +4,6 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,14 +17,15 @@ import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.waiting.MemberWaitingRequest;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
+import roomescape.utils.TestFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
 class WaitingControllerTest {
-    private static final String TOMORROW = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
-    private static final String EMAIL = "test@email.com";
-    private static final String PASSWORD = "password";
+    private static final String TOMORROW = TestFixture.getTomorrowDate();
+    private static final String EMAIL = TestFixture.getEmail();
+    private static final String PASSWORD = TestFixture.getPassword();
 
     private String accessToken;
 
@@ -141,7 +140,7 @@ class WaitingControllerTest {
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201);
-        
+
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().get("/waitings")
