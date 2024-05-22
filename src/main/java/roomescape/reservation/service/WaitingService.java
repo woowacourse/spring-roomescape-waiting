@@ -55,7 +55,8 @@ public class WaitingService {
     }
 
     private void checkBothWaitingAndReservationNotExist(final CreateWaitingRequest createWaitingRequest,
-                                              final LocalDate date, final String themeName, final LocalTime time) {
+                                                        final LocalDate date, final String themeName,
+                                                        final LocalTime time) {
         if (bothWaitingAndReservationNotExist(createWaitingRequest)) {
             throw new IllegalArgumentException(date + " " + time + "의 " + themeName + " 테마는 바로 예약 가능하여 대기가 불가능합니다.");
         }
@@ -119,15 +120,7 @@ public class WaitingService {
                 .toList();
     }
 
-    public FindWaitingResponse getReservation(Long id) {
-        return null;
-    }
-
-    public List<FindWaitingResponse> searchBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
-        return null;
-    }
-
     public void deleteWaiting(Long id) {
-
+        waitingRepository.deleteById(id);
     }
 }

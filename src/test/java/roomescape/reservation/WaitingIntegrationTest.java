@@ -64,12 +64,6 @@ class WaitingIntegrationTest {
                 .then().log().cookies().extract().cookie("token");
     }
 
-    private void saveTimeThemeMemberForReservation() {
-        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
-        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
-    }
-
     @Test
     @DisplayName("방탈출 예약 대기 생성 성공 시, 생성된 시간대의 정보를 반환한다.")
     void createWaiting() {
@@ -215,114 +209,22 @@ class WaitingIntegrationTest {
                 .body("id", hasItems(1, 2))
                 .body("size()", equalTo(2));
     }
-//
-//    @Test
-//    @DisplayName("방탈출 예약 하나를 조회한다.")
-//    void getReservationTime() {
-//        saveTimeThemeMemberForReservation();
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().get("/reservations/1")
-//                .then().log().all()
-//
-//                .statusCode(200)
-//                .body("id", equalTo(1))
-//                .body("member.name", equalTo("몰리"))
-//                .body("date", equalTo("2024-11-23"));
-//    }
-//
-//    @Test
-//    @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
-//    void getReservationTime_WhenTimeNotExist() {
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().get("/reservations/1")
-//                .then().log().all()
-//
-//                .statusCode(404)
-//                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
-//    }
-//
-//    @Test
-//    @DisplayName("해당 날짜와 테마를 통해 예약 가능한 시간 조회한다.")
-//    void getAvailableTimes() {
-//        saveTimeThemeMemberForReservation();
-//        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//
-//        List<FindAvailableTimesResponse> findAvailableTimesResponses = RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().get("/reservations/times?date=2024-11-23&themeId=1")
-//                .then().log().all()
-//                .extract().jsonPath()
-//                .getList(".", FindAvailableTimesResponse.class);
-//
-//        assertAll(
-//                () -> assertThat(findAvailableTimesResponses).hasSize(2),
-//                () -> assertThat(findAvailableTimesResponses).containsExactlyInAnyOrder(
-//                        new FindAvailableTimesResponse(1L, LocalTime.parse("20:00"), true),
-//                        new FindAvailableTimesResponse(2L, LocalTime.parse("10:00"), false)
-//                )
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("해당 날짜와 테마, 기간에 해당하는 예약을 검색한다.")
-//    void searchBy() {
-//        saveTimeThemeMemberForReservation();
-//        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00")));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2025-01-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().get("/reservations/search?memberId=1&themeId=1&dateFrom=2024-12-23&dateTo=2025-01-23")
-//                .then().log().all()
-//
-//                .statusCode(200)
-//                .body("[0].id", equalTo(2))
-//                .body("[0].date", equalTo("2024-12-23"))
-//
-//                .body("[1].id", equalTo(3))
-//                .body("[1].date", equalTo("2025-01-23"));
-//    }
-//
-//    @Test
-//    @DisplayName("방탈출 예약 하나를 삭제한다.")
-//    void deleteReservationTime() {
-//        saveTimeThemeMemberForReservation();
-//        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-//                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-//
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().delete("/reservations/1")
-//                .then().log().all()
-//
-//                .statusCode(204);
-//    }
-//
-//    @Test
-//    @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
-//    void deleteReservationTime_WhenTimeNotExist() {
-//        RestAssured.given().log().all()
-//                .contentType(ContentType.JSON)
-//                .when().delete("/reservations/1")
-//                .then().log().all()
-//
-//                .statusCode(404)
-//                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다."));
-//    }
+
+    @Test
+    @DisplayName("방탈출 예약 하나를 삭제한다.")
+    void deleteReservationTime() {
+
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Member oneMember = memberRepository.save(MemberFixture.getOne());
+        reservationRepository.save(
+                new Reservation(oneMember, LocalDate.parse("2024-11-23"), reservationTime, theme));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().delete("/reservations/1")
+                .then().log().all()
+
+                .statusCode(204);
+    }
 }
