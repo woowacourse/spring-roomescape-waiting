@@ -45,14 +45,9 @@ public class TimeService {
     }
 
     private void validateExistReservation(Long id) {
-        TimeSlot timeSlot = getTimeSlotById(id);
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(id);
         if (reservationRepository.existsByTime(timeSlot)) {
             throw new IllegalArgumentException("예약이 등록된 시간은 제거할 수 없습니다");
         }
-    }
-
-    private TimeSlot getTimeSlotById(long id) {
-        return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다"));
     }
 }

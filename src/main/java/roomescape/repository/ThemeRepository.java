@@ -18,4 +18,9 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             LIMIT 10
             """)
     List<Theme> findThemesWithReservationsBetweenDates(LocalDate startDate, LocalDate endDate);
+
+    default Theme getThemeById(long id) {
+        return findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
+    }
 }

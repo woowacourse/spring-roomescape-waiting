@@ -27,7 +27,7 @@ public class BookService {
     }
 
     public List<BookResponse> findAvaliableBookList(LocalDate date, Long themeId) {
-        Theme theme = getThemeById(themeId);
+        Theme theme = themeRepository.getThemeById(themeId);
         List<Reservation> reservations = reservationRepository.findAllByDateAndTheme(date, theme);
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();
 
@@ -39,10 +39,5 @@ public class BookService {
                                 .anyMatch(reservation -> reservation.getTime().getId().equals(timeSlot.getId()))
                 ))
                 .toList();
-    }
-
-    private Theme getThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
     }
 }

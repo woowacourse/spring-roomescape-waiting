@@ -41,4 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY r.date, r.time.startAt, r.id
             """)
     List<ReservationRank> findReservationRanksWithMember(Member member);
+
+    default Reservation getReservationBy(long id) {
+        return findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다"));
+    }
 }

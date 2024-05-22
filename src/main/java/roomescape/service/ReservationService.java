@@ -47,8 +47,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findDistinctReservations(ReservationFilterRequest request) {
-        Member member = getMemberById(request.memberId());
-        Theme theme = getThemeById(request.themeId());
+        Member member = memberRepository.getMemberById(request.memberId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
         List<Reservation> reservations = reservationRepository.findAllByMemberAndThemeAndDateBetween(
                 member,
                 theme,
@@ -61,9 +61,9 @@ public class ReservationService {
     }
 
     public ReservationResponse create(AdminReservationRequest request, LocalDateTime now) {
-        Member member = getMemberById(request.memberId());
-        TimeSlot timeSlot = getTimeSlotById(request.timeId());
-        Theme theme = getThemeById(request.themeId());
+        Member member = memberRepository.getMemberById(request.memberId());
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
         Reservation reservation = request.toEntity(member, timeSlot, theme);
         reservation.validatePast(now);
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
@@ -80,9 +80,9 @@ public class ReservationService {
     }
 
     public ReservationResponse create(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
-        Member member = getMemberById(loginMember.id());
-        TimeSlot timeSlot = getTimeSlotById(request.timeId());
-        Theme theme = getThemeById(request.themeId());
+        Member member = memberRepository.getMemberById(loginMember.id());
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
         Reservation reservation = request.toBookingEntity(member, timeSlot, theme);
         reservation.validatePast(now);
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
@@ -91,9 +91,9 @@ public class ReservationService {
     }
 
     public ReservationResponse createPending(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
-        Member member = getMemberById(loginMember.id());
-        TimeSlot timeSlot = getTimeSlotById(request.timeId());
-        Theme theme = getThemeById(request.themeId());
+        Member member = memberRepository.getMemberById(loginMember.id());
+        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
+        Theme theme = themeRepository.getThemeById(request.themeId());
         Reservation reservation = request.toPendingEntity(member, timeSlot, theme);
         reservation.validatePast(now);
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
@@ -102,7 +102,7 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findMyReservations(LoginMember loginMember) {
-        Member member = getMemberById(loginMember.id());
+        Member member = memberRepository.getMemberById(loginMember.id());
         List<ReservationRank> reservationRanks = reservationRepository.findReservationRanksWithMember(member);
         return reservationRanks.stream()
                 .map(ReservationMineResponse::from)
@@ -114,7 +114,7 @@ public class ReservationService {
     }
 
     public void bookPendingReservation(Long id) {
-        Reservation reservation = getReservationById(id);
+        Reservation reservation = reservationRepository.getReservationBy(id);
         validateAlreadyBooked(reservation.getDate(), reservation.getTime(), reservation.getTheme());
         reservation.updateStatusBooked();
     }
@@ -135,26 +135,5 @@ public class ReservationService {
         if (reservationRepository.existsByMemberAndDateAndTimeAndTheme(member, date, timeSlot, theme)) {
             throw new IllegalArgumentException("이미 예약을 시도 하였습니다.");
         }
-    }
-
-    private Reservation getReservationById(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 입니다"));
-    }
-
-
-    private Member getMemberById(long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
-    }
-
-    private TimeSlot getTimeSlotById(long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간 입니다"));
-    }
-
-    private Theme getThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마 입니다"));
     }
 }

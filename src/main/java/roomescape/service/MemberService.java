@@ -29,8 +29,7 @@ public class MemberService {
     }
 
     public MemberResponse loginCheck(LoginMember loginMember) {
-        Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 입니다"));
+        Member member = memberRepository.getMemberById(loginMember.id());
         return MemberResponse.from(member);
     }
 
