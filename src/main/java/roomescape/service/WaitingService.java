@@ -75,4 +75,11 @@ public class WaitingService {
         }
         waitingRepository.deleteById(reservationId);
     }
+
+    public List<ReservationResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
 }
