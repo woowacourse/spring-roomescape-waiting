@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 endpoint 설정
-     */
     fetch('/admin/waitings') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
@@ -20,11 +16,6 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [4단계] 예약 대기 관리 기능
-              예약 대기 목록 조회 response 명세에 맞춰 값 설정
-         */
-
         row.insertCell(0).textContent = item.id;
         row.insertCell(1).textContent = item.member.name;
         row.insertCell(2).textContent = item.theme.name;
@@ -33,7 +24,6 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
- //       actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
