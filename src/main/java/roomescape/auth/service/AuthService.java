@@ -6,6 +6,7 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
+import roomescape.common.exception.UnAuthorizationException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -37,7 +38,7 @@ public class AuthService {
 
     public GetAuthInfoResponse getMemberAuthInfo(final AuthInfo authInfo) {
         Member member = memberRepository.findById(authInfo.getMemberId())
-                .orElseThrow(() -> new SecurityException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
+                .orElseThrow(() -> new UnAuthorizationException("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요."));
         return GetAuthInfoResponse.from(member);
     }
 }

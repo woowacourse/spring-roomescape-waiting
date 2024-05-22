@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+import roomescape.common.exception.UnAuthorizationException;
 
 @Component
 public class CookieAuthorizationManager implements AuthorizationManager {
@@ -27,13 +28,13 @@ public class CookieAuthorizationManager implements AuthorizationManager {
         checkCookieExist(cookies);
 
         Cookie cookie = extractTokenCookie(cookies)
-                .orElseThrow(() -> new SecurityException("토큰에 대한 쿠키가 없어서 회원 정보를 찾을 수 없습니다. 다시 로그인해주세요."));
+                .orElseThrow(() -> new UnAuthorizationException("토큰에 대한 쿠키가 없어서 회원 정보를 찾을 수 없습니다. 다시 로그인해주세요."));
         return cookie.getValue();
     }
 
     private void checkCookieExist(final Cookie[] cookies) {
         if (cookies == null) {
-            throw new SecurityException("쿠키가 없어서 회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("쿠키가 없어서 회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
         }
     }
 

@@ -16,6 +16,7 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.dto.response.GetAuthInfoResponse;
 import roomescape.auth.dto.response.LoginResponse;
+import roomescape.common.exception.UnAuthorizationException;
 import roomescape.fixture.MemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -85,7 +86,7 @@ class AuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> authService.getMemberAuthInfo(authInfo))
-                .isInstanceOf(SecurityException.class)
+                .isInstanceOf(UnAuthorizationException.class)
                 .hasMessage("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요.");
     }
 }

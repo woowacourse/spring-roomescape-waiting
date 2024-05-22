@@ -10,6 +10,7 @@ import io.jsonwebtoken.SignatureException;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.common.exception.UnAuthorizationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
@@ -51,13 +52,13 @@ public class JwtTokenProvider implements TokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (MalformedJwtException e) {
-            throw new SecurityException("토큰의 형식이 유효하지 않습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰의 형식이 유효하지 않습니다. 다시 로그인해주세요.");
         } catch (SignatureException e) {
-            throw new SecurityException("토큰의 값을 인증할 수 없습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰의 값을 인증할 수 없습니다. 다시 로그인해주세요.");
         } catch (ExpiredJwtException e) {
-            throw new SecurityException("토큰이 만료되었습니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰이 만료되었습니다. 다시 로그인해주세요.");
         } catch (JwtException e) {
-            throw new SecurityException("토큰 오류입니다. 다시 로그인해주세요.");
+            throw new UnAuthorizationException("토큰 오류입니다. 다시 로그인해주세요.");
         }
     }
 }
