@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.ThemeRequest;
 import roomescape.controller.response.ThemeResponse;
@@ -14,6 +15,7 @@ import roomescape.service.dto.ThemeDto;
 import java.net.URI;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
