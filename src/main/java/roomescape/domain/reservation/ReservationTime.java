@@ -46,14 +46,14 @@ public class ReservationTime {
         }
     }
 
-    public boolean isBeforeNow() {
-        return startAt.isBefore(LocalTime.now());
-    }
-
     public void validateHavingReservations() {
         if (!reservations.isEmpty()) {
             throw new RoomescapeException("해당 시간을 사용하는 예약이 존재하여 삭제할 수 없습니다.");
         }
+    }
+
+    public boolean isBeforeNow() {
+        return startAt.isBefore(LocalTime.now());
     }
 
     public Long getId() {

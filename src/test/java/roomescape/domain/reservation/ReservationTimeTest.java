@@ -20,4 +20,15 @@ class ReservationTimeTest {
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("이미 존재하는 시간은 추가할 수 없습니다.");
     }
+
+
+    @DisplayName("해당 예약 시간을 참조하는 예약이 있으면 삭제할 수 없다.")
+    @Test
+    void validateHavingReservations() {
+        // given
+        ReservationTime reservationTime = new ReservationTime("10:00");
+        // when & then
+        assertThatCode(reservationTime::validateHavingReservations)
+            .doesNotThrowAnyException();
+    }
 }
