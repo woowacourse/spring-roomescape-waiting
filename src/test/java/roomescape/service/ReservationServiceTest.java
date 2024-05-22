@@ -31,8 +31,8 @@ class ReservationServiceTest {
         reservationRepository.deleteById(1L);
 
         //when
-        reservationService.bookPendingReservation(13L);
-        Reservation result = reservationRepository.findById(13L).orElseThrow();
+        reservationService.bookPendingReservation(2L);
+        Reservation result = reservationRepository.findById(2L).orElseThrow();
 
         //then
         assertThat(result.getStatus()).isEqualTo(ReservationStatus.BOOKING);

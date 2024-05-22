@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,10 @@ class ReservationRepositoryTest {
 
         System.out.println(pendingRanks);
 
-        assertThat(reservationRanksWithMember).hasSize(10);
-        assertThat(pendingRanks).hasSize(4);
+        assertAll(
+                () -> assertThat(reservationRanksWithMember).hasSize(9),
+                () -> assertThat(pendingRanks).hasSize(3)
+        );
+
     }
 }
