@@ -13,28 +13,39 @@ import roomescape.reservation.dto.response.CreateReservationResponse;
 import roomescape.reservation.dto.response.FindAvailableTimesResponse;
 import roomescape.reservation.dto.response.FindReservationResponse;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final ReservationRepository reservationRepository, WaitingRepository waitingRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
                               final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+    }
+
+    private static FindAvailableTimesResponse generateFindAvailableTimesResponse(final List<Reservation> reservations,
+                                                                                 final ReservationTime reservationTime) {
+        return FindAvailableTimesResponse.from(
+                reservationTime,
+                reservations.stream()
+                        .anyMatch(reservation -> reservation.hasSameTime(reservationTime)));
     }
 
     public CreateReservationResponse createReservation(final AuthInfo authInfo,
@@ -45,6 +56,8 @@ public class ReservationService {
 
         checkAlreadyExistReservation(createReservationRequest, createReservationRequest.date(), theme.getName(),
                 reservationTime.getStartAt());
+        checkWaitingExists(createReservationRequest, authInfo);
+
         Reservation reservation = createReservationRequest.toReservation(member, reservationTime, theme);
         return CreateReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -57,6 +70,15 @@ public class ReservationService {
                 createReservationRequest.themeId())) {
             throw new IllegalArgumentException("이미 " + date + "의 " + themeName + " 테마에는 " + time
                     + " 시의 예약이 존재하여 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private void checkWaitingExists(CreateReservationRequest createReservationRequest, AuthInfo authInfo) {
+        if (waitingRepository.existsByDateAndReservationTimeIdAndThemeId(
+                createReservationRequest.date(),
+                createReservationRequest.timeId(),
+                createReservationRequest.themeId())) {
+            throw new IllegalArgumentException("대기자가 있어 예약을 생성할 수 없습니다.");
         }
     }
 
@@ -97,17 +119,10 @@ public class ReservationService {
                 .toList();
     }
 
-    private static FindAvailableTimesResponse generateFindAvailableTimesResponse(final List<Reservation> reservations,
-                                                                                 final ReservationTime reservationTime) {
-        return FindAvailableTimesResponse.from(
-                reservationTime,
-                reservations.stream()
-                        .anyMatch(reservation -> reservation.hasSameTime(reservationTime)));
-    }
-
     public List<FindReservationResponse> searchBy(final Long themeId, final Long memberId,
                                                   final LocalDate dateFrom, final LocalDate dateTo) {
-        return mapToFindReservationResponse(reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
+        return mapToFindReservationResponse(
+                reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo));
     }
 
     private List<FindReservationResponse> mapToFindReservationResponse(final List<Reservation> reservations) {

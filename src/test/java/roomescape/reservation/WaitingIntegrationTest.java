@@ -138,7 +138,7 @@ class WaitingIntegrationTest {
 
     @Test
     @DisplayName("예약 대기 생성 시 같은 테마, 같은 날짜, 같은 시간에 내 예약이 있는 경우 예외를 반환한다.")
-    void createReservationWhenAlreadyHasReservation() {
+    void createWaitingWhenAlreadyHasReservation() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         Member member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
@@ -162,7 +162,7 @@ class WaitingIntegrationTest {
 
     @Test
     @DisplayName("예약 대기 생성 시 같은 테마, 같은 날짜, 같은 시간에 내 예약 대기가 있는 경우 예외를 반환한다.")
-    void createReservationWhenAlreadyHasWaiting() {
+    void createWaitingWhenAlreadyHasWaiting() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
         Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
         Member oneMember = memberRepository.save(MemberFixture.getOne());
@@ -185,6 +185,30 @@ class WaitingIntegrationTest {
 
                 .statusCode(400)
                 .body("detail", equalTo("이미 본인의 대기가 존재하여 대기를 생성할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("예약시 같은 테마, 같은 날짜, 같은 시간에 이미 예약 대기가 있는 경우 예외를 반환한다.")
+    void createReservationWhenAlreadyHasWaiting() {
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Member member = memberRepository.save(MemberFixture.getOne());
+        waitingRepository.save(new Waiting(member, LocalDate.parse("2024-11-23"), reservationTime, theme));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", "2024-11-23");
+        params.put("timeId", reservationTime.getId());
+        params.put("themeId", theme.getId());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin(member))
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+
+                .statusCode(400)
+                .body("detail", equalTo("대기자가 있어 예약을 생성할 수 없습니다."));
     }
 
     @Test
