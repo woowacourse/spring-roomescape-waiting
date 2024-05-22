@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -42,6 +43,11 @@ public class Waiting implements Comparable<Waiting> {
         return this.reservation.getDate() == otherReservation.getDate()
                 && this.reservation.getTime().equals(otherReservation.getTime())
                 && this.reservation.getTheme().equals(otherReservation.getTheme());
+    }
+
+    public void delete(){
+        reservation.removeWaiting(this);
+        member.removeWaiting(this);
     }
 
     public Member getMember() {

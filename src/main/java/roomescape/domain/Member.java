@@ -23,7 +23,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Waiting> waitings;
 
 

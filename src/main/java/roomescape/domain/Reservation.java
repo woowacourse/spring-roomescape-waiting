@@ -22,7 +22,7 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
     private List<Waiting> waitings = new ArrayList<>();
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {

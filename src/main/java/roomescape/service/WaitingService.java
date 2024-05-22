@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.domain.repository.*;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
@@ -11,8 +12,10 @@ import roomescape.service.dto.response.ThemeResponse;
 import roomescape.service.dto.response.WaitingResponse;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
@@ -45,6 +48,12 @@ public class WaitingService {
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         return createWaitingResponse(savedWaiting);
+    }
+
+    public void deleteWaiting(long id) {
+        Waiting waiting = findWaitingById(id);
+        waiting.delete();
+        waitingRepository.delete(waiting);
     }
 
     private void validateReservationMember(Waiting waiting, Reservation alreadyBookedReservation){
@@ -80,6 +89,11 @@ public class WaitingService {
         );
     }
 
+    private Waiting findWaitingById(long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeBusinessException("예약 대기 기록을 찾을 수 없습니다."));
+    }
+
     private Reservation findReservation(WaitingRequest waitingRequest) {
         return reservationRepository.findByDateAndThemeAndTime(
                 waitingRequest.date(),
@@ -102,5 +116,4 @@ public class WaitingService {
         return timeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
-
 }

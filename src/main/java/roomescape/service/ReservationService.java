@@ -123,7 +123,7 @@ public class ReservationService {
 
     private List<UserReservationResponse> makeWaitingReservations(Member user) {
         return user.getWaitings().stream()
-                .map(waiting -> UserReservationResponse.of(waiting.getReservation(), ReservationStatus.WAITING, waiting.getRank() + 1))
+                .map(waiting -> new UserReservationResponse(waiting.getId(), waiting.getReservation(), ReservationStatus.WAITING, waiting.getRank() + 1))
                 .toList();
     }
 
