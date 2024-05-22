@@ -15,11 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import roomescape.member.domain.Role;
 import roomescape.auth.TokenProvider;
 import roomescape.config.ControllerConfig;
 import roomescape.config.RoleCheckInterceptor;
 import roomescape.exception.ExceptionPageController;
+import roomescape.member.domain.Role;
 import roomescape.member.dto.LoginMemberInToken;
 
 @WebMvcTest(AdminPageController.class)
@@ -91,5 +91,18 @@ class AdminPageControllerTest {
                         .cookie(new Cookie("token", "cookieValue")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/theme"));
+    }
+
+    @Test
+    @DisplayName("/admin/waiting 을 요청하면 admin/waiting.html 를 반환한다.")
+    void requestWaiting() throws Exception {
+        LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.ADMIN, "어드민", "hogi@naver.com");
+        doReturn(loginMemberInToken).when(tokenProvider)
+                .getLoginMember(anyString());
+
+        mockMvc.perform(get("/admin/waiting")
+                        .cookie(new Cookie("token", "cookieValue")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/waiting"));
     }
 }

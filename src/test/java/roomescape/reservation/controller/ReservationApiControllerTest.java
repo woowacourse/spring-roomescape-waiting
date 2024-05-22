@@ -56,4 +56,13 @@ class ReservationApiControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @DisplayName("예약 대기목록을 성공적으로 조회하면 200 응답을 받는다.")
+    void findWaitingTest() throws Exception {
+        mockMvc.perform(get("/reservations/waiting")
+                        .cookie(new Cookie("token", "cookieValue"))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }

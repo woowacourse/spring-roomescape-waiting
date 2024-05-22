@@ -88,5 +88,22 @@ class ReservationServiceTest {
         List<MyReservationResponse> memberReservations = reservationService.findAllByMemberId(member.getId());
         assertThat(memberReservations.size()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("앞의 예약이 사라지면 1번 웨이팅이 예약 확정 된다.")
+    void deleteTest() {
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(new Member("hogi", "a", "a"));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.WAITING));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS));
+
+        reservationService.delete(reservation2.getId());
+        Reservation findReservation = reservationRepository.findById(reservation1.getId()).get();
+        
+        assertThat(findReservation.getStatus()).isEqualTo(Status.SUCCESS);
+    }
 }
 

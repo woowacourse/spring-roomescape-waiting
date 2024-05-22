@@ -189,4 +189,21 @@ public class ReservationRepositoryTest {
         List<Reservation> waitings = reservationRepository.findAllByStatus(Status.WAITING);
         assertThat(waitings.get(0).getId()).isEqualTo(reservation1.getId());
     }
+
+    @Test
+    @DisplayName("예약 정보가 일치하고 Waiting 인 예약을 가져온다.")
+    void findAllByDateAndReservationTimeIdAndThemeIdAndStatusTest() {
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(new Member("hogi", "a", "a"));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.WAITING));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS));
+
+        List<Reservation> findWaitingReservations = reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
+                reservation1.getDate(), theme.getId(), time.getId(), Status.WAITING);
+
+        assertThat(findWaitingReservations.get(0).getId()).isEqualTo(reservation1.getId());
+    }
 }
