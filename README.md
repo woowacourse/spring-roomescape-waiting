@@ -10,7 +10,6 @@ host: localhost:8080
 ```
 HTTP/1.1 200 
 Content-Type: application/json
-
 [
     {
         "reservationId": 1,
@@ -21,10 +20,10 @@ Content-Type: application/json
     },
     {
         "reservationId": 2,
-        "theme": "테마2",
+        "theme": "테마1",
         "date": "2024-03-01",
-        "time": "12:00",
-        "status": "예약"
+        "time": "10:00",
+        "status": "1번째 예약대기"
     },
     {
         "reservationId": 3,
@@ -35,3 +34,85 @@ Content-Type: application/json
     }
 ]
 ```
+### 에약 대기하기
+#### 예약 대기 생성
+- Request
+```
+POST /reservations HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+
+{
+    "date": "2030-4-18",
+    "timeId": 1,
+    "themeId": 1,
+    "status": "WAITING"
+}
+```
+- Response
+```
+HTTP/1.1 201 
+Content-Type: application/json
+{
+    "id": 2,
+    "memberName": "미아",
+    "date": "2030-04-18",
+    "time": {
+        "id": 1,
+        "startAt": "15:00"
+    },
+    "theme": {
+        "id": 1,
+        "name": "레벨2 탈출"
+    }
+}
+```
+#### 예약 대기 취소
+- Request
+```
+DELETE /reservations/1/waiting HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+```
+- Response
+```
+HTTP/1.1 204
+```
+### 예약 대기 관리하기
+#### 예약 대기 목록 조회
+- Request
+```
+GET /admin/reservations/waiting HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+
+[
+    {
+        "id": 2,
+        "memberName": "미아",
+        "date": "2030-05-19",
+        "time": {
+            "id": 1,
+            "startAt": "15:00"
+        },
+        "theme": {
+            "id": 1,
+            "name": "레벨2 탈출"
+        }
+    }
+]
+```
+#### 예약 대기 취소
+- Request
+```
+DELETE /admin/reservations/waiting/2 HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+```
+- Response
+```
+HTTP/1.1 204
+```
+#### 예약 대기 승인
+- 예약 취소시 자동으로 승인된다.
