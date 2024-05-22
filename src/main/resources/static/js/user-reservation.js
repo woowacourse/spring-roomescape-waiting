@@ -204,7 +204,11 @@ function onWaitButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation waiting failed');
+                if (!response.ok) {
+                    return response.json().then(errorResponse => {
+                        throw new Error(JSON.stringify(errorResponse));
+                    })
+                }
                 return response.json();
             })
             .then(data => {
@@ -213,7 +217,7 @@ function onWaitButtonClick() {
                 location.reload();
             })
             .catch(error => {
-                alert("An error occurred while making the reservation waiting.");
+                alert(error.message);
                 console.error(error);
             });
     } else {
