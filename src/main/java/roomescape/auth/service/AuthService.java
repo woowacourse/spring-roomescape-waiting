@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.SignUpRequest;
@@ -12,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
     private final MemberService memberService;
     private final JwtHandler jwtHandler;
@@ -21,6 +23,7 @@ public class AuthService {
         this.jwtHandler = jwtHandler;
     }
 
+    @Transactional
     public TokenDto signUp(final SignUpRequest signupRequest) {
         Member member = memberService.addMember(signupRequest);
 

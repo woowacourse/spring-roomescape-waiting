@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.AssociatedDataExistsException;
 import roomescape.global.exception.model.DataDuplicateException;
@@ -16,6 +17,7 @@ import roomescape.reservation.dto.response.ReservationTimesResponse;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -40,6 +42,7 @@ public class ReservationTimeService {
         return new ReservationTimesResponse(response);
     }
 
+    @Transactional
     public ReservationTimeResponse addTime(final ReservationTimeRequest reservationTimeRequest) {
         validateTimeDuplication(reservationTimeRequest);
         ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeRequest.toTime());
@@ -56,6 +59,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void removeTimeById(final Long id) {
         ReservationTime reservationTime = findTimeById(id);
         List<Reservation> usingTimeReservations = reservationRepository.findByReservationTime(reservationTime);

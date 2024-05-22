@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -57,7 +58,6 @@ public class ReservationService {
         this.themeService = themeService;
     }
 
-    @Transactional(readOnly = true)
     public ReservationsResponse findReservationsByStatus(final ReservationStatus status) {
         List<MemberReservation> memberReservations = memberReservationRepository.findByStatus(status);
         List<ReservationResponse> response = memberReservations.stream()
@@ -66,7 +66,6 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
-    @Transactional(readOnly = true)
     public ReservationsResponse findFirstOrderWaitingReservations() {
         List<MemberReservation> waitingMemberReservations = memberReservationRepository.findByStatus(ReservationStatus.WAITING);
         List<ReservationResponse> response = waitingMemberReservations.stream()
@@ -103,7 +102,6 @@ public class ReservationService {
                         String.format("예약(Reservation) 정보가 존재하지 않습니다. [reservationId: %d]", id)));
     }
 
-    //TODO: @Transactional 필요한 곳에 전부 설정
     @Transactional
     public void removeReservationById(final Long reservationId, final Long requestMemberId) {
         Member member = memberService.findMemberById(requestMemberId);
@@ -176,6 +174,7 @@ public class ReservationService {
                         ErrorType.MEMBER_RESERVATION_NOT_FOUND.getDescription()));
     }
 
+    @Transactional
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeService.findTimeById(request.timeId());
         Theme theme = themeService.findThemeById(request.themeId());

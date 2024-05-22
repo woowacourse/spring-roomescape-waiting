@@ -2,6 +2,7 @@ package roomescape.theme.service;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.error.ErrorType;
 import roomescape.global.exception.model.NotFoundException;
 import roomescape.theme.domain.Theme;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
 
@@ -49,12 +51,14 @@ public class ThemeService {
         return new ThemesResponse(response);
     }
 
+    @Transactional
     public ThemeResponse addTheme(final ThemeRequest request) {
         Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
 
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void removeThemeById(final Long id) {
         themeRepository.deleteById(id);
     }

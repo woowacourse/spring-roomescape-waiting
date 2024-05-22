@@ -1,6 +1,7 @@
 package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.SignUpRequest;
 import roomescape.global.exception.error.ErrorType;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
 
@@ -24,6 +26,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Member addMember(final SignUpRequest request) {
         Optional<Member> memberHasEmail = memberRepository.findByEmail(new Email(request.email()));
         if (memberHasEmail.isPresent()) {
