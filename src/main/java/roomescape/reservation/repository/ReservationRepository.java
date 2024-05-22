@@ -34,4 +34,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @EntityGraph(attributePaths = {"theme", "member", "reservationTime"})
     List<Reservation> findAllByStatus(Status status);
+
+    List<Reservation> findAllByDateAndReservationTimeIdAndThemeIdAndStatus(LocalDate date, Long reservationTimeId,
+                                                                           Long themeId, Status status);
 }
