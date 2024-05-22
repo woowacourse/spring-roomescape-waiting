@@ -59,7 +59,7 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = '/reservations/' + id;
+    const endpoint = '/admin/reservations/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

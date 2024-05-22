@@ -193,4 +193,16 @@ class ReservationServiceTest {
         Assertions.assertThatThrownBy(() -> reservationService.registerWaiting(saveRequest, member))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @DisplayName("예약 대기가 존재하는 예약을 취소할 경우 자동으로 다음 예약 대기가 승인된다.")
+    @Test
+    void confirmReservationIfWaitingExists() {
+        // when
+        reservationService.delete(2L);
+
+        // then
+        Optional<Reservation> reservation = reservationRepository.findById(4L);
+        assertTrue(reservation.isPresent());
+        assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
+    }
 }
