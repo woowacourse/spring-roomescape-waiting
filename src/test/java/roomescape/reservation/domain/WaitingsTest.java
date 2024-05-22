@@ -16,7 +16,6 @@ import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 import static roomescape.util.Fixture.TOMORROW;
 
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,5 +49,25 @@ class WaitingsTest {
                 () -> assertThat(waitings.findMemberRank(jojoReservation1, jojo.getId())).isEqualTo(2),
                 () -> assertThat(waitings.findMemberRank(jojoReservation2, jojo.getId())).isEqualTo(1)
         );
+    }
+
+    @DisplayName("첫 번째 대기 상태인 예약을 찾는다.")
+    @Test
+    void findFirstWaitingReservationByCanceledReservation() {
+        Theme theme = new Theme(1L, new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
+
+        ReservationTime hourTen = new ReservationTime(1L, HOUR_10);
+
+        Member kaki = new Member(1L, Role.USER, new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
+        Member jojo = new Member(2L, Role.USER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);
+
+        Reservation cancelReservation = new Reservation(kaki, TODAY, theme, hourTen, Status.CANCEL);
+        Reservation jojoReservation = new Reservation(jojo, TODAY, theme, hourTen, Status.WAIT);
+        Reservation kakiReservation = new Reservation(kaki, TODAY, theme, hourTen, Status.WAIT);
+
+        Waitings waitings = new Waitings(List.of(jojoReservation, kakiReservation));
+        Reservation reservation = waitings.findFirstWaitingReservationByCanceledReservation(cancelReservation).get();
+
+        assertThat(reservation.getId()).isEqualTo(kakiReservation.getId());
     }
 }

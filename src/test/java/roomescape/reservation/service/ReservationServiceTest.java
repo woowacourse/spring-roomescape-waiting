@@ -36,6 +36,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.MemberReservationResponse;
+import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
 import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -218,9 +219,9 @@ class ReservationServiceTest {
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
-        reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
+        ReservationResponse reservationResponse = reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
 
-        assertThatThrownBy(() -> reservationService.delete(loginMember.id()))
+        assertThatThrownBy(() -> reservationService.cancelById(reservationResponse.id()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
