@@ -12,6 +12,7 @@ import roomescape.reservation.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Transactional
 @Service
@@ -37,6 +38,11 @@ public class ThemeService {
                 .stream()
                 .map(ThemeDto::from)
                 .toList();
+    }
+
+    public Theme getTheme(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
     }
 
     public ThemeDto saveTheme(final SaveThemeRequest saveThemeRequest) {

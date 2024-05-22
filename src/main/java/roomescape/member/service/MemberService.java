@@ -10,6 +10,7 @@ import roomescape.member.model.MemberEmail;
 import roomescape.member.repository.MemberRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Transactional
 @Service
@@ -29,6 +30,11 @@ public class MemberService {
                 .stream()
                 .map(MemberDto::from)
                 .toList();
+    }
+
+    public Member getMember(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 회원이 존재하지 않습니다."));
     }
 
     public MemberDto saveMember(final SaveMemberRequest request) {

@@ -3,7 +3,7 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.ReservationDto;
 import roomescape.reservation.dto.SaveReservationRequest;
 import roomescape.reservation.dto.SearchReservationsParams;
@@ -14,12 +14,9 @@ import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.CustomReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Transactional
 @Service
@@ -27,22 +24,22 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final CustomReservationRepository customReservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationService(
             final CustomReservationRepository customReservationRepository,
             final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final ReservationTimeService reservationTimeService,
+            final ThemeService themeService,
+            final MemberService memberService
     ) {
         this.customReservationRepository = customReservationRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
+        this.memberService = memberService;
     }
 
     @Transactional(readOnly = true)
@@ -69,19 +66,15 @@ public class ReservationService {
     }
 
     public ReservationDto saveReservation(final SaveReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 테마가 존재하지 않습니다."));
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NoSuchElementException("해당 id의 회원이 존재하지 않습니다."));
-
+        final ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
+        final Theme theme = themeService.getTheme(request.themeId());
+        final Member member = memberService.getMember(request.memberId());
         final Reservation reservation = request.toReservation(reservationTime, theme, member);
-        validateReservationDateAndTime(reservation.getDate(), reservationTime);
-        validateReservationDuplication(reservation);
 
-        final Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationDto.from(savedReservation);
+        validateReservationDateAndTime(reservation.getDate(), reservationTime);
+        validateReservationDuplicated(reservation);
+
+        return ReservationDto.from(reservationRepository.save(reservation));
     }
 
     private static void validateReservationDateAndTime(final ReservationDate date, final ReservationTime time) {
@@ -91,7 +84,7 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationDuplication(final Reservation reservation) {
+    private void validateReservationDuplicated(final Reservation reservation) {
         if (reservationRepository.existsByDateAndTime_IdAndTheme_Id(
                 reservation.getDate(),
                 reservation.getTime().getId(),

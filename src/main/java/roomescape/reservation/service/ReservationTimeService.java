@@ -13,6 +13,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Transactional
 @Service
@@ -35,6 +36,11 @@ public class ReservationTimeService {
                 .stream()
                 .map(ReservationTimeDto::from)
                 .toList();
+    }
+
+    public ReservationTime getReservationTime(final Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId)
+                .orElseThrow(() -> new NoSuchElementException("해당 id의 예약 시간이 존재하지 않습니다."));
     }
 
     public ReservationTimeDto saveReservationTime(final SaveReservationTimeRequest request) {
