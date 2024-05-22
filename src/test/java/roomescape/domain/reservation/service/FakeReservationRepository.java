@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 import roomescape.domain.reservation.repository.reservation.ReservationRepository;
@@ -94,6 +95,15 @@ public class FakeReservationRepository implements ReservationRepository {
                                 reservation.getTime().getId().equals(timeId) &&
                                 reservation.getDate().equals(date) &&
                                 reservation.getTheme().getId().equals(themeId));
+    }
+
+    @Override
+    public List<Reservation> findByStatus(ReservationStatus status) {
+        return reservations.values()
+                .stream()
+                .filter(reservation ->
+                        reservation.getStatus() == status)
+                .toList();
     }
 
     @Override

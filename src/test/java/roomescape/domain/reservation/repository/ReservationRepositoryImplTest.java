@@ -139,4 +139,30 @@ class ReservationRepositoryImplTest extends RepositoryTest {
 
         assertThat(reservationWithOrderDtos.get(0).orderNumber()).isOne();
     }
+
+    @DisplayName("예약 대기 목록만을 불러올 수 있다.(예약상태제외)")
+    @Test
+    void should_find_waiting_list() {
+        Reservation saveWaitingReservation = reservationRepository.save(
+                new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, WAITING,
+                        LocalDateTime.now()));
+        reservationRepository.save(saveWaitingReservation);
+
+        int waitingSize = reservationRepository.findByStatus(WAITING).size();
+
+        assertThat(waitingSize).isOne();
+    }
+
+    @DisplayName("예약목록만을 불러올 수 있다.(예약 대기 제외)")
+    @Test
+    void should_find_reservation_list() {
+        Reservation saveWaitingReservation = reservationRepository.save(
+                new Reservation(null, AFTER_ONE_DAYS_DATE, TEN_RESERVATION_TIME, DUMMY_THEME, MEMBER_MEMBER, WAITING,
+                        LocalDateTime.now()));
+        reservationRepository.save(saveWaitingReservation);
+
+        int waitingSize = reservationRepository.findByStatus(RESERVED).size();
+
+        assertThat(waitingSize).isOne();
+    }
 }

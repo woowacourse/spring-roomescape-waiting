@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.domain.reservation.Reservation;
+import roomescape.domain.reservation.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationWithOrderDto;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
@@ -32,4 +33,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             WHERE r.member.id = :memberId
             """)
     List<ReservationWithOrderDto> findByMemberId(Long memberId);
+
+    List<Reservation> findByStatus(ReservationStatus status);
 }
