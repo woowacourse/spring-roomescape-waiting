@@ -47,8 +47,8 @@ public class AuthController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<CookieMemberResponse> check(@Valid final LoginMember loginMember) {
-        if (loginMember != null) {
+    public ResponseEntity<CookieMemberResponse> check(final LoginMember loginMember) {
+        if (loginMember.id() != null) {
             final Member member = memberService.findMemberById(loginMember.id());
             return ResponseEntity.ok(new CookieMemberResponse(member.getName()));
         }

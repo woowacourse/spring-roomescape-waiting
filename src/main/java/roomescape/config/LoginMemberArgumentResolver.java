@@ -33,6 +33,6 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         final Optional<String> token = TokenExtractor.fromRequest(request);
         return token.map(authService::findMemberIdByToken)
                 .map(LoginMember::new)
-                .orElse(null);
+                .orElse(new LoginMember(null));
     }
 }
