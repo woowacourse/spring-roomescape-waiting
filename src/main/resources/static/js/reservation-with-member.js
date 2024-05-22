@@ -163,6 +163,7 @@ function saveRow(event) {
     themeId: themeSelect.value,
     timeId: timeSelect.value,
     memberId: memberSelect.value,
+    status: "RESERVED"
   };
 
   requestCreate(reservation)

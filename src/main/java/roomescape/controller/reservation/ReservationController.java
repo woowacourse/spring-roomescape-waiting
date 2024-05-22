@@ -7,9 +7,9 @@ import roomescape.controller.auth.AuthenticationPrincipal;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.auth.LoginMember;
-import roomescape.dto.reservation.MemberReservationSaveRequest;
 import roomescape.dto.reservation.MyReservationWithRankResponse;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.service.MemberService;
@@ -43,7 +43,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             @AuthenticationPrincipal final LoginMember loginMember,
-            @RequestBody final MemberReservationSaveRequest request) {
+            @RequestBody final ReservationSaveRequest request) {
         final MemberResponse memberResponse = memberService.findById(loginMember.id());
         final ReservationTimeResponse reservationTimeResponse = reservationTimeService.findById(request.timeId());
         final ThemeResponse themeResponse = themeService.findById(request.themeId());

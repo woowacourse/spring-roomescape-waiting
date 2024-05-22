@@ -8,7 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import roomescape.dto.auth.TokenRequest;
 import roomescape.dto.auth.TokenResponse;
-import roomescape.dto.reservation.MemberReservationSaveRequest;
+import roomescape.dto.reservation.ReservationSaveRequest;
 import roomescape.dto.reservation.ReservationTimeSaveRequest;
 import roomescape.dto.theme.ThemeSaveRequest;
 
@@ -60,8 +60,8 @@ abstract class AcceptanceTest {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
-        final MemberReservationSaveRequest request
-                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
+        final ReservationSaveRequest request
+                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "RESERVED");
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
@@ -80,8 +80,8 @@ abstract class AcceptanceTest {
         final Long timeId = saveReservationTime();
         final Long themeId = saveTheme();
         final String accessToken = getAccessToken(MEMBER_MIA_EMAIL);
-        final MemberReservationSaveRequest request
-                = new MemberReservationSaveRequest(DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
+        final ReservationSaveRequest request
+                = new ReservationSaveRequest(null, DATE_MAY_EIGHTH, timeId, themeId, "WAITING");
 
         Integer id = RestAssured.given().log().all()
                 .cookie("token", accessToken)
