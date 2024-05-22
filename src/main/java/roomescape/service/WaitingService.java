@@ -82,4 +82,14 @@ public class WaitingService {
                 .map(ReservationResponse::from)
                 .toList();
     }
+
+    public ReservationResponse approve(Long waitingId) {
+        final Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
+
+        final Reservation reservation = waiting.toReservation();
+        final Reservation saved = reservationRepository.save(reservation);
+        waitingRepository.deleteById(waitingId);
+        return ReservationResponse.from(saved);
+    }
 }

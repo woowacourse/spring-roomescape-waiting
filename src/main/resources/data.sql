@@ -21,3 +21,5 @@ INSERT INTO waiting (member_id, date, time_id, theme_id)
 VALUES (2, '2024-05-20', 1, 1);
 INSERT INTO waiting (member_id, date, time_id, theme_id)
 VALUES (1, '2024-05-20', 1, 2);
+INSERT INTO waiting (member_id, date, time_id, theme_id)
+VALUES (1, '2025-05-20', 1, 2);

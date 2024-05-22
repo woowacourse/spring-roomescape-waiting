@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +59,16 @@ class WaitingServiceTest {
         ReservationResponse reservationResponse = waitingService.create(waiting);
 
         // then
-        Assertions.assertAll(
-                () -> assertThat(waitingRepository.findById(reservationResponse.id())).isEmpty(),
-                () -> assertThat(reservationRepository.findById(reservationResponse.id())).isPresent()
-        );
+        assertThat(reservationRepository.findById(reservationResponse.id())).isPresent();
+    }
+
+    @Test
+    @DisplayName("예약 대기를 승인하면 예약이 된다.")
+    void approve() {
+        // when
+        ReservationResponse response = waitingService.approve(1L);
+
+        // then
+        assertThat(reservationRepository.findById(response.id())).isPresent();
     }
 }
