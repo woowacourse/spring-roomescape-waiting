@@ -39,6 +39,18 @@ class AdminPageControllerTest extends IntegrationTest {
                     .contentType(ContentType.HTML);
         }
 
+        @DisplayName("/admin/reservation/waiting을 요청하면 html을 반환한다.")
+        @Test
+        void requestAdminWaitingReservation() {
+            RestAssured.given().log().all()
+                    .cookie(CookieUtils.TOKEN_KEY, getAdminToken())
+                    .when()
+                    .get("/admin/reservation/waiting")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .contentType(ContentType.HTML);
+        }
+
         @DisplayName("/admin/time을 요청하면 html을 반환한다.")
         @Test
         void requestTime() {
