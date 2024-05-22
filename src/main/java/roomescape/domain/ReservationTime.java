@@ -18,9 +18,6 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime() {
-    }
-
     public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
     }
@@ -28,6 +25,9 @@ public class ReservationTime {
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    protected ReservationTime() {
     }
 
     public Long getId() {

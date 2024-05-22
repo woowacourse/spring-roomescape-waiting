@@ -16,13 +16,13 @@ public class MemberEmail {
     @Column(name = "email", nullable = false)
     private String value;
 
-    public MemberEmail() {
-    }
-
     public MemberEmail(String value) {
         validateNullOrBlank(value);
         validateEmailPattern(value);
         this.value = value;
+    }
+
+    protected MemberEmail() {
     }
 
     private void validateNullOrBlank(String value) {

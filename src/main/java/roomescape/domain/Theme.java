@@ -23,9 +23,6 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme() {
-    }
-
     public Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
         this.name = name;
@@ -35,6 +32,9 @@ public class Theme {
 
     public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
+    }
+
+    protected Theme() {
     }
 
     public Long getId() {

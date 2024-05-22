@@ -32,9 +32,6 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation() {
-    }
-
     public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
@@ -45,6 +42,9 @@ public class Reservation {
 
     public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         this(null, member, date, reservationTime, theme);
+    }
+
+    protected Reservation() {
     }
 
     public Long getId() {

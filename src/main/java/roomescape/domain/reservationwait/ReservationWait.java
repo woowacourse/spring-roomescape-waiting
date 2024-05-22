@@ -37,9 +37,6 @@ public class ReservationWait {
     @Enumerated(value = EnumType.STRING)
     private ReservationWaitStatus status;
 
-    public ReservationWait() {
-    }
-
     public ReservationWait(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
                            ReservationWaitStatus status) {
         this.id = id;
@@ -53,6 +50,9 @@ public class ReservationWait {
     public ReservationWait(Member member, LocalDate date, ReservationTime time, Theme theme,
                            ReservationWaitStatus status) {
         this(null, member, date, time, theme, status);
+    }
+
+    protected ReservationWait() {
     }
 
     public void cancel() {

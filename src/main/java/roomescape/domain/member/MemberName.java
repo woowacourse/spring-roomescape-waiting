@@ -11,12 +11,12 @@ public class MemberName {
     @Column(name = "name", nullable = false)
     private String value;
 
-    public MemberName() {
-    }
-
     public MemberName(String value) {
         validateNullOrBlank(value);
         this.value = value;
+    }
+
+    protected MemberName() {
     }
 
     private void validateNullOrBlank(String value) {
