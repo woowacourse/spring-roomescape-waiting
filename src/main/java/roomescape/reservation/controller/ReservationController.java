@@ -58,6 +58,11 @@ public class ReservationController {
         return reservationService.findReservations();
     }
 
+    @GetMapping("/waitings")
+    public List<WaitingResponse> findWaitings() {
+        return waitingService.findAll();
+    }
+
     @GetMapping("/mine")
     public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
         List<ReservationOrWaitingResponse> reservations = reservationService.findReservationsByMember(memberRequest);

@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.WaitingService;
 
 @Controller
 @RequestMapping("/admin")
@@ -35,6 +37,7 @@ public class AdminPageController {
         return "/admin/theme";
     }
 
+    //TODO: 서비스를 사용하는 방향으로 리팩토링
     @GetMapping("/reservation")
     public String getReservationPage(Model model) {
         List<ReservationResponse> reservationResponses = new ArrayList<>();
@@ -43,5 +46,10 @@ public class AdminPageController {
         }
         model.addAttribute("reservationResponses", reservationResponses);
         return "/admin/reservation-new";
+    }
+
+    @GetMapping("/reservation/waiting")
+    public String getReservationWaitingPage() {
+        return "/admin/waiting";
     }
 }

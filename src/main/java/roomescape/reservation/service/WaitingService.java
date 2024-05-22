@@ -75,6 +75,15 @@ public class WaitingService {
                 .toList();
     }
 
+    public List<WaitingResponse> findAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
+
+    // TODO: 여러 케이스 테스트. ex) 예약 삭제하면 순차적으로 뒤따라오는 예약 번호가 줄어드는지
+    // TODO: MemberRequest를 받아서 삭제 권한이 있는 멤버인지 확인 해야 할까? 어드민이거나, 본인이 예약을 가진 회원이거나
     public void deleteWaiting(Long id) {
         waitingRepository.deleteById(id);
     }
