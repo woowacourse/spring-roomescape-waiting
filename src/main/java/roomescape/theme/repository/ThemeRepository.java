@@ -22,8 +22,8 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
             ORDER BY COUNT(r.theme) DESC
             """)
     List<Theme> findTrendingThemesBetweenDates(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
+            LocalDate startDate,
+            LocalDate endDate,
             Pageable pageable
     );
 
