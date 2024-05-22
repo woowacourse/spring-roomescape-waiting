@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,15 +37,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                 @Param("themeId") Long themeId);
 
     @Query("""
-            SELECT r
-            FROM Reservation AS r
-            JOIN FETCH r.time
-            JOIN FETCH r.theme
-            WHERE r.id = :id            
-            """)
-    Optional<Reservation> findByIdWithTimeAndTheme(@Param("id") Long id);
-
-    @Query("""
             SELECT r1
             FROM Reservation AS r1
             WHERE EXISTS (
@@ -59,6 +49,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             )
             """)
     List<Reservation> findWaitings();
-
-
 }

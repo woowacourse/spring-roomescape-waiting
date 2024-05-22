@@ -76,10 +76,6 @@ public class Reservation {
         return member.getId().equals(memberId);
     }
 
-    public boolean isWaitingRankLowerThan(Reservation other) {
-        return this.id > other.id;
-    }
-
     public boolean isWaitingOrderHigherThan(Reservation other) {
         return this.id < other.id;
     }
