@@ -21,7 +21,7 @@ public class WaitingRequest {
     public WaitingRequest() {
     }
 
-    public WaitingRequest(final Long memberId, String date, final Long timeId, final Long themeId) {
+    public WaitingRequest(final Long memberId, final String date, final Long timeId, final Long themeId) {
         this.memberId = memberId;
         this.date = date;
         this.timeId = timeId;
