@@ -1,8 +1,9 @@
-package roomescape.reservation.status;
+package roomescape.registration.reservation.domain;
 
 public enum ReservationStatus {
 
-    RESERVED("예약");
+    RESERVED("예약"),
+    WAITING("번째 예약 대기");
 
     private final String status;
 
