@@ -17,6 +17,7 @@ import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.ReservationFilterRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
+import roomescape.dto.response.ReservationPendingResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -61,11 +62,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllPending() {
-        List<Reservation> reservations =
-                reservationRepository.findAllByStatusOrderByDateAscTime(ReservationStatus.PENDING);
-        return reservations.stream()
-                .map(ReservationResponse::from)
+    public List<ReservationPendingResponse> findAllPending() {
+        List<ReservationRank> reservationRanks =
+                reservationRepository.findAllPendingOrderByDateAscTime();
+        return reservationRanks.stream()
+                .map(ReservationPendingResponse::from)
                 .toList();
     }
 

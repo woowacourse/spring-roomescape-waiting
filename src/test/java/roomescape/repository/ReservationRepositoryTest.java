@@ -8,10 +8,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationRank;
 
 @DataJpaTest
+@Sql(value = "classpath:test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -35,5 +38,15 @@ class ReservationRepositoryTest {
                 () -> assertThat(reservationRanksWithMember).hasSize(9),
                 () -> assertThat(pendingRanks).hasSize(3)
         );
+    }
+
+    @DisplayName("예약 대기 중인 예약들을 조회한다.")
+    @Test
+    void findAllPendingOrderByDateAscTime() {
+        //when
+        List<ReservationRank> reservationRanks = reservationRepository.findAllPendingOrderByDateAscTime();
+
+        //then
+        assertThat(reservationRanks).hasSize(10);
     }
 }

@@ -14,8 +14,6 @@ import roomescape.domain.TimeSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAllByStatusOrderByDateAscTime(ReservationStatus status);
-
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
 
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
@@ -34,6 +32,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY r.date, r.time.startAt, r.id
             """)
     List<ReservationRank> findReservationRanksWithMember(Member member);
+
+    @Query("""
+            SELECT new roomescape.domain.ReservationRank(
+            r,
+            (SELECT COUNT(r2)
+            FROM Reservation r2
+            WHERE r2.theme = r.theme
+                AND r2.date = r.date
+                AND r2.time = r.time
+                AND r2.id < r.id))
+            FROM Reservation r
+            WHERE r.status = 'PENDING'
+            ORDER BY r.date, r.time.startAt, r.id
+            """)
+    List<ReservationRank> findAllPendingOrderByDateAscTime();
 
     Optional<Reservation> findFirstByDateAndTimeAndThemeAndStatusOrderById(LocalDate date,
                                                                            TimeSlot timeSlot,
