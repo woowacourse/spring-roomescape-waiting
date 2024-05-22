@@ -23,7 +23,11 @@
     - [x] 몇 번째 대기인지 표시
 - [x] 예약 대기 취소
 
-### API 명세
+---
+
+## API 명세
+
+### 내 예약 목록 조회 (예약 대기 포함)
 
 #### request
 
@@ -41,11 +45,65 @@ Content-Type: application/json
 
 [
     {
-        "reservationId": 1,
+        "id": 1,
         "theme": "테마1",
         "date": "2024-03-01",
         "time": "10:00",
         "status": "예약"
+    },
+    {
+        "id": 2,
+        "theme": "테마1",
+        "date": "2024-03-01",
+        "time": "10:00",
+        "status": "1번째 예약대기"
     }
 ]
+```
+
+### 예약 대기 요청
+
+#### request
+
+```http request
+POST /waiting
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+Content-Type: application/json
+
+{
+    "date": "2021-07-01",
+    "themeId": 1,
+    "timeId": 1
+}
+```
+
+#### response
+
+```http request
+HTTP/1.1 201
+Content-Type: application/json
+Location: /waiting/2
+
+{
+    "id": 2,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "1번째 예약대기"
+}
+```
+
+### 사용자 예약 대기 취소
+
+#### request
+
+```http request
+DELETE /waiting/2
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+```
+
+#### response
+
+```http request
+HTTP/1.1 204
 ```
