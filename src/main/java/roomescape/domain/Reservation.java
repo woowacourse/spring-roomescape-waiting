@@ -61,6 +61,10 @@ public class Reservation {
         return waitings.indexOf(waiting);
     }
 
+    public boolean isOwn(Member other){
+        return this.member.equals(other);
+    }
+
     public Long getId() {
         return id;
     }

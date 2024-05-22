@@ -1,8 +1,8 @@
 package roomescape.service.dto.response;
 
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.service.dto.ReservationStatusMessageMapper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,28 +14,17 @@ public record UserReservationResponse(
         LocalTime time,
         String status
 ) {
-    public static UserReservationResponse of(Reservation reservation, ReservationStatus status, int rank) {
-        return new UserReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                ReservationStatusMessageMapper.messageOf(status, rank)
-        );
-    }
-
     public UserReservationResponse(
-            long waitingId,
+            long id,
             Reservation reservation,
-            ReservationStatus status,
-            int rank
+            Member member
     ) {
-       this(
-                waitingId,
+        this(
+                id,
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                ReservationStatusMessageMapper.messageOf(status, rank)
+                ReservationStatus.messageOf(reservation, member)
         );
     }
 }

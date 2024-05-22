@@ -1,13 +1,17 @@
 package roomescape.service.dto.response;
 
-import java.time.LocalDate;
+import roomescape.domain.Waiting;
 
 public record WaitingResponse(
         long id,
-        MemberResponse member,
-        LocalDate date,
-        ReservationTimeResponse time,
-        ThemeResponse theme
+        long memberId,
+        long reservationId
 ) {
-
+    public WaitingResponse(Waiting waiting){
+        this(
+                waiting.getId(),
+                waiting.getMember().getId(),
+                waiting.getReservation().getId()
+        );
+    }
 }

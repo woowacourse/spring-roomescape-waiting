@@ -3,7 +3,10 @@ package roomescape.domain;
 import jakarta.persistence.*;
 import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
+import roomescape.exception.customexception.RoomEscapeBusinessException;
 
+import java.nio.BufferOverflowException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +27,7 @@ public class Member {
     private Role role;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<Waiting> waitings;
+    private List<Waiting> waitings = new ArrayList<>();
 
 
     public Member(String name, String email, String password, Role role) {
@@ -39,6 +42,14 @@ public class Member {
 
     public static Member createUser(String name, String email, String password) {
         return new Member(name, email, password, Role.USER);
+    }
+
+    public int getReservationRanking(Reservation reservation){
+        return waitings.stream()
+                .filter(waiting -> waiting.isSameReservationWaiting(reservation))
+                .findAny()
+                .orElseThrow(()-> new RoomEscapeBusinessException("조회한 예약 대기를 가지고 있지 않습니다."))
+                .getRank();
     }
 
     public boolean hasWaiting(Waiting otherWaiting) {
