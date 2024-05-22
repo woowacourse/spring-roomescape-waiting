@@ -1,6 +1,7 @@
 package roomescape.core.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,9 +9,12 @@ import org.springframework.data.repository.query.Param;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
+import roomescape.core.domain.Status;
 import roomescape.core.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+    Reservation findReservationById(final Long id);
+
     List<Reservation> findAllByDateAndTheme(final LocalDate date, final Theme theme);
 
     @Query("""
@@ -33,6 +37,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByDateAndTimeAndThemeOrderByCreateAtAsc(final LocalDate date, final ReservationTime time,
                                                                      final Theme theme);
 
+    List<Reservation> findAllByStatus(final Status status);
+
     Integer countByTime(final ReservationTime reservationTime);
 
     Integer countByTheme(final Theme theme);
@@ -42,5 +48,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Integer countByMemberAndDateAndTimeAndTheme(final Member member, final LocalDate date, final ReservationTime time,
                                                 final Theme theme);
 
-    void deleteById(final long id);
+    @Query("""
+            SELECT COUNT(r) FROM Reservation r
+            WHERE r.date = :date
+            AND r.time = :time
+            AND r.theme = :theme
+            AND r.createAt < :createAt
+            """
+    )
+    Integer countByCreateAtRank(final LocalDate date, final ReservationTime time, final Theme theme,
+                                final LocalDateTime createAt);
 }

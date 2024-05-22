@@ -84,6 +84,10 @@ public class Reservation {
         return this.getCreateAt().equals(reservation.getCreateAt());
     }
 
+    public void approve() {
+        this.status = Status.BOOKED;
+    }
+
     public Long getId() {
         return id;
     }

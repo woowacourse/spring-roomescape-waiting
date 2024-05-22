@@ -3,7 +3,6 @@ package roomescape.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
@@ -108,7 +107,7 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<MyReservationResponse> findAllByMember(final LoginMember loginMember) {
         final Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(IllegalArgumentException::new);
@@ -121,25 +120,32 @@ public class ReservationService {
     }
 
     private String getStatus(final Reservation reservation) {
-        Integer rank = findRankByCreateAt(reservation);
-        if (rank == 0) {
+        Integer count = findRankByCreateAt(reservation);
+        if (count == 0) {
             return reservation.getStatus().getValue();
         }
-        return reservation.getStatus().waitingRankStatus(rank);
+        return reservation.getStatus().waitingRankStatus(count);
     }
 
     private Integer findRankByCreateAt(final Reservation reservation) {
-        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeOrderByCreateAtAsc(
-                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
-        return IntStream.range(0, reservations.size())
-                .filter(i -> reservations.get(i).isEqualCreateAt(reservation))
-                .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+        return reservationRepository.countByCreateAtRank(reservation.getDate(), reservation.getReservationTime(),
+                reservation.getTheme(), reservation.getCreateAt());
     }
 
     @Transactional
-    public void delete(final long id) {
+    public void delete(final Long id) {
+        updateReservationStatus(id);
         reservationRepository.deleteById(id);
+    }
+
+    private void updateReservationStatus(Long id) {
+        Reservation delete = reservationRepository.findReservationById(id);
+        List<Reservation> reservations = reservationRepository.findAllByDateAndTimeAndThemeOrderByCreateAtAsc(
+                delete.getDate(), delete.getReservationTime(), delete.getTheme());
+        reservations.remove(delete);
+        if (!reservations.isEmpty()) {
+            reservations.get(0).approve();
+        }
     }
 
     @Transactional(readOnly = true)
@@ -149,6 +155,14 @@ public class ReservationService {
         final LocalDate dateTo = LocalDate.parse(to);
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream()
+                .map(ReservationResponse::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> findAllByStatusStandby() {
+        List<Reservation> reservations = reservationRepository.findAllByStatus(Status.STANDBY);
+        return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
