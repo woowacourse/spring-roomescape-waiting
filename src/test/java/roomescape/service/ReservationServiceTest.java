@@ -99,7 +99,7 @@ class ReservationServiceTest {
                 new ReservationTime(LocalTime.of(10, 0)));
 
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.of(1999, 12, 12), reservationTime.getId(),
-                theme.getId(), 1L);
+                theme.getId(), member.getId());
 
         assertThatThrownBy(
                 () -> reservationService.createReservation(reservationRequest, reservationRequest.memberId()))
