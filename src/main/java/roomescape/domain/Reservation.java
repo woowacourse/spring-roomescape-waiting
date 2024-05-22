@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.PriorityQueue;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
@@ -19,6 +20,8 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
+    @OneToMany(mappedBy = "reservation")
+    private PriorityQueue<Waiting> waitings = new PriorityQueue<>();
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;
@@ -29,6 +32,24 @@ public class Reservation {
 
     protected Reservation() {
     }
+
+    public void addWaiting(Waiting waiting) {
+        waitings.add(waiting);
+        Member member = waiting.getMember();
+
+        if (!member.hasWaiting(waiting)) {
+            member.addWaiting(waiting);
+        }
+    }
+
+    public void removeWaiting(Waiting waiting) {
+        waitings.remove(waiting);
+    }
+
+    public boolean hasWaiting() {
+        return !waitings.isEmpty();
+    }
+
 
     public Long getId() {
         return id;

@@ -1,7 +1,9 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import org.springframework.lang.NonNull;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -10,15 +12,19 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @NonNull
     private String name;
-    @Column(nullable = false)
+    @NonNull
     private String email;
-    @Column(nullable = false)
+    @NonNull
     private String password;
-    @Column(nullable = false)
+    @NonNull
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany
+    private List<Waiting> waitings;
+
 
     public Member(String name, String email, String password, Role role) {
         this.name = name;
@@ -32,6 +38,19 @@ public class Member {
 
     public static Member createUser(String name, String email, String password) {
         return new Member(name, email, password, Role.USER);
+    }
+
+    public boolean hasWaiting(Waiting otherWaiting) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.isSameReservationWaiting(otherWaiting.getReservation()));
+    }
+
+    public void addWaiting(Waiting waiting){
+        waitings.add(waiting);
+    }
+
+    public void removeWaiting(Waiting waiting){
+        waitings.remove(waiting);
     }
 
     public Long getId() {
