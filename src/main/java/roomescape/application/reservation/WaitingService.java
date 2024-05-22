@@ -52,6 +52,31 @@ public class WaitingService {
 
     }
 
+    public List<ReservationResponse> findAll() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
+        List<Waiting> waitings = waitingRepository.findAllByMemberIdOrderByCreatedAtAsc(memberId);
+        return waitings.stream()
+                .map(this::makeReservationStatus)
+                .collect(Collectors.toList());
+
+    }
+
+    @Transactional
+    public void deleteById(long memberId, long id) {
+        Waiting waiting = waitingRepository.getById(id);
+        if (roleRepository.isAdminByMemberId(memberId) || waiting.isOwnedBy(memberId)) {
+            waitingRepository.deleteById(waiting.getId());
+            return;
+        }
+        throw new UnAuthorizedException();
+    }
+
     private void validateCreateWaiting(ReservationRequest reservationRequest, Reservation reservation) {
         validateWaitingAfterPresent(reservationRequest);
         validateReservationExist(reservation);
@@ -83,24 +108,6 @@ public class WaitingService {
         if (waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), reservationRequest.memberId())) {
             throw new IllegalArgumentException("동일한 예약 대기는 생성이 불가합니다.");
         }
-    }
-
-    @Transactional
-    public void deleteById(long memberId, long id) {
-        Waiting waiting = waitingRepository.getById(id);
-        if (roleRepository.isAdminByMemberId(memberId) || waiting.isOwnedBy(memberId)) {
-            waitingRepository.deleteById(waiting.getId());
-            return;
-        }
-        throw new UnAuthorizedException();
-    }
-
-    public List<ReservationStatusResponse> findAllByMemberId(long memberId) {
-        List<Waiting> waitings = waitingRepository.findAllByMemberIdOrderByCreatedAtAsc(memberId);
-        return waitings.stream()
-                .map(this::makeReservationStatus)
-                .collect(Collectors.toList());
-
     }
 
     private ReservationStatusResponse makeReservationStatus(Waiting waiting) {

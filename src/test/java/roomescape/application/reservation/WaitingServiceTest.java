@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
+import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
@@ -141,8 +142,8 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("모든 예약 대기를 생성 순서에 따라 조회한다.")
-    void readAllWaiting() {
+    @DisplayName("멤버의 예약 대기를 생성 순서에 따라 조회한다.")
+    void readAllWaitingByMemberId() {
         Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
         waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
 
@@ -157,5 +158,18 @@ class WaitingServiceTest {
                 () -> assertThat(reservationResponses1.get(0).status()).contains("2번째"),
                 () -> assertThat(reservationResponses2.get(0).status()).contains("1번째")
         );
+    }
+
+    @Test
+    @DisplayName("모든 예약 대기를 조회한다.")
+    void readAllWaiting() {
+        Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
+        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+
+        Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
+        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+
+        List<ReservationResponse> responses = waitingService.findAll();
+        assertThat(responses.size()).isEqualTo(2);
     }
 }

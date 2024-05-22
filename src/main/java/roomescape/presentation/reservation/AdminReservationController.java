@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.request.ReservationFilterRequest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
@@ -20,9 +21,11 @@ import roomescape.application.reservation.dto.response.ReservationResponse;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -39,6 +42,12 @@ public class AdminReservationController {
                                                                   @RequestParam(required = false) LocalDate endDate) {
         ReservationFilterRequest request = new ReservationFilterRequest(memberId, themeId, startDate, endDate);
         List<ReservationResponse> responses = reservationService.findByFilter(request);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
+        List<ReservationResponse> responses = waitingService.findAll();
         return ResponseEntity.ok(responses);
     }
 }
