@@ -10,19 +10,24 @@ import roomescape.reservation.dto.SearchReservationsParams;
 import roomescape.reservation.dto.SearchReservationsRequest;
 import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationDate;
+import roomescape.reservation.model.ReservationStatus;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.ReservationWaiting;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.repository.CustomReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationWaitingRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Transactional
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final CustomReservationRepository customReservationRepository;
     private final MemberService memberService;
     private final ThemeService themeService;
@@ -31,15 +36,17 @@ public class ReservationService {
     public ReservationService(
             final CustomReservationRepository customReservationRepository,
             final ReservationRepository reservationRepository,
-            final ReservationTimeService reservationTimeService,
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final MemberService memberService,
             final ThemeService themeService,
-            final MemberService memberService
+            final ReservationTimeService reservationTimeService
     ) {
         this.customReservationRepository = customReservationRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.memberService = memberService;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     @Transactional(readOnly = true)
@@ -95,7 +102,26 @@ public class ReservationService {
     }
 
     public void deleteReservation(final Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        final Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 정보입니다."));
+        reservationRepository.deleteById(reservation.getId());
+        reservationWaitingRepository.findTopByDateAndTimeAndThemeOrderByCreatedAtAsc(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme())
+                .ifPresent(this::saveReservationWithWaiting);
+    }
+
+    private void saveReservationWithWaiting(final ReservationWaiting reservationWaiting) {
+        final Reservation reservation = new Reservation(
+                ReservationStatus.RESERVATION,
+                reservationWaiting.getDate().getValue(),
+                reservationWaiting.getTime(),
+                reservationWaiting.getTheme(),
+                reservationWaiting.getMember()
+        );
+        reservationRepository.save(reservation);
+        reservationWaitingRepository.delete(reservationWaiting);
     }
 
     @Transactional(readOnly = true)
