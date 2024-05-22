@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -146,6 +147,10 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        if (findById(id).date().equals(LocalDate.now())) {
+            throw new IllegalArgumentException("당일 예약은 취소할 수 없습니다.");
+        }
+
         reservationRepository.deleteById(id);
     }
 }

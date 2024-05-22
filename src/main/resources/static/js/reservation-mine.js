@@ -35,14 +35,21 @@ function render(data) {
         if (status !== '예약') {
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
-            cancelButton.textContent = '취소';
+            cancelButton.textContent = '대기 취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
                 requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
-            row.insertCell(4).textContent = '';
+            const cancelCell = row.insertCell(4);
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = '예약 취소';
+            cancelButton.className = 'btn btn-danger';
+            cancelButton.onclick = function () {
+                requestDelete(item.reservationId).then(() => window.location.reload());
+            };
+            cancelCell.appendChild(cancelButton);
         }
     });
 }
@@ -52,7 +59,29 @@ function requestDeleteWaiting(id) {
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
+        if (response !== 204) {
+            return response.text().then(errorResponse => {
+                throw new Error(errorResponse);
+            })
+        }
+        return;
+    }).catch(error => {
+        alert(error.message);
+    });
+}
+
+function requestDelete(id) {
+    const endpoint = `${RESERVATION_API_ENDPOINT}/${id}`;
+    return fetch(endpoint, {
+        method: 'DELETE'
+    }).then(response => {
+        if (response !== 204) {
+            return response.text().then(errorResponse => {
+                throw new Error(errorResponse);
+            })
+        }
+        return;
+    }).catch(error => {
+        alert(error.message);
     });
 }

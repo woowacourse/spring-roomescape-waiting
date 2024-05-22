@@ -71,7 +71,8 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
     @Test
     void notExistReservationTimeIdExceptionTest() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), 1L);
@@ -83,17 +84,20 @@ class ReservationServiceTest {
     @DisplayName("예약 성공 상태의 중복된 예약이 있다면 예외가 발생한다.")
     @Test
     void validateDuplicatedReservationSuccess() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, JOJO_NAME, JOJO_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(),
+                reservationTime.getId());
         reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
 
-        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest duplicateRequest = new ReservationSaveRequest(TODAY, theme.getId(),
+                reservationTime.getId());
         assertThatThrownBy(() -> reservationService.saveReservationSuccess(duplicateRequest, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -101,14 +105,16 @@ class ReservationServiceTest {
     @DisplayName("동일한 회원이 예약 대기 상태의 중복된 예약을 할 경우 예외가 발생한다.")
     @Test
     void validateDuplicatedReservationWaiting() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(),
+                reservationTime.getId());
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember);
 
         assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
@@ -118,14 +124,16 @@ class ReservationServiceTest {
     @DisplayName("동일한 회원이 예약 후 해당 예약에 연달아 대기를 걸 경우 예외가 발생한다.")
     @Test
     void validateReservationWaitingAfterReservation() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
         memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(),
+                reservationTime.getId());
         reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
 
         assertThatThrownBy(() -> reservationService.saveReservationWaiting(reservationSaveRequest, loginMember))
@@ -135,14 +143,18 @@ class ReservationServiceTest {
     @DisplayName("회원 별 예약 목록을 조회 시 대기 상태의 예약은 대기 순서를 함께 반환한다.")
     @Test
     void findMemberReservations() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
 
-        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+        Member kaki = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(),
+                reservationTime.getId());
 
         LoginMember loginMember1 = new LoginMember(kaki.getId(), Role.USER, KAKI_NAME, KAKI_EMAIL);
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember1);
@@ -150,7 +162,8 @@ class ReservationServiceTest {
         LoginMember loginMember2 = new LoginMember(jojo.getId(), Role.USER, JOJO_NAME, JOJO_EMAIL);
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember2);
 
-        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember2);
+        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(
+                loginMember2);
 
         assertThat(memberReservationResponses).extracting(MemberReservationResponse::rank)
                 .containsExactly(2);
@@ -159,13 +172,16 @@ class ReservationServiceTest {
     @DisplayName("현재 날짜 이후의 예약들을 예약 날짜, 예약 시간, 예약 추가 순으로 정렬해 예약 대기 목록을 조회한다.")
     @Test
     void findWaitingReservations() {
-        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+        Theme theme = themeRepository.save(
+                new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
 
         ReservationTime hour10 = reservationTimeRepository.save(new ReservationTime(HOUR_10));
         ReservationTime hour11 = reservationTimeRepository.save(new ReservationTime(HOUR_11));
 
-        Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-        Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+        Member kaki = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+        Member jojo = memberRepository.save(
+                Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
         Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour11, Status.WAIT);
         Reservation reservation2 = new Reservation(kaki, TODAY, theme, hour10, Status.WAIT);
@@ -180,7 +196,8 @@ class ReservationServiceTest {
         List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
 
         assertThat(waitingReservations).extracting(ReservationWaitingResponse::id)
-                .containsExactly(reservation2.getId(), reservation3.getId(), reservation4.getId(), reservation1.getId());
+                .containsExactly(reservation2.getId(), reservation3.getId(), reservation4.getId(),
+                        reservation1.getId());
     }
 
     @DisplayName("예약 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
@@ -189,5 +206,21 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.findById(1L))
                 .isInstanceOf(IllegalArgumentException.class);
     }
-}
 
+    @DisplayName("당일 예약을 삭제하면 예외가 발생한다.")
+    @Test
+    void deleteTodayReservation() {
+        Theme theme = themeRepository.save(new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL));
+
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(HOUR_10));
+
+        memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
+
+        LoginMember loginMember = new LoginMember(1L, Role.USER, KAKI_NAME, KAKI_EMAIL);
+        ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(TODAY, theme.getId(), reservationTime.getId());
+        reservationService.saveReservationSuccess(reservationSaveRequest, loginMember);
+
+        assertThatThrownBy(() -> reservationService.delete(loginMember.id()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+}
