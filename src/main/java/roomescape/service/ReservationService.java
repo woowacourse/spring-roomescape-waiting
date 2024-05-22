@@ -22,7 +22,6 @@ import roomescape.repository.ThemeRepository;
 import roomescape.service.exception.DuplicateReservationException;
 import roomescape.service.exception.InvalidSearchDateException;
 import roomescape.service.exception.PreviousTimeException;
-import roomescape.service.exception.ReservationNotFoundException;
 
 @Service
 public class ReservationService {
@@ -97,22 +96,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation setWaitingReservationReserved(final long id) {
-        final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
-        if (waitingReservation.isReserved()) {
-            throw new ReservationNotFoundException("해당 예약대기는 이미 예약으로 변경되었습니다.");
-        }
-        Reservation reservation = addReservation(new CreateReservationDto(
-                waitingReservation.getMember().getId(),
-                waitingReservation.getTheme().getId(),
-                waitingReservation.getDate(),
-                waitingReservation.getTime().getId(),
-                Status.RESERVED));
-        reservationRepository.deleteById(waitingReservation.getId());
-        return reservation;
-    }
-
-    @Transactional
     public void deleteReservation(final long id) {
         final Reservation deleteReservation = reservationRepository.findByIdOrThrow(id);
         reservationRepository.deleteById(deleteReservation.getId());
@@ -124,8 +107,15 @@ public class ReservationService {
                             deleteReservation.getDate(),
                             Status.WAITING);
             firstWaitingReservation
-                    .ifPresent(reservation -> setWaitingReservationReserved(reservation.getId()));
+                    .ifPresent(reservation -> reserveWaitingReservation(reservation.getId()));
         }
+    }
+
+    @Transactional
+    public Reservation reserveWaitingReservation(final long id) {
+        final Reservation waitingReservation = reservationRepository.findByIdOrThrow(id);
+        waitingReservation.reserveWaiting();
+        return waitingReservation;
     }
 
     private void validateDateRange(final ReservationSearchCondition request) {

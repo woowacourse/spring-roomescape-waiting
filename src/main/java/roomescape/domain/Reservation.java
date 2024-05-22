@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.service.exception.ReservationNotFoundException;
 
 @Entity
 public class Reservation {
@@ -42,6 +43,13 @@ public class Reservation {
 
     public boolean isReserved() {
         return Status.RESERVED == status;
+    }
+
+    public void reserveWaiting() {
+        if (status == Status.RESERVED) {
+            throw new ReservationNotFoundException("해당 예약대기는 이미 예약으로 변경되었습니다.");
+        }
+        status = Status.RESERVED;
     }
 
     public Long getId() {

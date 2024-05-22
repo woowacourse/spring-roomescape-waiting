@@ -34,7 +34,7 @@ public class WaitingReservationController {
     @PostMapping("/{id}")
     public ResponseEntity<ReservationResponse> changeWaitingReservationToReserved(
             @PathVariable("id") final Long id) {
-        Reservation reservation = reservationService.setWaitingReservationReserved(id);
+        Reservation reservation = reservationService.reserveWaitingReservation(id);
         final URI uri = UriComponentsBuilder.fromPath("/reservations/{id}")
                 .buildAndExpand(reservation.getId())
                 .toUri();
