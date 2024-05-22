@@ -17,6 +17,9 @@ import roomescape.auth.TokenProvider;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.domain.reservation.ReservationWaitingRepository;
 import roomescape.domain.schedule.ReservationDate;
@@ -47,6 +50,10 @@ class ReservationWaitingServiceTest {
     private Theme theme;
     private Member member;
     private String token;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -65,6 +72,7 @@ class ReservationWaitingServiceTest {
         ReservationRequest request = new ReservationRequest(
                 date, reservationTime.getId(), theme.getId()
         );
+        reservationRepository.save(new Reservation(member, new Schedule(ReservationDate.of(date), reservationTime), theme, ReservationStatus.RESERVED));
 
         // when
         ReservationWaitingResponse response = reservationWaitingService.create(request, member.getId());
@@ -91,7 +99,7 @@ class ReservationWaitingServiceTest {
         reservationWaitingService.deleteById(target.getId(), tokenProvider.extractMemberId(token));
 
         // then
-        assertThat(reservationWaitingRepository.findAll()).isEmpty();
+        assertThat(reservationWaitingRepository.findById(target.getId())).isNotPresent();
     }
 
     @DisplayName("회원 정보가 일치하지 않으면 예약 취소 시 에외가 발생한다.")

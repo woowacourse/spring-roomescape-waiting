@@ -70,14 +70,8 @@ class ReservationWaitingControllerTest {
     @DisplayName("예약 대기 삭제 성공 테스트")
     @Test
     void deleteReservationWaitingById() {
-        // given
-        long id = RestAssured.given().contentType(ContentType.JSON)
-                .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
-                .body(new ReservationRequest(date, timeId, themeId))
-                .when().post("/reservations/waiting")
-                .then().extract().body().jsonPath().getLong("id");
-
         // when & then
+        long id = 1;
         RestAssured.given().log().all()
                 .cookie(AuthConstants.AUTH_COOKIE_NAME, token)
                 .when().delete("/reservations/waiting/" + id)
