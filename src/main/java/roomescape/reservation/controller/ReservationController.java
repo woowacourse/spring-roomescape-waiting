@@ -40,8 +40,9 @@ public class ReservationController {
     ) {
         final ReservationDto savedReservation = reservationService.saveReservation(
                 request.setMemberId(authenticatedMember.id()));
+        final ReservationResponse response = ReservationResponse.from(savedReservation);
 
         return ResponseEntity.created(URI.create("/reservations/" + savedReservation.id()))
-                .body(ReservationResponse.from(savedReservation));
+                .body(response);
     }
 }

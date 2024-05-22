@@ -19,16 +19,21 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
-    @Embedded
-    private ReservationDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
+
+    @Embedded
+    private ReservationDate date;
 
     protected Reservation() {
     }
