@@ -14,6 +14,7 @@ import roomescape.auth.AuthenticatedMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.service.dto.request.ReservationSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.UserReservationResponse;
@@ -52,9 +53,9 @@ public class ReservationApiController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> getUserReservations(@AuthenticatedMember Member member) {
-        List<Reservation> userReservations = reservationFindService.findUserReservations(member.getId());
+        List<ReservationWaitingWithRank> reservationWaitingWithRanks = reservationFindService.findMemberReservations(member.getId());
         return ResponseEntity.ok(
-                userReservations.stream()
+                reservationWaitingWithRanks.stream()
                         .map(UserReservationResponse::new)
                         .toList()
         );

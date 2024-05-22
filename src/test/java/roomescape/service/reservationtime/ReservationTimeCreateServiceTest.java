@@ -1,14 +1,15 @@
 package roomescape.service.reservationtime;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.service.dto.request.ReservationTimeSaveRequest;
+
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class ReservationTimeCreateServiceTest {
@@ -20,7 +21,7 @@ class ReservationTimeCreateServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간인 경우 성공한다")
     void checkDuplicateTime_Success() {
-        ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(12, 0));
+        ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(13, 0));
 
         assertThatCode(() -> reservationTimeCreateService.createReservationTime(request))
                 .doesNotThrowAnyException();

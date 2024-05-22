@@ -1,7 +1,8 @@
 package roomescape.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationWaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,11 +13,19 @@ public record UserReservationResponse(Long reservationId,
                                       @JsonFormat(pattern = "HH:mm") LocalTime time,
                                       String status) {
 
-    public UserReservationResponse(Reservation reservation) {
-        this(reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt(),
-                reservation.getReservationStatus().getStatus());
+    public UserReservationResponse(ReservationWaitingWithRank reservationWaitingWithRank) {
+        this(reservationWaitingWithRank.getReservation().getId(),
+                reservationWaitingWithRank.getReservation().getTheme().getName(),
+                reservationWaitingWithRank.getReservation().getDate(),
+                reservationWaitingWithRank.getReservation().getReservationTime().getStartAt(),
+                reservationStatusToString(reservationWaitingWithRank));
+    }
+
+    private static String reservationStatusToString(ReservationWaitingWithRank reservationWaitingWithRank) {
+        ReservationStatus reservationStatus = reservationWaitingWithRank.getReservation().getReservationStatus();
+        if (reservationStatus.isReserved()) {
+            return reservationStatus.getStatus();
+        }
+        return reservationWaitingWithRank.getRank() + "번째 " + reservationStatus.getStatus();
     }
 }

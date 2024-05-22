@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
@@ -18,8 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId,
                                                              LocalDate dateFrom, LocalDate dateTo);
-
-    List<Reservation> findByMemberId(long memberId);
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
@@ -41,5 +40,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("theme") Theme theme,
             @Param("reservationTime") ReservationTime reservationTime,
             @Param("date") LocalDate date);
+
+    @Query("""
+            SELECT new roomescape.domain.ReservationWaitingWithRank(
+             r, (SELECT COUNT(r2) + 1 
+                FROM Reservation r2 
+                WHERE r2.theme = r.theme 
+                AND r2.date = r.date 
+                AND r2.reservationTime = r.reservationTime
+                AND r2.reservationStatus = r.reservationStatus  
+                AND r2.createdAt < r.createdAt)
+             )
+             FROM Reservation r 
+             WHERE r.member.id = :memberId
+             """)
+    List<ReservationWaitingWithRank> findReservationWaitingWithRankByMemberId(@Param("memberId") long memberId);
 }
 

@@ -29,7 +29,8 @@ class ReservationTimeFindServiceTest {
         assertThat(bookingStatus.getReservationStatus())
                 .isEqualTo(Map.of(
                         new ReservationTime(1L, LocalTime.of(10, 0)), true,
-                        new ReservationTime(2L, LocalTime.of(11, 0)), false
-                ));
+                        new ReservationTime(2L, LocalTime.of(11, 0)), false,
+                        new ReservationTime(3L, LocalTime.of(12, 0)), false)
+                );
     }
 }

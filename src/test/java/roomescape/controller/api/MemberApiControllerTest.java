@@ -21,7 +21,7 @@ class MemberApiControllerTest {
                 .when().get("/admin/members")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3));
     }
 
     @Test

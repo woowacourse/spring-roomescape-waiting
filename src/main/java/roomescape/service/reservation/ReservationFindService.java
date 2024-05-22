@@ -1,10 +1,12 @@
 package roomescape.service.reservation;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWaitingWithRank;
 import roomescape.repository.ReservationRepository;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ReservationFindService {
@@ -24,7 +26,7 @@ public class ReservationFindService {
         return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
     }
 
-    public List<Reservation> findUserReservations(long memberId) {
-        return reservationRepository.findByMemberId(memberId);
+    public List<ReservationWaitingWithRank> findMemberReservations(long memberId) {
+        return reservationRepository.findReservationWaitingWithRankByMemberId(memberId);
     }
 }
