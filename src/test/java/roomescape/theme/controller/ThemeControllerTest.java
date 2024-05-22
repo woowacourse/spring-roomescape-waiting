@@ -41,7 +41,7 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -55,7 +55,7 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(5));
     }
 
     @DisplayName("테마 컨트롤러는 중복된 이름으로 생성 요청이 들어올 경우 400을 응답한다.")
@@ -98,7 +98,7 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
     }
 
     @DisplayName("테마 컨트롤러는 최근 일주일간 인기 테마 조회 요청이 들어오면 200을 반환한다.")

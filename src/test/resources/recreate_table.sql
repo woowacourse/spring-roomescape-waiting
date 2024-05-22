@@ -81,6 +81,8 @@ INSERT INTO reservation_time (start_at)
 VALUES ('12:00:00');
 INSERT INTO reservation_time (start_at)
 VALUES ('14:00:00');
+INSERT INTO reservation_time (start_at)
+VALUES ('15:00:00');
 
 INSERT INTO theme (name, description, thumbnail)
 VALUES ('공포', '완전 무서운 테마', 'https://example.org');
@@ -88,6 +90,8 @@ INSERT INTO theme (name, description, thumbnail)
 VALUES ('힐링', '완전 힐링되는 테마', 'https://example.org');
 INSERT INTO theme (name, description, thumbnail)
 VALUES ('힐링2', '완전 힐링되는 테마2', 'https://example.org');
+INSERT INTO theme (name, description, thumbnail)
+VALUES ('몽환', '안전 몽환적인 테마', 'https://example.org');
 
 INSERT INTO reservation (date, time_id, theme_id)
 VALUES ('2099-12-31', 1, 1);
@@ -111,6 +115,11 @@ VALUES (FORMATDATETIME(DATEADD('DAY', -4, NOW()), 'yyyy-MM-dd'), 1, 2);
 INSERT INTO reservation (date, time_id, theme_id)
 VALUES (FORMATDATETIME(DATEADD('DAY', -5, NOW()), 'yyyy-MM-dd'), 1, 1);
 
+INSERT INTO reservation (date, time_id, theme_id)
+VALUES ('2024-12-31', 4, 4);
+INSERT INTO reservation (date, time_id, theme_id)
+VALUES ('2025-12-31', 4, 4);
+
 INSERT INTO member_reservation (member_id, reservation_id)
 VALUES (1, 2);
 INSERT INTO member_reservation (member_id, reservation_id)
@@ -131,3 +140,13 @@ INSERT INTO member_reservation (member_id, reservation_id)
 VALUES (5, 9);
 INSERT INTO member_reservation (member_id, reservation_id)
 VALUES (6, 10);
+
+INSERT INTO member_reservation (member_id, reservation_id, status, created_at)
+VALUES (4, 11, 'WAITING', CURRENT_TIMESTAMP());
+INSERT INTO member_reservation (member_id, reservation_id, status, created_at)
+VALUES (3, 11, 'WAITING', DATEADD(DAY, 1, CURRENT_TIMESTAMP()));
+
+INSERT INTO member_reservation(member_id, reservation_id)
+VALUES (3, 12);
+INSERT INTO member_reservation(member_id, reservation_id, status)
+VALUES (3, 12, 'WAITING');

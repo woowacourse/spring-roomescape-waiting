@@ -79,7 +79,7 @@ class ReservationTimeServiceTest {
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes();
 
         // then
-        assertThat(reservationTimes.size()).isEqualTo(3);
+        assertThat(reservationTimes.size()).isEqualTo(4);
     }
 
     @DisplayName("예약 시간 서비스는 지정된 날짜와 테마별 예약 가능 여부를 포함하여 시간들을 반환한다.")
@@ -93,7 +93,7 @@ class ReservationTimeServiceTest {
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.readReservationTimes(date, themeId);
 
         // then
-        assertThat(reservationTimes).hasSize(3);
+        assertThat(reservationTimes).hasSize(4);
         assertThat(reservationTimes).contains(
                 ReservationTimeResponse.of(new ReservationTime(1L, LocalTime.of(10, 0)), true)
         );

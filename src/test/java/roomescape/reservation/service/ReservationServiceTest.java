@@ -48,7 +48,7 @@ class ReservationServiceTest {
         List<MemberReservationResponse> reservations = reservationService.readReservations();
 
         // then
-        assertThat(reservations.size()).isEqualTo(10);
+        assertThat(reservations.size()).isEqualTo(11);
     }
 
     @DisplayName("예약 서비스는 id에 맞는 예약을 조회한다.")

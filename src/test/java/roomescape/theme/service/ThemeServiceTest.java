@@ -69,7 +69,7 @@ class ThemeServiceTest {
         List<ThemeResponse> themeResponses = themeService.readThemes();
 
         // then
-        assertThat(themeResponses).hasSize(3);
+        assertThat(themeResponses).hasSize(4);
     }
 
     @DisplayName("테마 서비스는 최근 일주일 간의 인기 있는 테마를 조회힌다.")
