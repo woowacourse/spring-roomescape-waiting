@@ -26,7 +26,6 @@ import roomescape.theme.repository.ThemeRepository;
 @Service
 public class ReservationService {
 
-    //TODO: 이렇게 의존관계를 많이 두는게 최선인지 고민해보기
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -127,12 +126,14 @@ public class ReservationService {
                 .toList();
     }
 
-    // TODO: 메서드 분리
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.getById(id);
-
         reservationRepository.deleteById(id);
 
+        reorderWaitings(reservation);
+    }
+
+    private void reorderWaitings(Reservation reservation) {
         Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndReservationTimeAndThemeOrderByIdAsc(
                 reservation.getDate(),
                 reservation.getReservationTime(),

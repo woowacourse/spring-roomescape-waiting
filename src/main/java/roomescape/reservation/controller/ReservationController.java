@@ -15,6 +15,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
@@ -44,10 +45,10 @@ public class ReservationController {
 
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> addWaiting(
-            @RequestBody ReservationRequest reservationRequest,
+            @RequestBody WaitingRequest waitingRequest,
             MemberRequest memberRequest
     ) {
-        WaitingResponse waitingResponse = waitingService.addWaiting(reservationRequest, memberRequest);
+        WaitingResponse waitingResponse = waitingService.addWaiting(waitingRequest, memberRequest);
 
         return ResponseEntity.created(URI.create("/reservations/waitings/" + waitingResponse.id()))
                 .body(waitingResponse);
