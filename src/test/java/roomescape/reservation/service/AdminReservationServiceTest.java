@@ -31,9 +31,11 @@ class AdminReservationServiceTest {
         List<ReservationResponse> results = adminReservationService.getByFilter(null, null, dateFrom, dateTo);
 
         // then
-        assertEquals(2, results.size());
+        assertEquals(4, results.size());
         assertThat(results.get(0).date()).isEqualTo(LocalDate.parse("2024-12-12"));
         assertThat(results.get(1).date()).isEqualTo(LocalDate.parse("2024-12-23"));
+        assertThat(results.get(2).date()).isEqualTo(LocalDate.parse("2024-12-23"));
+        assertThat(results.get(3).date()).isEqualTo(LocalDate.parse("2024-12-23"));
     }
 
     @DisplayName("예약자 번호와 테마 번호를 기준으로 예약을 조회한다.")
@@ -104,8 +106,10 @@ class AdminReservationServiceTest {
         List<ReservationResponse> results = adminReservationService.getByFilter(null, null, null, dateTo);
 
         // then
-        assertEquals(2, results.size());
+        assertEquals(4, results.size());
         assertThat(results.get(0).date()).isEqualTo(LocalDate.parse("2024-12-12"));
         assertThat(results.get(1).date()).isEqualTo(LocalDate.parse("2024-12-23"));
+        assertThat(results.get(2).date()).isEqualTo(LocalDate.parse("2024-12-23"));
+        assertThat(results.get(3).date()).isEqualTo(LocalDate.parse("2024-12-23"));
     }
 }
