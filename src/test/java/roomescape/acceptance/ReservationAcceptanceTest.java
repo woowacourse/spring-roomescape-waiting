@@ -98,37 +98,6 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         );
     }
 
-    @DisplayName("모든 예약 대기 내역 조회 테스트")
-    @TestFactory
-    Stream<DynamicTest> findAllWaitings() {
-        return Stream.of(
-                DynamicTest.dynamicTest("예약을 생성한다.", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", guest1Token)
-                            .body(new ReservationRequest(date, timeId, themeId))
-                            .when().post("/reservations");
-                }),
-                DynamicTest.dynamicTest("guest2가 guest1과 동일한 테마와 일정으로 예약을 요청하고, 1번째 예약 대기 상태로 생성된다.", () -> {
-                    RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .cookie("token", guest2Token)
-                            .body(new ReservationRequest(date, timeId, themeId))
-                            .when().post("/reservations")
-                            .then().log().all()
-                            .assertThat().body("status",is("예약대기"));
-                }),
-                DynamicTest.dynamicTest("모든 예약 대기 내역을 조회한다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", guest1Token)
-                            .queryParam("waiting",true)
-                            .when().get("/reservations")
-                            .then().log().all()
-                            .assertThat().statusCode(200).body("size()", is(1));
-                })
-        );
-    }
-
     @DisplayName("일반 사용자는 예약을 삭제할 수 없다.")
     @TestFactory
     Stream<DynamicTest> deleteReservationSuccess() {

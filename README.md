@@ -53,12 +53,9 @@
     }
   ```
 
-### 모든 예약/예약 대기 조회 - 어드민
+### 모든 예약 조회 - 어드민
 - http method: GET
-- uri: /reservations?waiting={isWaiting}
-  - isWaiting: 조회 종류
-  - false(default): 예약
-  - true: 예약 대기
+- uri: /reservations
   - response
     ```
     HTTP/1.1 200 
@@ -85,6 +82,39 @@
               "role": "GUEST"
             },
             "status": "예약"
+        }
+    ]
+    ```
+    
+### 모든 예약 대기 조회 - 어드민
+- http method: GET
+- uri: /waitings
+  - response
+    ```
+    HTTP/1.1 200 
+    Content-Type: application/json
+  
+    [
+        {
+            "id": 1,
+            "date": "2023-01-01",
+            "time": {
+              "id": 1.
+              "startAt": "10:00"
+            },
+            "theme": {
+              "id": 1,
+              "name": "레벨2 탈출",
+              "description": "우테코 레벨2를 탈출하는 내용입니다.",
+              "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+            },
+            "member": {
+              "id": 1,
+              "name": "lini",
+              "email": "lini@email.com",
+              "role": "GUEST"
+            },
+            "status": "예약대기"
         }
     ]
     ```

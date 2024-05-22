@@ -161,21 +161,10 @@ class ReservationServiceTest {
     @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-reservation.sql"})
     void findAllReservations() {
         //when
-        List<ReservationResponse> reservations = reservationService.findAllReservations();
+        List<ReservationResponse> reservations = reservationService.findAll();
 
         //then
         assertThat(reservations).hasSize(3);
-    }
-
-    @DisplayName("모든 예약 대기 내역을 조회한다.")
-    @Test
-    @Sql({"/truncate-with-time-and-theme.sql", "/insert-past-waiting.sql"})
-    void findAllWaitings() {
-        //when
-        List<ReservationResponse> reservations = reservationService.findAllWaitings();
-
-        //then
-        assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("사용자 조건으로 예약 내역을 조회한다.")
@@ -222,7 +211,7 @@ class ReservationServiceTest {
         reservationService.deleteById(target.getId());
 
         //then
-        assertThat(reservationService.findAllReservations()).isEmpty();
+        assertThat(reservationService.findAll()).isEmpty();
     }
 
     @DisplayName("관리자가 예약을 삭제하고, 예약 대기가 있다면 가장 우선순위가 높은 예약 대기를 예약으로 전환한다.")

@@ -146,14 +146,8 @@ public class ReservationService {
                 dateFrom, dateTo).stream().map(ReservationResponse::new).toList();
     }
 
-    public List<ReservationResponse> findAllReservations() {
+    public List<ReservationResponse> findAll() {
         return reservationRepository.findAllByStatus(ReservationStatus.RESERVED).stream()
-                .map(ReservationResponse::new)
-                .toList();
-    }
-
-    public List<ReservationResponse> findAllWaitings() {
-        return reservationRepository.findAllByStatus(ReservationStatus.WAITING).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }

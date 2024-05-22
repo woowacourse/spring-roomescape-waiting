@@ -21,11 +21,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponse> findAllReservations(@RequestParam(name = "waiting",defaultValue = "false")boolean isWaiting ) {
-        if(isWaiting){
-            return reservationService.findAllWaitings();
-        }
-        return reservationService.findAllReservations();
+    public List<ReservationResponse> findAllReservations() {
+        return reservationService.findAll();
     }
 
     @PostMapping
