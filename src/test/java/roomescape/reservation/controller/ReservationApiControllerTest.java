@@ -1,6 +1,14 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static roomescape.util.Fixture.JOJO_EMAIL;
+import static roomescape.util.Fixture.JOJO_NAME;
+import static roomescape.util.Fixture.JOJO_PASSWORD;
+import static roomescape.util.Fixture.KAKI_EMAIL;
+import static roomescape.util.Fixture.KAKI_NAME;
+import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.MEMBER_JOJO;
+import static roomescape.util.Fixture.MEMBER_KAKI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +19,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import roomescape.auth.domain.Role;
 import roomescape.config.IntegrationTest;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.util.CookieUtils;
 
@@ -114,14 +125,17 @@ class ReservationApiControllerTest extends IntegrationTest {
     @DisplayName("회원이 예약 대기를 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")
     @Test
     void saveMemberWaitingReservation() throws JsonProcessingException {
-        saveMemberAsKaki();
+        saveMember(MEMBER_JOJO);
+        saveMember(MEMBER_KAKI);
         saveThemeAsHorror();
         saveReservationTimeAsTen();
 
         ReservationSaveRequest reservationSaveRequest = new ReservationSaveRequest(LocalDate.now(), 1L, 1L);
+        String jojoToken = getToken(new Member(1L, Role.MEMBER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
+        String kakiToken = getToken(new Member(2L, Role.MEMBER, new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         RestAssured.given().log().all()
-                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .cookie(CookieUtils.TOKEN_KEY, jojoToken)
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(reservationSaveRequest))
                 .accept(ContentType.JSON)
@@ -132,7 +146,7 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .header("Location", "/reservations/1");
 
         RestAssured.given().log().all()
-                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .cookie(CookieUtils.TOKEN_KEY, kakiToken)
                 .contentType(ContentType.JSON)
                 .body(objectMapper.writeValueAsString(reservationSaveRequest))
                 .accept(ContentType.JSON)

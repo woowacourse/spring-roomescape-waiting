@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
@@ -12,10 +13,10 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.WaitingWithRank;
-import roomescape.reservation.dto.response.MemberReservationResponse;
-import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
+import roomescape.reservation.dto.response.MemberReservationResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -48,6 +49,7 @@ public class ReservationService {
             Status status
     ) {
         Reservation reservation = createValidatedReservation(reservationSaveRequest, loginMember, status);
+        validateMemberReservation(reservation);  // TODO: 중복 로직 개선
         validateReservationWithStatus(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -69,6 +71,28 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return reservationSaveRequest.toReservation(member, theme, reservationTime, status);
+    }
+
+    private void validateMemberReservation(Reservation reservation) {
+        Optional<Reservation> duplicatedReservation = reservationRepository.findByDateAndReservationTimeStartAtAndThemeAndMember(
+                reservation.getDate(),
+                reservation.getStartAt(),
+                reservation.getTheme(),
+                reservation.getMember()
+        );
+
+        duplicatedReservation.ifPresent(ReservationService::throwExceptionByStatus);
+    }
+
+    private static void throwExceptionByStatus(Reservation memberReservation) {
+        Status status = memberReservation.getStatus();
+
+        if (status.isWait()) {
+            throw new IllegalArgumentException("이미 회원이 예약 대기한 내역이 있습니다.");
+        }
+        if (status.isSuccess()) {
+            throw new IllegalArgumentException("이미 회원이 예약한 내역이 있습니다.");
+        }
     }
 
     private void validateReservationWithStatus(Reservation reservation) {

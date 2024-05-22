@@ -40,6 +40,7 @@ public class Fixture {
     public static final LoginMember LOGIN_JOJO = new LoginMember(1L, Role.MEMBER, JOJO_NAME, JOJO_EMAIL);
 
     public static final LocalDate TODAY = LocalDate.now();
+    public static final LocalDate TOMORROW = TODAY.plusDays(1);
 
     private Fixture() {
     }

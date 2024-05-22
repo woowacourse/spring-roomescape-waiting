@@ -3,8 +3,10 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.WaitingWithRank;
@@ -34,6 +36,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Long memberId,
             LocalDate dateFrom,
             LocalDate dateTo
+    );
+
+    Optional<Reservation> findByDateAndReservationTimeStartAtAndThemeAndMember(
+            LocalDate date,
+            LocalTime startAt,
+            Theme theme,
+            Member member
     );
 
     boolean existsByDateAndReservationTimeStartAtAndTheme(LocalDate date, LocalTime startAt, Theme theme);

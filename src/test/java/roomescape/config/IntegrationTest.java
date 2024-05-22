@@ -48,6 +48,10 @@ public class IntegrationTest {
         return jwtTokenProvider.generateToken(member);
     }
 
+    protected String getToken(Member member) {
+        return jwtTokenProvider.generateToken(member);
+    }
+
     protected void saveMemberAsKaki() {
         String sql = "insert into member (name, email, password, role) values ('카키', 'kaki@email.com', '1234', 'MEMBER')";
 
@@ -58,6 +62,17 @@ public class IntegrationTest {
         String sql = "insert into member (name, email, password, role) values ('어드민', 'admin@email.com', '1234', 'ADMIN')";
 
         jdbcTemplate.update(sql);
+    }
+
+    protected void saveMember(Member member) {
+        String name = member.getName();
+        String email = member.getEmail();
+        String password = member.getPassword();
+        String role = member.getRole().name();
+
+        String sql = "insert into member (name, email, password, role) values (?, ?, ?, ?)";
+
+        jdbcTemplate.update(sql, name, email, password, role);
     }
 
     protected void saveThemeAsHorror() {

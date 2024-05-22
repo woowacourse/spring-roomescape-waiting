@@ -16,10 +16,12 @@ import static roomescape.util.Fixture.MEMBER_KAKI;
 import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
+import static roomescape.util.Fixture.TOMORROW;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,6 +190,28 @@ public class ReservationRepositoryTest {
         );
 
         assertThat(exist).isTrue();
+    }
+
+    @DisplayName("날짜, 시간, 테마, 회원 정보가 일치하는 Reservation을 반환한다.")
+    @Test
+    void findByDateAndReservationTimeStartAtAndThemeAndMember() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
+
+        reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        Optional<Reservation> savedReservation = reservationRepository.findByDateAndReservationTimeStartAtAndThemeAndMember(
+                TOMORROW,
+                reservationTime.getStartAt(),
+                theme,
+                member
+        );
+
+        assertThat(savedReservation).isNotEmpty()
+                .get()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(Status.SUCCESS);
     }
 
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
