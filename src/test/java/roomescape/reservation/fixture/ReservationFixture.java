@@ -54,4 +54,28 @@ public class ReservationFixture {
             RESERVATION_TIME_10_00_ID_1,
             THEME_1,
             1);
+
+    public static final Reservation RESERVED = new Reservation(
+            1L,
+            MemberFixture.MEMBER_ID_1,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1,
+            1);
+
+    public static final Reservation WAITING_2 = new Reservation(
+            2L,
+            MemberFixture.MEMBER_ID_2,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1,
+            2);
+
+    public static final Reservation WAITING_3 = new Reservation(
+            3L,
+            MemberFixture.MEMBER_ID_3,
+            TOMORROW,
+            RESERVATION_TIME_10_00_ID_1,
+            THEME_1,
+            3);
 }
