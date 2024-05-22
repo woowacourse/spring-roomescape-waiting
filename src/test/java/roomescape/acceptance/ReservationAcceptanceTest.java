@@ -3,6 +3,7 @@ package roomescape.acceptance;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
@@ -12,19 +13,20 @@ import org.junit.jupiter.api.Test;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import roomescape.domain.Member;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 class ReservationAcceptanceTest extends AcceptanceFixture {
-    
+
     @Test
     @DisplayName("예약 생성 API")
     void member_generate_API() {
         // given
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)", "name", "desc",
-                "thumb");
-        jdbcTemplate.update("INSERT INTO member(name, email, password, role) VALUES (?, ?, ?, ?)", "fram", "aa@aa.aa",
-                "aa", "NORMAL");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "01:00");
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+        memberRepository.save(new Member("fram", "aa@aa.aa", "aa"));
+        timeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+
         Map<String, String> reservationBody = Map.of("date", LocalDate.now().plusDays(1).toString(), "themeId", "1",
                 "memberId", "1", "timeId",
                 "1");
@@ -42,11 +44,10 @@ class ReservationAcceptanceTest extends AcceptanceFixture {
     @DisplayName("예약 조회 API")
     void reservation_inquiry_API() {
         // given
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)", "name", "desc",
-                "thumb");
-        jdbcTemplate.update("INSERT INTO member(name, email, password, role) VALUES (?, ?, ?, ?)", "fram", "aa@aa.aa",
-                "aa", "NORMAL");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "01:00");
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+        memberRepository.save(new Member("fram", "aa@aa.aa", "aa"));
+        timeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+
         Map<String, String> reservationBody1 = Map.of("date", "2024-12-11", "themeId", "1", "memberId", "1", "timeId",
                 "1");
         Map<String, String> reservationBody2 = Map.of("date", "2024-12-12", "themeId", "1", "memberId", "1", "timeId",
@@ -77,11 +78,9 @@ class ReservationAcceptanceTest extends AcceptanceFixture {
     @DisplayName("예약 삭제 API")
     void reservation_remove_API() {
         // given
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)", "name", "desc",
-                "thumb");
-        jdbcTemplate.update("INSERT INTO member(name, email, password, role) VALUES (?, ?, ?, ?)", "fram", "aa@aa.aa",
-                "aa", "NORMAL");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "01:00");
+        themeRepository.save(new Theme("name", "desc", "thumb"));
+        memberRepository.save(new Member("fram", "aa@aa.aa", "aa"));
+        timeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
         Map<String, String> reservationBody1 = Map.of("date", "2024-12-11", "themeId", "1", "memberId", "1", "timeId",
                 "1");
         Map<String, String> reservationBody2 = Map.of("date", "2024-12-12", "themeId", "1", "memberId", "1", "timeId",

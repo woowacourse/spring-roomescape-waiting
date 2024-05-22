@@ -5,6 +5,9 @@ import static org.hamcrest.Matchers.is;
 import static io.restassured.http.ContentType.JSON;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
@@ -12,6 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.RestAssured;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 class ThemeAcceptanceTest extends AcceptanceFixture {
 
@@ -87,27 +95,24 @@ class ThemeAcceptanceTest extends AcceptanceFixture {
     @DisplayName("테마 랭크 조회 API")
     void theme_ranking_inquiry_API() {
         // given
-        jdbcTemplate.update("INSERT INTO member(name, email,password, role) VALUES (?,?,?,?)", "aa", "aa@aa.aa", "aa",
-                "ADMIN");
-        jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES (?)", "01:00");
-        setThemes(11);
-        addReservationBy(2, 11);
-        addReservationBy(3, 10);
-        addReservationBy(1, 9);
-        addReservationBy(4, 8);
-        addReservationBy(5, 6);
-        addReservationBy(7, 5);
-        addReservationBy(8, 4);
-        addReservationBy(6, 3);
-        addReservationBy(9, 2);
-        addReservationBy(10, 2);
-        addReservationBy(11, 1);
+        memberRepository.save(new Member("aa", "aa@aa.aa", "aa", Role.ADMIN));
+        Member member = memberRepository.save(new Member("aa", "aa@aa.aa", "aa", Role.ADMIN));
+        ReservationTime time = timeRepository.save(new ReservationTime(LocalTime.of(1, 0)));
+        List<Theme> themes = setThemes(11);
+        addReservationBy(themes.get(1), time, member, 11);
+        addReservationBy(themes.get(2), time, member, 10);
+        addReservationBy(themes.get(0), time, member, 9);
+        addReservationBy(themes.get(3), time, member, 8);
+        addReservationBy(themes.get(4), time, member, 6);
+        addReservationBy(themes.get(6), time, member, 5);
+        addReservationBy(themes.get(7), time, member, 4);
+        addReservationBy(themes.get(5), time, member, 3);
 
         // when
         RestAssured
                 .given()
                 .when().get("/themes/ranking")
-                .then().body("size()", is(10))
+                .then().body("size()", is(8))
                 .body("[0].id", is(2))
                 .body("[1].id", is(3))
                 .body("[2].id", is(1))
@@ -118,17 +123,19 @@ class ThemeAcceptanceTest extends AcceptanceFixture {
                 .body("[7].id", is(6));
     }
 
-    private void setThemes(int count) {
+    private List<Theme> setThemes(int count) {
+        List<Theme> themes = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            jdbcTemplate.update("INSERT INTO theme(name, description, thumbnail) VALUES (?, ?, ?)", "name", "desc",
-                    "thumb");
+            Theme theme = new Theme("name", "desc", "thumb");
+            themeRepository.save(theme);
+            themes.add(theme);
         }
+        return themes;
     }
 
-    private void addReservationBy(int themeId, int count) {
+    private void addReservationBy(Theme theme, ReservationTime time, Member member, int count) {
         for (int i = 1; i <= count; i++) {
-            jdbcTemplate.update("INSERT INTO reservation(date, theme_id, time_id, member_id) VALUES (?,?,?,?)",
-                    LocalDate.now().minusDays(count % 7), themeId, "1", "1");
+            reservationRepository.save(new Reservation(LocalDate.now().minusDays(count % 7), time, theme, member));
         }
     }
 

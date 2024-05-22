@@ -10,6 +10,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import io.restassured.RestAssured;
+import roomescape.domain.repository.MemberRepository;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ThemeRepository;
 import roomescape.service.security.JwtProvider;
 
 @ActiveProfiles("test")
@@ -18,9 +22,17 @@ public abstract class AcceptanceFixture {
     @LocalServerPort
     private int port;
     @Autowired
-    protected JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     protected JwtProvider jwtProvider;
+    @Autowired
+    protected ReservationRepository reservationRepository;
+    @Autowired
+    protected ReservationTimeRepository timeRepository;
+    @Autowired
+    protected ThemeRepository themeRepository;
+    @Autowired
+    protected MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
@@ -29,13 +41,14 @@ public abstract class AcceptanceFixture {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.update("DELETE FROM reservation");
+        reservationRepository.deleteAll();
+        timeRepository.deleteAll();
+        themeRepository.deleteAll();
+        memberRepository.deleteAll();
+
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART");
-        jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART");
-        jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART");
-        jdbcTemplate.update("DELETE FROM member");
         jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART");
     }
 }
