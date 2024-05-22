@@ -48,7 +48,7 @@ public class MemberService {
     @Transactional
     public void withdraw(Long id) {
         Member foundMember = memberRepository.findById(id)
-                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomEscapeBusinessException("탈퇴할 회원이 없습니다."));
 
         memberRepository.delete(foundMember);
     }
