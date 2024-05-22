@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.TestFixture.ADMIN_EMAIL;
 import static roomescape.TestFixture.ADMIN_NAME;
-import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_TIME;
 import static roomescape.TestFixture.TEST_PASSWORD;
@@ -53,7 +52,7 @@ public abstract class AcceptanceTest {
 
     protected Long createTestTheme() {
         ThemeSaveRequest request = new ThemeSaveRequest(WOOTECO_THEME_NAME, WOOTECO_THEME_DESCRIPTION, THEME_THUMBNAIL);
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/themes")
@@ -64,7 +63,7 @@ public abstract class AcceptanceTest {
 
     protected Long createTestReservationTime() {
         ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(MIA_RESERVATION_TIME);
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/times")
@@ -75,7 +74,7 @@ public abstract class AcceptanceTest {
 
     protected Member createTestMember(String email) {
         MemberJoinRequest request = new MemberJoinRequest(email, TEST_PASSWORD, MIA_NAME);
-        MemberResponse response = RestAssured.given().log().all()
+        MemberResponse response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/members/join")
@@ -87,7 +86,7 @@ public abstract class AcceptanceTest {
     protected Long createTestReservation(LocalDate date, Long timeId, Long themeId, String token, ReservationStatus status) {
         ReservationSaveRequest request = new ReservationSaveRequest(date, timeId, themeId, status.name());
         Cookie cookie = new Cookie.Builder("token", token).build();
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookie(cookie)
                 .body(request)
@@ -99,7 +98,7 @@ public abstract class AcceptanceTest {
 
     protected Member createTestAdmin() {
         MemberJoinRequest request = new MemberJoinRequest(ADMIN_EMAIL, TEST_PASSWORD, ADMIN_NAME);
-        MemberResponse response = RestAssured.given().log().all()
+        MemberResponse response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/members/join/admin")
@@ -110,7 +109,7 @@ public abstract class AcceptanceTest {
 
     protected String createTestToken(String email) {
         LoginRequest request = new LoginRequest(email, TEST_PASSWORD);
-        return RestAssured.given().log().all()
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/login")

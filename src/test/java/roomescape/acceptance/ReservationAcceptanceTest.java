@@ -6,7 +6,9 @@ import io.restassured.http.Cookie;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import roomescape.global.dto.ErrorResponse;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
@@ -15,13 +17,16 @@ import roomescape.reservation.dto.response.ReservationResponse;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static roomescape.TestFixture.MIA_EMAIL;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
 import static roomescape.TestFixture.TOMMY_EMAIL;
+import static roomescape.TestFixture.TOMMY_RESERVATION_DATE;
 import static roomescape.reservation.domain.ReservationStatus.BOOKING;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
@@ -254,16 +259,22 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("사용자의 예약 목록을 조회한다.")
+    @DisplayName("사용자의 예약 중, 대기 중 예약 목록을 조회한다.")
     void findMyReservations() {
         // given
         Long themeId = createTestTheme();
         Long timeId = createTestReservationTime();
-        Member member = createTestMember(MIA_EMAIL);
-        String token = createTestToken(member.getEmail().getValue());
-        Cookie cookie = new Cookie.Builder("token", token).build();
 
-        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
+        Member mia = createTestMember(MIA_EMAIL);
+        String miaToken = createTestToken(mia.getEmail().getValue());
+        Member tommy = createTestMember(TOMMY_EMAIL);
+        String tommyToken = createTestToken(tommy.getEmail().getValue());
+
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, miaToken, BOOKING);
+        createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, tommyToken, BOOKING);
+        createTestReservation(TOMMY_RESERVATION_DATE, timeId, themeId, miaToken, WAITING);
+
+        Cookie cookie = new Cookie.Builder("token", miaToken).build();
 
         //  when
         ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -277,10 +288,54 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         // then
         assertSoftly(softly -> {
             checkHttpStatusOk(softly, response);
-            softly.assertThat(myReservationResponses).hasSize(1)
-                    .extracting(MyReservationResponse::reservationId)
-                    .isNotNull();
+            softly.assertThat(myReservationResponses).hasSize(2)
+                    .extracting(MyReservationResponse::status)
+                    .contains("예약", "1번째 예약대기");
         });
+    }
 
+    @TestFactory
+    @DisplayName("대기 예약을 추가하고 삭제한다.")
+    Stream<DynamicTest> createThenDeleteTheme() {
+        return Stream.of(
+                dynamicTest("대기 예약을 하나 생성한다.", this::createWaitingReservation),
+                dynamicTest("대기 예약이 하나 생성된 나의 예약 목록을 조회한다.", () -> findAllWaitingReservationsWithSize(1)),
+                dynamicTest("대기 예약을 취소한다.", this::deleteWaitingReservation),
+                dynamicTest("대기 예약이 없는 나의 예약 목록을 조회한다.", () -> findAllWaitingReservationsWithSize(0))
+        );
+    }
+
+    private void findAllWaitingReservationsWithSize(int expectedSize) {
+        // given
+        String miaToken = createTestToken(MIA_EMAIL);
+        Cookie cookie = new Cookie.Builder("token", miaToken).build();
+
+        //  when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .cookie(cookie)
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .extract();
+        List<MyReservationResponse> myReservationResponses = Arrays.stream(response.as(MyReservationResponse[].class))
+                .toList();
+
+        // then
+        assertThat(myReservationResponses).hasSize(expectedSize);
+    }
+
+    void deleteWaitingReservation() {
+        // given
+        String miaToken = createTestToken(MIA_EMAIL);
+        Cookie cookie = new Cookie.Builder("token", miaToken).build();
+
+        // when
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .cookie(cookie)
+                .when().delete("/reservations/2/waiting")
+                .then().log().all()
+                .extract();
+
+        // then
+        checkHttpStatusNoContent(response);
     }
 }
