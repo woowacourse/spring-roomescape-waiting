@@ -4,13 +4,16 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.TestDataInitExtension;
 import roomescape.auth.AuthorizationExtractor;
 import roomescape.controller.TestAccessToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(TestDataInitExtension.class)
 public class AdminPageTest {
     @LocalServerPort
     private int port;
@@ -58,6 +61,16 @@ public class AdminPageTest {
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().get("/admin/theme")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("waiting 페이지 URL 요청이 올바르게 연결된다.")
+    @Test
+    void given_when_GetWaitingPage_then_statusCodeIsOkay() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(200);
     }
