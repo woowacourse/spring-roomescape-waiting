@@ -4,6 +4,7 @@ import roomescape.domain.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.Waiting;
 
 public class ReservationMineResponse {
     private final Long reservationId;
@@ -26,6 +27,15 @@ public class ReservationMineResponse {
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getStatus().getDescription()
+        );
+    }
+
+    public ReservationMineResponse(Waiting waiting) {
+        this(waiting.getId(),
+                waiting.getTheme().getName(),
+                waiting.getDate(),
+                waiting.getTime().getStartAt(),
+                waiting.getStatus().getDescription()
         );
     }
 

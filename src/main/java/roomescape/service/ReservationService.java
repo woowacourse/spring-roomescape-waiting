@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import roomescape.exception.time.NotFoundTimeException;
 import roomescape.service.dto.ReservationMineResponse;
 import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.ReservationResponse;
+import roomescape.service.dto.WaitingResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,15 +25,16 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
-                              Clock clock) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              Clock clock, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findAllReservation(
@@ -44,9 +47,18 @@ public class ReservationService {
 
     public List<ReservationMineResponse> findMyReservation(Member member) {
         List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
-        return reservations.stream()
-                .map(ReservationMineResponse::new)
-                .toList();
+        List<Waiting> waitings = waitingRepository.findByMemberId(member.getId());
+        List<ReservationMineResponse> responses = new ArrayList<>();
+
+        for(Reservation reservation : reservations) {
+            responses.add(new ReservationMineResponse(reservation));
+        }
+
+        for(Waiting waiting : waitings) {
+            responses.add(new ReservationMineResponse(waiting));
+        }
+
+        return responses;
     }
 
     @Transactional
