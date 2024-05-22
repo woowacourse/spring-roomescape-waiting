@@ -40,7 +40,7 @@ public class ThemeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/theme-ranking")
+    @GetMapping("/themes/ranking")
     public ResponseEntity<List<ThemeRankingResponse>> getThemeRank() {
         List<ThemeRankingResponse> themeRankingResponses = themeService.getThemeRanking()
                 .stream()
