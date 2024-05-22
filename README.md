@@ -1,39 +1,7 @@
 ## 기능 요구 사항
 
 - [x] 사용자 예약을 조회한다.
-
-- Request
-```
-GET /reservations/mine HTTP/1.1
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
-host: localhost:8080
-```
-- Response
-```
-HTTP/1.1 200 
-Content-Type: application/json
-
-[
-    {
-        "reservationId": 1,
-        "theme": "테마1",
-        "date": "2024-03-01",
-        "time": "10:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 2,
-        "theme": "테마2",
-        "date": "2024-03-01",
-        "time": "12:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 3,
-        "theme": "테마3",
-        "date": "2024-03-01",
-        "time": "14:00",
-        "status": "예약"
-    }
-]
-```
+- [ ] 예약 대기 요청 기능을 구현한다.
+- [ ] 예약 대기 취소 기능을 구현한다.
+- [ ] 내 예약 목록 조회 시 예약 대기 목록도 포함한다.
+- [ ] 중복 예약이 불가능 하도록 구현한다.
