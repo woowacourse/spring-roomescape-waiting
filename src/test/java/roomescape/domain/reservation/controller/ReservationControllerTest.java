@@ -108,7 +108,7 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void should_remove_reservation_when_delete_request_reservations_id() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/reservation/1")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -117,7 +117,7 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void should_response_bad_request_when_nonExist_id() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/2")
+                .when().delete("/reservation/2")
                 .then().log().all()
                 .statusCode(400);
     }
