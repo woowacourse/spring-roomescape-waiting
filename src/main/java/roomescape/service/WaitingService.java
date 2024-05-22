@@ -103,6 +103,11 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional
+    public void deleteByAdmin(final Long id) {
+        waitingRepository.deleteById(id);
+    }
+
     public List<WaitingResponse> findEntireWaitingList() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)

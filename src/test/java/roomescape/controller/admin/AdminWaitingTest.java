@@ -32,14 +32,24 @@ class AdminWaitingTest {
         RestAssured.port = port;
     }
 
-    @DisplayName("예약 대기 목록을 불러오는데 성공하면 200을 응답한다.")
     @Test
-    void given_when_GetWaiting_then_statusCodeIsOk() {
+    @DisplayName("예약 대기 목록을 불러오는데 성공하면 200을 응답한다.")
+    void given_when_getWaiting_then_statusCodeIsOk() {
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .when().get("/admin/waitings")
                 .then().log().all()
                 .body("size()", is(2))
                 .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 성공 시 204를 응답한다.")
+    void given_when_deleteSuccessful_then_statusCodeIsNoContents() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .when().delete("/admin/waitings/1")
+                .then().log().all()
+                .statusCode(204);
     }
 }

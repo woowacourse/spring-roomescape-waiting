@@ -25,10 +25,10 @@
 
 ## 4단계
 
--[ ] 관리자 예약 대기 관리 기능
+-[x] 관리자 예약 대기 관리 기능
     - [x] 관리자 예약 대기 관리 페이지 추가
     - [x] 전체 예약 대기 목록 조회
-    - [ ] 예약 대기 취소
+    - [x] 예약 대기 취소
 - [ ] 예약 대기 승인
     - [ ] 예약 취소가 발생하면 우선순위에 따라 자동으로 예약으로 전환
 
@@ -121,7 +121,7 @@ HTTP/1.1 204
 
 #### request
 ```http request
-GET/admin/waitings
+GET /admin/waitings
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTcxNjM3MTA4NiwiZXhwIjoxNzE2Mzc0Njg2fQ.4PoyEWxALi18Z7Hz3XBxwFqFuANGnudm3OTc4BrpLFY
 ```
 
@@ -140,4 +140,17 @@ Content-Type: application/json
         "status": "예약대기"
     }
 ]
+```
+
+### 관리자 예약 대기 삭제
+
+#### request
+```http request
+DELETE /admin/waitings/1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkB0ZXN0LmNvbSIsImlhdCI6MTcxNjM3MTA4NiwiZXhwIjoxNzE2Mzc0Njg2fQ.4PoyEWxALi18Z7Hz3XBxwFqFuANGnudm3OTc4BrpLFY
+```
+
+#### response
+```http request
+HTTP/1.1 204 
 ```
