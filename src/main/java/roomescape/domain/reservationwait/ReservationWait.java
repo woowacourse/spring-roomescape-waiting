@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.domain.ReservationTime;
@@ -23,6 +24,7 @@ public class ReservationWait {
     @ManyToOne
     private Member member;
 
+    @NotNull
     private LocalDate date;
 
     @ManyToOne
@@ -31,6 +33,7 @@ public class ReservationWait {
     @ManyToOne
     private Theme theme;
 
+    @NotNull
     @Enumerated(value = EnumType.STRING)
     private ReservationWaitStatus status;
 

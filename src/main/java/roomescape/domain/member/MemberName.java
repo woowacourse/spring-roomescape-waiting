@@ -8,7 +8,7 @@ import roomescape.exception.InvalidRequestException;
 @Embeddable
 public class MemberName {
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String value;
 
     public MemberName() {

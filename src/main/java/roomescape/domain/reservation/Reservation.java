@@ -1,10 +1,12 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.domain.ReservationTime;
@@ -21,6 +23,7 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
+    @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne
