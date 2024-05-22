@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.ServiceTest;
 import roomescape.application.auth.TokenManager;
 import roomescape.application.member.dto.request.MemberLoginRequest;

@@ -16,11 +16,10 @@ import roomescape.application.config.TestConfig;
 @Sql("/truncate.sql")
 public abstract class AcceptanceTest {
 
-    @LocalServerPort
-    private int port;
-
     @Autowired
     protected AcceptanceFixture fixture;
+    @LocalServerPort
+    private int port;
 
     @BeforeEach
     void setPort() {

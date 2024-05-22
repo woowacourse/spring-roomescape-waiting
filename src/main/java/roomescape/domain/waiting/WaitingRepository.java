@@ -1,12 +1,8 @@
 package roomescape.domain.waiting;
 
-import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.repository.ListCrudRepository;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.role.MemberRole;
 
 public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
     boolean existsByReservationIdAndMemberId(long reservationId, long memberId);

@@ -2,7 +2,6 @@ package roomescape.presentation.reservation;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +44,7 @@ public class ReservationController {
 
         return ResponseEntity.ok(
                 Stream.concat(reservationResponses.stream(), waitingResponses.stream())
-                .collect(Collectors.toList())
+                        .collect(Collectors.toList())
         );
     }
 
@@ -59,7 +58,7 @@ public class ReservationController {
 
     @PostMapping("/waiting")
     public ResponseEntity<ReservationResponse> createWaiting(@LoginMemberId long memberId,
-                                                      @RequestBody @Valid ReservationRequest request) {
+                                                             @RequestBody @Valid ReservationRequest request) {
         ReservationResponse response = waitingService.create(request.withMemberId(memberId));
         URI location = URI.create("/reservations/waiting/" + response.id());
         return ResponseEntity.created(location).body(response);

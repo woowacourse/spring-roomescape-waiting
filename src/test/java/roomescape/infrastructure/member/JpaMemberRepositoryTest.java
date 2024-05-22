@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,8 @@ class JpaMemberRepositoryTest {
     @Test
     @DisplayName("이메일로 회원이 존재하는지 확인한다.")
     void existsByEmailTest() {
-        entityManager.persist(new Member(new MemberName("name"), new Email("email@test.com"), new Password("password")));
+        entityManager.persist(
+                new Member(new MemberName("name"), new Email("email@test.com"), new Password("password")));
         boolean existsByEmail = memberRepository.existsByEmail(new Email("email@test.com"));
         assertThat(existsByEmail).isTrue();
     }
@@ -36,7 +36,8 @@ class JpaMemberRepositoryTest {
     @Test
     @DisplayName("이메일로 회원을 조회한다.")
     void findByEmailTest() {
-        entityManager.persist(new Member(new MemberName("name"), new Email("email@test.com"), new Password("password")));
+        entityManager.persist(
+                new Member(new MemberName("name"), new Email("email@test.com"), new Password("password")));
         Optional<Member> actual = memberRepository.findByEmail(new Email("email@test.com"));
         assertThat(actual).isPresent();
     }

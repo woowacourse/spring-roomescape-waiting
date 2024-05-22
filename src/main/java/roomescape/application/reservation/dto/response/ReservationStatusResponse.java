@@ -2,7 +2,6 @@ package roomescape.application.reservation.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;

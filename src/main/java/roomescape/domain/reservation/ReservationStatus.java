@@ -1,8 +1,5 @@
 package roomescape.domain.reservation;
 
-import java.util.Arrays;
-import roomescape.domain.role.Role;
-
 public enum ReservationStatus {
     FINISH("진행 완료"),
     COMPLETE("예약 완료"),

@@ -82,12 +82,13 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
         fixture.registerMember(new MemberRegisterRequest("name", "email@mail.com", "12341234"));
         String reservationToken = fixture.loginAndGetToken("email@mail.com", "12341234");
-        fixture.createReservation(reservationToken, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
+        fixture.createReservation(reservationToken,
+                new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
 
         fixture.registerMember(new MemberRegisterRequest("test", "test@mail.com", "12341234"));
         String waitingToken = fixture.loginAndGetToken("test@mail.com", "12341234");
-        ReservationResponse response = fixture.createWaiting(waitingToken, new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
-
+        ReservationResponse response = fixture.createWaiting(waitingToken,
+                new ReservationRequest(LocalDate.of(2024, 12, 25), timeId, themeId));
 
         RestAssured.given().log().all()
                 .cookie("token", waitingToken)

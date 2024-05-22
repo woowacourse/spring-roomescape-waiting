@@ -1,23 +1,20 @@
 package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
-import org.codehaus.groovy.classgen.asm.AssertionWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
-import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationStatusResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberFixture;
@@ -28,7 +25,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.role.RoleRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
 
@@ -74,7 +70,8 @@ class WaitingServiceTest {
     @DisplayName("정상적인 예약 대기 요청을 받아서 저장한다.")
     void saveWaiting() {
         Member newMember = memberRepository.save(MemberFixture.createMember("시소"));
-        ReservationRequest reservationRequest = new ReservationRequest(newMember.getId(), date, time.getId(), theme.getId());
+        ReservationRequest reservationRequest = new ReservationRequest(newMember.getId(), date, time.getId(),
+                theme.getId());
 
         waitingService.create(reservationRequest);
 
@@ -109,7 +106,8 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약과 동일한 예약 대기를 생성하면 예외가 발생한다.")
     void saveWaitingExceptionWhenReservationDuplicate() {
-        ReservationRequest reservationRequest = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        ReservationRequest reservationRequest = new ReservationRequest(member.getId(), date, time.getId(),
+                theme.getId());
 
         Assertions.assertThatThrownBy(() -> waitingService.create(reservationRequest))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -120,7 +118,8 @@ class WaitingServiceTest {
     @DisplayName("기존 예약 대기와 동일한 예약 대기를 생성하면 예외가 발생한다.")
     void saveWaitingExceptionWhenWaitingDuplicate() {
         Member member = memberRepository.save(MemberFixture.createMember("시소"));
-        ReservationRequest reservationRequest = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
+        ReservationRequest reservationRequest = new ReservationRequest(member.getId(), date, time.getId(),
+                theme.getId());
 
         waitingService.create(reservationRequest);
 

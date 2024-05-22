@@ -13,19 +13,19 @@ public enum Role {
         this.roleName = roleName;
     }
 
+    public static Role from(String roleName) {
+        return Arrays.stream(Role.values())
+                .filter(role -> role.hasRoleNameOf(roleName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 역할이 없습니다."));
+    }
+
     public String getRoleName() {
         return roleName;
     }
 
     public boolean isAdmin() {
         return this == ADMIN;
-    }
-
-    public static Role from(String roleName) {
-        return Arrays.stream(Role.values())
-                .filter(role -> role.hasRoleNameOf(roleName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 역할이 없습니다."));
     }
 
     private boolean hasRoleNameOf(String otherName) {

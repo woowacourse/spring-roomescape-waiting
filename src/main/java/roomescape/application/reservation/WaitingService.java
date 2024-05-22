@@ -2,9 +2,7 @@ package roomescape.application.reservation;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,11 +104,11 @@ public class WaitingService {
     }
 
     private ReservationStatusResponse makeReservationStatus(Waiting waiting) {
-        if(waiting.getWaitingStatus().isWaiting()) {
+        if (waiting.getWaitingStatus().isWaiting()) {
             List<Waiting> sameReservationWaitings =
                     waitingRepository.findByReservationIdOrderByCreatedAtAsc(waiting.getReservation().getId());
             return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + 1);
         }
-       return ReservationStatusResponse.from(waiting);
+        return ReservationStatusResponse.from(waiting);
     }
 }

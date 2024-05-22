@@ -6,7 +6,6 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import java.time.Clock;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.application.auth.dto.JwtProperties;
 import roomescape.application.auth.dto.TokenPayload;

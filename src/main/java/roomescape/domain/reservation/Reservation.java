@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
-import roomescape.domain.role.Role;
 
 @Entity
 public class Reservation {
