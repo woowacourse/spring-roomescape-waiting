@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.model.Reservation;
@@ -29,11 +30,9 @@ public class WaitingService {
 
     public CreateWaitingResponse createWaiting(final AuthInfo authInfo,
                                                final CreateWaitingRequest createWaitingRequest) {
-        Reservation reservation = reservationRepository.findByDateAndReservationTimeIdAndThemeId(
-                        createWaitingRequest.date(), createWaitingRequest.timeId(), createWaitingRequest.themeId())
-                .orElseThrow(() -> new IllegalCallerException("예약이 존재하지 않아서 대기가 불가능합니다. " + createWaitingRequest));
-        Member member = memberRepository.findById(authInfo.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 회원이 존재하지 않습니다."));
+        Reservation reservation = reservationRepository.getByDateAndReservationTimeIdAndThemeId(
+                createWaitingRequest.date(), createWaitingRequest.timeId(), createWaitingRequest.themeId());
+        Member member = memberRepository.getById(authInfo.getMemberId());
 
         checkAlreadyExistsWaiting(authInfo.getMemberId(), reservation.getId());
         return CreateWaitingResponse.of(waitingRepository.save(new Waiting(reservation, member)));
@@ -43,6 +42,19 @@ public class WaitingService {
         if (waitingRepository.existsByMemberIdAndReservationId(memberId, reservationId)) {
             throw new IllegalArgumentException(
                     "memberId: " + memberId + " 회원이 reservationId: " + reservationId + "인 예약에 대해 이미 대기를 신청했습니다.");
+        }
+    }
+
+    public void deleteWaiting(final AuthInfo authInfo, final Long waitingId) {
+        Waiting waiting = waitingRepository.getById(waitingId);
+
+        checkMemberAuthentication(waiting, authInfo.getMemberId());
+        waitingRepository.delete(waiting);
+    }
+
+    private void checkMemberAuthentication(final Waiting waiting, final Long memberId) {
+        if (waiting.isNotSameMember(memberId)) {
+            throw new ForbiddenException("회원의 권한이 없어, 식별자 " + memberId + "인 예약 대기를 삭제할 수 없습니다.");
         }
     }
 }

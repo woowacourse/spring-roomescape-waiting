@@ -65,7 +65,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.searchBy(themeId, memberId, dateFrom, dateTo));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}") // TODO: member 정보가 필요할듯함
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();

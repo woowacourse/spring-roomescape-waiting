@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -47,9 +48,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             on r.theme.id = t.id
             where t.id = :themeId and m.id = :memberId and r.date between :dateFrom and :dateTo
             """)
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
+                                                                LocalDate dateTo);
 
     Optional<Reservation> findByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    default Reservation getByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() ->
+                new NoSuchElementException(date + "의 timeId: " + timeId + ", themeId: " + themeId + "의 예약이 존재하지 않습니다."));
+    }
 
     boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

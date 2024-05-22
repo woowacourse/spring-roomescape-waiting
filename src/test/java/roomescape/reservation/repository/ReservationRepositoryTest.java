@@ -1,11 +1,13 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
@@ -109,6 +111,39 @@ class ReservationRepositoryTest {
                         startDate,
                         startDate.plusDays(1)))
                 .containsExactlyInAnyOrder(reservation1, reservation2);
+    }
+
+    @Test
+    @DisplayName("날짜, 시간, 테마가 동일한 예약을 조회한다.")
+    void getByDateAndReservationTimeIdAndThemeId() {
+        LocalDate startDate = LocalDate.parse("2024-11-11");
+        Member member = memberRepository.save(MemberFixture.getOne());
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, startDate, reservationTime, theme));
+
+        assertThat(
+                reservationRepository.getByDateAndReservationTimeIdAndThemeId(startDate,
+                        reservationTime.getId(),
+                        theme.getId()))
+                .isEqualTo(reservation);
+    }
+
+    @Test
+    @DisplayName("날짜, 시간, 테마가 동일한 예약이 없는 경우, 예외를 반환한다.")
+    void getByDateAndReservationTimeIdAndThemeId_WhenNotExist() {
+        LocalDate startDate = LocalDate.parse("2024-11-11");
+        Member member = memberRepository.save(MemberFixture.getOne());
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+
+        assertThatThrownBy(() -> reservationRepository.getByDateAndReservationTimeIdAndThemeId(startDate,
+                        reservationTime.getId(),
+                        theme.getId()))
+                .isInstanceOf(InvalidDataAccessApiUsageException.class)
+                .hasMessage("2024-11-11의 timeId: 1, themeId: 1의 예약이 존재하지 않습니다.");
     }
 
     @Test
