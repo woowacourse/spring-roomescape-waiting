@@ -19,22 +19,22 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationDeleteUsecase;
 import roomescape.reservation.service.ReservationFindMineUsecase;
 import roomescape.reservation.service.ReservationFindService;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationUpdateService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationFindService findService;
-    private final ReservationService service;
+    private final ReservationUpdateService updateService;
     private final ReservationDeleteUsecase deleteUsecase;
     private final ReservationFindMineUsecase findMineUsecase;
 
     public ReservationController(ReservationFindService findService,
-                                 ReservationService service,
+                                 ReservationUpdateService updateService,
                                  ReservationDeleteUsecase deleteUsecase,
                                  ReservationFindMineUsecase findMineUsecase) {
         this.findService = findService;
-        this.service = service;
+        this.updateService = updateService;
         this.deleteUsecase = deleteUsecase;
         this.findMineUsecase = findMineUsecase;
     }
@@ -53,7 +53,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
             LoggedInMember member) {
-        ReservationResponse response = service.createReservation(request, member.id());
+        ReservationResponse response = updateService.createReservation(request, member.id());
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)

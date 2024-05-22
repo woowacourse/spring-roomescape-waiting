@@ -13,14 +13,14 @@ import roomescape.waiting.service.WaitingService;
 @Transactional
 public class ReservationDeleteUsecase {
     private final ReservationFindService reservationFindService;
-    private final ReservationService reservationService;
+    private final ReservationUpdateService reservationUpdateService;
     private final WaitingService waitingService;
 
     public ReservationDeleteUsecase(ReservationFindService reservationFindService,
-                                    ReservationService reservationService,
+                                    ReservationUpdateService reservationUpdateService,
                                     WaitingService waitingService) {
         this.reservationFindService = reservationFindService;
-        this.reservationService = reservationService;
+        this.reservationUpdateService = reservationUpdateService;
         this.waitingService = waitingService;
     }
 
@@ -28,11 +28,9 @@ public class ReservationDeleteUsecase {
         ReservationResponse reservation = reservationFindService.findReservation(reservationId);
         validateIsAfterFromNow(reservation);
 
-        Optional<WaitingResponse> highPriorityWaiting
-                = waitingService.findHighPriorityWaiting(reservationId);
-
+        Optional<WaitingResponse> highPriorityWaiting = waitingService.findHighPriorityWaiting(reservationId);
         if (highPriorityWaiting.isEmpty()) {
-            reservationService.deleteReservation(reservationId);
+            reservationUpdateService.deleteReservation(reservationId);
             return;
         }
         confirmNextWaiting(highPriorityWaiting.get());

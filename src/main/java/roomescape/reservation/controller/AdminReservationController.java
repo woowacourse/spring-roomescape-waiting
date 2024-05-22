@@ -13,17 +13,17 @@ import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.reservation.service.ReservationFindService;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationUpdateService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationFindService findService;
-    private final ReservationService service;
+    private final ReservationUpdateService updateService;
 
-    public AdminReservationController(ReservationFindService findService, ReservationService service) {
+    public AdminReservationController(ReservationFindService findService, ReservationUpdateService updateService) {
         this.findService = findService;
-        this.service = service;
+        this.updateService = updateService;
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationCreateRequest request) {
-        ReservationResponse response = service.createReservation(request);
+        ReservationResponse response = updateService.createReservation(request);
 
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location)
