@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
-        ResponseCookie cookie = ResponseCookie.from("token", "expired")
+        ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE_KEY, "expired")
                 .maxAge(0)
                 .build();
         return ResponseEntity.ok()
