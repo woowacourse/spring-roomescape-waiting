@@ -61,10 +61,22 @@ public class ReservationService {
         return ReservationOutput.toOutputs(themeReservationInfos);
     }
 
-    public void deleteReservation(final long id,final long memberId) {
+    public void deleteReservationWithAdmin(final long id) {
         final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotExistException(RESERVATION, id));
-        if(!reservation.getMember().isEqualId(memberId)){
+
+        waitingRepository.findFirstByReservationInfoOrderByCreatedDateAsc(reservation.getReservationInfo())
+                .ifPresentOrElse(
+                        this::changeWaitingToReservation,
+                        () -> reservationRepository.delete(reservation)
+                );
+    }
+
+    public void deleteReservation(final long id, final long memberId) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotExistException(RESERVATION, id));
+        if (!reservation.getMember()
+                .isEqualId(memberId)) {
             throw new IllegalArgumentException("현재 사용자의 예약이 아닙니다.");
         }
 

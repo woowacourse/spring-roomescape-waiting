@@ -29,6 +29,13 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
+    public List<WaitingOutput> getAllWaiting() {
+        final List<Waiting> waiting = waitingRepository.findAll();
+        return waiting.stream()
+                .map(w -> WaitingOutput.toOutput(w, getOrderWaitingByReservationInfo(w)))
+                .toList();
+    }
+
     public WaitingOutput createWaiting(final ReservationInput input) {
         final ReservationInfo reservationInfo = reservationInfoCreateValidator.validateReservationInput(input.parseReservationInfoInput());
         final Member member = memberRepository.getById(input.memberId());
@@ -55,13 +62,18 @@ public class WaitingService {
                 .indexOf(waiting) + 1;
     }
 
-    public void deleteWaiting(final long id,final long memberId) {
+    public void deleteWaitingWithAdmin(final long id) {
+        waitingRepository.deleteById(id);
+    }
+
+    public void deleteWaiting(final long id, final long memberId) {
         final Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(()->new NotExistException(WAITING,id));
-        if(waiting.getMember().isEqualId(memberId)){
+                .orElseThrow(() -> new NotExistException(WAITING, id));
+        if (waiting.getMember()
+                .isEqualId(memberId)) {
             waitingRepository.deleteById(id);
             return;
         }
-        throw new IllegalArgumentException(String.format("현재 사용자(%d)의 %d 대기가 아닙니다.",memberId,id));
+        throw new IllegalArgumentException(String.format("현재 사용자(%d)의 %d 대기가 아닙니다.", memberId, id));
     }
 }
