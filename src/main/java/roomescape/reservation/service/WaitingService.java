@@ -1,15 +1,16 @@
 package roomescape.reservation.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -25,20 +26,17 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
 
     public WaitingService(
             WaitingRepository waitingRepository,
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            ThemeRepository themeRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
     }
 
     //TODO: 메서드 분리
@@ -67,5 +65,13 @@ public class WaitingService {
         Waiting save = waitingRepository.save(waiting);
 
         return new WaitingResponse(save);
+    }
+
+    @Transactional
+    public List<ReservationOrWaitingResponse> findWaitingsByMember(MemberRequest memberRequest) {
+        return waitingRepository.findWaitingsWithRankByMemberId(memberRequest.id())
+                .stream()
+                .map(ReservationOrWaitingResponse::new)
+                .toList();
     }
 }

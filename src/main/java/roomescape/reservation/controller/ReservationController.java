@@ -1,6 +1,7 @@
 package roomescape.reservation.controller;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.dto.MemberReservationWaitingResponse;
+import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
@@ -58,8 +59,21 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<MemberReservationWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
-        return reservationService.findReservationsByMember(memberRequest.toMember());
+    public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
+        List<ReservationOrWaitingResponse> reservations = reservationService.findReservationsByMember(memberRequest);
+        List<ReservationOrWaitingResponse> waitings = waitingService.findWaitingsByMember(memberRequest);
+
+        return combineReservationsAndWaitings(reservations, waitings);
+    }
+
+    private List<ReservationOrWaitingResponse> combineReservationsAndWaitings(
+            List<ReservationOrWaitingResponse> reservations,
+            List<ReservationOrWaitingResponse> waitings
+    ) {
+        List<ReservationOrWaitingResponse> result = new ArrayList<>(reservations);
+        result.addAll(waitings);
+
+        return result;
     }
 
     @DeleteMapping("/{id}")
