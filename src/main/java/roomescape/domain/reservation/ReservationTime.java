@@ -3,10 +3,13 @@ package roomescape.domain.reservation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import roomescape.system.exception.RoomescapeException;
@@ -20,6 +23,9 @@ public class ReservationTime {
 
     @Embedded
     private Time startAt;
+
+    @OneToMany(mappedBy = "time", fetch = FetchType.LAZY)
+    private List<Reservation> reservations = new ArrayList<>();
 
     public ReservationTime(String startAt) {
         this(null, startAt);
@@ -44,6 +50,12 @@ public class ReservationTime {
         return startAt.isBefore(LocalTime.now());
     }
 
+    public void validateHavingReservations() {
+        if (!reservations.isEmpty()) {
+            throw new RoomescapeException("해당 시간을 사용하는 예약이 존재하여 삭제할 수 없습니다.");
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -51,6 +63,10 @@ public class ReservationTime {
     @JsonFormat(pattern = "HH:mm")
     public LocalTime getStartAt() {
         return startAt.getTime();
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 
     @Override

@@ -54,6 +54,17 @@ class ReservationTimeServiceTest {
             .hasMessage("이미 존재하는 시간은 추가할 수 없습니다.");
     }
 
+    @DisplayName("성공: 예약 시간을 삭제한다.")
+    @Test
+    void delete() {
+        // given
+        ReservationTime saved = reservationTimeService.save(rawTime);
+        // when
+        reservationTimeService.delete(saved.getId());
+        //then
+        assertThat(reservationTimeService.findAll()).hasSize(2);
+    }
+
     @DisplayName("실패: 시간을 사용하는 예약이 존재하는 경우 시간을 삭제할 수 없다.")
     @Test
     void delete_ReservationExists() {

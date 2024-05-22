@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Date;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -33,10 +34,12 @@ public class ReservationTimeService {
         return reservationTimeRepository.save(reservationTime);
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
-            throw new RoomescapeException("해당 시간을 사용하는 예약이 존재하여 삭제할 수 없습니다.");
-        }
+        ReservationTime reservationTime = reservationTimeRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException("존재하지 않는 예약 시간 id 입니다."));
+        reservationTime.validateHavingReservations();
+
         reservationTimeRepository.deleteById(id);
     }
 
