@@ -109,8 +109,14 @@ public class WaitingService {
     }
 
 
-    public List<FindWaitingResponse> getReservations() {
-        return null;
+    public List<FindWaitingResponse> getWaitings() {
+        return mapToFindWaitingResponse(waitingRepository.findAll());
+    }
+
+    private List<FindWaitingResponse> mapToFindWaitingResponse(final List<Waiting> waitings) {
+        return waitings.stream()
+                .map(FindWaitingResponse::from)
+                .toList();
     }
 
     public FindWaitingResponse getReservation(Long id) {

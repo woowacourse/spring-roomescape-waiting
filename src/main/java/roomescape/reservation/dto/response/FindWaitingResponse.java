@@ -2,6 +2,7 @@ package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
 import roomescape.reservation.model.Reservation;
+import roomescape.reservation.model.Waiting;
 
 public record FindWaitingResponse(
         Long id,
@@ -10,13 +11,13 @@ public record FindWaitingResponse(
         FindTimeOfWaitingResponse time,
         FindThemeOfWaitingResponse theme) {
 
-    public static FindWaitingResponse from(final Reservation reservation) {
+    public static FindWaitingResponse from(final Waiting waiting) {
         return new FindWaitingResponse(
-                reservation.getId(),
-                FindMemberOfWaitingResponse.from(reservation.getMember()),
-                reservation.getDate(),
-                FindTimeOfWaitingResponse.from(reservation.getReservationTime()),
-                FindThemeOfWaitingResponse.from(reservation.getTheme())
+                waiting.getId(),
+                FindMemberOfWaitingResponse.from(waiting.getMember()),
+                waiting.getDate(),
+                FindTimeOfWaitingResponse.from(waiting.getReservationTime()),
+                FindThemeOfWaitingResponse.from(waiting.getTheme())
         );
     }
 }
