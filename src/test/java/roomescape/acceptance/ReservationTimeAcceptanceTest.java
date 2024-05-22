@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.acceptance.config.AcceptanceTest;
+import roomescape.acceptance.step.MemberStep;
 import roomescape.controller.api.dto.request.ReservationTimeRequest;
 import roomescape.controller.api.dto.response.AvailReservationTimeResponse;
 import roomescape.controller.api.dto.response.AvailableReservationTimesResponse;
@@ -20,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.acceptance.step.MemberStep.멤버_로그인;
 import static roomescape.acceptance.step.ReservationStep.예약_생성;
 import static roomescape.acceptance.step.ReservationTimeStep.예약_시간_생성;
 import static roomescape.acceptance.step.ThemeStep.테마_생성;
@@ -133,7 +133,7 @@ public class ReservationTimeAcceptanceTest {
             void it_returns_(){
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
-                final String token = 멤버_로그인();
+                final String token = MemberStep.멤버_생성후_로그인();
                 예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
 
                 //@formatter:off
@@ -151,7 +151,7 @@ public class ReservationTimeAcceptanceTest {
         @Test
         @DisplayName("200과 결과를 반환한다.")
         void it_returns_200_and_response() {
-            final String token = 멤버_로그인();
+            final String token = MemberStep.멤버_생성후_로그인();
             final var theme = 테마_생성();
             final var reservationTime1 = 예약_시간_생성("10:00");
             final var reservationTime2 = 예약_시간_생성("11:00");

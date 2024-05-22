@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.config.AcceptanceTest;
+import roomescape.acceptance.step.MemberStep;
 import roomescape.controller.api.dto.request.ThemeCreateRequest;
 import roomescape.controller.api.dto.response.ReservationTimeResponse;
 import roomescape.controller.api.dto.response.ThemeResponse;
@@ -14,7 +15,6 @@ import roomescape.fixture.ThemeFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.acceptance.step.MemberStep.멤버_로그인;
 import static roomescape.acceptance.step.ReservationStep.예약_생성;
 import static roomescape.acceptance.step.ReservationTimeStep.예약_시간_생성;
 import static roomescape.acceptance.step.ThemeStep.테마_생성;
@@ -113,7 +113,7 @@ public class ThemeAcceptanceTest {
             void it_returns_(){
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
-                final String token = 멤버_로그인();
+                final String token = MemberStep.멤버_생성후_로그인();
                 예약_생성("2024-10-03",themeResponse.id(),reservationTimeResponse.id(),token);
 
                 //@formatter:off

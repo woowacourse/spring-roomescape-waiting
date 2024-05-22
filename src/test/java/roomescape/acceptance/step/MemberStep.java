@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import roomescape.controller.api.dto.request.MemberCreateRequest;
 import roomescape.controller.api.dto.request.MemberLoginRequest;
 import roomescape.controller.api.dto.response.MemberCreateResponse;
+import roomescape.controller.api.dto.response.MemberReservationsResponse;
 import roomescape.domain.user.Member;
 import roomescape.fixture.MemberFixture;
 
@@ -41,10 +42,15 @@ public class MemberStep {
                 .when().post("/login")
                 .then().assertThat().statusCode(200).extract().header(HttpHeaders.SET_COOKIE);
     }
-    public static String 멤버_로그인(){
+    public static String 멤버_생성후_로그인(){
         return 로그인(멤버_생성());
     }
-    public static String 멤버_로그인(final String email){
+    public static String 이메일로_멤버_생성후_로그인(final String email){
         return 로그인(멤버_생성(email));
+    }
+    public static MemberReservationsResponse 본인_예약_조회(final String token){
+        return RestAssured.given().cookie(token).contentType(ContentType.JSON)
+                .when().get("/reservations/mine")
+                .then().assertThat().statusCode(200).extract().as(MemberReservationsResponse.class);
     }
 }

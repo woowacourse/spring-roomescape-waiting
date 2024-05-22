@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.config.AcceptanceTest;
+import roomescape.acceptance.step.MemberStep;
 import roomescape.controller.api.dto.request.ReservationRequest;
 import roomescape.controller.api.dto.response.*;
 
@@ -13,7 +14,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.acceptance.step.MemberStep.멤버_로그인;
 import static roomescape.acceptance.step.ReservationStep.예약_생성;
 import static roomescape.acceptance.step.ReservationTimeStep.예약_시간_생성;
 import static roomescape.acceptance.step.ThemeStep.테마_생성;
@@ -28,7 +28,7 @@ public class ReservationAcceptanceTest {
         @DisplayName("DB내 존재하는 테마,예약시간 Id, 쿠키에 로그인한 토큰을 담은 경우")
         class ContextWithValidRequest {
             // 토큰을 빼는게 맞을까??
-            private final String token = 멤버_로그인();
+            private final String token = MemberStep.멤버_생성후_로그인();
 
             @Test
             @DisplayName("201과 결과를 반환한다.")
@@ -106,7 +106,7 @@ public class ReservationAcceptanceTest {
         @Nested
         @DisplayName("예약 정보 및 Id에 대한 값이 타당하지 않은 경우")
         class ContextWithInvalidRequest {
-            private final String token = 멤버_로그인();
+            private final String token = MemberStep.멤버_생성후_로그인();
 
             @Test
             @DisplayName("존재하지 않는 id를 통한 생성은 404를 반환한다.")
@@ -159,8 +159,8 @@ public class ReservationAcceptanceTest {
             void it_returns_200_and_reservation_and_waiting() {
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
-                final String token1 = 멤버_로그인("joyson5582@gmail.com");
-                final String token2 = 멤버_로그인("alphaka@gmail.com");
+                final String token1 = MemberStep.이메일로_멤버_생성후_로그인("joyson5582@gmail.com");
+                final String token2 = MemberStep.이메일로_멤버_생성후_로그인("alphaka@gmail.com");
                 예약_생성("2024-10-05", themeResponse.id(), reservationTimeResponse.id(), token2);
                 대기_생성("2024-10-05", themeResponse.id(), reservationTimeResponse.id(), token1);
                 예약_생성("2024-10-03", themeResponse.id(), reservationTimeResponse.id(), token1);
@@ -183,7 +183,7 @@ public class ReservationAcceptanceTest {
             void it_returns_200_and_response() {
                 final ThemeResponse themeResponse = 테마_생성();
                 final ReservationTimeResponse reservationTimeResponse = 예약_시간_생성();
-                final String token = 멤버_로그인();
+                final String token = MemberStep.멤버_생성후_로그인();
                 예약_생성("2024-10-03", themeResponse.id(), reservationTimeResponse.id(), token);
                 예약_생성("2024-10-04", themeResponse.id(), reservationTimeResponse.id(), token);
 
