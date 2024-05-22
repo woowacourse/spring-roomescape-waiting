@@ -23,6 +23,9 @@ public class Waitings {
                 .filter(waiting -> waiting.getTime().getStartAt().equals(reservation.getTime().getStartAt()))
                 .takeWhile(waiting -> !waiting.getMember().sameMemberId(memberId))
                 .count() + 1;
+    }
 
+    public Reservation getFirstWaiting() {
+        return waitings.get(0);
     }
 }

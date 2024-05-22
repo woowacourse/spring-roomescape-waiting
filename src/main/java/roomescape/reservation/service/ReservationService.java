@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
@@ -14,11 +15,13 @@ import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -45,7 +48,6 @@ public class ReservationService {
                     Status.WAITING);
             return reservationRepository.save(reservation).getId();
         }
-        ;
 
         Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken, Status.SUCCESS);
         return reservationRepository.save(reservation).getId();
@@ -104,6 +106,21 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        Reservation reservation = reservationRepository.findById(id).get();
+        List<Reservation> waitingReservation = reservationRepository.findAllByDateAndReservationTimeIdAndThemeIdAndStatus(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), Status.WAITING);
+        if (!waitingReservation.isEmpty()) {
+            Waitings waitings = new Waitings(waitingReservation);
+            Reservation firstWaiting = waitings.getFirstWaiting();
+            firstWaiting.changeSuccess();
+        }
         reservationRepository.deleteById(id);
+    }
+
+    public List<WaitingResponse> findWaiting() {
+        return reservationRepository.findAllByStatus(Status.WAITING).stream()
+                .map(reservation -> WaitingResponse.toResponse(reservation.getMember(), reservation.getTheme(),
+                        reservation, reservation.getTime()))
+                .toList();
     }
 }

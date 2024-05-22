@@ -70,6 +70,10 @@ public class Reservation {
         }
     }
 
+    public void changeSuccess() {
+        status = Status.SUCCESS;
+    }
+
     public Long getId() {
         return id;
     }
