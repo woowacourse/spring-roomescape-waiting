@@ -37,7 +37,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping("/reservation")
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody ReservationAddRequest reservationAddRequest,
                                                               @MemberResolver Member member,
                                                               @RequestParam(name = "waiting", required = false, defaultValue = "false") boolean waiting) {
@@ -52,7 +52,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId())).body(reservationResponse);
     }
 
-    @DeleteMapping("/reservation/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
         reservationService.removeReservation(id);
         return ResponseEntity.noContent().build();
