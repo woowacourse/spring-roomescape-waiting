@@ -12,15 +12,13 @@ import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -82,12 +80,12 @@ class ReservationTimeServiceTest {
 
         Reservation reservation = reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
 
-        List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
+        MultipleResponses<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
                 reservation.getDate(),
                 theme.getId()
         );
 
-        assertThat(availableTimes).containsExactly(
+        assertThat(availableTimes.responses()).containsExactly(
                 AvailableReservationTimeResponse.toResponse(hour10, true),
                 AvailableReservationTimeResponse.toResponse(hour11, false)
         );

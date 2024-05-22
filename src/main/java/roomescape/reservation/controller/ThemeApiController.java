@@ -2,7 +2,6 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
 import roomescape.reservation.dto.ThemeSaveRequest;
@@ -26,17 +26,17 @@ public class ThemeApiController {
     }
 
     @GetMapping("/themes/popular")
-    public ResponseEntity<List<PopularThemeResponse>> findTopTenThemesOfLastWeek(
+    public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
             @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
     ) {
-        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(limitCount);
+        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekForLimitCount(limitCount);
 
         return ResponseEntity.ok(popularThemeResponses);
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<ThemeResponse>> findAll() {
-        List<ThemeResponse> themeResponses = themeService.findAll();
+    public ResponseEntity<MultipleResponses<ThemeResponse>> findAll() {
+        MultipleResponses<ThemeResponse> themeResponses = themeService.findAll();
 
         return ResponseEntity.ok(themeResponses);
     }

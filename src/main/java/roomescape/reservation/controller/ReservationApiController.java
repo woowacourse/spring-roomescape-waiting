@@ -2,7 +2,6 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -30,31 +30,31 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll(@RequestParam(defaultValue = "SUCCESS") String status) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
+    public ResponseEntity<MultipleResponses<ReservationResponse>> findAll(@RequestParam(defaultValue = "SUCCESS") String status) {
+        MultipleResponses<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
 
         return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/reservations/mine")
-    public ResponseEntity<List<MemberReservationResponse>> findMemberReservations(LoginMember loginMember) {
-        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
+    public ResponseEntity<MultipleResponses<MemberReservationResponse>> findMemberReservations(LoginMember loginMember) {
+        MultipleResponses<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
 
         return ResponseEntity.ok(memberReservationResponses);
     }
 
     @GetMapping("/reservations/search")
-    public ResponseEntity<List<ReservationResponse>> findAllBySearchCond(
+    public ResponseEntity<MultipleResponses<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
+        MultipleResponses<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
 
         return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/admin/reservations/waiting")
-    public ResponseEntity<List<ReservationWaitingResponse>> findWaitingReservations() {
-        List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
+    public ResponseEntity<MultipleResponses<ReservationWaitingResponse>> findWaitingReservations() {
+        MultipleResponses<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
 
         return ResponseEntity.ok(waitingReservations);
     }

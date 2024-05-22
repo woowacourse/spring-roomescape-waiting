@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MemberSignUpRequest;
@@ -26,9 +27,11 @@ public class MemberService {
         return MemberResponse.toResponse(savedMember);
     }
 
-    public List<MemberResponse> findAll() {
-        return memberRepository.findAll().stream()
+    public MultipleResponses<MemberResponse> findAll() {
+        List<MemberResponse> memberResponses = memberRepository.findAll().stream()
                 .map(MemberResponse::toResponse)
                 .toList();
+
+        return new MultipleResponses<>(memberResponses);
     }
 }

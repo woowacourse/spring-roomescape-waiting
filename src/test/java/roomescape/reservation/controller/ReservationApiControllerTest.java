@@ -67,7 +67,7 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)
-                .body("$", hasSize(1));
+                .body("responses", hasSize(1));
     }
 
     @DisplayName("회원이 예약을 성공적으로 추가하면 201 응답과 Location 헤더에 리소스 저장 경로를 받는다.")

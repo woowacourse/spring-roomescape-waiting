@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.PopularThemeResponse;
 import roomescape.reservation.dto.ThemeResponse;
@@ -38,22 +39,24 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findAll() {
+    public MultipleResponses<ThemeResponse> findAll() {
         List<Theme> themes = themeRepository.findAll();
-
-        return themes.stream()
+        List<ThemeResponse> themeResponses = themes.stream()
                 .map(ThemeResponse::toResponse)
                 .toList();
+
+        return new MultipleResponses<>(themeResponses);
     }
 
     @Transactional(readOnly = true)
-    public List<PopularThemeResponse> findThemesDescOfLastWeekForLimitCount(int limitCount) {
+    public MultipleResponses<PopularThemeResponse> findThemesDescOfLastWeekForLimitCount(int limitCount) {
         LocalDate dateFrom = LocalDate.now().minusWeeks(1);
         List<Theme> popularTheme = themeRepository.findPopularThemesDescOfLastWeekForLimit(dateFrom, limitCount);
-
-        return popularTheme.stream()
+        List<PopularThemeResponse> popularThemeResponses = popularTheme.stream()
                 .map(PopularThemeResponse::toResponse)
                 .toList();
+
+        return new MultipleResponses<>(popularThemeResponses);
     }
 
     public void delete(Long id) {
