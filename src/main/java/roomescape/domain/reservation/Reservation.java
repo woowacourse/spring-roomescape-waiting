@@ -34,6 +34,7 @@ public class Reservation {
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @Enumerated(EnumType.STRING)

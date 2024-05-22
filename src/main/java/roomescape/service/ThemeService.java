@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -16,12 +17,10 @@ public class ThemeService {
     private static final int POPULAR_THEME_COUNT = 10;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
 
     public ThemeService(ThemeRepository themeRepository,
         ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public Theme save(String name, String description, String thumbnail) {
@@ -32,10 +31,12 @@ public class ThemeService {
         return themeRepository.save(theme);
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
-            throw new RoomescapeException("해당 테마를 사용하는 예약이 존재하여 삭제할 수 없습니다.");
-        }
+        Theme theme = themeRepository.findById(id).orElseThrow(() ->
+            new RoomescapeException("존재하지 않는 테마 id 입니다."));
+        theme.validateHavingReservation();
+
         themeRepository.deleteById(id);
     }
 
