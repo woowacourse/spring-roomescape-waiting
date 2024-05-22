@@ -28,7 +28,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        Member member = memberService.findMemberByEmailAndPassword(loginRequest.email(),
+        Member member = memberService.getMemberByEmailAndPassword(loginRequest.email(),
                 loginRequest.password());
         Cookie cookie = CookieGenerator.generate(COOKIE_NAME,
                 jwtTokenProvider.generateToken(String.valueOf(member.getId())));

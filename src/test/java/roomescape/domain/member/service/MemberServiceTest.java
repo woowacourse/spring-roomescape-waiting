@@ -45,7 +45,7 @@ class MemberServiceTest {
     @DisplayName("없는 id의 유저를 찾으면 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_by_non_exist_id() {
-        assertThatThrownBy(() -> memberService.findMemberById(2L))
+        assertThatThrownBy(() -> memberService.getMemberById(2L))
                 .isInstanceOf(NoMatchingDataException.class);
     }
 
@@ -54,7 +54,7 @@ class MemberServiceTest {
     void should_find_member_by_email_and_password() {
         Member expectedMember = ADMIN_MEMBER;
 
-        Member actualMember = memberService.findMemberByEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
+        Member actualMember = memberService.getMemberByEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
 
         assertThat(actualMember).isEqualTo(expectedMember);
     }
@@ -62,14 +62,14 @@ class MemberServiceTest {
     @DisplayName("존재 하지 않는 email로 member를 찾으려 하면, 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_member_by_non_exist_email() {
-        assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword("wrongEmail@gmail.com", "123456"))
+        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword("wrongEmail@gmail.com", "123456"))
                 .isInstanceOf(InvalidEmailPasswordException.class);
     }
 
     @DisplayName("틀린 password로 member를 찾으려 하면, 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_member_by_wrong_password() {
-        assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword("admin@gmail.com", "1234567"))
+        assertThatThrownBy(() -> memberService.getMemberByEmailAndPassword("admin@gmail.com", "1234567"))
                 .isInstanceOf(InvalidEmailPasswordException.class);
     }
 }

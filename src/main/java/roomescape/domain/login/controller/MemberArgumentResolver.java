@@ -40,6 +40,6 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
         }
         String token = jwtTokenProvider.extractTokenFromCookie(request.getCookies());
         Long memberId = jwtTokenProvider.validateAndGetLongSubject(token);
-        return memberService.findMemberById(memberId);
+        return memberService.getMemberById(memberId);
     }
 }

@@ -20,12 +20,12 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    public Member findMemberById(Long id) {
+    public Member getMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoMatchingDataException("없는 member를 조회 했습니다."));
     }
 
-    public Member findMemberByEmailAndPassword(String email, String password) {
+    public Member getMemberByEmailAndPassword(String email, String password) {
         return memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(InvalidEmailPasswordException::new);
     }

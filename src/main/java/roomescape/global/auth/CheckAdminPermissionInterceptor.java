@@ -29,7 +29,7 @@ public class CheckAdminPermissionInterceptor implements HandlerInterceptor {
         }
         String token = jwtTokenProvider.extractTokenFromCookie(cookies);
         Long memberId = jwtTokenProvider.validateAndGetLongSubject(token);
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberService.getMemberById(memberId);
         if (member == null || !member.isAdmin()) {
             throw new ForBiddenException("허가되지않은 접근입니다.");
         }
