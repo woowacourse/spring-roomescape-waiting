@@ -14,6 +14,7 @@ import roomescape.domain.reservation.domain.reservation.Reservation;
 import roomescape.domain.reservation.dto.request.ReservationAddRequest;
 import roomescape.domain.reservation.dto.request.ReservationFindRequest;
 import roomescape.domain.reservation.dto.response.ReservationResponse;
+import roomescape.domain.reservation.dto.response.WaitingReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
 
 @RestController
@@ -45,9 +46,10 @@ public class AdminReservationController {
     }
 
     @GetMapping("/reservations/waiting")
-    public ResponseEntity<List<ReservationResponse>> getWaitingReservationList() {
+    public ResponseEntity<List<WaitingReservationResponse>> getWaitingReservationList() {
         List<Reservation> reservations = reservationService.findWaitingReservations();
-        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
-        return ResponseEntity.ok(reservationResponses);
+        List<WaitingReservationResponse> waitingReservationResponses = WaitingReservationResponse.fromList(
+                reservations);
+        return ResponseEntity.ok(waitingReservationResponses);
     }
 }
