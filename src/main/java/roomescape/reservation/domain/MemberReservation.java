@@ -71,10 +71,6 @@ public class MemberReservation {
         return status.isReserved();
     }
 
-    public boolean isStatus(final ReservationStatus status) {
-        return this.status == status;
-    }
-
     public Long getId() {
         return id;
     }

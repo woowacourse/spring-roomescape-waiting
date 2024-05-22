@@ -21,7 +21,7 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             WHERE mr.member = :member
             ORDER BY r.date, rt.startAt ASC
             """)
-    List<MemberReservation> findByMember(final Member member);
+    List<MemberReservation> findByMemberOrderByDateTimeAsc(final Member member);
 
     @Query("""
             SELECT mr

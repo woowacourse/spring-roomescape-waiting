@@ -9,7 +9,6 @@ import roomescape.global.exception.model.NotFoundException;
 import roomescape.global.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -29,7 +28,6 @@ import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,18 +40,17 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberReservationRepository memberReservationRepository;
     private final MemberRepository memberRepository;
-    private final MemberService memberService;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository, MemberReservationRepository memberReservationRepository, MemberRepository memberRepository,
-                              final MemberService memberService) {
+                              final ThemeRepository themeRepository,
+                              final MemberReservationRepository memberReservationRepository,
+                              final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberReservationRepository = memberReservationRepository;
         this.memberRepository = memberRepository;
-        this.memberService = memberService;
     }
 
     public ReservationsResponse findReservationsByStatus(final ReservationStatus status) {
@@ -174,12 +171,15 @@ public class ReservationService {
         List<MemberReservation> alreadyBookedReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(time, request.date(), theme);
         long order = alreadyBookedReservations.size();
 
-        validateDateAndTime(request.date(), time, LocalDateTime.now());
-        validateDuplication(request, time, theme, member);
-        validateCanReserve(request, order);
+        Reservation requestReservation = request.toEntity(time, theme, member);
+        MemberReservation requestMemberReservation = new MemberReservation(requestReservation, member, request.status(), order);
 
-        Reservation savedReservation = reservationRepository.save(request.toEntity(time, theme, member));
-        memberReservationRepository.save(new MemberReservation(savedReservation, member, request.status(), order));
+        validateDateAndTime(requestReservation, LocalDateTime.now());
+        validateDuplication(requestReservation, requestMemberReservation.getStatus());
+        validateCanReserve(requestReservation, requestMemberReservation.getStatus(), order);
+
+        Reservation savedReservation = reservationRepository.save(requestReservation);
+        memberReservationRepository.save(requestMemberReservation);
         return ReservationResponse.from(savedReservation);
     }
 
@@ -242,14 +242,10 @@ public class ReservationService {
 
     public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
         Member member = memberRepository.getById(memberId);
-        List<MemberReservation> reservations = memberReservationRepository.findByMember(member);
+        List<MemberReservation> reservations = memberReservationRepository.findByMemberOrderByDateTimeAsc(member);
 
         List<MemberReservationResponse> responses = new ArrayList<>();
         for (MemberReservation memberReservation : reservations) {
-            if (!memberReservation.isReserved()) {
-                responses.add(MemberReservationResponse.fromEntity(memberReservation));
-                continue;
-            }
             responses.add(MemberReservationResponse.fromEntity(memberReservation));
         }
         return new MemberReservationsResponse(responses);
