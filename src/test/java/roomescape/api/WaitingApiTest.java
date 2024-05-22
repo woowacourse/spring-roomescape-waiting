@@ -41,4 +41,32 @@ class WaitingApiTest {
                 .statusCode(201)
                 .header("Location", "/waitings/1");
     }
+
+    @Test
+    void 예약_대기_취소() {
+        Cookie cookieByUserLogin = getCookieByLogin(port, "test1@email.com", "123456");
+        WaitingRequest waitingRequest = new WaitingRequest(2L, 1L);
+        addWaiting(waitingRequest);
+
+        RestAssured.given().log().all()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .cookie(cookieByUserLogin)
+                .when().delete("/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    private void addWaiting(WaitingRequest waitingRequest) {
+        Cookie cookieByUserLogin = getCookieByLogin(port, "test1@email.com", "123456");
+
+        RestAssured.given().log().all()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .cookie(cookieByUserLogin)
+                .body(waitingRequest)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
+    }
 }

@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Role;
+import roomescape.dto.login.LoginMember;
 import roomescape.dto.member.MemberResponse;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.waiting.WaitingRequest;
@@ -66,6 +68,27 @@ class WaitingServiceTest {
 
         //when, then
         assertThatThrownBy(() -> waitingService.addWaiting(waitingRequest))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 잘못된_예약_대기_id로_취소할_시_예외_발생() {
+        // given
+        LoginMember loginMember = new LoginMember(1L, "name", "eamil@test.com", Role.ADMIN);
+
+        // when, then
+        assertThatThrownBy(() -> waitingService.deleteWaiting(0L, loginMember))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 자신의_예약_대기가_아닌_경우_취소_불가능() {
+        // given
+        LoginMember loginMember = new LoginMember(1L, "name", "eamil@test.com", Role.ADMIN);
+        Long otherMemberWaitingId = 1L;
+
+        // when, then
+        assertThatThrownBy(() -> waitingService.deleteWaiting(otherMemberWaitingId, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

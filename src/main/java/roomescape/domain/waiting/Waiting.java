@@ -3,6 +3,7 @@ package roomescape.domain.waiting;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
@@ -12,7 +13,7 @@ import roomescape.domain.reservation.Reservation;
 public class Waiting {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +30,15 @@ public class Waiting {
         this.reservation = reservation;
     }
 
+    public boolean isNotOwner(Member member) {
+        return !this.member.equals(member);
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public Member getMember() {
+        return member;
     }
 }

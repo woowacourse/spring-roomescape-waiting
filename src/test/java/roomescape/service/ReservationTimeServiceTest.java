@@ -71,7 +71,6 @@ class ReservationTimeServiceTest {
                 LocalDate.now().plusDays(1),
                 1L
         );
-        System.out.println(availableTimes);
 
         //then
         assertThat(availableTimes)

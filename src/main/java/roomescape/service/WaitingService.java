@@ -3,9 +3,11 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
+import roomescape.dto.login.LoginMember;
 import roomescape.dto.waiting.WaitingRequest;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -32,13 +34,22 @@ public class WaitingService {
     public Long addWaiting(WaitingRequest waitingRequest) {
         Member member = findMember(waitingRequest.memberId());
         Reservation reservation = findReservation(waitingRequest.reservationId());
-        validateOwner(member, reservation);
+        validateReservationOwner(member, reservation);
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
 
         Waiting waiting = new Waiting(member, reservation);
         waitingRepository.save(waiting);
 
         return waiting.getId();
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id, LoginMember loginMember) {
+        Waiting waiting = findWaiting(id);
+        Member member = findMember(loginMember.id());
+        validateWaitingOwner(member, waiting);
+
+        waitingRepository.delete(waiting);
     }
 
     private Member findMember(Long memberId) {
@@ -49,25 +60,45 @@ public class WaitingService {
                 ));
     }
 
-    private Reservation findReservation(Long id) {
-        return reservationRepository.findById(id)
+    private Reservation findReservation(Long reservationId) {
+        return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + id)
+                        new Throwable("reservation_id : " + reservationId)
                 ));
     }
 
-    private void validateOwner(Member member, Reservation reservation) {
+    private Waiting findWaiting(Long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "[ERROR] 잘못된 예약 대기 정보 입니다.",
+                        new Throwable("waiting_id : " + waitingId)
+                ));
+    }
+
+    private void validateReservationOwner(Member member, Reservation reservation) {
         if (reservation.isOwner(member)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "[ERROR] 자신의 예약에 대한 예약 대기를 생성할 수 없습니다.",
+                    new Throwable("reservation_id : " + reservation.getId())
+            );
+        }
+    }
+
+    private void validateWaitingOwner(Member member, Waiting waiting) {
+        if (waiting.isNotOwner(member)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 자신의 예약 대기만 삭제할 수 있습니다.",
+                    new Throwable("waiting_id : " + waiting.getId())
+            );
         }
     }
 
     private void validateUnPassedDate(LocalDate date, LocalTime time) {
         if (DateUtil.isPastDateTime(date, time)) {
             throw new IllegalArgumentException(
-                    "[ERROR] 지나간 날짜와 시간은 예약이 불가능합니다.",
-                    new Throwable("생성 예약 시간 : " + date + " " + time)
+                    "[ERROR] 지나간 날짜와 시간은 예약 대기가 불가능합니다.",
+                    new Throwable("생성 예약 대기 시간 : " + date + " " + time)
             );
         }
     }
