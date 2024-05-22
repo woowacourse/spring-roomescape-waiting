@@ -60,9 +60,10 @@ public class ReservationDbService {
         );
     }
 
-    public void delete(long id) {
-        reservationTimeRepository.deleteById(id);
+    public void delete(Reservation reservation) {
+        reservationRepository.delete(reservation);
     }
+
 
     public List<Reservation> findByConditions(
             Optional<LocalDate> start,
@@ -73,7 +74,13 @@ public class ReservationDbService {
         return reservationRepository.findByConditions(start, end, themeId, memberId);
     }
 
-    private Member findMemberById(Long memberId) {
+    public Reservation findById(long id){
+        return reservationRepository.findById(id)
+                .orElseThrow(()-> new RoomEscapeBusinessException("예약이 존재하지 않습니다."));
+    }
+
+
+    public Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
     }

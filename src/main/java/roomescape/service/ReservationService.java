@@ -1,13 +1,9 @@
 package roomescape.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
-import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.ReservationConditionRequest;
@@ -24,14 +20,9 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ReservationService {
-    private final MemberRepository memberRepository;
     private final ReservationDbService reservationDbService;
 
-    public ReservationService(
-            MemberRepository memberRepository,
-            ReservationDbService reservationDbService
-    ) {
-        this.memberRepository = memberRepository;
+    public ReservationService(ReservationDbService reservationDbService) {
         this.reservationDbService = reservationDbService;
     }
 
@@ -56,7 +47,12 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        reservationDbService.delete(id);
+        Reservation reservation = reservationDbService.findById(id);
+        if (reservation.isEmptyWaitings()) {
+            reservationDbService.delete(reservation);
+            return;
+        }
+        reservation.changeToNextWaitingMember();
     }
 
     public ReservationResponses findReservationsByCondition(ReservationConditionRequest reservationConditionRequest) {
@@ -78,7 +74,7 @@ public class ReservationService {
     }
 
     public UserReservationResponses findAllUserReservation(Long memberId) {
-        Member user = findMemberById(memberId);
+        Member user = reservationDbService.findMemberById(memberId);
         return getAllUserReservations(user);
     }
 
@@ -100,11 +96,6 @@ public class ReservationService {
         return user.getWaitings().stream()
                 .map(waiting -> new UserReservationResponse(waiting.getId(), waiting.getReservation(), user))
                 .toList();
-    }
-
-    private Member findMemberById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new RoomEscapeBusinessException("회원이 존재하지 않습니다."));
     }
 }
 

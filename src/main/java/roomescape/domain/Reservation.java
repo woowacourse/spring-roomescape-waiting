@@ -1,12 +1,10 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import roomescape.exception.customexception.RoomEscapeBusinessException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})})
@@ -22,7 +20,7 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reservation", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Waiting> waitings = new ArrayList<>();
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
@@ -49,19 +47,29 @@ public class Reservation {
     }
 
     public boolean isEmptyWaitings() {
-        return !waitings.isEmpty();
+        return waitings.isEmpty();
     }
 
-    public boolean hasWaiting(Waiting waiting){
+    public void changeToNextWaitingMember() {
+        if (isEmptyWaitings()) {
+            throw new RoomEscapeBusinessException("다음 대기자가 없습니다.");
+        }
+        Waiting nextWaiting = Collections.min(waitings);
+        this.member = nextWaiting.getMember();
+        nextWaiting.delete();
+    }
+
+
+    public boolean hasWaiting(Waiting waiting) {
         return waitings.contains(waiting);
     }
 
-    public int rank(Waiting waiting){
+    public int rank(Waiting waiting) {
         waitings.sort(Comparator.naturalOrder());
         return waitings.indexOf(waiting);
     }
 
-    public boolean isOwn(Member other){
+    public boolean isOwn(Member other) {
         return this.member.equals(other);
     }
 

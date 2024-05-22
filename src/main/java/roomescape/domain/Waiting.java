@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,10 +16,10 @@ public class Waiting implements Comparable<Waiting> {
     @NotNull
     private LocalDateTime createAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Reservation reservation;
 
     public Waiting(LocalDateTime createAt, Member member, Reservation reservation) {

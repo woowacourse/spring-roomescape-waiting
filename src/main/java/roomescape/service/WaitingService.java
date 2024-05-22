@@ -24,7 +24,7 @@ public class WaitingService {
 
     public WaitingResponse saveWaiting(WaitingRequest waitingRequest, long memberId) {
         Reservation alreadyBookedReservation = reservationDbService.findReservation(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId());
-        Waiting waiting = createWaiting(alreadyBookedReservation);
+        Waiting waiting = createWaiting(alreadyBookedReservation, reservationDbService.findMemberById(memberId));
 
         validateAlreadyReservedMember(waiting, alreadyBookedReservation);
         validateDuplicatedWaiting(waiting);
@@ -56,10 +56,10 @@ public class WaitingService {
         }
     }
 
-    private Waiting createWaiting(Reservation alreadyBookedReservation) {
+    private Waiting createWaiting(Reservation alreadyBookedReservation, Member member) {
         return new Waiting(
                 LocalDateTime.now(),
-                alreadyBookedReservation.getMember(),
+                member,
                 alreadyBookedReservation
         );
     }
