@@ -16,8 +16,8 @@ public record MemberRequest(
         String password,
         @NotNull(message = "역할을 입력해주세요.")
         Role role) {
+
     public Member toEntity() {
         return new Member(name, email, password, role);
     }
-
 }

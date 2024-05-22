@@ -11,6 +11,5 @@ public record ReservationConditionRequest(
         @NotNull(message = "시작 날짜를 입력해주세요.")
         LocalDate dateFrom,
         @NotNull(message = "종료 날짜를 입력해주세요.")
-        LocalDate dateTo
-) {
+        LocalDate dateTo) {
 }

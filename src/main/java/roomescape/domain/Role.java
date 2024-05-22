@@ -21,5 +21,4 @@ public enum Role {
     public boolean isNotAdmin() {
         return !isAdmin();
     }
-
 }
