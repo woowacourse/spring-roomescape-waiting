@@ -35,8 +35,8 @@ public class ReservationService {
     @Transactional
     public Reservation create(Reservation reservation) {
         validateReservationDate(reservation);
-        validateDuplicatedReservation(reservation);
         validateReservationCapacity(reservation);
+        validateDuplicatedReservation(reservation);
         return reservationRepository.save(reservation);
     }
 
@@ -44,14 +44,6 @@ public class ReservationService {
         LocalDate today = LocalDate.now();
         if (reservation.isBeforeOrOnToday(today)) {
             throw new ViolationException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
-    }
-
-    private void validateDuplicatedReservation(Reservation reservation) {
-        boolean existDuplicatedReservation = reservationRepository.existsByDateAndTimeAndThemeAndMember(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme(), reservation.getMember());
-        if (existDuplicatedReservation) {
-            throw new ViolationException("동일한 사용자의 중복된 예약입니다.");
         }
     }
 
@@ -63,6 +55,14 @@ public class ReservationService {
         }
         if (!existInSameTime && reservation.isWaiting()) {
             throw new ViolationException("해당 시간대에 예약이 가능합니다. 대기 말고 예약을 해주세요.");
+        }
+    }
+
+    private void validateDuplicatedReservation(Reservation reservation) {
+        boolean existDuplicatedReservation = reservationRepository.existsByDateAndTimeAndThemeAndMember(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme(), reservation.getMember());
+        if (existDuplicatedReservation) {
+            throw new ViolationException("동일한 사용자의 중복된 예약입니다.");
         }
     }
 

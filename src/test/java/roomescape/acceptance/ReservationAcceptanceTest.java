@@ -16,6 +16,7 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.MIA_NAME;
 import static roomescape.TestFixture.MIA_RESERVATION_DATE;
@@ -88,7 +89,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("동일한 시간에 중복 예약을 추가한다.")
+    @DisplayName("동일한 시간대에 예약을 추가한다.")
     void createDuplicatedReservation() {
         // given
         Member member = createTestMember();
@@ -116,6 +117,48 @@ class ReservationAcceptanceTest extends AcceptanceTest {
             checkHttpStatusBadRequest(softly, response);
             softly.assertThat(errorResponse.message()).isNotNull();
         });
+    }
+
+    @Test
+    @DisplayName("동시 요청으로 동일한 시간대에 예약을 추가한다.")
+    void createDuplicatedReservationInMultiThread() {
+        // given
+        Member member = createTestMember();
+        String token = createTestToken(member.getEmail().getValue());
+        Long themeId = createTestTheme();
+        Long timeId = createTestReservationTime();
+
+        createTestReservation(MIA_RESERVATION_DATE, timeId, themeId, token, BOOKING);
+
+        ReservationSaveRequest request = new ReservationSaveRequest(MIA_RESERVATION_DATE, timeId, themeId, BOOKING.getIdentifier());
+        Cookie cookie = new Cookie.Builder("token", token).build();
+
+        // when
+        for (int i = 0; i < 5; i++) {
+            new Thread(() -> RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie(cookie)
+                    .body(request)
+                    .when().post("/reservations")
+            ).start();
+        }
+
+        // then
+        List<ReservationResponse> reservationResponses = findAllReservations();
+        assertThat(reservationResponses).hasSize(1);
+    }
+
+    private List<ReservationResponse> findAllReservations() {
+        Member admin = createTestAdmin();
+        String adminToken = createTestToken(admin.getEmail().getValue());
+        Cookie adminCookie = new Cookie.Builder("token", adminToken).build();
+        ExtractableResponse<Response> response = RestAssured.given().log().all()
+                .cookie(adminCookie)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .extract();
+        return Arrays.stream(response.as(ReservationResponse[].class))
+                .toList();
     }
 
     @Test
