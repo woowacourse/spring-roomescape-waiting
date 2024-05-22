@@ -19,4 +19,13 @@ public record MemberReservationStatusResponse(
                 reservation.getStatus().getValue()
         );
     }
+
+    public MemberReservationStatusResponse(Reservation reservation, String status) {
+        this(reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                status
+        );
+    }
 }

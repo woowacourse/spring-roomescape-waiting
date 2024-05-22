@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.DuplicateSaveException;
@@ -54,10 +55,23 @@ public class ReservationService {
     }
 
     public List<MemberReservationStatusResponse> findAllByMemberWithStatus(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
-                .stream()
-                .map(MemberReservationStatusResponse::new)
-                .toList();
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+
+        List<MemberReservationStatusResponse> memberReservationStatusResponses = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            String reservationStatus = reservation.getStatus().getValue();
+            if (reservation.isWaiting()) {
+                int reservationRank = reservationRepository.countWaitingRank(
+                        reservation.getDate(),
+                        reservation.getTime().getId(),
+                        reservation.getTheme().getId(),
+                        reservation.getId()
+                );
+                reservationStatus = reservationRank + "번째 " + reservationStatus;
+            }
+            memberReservationStatusResponses.add(new MemberReservationStatusResponse(reservation, reservationStatus));
+        }
+        return memberReservationStatusResponses;
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {

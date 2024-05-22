@@ -60,6 +60,16 @@ public class ReservationController {
         return ResponseEntity.created(createdUri).body(saveResponse);
     }
 
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<ReservationResponse> saveMemberWaitingReseravtion(
+            @Authenticated Accessor accessor,
+            @Valid @RequestBody MemberReservationAddRequest memberReservationAddRequest) {
+        ReservationResponse saveResponse = reservationService.saveMemberWaitingReservation(accessor.id(),
+                memberReservationAddRequest);
+        URI createdUri = URI.create("/reservations/" + saveResponse.id());
+        return ResponseEntity.created(createdUri).body(saveResponse);
+    }
+
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
         reservationService.removeReservation(id);
