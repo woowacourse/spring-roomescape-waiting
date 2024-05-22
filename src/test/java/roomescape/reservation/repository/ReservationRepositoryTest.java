@@ -99,31 +99,6 @@ public class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("이미 저장된 예약일 경우 true를 반환한다.")
-    void existReservationTest() {
-        Long themeId = themeRepository.save(
-                new Theme("공포", "무서운 테마", "https://i.pinimg.com/236x.jpg")
-        ).getId();
-        Theme theme = themeRepository.findById(themeId).get();
-
-        Long timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("10:00"))).getId();
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
-
-        Long memberId = memberRepository.save(new Member("호기", "hogi@naver.com", "asd")).getId();
-        Member member = memberRepository.findById(memberId).get();
-
-        Long reservationId = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS)).getId();
-        Reservation findReservation = reservationRepository.findById(reservationId).get();
-
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAt(findReservation.getDate(),
-                findReservation.getTime()
-                        .getStartAt());
-
-        assertThat(exist).isTrue();
-    }
-
-    @Test
     @DisplayName("회원 아이디, 테마 아이디와 기간이 일치하는 Reservation을 반환한다.")
     void findAllByThemeIdAndMemberIdBetweenStartAndEnd() {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
@@ -198,5 +173,20 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAll();
 
         assertThat(reservations.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("status 가 일치하는 정보를 가져온다.")
+    void findAllByStatusTest() {
+        Theme theme = themeRepository.save(new Theme("a", "a", "a"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Member member = memberRepository.save(new Member("hogi", "a", "a"));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.WAITING));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(), theme, time, Status.SUCCESS));
+
+        List<Reservation> waitings = reservationRepository.findAllByStatus(Status.WAITING);
+        assertThat(waitings.get(0).getId()).isEqualTo(reservation1.getId());
     }
 }

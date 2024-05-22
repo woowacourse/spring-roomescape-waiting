@@ -53,6 +53,17 @@ public class Reservation {
         this.status = status;
     }
 
+    public Reservation(Long id, LocalDate date, Status status, Member member, Theme theme,
+                       ReservationTime reservationTime, LocalDateTime createdAt) {
+        this.id = id;
+        this.date = date;
+        this.status = status;
+        this.member = member;
+        this.theme = theme;
+        this.reservationTime = reservationTime;
+        this.createdAt = createdAt;
+    }
+
     private void validateLastDate(LocalDate date) {
         if (date.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");
