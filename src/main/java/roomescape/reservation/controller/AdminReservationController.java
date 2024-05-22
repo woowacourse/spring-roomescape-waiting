@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,9 +16,12 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService,
+                                      WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping
@@ -42,12 +46,12 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public List<MemberReservationResponse> readWaitingReservations() {
-        return reservationService.readWaitingReservations();
+        return waitingReservationService.readWaitingReservations();
     }
 
     @PutMapping("/waiting/{id}")
     public void confirmWaitingReservation(@PathVariable Long id) {
-        reservationService.confirmWaitingReservation(id);
+        waitingReservationService.confirmWaitingReservation(id);
     }
 
     @DeleteMapping("/{id}")

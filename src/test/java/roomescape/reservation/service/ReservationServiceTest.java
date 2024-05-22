@@ -24,7 +24,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import(value = {ReservationService.class})
+@Import(value = {ReservationService.class, ReservationCreateService.class})
 @Sql(value = "/recreate_table.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("예약 서비스")
 class ReservationServiceTest {
