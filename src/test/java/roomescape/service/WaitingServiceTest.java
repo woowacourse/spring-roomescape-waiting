@@ -113,4 +113,19 @@ class WaitingServiceTest {
             assertThat(output2.order()).isEqualTo(2);
         });
     }
+
+    @Test
+    @DisplayName("에약자는 예약 대기를 신청할 수 없다.")
+    void reservation_member_can_not_waiting() {
+        final ReservationTime time = reservationTimeRepository.save(ReservationTime.from("11:00"));
+        final Theme theme = themeRepository.save(ThemeFixture.getDomain());
+        final Member member = memberRepository.save(MemberFixture.getDomain());
+
+        final ReservationInfo reservationInfo = reservationInfoRepository.save(ReservationInfo.from("2025-01-01", time, theme));
+        reservationRepository.save(new Reservation(member, reservationInfo));
+
+        final var input = new ReservationInput("2025-01-01", time.getId(), theme.getId(), member.getId());
+        assertThatThrownBy(() -> sut.createWaiting(input))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

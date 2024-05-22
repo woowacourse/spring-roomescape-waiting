@@ -30,11 +30,11 @@ public class WaitingService {
         final ReservationInfo reservationInfo = reservationInfoCreateValidator.validateReservationInput(input.parseReservationInfoInput());
         final Member member = memberRepository.getById(input.memberId());
 
-        if (waitingRepository.existsByMemberAndReservationInfo(member, reservationInfo)) {
+        if (waitingRepository.existsByMemberAndReservationInfo(member, reservationInfo) || reservationRepository.existsByMemberAndReservationInfo(member, reservationInfo)) {
             throw new IllegalArgumentException(String.format("%s는 %s에 대한 대기가 이미 존재합니다.", member.getName(), reservationInfo.getLocalDateTimeFormat()));
         }
         if (reservationRepository.notExistsByReservationInfo(reservationInfo)) {
-            throw new IllegalArgumentException(String.format("%s에 대한 예약이 없습니다.",reservationInfo));
+            throw new IllegalArgumentException(String.format("%s에 대한 예약이 없습니다.", reservationInfo));
         }
         final Waiting waiting = waitingRepository.save(new Waiting(member, reservationInfo));
         return WaitingOutput.toOutput(waiting, getOrderWaitingByReservationInfo(waiting));
