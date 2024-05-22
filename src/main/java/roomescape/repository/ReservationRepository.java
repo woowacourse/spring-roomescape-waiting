@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -58,5 +60,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<ReservationWaitingWithRank> findReservationWaitingWithRankByMemberId(@Param("memberId") long memberId);
 
     List<Reservation> findByReservationStatus(ReservationStatus reservationStatus);
+
+    @Query("""
+            SELECT r 
+            FROM Reservation r 
+            WHERE r.theme = :theme 
+            AND r.reservationTime = :reservationTime 
+            AND r.date = :date  
+            AND r.reservationStatus = 'WAITING' 
+            ORDER BY r.createdAt
+            """)
+    Optional<Reservation> findNextWaiting(@Param("theme") Theme theme,
+                                          @Param("reservationTime") ReservationTime reservationTime,
+                                          @Param("date") LocalDate date,
+                                          Limit limit);
 }
 

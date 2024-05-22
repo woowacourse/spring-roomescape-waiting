@@ -71,6 +71,14 @@ public class Reservation extends BaseTime {
         }
     }
 
+    public boolean isReserved() {
+        return reservationStatus.isReserved();
+    }
+
+    public void changeWaitingToReserved() {
+        this.reservationStatus = ReservationStatus.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }
