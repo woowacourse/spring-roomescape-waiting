@@ -165,6 +165,20 @@ public class ReservationRepositoryTest {
         assertThat(timeIds).containsExactly(reservationTime.getId());
     }
 
+    @DisplayName("Status로 예약 목록을 조회한다.")
+    @Test
+    void findAllByStatus() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
+
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        List<Reservation> reservations = reservationRepository.findAllByStatus(Status.WAIT);
+        assertThat(reservations).hasSize(1);
+    }
+
     @DisplayName("같은 테마, 날짜, 시간에 예약이 있을 경우 true를 반환한다.")
     @Test
     void existReservationTest() {

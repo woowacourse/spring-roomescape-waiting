@@ -55,6 +55,25 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .statusCode(HttpStatus.OK.value());
     }
 
+    @DisplayName("예약 대기 목록 조회에 성공하면 200 응답을 받는다.")
+    @Test
+    void findWaitingReservations() {
+        saveMemberAsKaki();
+        saveThemeAsHorror();
+        saveReservationTimeAsTen();
+        saveWaitReservationAsDateNow();
+
+        RestAssured.given().log().all()
+                .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
+                .accept(ContentType.JSON)
+                .when()
+                .get("/reservations/wait")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(ContentType.JSON)
+                .body("resources.$", hasSize(1));
+    }
+
     @DisplayName("테마 아이디, 회원 아이디, 기간 조건 조회에 성공하면 200 응답을 받는다.")
     @Test
     void findAllBySearchCond() {

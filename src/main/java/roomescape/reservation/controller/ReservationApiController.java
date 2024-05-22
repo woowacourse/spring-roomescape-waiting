@@ -18,6 +18,7 @@ import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -70,6 +71,13 @@ public class ReservationApiController {
 
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
+    }
+
+    @GetMapping("/reservations/wait")
+    public ResponseEntity<ResourcesResponse<WaitingResponse>> findWaitingReservations() {
+        List<WaitingResponse> reservations = reservationService.findWaitingReservations();
+        ResourcesResponse<WaitingResponse> response = new ResourcesResponse<>(reservations);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reservations/wait")

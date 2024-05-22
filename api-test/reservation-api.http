@@ -33,7 +33,7 @@ Content-Type: application/json
   "memberId": 1
 }
 
-### 사용자 예약 대기 추가 API
+### 대기 예약 추가 API
 
 POST http://localhost:8080/reservations/wait
 Content-Type: application/json
@@ -43,6 +43,10 @@ Content-Type: application/json
   "timeId": 1,
   "themeId": 1
 }
+
+### 대기 예약 조회 API
+
+GET http://localhost:8080/reservations/wait
 
 ### 예약 삭제 API
 

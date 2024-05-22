@@ -17,6 +17,7 @@ import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -143,6 +144,13 @@ public class ReservationService {
             return MemberReservationResponse.toWaitResponse(waitingWithRank);
         }
         return MemberReservationResponse.toResponse(reservation);
+    }
+
+    public List<WaitingResponse> findWaitingReservations() {
+        return reservationRepository.findAllByStatus(Status.WAIT)
+                .stream()
+                .map(WaitingResponse::toResponse)
+                .toList();
     }
 
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
