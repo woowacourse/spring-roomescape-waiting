@@ -34,7 +34,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -127,10 +127,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteById(long reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
-
+    @Transactional
     public List<ReservationDetailResponse> findAllByMemberId(long memberId) {
         Reservations reservations = new Reservations(reservationRepository.findAllByMemberId(memberId));
         List<Waiting> waitings = reservations.waiting().stream()
@@ -145,10 +142,17 @@ public class ReservationService {
         return ReservationDetailResponse.of(reservations, waitings);
     }
 
+    @Transactional
+    public void deleteById(long reservationId) {
+        reservationRepository.deleteById(reservationId);
+    }
+
+    @Transactional
     public void deleteByMemberIdAndId(LoginMember loginMember, long id) {
         reservationRepository.deleteByMemberIdAndId(loginMember.getId(), id);
     }
 
+    @Transactional
     public List<AdminReservationDetailResponse> findAllWaitingReservations() {
         List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
         return reservations.stream()
