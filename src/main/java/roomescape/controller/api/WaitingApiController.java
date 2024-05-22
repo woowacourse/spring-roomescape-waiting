@@ -27,9 +27,10 @@ public class WaitingApiController {
         return ResponseEntity.created(URI.create("/waitings/" + output.id()))
                 .body(ReservationResponse.toResponse(output));
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable final long id) {
-        waitingService.deleteWaiting(id);
+    public ResponseEntity<Void> deleteWaiting(@PathVariable final long id, final LoginMemberRequest loginMemberRequests) {
+        waitingService.deleteWaiting(id,loginMemberRequests.id());
         return ResponseEntity.noContent()
                 .build();
     }

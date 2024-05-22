@@ -60,7 +60,8 @@ public class WaitingService {
                 .orElseThrow(()->new NotExistException(WAITING,id));
         if(waiting.getMember().isEqualId(memberId)){
             waitingRepository.deleteById(id);
+            return;
         }
-        throw new IllegalArgumentException("현재 사용자의 대기가 아닙니다.");
+        throw new IllegalArgumentException(String.format("현재 사용자(%d)의 %d 대기가 아닙니다.",memberId,id));
     }
 }
