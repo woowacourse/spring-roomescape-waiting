@@ -31,6 +31,10 @@ public class MemberService {
         this.encryptionService = encryptionService;
     }
 
+    public List<Member> findAll() {
+        return memberRepository.findAll();
+    }
+
     public Member save(final SignupRequest request) {
         final Optional<Member> findMember = memberRepository.findByEmail(request.email());
         if (findMember.isPresent()) {
@@ -39,12 +43,6 @@ public class MemberService {
         final String encryptedPassword = encryptionService.encryptPassword(request.password());
         final Member member = new Member(null, request.name(), request.email(), encryptedPassword, Role.USER);
         return memberRepository.save(member);
-    }
-
-    public boolean invalidPassword(final String email, final String rawPassword) {
-        final Member findMember = memberRepository.fetchByEmail(email);
-        final String encryptedPassword = encryptionService.encryptPassword(rawPassword);
-        return !encryptedPassword.equals(findMember.getPassword());
     }
 
     public TokenResponse createToken(final MemberLoginRequest request) {
@@ -75,7 +73,9 @@ public class MemberService {
                 Role.valueOf((String) payload.get("role")));
     }
 
-    public List<Member> findAll() {
-        return memberRepository.findAll();
+    private boolean invalidPassword(final String email, final String rawPassword) {
+        final Member findMember = memberRepository.fetchByEmail(email);
+        final String encryptedPassword = encryptionService.encryptPassword(rawPassword);
+        return !encryptedPassword.equals(findMember.getPassword());
     }
 }

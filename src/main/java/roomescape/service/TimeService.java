@@ -37,6 +37,7 @@ public class TimeService {
 
     public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
         final List<ReservationTime> times = timeRepository.findAll();
+        //TODO 자기가 예약하건 안보여줘야 할 듯. 예약도 예약 대기도 불가.
         final Set<ReservationTime> bookedTimes = reservationRepository
                 .findAllByDateAndThemeId(request.date(), request.themeId())
                 .stream()

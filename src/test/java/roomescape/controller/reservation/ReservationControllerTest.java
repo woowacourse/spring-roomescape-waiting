@@ -115,6 +115,26 @@ class ReservationControllerTest {
                 .body("size()", is(3));
     }
 
+    @ParameterizedTest
+    @DisplayName("예약 조건 조회")
+    @MethodSource("searchReservationsParameterProvider")
+    void searchReservations(final Map<String, Object> param, final List<Long> expected) {
+        final List<ReservationResponse> result = RestAssured.given().log().all()
+                .cookie("token", accessToken)
+                .contentType(ContentType.JSON)
+                .params(param)
+                .when().get("/reservations/search")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList("$", ReservationResponse.class);
+
+        final List<Long> ids = result.stream()
+                .map(ReservationResponse::id)
+                .toList();
+
+        assertThat(ids).isEqualTo(expected);
+    }
+
     @Test
     @DisplayName("예약 대기 삭제")
     void deleteWaitReservation() {
@@ -135,6 +155,25 @@ class ReservationControllerTest {
                 Arguments.of(date, "dk", themeId),
                 Arguments.of(date, timeId, "al"),
                 Arguments.of("2023", timeId, themeId)
+        );
+    }
+
+    static Stream<Arguments> searchReservationsParameterProvider() {
+        final LocalDate date = LocalDate.now();
+
+        return Stream.of(
+                Arguments.of(Map.of("themeId", 2L, "memberId", 2L, "dateFrom", String.valueOf(date.minusDays(8)),
+                                "dateTo", String.valueOf(date.minusDays(1))),
+                        List.of(2L, 4L)),
+                Arguments.of(Map.of("themeId", 3L, "memberId", 3L, "dateFrom", String.valueOf(date.minusDays(5)),
+                                "dateTo", String.valueOf(date.plusDays(5))),
+                        List.of(6L, 8L)),
+                Arguments.of(Map.of("themeId", 3L, "memberId", 3L, "dateFrom", String.valueOf(date.minusDays(7)),
+                                "dateTo", String.valueOf(date.plusDays(4))),
+                        List.of(5L, 6L, 8L)),
+                Arguments.of(Map.of("themeId", 1L, "memberId", 1L, "dateFrom", String.valueOf(date.minusDays(14)),
+                                "dateTo", String.valueOf(date.minusDays(7))),
+                        List.of())
         );
     }
 }
