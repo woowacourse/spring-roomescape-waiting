@@ -12,6 +12,14 @@
 - [x] 내 예약 목록 조회 시 예약 대기 목록도 함께 포함한다.
     - [x] 몇 번째 대기인지 함께 표기한다.
 
+- [x] API 명세를 작성한다.
+- [ ] 어드민에서 예약 대기 관리 기능을 구현한다.
+  - [ ] 어드민은 예약 대기 목록을 조회할 수 있다.
+  - [ ] 어드민은 예약 대기를 취소시킬 수 있다.
+- [ ] 예약 대기 승인 기능을 구현한다.
+  - [ ] 예약이 취소되면 가장 빠른 예약 대기가 자동으로 승인된다.
+- [ ] 화면 응답 파일을 수정한다.
+
 # 방탈출 API 명세
 
 ## 예약 조회
@@ -440,3 +448,58 @@
 - Set-Cookie: token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/; HttpOnly
 
 
+---
+
+## 관리자 예약 대기 조회
+
+### Request
+
+- GET admin/reservations/waiting
+- cookie: token={token}
+- content-type: application/json
+- 
+
+### Response
+
+- 200 OK
+- content-type: application/json
+
+```json
+[
+  {
+    "reservationId": 1,
+    "theme": "테마1",
+    "date": "2024-03-01",
+    "time": "10:00",
+    "status": "대기"
+  },
+  {
+    "reservationId": 2,
+    "theme": "테마2",
+    "date": "2024-03-01",
+    "time": "12:00",
+    "status": "대기"
+  },
+  {
+    "reservationId": 3,
+    "theme": "테마3",
+    "date": "2024-03-01",
+    "time": "14:00",
+    "status": "대기"
+  }
+]
+```
+
+---
+
+## 관리자 예약 대기 삭제
+
+### Request
+
+- DELETE admin/reservations/waiting/{id}
+
+### Response
+
+- 204 No Content
+
+---
