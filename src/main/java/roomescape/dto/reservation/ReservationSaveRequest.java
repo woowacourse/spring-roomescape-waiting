@@ -10,6 +10,9 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.theme.ThemeResponse;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 public record ReservationSaveRequest(
         @Nullable
         Long memberId,
@@ -29,6 +32,25 @@ public record ReservationSaveRequest(
         final ReservationTime time = new ReservationTime(timeResponse.id(), timeResponse.startAt());
         final Theme theme = new Theme(themeResponse.id(), themeResponse.name(), themeResponse.description(), themeResponse.thumbnail());
         final ReservationStatus reservationStatus = ReservationStatus.valueOf(status);
+        final LocalDate date = convertToLocalDate(this.date);
+        validateDate(date);
         return new Reservation(member, date, time, theme, reservationStatus);
+    }
+
+    private static LocalDate convertToLocalDate(final String date) {
+        if (date == null || date.isEmpty()) {
+            throw new IllegalArgumentException("예약 날짜가 비어있습니다.");
+        }
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("유효하지 않은 예약 날짜입니다.");
+        }
+    }
+
+    private void validateDate(final LocalDate date) {
+        if (date.isBefore(LocalDate.now()) || date.equals(LocalDate.now())) {
+            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
+        }
     }
 }

@@ -46,14 +46,14 @@ class ReservationRepositoryTest {
         member = memberRepository.save(MEMBER_BROWN());
         reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SIX());
         theme = themeRepository.save(THEME_HORROR());
-        reservation = reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.RESERVED));
+        reservation = reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.RESERVED));
     }
 
     @Test
     @DisplayName("예약을 저장한다.")
     void save() {
         // given
-        final Reservation reservation = new Reservation(member, DATE_MAY_NINTH, reservationTime, theme, ReservationStatus.RESERVED);
+        final Reservation reservation = new Reservation(member, LocalDate.parse(DATE_MAY_NINTH), reservationTime, theme, ReservationStatus.RESERVED);
 
         // when
         final Reservation actual = reservationRepository.save(reservation);
@@ -149,7 +149,7 @@ class ReservationRepositoryTest {
     @DisplayName("특정 사용자의 예약 목록 및 대기 목록을 조회한다.")
     void findByReservationsMemberIdWithRank() {
         final Long memberId = member.getId();
-        reservationRepository.save(new Reservation(member, DATE_MAY_EIGHTH, reservationTime, theme, ReservationStatus.WAITING));
+        reservationRepository.save(new Reservation(member, LocalDate.parse(DATE_MAY_EIGHTH), reservationTime, theme, ReservationStatus.WAITING));
 
         final List<MyReservationWithRankResponse> actual = reservationRepository.findByMemberId(memberId);
 

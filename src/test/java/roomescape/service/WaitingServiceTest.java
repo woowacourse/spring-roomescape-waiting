@@ -11,6 +11,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.repository.ReservationRepository;
 
+import java.time.LocalDate;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -29,7 +31,7 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 거절한다.")
     void rejectReservationWaiting() {
         // given
-        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), DATE_MAY_EIGHTH,
+        final Reservation waiting = new Reservation(1L, TestFixture.MEMBER_MIA(), LocalDate.parse(DATE_MAY_EIGHTH),
                 RESERVATION_TIME_SIX(), THEME_HORROR(), ReservationStatus.WAITING);
         given(reservationRepository.existsById(waiting.getId()))
                 .willReturn(true);

@@ -6,7 +6,6 @@ import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 @Entity
@@ -38,42 +37,19 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(final Member member, final String date, final ReservationTime time,
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme, final ReservationStatus status) {
         this(null, member, date, time, theme, status);
     }
 
-    public Reservation(final Long id, final Member member, final String date,
-                       final ReservationTime time, final Theme theme, final ReservationStatus status) {
-        this(id, member, convertToLocalDate(date), time, theme, status);
-    }
-
     public Reservation(final Long id, final Member member, final LocalDate date,
                        final ReservationTime time, final Theme theme, final ReservationStatus status) {
-        validateDate(date);
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    private static LocalDate convertToLocalDate(final String date) {
-        if (date == null || date.isEmpty()) {
-            throw new IllegalArgumentException("예약 날짜가 비어있습니다.");
-        }
-        try {
-            return LocalDate.parse(date);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("유효하지 않은 예약 날짜입니다.");
-        }
-    }
-
-    private void validateDate(final LocalDate date) {
-        if (date.isBefore(LocalDate.now()) || date.equals(LocalDate.now())) {
-            throw new IllegalArgumentException("이전 날짜 혹은 당일은 예약할 수 없습니다.");
-        }
     }
 
     public boolean hasSameDateTime(final LocalDate date, final ReservationTime time) {
