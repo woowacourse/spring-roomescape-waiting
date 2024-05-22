@@ -18,10 +18,8 @@ import roomescape.service.ReservationService;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
-import roomescape.service.dto.request.UserWaitingRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.WaitingResponse;
 
 
 @RestController
@@ -50,21 +48,6 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @PostMapping("/waiting")
-    public ResponseEntity<WaitingResponse> postReservationWaiting(
-            @RequestBody @Valid UserWaitingRequest userWaitingRequest,
-            @MemberId Long id
-    ) {
-        WaitingResponse waitingResponse = reservationService.createReservationWaiting(userWaitingRequest, id);
-        URI location = UriComponentsBuilder.newInstance()
-                .path("/reservations/waiting/{id}")
-                .buildAndExpand(waitingResponse.id())
-                .toUri();
-
-        return ResponseEntity.created(location)
-                .body(waitingResponse);
-    }
-
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         return ResponseEntity.ok(reservationService.findAllReservations());
@@ -85,13 +68,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.noContent()
-                .build();
-    }
-
-    @DeleteMapping("waiting/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-        reservationService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
     }

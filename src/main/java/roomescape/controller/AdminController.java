@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.response.ReservationResponse;
 import roomescape.service.dto.response.WaitingResponse;
@@ -22,9 +23,11 @@ import roomescape.service.dto.response.WaitingResponse;
 public class AdminController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminController(ReservationService reservationService) {
+    public AdminController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
@@ -43,12 +46,12 @@ public class AdminController {
 
     @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaitings() {
-        return ResponseEntity.ok(reservationService.findAllWaitings());
+        return ResponseEntity.ok(waitingService.findAllWaitings());
     }
 
     @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-        reservationService.deleteWaiting(id);
+        waitingService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
     }

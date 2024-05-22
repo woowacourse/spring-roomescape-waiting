@@ -20,10 +20,8 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.request.UserWaitingRequest;
 import roomescape.service.dto.response.MyReservationResponse;
 import roomescape.service.dto.response.ReservationResponse;
-import roomescape.service.dto.response.WaitingResponse;
 
 @Service
 public class ReservationService {
@@ -59,18 +57,6 @@ public class ReservationService {
         Reservation reservation = reservationRequest.toEntity(member, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
-    }
-
-    public WaitingResponse createReservationWaiting(UserWaitingRequest userWaitingRequest, Long memberId) {
-        Member member = getMember(memberId);
-        ReservationTime reservationTime = getReservationTime(userWaitingRequest.timeId());
-        Theme theme = getTheme(userWaitingRequest.themeId());
-
-        validateIsPastTime(userWaitingRequest.date(), reservationTime);
-
-        Waiting waiting = userWaitingRequest.toEntity(member, reservationTime, theme);
-        Waiting savedReservation = waitingRepository.save(waiting);
-        return WaitingResponse.from(savedReservation);
     }
 
     private void validateIsPastTime(LocalDate date, ReservationTime time) {
@@ -116,13 +102,6 @@ public class ReservationService {
         return reservationResponses;
     }
 
-    public List<WaitingResponse> findAllWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
-        return waitings.stream()
-                .map(WaitingResponse::from)
-                .toList();
-    }
-
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
@@ -136,10 +115,6 @@ public class ReservationService {
         reservationRepository.save(waiting.get().toReservation());
         }
         reservationRepository.deleteById(id);
-    }
-
-    public void deleteWaiting(Long id) {
-        waitingRepository.deleteById(id);
     }
 
     private Theme getTheme(Long id) {
