@@ -26,7 +26,7 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<WaitingResponse> postReservationWaiting(
+    public ResponseEntity<WaitingResponse> postWaiting(
             @RequestBody @Valid WaitingRequest waitingRequest,
             @MemberId Long id
     ) {

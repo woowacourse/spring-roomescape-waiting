@@ -48,7 +48,7 @@ public class WaitingService {
 
         validateIsWaitingInThePast(waitingRequest.date(), reservationTime);
         validateMemberWaitingAlreadyExist(waitingRequest.date(), theme, member);
-        validateMemberReservationAlreadyExist(waitingRequest.date(), reservationTime, theme, member);
+        validateMemberReservationAlreadyExist(waitingRequest.date(), theme, member);
 
         Waiting waiting = waitingRequest.toEntity(member, reservationTime, theme);
         Waiting savedReservation = waitingRepository.save(waiting);
@@ -61,10 +61,9 @@ public class WaitingService {
         }
     }
 
-    private void validateMemberReservationAlreadyExist(LocalDate date, ReservationTime reservationTime, Theme theme,
+    private void validateMemberReservationAlreadyExist(LocalDate date, Theme theme,
                                                        Member member) {
-        if (reservationRepository.existsByTimeAndDateAndThemeAndMember(reservationTime, date, theme,
-                member)) {
+        if (reservationRepository.existsByDateAndThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
     }

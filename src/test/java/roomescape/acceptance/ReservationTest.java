@@ -28,9 +28,14 @@ class ReservationTest extends AcceptanceTest {
                 .contentType(ContentType.JSON)
                 .cookies("token", adminToken)
                 .body(reservationTimeRequest)
-                .post("/times")
-                .then().log().all()
-                .extract();
+                .post("/times");
+
+        ReservationTimeRequest reservationTimeRequest2 = new ReservationTimeRequest(LocalTime.of(10, 10));
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies("token", adminToken)
+                .body(reservationTimeRequest)
+                .post("/times");
 
         ThemeRequest themeRequest = new ThemeRequest("hi", "happy", "abcd.html");
         RestAssured.given().log().all()
@@ -156,8 +161,47 @@ class ReservationTest extends AcceptanceTest {
                 dynamicTest("중복된 예약을 추가한다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
+                            .cookies("token", adminToken)
+                            .body(reservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(400);
+                })
+        );
+    }
+
+    @DisplayName("회원은 동일 날짜에 테마당 하나의 예약 생성 가능하다")
+    @TestFactory
+    Stream<DynamicTest> validateMemberAlreadyReservedThemeOnDate() {
+        Map<String, String> reservationRequest = new HashMap<>();
+        reservationRequest.put("name", "1234567890");
+        reservationRequest.put("date", "2030-12-12");
+        reservationRequest.put("timeId", "1");
+        reservationRequest.put("themeId", "1");
+
+        Map<String, String> reservationRequest2 = new HashMap<>();
+        reservationRequest.put("name", "1234567890");
+        reservationRequest.put("date", "2030-12-12");
+        reservationRequest.put("timeId", "2");
+        reservationRequest.put("themeId", "1");
+
+        return Stream.of(
+                dynamicTest("예약을 추가한다.", () -> {
+
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
                             .cookies("token", userToken)
                             .body(reservationRequest)
+                            .when().post("/reservations")
+                            .then().log().all()
+                            .statusCode(201);
+                }),
+
+                dynamicTest("동일 날짜, 테마의 다른 시간 예약을 시도한다.", () -> {
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .cookies("token", userToken)
+                            .body(reservationRequest2)
                             .when().post("/reservations")
                             .then().log().all()
                             .statusCode(400);
