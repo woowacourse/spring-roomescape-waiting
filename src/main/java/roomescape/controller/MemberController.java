@@ -8,14 +8,17 @@ import roomescape.auth.LoginMemberId;
 import roomescape.service.member.MemberService;
 import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.reservation.ReservationService;
 
 @RestController
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
+    private final ReservationService reservationService;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, ReservationService reservationService) {
         this.memberService = memberService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping
@@ -25,6 +28,6 @@ public class MemberController {
 
     @GetMapping("/reservations")
     public List<MemberReservationResponse> findReservations(@LoginMemberId long memberId) {
-        return memberService.findReservations(memberId);  // TODO: reservationService 로 옮기기
+        return reservationService.findReservationsOf(memberId);
     }
 }

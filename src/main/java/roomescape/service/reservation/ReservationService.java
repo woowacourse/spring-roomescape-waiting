@@ -3,12 +3,14 @@ package roomescape.service.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWaitingRepository;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -18,6 +20,7 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidMemberException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
@@ -29,17 +32,19 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
-    ) {
+            MemberRepository memberRepository,
+            ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public ReservationResponse create(AdminReservationRequest adminReservationRequest) {
@@ -124,5 +129,15 @@ public class ReservationService {
         ReservationDate dateTo = ReservationDate.of(reservationFilterRequest.dateTo());
         return reservationRepository.findBy(reservationFilterRequest.memberId(), reservationFilterRequest.themeId(),
                 dateFrom, dateTo).stream().map(ReservationResponse::new).toList();
+    }
+
+    public List<MemberReservationResponse> findReservationsOf(long memberId) {
+        Stream<MemberReservationResponse> reservations = reservationRepository.findByMemberId(memberId).stream()
+                .map(MemberReservationResponse::from);
+        Stream<MemberReservationResponse> waitings = reservationWaitingRepository.findWithRankByMemberId(memberId)
+                .stream()
+                .map(MemberReservationResponse::from);
+
+        return Stream.concat(reservations, waitings).toList();
     }
 }

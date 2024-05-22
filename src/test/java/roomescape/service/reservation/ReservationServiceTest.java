@@ -19,6 +19,8 @@ import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWaiting;
+import roomescape.domain.reservation.ReservationWaitingRepository;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;
@@ -26,6 +28,7 @@ import roomescape.domain.schedule.Schedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InvalidReservationException;
+import roomescape.service.member.dto.MemberReservationResponse;
 import roomescape.service.reservation.dto.AdminReservationRequest;
 import roomescape.service.reservation.dto.ReservationFilterRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
@@ -46,6 +49,8 @@ class ReservationServiceTest {
     private ReservationTime reservationTime;
     private Theme theme;
     private Member member;
+    @Autowired
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -53,7 +58,6 @@ class ReservationServiceTest {
         theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.MEMBER));
-
     }
 
     @DisplayName("새로운 예약을 저장한다.")
@@ -123,6 +127,29 @@ class ReservationServiceTest {
 
         //then
         assertThat(reservations).isEmpty();
+    }
+
+    @DisplayName("id로 사용자의 예약과 예약 대기 목록을 조회한다.")
+    @Test
+    void findReservationsOf() {
+        // given
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
+        Theme theme = themeRepository.save(
+                new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                        "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg")
+        );
+        Member member = memberRepository.save(new Member("pedro", "pedro@email.com", "pedro123", Role.MEMBER));
+        Schedule schedule = new Schedule(ReservationDate.of(LocalDate.now()), reservationTime);
+        reservationRepository.save(
+                new Reservation(member, schedule, theme, ReservationStatus.RESERVED)
+        );
+        reservationWaitingRepository.save(new ReservationWaiting(member, theme, schedule));
+
+        // when
+        List<MemberReservationResponse> reservations = reservationService.findReservationsOf(4L);
+
+        // then
+        assertThat(reservations).hasSize(2);
     }
 
     @DisplayName("id로 예약을 삭제한다.")
