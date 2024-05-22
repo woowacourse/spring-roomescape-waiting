@@ -17,7 +17,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 
-@Service
+@Service // TODO 분리 필요
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;

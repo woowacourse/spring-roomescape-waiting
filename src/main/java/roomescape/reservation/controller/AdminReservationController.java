@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 import java.net.URI;
 import java.util.List;
@@ -18,9 +19,11 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping()
@@ -39,7 +42,6 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public List<ReservationResponse> waiting() {
-
-        return null;
+        return waitingReservationService.findAllByWaitingReservation();
     }
 }

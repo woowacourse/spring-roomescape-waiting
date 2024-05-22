@@ -41,5 +41,7 @@ VALUES (DATEADD('MONTH', 1, CURRENT_DATE()), 3, 2);
 -- -- 예약 목록 추가
 INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
 VALUES (1, 1, CURRENT_TIME(), 'BOOKED');
+INSERT INTO member_reservation(member_id, reservation_id, created_time, status)
+VALUES (2, 1, DATEADD('HOUR', 1, CURRENT_TIME()), 'WAITING');
 
 SET REFERENTIAL_INTEGRITY TRUE;

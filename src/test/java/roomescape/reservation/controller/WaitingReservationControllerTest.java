@@ -68,7 +68,7 @@ class WaitingReservationControllerTest extends ControllerTest {
                 bookedReservation.getTheme().getId()
         );
 
-        //when & then
+//        when & then
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)

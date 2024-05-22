@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.MyReservationWithStatus;
+import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.domain.MemberReservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 
 import java.util.List;
@@ -37,5 +40,12 @@ public class WaitingReservationService {
             );
         }
         return MyReservationResponse.from(myReservationWithStatus);
+    }
+
+    public List<ReservationResponse> findAllByWaitingReservation() { // TODO 어드민만 호출할 수 있는 메서드를 분리하지 않아도 될까??
+        List<MemberReservation> memberReservations = memberReservationRepository.findAllByStatus(ReservationStatus.WAITING);
+        return memberReservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 }

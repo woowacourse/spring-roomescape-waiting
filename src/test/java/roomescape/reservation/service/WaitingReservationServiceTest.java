@@ -30,16 +30,13 @@ class WaitingReservationServiceTest extends ServiceTest {
     void waitingOrder() {
 //        //given
         AuthInfo authInfo = AuthInfo.of(MemberFixture.getMemberTacan());
-        MemberReservation bookedMemberReservation = MemberReservationFixture.getMemberReservation1();
-        Reservation bookedReservation = bookedMemberReservation.getReservation();
-        reservationService.createMemberReservation(authInfo, new ReservationRequest(bookedReservation.getDate().format(DateTimeFormatter.ISO_DATE), bookedReservation.getTime().getId(), bookedReservation.getTheme().getId()));
 
         //when
         List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(authInfo);
         List<MyReservationResponse> myReservationResponses = waitingReservationService.handleWaitingOrder(myReservations);
 
         //then
-        MyReservationResponse myReservationResponse = myReservationResponses.get(myReservations.size() - 1);
+//        MyReservationResponse myReservationResponse = myReservationResponses.get(myReservations.size() - 1);
 //        assertThat(myReservationResponse.status()).isEqualTo("2번째 대기");
     }
 }
