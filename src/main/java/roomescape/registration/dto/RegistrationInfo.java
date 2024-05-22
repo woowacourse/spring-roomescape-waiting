@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.registration.reservation.domain.Reservation;
 import roomescape.registration.reservation.domain.ReservationStatus;
+import roomescape.registration.reservation.dto.ReservationResponse;
 import roomescape.registration.waiting.Waiting;
 import roomescape.registration.waiting.WaitingWithRank;
 
-/** todo: 상태를 어디서 지정할까?
+/**
+ * todo: 상태를 어디서 지정할까?
  * 현재 Reservation과 Waiting은 분리되어 있다.
  * 그리고 status는 Reservation에 없다.
  * status 계산은 예약자가 자신의 정보를 볼 때만 사용한다.(추가로 4단계 - 예약 대기 관리에서 사용)
@@ -17,7 +19,7 @@ import roomescape.registration.waiting.WaitingWithRank;
  **/
 public record RegistrationInfo(long id, String themeName, LocalDate date, LocalTime time, String status) {
 
-    // todo: 예약은 무조건 status가 RESERVED라 여기서 부여해 주는데 dto에서 값을 부여해도 괜찮을까?
+    // todo: 삭제하기
     public static RegistrationInfo from(Reservation reservation) {
         return new RegistrationInfo(reservation.getId(), reservation.getTheme().getName(),
                 reservation.getDate(), reservation.getReservationTime().getStartAt(),
@@ -36,4 +38,11 @@ public record RegistrationInfo(long id, String themeName, LocalDate date, LocalT
         );
     }
 
+    // todo: 예약은 무조건 status가 RESERVED라 여기서 부여해 주는데 dto에서 값을 부여해도 괜찮을까?
+    public static RegistrationInfo from(ReservationResponse reservationResponse) {
+        return new RegistrationInfo(reservationResponse.id(), reservationResponse.themeName(),
+                reservationResponse.date(), reservationResponse.startAt(),
+                ReservationStatus.RESERVED.getStatus()
+        );
+    }
 }
