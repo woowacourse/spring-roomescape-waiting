@@ -119,12 +119,11 @@ class ReservationAcceptanceTest extends AcceptanceTest {
 
     @Test
     @DisplayName("관리자가 예약 목록을 조회한다.")
-    void readWaiting() {
+    void adminReadWaiting() {
         RestAssured.given().log().all()
                 .cookie("token", fixture.getAdminToken())
                 .when().get("admin/reservations/waiting")
                 .then().log().all()
                 .statusCode(200);
     }
-
 }
