@@ -49,10 +49,17 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(reservationRequest.timeId());
         Theme theme = getTheme(reservationRequest.themeId());
 
-        if (reservationRepository.existsByTimeAndDateAndMember(reservationTime, reservationRequest.date(), member)) {
+        // 해당 시간에 이미 예약이 존재시 불가능
+        if (reservationRepository.existsByDateAndTimeAndTheme(reservationRequest.date(), reservationTime, theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
         }
+        // 과거 시간 예약 불가능
         validateIsPastTime(reservationRequest.date(), reservationTime);
+
+        // 해당 회원이 해당 날짜, 테마에 예약이 존재시 다른 예약 시간으로 예약 불가능
+        if (reservationRepository.existsByDateAndThemeAndMember(reservationRequest.date(), theme, member)) {
+            throw new CustomException(ExceptionCode.DUPLICATE_RESERVATION);
+        }
 
         Reservation reservation = reservationRequest.toEntity(member, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
