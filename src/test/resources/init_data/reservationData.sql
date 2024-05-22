@@ -1,9 +1,29 @@
+SET
+REFERENTIAL_INTEGRITY FALSE;
+TRUNCATE TABLE reservation;
+ALTER TABLE reservation
+    ALTER COLUMN id RESTART;
+TRUNCATE TABLE reservation_time;
+ALTER TABLE reservation_time
+    ALTER COLUMN id RESTART;
+TRUNCATE TABLE member;
+ALTER TABLE member
+    ALTER COLUMN id RESTART;
+TRUNCATE TABLE theme;
+ALTER TABLE theme
+    ALTER COLUMN id RESTART;
+SET
+REFERENTIAL_INTEGRITY TRUE;
+
 INSERT INTO member (name, email, password, role)
 VALUES ('a1', 'a1@email.com', 'a1', 'ADMIN'),
        ('a2', 'a2@email.com', 'a2', 'ADMIN'),
        ('a3', 'a3@email.com', 'a3', 'ADMIN'),
        ('a4', 'a4@email.com', 'a4', 'ADMIN'),
-       ('a5', 'a5@email.com', 'a5', 'ADMIN');
+       ('a5', 'a5@email.com', 'a5', 'ADMIN'),
+       ('admin', 'admin@email.com', 'password', 'ADMIN'),
+       ('asd', 'asd@email.com', 'password', 'USER'),
+       ('qwe', 'qwe@email.com', 'password', 'USER');
 
 
 INSERT INTO reservation_time (start_at)
@@ -22,18 +42,30 @@ VALUES ('10:00:00'),
 
 
 INSERT INTO theme (name, description, thumbnail)
-VALUES ('hi1', 'happy1', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi2', 'happy2', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi3', 'happy3', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi4', 'happy4', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi5', 'happy5', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi6', 'happy6', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi7', 'happy7', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi8', 'happy8', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi9', 'happy9', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi10', 'happy10', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi11', 'happy11', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
-       ('hi12', 'happy12', 'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg');
+VALUES ('hi1', 'happy1',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi2', 'happy2',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi3', 'happy3',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi4', 'happy4',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi5', 'happy5',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi6', 'happy6',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi7', 'happy7',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi8', 'happy8',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi9', 'happy9',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi10', 'happy10',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi11', 'happy11',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg'),
+       ('hi12', 'happy12',
+        'https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FsYpXc%2FbtqDhvJwpgl%2FHdOH4fsVgyK5kazXCbmiz0%2Fimg.jpg');
 
 
 INSERT INTO reservation (date, member_id, time_id, theme_id)
@@ -122,3 +154,4 @@ VALUES ('2024-04-25', 1, 1, 1),
        ('2024-04-25', 3, 1, 1),
        ('2024-04-25', 4, 1, 1),
        ('2024-04-25', 5, 1, 1);
+
