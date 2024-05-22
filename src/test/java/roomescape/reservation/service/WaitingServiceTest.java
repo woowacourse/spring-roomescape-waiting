@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
-import static roomescape.InitialMemberFixture.MEMBER_3;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 import static roomescape.InitialReservationFixture.NO_RESERVATION_DATE;
 import static roomescape.InitialReservationFixture.RESERVATION_1;

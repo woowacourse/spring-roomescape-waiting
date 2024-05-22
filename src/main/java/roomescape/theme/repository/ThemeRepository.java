@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.query.Param;
 import roomescape.exceptions.NotFoundException;
 import roomescape.theme.domain.Name;
 import roomescape.theme.domain.Theme;

@@ -1,10 +1,10 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.MEMBER_3;
-import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
 
 import java.util.ArrayList;
