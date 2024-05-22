@@ -38,7 +38,7 @@ class MemberIntegrationTest extends IntegrationTest {
         RestAssured.given().log().all()
                 .cookie(cookie.toString())
                 .contentType(ContentType.JSON)
-                .when().get("/member/reservations")
+                .when().get("/member/registrations")
                 .then()
                 .statusCode(200)
                 .contentType(ContentType.JSON)
