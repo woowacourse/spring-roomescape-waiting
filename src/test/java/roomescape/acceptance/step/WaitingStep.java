@@ -38,4 +38,11 @@ public class WaitingStep {
                 .then().assertThat().statusCode(201).extract().as(ReservationResponse.class);
         //@formatter:on
     }
+    public static void 운영자가_대기_취소(final String token,final long waitingId){
+        //@formatter:off
+        RestAssured.given().cookie(token).contentType(ContentType.JSON)
+                .when().delete("/admin/waiting/"+waitingId)
+                .then().assertThat().statusCode(204);
+        //@formatter:on
+    }
 }

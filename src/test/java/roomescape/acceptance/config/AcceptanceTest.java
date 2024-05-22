@@ -9,7 +9,7 @@ import roomescape.RoomescapeApplication;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@Sql(value = "/clear.sql", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value = {"/clear.sql","/context.sql"}, executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,classes = RoomescapeApplication.class)
 @TestExecutionListeners(

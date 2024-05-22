@@ -53,4 +53,7 @@ public class MemberStep {
                 .when().get("/reservations/mine")
                 .then().assertThat().statusCode(200).extract().as(MemberReservationsResponse.class);
     }
+    public static String 어드민_로그인(){
+        return 로그인(new MemberCreateResponse(1, "admin@email.com","어드민","adminpassword"));
+    }
 }
