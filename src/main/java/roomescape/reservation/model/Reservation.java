@@ -4,7 +4,6 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,13 +19,13 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private ReservationTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Theme theme;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Member member;
 
     @Enumerated(EnumType.STRING)
