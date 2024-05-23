@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.response.MemberReservationResponse;
 import roomescape.exception.NotFoundException;
 import roomescape.model.*;
@@ -24,6 +25,7 @@ public class ReservationWaitingService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> getAllMemberReservationsAndWaiting(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() ->
                 new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(memberId)));;
@@ -40,6 +42,7 @@ public class ReservationWaitingService {
         return allMemberReservations;
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("해당 id:[%s] 값으로 예약된 내역이 존재하지 않습니다.".formatted(id)));

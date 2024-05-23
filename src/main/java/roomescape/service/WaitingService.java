@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.request.WaitingRequest;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
@@ -10,7 +11,6 @@ import roomescape.repository.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -32,6 +32,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public Waiting addWaiting(WaitingRequest request, Member member) {
         ReservationTime reservationTime = findReservationTime(request.date(), request.timeId());
         Theme theme = themeRepository.findById(request.themeId())
@@ -58,6 +59,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public boolean existsWaiting(Theme theme, LocalDate date, ReservationTime time) {
         return waitingRepository.existsWaitingByThemeAndDateAndTime(theme, date, time);
     }
@@ -69,6 +71,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void deleteWaiting(long id) {
         validateExistWaiting(id);
         waitingRepository.deleteById(id);
@@ -81,6 +84,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWithRank> findMemberWaiting(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
@@ -88,10 +92,12 @@ public class WaitingService {
         return waitingRepository.findWaitingWithRankByMemberId(member.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAllWaiting() {
         return waitingRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Waiting findFirstWaitingByCondition(Theme theme, LocalDate date, ReservationTime time) {
         return waitingRepository.findFirstByThemeAndDateAndTime(theme, date, time)
                 .orElseThrow(() ->

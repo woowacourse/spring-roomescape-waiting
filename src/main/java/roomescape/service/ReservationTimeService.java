@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.request.ReservationTimeRequest;
 import roomescape.controller.response.IsReservedTimeResponse;
 import roomescape.exception.BadRequestException;
@@ -29,10 +30,12 @@ public class ReservationTimeService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<ReservationTime> findAllReservationTimes() {
         return reservationTimeRepository.findAll();
     }
 
+    @Transactional
     public ReservationTime addReservationTime(ReservationTimeRequest request) {
         LocalTime startAt = request.startAt();
         validateExistTime(startAt);
@@ -47,11 +50,13 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime findReservationTime(long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("아이디가 %s인 예약 시간이 존재하지 않습니다.".formatted(id)));
     }
 
+    @Transactional(readOnly = true)
     public List<IsReservedTimeResponse> getIsReservedTime(LocalDate date, long themeId) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         List<ReservationTime> bookedTimes = reservationTimeRepository.findAllReservedTimes(date, themeId);
@@ -61,6 +66,7 @@ public class ReservationTimeService {
         return concat(notBookedResponse, bookedResponse);
     }
 
+    @Transactional
     public void deleteReservationTime(long id) {
         validateNotExistReservationTime(id);
         validateReservedTime(id);
