@@ -83,7 +83,7 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/reservations/wait/{id}")
     public ResponseEntity<Void> removeReservationWait(@PathVariable("id") Long id) {
         reservationService.removeReservationWait(id);
         return ResponseEntity.noContent().build();

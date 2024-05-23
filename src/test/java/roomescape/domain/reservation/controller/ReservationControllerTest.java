@@ -117,7 +117,7 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void should_response_internal_server_error_when_delete_reservation() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/wait/20")
+                .when().delete("/reservations/wait/1")
                 .then().log().all()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
