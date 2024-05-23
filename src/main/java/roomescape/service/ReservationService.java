@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.Status;
+import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -62,9 +62,15 @@ public class ReservationService {
     }
 
     public ListResponse<ReservationResponse> findAll() {
-        List<ReservationResponse> responses = reservationRepository.findAll()
-                .stream()
-                .filter(r -> r.getStatus() == Status.CONFIRMED)
+        List<ReservationResponse> responses = findAllByStatus(Status.CONFIRMED).stream()
+                .map(ReservationResponse::from)
+                .toList();
+
+        return new ListResponse<>(responses);
+    }
+
+    public ListResponse<ReservationResponse> findAllWaiting() {
+        List<ReservationResponse> responses = findAllByStatus(Status.WAITING).stream()
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -98,6 +104,14 @@ public class ReservationService {
 
     public void deleteById(Long id) {
         reservationRepository.deleteById(id);
+    }
+
+    private List<Reservation> findAllByStatus(Status status) {
+        Specification<Reservation> spec = new ReservationSearchSpecification()
+                .status(status)
+                .build();
+
+        return reservationRepository.findAll(spec);
     }
 
     private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {
@@ -165,4 +179,5 @@ public class ReservationService {
             throw new BadRequestException("종료 날짜가 시작 날짜 이전일 수 없습니다.");
         }
     }
+
 }

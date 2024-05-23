@@ -49,4 +49,9 @@ public class AdminReservationController {
         reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<ListResponse<ReservationResponse>> findAllWaiting() {
+        return ResponseEntity.ok().body(reservationService.findAllWaiting());
+    }
 }

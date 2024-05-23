@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.Reservation;
+import roomescape.domain.Status;
 
 public class ReservationSearchSpecification {
 
@@ -40,6 +41,14 @@ public class ReservationSearchSpecification {
         if (toDate != null) {
             this.spec = this.spec.and(
                     (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), toDate));
+        }
+        return this;
+    }
+
+    public ReservationSearchSpecification status(Status status) {
+        if (status != null) {
+            this.spec = this.spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
         return this;
     }
