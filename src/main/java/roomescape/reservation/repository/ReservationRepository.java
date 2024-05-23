@@ -37,11 +37,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
-            LocalDate dateTo
+            LocalDate dateTo,
+            Status status
     );
 
     List<Reservation> findAllByStatus(Status status);

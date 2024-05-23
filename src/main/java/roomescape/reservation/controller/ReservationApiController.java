@@ -47,11 +47,19 @@ public class ReservationApiController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/reservations/search")
-    public ResponseEntity<ResourcesResponse<ReservationResponse>> findAllBySearchCond(
-            @Valid @ModelAttribute ReservationSearchCondRequest reservationSearchCondRequest
+    @GetMapping("/reservations/success")
+    public ResponseEntity<ResourcesResponse<ReservationResponse>> findSuccessReservations() {
+        List<ReservationResponse> reservations = reservationService.findSuccessReservations();
+        ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reservations/success/search")
+    public ResponseEntity<ResourcesResponse<ReservationResponse>> findSuccessReservationsBySearchCond(
+            @Valid @ModelAttribute ReservationSearchCondRequest searchCondRequest
     ) {
-        List<ReservationResponse> reservations = reservationService.findAllBySearchCond(reservationSearchCondRequest);
+        List<ReservationResponse> reservations = reservationService.findSuccessReservationsBySearchCond(searchCondRequest);
         ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
 
         return ResponseEntity.ok(response);

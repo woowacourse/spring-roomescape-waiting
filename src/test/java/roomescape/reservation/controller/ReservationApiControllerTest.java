@@ -27,7 +27,7 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
                 .when()
-                .get("/reservations")
+                .get("/reservations/success")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
@@ -46,7 +46,7 @@ class ReservationApiControllerTest extends IntegrationTest {
 
     @DisplayName("테마 아이디, 회원 아이디, 기간 조건 조회에 성공하면 200 응답을 받는다.")
     @Test
-    void findAllBySearchCond() {
+    void findSuccessReservationsBySearchCond() {
         saveAdminMember();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
@@ -62,7 +62,7 @@ class ReservationApiControllerTest extends IntegrationTest {
                 .log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .when()
-                .get("/reservations/search")
+                .get("/reservations/success/search")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)

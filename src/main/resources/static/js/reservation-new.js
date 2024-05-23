@@ -8,7 +8,7 @@ const themesOptions = [];
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(RESERVATION_API_ENDPOINT + '/success')
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 

@@ -254,11 +254,12 @@ class ReservationRepositoryTest {
                 tomorrow
         );
 
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
                 request.themeId(),
                 request.memberId(),
                 request.dateFrom(),
-                request.dateTo()
+                request.dateTo(),
+                Status.SUCCESS
         );
 
         assertThat(reservations).hasSize(1);

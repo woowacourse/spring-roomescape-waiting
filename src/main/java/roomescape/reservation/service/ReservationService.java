@@ -53,6 +53,7 @@ public class ReservationService {
         return saveReservation(reservation);
     }
 
+    @Transactional
     public ReservationResponse saveByAdmin(AdminReservationSaveRequest adminRequest, Status status) {
         ReservationSaveRequest saveRequest = new ReservationSaveRequest(
                 adminRequest.date(),
@@ -139,10 +140,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findReservationWithRanksByMemberId(loginMember.id())
+    public List<ReservationResponse> findSuccessReservations() {
+        return reservationRepository.findAllByStatus(Status.SUCCESS)
                 .stream()
-                .map(MemberReservationResponse::toResponse)
+                .map(ReservationResponse::toResponse)
                 .toList();
     }
 
@@ -153,12 +154,20 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
+        return reservationRepository.findReservationWithRanksByMemberId(loginMember.id())
+                .stream()
+                .map(MemberReservationResponse::toResponse)
+                .toList();
+    }
+
+    public List<ReservationResponse> findSuccessReservationsBySearchCond(ReservationSearchCondRequest request) {
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
                         request.themeId(),
                         request.memberId(),
                         request.dateFrom(),
-                        request.dateTo()
+                        request.dateTo(),
+                        Status.SUCCESS
                 ).stream()
                 .map(ReservationResponse::toResponse)
                 .toList();

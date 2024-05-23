@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(RESERVATION_API_ENDPOINT + '/success')
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -200,7 +200,7 @@ function applyFilter(event) {
     'dateTo': dateTo,
   });
 
-  fetch(`/reservations/search?${queryParams.toString()}`, {
+  fetch(`/reservations/success/search?${queryParams.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
