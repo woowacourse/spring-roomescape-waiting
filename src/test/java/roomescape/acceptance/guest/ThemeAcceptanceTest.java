@@ -13,11 +13,6 @@ import roomescape.dto.response.ThemeResponse;
 
 class ThemeAcceptanceTest extends BaseAcceptanceTest {
 
-    /*
-    @Mock
-    MemberService memberService;
-    * */
-
     @DisplayName("테마 목록을 조회한다.")
     @Test
     void getThemes_success() {
@@ -42,10 +37,5 @@ class ThemeAcceptanceTest extends BaseAcceptanceTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().as(ThemesFormat);
-        // todo: from 과 to 의 시간을 받아서 갯수 조절할 수 있게 하기 - 시간 때문에 테스트 코드 안돌아감..
-/*        assertThat(response).containsExactly(
-                ThemeResponse.from(preInsertedTheme2),
-                ThemeResponse.from(preInsertedTheme1)
-        );*/
     }
 }

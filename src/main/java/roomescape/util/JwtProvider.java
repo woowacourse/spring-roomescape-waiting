@@ -16,8 +16,6 @@ import roomescape.domain.Member;
 @Component
 public class JwtProvider {
 
-    private static final String ROLE_CLAIM_KEY = "role";
-
     @Value("${jwt.secret-key}")
     private String secretKey;
 
