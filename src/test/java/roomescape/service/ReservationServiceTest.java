@@ -120,7 +120,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("자신의 예약이 아니고 관리자가 아닌 경우 지울 수 없는지 확인")
-    void delete() {
+    void cancelFailWhenPermission() {
         initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
@@ -130,21 +130,21 @@ class ReservationServiceTest {
                 DEFAULT_ADMIN.getId(), DEFAULT_TIME.getId(), DEFAULT_THEME.getId());
         ReservationResponse saved = reservationService.save(reservationRequestFromAdmin);
 
-        Assertions.assertThatThrownBy(() -> reservationService.delete(DEFAULT_MEMBER.getId(), saved.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(DEFAULT_MEMBER.getId(), saved.id()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ExceptionType.PERMISSION_DENIED.getMessage());
     }
 
     @Test
     @DisplayName("관리자는 다른 사람의 예약도 삭제할 수 있는지 확인")
-    void deleteSuccessWhenAdmin() {
+    void cancelSuccessWhenAdmin() {
         initServiceWithMember();
         reservationTimeRepository.save(DEFAULT_TIME);
         themeRepository.save(DEFAULT_THEME);
 
         ReservationResponse saved = reservationService.save(ReservationFixture.DEFAULT_REQUEST);
 
-        assertDoesNotThrow(() -> reservationService.delete(DEFAULT_ADMIN.getId(), saved.id()));
+        assertDoesNotThrow(() -> reservationService.cancel(DEFAULT_ADMIN.getId(), saved.id()));
     }
 
     @Test
@@ -157,7 +157,7 @@ class ReservationServiceTest {
         ReservationResponse saved = reservationService.save(ReservationFixture.DEFAULT_REQUEST);
         waitingRepository.save(ReservationWaitingFixture.DEFAULT_WAITING);
 
-        reservationService.delete(DEFAULT_ADMIN.getId(), saved.id());
+        reservationService.cancel(DEFAULT_ADMIN.getId(), saved.id());
 
         boolean reservationMemberIsAdmin = reservationRepository.findById(saved.id())
                 .orElseThrow()

@@ -69,8 +69,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public void delete(long requestMemberId, long reservationId) {
-        if (!canDelete(requestMemberId, reservationId)) {
+    public void cancel(long requestMemberId, long reservationId) {
+        if (!canCancel(requestMemberId, reservationId)) {
             throw new RoomescapeException(PERMISSION_DENIED);
         }
 
@@ -82,7 +82,7 @@ public class ReservationService {
                         () -> deleteReservation(reservationId));
     }
 
-    private boolean canDelete(long requestMemberId, long reservationId) {
+    private boolean canCancel(long requestMemberId, long reservationId) {
         Member requestMember = memberFinder.findById(requestMemberId);
         if (requestMember.isAdmin()) {
             return true;
