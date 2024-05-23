@@ -57,14 +57,13 @@ public class MemberReservation {
 
     public void increaseOrder() {
         this.order = order.increase();
+        if (isPossibleReserve()) {
+            changeStatusToReserve();
+        }
     }
 
-    public boolean isReserveOrder() {
-        return order.isReserveOrder();
-    }
-
-    public boolean isFirstWaitingOrder() {
-        return order.isFirstWaitingOrder();
+    public boolean isPossibleReserve() {
+        return order.isReservationPossibleOrder();
     }
 
     public boolean isReserved() {

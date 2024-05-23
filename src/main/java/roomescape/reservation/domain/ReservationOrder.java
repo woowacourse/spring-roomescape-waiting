@@ -31,7 +31,7 @@ public record ReservationOrder(Long reservationOrder) {
         return new ReservationOrder(reservationOrder - 1);
     }
 
-    public boolean isReserveOrder() {
+    public boolean isReservationPossibleOrder() {
         return reservationOrder == 0;
     }
 

@@ -116,9 +116,6 @@ public class ReservationService {
                 reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
         for (MemberReservation waitingReservation : waitingReservations) {
             waitingReservation.increaseOrder();
-            if (waitingReservation.isReserveOrder()) {
-                waitingReservation.changeStatusToReserve();
-            }
         }
     }
 
