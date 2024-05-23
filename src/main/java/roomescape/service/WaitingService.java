@@ -33,7 +33,7 @@ public class WaitingService {
 
     public Long addWaiting(WaitingRequest waitingRequest) {
         Member member = findMember(waitingRequest.memberId());
-        Reservation reservation = findReservation(waitingRequest.reservationId());
+        Reservation reservation = findReservation(waitingRequest);
         validateReservationOwner(member, reservation);
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
 
@@ -52,19 +52,19 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    private Reservation findReservation(WaitingRequest waitingRequest) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(
+                waitingRequest.date(),
+                waitingRequest.timeId(),
+                waitingRequest.themeId()
+        ).orElseThrow(() -> new IllegalArgumentException("[ERROR] 존재하지 않는 예약입니다."));
+    }
+
     private Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "[ERROR] 잘못된 사용자 정보 입니다.",
                         new Throwable("member_id : " + memberId)
-                ));
-    }
-
-    private Reservation findReservation(Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "[ERROR] 잘못된 예약 정보 입니다.",
-                        new Throwable("reservation_id : " + reservationId)
                 ));
     }
 

@@ -20,7 +20,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.UserReservationRequest;
-import roomescape.dto.waiting.WaitingWebRequest;
+import roomescape.dto.waiting.UserWaitingRequest;
 import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/reservation-api-test-data.sql")
@@ -61,7 +61,7 @@ class ReservationApiTest {
     @Test
     void 관리자_예약_추가() {
         Cookie cookieByAdminLogin = getCookieByLogin(port, "admin@email.com", "123456");
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
 
         RestAssured.given().log().all()
                 .port(port)
@@ -81,7 +81,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_단일_조회() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -98,7 +98,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_전체_조회() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -111,8 +111,8 @@ class ReservationApiTest {
 
     @Test
     void 사용자_예약_전체_조회() {
-        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L);
-        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L);
+        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L, 1L);
+        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L, 1L);
         addReservation(otherUserReservationRequest);
         addReservation(userReservationRequest);
 
@@ -129,9 +129,9 @@ class ReservationApiTest {
 
     @Test
     void 사용자_예약_및_예약_대기_전체_조회() {
-        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L);
-        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L);
-        WaitingWebRequest userWaitingRequest = createWaitingRequest(1L);
+        ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L, 1L);
+        ReservationRequest userReservationRequest = createReservationRequest(3L, 2L, 1L);
+        UserWaitingRequest userWaitingRequest = createUserWaitingRequest(1L, 1L);
 
         addReservation(otherUserReservationRequest);
         addReservation(userReservationRequest);
@@ -163,7 +163,7 @@ class ReservationApiTest {
 
     @Test
     void 예약_삭제() {
-        ReservationRequest reservationRequest = createReservationRequest(2L, 1L);
+        ReservationRequest reservationRequest = createReservationRequest(2L, 1L, 1L);
         addReservation(reservationRequest);
 
         RestAssured.given().log().all()
@@ -177,12 +177,12 @@ class ReservationApiTest {
         return new UserReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
     }
 
-    private ReservationRequest createReservationRequest(Long memberId, Long timeId) {
-        return new ReservationRequest(LocalDate.now().plusDays(1), timeId, 1L, memberId);
+    private ReservationRequest createReservationRequest(Long memberId, Long timeId, Long themeId) {
+        return new ReservationRequest(LocalDate.now().plusDays(1), timeId, themeId, memberId);
     }
 
-    private WaitingWebRequest createWaitingRequest(Long reservationId) {
-        return new WaitingWebRequest(reservationId);
+    private UserWaitingRequest createUserWaitingRequest(Long timeId, Long themeId) {
+        return new UserWaitingRequest(LocalDate.now().plusDays(1), timeId, themeId);
     }
 
     private void addReservation(ReservationRequest reservationRequest) {
@@ -196,7 +196,7 @@ class ReservationApiTest {
                 .when().post("/admin/reservations");
     }
 
-    private void addWaiting(WaitingWebRequest waitingRequest) {
+    private void addWaiting(UserWaitingRequest waitingRequest) {
         Cookie cookieByUserLogin = getCookieByLogin(port, "atom@email.com", "123456");
 
         RestAssured.given().log().all()

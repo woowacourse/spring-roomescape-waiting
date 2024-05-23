@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.login.LoginMember;
-import roomescape.dto.waiting.WaitingWebRequest;
+import roomescape.dto.waiting.UserWaitingRequest;
+import roomescape.dto.waiting.WaitingRequest;
 import roomescape.service.WaitingService;
 
 @RestController
@@ -23,9 +24,8 @@ class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addWaiting(@RequestBody WaitingWebRequest waitingWebRequest, LoginMember loginMember) {
-        Long savedId = waitingService.addWaiting(waitingWebRequest.toServiceRequest(loginMember.id()));
-
+    public ResponseEntity<Void> addWaiting(@RequestBody UserWaitingRequest userWaitingRequest, LoginMember loginMember) {
+        Long savedId = waitingService.addWaiting(WaitingRequest.from(userWaitingRequest, loginMember.id()));
         return ResponseEntity.created(URI.create("/waitings/" + savedId)).build();
     }
 

@@ -16,6 +16,20 @@ interface SpringDataJpaReservationRepository extends JpaRepository<Reservation, 
     Optional<Reservation> findById(Long id);
 
     @Query("""
+               SELECT r
+               FROM Reservation r
+               JOIN FETCH r.member
+               JOIN FETCH r.theme
+               JOIN FETCH r.time
+               WHERE
+                   r.date = :date AND
+                   r.time.id = :timeId AND
+                   r.theme.id = :themeId
+            """
+    )
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
               SELECT r.theme.id
               FROM Reservation r
               WHERE r.date BETWEEN :startDate AND :endDate

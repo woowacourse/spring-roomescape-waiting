@@ -2,6 +2,7 @@ package roomescape.api;
 
 import static roomescape.LoginTestSetting.getCookieByLogin;
 
+import java.time.LocalDate;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.dto.waiting.WaitingWebRequest;
+import roomescape.dto.waiting.UserWaitingRequest;
 import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/waiting-api-test-data.sql")
@@ -29,7 +30,7 @@ class WaitingApiTest {
     @Test
     void 예약_대기_추가() {
         Cookie cookieByUserLogin = getCookieByLogin(port, "test1@email.com", "123456");
-        WaitingWebRequest waitingRequest = new WaitingWebRequest(1L);
+        UserWaitingRequest waitingRequest = createUserWaitingRequest(1L, 1L);
 
         RestAssured.given().log().all()
                 .port(port)
@@ -45,7 +46,7 @@ class WaitingApiTest {
     @Test
     void 예약_대기_취소() {
         Cookie cookieByUserLogin = getCookieByLogin(port, "test1@email.com", "123456");
-        WaitingWebRequest waitingRequest = new WaitingWebRequest(1L);
+        UserWaitingRequest waitingRequest = createUserWaitingRequest(1L, 1L);
         addWaiting(waitingRequest);
 
         RestAssured.given().log().all()
@@ -57,7 +58,11 @@ class WaitingApiTest {
                 .statusCode(204);
     }
 
-    private void addWaiting(WaitingWebRequest waitingRequest) {
+    private UserWaitingRequest createUserWaitingRequest(Long timeId, Long themeId) {
+        return new UserWaitingRequest(LocalDate.now().plusDays(1), timeId, themeId);
+    }
+
+    private void addWaiting(UserWaitingRequest waitingRequest) {
         Cookie cookieByUserLogin = getCookieByLogin(port, "test1@email.com", "123456");
 
         RestAssured.given().log().all()

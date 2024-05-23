@@ -14,6 +14,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
     List<Long> findThemeReservationCountsForDate(LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findAll();
