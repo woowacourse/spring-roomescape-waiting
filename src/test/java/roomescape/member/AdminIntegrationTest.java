@@ -1,9 +1,11 @@
 package roomescape.member;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +17,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.auth.dto.request.LoginRequest;
+import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationTimeFixture;
+import roomescape.fixture.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
+import roomescape.reservation.model.Waiting;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.util.IntegrationTest;
 
 @IntegrationTest
@@ -36,6 +46,12 @@ class AdminIntegrationTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
     @LocalServerPort
     private int port;
 
@@ -46,8 +62,7 @@ class AdminIntegrationTest {
 
     private String getTokenByLogin() {
         memberRepository.save(new Member("비밥", Role.ADMIN, "admin@naver.com", "hihi"));
-        return RestAssured
-                .given().log().all()
+        return given().log().all()
                 .body(new LoginRequest("admin@naver.com", "hihi"))
                 .contentType(ContentType.JSON)
                 .when().post("/login")
@@ -68,7 +83,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -92,7 +107,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -112,7 +127,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -133,7 +148,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -153,7 +168,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -174,7 +189,7 @@ class AdminIntegrationTest {
         params.put("timeId", timeId);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -194,7 +209,7 @@ class AdminIntegrationTest {
         params.put("timeId", null);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -215,7 +230,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -235,7 +250,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", null);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -258,7 +273,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -281,7 +296,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -304,7 +319,7 @@ class AdminIntegrationTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin())
                 .body(params)
@@ -313,5 +328,83 @@ class AdminIntegrationTest {
 
                 .statusCode(404)
                 .body("detail", equalTo("해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("관리자 권한으로 대기를 예약으로 변경한다.")
+    public void confirmWaitingSuccess() {
+        Member member = memberRepository.save(MemberFixture.getOne());
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+        Waiting waiting = waitingRepository.save(new Waiting(member, new Slot(date, reservationTime, theme)));
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when()
+                .post("/admin/waitings/" + waiting.getId() + "/confirmation")
+                .then()
+                .statusCode(201)
+                .header("Location", equalTo("/waitings/" + waiting.getId()))
+                .body("id", equalTo(waiting.getId().intValue()));
+    }
+
+    @Test
+    @DisplayName("관리자 권한으로 대기를 예약으로 변경 시, 이미 예약이 존재하는 경우 예외를 반환한다.")
+    public void confirmWaitingFailDueToExistingReservation() {
+        Member member = memberRepository.save(MemberFixture.getOne());
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+        Slot slot = new Slot(date, reservationTime, theme);
+        reservationRepository.save(new Reservation(member, slot));
+        Waiting waiting = waitingRepository.save(new Waiting(member, slot));
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when()
+                .post("/admin/waitings/" + waiting.getId() + "/confirmation")
+                .then()
+                .statusCode(400)
+                .body("detail", equalTo("이미 예약이 존재하여 대기를 예약으로 변경할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("관리자 권한으로 대기를 예약으로 변경 시, 앞선 대기가 존재하는 경우 예외를 반환한다.")
+    public void confirmWaitingFailDueToEarlierWaiting() {
+        Member firstMember = memberRepository.save(MemberFixture.getOne());
+        Member secondMember = memberRepository.save(MemberFixture.getOne("email@google.com"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTimeFixture.getOne());
+        Theme theme = themeRepository.save(ThemeFixture.getOne());
+        Slot slot = new Slot(date, reservationTime, theme);
+        Waiting first = waitingRepository.save(new Waiting(firstMember, slot));
+        Waiting second = waitingRepository.save(new Waiting(secondMember, slot));
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when()
+                .post("/admin/waitings/" + second.getId() + "/confirmation")
+                .then()
+                .statusCode(400)
+                .body("detail", equalTo(second.getId() + "번 예약 대기보다 앞선 대기가 존재하여 예약으로 변경할 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("관리자 권한으로 대기를 예약으로 변경 시, 대기가 존재하지 않는 경우 예외를 반환한다.")
+    public void confirmWaitingFailDueToNonExistentWaiting() {
+        Long nonExistentId = 999L;
+
+        given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when()
+                .post("/admin/waitings/" + nonExistentId + "/confirmation")
+                .then()
+                .statusCode(404)
+                .body("detail", equalTo("식별자 " + nonExistentId + "에 해당하는 대기가 존재하지 않아 예약으로 변경할 수 없습니다."));
     }
 }
