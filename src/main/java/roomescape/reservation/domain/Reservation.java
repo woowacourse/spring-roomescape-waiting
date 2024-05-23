@@ -102,6 +102,10 @@ public class Reservation {
         return status;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public void setStatus(Status status) {
         this.status = status;
     }

@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    int countByDateAndTimeIdAndThemeIdAndCreatedAtBefore(LocalDate date,
+                                                         long timeId,
+                                                         long themeId,
+                                                         LocalDateTime createdAt);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, long themeId);
 

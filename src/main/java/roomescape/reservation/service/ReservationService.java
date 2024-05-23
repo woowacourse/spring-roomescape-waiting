@@ -87,10 +87,17 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponse> findByMemberId(final long memberId) {
-        return reservationRepository.findByMemberId(memberId)
-                .stream()
-                .map(MemberReservationResponse::from)
-                .toList();
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+        return reservations.stream()
+                .map(reservation -> MemberReservationResponse.of(
+                        reservation,
+                        reservationRepository.countByDateAndTimeIdAndThemeIdAndCreatedAtBefore(
+                                reservation.getDate(),
+                                reservation.getTime().getId(),
+                                reservation.getTheme().getId(),
+                                reservation.getCreatedAt()
+                        )
+                )).toList();
     }
 
     public void delete(final long id) {

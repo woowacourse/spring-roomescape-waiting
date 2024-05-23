@@ -14,13 +14,20 @@ public record MemberReservationResponse(
         String status
 ) {
 
-    public static MemberReservationResponse from(final Reservation reservation) {
+    public static MemberReservationResponse of(final Reservation reservation, final int count) {
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getTheme().getThemeNameValue(),
-                reservation.getStatus().getValue()
+                makeStatus(count)
         );
+    }
+
+    private static String makeStatus(final int count) {
+        if (count == 0) {
+            return "예약";
+        }
+        return String.format("%d번째 %s", count, "예약대기");
     }
 }

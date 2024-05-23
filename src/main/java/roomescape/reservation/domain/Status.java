@@ -6,14 +6,12 @@ import java.util.Optional;
 
 public enum Status {
 
-    RESERVATION("예약"),
-    WAITING("예약대기"),
+    RESERVATION,
+    WAITING,
     ;
 
-    private final String value;
+    Status() {
 
-    Status(String value) {
-        this.value = value;
     }
 
     public static Optional<Status> from(final String name) {
@@ -25,10 +23,6 @@ public enum Status {
                 .findAny()
                 .map(Optional::of)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 예약 상태를 입력하였습니다."));
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public boolean isReservation() {
