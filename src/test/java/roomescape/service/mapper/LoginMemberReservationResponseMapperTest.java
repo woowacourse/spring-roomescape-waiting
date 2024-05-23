@@ -4,7 +4,6 @@ import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
 import static roomescape.fixture.ReservationWaitingFixture.DEFAULT_WAITING;
 import static roomescape.fixture.ThemeFixture.DEFAULT_THEME;
 
-import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,8 +31,7 @@ class LoginMemberReservationResponseMapperTest {
     @DisplayName("예약 대기 응답을 내 예약 조회 응답으로 잘 변환하는지 확인")
     void from() {
         LoginMemberReservationResponse response = LoginMemberReservationResponseMapper
-                .from(ReservationWaitingResponseMapper.toResponse(DEFAULT_WAITING,
-                        List.of(DEFAULT_WAITING)));
+                .from(ReservationWaitingResponseMapper.toResponse(DEFAULT_WAITING, 1));
 
         Assertions.assertThat(response)
                 .isEqualTo(new LoginMemberReservationResponse(
