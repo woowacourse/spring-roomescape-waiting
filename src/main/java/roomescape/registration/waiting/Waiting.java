@@ -21,12 +21,12 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(nullable = false)
+    private LocalDate date;
+
     @ManyToOne
     @JoinColumn(name = "theme_id", referencedColumnName = "id", nullable = false)
     private Theme theme;
-
-    @Column(nullable = false)
-    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "reservation_time_id", referencedColumnName = "id", nullable = false)
@@ -39,18 +39,18 @@ public class Waiting {
     public Waiting() {
     }
 
-    public Waiting(Theme theme, LocalDate date, ReservationTime reservationTime, Member member) {
+    public Waiting(LocalDate date, Theme theme, ReservationTime reservationTime, Member member) {
         this.id = NULL_ID;
-        this.theme = theme;
         this.date = date;
+        this.theme = theme;
         this.reservationTime = reservationTime;
         this.member = member;
     }
 
-    public Waiting(long id, Theme theme, LocalDate date, ReservationTime reservationTime, Member member) {
+    public Waiting(long id, LocalDate date, Theme theme, ReservationTime reservationTime, Member member) {
         this.id = id;
-        this.theme = theme;
         this.date = date;
+        this.theme = theme;
         this.reservationTime = reservationTime;
         this.member = member;
     }

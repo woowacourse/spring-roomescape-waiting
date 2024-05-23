@@ -48,7 +48,7 @@ public class WaitingService {
         Member member = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new RoomEscapeException(WaitingExceptionCode.MEMBER_INFO_IS_NULL_EXCEPTION));
 
-        Waiting unSavedWaiting = new Waiting(theme, waitingRequest.date(), reservationTime, member);
+        Waiting unSavedWaiting = new Waiting(waitingRequest.date(), theme, reservationTime, member);
 
         return WaitingResponse.from(waitingRepository.save(unSavedWaiting));
     }
@@ -83,7 +83,7 @@ public class WaitingService {
     }
 
     private void validateAlreadyWaiting(WaitingRequest waitingRequest, long memberId) {
-        boolean existWaiting =  waitingRepository.existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
+        boolean existWaiting = waitingRepository.existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
                 waitingRequest.date(),
                 waitingRequest.themeId(),
                 waitingRequest.timeId(),
