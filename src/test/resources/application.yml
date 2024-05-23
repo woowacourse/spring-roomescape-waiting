@@ -10,10 +10,6 @@ spring:
     init:
       mode: never
   jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
@@ -21,3 +17,8 @@ spring:
 jwt:
   secret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9ih1aovtQShabQ7l0cINw4k1fagApg3qLWiB8Kt59Lno
   expired-period: 3600000
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
