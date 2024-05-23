@@ -3,12 +3,12 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.concurrency.AtomicQueue;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Waiting;
@@ -33,35 +33,41 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
+    private final AtomicQueue<ReservationSlot, Member> atomicQueue;
 
     public ReservationService(
             ReservationSlotService reservationSlotService,
             ReservationRepository reservationRepository,
             WaitingRepository waitingRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            AtomicQueue<ReservationSlot, Member> atomicQueue
     ) {
         this.reservationSlotService = reservationSlotService;
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
+        this.atomicQueue = atomicQueue;
     }
 
     @Transactional
     public ReservationResponse saveReservation(ReservationSaveRequest reservationSaveRequest) {
         Member member = findMemberById(reservationSaveRequest.memberId());
         ReservationSlot slot = reservationSlotService.findSlot(reservationSaveRequest.toSlotRequest());
+        Reservation reservation = reservationRepository.findBySlot(slot);
 
-        Optional<Reservation> reservation = reservationRepository.findBySlot(slot);
-        if (reservation.isPresent()) {
-            Reservation foundReservation = reservation.get();
-            Waiting waiting = foundReservation.addWaiting(member);
-            waitingRepository.save(waiting);
-            return ReservationResponse.createByWaiting(waiting);
+        if (reservation == null) {
+            boolean isFirst = atomicQueue.ifFirstRunElseWait(member, slot,
+                    (m, s) -> reservationRepository.save(new Reservation(m, s)));
+
+            reservation = reservationRepository.findBySlot(slot);
+            if (isFirst) {
+                return ReservationResponse.createByReservation(reservation);
+            }
         }
 
-        Reservation newReservation = new Reservation(member, slot);
-        reservationRepository.save(newReservation);
-        return ReservationResponse.createByReservation(newReservation);
+        Waiting waiting = reservation.addWaiting(member);
+        waitingRepository.save(waiting);
+        return ReservationResponse.createByWaiting(waiting);
     }
 
     @Transactional(readOnly = true)
