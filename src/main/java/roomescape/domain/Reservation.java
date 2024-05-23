@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
-@Entity //todo: 롬복 사용
+@Entity
 public class Reservation {
 
     @Id

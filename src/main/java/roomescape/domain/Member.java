@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
-@Entity //todo: 롬복 사용
+@Entity
 public class Member {
 
     @Id

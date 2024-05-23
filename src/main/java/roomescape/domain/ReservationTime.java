@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity //todo: 롬복 사용
+@Entity
 public class ReservationTime {
 
     @Id
