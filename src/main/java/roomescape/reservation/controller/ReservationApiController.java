@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.dto.MultipleResponses;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSaveRequest;
@@ -32,8 +33,10 @@ public class ReservationApiController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<MultipleResponses<ReservationResponse>> findAll(@RequestParam(defaultValue = "SUCCESS") String status) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
+    public ResponseEntity<MultipleResponses<ReservationResponse>> findAll(
+            @RequestParam(name = "status", defaultValue = "SUCCESS") ReservationStatus reservationStatus
+    ) {
+        List<ReservationResponse> reservationResponses = reservationService.findAllByStatus(reservationStatus);
 
         return ResponseEntity.ok(new MultipleResponses<>(reservationResponses));
     }
