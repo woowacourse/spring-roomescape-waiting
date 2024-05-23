@@ -6,7 +6,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.repository.MemberReservationRepository;
@@ -93,9 +92,8 @@ public class ReservationCreateService {
     }
 
     private void validateNotWaitingReservation(MemberReservation memberReservation) {
-        memberReservationRepository.findByReservationAndStatus(
-                        memberReservation.getReservation(),
-                        ReservationStatus.CONFIRMATION)
+        memberReservationRepository.findByReservationAndStatusIsConfirmation(
+                        memberReservation.getReservation())
                 .ifPresent(memberReservation::validateDuplicated);
     }
 

@@ -46,7 +46,7 @@ public class WaitingReservationService {
     }
 
     private void validateConfirmReservationExists(Reservation reservation) {
-        memberReservationRepository.findByReservationAndStatus(reservation, ReservationStatus.CONFIRMATION)
+        memberReservationRepository.findByReservationAndStatusIsConfirmation(reservation)
                 .ifPresent((confirmReservation) -> {
                     throw new BadRequestException("이미 예약이 존재해 대기를 승인할 수 없습니다.");
                 });

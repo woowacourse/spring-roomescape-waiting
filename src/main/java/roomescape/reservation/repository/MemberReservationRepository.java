@@ -16,9 +16,12 @@ import java.util.Optional;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
 
-    Optional<MemberReservation> findByReservationAndStatus(Reservation reservation, ReservationStatus status);
-
     Optional<MemberReservation> findByReservationAndMember(Reservation reservation, Member member);
+
+    Optional<MemberReservation> findFirstByReservationAndStatus(Reservation reservation, ReservationStatus status);
+
+    @Query("select mr from MemberReservation as mr where mr.reservation = :reservation and mr.status = 'CONFIRMATION'")
+    Optional<MemberReservation> findByReservationAndStatusIsConfirmation(Reservation reservation);
 
     List<MemberReservation> findByStatus(ReservationStatus status);
 

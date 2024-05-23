@@ -91,12 +91,23 @@ public class ReservationService {
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteReservation(Long id) {
+        MemberReservation memberReservation = findMemberReservationById(id);
         memberReservationRepository.deleteById(id);
+
+        confirmFirstWaitingReservation(memberReservation.getReservation());
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteReservation(Long id, LoginMember loginMember) {
-        findMemberReservationById(id).validateIsOwner(loginMember);
+        MemberReservation memberReservation = findMemberReservationById(id);
+        memberReservation.validateIsOwner(loginMember);
         memberReservationRepository.deleteById(id);
+
+        confirmFirstWaitingReservation(memberReservation.getReservation());
+    }
+
+    private void confirmFirstWaitingReservation(Reservation reservation) {
+        memberReservationRepository.findFirstByReservationAndStatus(reservation, ReservationStatus.WAITING)
+                .ifPresent((memberReservation) -> memberReservation.setStatus(ReservationStatus.CONFIRMATION));
     }
 }
