@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DATE_AFTER_1DAY;
 import static roomescape.TestFixture.MEMBER_BROWN;
@@ -23,7 +22,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
-import roomescape.exception.BadRequestException;
+import roomescape.domain.Status;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -87,7 +86,7 @@ class ReservationTimeServiceTest {
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
 
         // 예약 저장
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme, Status.CREATED));
 
         ReservationAvailabilityTimeRequest timeRequest = new ReservationAvailabilityTimeRequest(
                 DATE_AFTER_1DAY, savedRoomTheme.getId());
@@ -123,7 +122,7 @@ class ReservationTimeServiceTest {
         RoomTheme savedRoomTheme2 = roomThemeRepository.save(ROOM_THEME2);
 
         // 예약 저장
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme1));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme1, Status.CREATED));
 
         ReservationAvailabilityTimeRequest timeRequest = new ReservationAvailabilityTimeRequest(
                 DATE_AFTER_1DAY, savedRoomTheme2.getId());

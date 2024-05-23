@@ -1,10 +1,12 @@
-package roomescape.service.dto.request;
+package roomescape.controller.reservation.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-public record ReservationCreateMemberRequest(
+public record ReservationCreateAdminRequest(
+        @NotNull
+        Long memberId,
         @NotNull
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,

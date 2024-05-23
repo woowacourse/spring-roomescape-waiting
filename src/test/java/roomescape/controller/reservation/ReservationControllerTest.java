@@ -24,6 +24,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -194,7 +195,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new ReservationCreateRequest(1L, DATE_AFTER_1DAY, 1L, 1L))
+                .body(new ReservationCreateRequest(1L, DATE_AFTER_1DAY, 1L, 1L, Status.CREATED))
                 .when().post("/reservations")
                 .then().log().all().assertThat().statusCode(HttpStatus.NOT_FOUND.value());
     }
@@ -207,7 +208,7 @@ class ReservationControllerTest {
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme, Status.CREATED));
 
         // when & then
         Long id = savedReservation.getId();

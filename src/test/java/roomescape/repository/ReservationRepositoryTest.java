@@ -15,6 +15,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReservationRepositoryTest {
@@ -47,7 +48,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
         // when
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme, Status.CREATED));
         // then
         assertThat(reservationRepository.findAll()).hasSize(1);
     }
@@ -60,7 +61,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
         RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme, Status.CREATED));
         // when
         reservationRepository.deleteById(savedReservation.getId());
         // then

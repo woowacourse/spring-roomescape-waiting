@@ -21,7 +21,7 @@ class ReservationTest {
     @ParameterizedTest
     @NullSource
     void nullEmptyName(Member value) {
-        Assertions.assertThatThrownBy(() -> new Reservation(value, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1))
+        Assertions.assertThatThrownBy(() -> new Reservation(value, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1, Status.CREATED))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("사용자에 빈값을 입력할 수 없습니다.");
     }
@@ -30,7 +30,7 @@ class ReservationTest {
     @ParameterizedTest
     @NullSource
     void nullEmptyDate(LocalDate value) {
-        Assertions.assertThatThrownBy(() -> new Reservation(MEMBER_BROWN, value, RESERVATION_TIME_10AM, ROOM_THEME1))
+        Assertions.assertThatThrownBy(() -> new Reservation(MEMBER_BROWN, value, RESERVATION_TIME_10AM, ROOM_THEME1, Status.CREATED))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("날짜에 빈값을 입력할 수 없습니다.");
     }
@@ -39,7 +39,7 @@ class ReservationTest {
     @ParameterizedTest
     @NullSource
     void nullEmptyTime(ReservationTime value) {
-        Assertions.assertThatThrownBy(() -> new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, value, ROOM_THEME1))
+        Assertions.assertThatThrownBy(() -> new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, value, ROOM_THEME1, Status.CREATED))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("시간에 빈값을 입력할 수 없습니다.");
     }
@@ -49,7 +49,7 @@ class ReservationTest {
     @NullSource
     void nullEmptyTheme(RoomTheme value) {
         Assertions.assertThatThrownBy(
-                        () -> new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, value))
+                        () -> new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, value, Status.CREATED))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("테마에 빈값을 입력할 수 없습니다.");
     }
@@ -58,8 +58,8 @@ class ReservationTest {
     @Test
     void duplicatedDateTime() {
         // given
-        Reservation reservation = new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1);
-        Reservation comparedReservation = new Reservation(ADMIN_ZEZE, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1);
+        Reservation reservation = new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1, Status.CREATED);
+        Reservation comparedReservation = new Reservation(ADMIN_ZEZE, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1, Status.CREATED);
 
         // when & then
         Assertions.assertThatThrownBy(() -> reservation.validateDuplicatedDateTime(comparedReservation))
@@ -71,9 +71,9 @@ class ReservationTest {
     @Test
     void NotDuplicatedDateTime() {
         // given
-        Reservation reservation = new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1);
+        Reservation reservation = new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, ROOM_THEME1, Status.CREATED);
         Reservation comparedReservation = new Reservation(ADMIN_ZEZE, DATE_AFTER_1DAY, RESERVATION_TIME_10AM,
-                ROOM_THEME2);
+                ROOM_THEME2, Status.CREATED);
 
         // when & then
         Assertions.assertThatCode(() -> reservation.validateDuplicatedDateTime(comparedReservation))
