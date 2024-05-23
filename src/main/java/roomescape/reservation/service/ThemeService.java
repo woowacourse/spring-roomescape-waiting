@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ThemeSaveRequest;
 import roomescape.reservation.controller.dto.response.ThemeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ThemeResponse;
@@ -16,6 +17,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final ThemeRepository themeRepository;

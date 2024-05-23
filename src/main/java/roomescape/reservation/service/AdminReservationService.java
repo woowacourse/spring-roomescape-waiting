@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
@@ -15,6 +16,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 
 @Service
+@Transactional
 public class AdminReservationService {
 
     private final ReservationService reservationService;

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservation.controller.dto.response.ReservationTimeDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationTimeResponse;
@@ -11,6 +12,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationService reservationService;
