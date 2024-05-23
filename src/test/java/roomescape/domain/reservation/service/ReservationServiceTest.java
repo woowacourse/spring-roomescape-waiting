@@ -104,7 +104,7 @@ class ReservationServiceTest extends ServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservationWait(reservationWaitAddRequest))
                 .isInstanceOf(DataConflictException.class)
-                .hasMessage("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기가 있으면 예약대기를 할 수 없습니다.");
+                .hasMessage("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약 또는 예약대기가 있으면 예약대기를 할 수 없습니다.");
     }
 
     @DisplayName("없는 id의 예약을 삭제하면 예외를 발생합니다.")
