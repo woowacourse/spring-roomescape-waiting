@@ -7,9 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
-import roomescape.domain.reservation.dto.ReservationWithRankDto;
+import roomescape.domain.reservation.dto.WaitingWithRankDto;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
+
+    List<Reservation> findByMemberIdAndStatus(long memberId, ReservationStatus status);
 
     boolean existsByTimeId(long id);
 
@@ -53,25 +55,20 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     @Query("""
             SELECT
-                new roomescape.domain.reservation.dto.ReservationWithRankDto(
+                new roomescape.domain.reservation.dto.WaitingWithRankDto(
                     r,
-                    CAST ((
-                        SELECT COUNT(r2)
-                        FROM Reservation r2
-                        WHERE r2.status = 'WAITING'
-                        AND r2.theme = r.theme
-                        AND r2.date = r.date
-                        AND r2.time = r.time
-                        AND r2.id <= r.id
-                    ) AS Long)
+                    COUNT(*)
                 )
             FROM Reservation r
+            JOIN Reservation r2
+            ON r.date = r2.date AND r.time = r2.time AND r.theme = r2.theme
             JOIN FETCH r.member
             JOIN FETCH r.time
             JOIN FETCH r.theme
-            WHERE r.member.id = :memberId
+            WHERE r.member.id = :memberId AND r.status = 'WAITING' AND r2.status = 'WAITING' AND r.id >= r2.id
+            GROUP BY r.id
             """)
-    List<ReservationWithRankDto> findReservationWithRanksByMemberId(Long memberId);
+    List<WaitingWithRankDto> findWaitingsWithRankByMemberId(Long memberId);
 
     @Query("""
             SELECT r

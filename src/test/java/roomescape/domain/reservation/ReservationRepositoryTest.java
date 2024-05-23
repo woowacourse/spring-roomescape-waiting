@@ -17,7 +17,7 @@ import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.domain.reservation.dto.ReservationWithRankDto;
+import roomescape.domain.reservation.dto.WaitingWithRankDto;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -141,20 +141,17 @@ class ReservationRepositoryTest {
     @Sql("/waitings.sql")
     @DisplayName("회원 아이디로 예약 대기 순번을 포함한 예약 대기들을 조회한다.")
     void findReservationWithRanksByMemberId() {
-        List<ReservationWithRankDto> reservationWithRanks = reservationRepository
-                .findReservationWithRanksByMemberId(4L);
+        List<WaitingWithRankDto> reservationWithRanks = reservationRepository
+                .findWaitingsWithRankByMemberId(4L);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(reservationWithRanks).hasSize(3);
+            softly.assertThat(reservationWithRanks).hasSize(2);
 
             softly.assertThat(reservationWithRanks.get(0).reservation().getId()).isEqualTo(4L);
             softly.assertThat(reservationWithRanks.get(0).rank()).isEqualTo(3);
 
-            softly.assertThat(reservationWithRanks.get(1).reservation().getId()).isEqualTo(6L);
-            softly.assertThat(reservationWithRanks.get(1).rank()).isEqualTo(0);
-
-            softly.assertThat(reservationWithRanks.get(2).reservation().getId()).isEqualTo(9L);
-            softly.assertThat(reservationWithRanks.get(2).rank()).isEqualTo(1);
+            softly.assertThat(reservationWithRanks.get(1).reservation().getId()).isEqualTo(9L);
+            softly.assertThat(reservationWithRanks.get(1).rank()).isEqualTo(1);
         });
     }
 

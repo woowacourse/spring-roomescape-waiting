@@ -3,7 +3,9 @@ package roomescape.application;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.request.ReservationRequest;
@@ -20,7 +22,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.reservation.dto.ReservationWithRankDto;
+import roomescape.domain.reservation.dto.WaitingWithRankDto;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.UnauthorizedException;
 
@@ -99,10 +101,18 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservationWithRanks(long memberId) {
-        List<ReservationWithRankDto> reservations = reservationRepository.findReservationWithRanksByMemberId(memberId);
+        List<Reservation> reservations = reservationRepository
+                .findByMemberIdAndStatus(memberId, ReservationStatus.RESERVED);
+        List<WaitingWithRankDto> waitings = reservationRepository
+                .findWaitingsWithRankByMemberId(memberId);
 
-        return reservations.stream()
-                .map(MyReservationResponse::from)
+        Stream<MyReservationResponse> reservedStream = reservations.stream()
+                .map(MyReservationResponse::from);
+        Stream<MyReservationResponse> waitingStream = waitings.stream()
+                .map(MyReservationResponse::from);
+
+        return Stream.concat(reservedStream, waitingStream)
+                .sorted(Comparator.comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::time))
                 .toList();
     }
 
