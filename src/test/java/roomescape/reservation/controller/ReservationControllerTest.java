@@ -306,37 +306,31 @@ public class ReservationControllerTest {
 
     @Test
     @DisplayName("이미 예약이 존재하는 날짜/시간/테마로 예약 생성 요청 시, 409 에러를 발생한다.")
-    void validateDateTimeTheme() {
+    void validateDateTimeThemeDuplication() {
         // given
-        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        Member member1 = memberRepository.save(new Member("이름", "member1@admin.com", "12341234", Role.MEMBER));
 
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
-        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
+
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
+
+        Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
+        String member2AccessTokenCookie = getAccessTokenCookieByLogin(member2.getEmail(), member2.getPassword());
 
         Map<String, String> reservationParams = Map.of(
-                "name", "썬",
-                "date", LocalDate.now().plusDays(1L).toString(),
-                "timeId", "1",
-                "themeId", "1",
+                "date", tomorrow.toString(),
+                "timeId", time.getId().toString(),
+                "themeId", theme.getId().toString(),
                 "status", ReservationStatus.RESERVED.name()
         );
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .header("Cookie", accessTokenCookie)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("data.id", is(1))
-                .header("Location", "/reservations/1");
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", accessTokenCookie)
+                .header("Cookie", member2AccessTokenCookie)
                 .body(reservationParams)
                 .when().post("/reservations")
                 .then().log().all()

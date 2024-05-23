@@ -219,4 +219,23 @@ class ReservationServiceTest {
         Assertions.assertThat(member3WaitingReservation.getOrder()).isEqualTo(1L);
         Assertions.assertThat(member3WaitingReservation.getReservation().getId()).isEqualTo(secondWaitingReservationByMember3.id());
     }
+
+    @Test
+    @DisplayName("이미 예약이 존재하는 날짜/시간/테마에 예약 생성을 수행하면 예외가 발생한다.")
+    void validateDateTimeThemeDuplication() {
+        // given
+        Member member1 = memberRepository.save(new Member("이름", "member1@admin.com", "12341234", Role.MEMBER));
+
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
+
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
+
+        Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member2.getId()))
+                .isInstanceOf(DataDuplicateException.class);
+    }
 }
