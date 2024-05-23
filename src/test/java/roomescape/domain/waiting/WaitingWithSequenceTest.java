@@ -21,9 +21,10 @@ class WaitingWithSequenceTest {
         // given
         Member member = new Member("name", "email@email.com", "password123", Role.ADMIN);
         Member member2 = new Member("name", "email@email.com", "password123", Role.ADMIN);
+        LocalDate date = LocalDate.now().plusDays(1);
         ReservationTime reservationTime = new ReservationTime(LocalTime.now());
         Theme theme = new Theme("name", "description", "thumbnail");
-        Reservation reservation = new Reservation(LocalDate.now(), reservationTime, theme, member);
+        Reservation reservation = new Reservation(date, reservationTime, theme, member);
         Waiting waiting = new Waiting(member2, reservation);
         WaitingWithSequence waitingWithSequence = new WaitingWithSequence(waiting, 1L);
 
