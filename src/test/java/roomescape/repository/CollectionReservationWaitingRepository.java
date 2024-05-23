@@ -1,8 +1,11 @@
 package roomescape.repository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import roomescape.domain.BaseEntity;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
@@ -45,6 +48,15 @@ public class CollectionReservationWaitingRepository implements
         return reservationWaitings.stream()
                 .filter(reservationWaiting -> reservationWaiting.getReservation().equals(reservation))
                 .toList();
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findTopWaitingByReservation(Reservation reservation) {
+        return findByReservation(reservation)
+                .stream()
+                .sorted(Comparator.comparing(BaseEntity::getCreateAt))
+                .limit(1)
+                .findAny();
     }
 
     @Override

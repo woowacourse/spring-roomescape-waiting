@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -33,6 +34,11 @@ public class JpaReservationWaitingRepository implements ReservationWaitingReposi
     @Override
     public List<ReservationWaiting> findByReservation(Reservation reservation) {
         return waitingDao.findAllByReservation(reservation);
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findTopWaitingByReservation(Reservation reservation) {
+        return waitingDao.findTopByReservationOrderByCreateAt(reservation);
     }
 
     @Override

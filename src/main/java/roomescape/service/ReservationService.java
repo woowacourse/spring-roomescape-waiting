@@ -7,12 +7,9 @@ import static roomescape.service.mapper.ReservationResponseMapper.toResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.BaseEntity;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
@@ -87,15 +84,10 @@ public class ReservationService {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION));
-        List<ReservationWaiting> waitings = new ArrayList<>(waitingRepository.findByReservation(reservation));
-        if (waitings.isEmpty()) {
-            reservationRepository.delete(reservationId);
-            return;
-        }
-
-        waitings.sort(Comparator.comparing(BaseEntity::getCreateAt));
-        reservation.updateReservationMember(waitings.get(0).getWaitingMember());
-        waitingRepository.delete(waitings.get(0).getId());
+        
+        waitingRepository.findTopWaitingByReservation(reservation)
+                .ifPresentOrElse(waiting -> updateReservationAndDeleteTopWaiting(reservation, waiting),
+                        () -> deleteReservation(reservationId));
     }
 
     private boolean canDelete(long requestMemberId, long reservationId) {
@@ -111,5 +103,15 @@ public class ReservationService {
                 .map(Reservation::getReservationMember)
                 .map(member -> member.hasIdOf(memberId))
                 .orElse(false);
+    }
+
+    private void updateReservationAndDeleteTopWaiting(Reservation reservation, ReservationWaiting waiting) {
+        Member waitingMember = waiting.getWaitingMember();
+        reservation.updateReservationMember(waitingMember);
+        waitingRepository.delete(waiting.getId());
+    }
+
+    private void deleteReservation(long reservationId) {
+        reservationRepository.delete(reservationId);
     }
 }
