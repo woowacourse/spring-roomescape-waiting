@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestConfig;
 import roomescape.dto.request.LoginRequest;
 import roomescape.support.extension.DatabaseClearExtension;
@@ -16,6 +17,7 @@ import roomescape.support.extension.DatabaseClearExtension;
         classes = TestConfig.class,
         webEnvironment = WebEnvironment.RANDOM_PORT
 )
+@Sql("/member.sql")
 public abstract class BaseControllerTest {
 
     protected static final Long ADMIN_ID = 1L;
