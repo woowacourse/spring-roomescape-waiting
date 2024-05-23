@@ -27,7 +27,7 @@ class AdminReservationControllerTest extends ControllerTest {
                 .statusCode(201);
     }
 
-    @DisplayName("존재하는 리소스에 대한 삭제 요청시, 204 no content를 응답한다.")
+    @DisplayName("존재하는 예약에 대한 삭제 요청시, 204 no content를 응답한다.")
     @Test
     void should_remove_reservation_when_delete_request_reservations_id() {
         String cookie = getAdminCookie();
@@ -39,7 +39,7 @@ class AdminReservationControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
-    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 404 Not Found를 응답한다.")
+    @DisplayName("존재하지 않는 예약에 대한 삭제 요청시, 404 Not Found를 응답한다.")
     @Test
     void should_response_bad_request_when_nonExist_id() {
         String cookie = getAdminCookie();
