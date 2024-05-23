@@ -3,7 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static roomescape.model.Role.MEMBER;
+import static roomescape.service.fixture.TestMemberFactory.createMember;
 
 import java.util.List;
 
@@ -37,9 +37,8 @@ class MemberServiceTest {
     @DisplayName("아이디와 비밀번호가 같은 유저가 존재하면 해당 유저를 반환한다.")
     @Test
     void should_find_member_when_member_exist() {
-        Member member = new Member("배키", MEMBER, "hello@email.com", "1234");
-        memberRepository.save(member);
-        MemberLoginRequest request = new MemberLoginRequest("1234", "hello@email.com");
+        Member member = memberRepository.save(createMember(1L));
+        MemberLoginRequest request = new MemberLoginRequest(member.getPassword(), member.getEmail());
 
         Member findMember = memberService.findMemberByEmailAndPassword(request);
 
@@ -49,9 +48,7 @@ class MemberServiceTest {
     @DisplayName("아이디와 비밀번호 같은 유저가 없으면 예외가 발생한다.")
     @Test
     void should_throw_exception_when_member_not_exist() {
-        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        memberRepository.save(member);
-        MemberLoginRequest request = new MemberLoginRequest("1111", "sun@email.com");
+        MemberLoginRequest request = new MemberLoginRequest("id", "id");
 
         assertThatThrownBy(() -> memberService.findMemberByEmailAndPassword(request))
                 .isInstanceOf(AuthenticationException.class);
@@ -60,12 +57,11 @@ class MemberServiceTest {
     @DisplayName("아이디를 통해 사용자 이름을 조회한다.")
     @Test
     void should_find_member_name_when_give_id() {
-        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        memberRepository.save(member);
+        Member member = memberRepository.save(createMember(1L));
 
         String memberNameById = memberService.findMemberNameById(1L);
 
-        assertThat(memberNameById).isEqualTo("배키");
+        assertThat(memberNameById).isEqualTo(member.getName());
     }
 
     @DisplayName("주어진 아이디에 해당하는 사용자가 없으면 예외가 발생한다.")
@@ -78,8 +74,7 @@ class MemberServiceTest {
     @DisplayName("아이디를 통해 사용자 이름을 조회한다.")
     @Test
     void should_find_member_when_give_id() {
-        Member member = new Member(1L, "배키", MEMBER, "hello@email.com", "1234");
-        memberRepository.save(member);
+        Member member = memberRepository.save(createMember(1L));
 
         Member memberById = memberService.findMemberById(1L);
 
@@ -96,8 +91,8 @@ class MemberServiceTest {
     @DisplayName("모든 사용자를 조회한다.")
     @Test
     void should_find_all_members() {
-        memberRepository.save(new Member(1L, "썬", MEMBER, "sun@email.com", "1111"));
-        memberRepository.save(new Member(2L, "배키", MEMBER, "dmsgml@email.com", "2222"));
+        memberRepository.save(createMember(1L));
+        memberRepository.save(createMember(2L));
 
         List<Member> members = memberService.findAllMembers();
 

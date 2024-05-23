@@ -2,6 +2,8 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static roomescape.service.fixture.TestThemeFactory.createTheme;
+
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -34,8 +36,8 @@ class ThemeServiceTest {
     @DisplayName("테마를 조회한다.")
     @Test
     void should_find_all_themes() {
-        themeRepository.save(new Theme("리사", "공포", "image.jpg"));
-        themeRepository.save(new Theme("네오", "스릴러", "image1.jpg"));
+        themeRepository.save(createTheme(1L));
+        themeRepository.save(createTheme(2L));
 
         assertThat(themeService.findAllThemes()).hasSize(2);
     }
@@ -53,8 +55,8 @@ class ThemeServiceTest {
     @DisplayName("테마를 삭제한다.")
     @Test
     void should_delete_theme() {
-        themeRepository.save(new Theme(1L, "리사", "공포", "image.jpg"));
-        themeRepository.save(new Theme(2L, "네오", "스릴러", "image1.jpg"));
+        themeRepository.save(createTheme(1L));
+        themeRepository.save(createTheme(2L));
 
         themeService.deleteTheme(1L);
 
