@@ -4,24 +4,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.exceptions.ValidationException;
+import roomescape.member.dto.WaitingResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/reservations")
+@RequestMapping("/admin")
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody AdminReservationRequest adminReservationRequest
     ) {
@@ -31,15 +35,15 @@ public class AdminReservationController {
                 .body(reservationResponse);
     }
 
-    @GetMapping("/search")
-    public List<ReservationResponse> getReservations(
+    @GetMapping("/reservations/search")
+    public ResponseEntity<List<ReservationResponse>> getReservations(
             @RequestParam Long themeId,
             @RequestParam Long memberId,
             @RequestParam LocalDate dateFrom,
             @RequestParam LocalDate dateTo
     ) {
         validateDateRange(dateFrom, dateTo);
-        return reservationService.searchReservations(themeId, memberId, dateFrom, dateTo);
+        return ResponseEntity.ok(reservationService.searchReservations(themeId, memberId, dateFrom, dateTo));
     }
 
     private void validateDateRange(LocalDate dateFrom, LocalDate dateTo) {
@@ -50,5 +54,11 @@ public class AdminReservationController {
                     dateTo)
             );
         }
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
+        List<WaitingResponse> waitings = waitingService.findWaitings();
+        return ResponseEntity.ok(waitings);
     }
 }

@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.member.MemberArgumentResolver;
 import roomescape.member.dto.MemberRequest;
-import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -12,7 +11,6 @@ import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -46,18 +44,13 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationOfMemberResponse>> findReservationsByMember(@MemberArgumentResolver MemberRequest memberRequest) {
-        List<ReservationOfMemberResponse> myReservations = new ArrayList<>(reservationService.findReservationsByMember(memberRequest.toLoginMember()));
-        List<ReservationOfMemberResponse> waitings = waitingService.findWaitingsByMember(memberRequest.toLoginMember())
-                .stream()
-                .map(WaitingWithRank::toReservationOfMemberResponse)
-                .toList();
-        myReservations.addAll(waitings);
+        List<ReservationOfMemberResponse> myReservations = reservationService.findReservationsByMember(memberRequest);
         return ResponseEntity.ok(myReservations);
     }
 
-    @DeleteMapping("/mine/{id}")
-    public ResponseEntity<Void> cancelWaiting (@PathVariable("id") Long id) {
-        waitingService.cancelWaiting(id);
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> cancelWaiting(@PathVariable("id") Long id) {
+        waitingService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 

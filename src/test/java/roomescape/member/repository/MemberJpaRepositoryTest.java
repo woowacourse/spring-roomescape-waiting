@@ -62,8 +62,8 @@ class MemberJpaRepositoryTest {
     @Test
     @DisplayName("id에 맞는 Member을 제거한다.")
     void delete() {
-        memberJpaRepository.deleteById(MEMBER_3.getId());
+        memberJpaRepository.deleteById(MEMBER_4.getId());
 
-        assertThat(memberJpaRepository.findById(MEMBER_3.getId()).isEmpty()).isTrue();
+        assertThat(memberJpaRepository.findById(MEMBER_4.getId()).isEmpty()).isTrue();
     }
 }

@@ -5,7 +5,9 @@ import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
+import roomescape.member.dto.WaitingResponse;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.ReservationResponse;
@@ -16,6 +18,7 @@ import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WaitingService {
@@ -62,7 +65,18 @@ public class WaitingService {
         return waitingJpaRepository.findWaitingsWithRankByMemberId(loginMember.getId());
     }
 
-    public void cancelWaiting(Long id) {
+    public void deleteById(Long id) {
         waitingJpaRepository.deleteById(id);
+    }
+
+    public List<WaitingResponse> findWaitings() {
+        return waitingJpaRepository.findAll()
+                .stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
+
+    public Optional<Waiting> findWaitingByReservation(Reservation reservation) {
+        return waitingJpaRepository.findTopByDateAndReservationTimeAndTheme(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
     }
 }

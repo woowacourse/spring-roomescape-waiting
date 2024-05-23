@@ -11,6 +11,7 @@ import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
@@ -28,4 +29,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    Optional<Waiting> findTopByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime reservationTime, Theme theme);
 }

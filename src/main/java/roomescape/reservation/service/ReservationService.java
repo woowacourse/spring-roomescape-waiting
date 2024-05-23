@@ -8,6 +8,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.ReservationOfMemberResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -19,6 +20,8 @@ import roomescape.theme.service.ThemeService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -27,17 +30,20 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationJpaRepository ReservationJpaRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
-            MemberService memberService
+            MemberService memberService,
+            WaitingService waitingService
     ) {
         this.reservationJpaRepository = ReservationJpaRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
     public ReservationResponse addReservation(
@@ -110,14 +116,38 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationOfMemberResponse> findReservationsByMember(Member member) {
-        return reservationJpaRepository.findByMember(member)
+    public List<ReservationOfMemberResponse> findReservationsByMember(MemberRequest memberRequest) {
+        Stream<ReservationOfMemberResponse> reservations = reservationJpaRepository.findByMember(memberRequest.toLoginMember())
                 .stream()
-                .map(ReservationOfMemberResponse::new)
-                .toList();
+                .map(ReservationOfMemberResponse::from);
+
+        Stream<ReservationOfMemberResponse> waitings = waitingService.findWaitingsByMember(memberRequest.toLoginMember())
+                .stream()
+                .map(ReservationOfMemberResponse::from);
+
+        return Stream.concat(reservations, waitings).toList();
     }
 
     public void deleteReservation(Long id) {
-        reservationJpaRepository.deleteById(id);
+        Optional<Reservation> optionalReservation = reservationJpaRepository.findById(id);
+
+        optionalReservation.ifPresent(reservation -> {
+            waitingService.findWaitingByReservation(reservation)
+                    .ifPresentOrElse(
+                            waiting -> updateReservationByWaiting(waiting, reservation),
+                            () -> reservationJpaRepository.deleteById(id)
+                    );
+        });
+    }
+
+    private void updateReservationByWaiting(Waiting waiting, Reservation reservation) {
+        Reservation changedReservation = new Reservation(reservation.getId(),
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme(),
+                waiting.getMember()
+                );
+        reservationJpaRepository.save(changedReservation);
+        waitingService.deleteById(waiting.getId());
     }
 }

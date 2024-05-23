@@ -46,4 +46,9 @@ public class AdminPageController {
         model.addAttribute("reservationResponses", reservationResponses);
         return "/admin/reservation-new";
     }
+
+    @GetMapping("waiting")
+    public String getAdminWaitingPage() {
+        return "/admin/waiting";
+    }
 }
