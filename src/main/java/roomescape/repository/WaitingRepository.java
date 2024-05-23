@@ -18,16 +18,29 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
 
     @Query("""
             SELECT new roomescape.model.WaitingWithRank(
-            w, 
-            (SELECT COUNT(w2) + 1 
-                FROM Waiting w2 
-                WHERE w2.theme = w.theme 
-                AND w2.date = w.date 
-                AND w2.time = w.time 
-                AND w2.id < w.id)) 
-            FROM Waiting w 
+            w, COUNT(w2))
+            FROM Waiting w
+            INNER JOIN Waiting w2
+            ON w2.theme = w.theme
+            AND w2.date = w.date
+            AND w2.time = w.time
+            AND w2.id <= w.id
             WHERE w.member.id = :memberId
+            GROUP BY w.id
             """)
+    /*
+    *
+    * SELECT new roomescape.model.WaitingWithRank(
+            w,
+            (SELECT COUNT(w2) + 1
+                FROM Waiting w2
+                WHERE w2.theme = w.theme
+                AND w2.date = w.date
+                AND w2.time = w.time
+                AND w2.id < w.id))
+            FROM Waiting w
+            WHERE w.member.id = :memberId
+    *  */
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     boolean existsWaitingByThemeAndDateAndTimeAndMember(Theme theme, LocalDate date, ReservationTime time, Member member);
