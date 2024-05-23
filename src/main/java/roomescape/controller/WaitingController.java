@@ -13,6 +13,7 @@ import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/reservations/waiting")
@@ -22,6 +23,15 @@ public class WaitingController {
 
     public WaitingController(WaitingService waitingService) {
         this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
+        List<Waiting> allWaiting = waitingService.findAllWaiting();
+        List<WaitingResponse> response = allWaiting.stream()
+                .map(WaitingResponse::from)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

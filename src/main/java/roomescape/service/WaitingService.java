@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class WaitingService {
+public class WaitingService { // TODO: 본인이 대기한 예약은 대기할 수 없도록
 
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -34,6 +34,10 @@ public class WaitingService {
         this.reservationTimeRepository = reservationTimeRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
+    }
+
+    public List<Waiting> findAllWaiting() {
+        return waitingRepository.findAll();
     }
 
     public Waiting saveWaiting(ReservationDto reservationDto) {
