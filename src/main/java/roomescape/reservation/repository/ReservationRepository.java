@@ -22,6 +22,10 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId, Date fromDate,
                                                                 Date toDate);
 
+    Optional<Reservation> findById(long id);
+
+    Optional<Reservation> findFirstByDateAndThemeAndTime(Date date, Theme theme, Time time);
+
     List<Reservation> findByTimeId(long timeId);
 
     Optional<Reservation> findByDateAndMemberIdAndThemeIdAndTimeId(Date date, long memberId, long themeId, long timeId);

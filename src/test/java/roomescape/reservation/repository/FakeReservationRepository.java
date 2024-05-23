@@ -69,7 +69,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByTimeId(long timeId) {
         return reservations.values().stream()
-                .filter(reservation -> isSameTime(timeId, reservation))
+                .filter(reservation -> isSameTimeId(timeId, reservation))
                 .toList();
     }
 
@@ -79,7 +79,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.values().stream()
                 .filter(reservation -> isSameThemeId(themeId, reservation))
                 .filter(reservation -> isSameDate(date, reservation))
-                .filter(reservation -> isSameTime(timeId, reservation))
+                .filter(reservation -> isSameTimeId(timeId, reservation))
                 .filter(reservation -> isSameMember(memberId, reservation))
                 .findAny();
     }
@@ -109,10 +109,24 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findById(long id) {
+        return Optional.ofNullable(reservations.get(id));
+    }
+
+    @Override
+    public Optional<Reservation> findFirstByDateAndThemeAndTime(Date date, Theme theme, Time time) {
+        return reservations.values().stream()
+                .filter(reservation -> isSameDate(date, reservation))
+                .filter(reservation -> isSameTimeId(time.getId(), reservation))
+                .filter(reservation -> isSameThemeId(theme.getId(), reservation))
+                .findFirst();
+    }
+
+    @Override
     public int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId) {
         return (int) reservations.values().stream()
                 .filter(reservation -> isSameThemeId(theme.getId(), reservation))
-                .filter(reservation -> isSameTime(time.getId(), reservation))
+                .filter(reservation -> isSameTimeId(time.getId(), reservation))
                 .filter(reservation -> isSameDate(date, reservation))
                 .filter(reservation -> reservation.getId() < waitingId)
                 .count();
@@ -143,7 +157,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservation.getDate().equals(date.getDate());
     }
 
-    private boolean isSameTime(long timeId, Reservation reservation) {
+    private boolean isSameTimeId(long timeId, Reservation reservation) {
         return reservation.getReservationTime().getId() == timeId;
     }
 

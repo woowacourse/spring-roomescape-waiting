@@ -11,14 +11,21 @@ VALUES ('15:40'),
        ('17:40');
 
 INSERT INTO member (name, email, password, role)
-VALUES ('어드민', 'polla@gmail.com', 'pollari99', 'ADMIN'),
-       ('일반', 'polla@naver.com', 'pollari999', 'MEMBER');
+VALUES ('어드민 폴라', 'polla@gmail.com', 'pollari99', 'ADMIN'),
+       ('일반 멤버 폴라', 'polla@naver.com', 'pollari999', 'MEMBER'),
+       ('일반 멤버 아서', 'pollarii@gmail.com', 'pollari9', 'MEMBER');
 
 
 INSERT INTO theme (name, description, thumbnail)
-VALUES ('polla', '폴라 방탈출', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-       ('dobby', '도비 방탈출', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-       ('pobi', '포비 방탈출', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+VALUES ('그림자 없는 상자', '미안해 누나. 근데 내가 맞았어. 결국 끝도, 시작도, 누나한테 달렸어.',
+        'https://cdn.imweb.me/thumbnail/20211118/dc77d37d458b0.jpeg'),
+       ('사람들은 그것을 행복이라 부르기로 했다', '석우는 연기를 들이키며 영원이라는 것에 대해 생각해보았다.',
+        'https://cdn.imweb.me/thumbnail/20220119/5654d99aeb966.jpg'),
+       ('쓰여진 문장 속에 구원이 없다면', '딱 발 한 폭 너비의 벼랑을 생각해보라. 아래를 내려다보면, 아찔한 공허',
+        'https://cdn.imweb.me/thumbnail/20240425/22ddac7689249.png'),
+       ('존재할 자격', '누구에게 물어도 그는 별 볼 일 없는 사람이었지만, 그 자신은 제법 만족스럽게 살았다.',
+        'https://cdn.imweb.me/thumbnail/20240425/c79ae78193e55.png'),
+       ('뱃사람의 별', '나는 내 한 몸 들어가는 쪽배를 타고 밤바다를 부유하곤 합니다.', 'https://cdn.imweb.me/thumbnail/20240425/d8a954954a4fb.jpeg');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, reservation_status)
 VALUES ('2024-04-30', 1, 1, 1, 'RESERVED'),

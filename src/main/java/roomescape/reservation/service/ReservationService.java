@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.FilterInfo;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.AdminWaitingResponse;
@@ -22,6 +23,7 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationTimeAvailabilityResponse;
 import roomescape.reservation.exception.ReservationExceptionCode;
+import roomescape.reservation.exception.model.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.model.ThemeNotFoundException;
@@ -132,8 +134,13 @@ public class ReservationService {
         return memberReservationRespons;
     }
 
+    @Transactional
     public void removeReservations(long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(ReservationNotFoundException::new);
+
         reservationRepository.deleteById(reservationId);
+        waitingToReservation(reservation);
     }
 
     public void removeWaitingReservations(long waitingId) {
@@ -151,6 +158,16 @@ public class ReservationService {
         }
         return waitings;
     }
+
+    public List<AdminWaitingResponse> findWaitings() {
+        List<Reservation> reservations = reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
+        return reservations.stream()
+                .map(reservation -> new AdminWaitingResponse(reservation.getId(), reservation.getMember().getName(),
+                        reservation.getTheme().getName(), reservation.getDate(),
+                        reservation.getReservationTime().getStartAt()))
+                .toList();
+    }
+
 
     private Reservation makeReservation(ReservationRequest reservationRequest, long memberId,
                                         ReservationStatus reservationStatus) {
@@ -184,12 +201,13 @@ public class ReservationService {
         return bookedTimes.contains(time);
     }
 
-    public List<AdminWaitingResponse> findWaitings() {
-        List<Reservation> reservations = reservationRepository.findByReservationStatus(ReservationStatus.WAITING);
-        return reservations.stream()
-                .map(reservation -> new AdminWaitingResponse(reservation.getId(), reservation.getMember().getName(),
-                        reservation.getTheme().getName(), reservation.getDate(),
-                        reservation.getReservationTime().getStartAt()))
-                .toList();
+    private void waitingToReservation(Reservation reservation) {
+        Optional<Reservation> topWaiting = reservationRepository.findFirstByDateAndThemeAndTime(
+                Date.dateFrom(reservation.getDate()), reservation.getTheme(), reservation.getReservationTime());
+
+        if (topWaiting.isPresent()) {
+            Reservation nextReservation = topWaiting.get();
+            nextReservation.setReservationStatus(ReservationStatus.RESERVED);
+        }
     }
 }
