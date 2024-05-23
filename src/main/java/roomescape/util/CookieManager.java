@@ -22,6 +22,9 @@ public class CookieManager {
 
     public static Optional<Cookie> extractAuthCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return Optional.empty();
+        }
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(AUTH_KEY))
                 .findFirst();
