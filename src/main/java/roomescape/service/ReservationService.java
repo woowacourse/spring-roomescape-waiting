@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -13,10 +12,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithSequence;
-import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
-import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.UserReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -51,50 +47,6 @@ public class ReservationService {
         Reservation reservation = convertReservation(request);
         validateAddable(reservation);
         return reservationRepository.save(reservation).getId();
-    }
-
-    public List<ReservationResponse> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public ReservationResponse getReservation(Long id) {
-        Reservation reservation = findReservationById(id);
-        return ReservationResponse.from(reservation);
-    }
-
-    public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
-        Member member = findMember(memberId);
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByMember(member);
-
-        List<UserReservationResponse> userWaitings = waitings.stream()
-                .map(UserReservationResponse::from)
-                .toList();
-
-        List<UserReservationResponse> userReservations = reservations.stream()
-                .map(UserReservationResponse::from)
-                .toList();
-
-        List<UserReservationResponse> result = new ArrayList<>();
-        result.addAll(userReservations);
-        result.addAll(userWaitings);
-
-        return result;
-    }
-
-    public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
-                filter.getMemberId(),
-                filter.getThemeId(),
-                filter.getDateFrom(),
-                filter.getDateTo()
-        );
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 
     @Transactional

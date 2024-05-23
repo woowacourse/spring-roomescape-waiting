@@ -25,6 +25,9 @@ class ThemeServiceTest {
     ThemeService themeService;
 
     @Autowired
+    ReservationQueryService reservationQueryService;
+
+    @Autowired
     ReservationService reservationService;
 
     @Test
@@ -51,7 +54,7 @@ class ThemeServiceTest {
     @Test
     void 예약_되어있는_테마를_삭제할_경우_예외_발생() {
         //given
-        ReservationResponse reservationResponse = reservationService.getReservation(1L);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(1L);
         ThemeResponse themeResponse = reservationResponse.theme();
         Long themeId = themeResponse.id();
 
@@ -87,7 +90,7 @@ class ThemeServiceTest {
     }
 
     void deleteAllReservation() {
-        List<ReservationResponse> reservationResponses = reservationService.getAllReservations();
+        List<ReservationResponse> reservationResponses = reservationQueryService.getAllReservations();
         reservationResponses.forEach(reservation -> reservationService.deleteReservation(reservation.id()));
     }
 }

@@ -27,7 +27,7 @@ class ReservationTimeServiceTest {
     ReservationTimeService reservationTimeService;
 
     @Autowired
-    ReservationService reservationService;
+    ReservationQueryService reservationQueryService;
 
     @Test
     void 동일한_시간을_추가할_경우_예외_발생() {
@@ -55,7 +55,7 @@ class ReservationTimeServiceTest {
     @Test
     void 예약이_존재하는_시간대를_삭제할_경우_예외_발생() {
         //given
-        ReservationResponse reservationResponse = reservationService.getReservation(1L);
+        ReservationResponse reservationResponse = reservationQueryService.getReservation(1L);
         ReservationTimeResponse timeResponse = reservationResponse.time();
         Long timeId = timeResponse.id();
 
