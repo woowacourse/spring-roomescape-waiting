@@ -19,6 +19,7 @@ import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,8 @@ import static roomescape.TestFixture.ADMIN;
 import static roomescape.TestFixture.ADMIN_NAME;
 import static roomescape.TestFixture.DATE_MAY_EIGHTH;
 import static roomescape.TestFixture.DATE_MAY_NINTH;
+import static roomescape.TestFixture.DATE_MAY_ONE;
+import static roomescape.TestFixture.MEMBER_CAT;
 import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
 import static roomescape.TestFixture.START_AT_SEVEN;
@@ -155,7 +158,9 @@ class ReservationServiceTest {
     void delete() {
         // given
         final Long existingId = 1L;
-        given(reservationRepository.existsById(existingId)).willReturn(true);
+        given(reservationRepository.findById(existingId)).willReturn(
+                Optional.of(new Reservation(MEMBER_CAT(1L), DATE_MAY_ONE, RESERVATION_TIME_SEVEN(), THEME_COMIC()))
+        );
 
         // when & then
         assertThatCode(() -> reservationService.delete(existingId))
@@ -166,8 +171,7 @@ class ReservationServiceTest {
     @DisplayName("삭제하려는 예약이 존재하지 않는 경우 예외가 발생한다.")
     void throwExceptionWhenDeleteNotExistingReservation() {
         // given
-        final Long notExistingId = 1L;
-        given(reservationRepository.existsById(notExistingId)).willReturn(false);
+        final Long notExistingId = 0L;
 
         // when & then
         assertThatThrownBy(() -> reservationService.delete(notExistingId))

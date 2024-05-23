@@ -79,7 +79,7 @@ class ThemeRepositoryTest {
         assertThat(actual).doesNotContain(theme);
     }
 
-    @Sql("/popular-theme-data.sql")
+    @Sql("/data.sql")
     @Test
     @DisplayName("인기 테마 목록을 조회한다.")
     void findPopularThemes() {

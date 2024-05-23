@@ -3,7 +3,9 @@ package roomescape;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Name;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Waiting;
 import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
@@ -94,5 +96,13 @@ public class TestFixture {
 
     public static Theme THEME_ANIME(final Long id) {
         return new Theme(id, THEME_ANIME_NAME, THEME_ANIME_DESCRIPTION, THEME_ANIME_THUMBNAIL);
+    }
+
+    public static Reservation RESERVATION() {
+        return new Reservation(ADMIN(1L), LocalDate.now(), RESERVATION_TIME_ONE(1L), THEME_ANIME(1L));
+    }
+
+    public static Waiting WAITING() {
+        return new Waiting(ADMIN(1L), LocalDate.now(), RESERVATION_TIME_ONE(1L), THEME_ANIME(1L));
     }
 }

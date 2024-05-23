@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.RESERVATION_TIME_SEVEN;
+import static roomescape.TestFixture.RESERVATION_TIME_ONE;
 import static roomescape.TestFixture.RESERVATION_TIME_SIX;
 
 @Transactional
@@ -26,7 +26,7 @@ class ReservationTimeRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        reservationTime = reservationTimeRepository.save(RESERVATION_TIME_SEVEN());
+        reservationTime = reservationTimeRepository.save(RESERVATION_TIME_ONE());
     }
 
     @Test

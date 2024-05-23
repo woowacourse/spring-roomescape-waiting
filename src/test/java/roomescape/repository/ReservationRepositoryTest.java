@@ -128,7 +128,7 @@ class ReservationRepositoryTest {
     @DisplayName("timeId에 해당하는 예약 건수를 조회한다.")
     void countByTimeId() {
         // given
-        final long timeId = 2L;
+        final long timeId = 0L;
 
         // when
         final int actual = reservationRepository.countByTime_Id(timeId);
