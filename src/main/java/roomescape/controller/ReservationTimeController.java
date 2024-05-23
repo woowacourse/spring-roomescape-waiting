@@ -3,6 +3,8 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.auth.LoginMemberId;
+import roomescape.service.auth.AuthService;
 import roomescape.service.schedule.ReservationTimeService;
 import roomescape.service.schedule.dto.AvailableReservationTimeResponse;
 import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
@@ -16,9 +18,11 @@ import java.util.List;
 @RequestMapping("/times")
 public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
+    private final AuthService authService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService) {
+    public ReservationTimeController(ReservationTimeService reservationTimeService, AuthService authService) {
         this.reservationTimeService = reservationTimeService;
+        this.authService = authService;
     }
 
     @PostMapping
@@ -41,8 +45,9 @@ public class ReservationTimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTimeById(@PathVariable("id") long id) {
-        reservationTimeService.deleteById(id);
+    public ResponseEntity<Void> deleteReservationTimeById(@PathVariable("id") long timeId, @LoginMemberId long memberId) {
+        authService.validateAdmin(memberId);
+        reservationTimeService.deleteById(timeId);
         return ResponseEntity.noContent().build();
     }
 }

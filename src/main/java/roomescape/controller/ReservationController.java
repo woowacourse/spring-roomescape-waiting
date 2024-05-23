@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMemberId;
+import roomescape.service.auth.AuthService;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.dto.ReservationRequest;
 import roomescape.service.reservation.dto.ReservationResponse;
@@ -15,9 +16,11 @@ import java.util.List;
 @RequestMapping("/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
+    private final AuthService authService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, AuthService authService) {
         this.reservationService = reservationService;
+        this.authService = authService;
     }
 
     @GetMapping
@@ -36,7 +39,8 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") long reservationId, @LoginMemberId long memberId) {
-        reservationService.deleteById(reservationId, memberId);
+        authService.validateAdmin(memberId);
+        reservationService.deleteById(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

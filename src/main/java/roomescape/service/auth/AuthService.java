@@ -62,4 +62,12 @@ public class AuthService {
         return memberRepository.findByEmail(Email.of(email))
                 .orElseThrow(() -> new InvalidMemberException("이메일 또는 비밀번호가 잘못되었습니다."));
     }
+
+    public void validateAdmin(long memberId) {
+        memberRepository.findById(memberId).ifPresent(member -> {
+            if (member.isGuest()) {
+                throw new ForbiddenException("예약을 삭제할 권한이 없습니다.");
+            }
+        });
+    }
 }

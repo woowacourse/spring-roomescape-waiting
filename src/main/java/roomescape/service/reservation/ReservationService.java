@@ -97,22 +97,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(long reservationId, long memberId) {
-        reservationRepository.findById(reservationId)
+    public void deleteById(long id) {
+        reservationRepository.findById(id)
                 .ifPresent(reservation -> {
-                    validateAuthority(memberId);
                     validateScheduleIfReserved(reservation);
-                    reservationRepository.deleteById(reservationId);
+                    reservationRepository.deleteById(id);
                     updateReservation(reservation.getDetail().getId());
                 });
-    }
-
-    private void validateAuthority(long memberId) {
-        memberRepository.findById(memberId).ifPresent(member -> {
-            if (member.isGuest()) {
-                throw new ForbiddenException("예약을 삭제할 권한이 없습니다.");
-            }
-        });
     }
 
     private void validateScheduleIfReserved(Reservation reservation) {

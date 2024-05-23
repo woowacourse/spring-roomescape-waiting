@@ -208,7 +208,7 @@ class ReservationServiceTest {
         Reservation target = reservationRepository.save(reservation);
 
         //when
-        reservationService.deleteById(target.getId(), admin.getId());
+        reservationService.deleteById(target.getId());
 
         //then
         assertThat(reservationService.findAll()).isEmpty();
@@ -226,24 +226,11 @@ class ReservationServiceTest {
         reservationRepository.save(reservation3);
 
         //when
-        reservationService.deleteById(reservation.getId(), admin.getId());
+        reservationService.deleteById(reservation.getId());
 
         //then
         List<ReservationWithRank> reservations = reservationRepository.findWithRankingByMemberId(member.getId());
         assertThat(reservations.get(0).getReservation().isReserved()).isTrue();
-    }
-
-    @DisplayName("일반 사용자가 예약을 삭제하려고 하면 예외가 발생한다.")
-    @Test
-    void cannotDeleteReservationByGuest() {
-        //given
-        Reservation reservation = new Reservation(admin, reservationDetail, ReservationStatus.RESERVED);
-        Reservation target = reservationRepository.save(reservation);
-
-        //when & then
-        assertThatThrownBy(() -> reservationService.deleteById(target.getId(), member.getId()))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessage("예약을 삭제할 권한이 없습니다.");
     }
 
     @DisplayName("관리자가 과거 예약을 삭제하려고 하면 예외가 발생한다.")
@@ -254,7 +241,7 @@ class ReservationServiceTest {
         long id = 1;
 
         //when & then
-        assertThatThrownBy(() -> reservationService.deleteById(id, admin.getId()))
+        assertThatThrownBy(() -> reservationService.deleteById(id))
                 .isInstanceOf(InvalidReservationException.class)
                 .hasMessage("이미 지난 예약은 삭제할 수 없습니다.");
     }
