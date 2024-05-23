@@ -3,15 +3,14 @@ package roomescape.infrastructure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.IntegrationTestSupport;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class JwtTokenProviderTest {
+class JwtTokenProviderTest extends IntegrationTestSupport {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
@@ -33,6 +32,5 @@ class JwtTokenProviderTest {
                 () -> assertThat(jwtTokenProvider.validateToken("redddy")).isFalse(),
                 () -> assertThat(jwtTokenProvider.validateToken(token + "i")).isFalse()
         );
-
     }
 }

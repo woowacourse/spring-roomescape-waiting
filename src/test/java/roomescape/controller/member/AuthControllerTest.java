@@ -3,17 +3,16 @@ package roomescape.controller.member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import roomescape.IntegrationTestSupport;
 import roomescape.controller.member.dto.CookieMemberResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.domain.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthControllerTest {
+class AuthControllerTest extends IntegrationTestSupport {
 
     @Autowired
     AuthController authController;
@@ -22,8 +21,8 @@ class AuthControllerTest {
     @DisplayName("로그인된 유저의 /check")
     void loginMemberCheck() {
         //given
-        final LoginMember loginMember = new LoginMember(1L, "레디", Role.ADMIN);
-        final CookieMemberResponse expected = new CookieMemberResponse("레디");
+        final LoginMember loginMember = new LoginMember(1L, ADMIN_NAME, Role.ADMIN);
+        final CookieMemberResponse expected = new CookieMemberResponse(ADMIN_NAME);
 
         //when
         final ResponseEntity<CookieMemberResponse> check = authController.check(loginMember);

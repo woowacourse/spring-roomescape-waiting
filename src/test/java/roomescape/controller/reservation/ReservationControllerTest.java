@@ -2,18 +2,14 @@ package roomescape.controller.reservation;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.member.dto.MemberLoginRequest;
+import roomescape.IntegrationTestSupport;
 import roomescape.controller.reservation.dto.MemberResponse;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.controller.theme.dto.ReservationThemeResponse;
@@ -28,30 +24,11 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationControllerTest {
+class ReservationControllerTest extends IntegrationTestSupport {
 
     @Autowired
     ReservationController reservationController;
-
-    @LocalServerPort
-    int port;
-
-    String accessToken;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new MemberLoginRequest("jinwuo0925@gmail.com", "1111"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
-    }
 
     @Test
     @DisplayName("예약 조회 (예약 대기 제외)")
@@ -92,7 +69,7 @@ class ReservationControllerTest {
         final Map<String, String> params = Map.of("date", date, "timeId", timeId, "themeId", themeId);
 
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", USER_TOKEN)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
@@ -104,7 +81,7 @@ class ReservationControllerTest {
     @DisplayName("나의 예약 조회")
     void getReservationMine() {
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", USER_TOKEN)
                 .contentType(ContentType.JSON)
                 .when().get("/reservations/mine")
                 .then().log().all()
@@ -117,7 +94,7 @@ class ReservationControllerTest {
     @MethodSource("searchReservationsParameterProvider")
     void searchReservations(final Map<String, Object> param, final List<Long> expected) {
         final List<ReservationResponse> result = RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", USER_TOKEN)
                 .contentType(ContentType.JSON)
                 .params(param)
                 .when().get("/reservations/search")
@@ -136,7 +113,7 @@ class ReservationControllerTest {
     @DisplayName("예약 대기 삭제")
     void deleteWaitReservation() {
         RestAssured.given().log().all()
-                .cookie("token", accessToken)
+                .cookie("token", USER_TOKEN)
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/wait/8")
                 .then().log().all()

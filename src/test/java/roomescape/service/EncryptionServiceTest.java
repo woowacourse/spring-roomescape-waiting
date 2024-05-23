@@ -4,12 +4,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-class EncryptionServiceTest {
+class EncryptionServiceTest extends IntegrationTestSupport {
 
     @Autowired
     EncryptionService encryptionService;
