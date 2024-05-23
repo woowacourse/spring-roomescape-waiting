@@ -97,6 +97,21 @@ public class ReservationController {
     }
 
     @Auth
+    @PostMapping("/reservations/waitings")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<ReservationResponse> requestReservationWaiting(
+            @Valid @RequestBody final ReservationRequest reservationRequest,
+            @MemberId final Long memberId,
+            final HttpServletResponse response
+    ) {
+        ReservationResponse reservationResponse = reservationService.addReservationWaiting(
+                reservationRequest, memberId);
+
+        response.setHeader(HttpHeaders.LOCATION, "/reservations/waitings/" + reservationResponse.id());
+        return ApiResponse.success(reservationResponse);
+    }
+
+    @Auth
     @DeleteMapping("/reservations/waitings/{reservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<Void> removeWaitingReservation(

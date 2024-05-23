@@ -4,7 +4,6 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -17,9 +16,7 @@ public record ReservationRequest(
         @NotNull(message = "예약(Reservation) 요청의 timeId는 null 일 수 없습니다.")
         Long timeId,
         @NotNull(message = "예약(Reservation) 요청의 themeId는 null 일 수 없습니다.")
-        Long themeId,
-        @NotNull(message = "예약(Reservation) 요청의 ReservationStatus는 null 일 수 없습니다.")
-        ReservationStatus status
+        Long themeId
 ) {
 
     public Reservation toEntity(final ReservationTime reservationTime, final Theme theme, final Member member) {

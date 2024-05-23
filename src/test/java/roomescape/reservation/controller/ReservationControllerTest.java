@@ -61,8 +61,8 @@ public class ReservationControllerTest {
 
 
     @Test
-    @DisplayName("처음으로 등록하는 예약의 id는 1이다.")
-    void firstPost() {
+    @DisplayName("회원권한이 있으면 예약을 등록할 수 있다.")
+    void reservationHasRole() {
         String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
 
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
@@ -86,6 +86,31 @@ public class ReservationControllerTest {
                 .statusCode(201)
                 .body("data.id", is(1))
                 .header("Location", "/reservations/1");
+    }
+
+    @Test
+    @DisplayName("예약이 존재하지 않으면 예약대기 등록을 할 수 없다.")
+    void cannotReservationWaitingBecauseReservationNotExist() {
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
+        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+
+        Map<String, String> reservationParams = Map.of(
+                "date", LocalDate.now().plusDays(1L).toString(),
+                "timeId", "1",
+                "themeId", "1"
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", accessTokenCookie)
+                .body(reservationParams)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @Test
@@ -132,11 +157,11 @@ public class ReservationControllerTest {
         Theme theme3 = themeRepository.save(new Theme("테마명3", "설명", "썸네일URL"));
 
         LocalDate date = LocalDate.now().plusDays(1);
-        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
-        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
-        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme2.getId(), ReservationStatus.WAITING), member.getId());
-        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme2.getId(), ReservationStatus.RESERVED), anotherMember.getId());
-        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme3.getId(), ReservationStatus.RESERVED), anotherMember.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme1.getId()), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme1.getId()), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme2.getId()), anotherMember.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme3.getId()), anotherMember.getId());
+        reservationService.addReservationWaiting(new ReservationRequest(date, reservationTime2.getId(), theme2.getId()), member.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -314,7 +339,7 @@ public class ReservationControllerTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId());
 
         Member member2 = memberRepository.save(new Member("이름", "member2@admin.com", "12341234", Role.MEMBER));
         String member2AccessTokenCookie = getAccessTokenCookieByLogin(member2.getEmail(), member2.getPassword());
@@ -349,8 +374,8 @@ public class ReservationControllerTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member.getId());
-        ReservationResponse anotherMemberWaitingReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), anotherMember.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member.getId());
+        ReservationResponse anotherMemberWaitingReservation = reservationService.addReservationWaiting(new ReservationRequest(tomorrow, time.getId(), theme.getId()), anotherMember.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -374,8 +399,8 @@ public class ReservationControllerTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), anotherMember.getId());
-        ReservationResponse myWaitingReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), anotherMember.getId());
+        ReservationResponse myWaitingReservation = reservationService.addReservationWaiting(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -398,8 +423,8 @@ public class ReservationControllerTest {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
-        ReservationResponse waitingStatusReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member2.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId());
+        ReservationResponse waitingStatusReservation = reservationService.addReservationWaiting(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -424,9 +449,9 @@ public class ReservationControllerTest {
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
         LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member2.getId());
-        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member3.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member1.getId());
+        reservationService.addReservationWaiting(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member2.getId());
+        reservationService.addReservationWaiting(new ReservationRequest(tomorrow, time.getId(), theme.getId()), member3.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -479,10 +504,10 @@ public class ReservationControllerTest {
         Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
         Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
 
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId(), ReservationStatus.RESERVED), member1.getId());
-        ReservationResponse firstWaitingOrder1 = reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId(), ReservationStatus.WAITING), member2.getId());
-        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId(), ReservationStatus.RESERVED), member2.getId());
-        ReservationResponse firstWaitingOrder2 = reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId(), ReservationStatus.WAITING), member3.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member1.getId());
+        ReservationResponse firstWaitingOrder1 = reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId()), member2.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member2.getId());
+        ReservationResponse firstWaitingOrder2 = reservationService.addReservationWaiting(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId()), member3.getId());
 
         // when & then
         RestAssured.given().log().all()

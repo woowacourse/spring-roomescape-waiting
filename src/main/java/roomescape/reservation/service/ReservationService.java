@@ -179,15 +179,42 @@ public class ReservationService {
         long order = alreadyBookedReservations.size();
 
         Reservation requestReservation = request.toEntity(time, theme, member);
-        MemberReservation requestMemberReservation = new MemberReservation(requestReservation, member, request.status(), order);
+        MemberReservation requestMemberReservation = new MemberReservation(requestReservation, member, ReservationStatus.RESERVED, order);
 
+        validateAlreadyBookedReservationNotExist(requestReservation, order);
         validateDateAndTime(requestReservation, LocalDateTime.now());
-        validateDuplication(requestReservation, requestMemberReservation.getStatus());
-        validateCanReserve(requestReservation, requestMemberReservation.getStatus(), order);
 
         Reservation savedReservation = reservationRepository.save(requestReservation);
         memberReservationRepository.save(requestMemberReservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateAlreadyBookedReservationNotExist(final Reservation requestReservation, final Long order) {
+        if (order > 0) {
+            throw new DataDuplicateException(ErrorType.RESERVATION_WAITING_DUPLICATED,
+                    String.format("이미 요청하신 날짜/테마/시간 에 예약 정보가 존재하여 예약할 수 없습니다. '예약 대기'로 요청해주세요. [values: %s/%s/%s]",
+                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
+        }
+    }
+
+    @Transactional
+    public ReservationResponse addReservationWaiting(final ReservationRequest request, final Long memberId) {
+        ReservationTime time = reservationTimeRepository.getById(request.timeId());
+        Theme theme = themeRepository.getById(request.themeId());
+        Member member = memberRepository.getById(memberId);
+        List<MemberReservation> alreadyBookedReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(time, request.date(), theme);
+        long order = alreadyBookedReservations.size();
+
+        Reservation requestReservationWaiting = request.toEntity(time, theme, member);
+        MemberReservation requestMemberReservationWaiting = new MemberReservation(requestReservationWaiting, member, ReservationStatus.WAITING, order);
+
+        validateDateAndTime(requestReservationWaiting, LocalDateTime.now());
+        validateAlreadyBookedReservationExist(request, order, time, theme);
+        validateMemberReservationDuplicate(requestReservationWaiting);
+
+        Reservation savedReservationWaiting = reservationRepository.save(requestReservationWaiting);
+        memberReservationRepository.save(requestMemberReservationWaiting);
+        return ReservationResponse.from(savedReservationWaiting);
     }
 
     private void validateDateAndTime(final Reservation reservation, final LocalDateTime now) {
@@ -198,30 +225,11 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplication(final Reservation requestReservation, final ReservationStatus requestStatus) {
-        if (requestStatus.isReserved()) {
-            validateReservationDuplicate(requestReservation);
-        } else if (requestStatus.isWaiting()) {
-            validateMemberReservationDuplicate(requestReservation);
-        }
-    }
-
-    private void validateCanReserve(final Reservation requestReservation, final ReservationStatus requestReserveStatus, final long canReserveOrder) {
-        if (requestReserveStatus.isReserved() && canReserveOrder > 0) {
+    private void validateAlreadyBookedReservationExist(final ReservationRequest request, final long order, final ReservationTime time, final Theme theme) {
+        if (order == 0) {
             throw new ValidateException(ErrorType.INVALID_REQUEST_DATA,
-                    String.format("이미 요청하신 날짜/테마/시간 에 예약 정보가 존재하여 예약할 수 없습니다. '예약 대기'로 요청해주세요. [values: %s/%s/%s]",
-                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
-        }
-    }
-
-    private void validateReservationDuplicate(final Reservation requestReservation) {
-        Optional<Reservation> reservation = reservationRepository.findByReservationTimeAndDateAndTheme(
-                requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme());
-
-        if (reservation.isPresent()) {
-            throw new DataDuplicateException(ErrorType.RESERVATION_WAITING_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s/%s/%s]",
-                            requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
+                    String.format("이미 요청하신 날짜/시간/테마 에 예약 정보가 존재하지 않아 예약 대기를 할 수 없습니다. '예약'으로 요청해주세요. [values: %s/%s/%s]",
+                            time, request.date(), theme));
         }
     }
 
@@ -231,7 +239,7 @@ public class ReservationService {
 
         if (memberReservation.isPresent()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약 또는 예약대기 중 입니다. [values: %s/%s/%s]",
+                    String.format("이미 해당 날짜/시간/테마에 예약대기 중 입니다. [values: %s/%s/%s]",
                             requestReservation.getReservationTime(), requestReservation.getDate(), requestReservation.getTheme()));
         }
     }
