@@ -41,6 +41,8 @@ INSERT INTO member(name, email, role, password)
 VALUES ('브리', 'bri@abc.com', 'USER', '1234');
 INSERT INTO member(name, email, role, password)
 VALUES ('오리', 'duck@abc.com', 'USER', '1234');
+INSERT INTO member(name, email, role, password)
+VALUES ('썬', 'sun@abc.com', 'USER', '1234');
 
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, CURRENT_DATE - 1, 1, 1);
@@ -55,3 +57,5 @@ VALUES (2, '2050-05-05', 2, 2);
 
 INSERT INTO waiting (reservation_id, member_id, created_at)
 VALUES (5, 4, '2024-05-18 09:00:00.000');
+INSERT INTO waiting (reservation_id, member_id, created_at)
+VALUES (5, 5, '2024-05-19 09:00:00.000');

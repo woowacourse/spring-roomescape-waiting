@@ -20,7 +20,7 @@ import roomescape.waiting.dto.WaitingRequest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/init-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class WaitingControllerTest {
-    private static final int COUNT_OF_WAITING = 1;
+    private static final int COUNT_OF_WAITING = 2;
 
     @LocalServerPort
     private int port;
