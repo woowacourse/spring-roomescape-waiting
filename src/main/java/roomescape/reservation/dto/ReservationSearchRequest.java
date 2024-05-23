@@ -2,9 +2,9 @@ package roomescape.reservation.dto;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.exception.ValidDate;
+import roomescape.exception.ValidDateDuration;
 
-@ValidDate
+@ValidDateDuration
 @NotNull
 public record ReservationSearchRequest(
         Long themeId,
@@ -13,4 +13,3 @@ public record ReservationSearchRequest(
         LocalDate dateTo
 ) {
 }
-

@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
-import roomescape.reservation.dto.ReservationCreateRequest;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingCreateRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.WaitingService;

@@ -7,14 +7,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = DateValidator.class)
+@Constraint(validatedBy = DateDurationValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidDate {
+public @interface ValidDateDuration {
 
-    String message() default "최대 " + DateValidator.LIMIT_DAY + "일 까지만 조회가능합니다.";
+    String message() default "최대 {days}일 까지만 조회가능합니다.";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    int days() default 30;
 }

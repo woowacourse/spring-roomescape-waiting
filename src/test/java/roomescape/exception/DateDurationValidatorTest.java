@@ -2,6 +2,7 @@ package roomescape.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.reservation.dto.ReservationSearchRequest;
 
-class DateValidatorTest {
+class DateDurationValidatorTest {
 
     @ParameterizedTest
     @CsvSource({"'2024-03-01', '2024-03-02', true", "'2024-03-01', '2024-04-01', false"})
@@ -22,9 +23,12 @@ class DateValidatorTest {
                 dateFrom,
                 dateTo
         );
+        DateDurationValidator dateDurationValidator = new DateDurationValidator();
+        final ValidDateDuration validDateDuration = mock(ValidDateDuration.class);
+        when(validDateDuration.days()).thenReturn(30);
+        dateDurationValidator.initialize(validDateDuration);
 
-        DateValidator dateValidator = new DateValidator();
-        boolean valid = dateValidator.isValid(reservationSearchRequest, mock(ConstraintValidatorContext.class));
+        boolean valid = dateDurationValidator.isValid(reservationSearchRequest, mock(ConstraintValidatorContext.class));
 
         assertThat(valid).isEqualTo(expected);
     }
