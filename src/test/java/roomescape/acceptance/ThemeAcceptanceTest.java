@@ -135,7 +135,7 @@ class ThemeAcceptanceTest extends AcceptanceFixture {
 
     private void addReservationBy(Theme theme, ReservationTime time, Member member, int count) {
         for (int i = 1; i <= count; i++) {
-            reservationRepository.save(new Reservation(LocalDate.now().minusDays(count % 7), time, theme, member));
+            reservationRepository.save(new Reservation(LocalDate.now().minusDays(count % 7), time, theme));
         }
     }
 

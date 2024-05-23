@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -103,8 +102,7 @@ class ThemeServiceTest {
     }
 
     private void creatReservation(int day, ReservationTime reservationTime, Theme theme) {
-        Member savedMember = memberRepository.save(new Member("a", "b", "C"));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(day), reservationTime, theme, savedMember));
+                new Reservation(LocalDate.now().minusDays(day), reservationTime, theme));
     }
 }

@@ -20,10 +20,9 @@ class ReservationTest {
         // given
         ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
         Theme theme = new Theme("a", "a", "a");
-        Member member = new Member("a", "a", "a");
         LocalDate date = LocalDate.of(2023, 1, 1);
-        List<Reservation> reservations = List.of(new Reservation(date, time, theme, member));
-        Reservation sut = new Reservation(date, time, theme, member);
+        List<Reservation> reservations = List.of(new Reservation(date, time, theme));
+        Reservation sut = new Reservation(date, time, theme);
 
         // when & them
         Assertions.assertThatThrownBy(() -> sut.validateDuplicateDateTime(reservations))
@@ -37,9 +36,8 @@ class ReservationTest {
         LocalDate date = LocalDate.of(2023, 1, 1);
         ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
         Theme theme = new Theme("a", "a", "a");
-        Member member = new Member("a", "a", "a");
 
-        Reservation sut = new Reservation(date, time, theme, member);
+        Reservation sut = new Reservation(date, time, theme);
 
         // when & them
         Assertions.assertThatCode(() -> sut.validateDuplicateDateTime(List.of()))
@@ -53,10 +51,9 @@ class ReservationTest {
         LocalDate date = LocalDate.of(1998, 1, 1);
         ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
         Theme theme = new Theme("a", "a", "a");
-        Member member = new Member("a", "a", "a");
         ReservationDueTimePolicy fixDueTimePolicy = new FixeDueTimePolicy();
 
-        Reservation sut = new Reservation(date, time, theme, member);
+        Reservation sut = new Reservation(date, time, theme);
 
         // when & then
         Assertions.assertThatThrownBy(() -> sut.validateDateTimeReservation(fixDueTimePolicy))
@@ -70,10 +67,9 @@ class ReservationTest {
         LocalDate date = LocalDate.of(1999, 1, 1);
         ReservationTime time = new ReservationTime(LocalTime.of(1, 1));
         Theme theme = new Theme("a", "a", "a");
-        Member member = new Member("a", "a", "a");
         ReservationDueTimePolicy fixDueTimePolicy = new FixeDueTimePolicy();
 
-        Reservation sut = new Reservation(date, time, theme, member);
+        Reservation sut = new Reservation(date, time, theme);
 
         // when & then
         Assertions.assertThatCode(() -> sut.validateDateTimeReservation(fixDueTimePolicy))

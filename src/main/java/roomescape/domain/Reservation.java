@@ -38,20 +38,16 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "theme_id", referencedColumnName = "id", nullable = false)
     private Theme theme;
-    @ManyToOne
-    @JoinColumn(name = "member_id", referencedColumnName = "id", nullable = false)
-    private Member member;
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme) {
+        this(null, date, time, theme);
     }
 
     public void validateDuplicateDateTime(List<Reservation> foundReservations) {

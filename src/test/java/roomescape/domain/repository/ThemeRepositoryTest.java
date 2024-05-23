@@ -5,17 +5,18 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
+@Transactional
 @SpringBootTest
 class ThemeRepositoryTest {
     @Autowired
@@ -26,14 +27,6 @@ class ThemeRepositoryTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
-
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        memberRepository.deleteAll();
-        themeRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("테마를 저장한다")
@@ -78,10 +71,10 @@ class ThemeRepositoryTest {
         Theme savedTheme2 = themeRepository.save(theme2);
         Theme savedTheme3 = themeRepository.save(theme3);
         Theme savedTheme4 = themeRepository.save(theme4);
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme1, member));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 2), savedTime, savedTheme2, member));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 3), savedTime, savedTheme3, member));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 4), savedTime, savedTheme4, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme1));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 2), savedTime, savedTheme2));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 3), savedTime, savedTheme3));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 2, 4), savedTime, savedTheme4));
 
         // when
         List<Theme> themesByPeriodWithLimit = themeRepository.findThemeByPeriodWithLimit(LocalDate.of(2023, 2, 2),

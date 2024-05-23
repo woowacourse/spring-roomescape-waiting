@@ -5,17 +5,18 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
+@Transactional
 @SpringBootTest
 class ReservationRepositoryTest {
     @Autowired
@@ -27,14 +28,6 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
-    @AfterEach
-    void tearDown() {
-        reservationRepository.deleteAll();
-        themeRepository.deleteAll();
-        memberRepository.deleteAll();
-        reservationTimeRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("예약에 대한 영속성을 저장한다")
     void save_ShouldStorePersistence() {
@@ -43,7 +36,7 @@ class ReservationRepositoryTest {
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Theme theme = new Theme("name", "desc", "thumb");
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(date, time, theme, member);
+        Reservation reservation = new Reservation(date, time, theme);
         memberRepository.save(member);
         reservationTimeRepository.save(time);
         themeRepository.save(theme);
@@ -67,7 +60,7 @@ class ReservationRepositoryTest {
         Theme savedTheme = themeRepository.save(theme);
         Member savedMember = memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, savedMember));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme));
 
         //when &then
         Assertions.assertThat(reservationRepository.findById(savedReservation.getId()))
@@ -104,7 +97,7 @@ class ReservationRepositoryTest {
         Member member = new Member("a", "b", "c");
         memberRepository.save(member);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme, member));
+                new Reservation(LocalDate.of(2023, 2, 1), savedTime, savedTheme));
 
         // when
         reservationRepository.delete(savedReservation);
@@ -128,10 +121,8 @@ class ReservationRepositoryTest {
 
         Member member1 = new Member("name1", "email", "password");
         Member savedMember1 = memberRepository.save(member1);
-        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1,
-                savedMember1);
-        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2,
-                savedMember1);
+        Reservation reservation1 = new Reservation(LocalDate.of(2023, 1, 1), savedTime, savedTheme1);
+        Reservation reservation2 = new Reservation(LocalDate.of(2023, 1, 2), savedTime, savedTheme2);
 
         Reservation savedReservation1 = reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -149,7 +140,7 @@ class ReservationRepositoryTest {
         Theme theme = new Theme("name", "desc", "thumb");
         ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
         Member member = new Member("name", "aa@aa.aa", "aa");
-        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme, member);
+        Reservation reservation = new Reservation(LocalDate.of(2023, 1, dayOfMonth), time, theme);
 
         themeRepository.save(theme);
         reservationTimeRepository.save(time);

@@ -108,8 +108,8 @@ class TimeAcceptanceTest extends AcceptanceFixture {
         Member member = memberRepository.save(new Member("aa", "aa@aa.aa", "aa"));
         Theme theme = themeRepository.save(new Theme("n", "d", "t"));
 
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 11), time1, theme, member));
-        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 12), time2, theme, member));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 11), time1, theme));
+        reservationRepository.save(new Reservation(LocalDate.of(2023, 12, 12), time2, theme));
 
         // when
         RestAssured

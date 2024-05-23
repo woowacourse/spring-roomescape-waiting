@@ -1,23 +1,19 @@
 package roomescape.domain.repository;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 
+@Transactional
 @SpringBootTest
 class MemberRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAll();
-    }
 
     @Test
     @DisplayName("회원 정보를 영속화한다")

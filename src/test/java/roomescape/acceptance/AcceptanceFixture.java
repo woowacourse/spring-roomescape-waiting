@@ -13,6 +13,7 @@ import io.restassured.RestAssured;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ReservationWaitRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.service.security.JwtProvider;
 
@@ -33,6 +34,8 @@ public abstract class AcceptanceFixture {
     protected ThemeRepository themeRepository;
     @Autowired
     protected MemberRepository memberRepository;
+    @Autowired
+    protected ReservationWaitRepository waitRepository;
 
     @BeforeEach
     void setUp() {
@@ -41,11 +44,13 @@ public abstract class AcceptanceFixture {
 
     @AfterEach
     void tearDown() {
+        waitRepository.deleteAll();
         reservationRepository.deleteAll();
         timeRepository.deleteAll();
         themeRepository.deleteAll();
         memberRepository.deleteAll();
 
+        jdbcTemplate.update("ALTER TABLE reservation_wait ALTER COLUMN id RESTART");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART");
