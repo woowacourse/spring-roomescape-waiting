@@ -1,6 +1,6 @@
 INSERT INTO member(name, email, password, role)
-VALUES ('dominic', 'test2@email.com', '1234', 'USER'),
-       ('ash', 'test@email.com', '1234', 'ADMIN');
+VALUES ('ash', 'test@email.com', '1234', 'ADMIN'),
+       ('dominic', 'test2@email.com', '1234', 'USER');
 
 INSERT INTO time_slot(start_at)
 VALUES ('10:00'),
