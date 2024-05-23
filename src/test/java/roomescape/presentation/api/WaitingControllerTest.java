@@ -21,7 +21,6 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
@@ -30,7 +29,7 @@ import roomescape.presentation.BaseControllerTest;
 import roomescape.presentation.dto.request.ReservationWebRequest;
 
 @Sql("/member.sql")
-class ReservationWaitingControllerTest extends BaseControllerTest {
+class WaitingControllerTest extends BaseControllerTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;

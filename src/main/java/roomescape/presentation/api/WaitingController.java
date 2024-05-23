@@ -9,33 +9,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.ReservationService;
+import roomescape.application.WaitingService;
 import roomescape.application.dto.request.ReservationWaitingRequest;
-import roomescape.application.dto.response.ReservationResponse;
+import roomescape.application.dto.response.WaitingResponse;
 import roomescape.presentation.Auth;
 import roomescape.presentation.dto.Accessor;
 import roomescape.presentation.dto.request.ReservationWaitingWebRequest;
 
 @RestController
-@RequestMapping("/reservations/waiting")
-public class ReservationWaitingController {
+@RequestMapping("/waitings")
+public class WaitingController {
 
-    private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationWaitingController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public WaitingController(WaitingService waitingService) {
+        this.waitingService = waitingService;
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservationWaiting(
+    public ResponseEntity<WaitingResponse> addReservationWaiting(
             @RequestBody @Valid ReservationWaitingWebRequest request,
             @Auth Accessor accessor
     ) {
         ReservationWaitingRequest reservationWaitingRequest = request.toReservationWaitingRequest(accessor.id());
-        ReservationResponse reservationResponse = reservationService.addReservationWaiting(reservationWaitingRequest);
+        WaitingResponse waitingResponse = waitingService.addWaiting(reservationWaitingRequest);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id() + "/waiting"))
-                .body(reservationResponse);
+        return ResponseEntity.created(URI.create("/waitings/" + waitingResponse.id()))
+                .body(waitingResponse);
     }
 
     @DeleteMapping("/{id}")
@@ -43,7 +43,7 @@ public class ReservationWaitingController {
             @PathVariable Long id,
             @Auth Accessor accessor
     ) {
-        reservationService.deleteReservationWaitingById(id, accessor.id());
+        waitingService.deleteWaitingById(id, accessor.id());
 
         return ResponseEntity.noContent().build();
     }

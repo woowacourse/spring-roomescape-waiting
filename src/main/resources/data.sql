@@ -24,30 +24,25 @@ VALUES ('admin@gmail.com', '$2a$10$MbGFqyn/u4wfggRK7HAqDeC1y9s1mESgmXV3b7e7GZT5u
        ('example3@gmail.com', '1234', '구름3', 'USER'),
        ('example4@gmail.com', '1234', '구름4', 'USER');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id, status)
-VALUES (CURRENT_DATE() - 7, 1, 1, 5, 'RESERVED'),
-       (CURRENT_DATE() - 7, 2, 1, 5, 'WAITING'),
-       (CURRENT_DATE() - 7, 3, 1, 5, 'WAITING'),
+INSERT INTO reservation (date, member_id, time_id, theme_id)
+VALUES (CURRENT_DATE() - 7, 1, 1, 5),
+       (CURRENT_DATE() - 6, 2, 3, 4),
+       (CURRENT_DATE() - 5, 2, 3, 3),
+       (CURRENT_DATE() - 4, 2, 1, 2),
+       (CURRENT_DATE() - 3, 1, 4, 1),
+       (CURRENT_DATE() - 2, 3, 1, 1),
+       (CURRENT_DATE() - 1, 2, 3, 2),
+       (CURRENT_DATE() + 2, 2, 1, 1);
 
-       (CURRENT_DATE() - 6, 1, 3, 4, 'WAITING'),
-       (CURRENT_DATE() - 6, 2, 3, 4, 'RESERVED'),
-       (CURRENT_DATE() - 6, 3, 3, 4, 'WAITING'),
-       (CURRENT_DATE() - 6, 4, 3, 4, 'WAITING'),
-
-       (CURRENT_DATE() - 5, 2, 3, 3, 'RESERVED'),
-       (CURRENT_DATE() - 5, 3, 3, 3, 'RESERVED'),
-       (CURRENT_DATE() - 5, 4, 3, 3, 'WAITING'),
-
-       (CURRENT_DATE() - 4, 1, 1, 2, 'WAITING'),
-       (CURRENT_DATE() - 4, 2, 1, 2, 'RESERVED'),
-       (CURRENT_DATE() - 4, 3, 1, 2, 'RESERVED'),
-
-       (CURRENT_DATE() - 3, 4, 4, 1, 'WAITING'),
-       (CURRENT_DATE() - 3, 1, 4, 1, 'RESERVED'),
-       (CURRENT_DATE() - 3, 2, 4, 1, 'RESERVED'),
-
-       (CURRENT_DATE() - 2, 3, 1, 1, 'RESERVED'),
-       (CURRENT_DATE() - 2, 4, 1, 1, 'RESERVED'),
-
-       (CURRENT_DATE() - 1, 2, 3, 2, 'RESERVED'),
-       (CURRENT_DATE() - 1, 1, 3, 2, 'WAITING');
+INSERT INTO waiting (date, member_id, time_id, theme_id)
+VALUES (CURRENT_DATE() - 7, 2, 1, 5),
+       (CURRENT_DATE() - 7, 3, 1, 5),
+       (CURRENT_DATE() - 6, 1, 3, 4),
+       (CURRENT_DATE() - 6, 3, 3, 4),
+       (CURRENT_DATE() - 6, 4, 3, 4),
+       (CURRENT_DATE() - 5, 4, 3, 3),
+       (CURRENT_DATE() - 4, 1, 1, 2),
+       (CURRENT_DATE() - 3, 4, 4, 1),
+       (CURRENT_DATE() - 1, 1, 3, 2),
+       (CURRENT_DATE() + 2, 3, 1, 1),
+       (CURRENT_DATE() + 2, 1, 1, 1);

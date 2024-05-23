@@ -15,7 +15,7 @@ import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,10 +36,10 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(
+    public Waiting(
             LocalDate date,
             Member member,
             ReservationTime time,
@@ -48,7 +48,7 @@ public class Reservation {
         this(null, date, member, time, theme);
     }
 
-    public Reservation(
+    public Waiting(
             Long id,
             LocalDate date,
             Member member,
@@ -64,7 +64,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation create(
+    public static Waiting create(
             LocalDateTime currentDateTime,
             LocalDate date,
             Member member,
@@ -74,12 +74,13 @@ public class Reservation {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
 
         if (reservationDateTime.isBefore(currentDateTime)) {
-            String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)", date, time.getStartAt());
+            String message = String.format("지나간 날짜/시간에 대한 예약 대기은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)", date,
+                    time.getStartAt());
 
             throw new DomainValidationException(message);
         }
 
-        return new Reservation(date, member, time, theme);
+        return new Waiting(date, member, time, theme);
     }
 
     private void validate(
@@ -117,7 +118,7 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) o;
+        Waiting that = (Waiting) o;
         return Objects.equals(id, that.id);
     }
 
