@@ -46,6 +46,58 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    public ReservationResponse save(ReservationCreateRequest request) {
+        Reservation reservation = getReservationForSave(request, Status.CONFIRMED);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    public ReservationResponse wait(ReservationCreateRequest request) {
+        Reservation reservation = getReservationForSave(request, Status.WAITING);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {
+        validateDuplicate(request);
+        ReservationTime reservationTime = getValidatedTime(request);
+        Member member = getValidatedMember(request);
+        RoomTheme roomTheme = getValidatedTheme(request);
+        return new Reservation(member, request.date(), reservationTime, roomTheme, status);
+    }
+
+    private void validateDuplicate(ReservationCreateRequest request) {
+        if (reservationRepository.hasSameReservation(request.date(), request.timeId(), request.themeId(),
+                request.memberId())) {
+            throw new BadRequestException("중복된 예약(대기)를 생성할 수 없습니다.");
+        }
+    }
+
+    private ReservationTime getValidatedTime(ReservationCreateRequest request) {
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("예약시간을 찾을 수 없습니다. timeId = " + request.timeId()));
+
+        validateOutdatedDateTime(request.date(), time.getStartAt());
+        return time;
+    }
+
+    private void validateOutdatedDateTime(LocalDate date, LocalTime time) {
+        LocalDateTime now = LocalDateTime.now(Clock.systemDefaultZone());
+        if (LocalDateTime.of(date, time).isBefore(now)) {
+            throw new BadRequestException("지나간 날짜와 시간에 대한 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private Member getValidatedMember(ReservationCreateRequest request) {
+        return memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다. memberId = " + request.memberId()));
+    }
+
+    private RoomTheme getValidatedTheme(ReservationCreateRequest request) {
+        return roomThemeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + request.themeId()));
+    }
+
     public ListResponse<ReservationResponse> findAll() {
         List<ReservationResponse> responses = reservationRepository.findAll()
                 .stream()
@@ -81,47 +133,16 @@ public class ReservationService {
         return new ListResponse<>(responses);
     }
 
-    public ReservationResponse save(ReservationCreateRequest reservationCreateRequest) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
-                .orElseThrow(
-                        () -> new NotFoundException("예약시간을 찾을 수 없습니다. timeId = " + reservationCreateRequest.timeId()));
-        validateOutdatedDateTime(reservationCreateRequest.date(), reservationTime.getStartAt());
-        Member member = memberRepository.findById(reservationCreateRequest.memberId())
-                .orElseThrow(() -> new NotFoundException(
-                        "사용자를 찾을 수 없습니다. memberId = " + reservationCreateRequest.memberId()));
-        RoomTheme roomTheme = roomThemeRepository.findById(reservationCreateRequest.themeId())
-                .orElseThrow(
-                        () -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + reservationCreateRequest.themeId()));
-        Status status = getStatus(reservationCreateRequest);
-
-        Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme, status);
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(savedReservation);
-    }
-
     public void deleteById(Long id) {
         reservationRepository.deleteById(id);
     }
 
     private void validateDateCondition(LocalDate dateFrom, LocalDate dateTo) {
+        if (dateFrom == null || dateTo == null) {
+            return;
+        }
         if (dateFrom.isAfter(dateTo)) {
             throw new BadRequestException("종료 날짜가 시작 날짜 이전일 수 없습니다.");
         }
-    }
-
-    private void validateOutdatedDateTime(LocalDate date, LocalTime time) {
-        LocalDateTime now = LocalDateTime.now(Clock.systemDefaultZone());
-        if (LocalDateTime.of(date, time).isBefore(now)) {
-            throw new BadRequestException("지나간 날짜와 시간에 대한 예약을 생성할 수 없습니다.");
-        }
-    }
-
-    private Status getStatus(ReservationCreateRequest request) {
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
-                request.themeId());
-        if (exists) {
-            return Status.WAITING;
-        }
-        return Status.CONFIRMED;
     }
 }
