@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.dto.response.FindReservationResponse;
 import roomescape.member.dto.response.FindWaitingRankResponse;
@@ -12,6 +13,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -25,13 +27,14 @@ public class MemberService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<FindMembersResponse> getMembers() {
         return memberRepository.findAll().stream()
                 .map(FindMembersResponse::of)
                 .toList();
     }
 
-
+    @Transactional(readOnly = true)
     public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(authInfo.getMemberId());
         return reservations.stream()
@@ -39,6 +42,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<FindWaitingRankResponse> getWaitingsByMember(AuthInfo authInfo) {
         return waitingRepository.findAllWaitingResponses(authInfo.getMemberId());
     }

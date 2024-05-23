@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.request.CreateThemeRequest;
 import roomescape.reservation.dto.response.CreateThemeResponse;
 import roomescape.reservation.dto.response.FindPopularThemesResponse;
@@ -13,6 +14,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -29,6 +31,7 @@ public class ThemeService {
         return CreateThemeResponse.from(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<FindThemeResponse> getThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -36,6 +39,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<FindPopularThemesResponse> getPopularThemes(Pageable pageable) {
         return themeRepository.findAllOrderByReservationCount(pageable).stream()
                 .map(FindPopularThemesResponse::from)

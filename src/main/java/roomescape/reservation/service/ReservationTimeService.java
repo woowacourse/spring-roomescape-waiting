@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.dto.request.CreateReservationTimeRequest;
 import roomescape.reservation.dto.response.CreateReservationTimeResponse;
 import roomescape.reservation.dto.response.FindReservationTimeResponse;
@@ -12,6 +13,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -37,12 +39,14 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<FindReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(FindReservationTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public FindReservationTimeResponse getReservationTime(final Long id) {
         ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다."));

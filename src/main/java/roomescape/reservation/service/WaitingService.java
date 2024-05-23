@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -22,6 +23,7 @@ import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -95,6 +97,7 @@ public class WaitingService {
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<FindWaitingResponse> getWaitings() {
         Map<Slot, List<Waiting>> waitingGroupsBySlot = waitingRepository.findAll().stream()
                 .collect(Collectors.groupingBy(Waiting::getSlot));

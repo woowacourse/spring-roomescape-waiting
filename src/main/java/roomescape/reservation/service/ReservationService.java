@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -21,6 +22,7 @@ import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -88,10 +90,12 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<FindReservationResponse> getReservations() {
         return mapToFindReservationResponse(reservationRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public FindReservationResponse getReservation(final Long id) {
         return FindReservationResponse.from(findReservation(id));
     }
@@ -101,6 +105,7 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<FindAvailableTimesResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Reservation> reservations = reservationRepository.findAllBySlot_DateAndSlot_ThemeId(date, themeId);
@@ -109,6 +114,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<FindReservationResponse> searchBy(final Long themeId, final Long memberId,
                                                   final LocalDate dateFrom, final LocalDate dateTo) {
         return mapToFindReservationResponse(

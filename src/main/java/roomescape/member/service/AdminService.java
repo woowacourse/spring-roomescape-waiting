@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.CreateReservationRequest;
 import roomescape.member.dto.response.CreateReservationResponse;
@@ -18,6 +19,7 @@ import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
+@Transactional
 public class AdminService {
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
