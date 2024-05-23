@@ -12,14 +12,14 @@ import java.util.stream.Stream;
 
 public class MemberReservationResponse {
 
-    private final long reservationId;
+    private final long id;
     private final String theme;
     private final LocalDate date;
     private final LocalTime time;
     private final String status;
 
-    private MemberReservationResponse(long reservationId, String theme, LocalDate date, LocalTime time, String status) {
-        this.reservationId = reservationId;
+    private MemberReservationResponse(long id, String theme, LocalDate date, LocalTime time, String status) {
+        this.id = id;
         this.theme = theme;
         this.date = date;
         this.time = time;
@@ -56,8 +56,8 @@ public class MemberReservationResponse {
         return Stream.concat(reservationResponses.stream(), waitingResponses.stream()).toList();
     }
 
-    public long getReservationId() {
-        return reservationId;
+    public long getId() {
+        return id;
     }
 
     public String getTheme() {
