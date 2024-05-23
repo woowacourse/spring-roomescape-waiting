@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     /*
     [4단계] 예약 대기 관리 기능
     예약 대기 목록 조회 endpoint 설정
-    TODO: 좋은 API인가? 에 대해 생각해보기
      */
     fetch('/reservations/waitings') // 내 예약 목록 조회 API 호출
         .then(response => {
@@ -72,7 +71,6 @@ function deny(event) {
     [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    // TODO: 아래 URL 맞나?
     const endpoint = `/reservations/waitings/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
