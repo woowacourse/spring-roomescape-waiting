@@ -49,8 +49,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간에 예약을 하면 예외가 발생한다.")
     void notExistReservationTimeIdExceptionTest() {
-        Theme theme = themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
-
+        themeRepository.save(new Theme("공포", "호러 방탈출", "http://asdf.jpg"));
         LoginMemberInToken loginMemberInToken = new LoginMemberInToken(1L, Role.MEMBER, "카키", "kaki@email.com");
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(
                 LocalDate.now(), 1L, 1L);

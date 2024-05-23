@@ -45,7 +45,7 @@ public class ReservationService {
     }
 
     private Reservation getValidatedReservation(ReservationCreateRequest reservationCreateRequest,
-                                                LoginMemberInToken loginMemberInToken) {
+            LoginMemberInToken loginMemberInToken) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationCreateRequest.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
 
@@ -72,12 +72,17 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllBySearch(ReservationSearchRequest reservationSearchRequest) {
-        Member member = memberRepository.findById(reservationSearchRequest.memberId()).get();
-        Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
+        Member member = memberRepository.findById(reservationSearchRequest.memberId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        Theme theme = themeRepository.findById(reservationSearchRequest.themeId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member,
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
+                        member,
                         theme,
-                        reservationSearchRequest.dateFrom(), reservationSearchRequest.dateTo()).stream()
+                        reservationSearchRequest.dateFrom(),
+                        reservationSearchRequest.dateTo()
+                ).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
