@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.domain.Member;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
-             SELECT new roomescape.domain.WaitingWithRank(
+             SELECT new roomescape.domain.reservation.WaitingWithRank(
                  w,
                  (SELECT COUNT(w2)
                   FROM Waiting w2

@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.Theme;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.request.ThemeRequest;
-import roomescape.service.dto.response.ThemeResponse;
+import roomescape.service.reservation.dto.ThemeRequest;
+import roomescape.service.reservation.dto.ThemeResponse;
+import roomescape.service.reservation.ThemeService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional

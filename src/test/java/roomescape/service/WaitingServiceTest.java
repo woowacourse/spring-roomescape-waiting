@@ -12,24 +12,25 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
-import roomescape.handler.exception.CustomException;
-import roomescape.handler.exception.ExceptionCode;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.Waiting;
+import roomescape.global.handler.exception.CustomException;
+import roomescape.global.handler.exception.ExceptionCode;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.request.WaitingRequest;
-import roomescape.service.dto.response.MemberResponse;
-import roomescape.service.dto.response.ReservationTimeResponse;
-import roomescape.service.dto.response.ThemeResponse;
-import roomescape.service.dto.response.WaitingResponse;
+import roomescape.service.reservation.dto.WaitingRequest;
+import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.reservation.dto.ReservationTimeResponse;
+import roomescape.service.reservation.dto.ThemeResponse;
+import roomescape.service.reservation.dto.WaitingResponse;
+import roomescape.service.reservation.WaitingService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional

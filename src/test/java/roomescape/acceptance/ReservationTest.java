@@ -15,9 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import roomescape.service.dto.request.ReservationRequest;
-import roomescape.service.dto.request.ReservationTimeRequest;
-import roomescape.service.dto.request.ThemeRequest;
+import roomescape.service.reservation.dto.ReservationRequest;
+import roomescape.service.reservation.dto.ReservationTimeRequest;
+import roomescape.service.reservation.dto.ThemeRequest;
 
 class ReservationTest extends AcceptanceTest {
 

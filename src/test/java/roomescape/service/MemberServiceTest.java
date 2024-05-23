@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Role;
+import roomescape.domain.member.Role;
 import roomescape.repository.MemberRepository;
-import roomescape.service.dto.request.MemberRequest;
-import roomescape.service.dto.response.MemberResponse;
+import roomescape.service.member.dto.MemberRequest;
+import roomescape.service.member.dto.MemberResponse;
+import roomescape.service.member.MemberService;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
