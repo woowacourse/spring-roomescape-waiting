@@ -25,8 +25,14 @@ public class Waiting {
     protected Waiting() {
     }
 
-    // TODO : isNotOwner를 생성자 내부로 이동
     public Waiting(Member member, Reservation reservation) {
+        if (reservation.isOwner(member)) {
+            throw new IllegalArgumentException(
+                    "[ERROR] 자신의 예약에 대한 예약 대기를 생성할 수 없습니다.",
+                    new Throwable("reservation_id : " + reservation.getId())
+            );
+        }
+
         this.member = member;
         this.reservation = reservation;
     }

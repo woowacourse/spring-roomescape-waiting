@@ -36,15 +36,14 @@ public class WaitingService {
     public List<WaitingResponse> getAllWaitings() {
         List<Waiting> waitings = waitingRepository.findAll();
 
-        return waitings
-                .stream().map(WaitingResponse::from)
+        return waitings.stream()
+                .map(WaitingResponse::from)
                 .toList();
     }
 
     public Long addWaiting(WaitingRequest waitingRequest) {
         Member member = findMember(waitingRequest.memberId());
         Reservation reservation = findReservation(waitingRequest);
-        validateReservationOwner(member, reservation);
         validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
 
         Waiting waiting = new Waiting(member, reservation);
@@ -90,15 +89,6 @@ public class WaitingService {
                         "[ERROR] 잘못된 예약 대기 정보 입니다.",
                         new Throwable("waiting_id : " + waitingId)
                 ));
-    }
-
-    private void validateReservationOwner(Member member, Reservation reservation) {
-        if (reservation.isOwner(member)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 자신의 예약에 대한 예약 대기를 생성할 수 없습니다.",
-                    new Throwable("reservation_id : " + reservation.getId())
-            );
-        }
     }
 
     private void validateWaitingOwner(Member member, Waiting waiting) {
