@@ -2,14 +2,12 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
+import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
 import java.util.stream.Stream;
@@ -19,9 +17,26 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
-@Sql("/truncate-with-guests.sql")
+@Sql("/truncate-with-admin-and-guest.sql")
 class ThemeAcceptanceTest extends AcceptanceTest {
     private long themeId;
+    private String adminToken;
+    private String guestToken;
+
+    @BeforeEach
+    void init() {
+        adminToken = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(new LoginRequest("admin123", "admin@email.com"))
+                .when().post("/login")
+                .then().log().all().extract().cookie("token");
+
+        guestToken = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(new LoginRequest("lini123", "lini@email.com"))
+                .when().post("/login")
+                .then().log().all().extract().cookie("token");
+    }
 
     @DisplayName("테마 추가 성공 테스트")
     @Test
@@ -83,6 +98,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 }),
                 DynamicTest.dynamicTest("테마를 삭제한다.", () -> {
                     RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .when().delete("/themes/" + themeId)
                             .then().log().all().statusCode(204);
 

@@ -20,9 +20,7 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
     private long timeId;
     private long themeId;
     private long guestId;
-    private long reservationId;
     private String adminToken;
-    private String guestToken;
 
     @BeforeEach
     void init() {
@@ -34,12 +32,6 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
         adminToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(new LoginRequest("admin123", "admin@email.com"))
-                .when().post("/login")
-                .then().log().all().extract().cookie("token");
-
-        guestToken = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(new LoginRequest("guest123", "guest@email.com"))
                 .when().post("/login")
                 .then().log().all().extract().cookie("token");
     }

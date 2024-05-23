@@ -190,7 +190,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(403)
-                            .body("message", is("예약을 삭제할 권한이 없습니다."));
+                            .body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
                 })
         );
     }
