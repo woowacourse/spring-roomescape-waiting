@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.Authenticated;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateMemberRequest;
@@ -34,13 +35,14 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<ListResponse<MyReservationResponse>> findMyReservations(AuthInfo authInfo) {
+    public ResponseEntity<ListResponse<MyReservationResponse>> findMyReservations(@Authenticated AuthInfo authInfo) {
         return ResponseEntity.ok(reservationService.findMyReservations(authInfo));
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
-            @Valid @RequestBody ReservationCreateMemberRequest memberRequest, AuthInfo authInfo
+            @RequestBody @Valid ReservationCreateMemberRequest memberRequest,
+            @Authenticated AuthInfo authInfo
     ) {
         ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(memberRequest, authInfo.id());
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
@@ -49,7 +51,9 @@ public class ReservationController {
 
     @PostMapping("/waiting")
     public ResponseEntity<ReservationResponse> createWaiting(
-            @Valid @RequestBody ReservationCreateMemberRequest memberRequest, AuthInfo authInfo) {
+            @RequestBody @Valid ReservationCreateMemberRequest memberRequest,
+            @Authenticated AuthInfo authInfo
+    ) {
         ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.from(memberRequest, authInfo.id());
         ReservationResponse reservationResponse = reservationService.wait(reservationCreateRequest);
         return ResponseEntity.created(URI.create("/reservations" + reservationResponse.id())).body(reservationResponse);

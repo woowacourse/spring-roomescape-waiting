@@ -8,7 +8,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.service.auth.AuthService;
-import roomescape.service.dto.AuthInfo;
 
 @Component
 public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
@@ -21,7 +20,7 @@ public class AuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(AuthInfo.class);
+        return parameter.hasParameterAnnotation(Authenticated.class);
     }
 
     @Override
