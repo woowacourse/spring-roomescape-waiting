@@ -26,4 +26,14 @@ public record MyReservationResponse(long reservationId, String themeName, LocalD
                 myReservationWithStatus.status().getStatus()
         );
     }
+
+    public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus, int waitingCount) {
+        return new MyReservationResponse(
+                myReservationWithStatus.memberReservationId(),
+                myReservationWithStatus.themeName(),
+                myReservationWithStatus.date(),
+                myReservationWithStatus.time(),
+                waitingCount + "번째 " + myReservationWithStatus.status().getStatus()
+        );
+    }
 }

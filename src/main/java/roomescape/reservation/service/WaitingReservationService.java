@@ -37,13 +37,7 @@ public class WaitingReservationService {
     private MyReservationResponse handler(MyReservationWithStatus myReservationWithStatus) {
         if (myReservationWithStatus.status().isWaiting()) {
             int waitingCount = memberReservationRepository.countWaitingMemberReservation(myReservationWithStatus.memberReservationId());
-            return new MyReservationResponse(
-                    myReservationWithStatus.memberReservationId(),
-                    myReservationWithStatus.themeName(),
-                    myReservationWithStatus.date(),
-                    myReservationWithStatus.time(),
-                    waitingCount + "번째 " + myReservationWithStatus.status().getStatus()
-            );
+            return MyReservationResponse.from(myReservationWithStatus, waitingCount);
         }
         return MyReservationResponse.from(myReservationWithStatus);
     }
