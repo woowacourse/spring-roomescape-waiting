@@ -3,9 +3,6 @@ package roomescape.exception.model;
 import org.springframework.http.HttpStatus;
 import roomescape.exception.ExceptionCode;
 
-// todo: 예외처리 추가
-//  같은 테마, 날짜, 시간이면 아예 예약 불가.
-//	 같은 테마, 날짜, 시간이면 "예약하기" 버튼 불가
 public enum ReservationExceptionCode implements ExceptionCode {
 
     RESERVATION_TIME_IS_PAST_EXCEPTION(HttpStatus.BAD_REQUEST, "지난 시간의 테마를 선택했습니다."),
