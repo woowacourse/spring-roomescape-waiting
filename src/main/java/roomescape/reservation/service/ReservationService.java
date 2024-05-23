@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.error.ErrorType;
@@ -111,17 +112,36 @@ public class ReservationService {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDate requestDate = request.date();
 
-        final ReservationTime requestReservationTime = reservationTimeService.findTimeById(request.timeId());
-        final Theme theme = themeService.findThemeById(request.themeId());
+        final ReservationTime requestTime = reservationTimeService.findTimeById(request.timeId());
+        final Theme requestTheme = themeService.findThemeById(request.themeId());
         final Member member = memberService.findMemberById(memberId);
 
-        validateDateAndTime(requestDate, requestReservationTime, now);
-        validateReservationDuplicate(request, theme);
+        validateDateAndTime(requestDate, requestTime, now);
+//        validateReservationDuplicate(request, requestTheme);
 
         // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
-        final Reservation savedReservation = reservationRepository.save(
-                request.toEntity(requestReservationTime, theme, member, ReservationStatus.RESERVED));
-        return ReservationResponse.from(savedReservation);
+
+        /*
+            1. 예약 추가
+            2. reservationRepository에서 (X일,Y시간,Z테마)인 예약을 가져온다.
+                2.1 예약이 있고 요청이 예약 대기라면 예약을 저장소에 추가한다.
+                2.2 예약이 없고 요청이 예약이라면 상태를 예약됨으로 바꾸고 저장소에 추가한다.
+                2.3 예약이 있고 요청이 예약이라면 예외가 발생한다. <- 불가능한 경우, API가 유효하지 않은 것으로 간주
+                2.4 예약이 없고 요청이 예약 대기라면 예외가 발생한다. <- 불가능한 경우, API가 유효하지 않은 것으로 간주
+
+           3. 요청에서 예약과 예약 대기를 구분하지 못하도록 했는데 위에는 무슨 경우니?
+                3.1 예약은 항상 대기상태다.
+                3.2 예약저장소에 예약이 있으면 예약을 그대로 집어넣는다.
+                3.3 예약저장소에 예약이 없으면 예약을 예약됨으로 바꾸고 집어넣는다.
+         */
+
+        Optional<Reservation> optional = reservationRepository.findOneByReservationTimeAndDateAndThemeAndReservationStatus(
+                requestTime, requestDate, requestTheme, ReservationStatus.RESERVED
+        );
+        ReservationStatus state = optional.isEmpty() ? ReservationStatus.RESERVED : ReservationStatus.WAITING;
+        Reservation saved = reservationRepository.save(
+                new Reservation(requestDate, requestTime, requestTheme, member, state));
+        return ReservationResponse.from(saved);
     }
 
     private void validateDateAndTime(
@@ -158,10 +178,10 @@ public class ReservationService {
     ) {
         final ReservationTime time = reservationTimeService.findTimeById(reservationRequest.timeId());
 
-        final List<Reservation> duplicateTimeReservations = reservationRepository.findByReservationTimeAndDateAndTheme(
-                time, reservationRequest.date(), theme);
+        Optional<Reservation> optional = reservationRepository.findOneByReservationTimeAndDateAndThemeAndReservationStatus(
+                time, reservationRequest.date(), theme, ReservationStatus.RESERVED);
 
-        if (!duplicateTimeReservations.isEmpty()) {
+        if (optional.isPresent()) {
             throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
                     String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s]", reservationRequest));
         }

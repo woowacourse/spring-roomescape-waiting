@@ -48,7 +48,7 @@ public class Reservation {
             final Theme theme,
             final Member member
     ) {
-        this(null, date, reservationTime, theme, member, ReservationStatus.RESERVED);
+        this(null, date, reservationTime, theme, member, ReservationStatus.WAITING);
     }
 
     public Reservation(

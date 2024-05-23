@@ -1,5 +1,6 @@
 package roomescape.reservation.dto.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
