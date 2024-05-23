@@ -7,6 +7,7 @@ import roomescape.global.exception.IllegalRequestException;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationWithWaiting;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
@@ -45,10 +46,19 @@ public class ReservationService {
     }
 
     public List<MemberReservation> findMemberReservationWithWaitingStatus(Long memberId) {
-        return reservationRepository.findByMemberIdWithWaiting(memberId)
-                .stream()
+        return reservationRepository.findByMemberId(memberId).stream()
+                .map(reservation -> new ReservationWithWaiting(reservation, countEarlierReservation(reservation)))
                 .map(MemberReservation::new)
                 .toList();
+    }
+
+    private int countEarlierReservation(Reservation reservation) {
+        return reservationRepository.countEarlierReservationOnSlot(
+                reservation.getId(),
+                reservation.getTimeId(),
+                reservation.getThemeId(),
+                reservation.getDate()
+        );
     }
 
     public List<WaitingResponse> findReservationsOnWaiting() {

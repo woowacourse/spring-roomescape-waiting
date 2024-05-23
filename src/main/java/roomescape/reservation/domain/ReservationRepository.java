@@ -20,26 +20,30 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                     @Param("dateFrom") LocalDate dateFrom,
                                                     @Param("dateTo") LocalDate dateTo);
 
+
+    List<Reservation> findByMemberId(Long memberId);
+
     @Query("""
-            SELECT new roomescape.reservation.domain.ReservationWithWaiting(
-                r1,(SELECT COUNT(r2) + 1
-                     FROM Reservation AS r2
-                     WHERE r2.date = r1.date
-                     AND r2.theme = r1.theme
-                     AND r2.time = r1.time
-                     AND r1.id > r2.id))
-            FROM Reservation AS r1
-            WHERE r1.member.id = :memberId
+            SELECT COUNT(r)
+            FROM Reservation AS r
+            WHERE r.date = :date
+            AND r.theme = :themeId
+            AND r.time = :timeId
+            AND r.id < :id
             """)
-    List<ReservationWithWaiting> findByMemberIdWithWaiting(@Param("memberId") Long memberId);
+    int countEarlierReservationOnSlot(@Param("id") Long id,
+                                      @Param("timeId") Long timeId,
+                                      @Param("themeId") Long themeId,
+                                      @Param("date") LocalDate date);
+
 
     @Query("""
             SELECT r
             FROM Reservation AS r
-            JOIN FETCH r.member 
-            WHERE r.date.value = :date
-            AND r.time.id = :timeId
-            AND r.theme.id = :themeId        
+            JOIN FETCH r.member
+            WHERE r.date.value =:date
+            AND r.time.id =:timeId
+            AND r.theme.id =:themeId
             """)
     List<Reservation> findByDateAndTimeAndTheme(@Param("date") LocalDate date,
                                                 @Param("timeId") Long timeId,
@@ -48,12 +52,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT r1
             FROM Reservation AS r1
-            WHERE (SELECT COUNT(r2)
-                     FROM Reservation AS r2
-                     WHERE r2.date = r1.date
-                     AND r2.theme = r1.theme
-                     AND r2.time = r1.time
-                     AND r1.id > r2.id) > 0
+            WHERE(SELECT COUNT(r2)
+            FROM Reservation AS r2
+            WHERE r2.date=r1.date
+            AND r2.theme = r1.theme
+            AND r2.time = r1.time
+            AND r1.id>r2.id) > 0
             """)
     List<Reservation> findReservationOnWaiting();
 

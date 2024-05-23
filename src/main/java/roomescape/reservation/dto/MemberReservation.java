@@ -21,7 +21,7 @@ public record MemberReservation(
         );
     }
 
-    private static String statusMessage(Long waitingNumber) {
+    private static String statusMessage(int waitingNumber) {
         if (waitingNumber > 1) {
             return waitingNumber + "번째 예약 대기";
         }

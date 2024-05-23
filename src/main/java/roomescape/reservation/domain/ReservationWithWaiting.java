@@ -6,9 +6,9 @@ import java.time.LocalTime;
 public class ReservationWithWaiting {
 
     private final Reservation reservation;
-    private final Long waitingNumber;
+    private final int waitingNumber;
 
-    public ReservationWithWaiting(Reservation reservation, Long waitingNumber) {
+    public ReservationWithWaiting(Reservation reservation, int waitingNumber) {
         this.reservation = reservation;
         this.waitingNumber = waitingNumber;
     }
@@ -33,7 +33,7 @@ public class ReservationWithWaiting {
         return reservation.getStartAt();
     }
 
-    public Long getWaitingNumber() {
+    public int getWaitingNumber() {
         return waitingNumber;
     }
 }
