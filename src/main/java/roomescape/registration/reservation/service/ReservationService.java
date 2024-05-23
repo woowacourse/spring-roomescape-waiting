@@ -68,7 +68,7 @@ public class ReservationService {
 
 
     public List<ReservationResponse> findReservations() {
-        List<Reservation> reservations = reservationRepository.findAllByOrderByDateAscTimeAsc();
+        List<Reservation> reservations = reservationRepository.findAllByOrderByDateAscReservationTimeAsc();
 
         return reservations.stream()
                 .map(ReservationResponse::from)

@@ -58,7 +58,7 @@ public class ReservationTimeService {
     }
 
     public void validateReservationExistence(long timeId) {
-        List<Reservation> reservation = reservationRepository.findByTimeId(timeId);
+        List<Reservation> reservation = reservationRepository.findByReservationTimeId(timeId);
 
         if (!reservation.isEmpty()) {
             throw new RoomEscapeException(ReservationTimeExceptionCode.EXIST_RESERVATION_AT_CHOOSE_TIME);

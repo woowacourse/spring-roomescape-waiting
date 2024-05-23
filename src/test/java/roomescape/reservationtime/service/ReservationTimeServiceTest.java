@@ -104,7 +104,7 @@ class ReservationTimeServiceTest {
                 new Member(1L, new Name("레모네"), "lemone@gmail.com", "lemon12", MemberRole.MEMBER))
         );
 
-        when(reservationRepository.findByTimeId(1L))
+        when(reservationRepository.findByReservationTimeId(1L))
                 .thenReturn(reservations);
 
         Throwable reservationExistAtTime = assertThrows(

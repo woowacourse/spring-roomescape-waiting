@@ -85,7 +85,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 찾는다.")
     void findReservations() {
-        when(reservationRepository.findAllByOrderByDateAscTimeAsc())
+        when(reservationRepository.findAllByOrderByDateAscReservationTimeAsc())
                 .thenReturn(List.of(reservation));
 
         List<ReservationResponse> reservationResponses = reservationService.findReservations();
