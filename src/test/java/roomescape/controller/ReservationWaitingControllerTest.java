@@ -57,4 +57,12 @@ class ReservationWaitingControllerTest extends ControllerTest {
                 .statusCode(400);
     }
 
+    @DisplayName("예약 대기를 삭제한다. -> 204")
+    @Test
+    void delete() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/" + 1)
+                .then().log().all()
+                .statusCode(204);
+    }
 }

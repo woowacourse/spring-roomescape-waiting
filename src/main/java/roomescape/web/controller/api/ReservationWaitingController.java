@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,8 +37,16 @@ public class ReservationWaitingController {
                 LocalDate.parse(request.date()), request.timeId(), request.themeId(), loginMember.id());
         ReservationWaitingAppResponse appResponse = reservationWaitingService.save(appRequest);
 
-        Long id = appResponse.id();
-        return ResponseEntity.created(URI.create("/reservations/waiting/" + id)).body(
-                ReservationWaitingWebResponse.from(appResponse));
+        ReservationWaitingWebResponse webResponse = ReservationWaitingWebResponse.from(appResponse);
+        Long id = webResponse.id();
+
+        return ResponseEntity.created(URI.create("/reservations/waiting/" + id)).body(webResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        reservationWaitingService.deleteBy(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

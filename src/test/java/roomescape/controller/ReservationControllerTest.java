@@ -130,7 +130,7 @@ class ReservationControllerTest extends ControllerTest {
 
         assertAll(
                 () -> assertEquals(1, responses.size()),
-                () -> assertEquals(1L, responses.get(0).reservationId())
+                () -> assertEquals(1L, responses.get(0).id())
         );
     }
 }
