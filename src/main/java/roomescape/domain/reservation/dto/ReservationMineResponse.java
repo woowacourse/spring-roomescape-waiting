@@ -10,7 +10,7 @@ import java.time.LocalTime;
 public record ReservationMineResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {
 
     public ReservationMineResponse(Reservation reservation) {
-        this(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(), reservation.getTime().getStartAt(), "예약");
+        this(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus().getValue());
     }
 
     @JsonFormat(pattern = "HH:mm")
