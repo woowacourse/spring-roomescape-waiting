@@ -34,13 +34,16 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    private LocalDateTime createdAt;
+
     public Reservation(
             final Long id,
             final Member member,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
-            final Status status
+            final Status status,
+            final LocalDateTime createdAt
     ) {
         validateDate(date);
         validateIsNotBeforeReservation(date, time);
@@ -50,6 +53,7 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
     protected Reservation() {
@@ -71,7 +75,7 @@ public class Reservation {
 
     public static Reservation of(final Member member, final LocalDate date, final ReservationTime time,
                                  final Theme theme, final Status status) {
-        return new Reservation(null, member, date, time, theme, status);
+        return new Reservation(null, member, date, time, theme, status, LocalDateTime.now());
     }
 
     public Long getId() {
@@ -96,6 +100,10 @@ public class Reservation {
 
     public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     @Override

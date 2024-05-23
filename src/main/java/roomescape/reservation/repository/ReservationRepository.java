@@ -3,14 +3,12 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 
-public interface ReservationRepository extends CrudRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     List<Reservation> findByTimeId(long timeId);
 
@@ -39,7 +37,5 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
                                                                       Optional<Status> status,
                                                                       LocalDate dateFrom, LocalDate dateTo);
 
-    @Modifying
-    @Query("delete from Reservation where id = :id")
-    int deleteById(@Param("id") long id);
+    Optional<Reservation> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(LocalDate date, long timeId, long themeId);
 }

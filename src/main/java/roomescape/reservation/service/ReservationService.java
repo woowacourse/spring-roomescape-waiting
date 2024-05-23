@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.dto.request.AdminReservationSaveRequest;
 import roomescape.reservation.controller.dto.request.ReservationSaveRequest;
 import roomescape.reservation.controller.dto.response.MemberReservationResponse;
-import roomescape.reservation.controller.dto.response.ReservationDeleteResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -21,7 +21,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -93,14 +93,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationDeleteResponse delete(final long id) {
-        validateNotExitsReservationById(id);
-        return new ReservationDeleteResponse(reservationRepository.deleteById(id));
+    public void delete(final long id) {
+        Reservation reservation = getById(id);
+        reservationRepository.delete(reservation);
+
+        Optional<Reservation> reservationWithStatusWaiting = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        );
+        reservationWithStatusWaiting.ifPresent(value -> value.setStatus(Status.RESERVATION));
     }
 
-    private void validateNotExitsReservationById(final long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
-            throw new NoSuchElementException("[ERROR] (themeId : " + id + ") 에 대한 예약이 존재하지 않습니다.");
-        }
+    private Reservation getById(long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] (themeId : " + id + ") 에 대한 예약이 존재하지 않습니다."));
     }
 }

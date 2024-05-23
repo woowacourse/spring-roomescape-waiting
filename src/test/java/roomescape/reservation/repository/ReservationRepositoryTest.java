@@ -1,7 +1,6 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -21,7 +20,7 @@ import roomescape.reservation.domain.Status;
 @DataJpaTest
 class ReservationRepositoryTest {
 
-    private static final int DEFAULT_RESERVATION_COUNT = 4;
+    private static final int DEFAULT_RESERVATION_COUNT = 5;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -54,17 +53,15 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.findAll()).hasSize(DEFAULT_RESERVATION_COUNT + 1);
     }
 
-    @DisplayName("id로 예약을 삭제한다.")
+    @DisplayName("예약을 삭제한다.")
     @Test
-    void deleteById() {
-        final var result = reservationRepository.deleteById(3);
+    void delete() {
+        Reservation reservation = reservationRepository.findById(3L).get();
+        reservationRepository.delete(reservation);
 
-        assertAll(
-                () -> assertThat(result).isEqualTo(1),
-                () -> assertThat(reservationRepository.findAll())
-                        .extracting(Reservation::getId)
-                        .doesNotContain(3L)
-        );
+        assertThat(reservationRepository.findAll())
+                .extracting(Reservation::getId)
+                .doesNotContain(3L);
     }
 
     @DisplayName("예약 시간 id로 예약을 조회한다.")
@@ -140,15 +137,22 @@ class ReservationRepositoryTest {
                                                          Long memberId,
                                                          Optional<Status> status,
                                                          LocalDate dateFrom,
-                                                         LocalDate dateTo,
-                                                         int size) {
+                                                         LocalDate dateTo) {
         final var result = reservationRepository.findByThemeIdAndMemberIdAndStatusAndDateBetween(
                 themeId, memberId, status, dateFrom, dateTo
         );
 
         assertThat(result)
-                .hasSize(size)
                 .allMatch(matchCondition(themeId, memberId, dateFrom, dateTo));
+    }
+
+    @Test
+    void findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt() {
+        Reservation result = reservationRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                LocalDate.parse("2024-06-30"), 1, 2
+        ).get();
+
+        assertThat(result).extracting(reservation -> reservation.getMember().getId()).isEqualTo(1L);
     }
 
     private static Stream<Arguments> getThemeIdAndMemberIdAndStatusDateBetween() {
@@ -156,14 +160,13 @@ class ReservationRepositoryTest {
         LocalDate dateTo = LocalDate.parse("2024-12-24");
 
         return Stream.of(
-                Arguments.of(null, null, Optional.empty(), null, null, DEFAULT_RESERVATION_COUNT),
-                Arguments.of(1L, null, Optional.empty(), null, null, 1),
-                Arguments.of(null, 1L, Optional.empty(), null, null, 2),
-                Arguments.of(null, null, Optional.empty(), dateFrom, null, 2),
-                Arguments.of(null, null, Optional.empty(), null, dateTo, 3),
-                Arguments.of(null, null, Optional.empty(), dateFrom, dateTo, 1),
-                Arguments.of(3L, 2L, Optional.empty(), dateFrom, dateTo, 0),
-                Arguments.of(null, null, Optional.of(Status.WAITING), null, null, 1)
+                Arguments.of(1L, null, Optional.empty(), null, null),
+                Arguments.of(null, 1L, Optional.empty(), null, null),
+                Arguments.of(null, null, Optional.empty(), dateFrom, null),
+                Arguments.of(null, null, Optional.empty(), null, dateTo),
+                Arguments.of(null, null, Optional.empty(), dateFrom, dateTo),
+                Arguments.of(3L, 2L, Optional.empty(), dateFrom, dateTo),
+                Arguments.of(null, null, Optional.of(Status.WAITING), null, null)
         );
     }
 

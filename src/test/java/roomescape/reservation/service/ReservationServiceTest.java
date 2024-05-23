@@ -60,9 +60,10 @@ class ReservationServiceTest {
         List<ReservationResponse> results = reservationService.findByFilter(memberId, null, null, null, null);
 
         // then
-        assertEquals(2, results.size());
+        assertEquals(3, results.size());
         assertThat(results.get(0).date()).isEqualTo(LocalDate.parse("2024-12-12"));
         assertThat(results.get(1).date()).isEqualTo(LocalDate.parse("2024-12-23"));
+        assertThat(results.get(2).date()).isEqualTo(LocalDate.parse("2024-06-30"));
     }
 
     @DisplayName("테마 번호를 기준으로 예약을 조회한다.")
@@ -103,10 +104,11 @@ class ReservationServiceTest {
         List<ReservationResponse> results = reservationService.findByFilter(null, null, null, null, dateTo);
 
         // then
-        assertEquals(3, results.size());
+        assertEquals(4, results.size());
         assertThat(results.get(0).date()).isEqualTo(LocalDate.parse("2024-12-12"));
         assertThat(results.get(1).date()).isEqualTo(LocalDate.parse("2024-12-23"));
         assertThat(results.get(2).date()).isEqualTo(LocalDate.parse("2024-06-30"));
+        assertThat(results.get(3).date()).isEqualTo(LocalDate.parse("2024-06-30"));
     }
 
     @DisplayName("상태로 예약을 조회한다.")
