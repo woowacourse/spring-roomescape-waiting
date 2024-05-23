@@ -53,6 +53,15 @@ public class MemberReservationController {
         return ResponseEntity.ok(reservations);
     }
 
+    @DeleteMapping("/waitings/{idWaiting}")
+    public ResponseEntity<Void> cancelWaiting(
+            @PathVariable(value = "idWaiting") Long waitingId,
+            MemberInfo memberInfo
+    ) {
+        reservationService.cancelReservation(waitingId, memberInfo);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/reservations/{idReservation}")
     public ResponseEntity<Void> cancelReservation(
             @PathVariable(value = "idReservation") Long reservationId,
