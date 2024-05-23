@@ -31,6 +31,7 @@ class WaitingApiTest {
     @Test
     void 전체_예약_대기_조회() {
         UserWaitingRequest waitingRequest = createUserWaitingRequest(1L, 1L);
+        addWaiting(waitingRequest);
 
         RestAssured.given().log().all()
                 .port(port)
