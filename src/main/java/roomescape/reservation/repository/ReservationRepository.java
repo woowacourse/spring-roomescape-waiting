@@ -3,6 +3,7 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,8 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate fromDate,
                                                             LocalDate toDate);
 
-    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
-
     @Query("""
             select r.reservationTime.id
             from Reservation r
@@ -26,4 +25,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Long> findIdByReservationsDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    Optional<Reservation> findByThemeIdAndDateAndReservationTimeStartAt(final Long themeId, LocalDate date, LocalTime startAt);
+
+    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
 }

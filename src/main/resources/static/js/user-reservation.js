@@ -1,4 +1,5 @@
 const THEME_API_ENDPOINT = '/themes';
+const WAITING_API_ENDPOINT = '/waiting';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -200,14 +201,11 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('', {
+        fetch(WAITING_API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
