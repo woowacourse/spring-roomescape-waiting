@@ -13,8 +13,6 @@ import java.util.Objects;
 @Entity
 public class Member {
 
-    private static final int NAME_MAX_LENGTH = 30;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
