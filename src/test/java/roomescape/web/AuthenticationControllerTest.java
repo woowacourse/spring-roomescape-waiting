@@ -20,7 +20,7 @@ import roomescape.domain.Role;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.service.security.JwtProvider;
 
-class AuthControllerTest extends ControllerTest {
+class AuthenticationControllerTest extends ControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,7 +81,7 @@ class AuthControllerTest extends ControllerTest {
     void when_haveExpiredToken_then_checkLoginFails() throws Exception {
         // given
         String token = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiTUVNQkVSIiwiZW1haWwiOiJwa3BrcGtwa0B3b293YS5uZXQifQ" +
-                ".o0PmXyH_dfrTl23OllhBVYJES5WhTMoG80SjpSz-nqU";
+                       ".o0PmXyH_dfrTl23OllhBVYJES5WhTMoG80SjpSz-nqU";
 
         // when, then
         mockMvc.perform(get("/login/check")

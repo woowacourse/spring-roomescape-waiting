@@ -17,14 +17,8 @@ import roomescape.service.dto.response.member.MemberResponse;
 
 @RestController
 @RequiredArgsConstructor
-public class MemberController {
+public class MemberManagementController {
     private final MemberService memberService;
-
-    @GetMapping("/members")
-    public ResponseEntity<List<MemberResponse>> findAllMember() {
-        List<MemberResponse> allMember = memberService.findAllMember();
-        return ResponseEntity.ok(allMember);
-    }
 
     @PostMapping("/members")
     public ResponseEntity<Void> signup(@RequestBody @Valid SignupRequest request) {
@@ -32,9 +26,15 @@ public class MemberController {
         return ResponseEntity.created(URI.create("/members/" + createdId)).build();
     }
 
-    @DeleteMapping("/members/{id}")
-    public ResponseEntity<Void> withdrawal(@PathVariable("id") String id) {
-        memberService.withdrawal(Long.valueOf(id));
+    @GetMapping("/members")
+    public ResponseEntity<List<MemberResponse>> findAllMembers() {
+        List<MemberResponse> allMember = memberService.findAllMember();
+        return ResponseEntity.ok(allMember);
+    }
+
+    @DeleteMapping("/members/{idMember}")
+    public ResponseEntity<Void> withdrawal(@PathVariable("idMember") Long memberId) {
+        memberService.withdrawal(memberId);
         return ResponseEntity.noContent().build();
     }
 }

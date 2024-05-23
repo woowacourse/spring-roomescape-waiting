@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-class ThemeControllerTest extends ExcludeInterceptorTest {
+class MemberThemeControllerTest extends ExcludeInterceptorTest {
 
     @Autowired
     private MockMvc mockMvc;

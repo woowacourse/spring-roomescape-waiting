@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-class MemberControllerTest extends ExcludeInterceptorTest {
+class MemberManagementControllerTest extends ExcludeInterceptorTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -1,6 +1,5 @@
 package roomescape.web.api;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +17,7 @@ import roomescape.service.security.JwtProvider;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthenticationController {
     private static final String TOKEN_COOKIE_KEY_NAME = "token";
 
     private final MemberService memberService;
@@ -33,8 +32,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        ResponseCookie cookie = createEmptyTokenCookie();
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = createCookieWithEmptyToken();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
@@ -48,7 +47,7 @@ public class AuthController {
         return ResponseEntity.ok().body(response);
     }
 
-    private ResponseCookie createEmptyTokenCookie() {
+    private ResponseCookie createCookieWithEmptyToken() {
         return ResponseCookie.from(TOKEN_COOKIE_KEY_NAME, "")
                 .path("/")
                 .httpOnly(true)

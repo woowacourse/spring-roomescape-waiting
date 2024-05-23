@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-class ReservationTimeControllerTest extends ExcludeInterceptorTest {
+class MemberReservationTimeControllerTest extends ExcludeInterceptorTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -26,7 +26,7 @@ class ReservationTimeControllerTest extends ExcludeInterceptorTest {
         String requestReservationTime = "{\"startAt\": \"10:00\"}";
 
         // when, then
-        mockMvc.perform(post("/times")
+        mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestReservationTime))
                 .andExpect(status().isCreated())
@@ -40,12 +40,12 @@ class ReservationTimeControllerTest extends ExcludeInterceptorTest {
         String requestReservationTime = "{\"startAt\": \"10:00\"}";
 
         // when, then
-        mockMvc.perform(post("/times")
+        mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestReservationTime))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/times")
+        mockMvc.perform(post("/admin/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestReservationTime))
                 .andExpect(status().isBadRequest());
@@ -66,7 +66,7 @@ class ReservationTimeControllerTest extends ExcludeInterceptorTest {
     @Test
     void when_deleteReservationTime_then_noContent() throws Exception {
         // when, then
-        mockMvc.perform(delete("/times/1"))
+        mockMvc.perform(delete("/admin/times/1"))
                 .andExpect(status().isNoContent());
     }
 
