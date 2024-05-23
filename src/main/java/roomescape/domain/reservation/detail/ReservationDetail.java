@@ -27,9 +27,25 @@ public class ReservationDetail {
     }
 
     public ReservationDetail(LocalDate date, ReservationTime time, Theme theme) {
+        validate(date, time, theme);
+
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    private void validate(LocalDate date, ReservationTime time, Theme theme) {
+        if (date == null) {
+            throw new IllegalArgumentException("예약 날짜는 필수 값입니다.");
+        }
+
+        if (time == null) {
+            throw new IllegalArgumentException("예약 시간은 필수 값입니다.");
+        }
+
+        if (theme == null) {
+            throw new IllegalArgumentException("테마는 필수 값입니다.");
+        }
     }
 
     public boolean isBefore(LocalDateTime now) {

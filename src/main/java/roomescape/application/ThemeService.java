@@ -61,7 +61,7 @@ public class ThemeService {
             throw new DomainNotFoundException(String.format("해당 id의 테마가 존재하지 않습니다. (id: %d)", id));
         }
 
-        if (reservationRepository.existsByDetail_TimeId(id)) {
+        if (reservationRepository.existsByDetail_ThemeId(id)) {
             throw new BadRequestException("해당 테마를 사용하는 예약이 존재합니다.");
         }
 
