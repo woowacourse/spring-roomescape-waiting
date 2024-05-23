@@ -54,13 +54,6 @@ class MemberAcceptanceTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> findAllMembers() {
         return Stream.of(
-                DynamicTest.dynamicTest("어드민이 로그인한다.", () -> {
-                    adminToken = RestAssured.given().log().all()
-                            .contentType(ContentType.JSON)
-                            .body(new LoginRequest("admin123", "admin@email.com"))
-                            .when().post("/login")
-                            .then().log().all().extract().cookie("token");
-                }),
                 DynamicTest.dynamicTest("어드민이 모든 사용자 정보를 조회한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)

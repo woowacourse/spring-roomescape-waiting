@@ -11,6 +11,7 @@ import roomescape.service.schedule.dto.ReservationTimeCreateRequest;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -19,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-admin-and-guest.sql")
 class ReservationTimeAcceptanceTest extends AcceptanceTest {
-    private long timeId;
     private String adminToken;
     private String guestToken;
 
@@ -67,7 +67,6 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @TestFactory
     Stream<DynamicTest> createDuplicateTime() {
         LocalTime time = LocalTime.of(10, 0);
-        ;
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     RestAssured.given().log().all()
@@ -109,14 +108,15 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("어드민이 시간 정보를 id로 삭제한다.")
     @TestFactory
     Stream<DynamicTest> deleteReservationTimeById() {
+        AtomicLong timeId = new AtomicLong();
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
-                    timeId = (int) RestAssured.given().log().all()
+                    timeId.set((int) RestAssured.given().log().all()
                             .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                             .when().post("/times")
-                            .then().log().all().extract().response().jsonPath().get("id");
+                            .then().log().all().extract().response().jsonPath().get("id"));
                     ;
                 }),
                 DynamicTest.dynamicTest("시간을 삭제한다.", () -> {
@@ -137,14 +137,15 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
     @DisplayName("일반 사용자는 시간 정보를 삭제할 수 없다.")
     @TestFactory
     Stream<DynamicTest> cannotDeleteReservationTimeByIdByGuest() {
+        AtomicLong timeId = new AtomicLong();
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
-                    timeId = (int) RestAssured.given().log().all()
+                    timeId.set((int) RestAssured.given().log().all()
                             .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                             .when().post("/times")
-                            .then().log().all().extract().response().jsonPath().get("id");
+                            .then().log().all().extract().response().jsonPath().get("id"));
                     ;
                 }),
                 DynamicTest.dynamicTest("시간을 삭제한다.", () -> {

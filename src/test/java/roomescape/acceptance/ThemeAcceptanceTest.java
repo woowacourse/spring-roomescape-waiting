@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.theme.dto.ThemeRequest;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -19,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Sql("/truncate-with-admin-and-guest.sql")
 class ThemeAcceptanceTest extends AcceptanceTest {
-    private long themeId;
     private String adminToken;
     private String guestToken;
 
@@ -111,15 +111,16 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("테마 삭제 성공 테스트")
     @TestFactory
     Stream<DynamicTest> deleteTheme() {
+        AtomicLong themeId = new AtomicLong();
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
-                    themeId = (int) RestAssured.given().log().all()
+                    themeId.set((int) RestAssured.given().log().all()
                             .cookie("token", adminToken)
                             .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
-                            .then().extract().response().jsonPath().get("id");
+                            .then().extract().response().jsonPath().get("id"));
                 }),
                 DynamicTest.dynamicTest("테마를 삭제한다.", () -> {
                     RestAssured.given().log().all()
@@ -140,15 +141,16 @@ class ThemeAcceptanceTest extends AcceptanceTest {
     @DisplayName("일반 사용자는 테마를 삭제할 수 없다.")
     @TestFactory
     Stream<DynamicTest> cannotDeleteThemeByGuest() {
+        AtomicLong themeId = new AtomicLong();
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
-                    themeId = (int) RestAssured.given().log().all()
+                    themeId.set((int) RestAssured.given().log().all()
                             .cookie("token", adminToken)
                             .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
-                            .then().extract().response().jsonPath().get("id");
+                            .then().extract().response().jsonPath().get("id"));
                 }),
                 DynamicTest.dynamicTest("테마를 삭제한다.", () -> {
                     RestAssured.given().log().all()
