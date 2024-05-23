@@ -22,7 +22,7 @@ public class AdminWaitingController {
         return ResponseEntity.ok(waitingService.findReservationWaitings());
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Void> approveReservationWaiting(@PathVariable final Long id) {
         waitingService.approveReservationWaiting(id);
         return ResponseEntity.ok().build();

@@ -54,7 +54,7 @@ public class WaitingAcceptanceTest extends AcceptanceTest {
 
         RestAssured.given().log().all()
                 .cookie("token", accessToken)
-                .when().put("/admin/waitings/" + id)
+                .when().patch("/admin/waitings/" + id)
                 .then().log().all()
                 .statusCode(200);
     }
