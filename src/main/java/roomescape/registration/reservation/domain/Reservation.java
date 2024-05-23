@@ -29,7 +29,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
+    private ReservationTime reservationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
@@ -40,19 +40,19 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(long id, LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
         validateAtSave(date);
-        validateAtSaveDateAndTime(date, time);
+        validateAtSaveDateAndTime(date, reservationTime);
 
         this.id = id;
         this.date = date;
-        this.time = time;
+        this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(NULL_ID, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member) {
+        this(NULL_ID, date, reservationTime, theme, member);
     }
 
     private void validateAtSave(LocalDate date) {
@@ -82,7 +82,7 @@ public class Reservation {
     }
 
     public ReservationTime getReservationTime() {
-        return time;
+        return reservationTime;
     }
 
     public Theme getTheme() {
