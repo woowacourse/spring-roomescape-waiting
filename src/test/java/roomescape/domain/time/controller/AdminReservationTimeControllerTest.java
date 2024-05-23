@@ -53,4 +53,14 @@ class AdminReservationTimeControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(404);
     }
+
+    @DisplayName("예약 가능 시각 목록을 불러올 수 있다. (200 OK)")
+    @Test
+    void should_response_bookable_time() {
+        RestAssured.given().log().all()
+                .when().get("/times/bookable?date=2024-05-10&themeId=4")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(5));
+    }
 }

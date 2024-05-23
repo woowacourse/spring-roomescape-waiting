@@ -7,11 +7,8 @@ import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.Reservation;
 import roomescape.domain.reservation.dto.*;
 import roomescape.domain.reservation.service.ReservationService;
-import roomescape.domain.time.dto.BookableTimeResponse;
-import roomescape.domain.time.dto.BookableTimesRequest;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -55,13 +52,6 @@ public class ReservationController {
         Reservation reservation = reservationService.addReservation(reservationAddRequest);
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
-    }
-
-    @GetMapping("/bookable-times")
-    public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("themeId") Long themeId) {
-        return ResponseEntity.ok(reservationService.findBookableTimes(new BookableTimesRequest(date, themeId)));
     }
 
     @GetMapping("/reservations/all")

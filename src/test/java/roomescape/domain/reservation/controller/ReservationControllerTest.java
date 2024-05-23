@@ -85,16 +85,6 @@ class ReservationControllerTest extends ControllerTest {
                 .body("status", is("RESERVATION_WAIT"));
     }
 
-    @DisplayName("예약 가능 시각 목록을 불러올 수 있다. (200 OK)")
-    @Test
-    void should_response_bookable_time() {
-        RestAssured.given().log().all()
-                .when().get("/bookable-times?date=2024-05-10&themeId=4")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(5));
-    }
-
     @DisplayName("존재하는 예약대기에 대한 삭제 요청시, 204 no content를 응답한다.")
     @Test
     void should_remove_reservation_wait_when_delete_request_reservations_id() {

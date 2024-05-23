@@ -36,7 +36,7 @@ public class ThemeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/theme-ranking")
+    @GetMapping("/theme/ranking")
     public ResponseEntity<List<Theme>> getThemeRank() {
         LocalDate now = LocalDate.now();
         return ResponseEntity.ok(themeService.getThemeRanking(now));
