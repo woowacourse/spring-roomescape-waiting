@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -38,5 +39,13 @@ public class ReservationDetail {
 
     public ReservationDetail(LocalDate date, ReservationTime time, Theme theme) {
         this(null, date, time, theme);
+    }
+
+    public boolean isBeforeNow() {
+        return date.isBefore(LocalDate.now());
+    }
+
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.of(date, time.getStartAt());
     }
 }

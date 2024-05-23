@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import roomescape.exception.reservation.CancelReservationException;
 
 @Entity
 @Getter
@@ -50,17 +51,33 @@ public class Reservation {
         this(null, member, detail, status, null);
     }
 
-    public boolean isNotOwner(Long id) {
-        return !this.member.getId().equals(id);
-    }
-
     public Reservation approve() {
+        if (this.isCanceled()) {
+            throw new CancelReservationException("이미 취소된 예약입니다.");
+        }
         this.status = Status.RESERVED;
         return this;
     }
 
-    public void cancel() {
+    public void cancel(Long memberId) {
+        if (this.isNotOwner(memberId)) {
+            throw new CancelReservationException("다른 회원의 예약을 취소할 수 없습니다.");
+        }
+        if (this.isReserved()) {
+            throw new CancelReservationException("예약 취소는 어드민만 할 수 있습니다.");
+        }
+        forceCancel();
+    }
+
+    public void forceCancel() {
+        if (this.isCanceled()) {
+            throw new CancelReservationException("이미 취소된 예약입니다.");
+        }
         this.status = Status.CANCELED;
+    }
+
+    public boolean isNotOwner(Long id) {
+        return !this.member.getId().equals(id);
     }
 
     public boolean isReserved() {

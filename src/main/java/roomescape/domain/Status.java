@@ -3,6 +3,12 @@ package roomescape.domain;
 public enum Status {
     WAITING,
     RESERVED,
-    CANCELED,
-    ;
+    CANCELED;
+
+    public static Status from(boolean isWaiting) {
+        if (isWaiting) {
+            return WAITING;
+        }
+        return RESERVED;
+    }
 }

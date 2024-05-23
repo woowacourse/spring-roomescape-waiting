@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.request.reservation.ReservationRequest;
-import roomescape.service.dto.request.reservation.ReservationSearchCond;
+import roomescape.service.dto.request.reservation.ReservationSearchCondition;
 import roomescape.service.dto.response.reservation.ReservationResponse;
 
 @RestController
@@ -33,7 +33,7 @@ public class AdminReservationController {
 
     @PostMapping("/admin/reservations/{idWaiting}")
     public ResponseEntity<ReservationResponse> approveWaiting(@PathVariable("idWaiting") Long waitingId) {
-        Reservation reservation = reservationService.approveReservation(waitingId);
+        Reservation reservation = reservationService.approveWaiting(waitingId);
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
 
@@ -50,7 +50,7 @@ public class AdminReservationController {
             @RequestParam("memberId") Long memberId,
             @RequestParam("themeId") Long themeId
     ) {
-        ReservationSearchCond searchQuery = new ReservationSearchCond(start, end, memberId, themeId);
+        ReservationSearchCondition searchQuery = new ReservationSearchCondition(start, end, memberId, themeId);
         List<ReservationResponse> reservations = reservationService.findAllReservationByConditions(searchQuery);
         return ResponseEntity.ok(reservations);
     }
@@ -63,13 +63,13 @@ public class AdminReservationController {
 
     @DeleteMapping("/admin/waitings/{idWaiting}")
     public ResponseEntity<Void> cancelWaiting(@PathVariable("idWaiting") Long waitingId) {
-        reservationService.cancelReservation(waitingId);
+        reservationService.forceCancelReservation(waitingId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/admin/reservations/{idReservation}")
     public ResponseEntity<Void> cancelReservation(@PathVariable("idReservation") Long reservationId) {
-        reservationService.cancelReservation(reservationId);
+        reservationService.forceCancelReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
