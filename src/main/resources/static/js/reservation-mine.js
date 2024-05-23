@@ -19,6 +19,7 @@ function render(data) {
     const date = item.date;
     const time = item.time;
     const status = item.status;
+    const rank = item.rank
 
     row.insertCell(0).textContent = theme;
     row.insertCell(1).textContent = date;
@@ -27,7 +28,7 @@ function render(data) {
     if (status === '예약') {
       row.insertCell(3).textContent = status;
     } else {
-      row.insertCell(3).textContent = `${item.rank}번쨰 ${item.status}`;
+      row.insertCell(3).textContent = `${rank}번쨰 ${status}`;
     }
 
     /*
