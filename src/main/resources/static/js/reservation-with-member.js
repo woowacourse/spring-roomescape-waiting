@@ -203,14 +203,14 @@ function applyFilter(event) {
 
     const themeId = document.getElementById('theme').value;
     const member = document.getElementById('member').value;
-    const dateFrom = document.getElementById('date-from').value;
-    const dateTo = document.getElementById('date-to').value;
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
 
     /*
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
           요청 포맷에 맞게 설정
     */
-    fetch(`/admin/reservations/confirmed?member=${member}&theme=${themeId}&start-date=${dateFrom}&end-date=${dateTo}`, { // 예약 검색 API 호출
+    fetch(`/admin/reservations/confirmed?member=${member}&theme=${themeId}&start-date=${startDate}&end-date=${endDate}`, { // 예약 검색 API 호출
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

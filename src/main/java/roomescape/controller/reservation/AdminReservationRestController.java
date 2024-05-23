@@ -33,9 +33,9 @@ public class AdminReservationRestController {
     public List<ReservationResponse> searchConfirmedReservations(
             @RequestParam(name = "member", required = false) String email,
             @RequestParam(name = "theme", required = false) Long themeId,
-            @RequestParam(name = "start-date", required = false) LocalDate dateFrom,
-            @RequestParam(name = "end-date", required = false) LocalDate dateTo) {
-        ReservationSearchParams request = new ReservationSearchParams(email, themeId, dateFrom, dateTo, CONFIRMED);
+            @RequestParam(name = "start-date", required = false) LocalDate startDate,
+            @RequestParam(name = "end-date", required = false) LocalDate endDate) {
+        ReservationSearchParams request = new ReservationSearchParams(email, themeId, startDate, endDate, CONFIRMED);
         return reservationService.searchConfirmedReservations(request);
     }
 

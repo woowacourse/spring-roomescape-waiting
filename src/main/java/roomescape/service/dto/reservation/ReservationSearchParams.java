@@ -6,19 +6,19 @@ import roomescape.domain.reservation.ReservationStatus;
 public class ReservationSearchParams {
     private final String email;
     private final Long themeId;
-    private final LocalDate dateFrom;
-    private final LocalDate dateTo;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
     private final ReservationStatus status;
 
     public ReservationSearchParams(String email,
                                    Long themeId,
-                                   LocalDate dateFrom,
-                                   LocalDate dateTo,
+                                   LocalDate startDate,
+                                   LocalDate endDate,
                                    ReservationStatus status) {
         this.email = email;
         this.themeId = themeId;
-        this.dateFrom = dateFrom;
-        this.dateTo = dateTo;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.status = status;
     }
 
@@ -30,12 +30,12 @@ public class ReservationSearchParams {
         return themeId;
     }
 
-    public LocalDate getDateFrom() {
-        return dateFrom;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public LocalDate getDateTo() {
-        return dateTo;
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
     public ReservationStatus getStatus() {

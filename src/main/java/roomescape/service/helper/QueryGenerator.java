@@ -22,11 +22,11 @@ public class QueryGenerator {
             if (request.getThemeId() != null) {
                 predicates.add(builder.equal(root.get("theme").get("id"), request.getThemeId()));
             }
-            if (request.getDateFrom() != null) {
-                predicates.add(builder.greaterThanOrEqualTo(root.get("date"), request.getDateFrom()));
+            if (request.getStartDate() != null) {
+                predicates.add(builder.greaterThanOrEqualTo(root.get("date"), request.getStartDate()));
             }
-            if (request.getDateTo() != null) {
-                predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getDateTo()));
+            if (request.getEndDate() != null) {
+                predicates.add(builder.lessThanOrEqualTo(root.get("date"), request.getEndDate()));
             }
             if (request.getStatus() != null) {
                 predicates.add(builder.equal(root.get("status"), request.getStatus()));
