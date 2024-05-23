@@ -52,7 +52,7 @@ class ReservationWaitRepositoryTest {
     @DisplayName("예약 대기 정보를 저장한다")
     void save_ShouldStoreReservationWaitInfo() {
         // given
-        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0, RESERVED);
+        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0);
 
         // when
         waitRepository.save(reservationWait);
@@ -73,9 +73,9 @@ class ReservationWaitRepositoryTest {
         reservationRepository.save(reservation2);
         reservationRepository.save(reservation3);
 
-        ReservationWait reservationWait1 = new ReservationWait(dummyMember, reservation1, 0, RESERVED);
-        ReservationWait reservationWait2 = new ReservationWait(dummyMember, reservation2, 1, WAITING);
-        ReservationWait reservationWait3 = new ReservationWait(dummyMember, reservation3, 1, WAITING);
+        ReservationWait reservationWait1 = new ReservationWait(dummyMember, reservation1, 0);
+        ReservationWait reservationWait2 = new ReservationWait(dummyMember, reservation2, 1);
+        ReservationWait reservationWait3 = new ReservationWait(dummyMember, reservation3, 1);
 
         waitRepository.save(reservationWait1);
         waitRepository.save(reservationWait2);
@@ -104,9 +104,9 @@ class ReservationWaitRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 1, WAITING);
-        ReservationWait wait2 = new ReservationWait(member2, dummyReservation, 1, WAITING);
-        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0, RESERVED);
+        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 1);
+        ReservationWait wait2 = new ReservationWait(member2, dummyReservation, 1);
+        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0);
 
         waitRepository.save(wait1);
         waitRepository.save(wait2);
@@ -130,9 +130,9 @@ class ReservationWaitRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 0, RESERVED);
-        ReservationWait wait2 = new ReservationWait(member1, dummyReservation, 1, WAITING);
-        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0, RESERVED);
+        ReservationWait wait1 = new ReservationWait(member1, dummyReservation, 0);
+        ReservationWait wait2 = new ReservationWait(member1, dummyReservation, 1);
+        ReservationWait wait3 = new ReservationWait(member2, dummyReservation, 0);
 
         waitRepository.save(wait1);
         waitRepository.save(wait2);
@@ -150,7 +150,7 @@ class ReservationWaitRepositoryTest {
     @DisplayName("멤버의 ID로 예약 대기 정보를 삭제할 수 있다")
     void deleteByMemberId_ShouldRemovePersistence() {
         // given
-        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0, RESERVED);
+        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0);
         waitRepository.save(reservationWait);
 
         // when
@@ -166,7 +166,7 @@ class ReservationWaitRepositoryTest {
     @DisplayName("예약의 ID로 예약 대기 정보를 삭제할 수 있다")
     void deleteByReservationId_ShouldRemovePersistence() {
         // given
-        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0, RESERVED);
+        ReservationWait reservationWait = new ReservationWait(dummyMember, dummyReservation, 0);
         waitRepository.save(reservationWait);
 
         // when
@@ -187,9 +187,9 @@ class ReservationWaitRepositoryTest {
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
 
-        ReservationWait reservationWait1 = new ReservationWait(dummyMember, reservation1, 0, RESERVED);
-        ReservationWait reservationWait2 = new ReservationWait(dummyMember, reservation2, 0, RESERVED);
-        ReservationWait reservationWait3 = new ReservationWait(dummyMember, reservation1, 0, RESERVED);
+        ReservationWait reservationWait1 = new ReservationWait(dummyMember, reservation1, 0);
+        ReservationWait reservationWait2 = new ReservationWait(dummyMember, reservation2, 0);
+        ReservationWait reservationWait3 = new ReservationWait(dummyMember, reservation1, 0);
 
         waitRepository.save(reservationWait1);
         waitRepository.save(reservationWait2);

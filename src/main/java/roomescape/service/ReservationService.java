@@ -72,7 +72,7 @@ public class ReservationService {
         Reservation verifiedReservation = verifyReservation(request, time, theme);
         Reservation savedReservation = reservationRepository.save(verifiedReservation);
 
-        waitRepository.save(new ReservationWait(member, savedReservation, 0, RESERVED));
+        waitRepository.save(new ReservationWait(member, savedReservation, 0));
         return ReservationResponse.from(savedReservation, member);
     }
 

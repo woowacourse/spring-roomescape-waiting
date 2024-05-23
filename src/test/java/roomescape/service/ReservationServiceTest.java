@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
 import roomescape.domain.Theme;
@@ -63,9 +62,9 @@ class ReservationServiceTest {
         Reservation reservation2 = reservationRepository.save(new Reservation(date, reservationTime, theme));
         Reservation reservation3 = reservationRepository.save(new Reservation(date, reservationTime, theme));
 
-        waitRepository.save(new ReservationWait(member, reservation1, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member, reservation2, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member, reservation3, 0, ReservationStatus.RESERVED));
+        waitRepository.save(new ReservationWait(member, reservation1, 0));
+        waitRepository.save(new ReservationWait(member, reservation2, 0));
+        waitRepository.save(new ReservationWait(member, reservation3, 0));
 
         // when
         List<ReservationResponse> reservations = reservationService.findAllReservation();
@@ -165,12 +164,12 @@ class ReservationServiceTest {
         Reservation savedReservation5 = reservationRepository.save(reservation5);
         Reservation savedReservation6 = reservationRepository.save(reservation6);
 
-        waitRepository.save(new ReservationWait(member1, savedReservation1, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member1, savedReservation2, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member1, savedReservation3, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member1, savedReservation4, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member1, savedReservation5, 0, ReservationStatus.RESERVED));
-        waitRepository.save(new ReservationWait(member2, savedReservation6, 0, ReservationStatus.RESERVED));
+        waitRepository.save(new ReservationWait(member1, savedReservation1, 0));
+        waitRepository.save(new ReservationWait(member1, savedReservation2, 0));
+        waitRepository.save(new ReservationWait(member1, savedReservation3, 0));
+        waitRepository.save(new ReservationWait(member1, savedReservation4, 0));
+        waitRepository.save(new ReservationWait(member1, savedReservation5, 0));
+        waitRepository.save(new ReservationWait(member2, savedReservation6, 0));
 
         ReservationSearchCond condition = new ReservationSearchCond(LocalDate.of(2023, JANUARY, 1),
                 LocalDate.of(2023, JANUARY, 2), member1.getName(), theme1.getName());
