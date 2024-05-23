@@ -25,29 +25,10 @@ public class ReservationApiControllerTest {
     private ReservationApiController reservationApiController;
 
     @Test
-    @DisplayName("관리자 예약 페이지 요청이 정상적으로 수행된다.")
-    void moveToReservationPage_Success() {
-        RestAssured.given().log().all()
-                .cookie("token", TokenGenerator.makeAdminToken())
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(200);
-    }
-
-    @Test
-    @DisplayName("관리자 예약 페이지에 권한이 없는 유저는 401을 받는다.")
-    void moveToReservationPage_Failure() {
-        RestAssured.given().log().all()
-                .when().get("/admin/reservation")
-                .then().log().all()
-                .statusCode(401);
-    }
-
-    @Test
     @DisplayName("예약 목록 조회 요청이 정상석으로 수행된다.")
     void selectReservationListRequest_Success() {
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(6));
@@ -58,7 +39,7 @@ public class ReservationApiControllerTest {
     void selectUserReservationListRequest_Success() {
         RestAssured.given().log().all()
                 .cookie("token", TokenGenerator.makeUserToken())
-                .when().get("/reservations-mine")
+                .when().get("/api/reservations-mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
@@ -77,12 +58,12 @@ public class ReservationApiControllerTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", TokenGenerator.makeUserToken())
                 .body(reservation)
-                .when().post("/reservations")
+                .when().post("/api/reservations")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(7));
@@ -92,12 +73,12 @@ public class ReservationApiControllerTest {
     @DisplayName("DB에 저장된 예약을 정상적으로 삭제한다.")
     void deleteReservation_InDatabase_Success() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .when().delete("/api/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5));

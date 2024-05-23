@@ -21,11 +21,11 @@ public class MemberApiController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/members")
+    @PostMapping("/api/members")
     public ResponseEntity<MemberIdAndNameResponse> signup(@RequestBody @Valid
                                                           SignupRequest request) {
         Member member = memberService.signUp(request);
-        return ResponseEntity.created(URI.create("/members/" + member.getId()))
+        return ResponseEntity.created(URI.create("/api/members/" + member.getId()))
                 .body(new MemberIdAndNameResponse(member.getId(), member.getName()));
     }
 }

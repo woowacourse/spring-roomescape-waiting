@@ -27,7 +27,7 @@ public class AdminWaitingApiController {
         this.reservationDeleteService = reservationDeleteService;
     }
 
-    @GetMapping("/admin/waitings")
+    @GetMapping("/api/admin/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaiting(@AuthenticatedMember Member member) {
         List<Reservation> waitings = reservationFindService.findWaitings();
         return ResponseEntity.ok(
@@ -37,7 +37,7 @@ public class AdminWaitingApiController {
         );
     }
 
-    @DeleteMapping("/admin/waitings/{id}")
+    @DeleteMapping("/api/admin/waitings/{id}")
     public ResponseEntity<Void> deleteReservation(@AuthenticatedMember Member member,
                                                   @PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.") long id) {

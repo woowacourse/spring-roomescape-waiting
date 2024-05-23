@@ -1,5 +1,5 @@
 let isEditing = false;
-const API_ENDPOINT = '/times';
+const API_ENDPOINT = '/api/times';
 const cellFields = ['id', 'startAt'];
 const createCellFields = ['', createInput()];
 

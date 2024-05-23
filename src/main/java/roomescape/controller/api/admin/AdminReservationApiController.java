@@ -29,7 +29,7 @@ public class AdminReservationApiController {
         this.reservationFindService = reservationFindService;
     }
 
-    @GetMapping("/admin/reservations/search")
+    @GetMapping("/api/admin/reservations/search")
     public ResponseEntity<List<ReservationResponse>> getSearchingReservations(@RequestParam long memberId,
                                                                               @RequestParam long themeId,
                                                                               @RequestParam LocalDate dateFrom,
@@ -42,11 +42,11 @@ public class AdminReservationApiController {
         );
     }
 
-    @PostMapping("/admin/reservations")
+    @PostMapping("/api/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid
                                                                      ReservationAdminSaveRequest request) {
         Reservation newReservation = adminReservationCreateService.createReservation(request);
-        return ResponseEntity.created(URI.create("/admin/reservations/" + newReservation.getId()))
+        return ResponseEntity.created(URI.create("/api/admin/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
 }

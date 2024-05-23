@@ -36,7 +36,7 @@ public class ThemeApiController {
         this.themeDeleteService = themeDeleteService;
     }
 
-    @GetMapping("/themes")
+    @GetMapping("/api/themes")
     public ResponseEntity<List<ThemeResponse>> getThemes() {
         List<Theme> themes = themeFindService.findThemes();
         return ResponseEntity.ok(
@@ -46,7 +46,7 @@ public class ThemeApiController {
         );
     }
 
-    @GetMapping("/themes/ranks")
+    @GetMapping("/api/themes/ranks")
     public ResponseEntity<List<ThemeResponse>> getThemeRanks() {
         List<Theme> themes = themeFindService.findThemeRanks();
         return ResponseEntity.ok(
@@ -56,15 +56,15 @@ public class ThemeApiController {
         );
     }
 
-    @PostMapping("/themes")
+    @PostMapping("/api/themes")
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody @Valid
                                                   ThemeSaveRequest request) {
         Theme theme = themeCreateService.createTheme(request);
-        return ResponseEntity.created(URI.create("/themes/" + theme.getId()))
+        return ResponseEntity.created(URI.create("/api/themes/" + theme.getId()))
                 .body(new ThemeResponse(theme));
     }
 
-    @DeleteMapping("/themes/{id}")
+    @DeleteMapping("/api/themes/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable
                                             @Positive(message = "1 이상의 값만 입력해주세요.")
                                             long id) {

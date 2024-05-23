@@ -24,7 +24,7 @@ class WaitingApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 2L))
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().post("/waiting")
+                .when().post("/api/waitings")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -36,7 +36,7 @@ class WaitingApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(new ReservationSaveRequest(LocalDate.now().plusDays(1L), 1L, 1L))
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().post("/waiting")
+                .when().post("/api/waitings")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -47,7 +47,7 @@ class WaitingApiControllerTest {
         RestAssured.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().get("/admin/waitings")
+                .when().get("/api/admin/waitings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(4));
@@ -58,7 +58,7 @@ class WaitingApiControllerTest {
     void deleteWaiting() {
         RestAssured.given().log().all()
                 .cookie("token", TokenGenerator.makeAdminToken())
-                .when().delete("/admin/waitings/2")
+                .when().delete("/api/admin/waitings/2")
                 .then().log().all()
                 .statusCode(204);
     }

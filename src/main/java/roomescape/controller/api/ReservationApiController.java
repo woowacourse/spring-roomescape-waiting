@@ -41,7 +41,7 @@ public class ReservationApiController {
         this.reservationDeleteService = reservationDeleteService;
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/api/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<Reservation> reservations = reservationFindService.findReservations();
         return ResponseEntity.ok(
@@ -51,7 +51,7 @@ public class ReservationApiController {
         );
     }
 
-    @GetMapping("/reservations-mine")
+    @GetMapping("/api/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> getUserReservations(@AuthenticatedMember Member member) {
         List<ReservationWaitingWithRank> reservationWaitingWithRanks =
                 reservationFindService.findMemberReservations(member.getId());
@@ -62,7 +62,7 @@ public class ReservationApiController {
         );
     }
 
-    @PostMapping("/reservations")
+    @PostMapping("/api/reservations")
     public ResponseEntity<ReservationResponse> addReservationByUser(@RequestBody @Valid
                                                                     ReservationSaveRequest request,
                                                                     @AuthenticatedMember Member member) {
@@ -71,11 +71,11 @@ public class ReservationApiController {
                 member,
                 ReservationStatus.RESERVED
         );
-        return ResponseEntity.created(URI.create("/reservations/" + newReservation.getId()))
+        return ResponseEntity.created(URI.create("/api/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/api/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.")
                                                   long id) {

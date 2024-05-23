@@ -19,7 +19,7 @@ class AuthApiControllerTest {
         RestAssured.given().log().all()
                 .body(new LoginRequest("user@naver.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
+                .when().post("/api/login")
                 .then().log().all()
                 .statusCode(200);
     }
@@ -30,7 +30,7 @@ class AuthApiControllerTest {
         RestAssured.given().log().all()
                 .body(new LoginRequest("wrong@naver.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
+                .when().post("/api/login")
                 .then().log().all()
                 .statusCode(401);
     }
@@ -40,7 +40,7 @@ class AuthApiControllerTest {
     void authenticatedMemberLoginCheck_Success() {
         MemberIdAndNameResponse response = RestAssured.given().log().all()
                 .cookie("token", TokenGenerator.makeUserToken())
-                .when().get("/login/check")
+                .when().get("/api/login/check")
                 .then().log().all()
                 .statusCode(200).extract().as(MemberIdAndNameResponse.class);
 
@@ -51,7 +51,7 @@ class AuthApiControllerTest {
     @DisplayName("로그인하지 않은 사용자의 인증 정보 조회 시, 실패한다.")
     void authenticatedMemberLoginCheck_Failure() {
         RestAssured.given().log().all()
-                .when().get("/login/check")
+                .when().get("/api/login/check")
                 .then().log().all()
                 .statusCode(401);
     }

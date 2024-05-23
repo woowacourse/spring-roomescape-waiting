@@ -19,7 +19,7 @@ public class ThemeApiControllerTest {
     @DisplayName("테마 조회를 정상적으로 수행한다.")
     void findTheme_Success() {
         RestAssured.given().log().all()
-                .when().get("/themes")
+                .when().get("/api/themes")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(3));
@@ -36,13 +36,13 @@ public class ThemeApiControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/themes")
+                .when().post("/api/themes")
                 .then().log().all()
                 .statusCode(201)
                 .body("id", is(4));
 
         RestAssured.given().log().all()
-                .when().get("/themes")
+                .when().get("/api/themes")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(4));
@@ -52,12 +52,12 @@ public class ThemeApiControllerTest {
     @DisplayName("테마 삭제를 정상적으로 수행한다.")
     void deleteTheme_Success() {
         RestAssured.given().log().all()
-                .when().delete("/themes/3")
+                .when().delete("/api/themes/3")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/themes")
+                .when().get("/api/themes")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));

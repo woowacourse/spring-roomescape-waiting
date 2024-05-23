@@ -10,7 +10,7 @@ public class TokenGenerator {
         return RestAssured.given().log().all()
                 .body(new LoginRequest("user@naver.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
+                .when().post("/api/login")
                 .then().log().cookies().extract().cookie("token");
     }
 
@@ -18,7 +18,7 @@ public class TokenGenerator {
         return RestAssured.given().log().all()
                 .body(new LoginRequest("admin@naver.com", "1234"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
+                .when().post("/api/login")
                 .then().log().cookies().extract().cookie("token");
     }
 }

@@ -1,4 +1,4 @@
-const THEME_API_ENDPOINT = '/themes';
+const THEME_API_ENDPOINT = 'api/themes';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -80,7 +80,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    fetch(`/times/available?date=${date}&themeId=${themeId}`, { // 예약 가능 시간 조회 API endpoint
+    fetch(`/api/times/available?date=${date}&themeId=${themeId}`, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ function onReservationButtonClick() {
             timeId: selectedTimeId,
         };
 
-        fetch('/reservations', {
+        fetch('/api/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -187,7 +187,7 @@ function onWaitButtonClick() {
             timeId: selectedTimeId
         };
 
-        fetch('/waiting', {
+        fetch('/api/waitings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

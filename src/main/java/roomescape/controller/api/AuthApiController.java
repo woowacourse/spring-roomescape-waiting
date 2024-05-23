@@ -23,12 +23,12 @@ public class AuthApiController {
         this.authService = authService;
     }
 
-    @GetMapping("/login/check")
+    @GetMapping("/api/login/check")
     public ResponseEntity<MemberIdAndNameResponse> getMemberLoginInfo(@AuthenticatedMember Member member) {
         return ResponseEntity.ok(new MemberIdAndNameResponse(member.getId(), member.getName()));
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<Void> login(@RequestBody @Valid
                                       LoginRequest request,
                                       HttpServletResponse response) {

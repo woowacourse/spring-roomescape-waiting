@@ -25,18 +25,18 @@ public class ReservationTimeApiControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(time)
-                .when().post("/times")
+                .when().post("/api/times")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times")
+                .when().get("/api/times")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(4));
 
         RestAssured.given().log().all()
-                .when().delete("/times/4")
+                .when().delete("/api/times/4")
                 .then().log().all()
                 .statusCode(204);
     }

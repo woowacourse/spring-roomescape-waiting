@@ -11,22 +11,22 @@ public class AdminController {
         return "admin/index";
     }
 
-    @GetMapping("/admin/time")
+    @GetMapping("/admin/times")
     public String reservationTimeAdminPage() {
         return "admin/time";
     }
 
-    @GetMapping("/admin/reservation")
+    @GetMapping("/admin/reservations")
     public String reservationAdminPage() {
         return "admin/reservation-new";
     }
 
-    @GetMapping("/admin/theme")
+    @GetMapping("/admin/themes")
     public String themeAdminPage() {
         return "admin/theme";
     }
 
-    @GetMapping("/admin/waiting")
+    @GetMapping("/admin/waitings")
     public String waitingAdminPage() {
         return "admin/waiting";
     }

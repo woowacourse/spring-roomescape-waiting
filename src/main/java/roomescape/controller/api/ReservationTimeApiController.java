@@ -40,7 +40,7 @@ public class ReservationTimeApiController {
         this.reservationTimeDeleteService = reservationTimeDeleteService;
     }
 
-    @GetMapping("/times")
+    @GetMapping("/api/times")
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
         List<ReservationTime> reservationTimes = reservationTimeFindService.findReservationTimes();
         return ResponseEntity.ok(
@@ -50,7 +50,7 @@ public class ReservationTimeApiController {
         );
     }
 
-    @GetMapping("/times/available")
+    @GetMapping("/api/times/available")
     public ResponseEntity<List<BookingStatusResponse>> getReservationTimesIsBooked(@RequestParam LocalDate date,
                                                                                    @RequestParam
                                                                                    @Positive(message = "1 이상의 값만 입력해주세요.")
@@ -68,15 +68,15 @@ public class ReservationTimeApiController {
         );
     }
 
-    @PostMapping("/times")
+    @PostMapping("/api/times")
     public ResponseEntity<ReservationTimeResponse> addReservationTime(
             @RequestBody @Valid ReservationTimeSaveRequest request) {
         ReservationTime reservationTime = reservationTimeCreateService.createReservationTime(request);
-        return ResponseEntity.created(URI.create("times/" + reservationTime.getId()))
+        return ResponseEntity.created(URI.create("api/times/" + reservationTime.getId()))
                 .body(new ReservationTimeResponse(reservationTime));
     }
 
-    @DeleteMapping("/times/{id}")
+    @DeleteMapping("/api/times/{id}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable
                                                       @Positive(message = "1 이상의 값만 입력해주세요.")
                                                       long id) {

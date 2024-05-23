@@ -1,8 +1,8 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
-const TIME_API_ENDPOINT = '/times';
-const THEME_API_ENDPOINT = '/themes';
-const MEMBER_API_ENDPOINT = '/admin/members';
+const RESERVATION_API_ENDPOINT = '/api/reservations';
+const TIME_API_ENDPOINT = '/api/times';
+const THEME_API_ENDPOINT = '/api/themes';
+const MEMBER_API_ENDPOINT = '/api/admin/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -192,7 +192,7 @@ function applyFilter(event) {
     const dateFrom = document.getElementById('date-from').value;
     const dateTo = document.getElementById('date-to').value;
 
-    fetch(`/admin/reservations/search?memberId=${memberId}&themeId=${themeId}&dateFrom=${dateFrom}&dateTo=${dateTo}`, {
+    fetch(`/api/admin/reservations/search?memberId=${memberId}&themeId=${themeId}&dateFrom=${dateFrom}&dateTo=${dateTo}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -211,7 +211,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/admin/reservations', requestOptions)
+    return fetch('/api/admin/reservations', requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
