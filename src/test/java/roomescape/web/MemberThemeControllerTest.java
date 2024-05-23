@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ class MemberThemeControllerTest extends ExcludeInterceptorTest {
                               ".cc/cLqW2JLB/theme-SOS-SOS.jpg\"}";
 
         // when, then
-        mockMvc.perform(post("/themes")
+        mockMvc.perform(post("/admin/themes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestTheme))
                 .andExpect(status().isCreated())
@@ -50,17 +49,18 @@ class MemberThemeControllerTest extends ExcludeInterceptorTest {
     @Test
     void when_deleteTheme_then_noContent() throws Exception {
         // when, then
-        mockMvc.perform(delete("/themes/1"))
+        mockMvc.perform(delete("/admin/themes/1"))
                 .andExpect(status().isNoContent());
     }
 
-    @Disabled
     @DisplayName("상위 10개 테마를 조회한다")
+    @Sql(value = {"/test-data/themes.sql", "/test-data/members.sql", "/test-data/times.sql",
+            "/test-data/reservations-details.sql", "/test-data/past-reservations.sql"})
     @Test
     void when_getTop10Themes_then_returnThemes() throws Exception {
         // when, then
-        mockMvc.perform(get("/themes/tops"))
+        mockMvc.perform(get("/themes/ranking"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.themes", hasSize(10)));
+                .andExpect(jsonPath("$", hasSize(10)));
     }
 }

@@ -1,13 +1,17 @@
-SET REFERENTIAL_INTEGRITY FALSE;
+set referential_integrity false;
 
-TRUNCATE TABLE reservation_detail;
-TRUNCATE TABLE reservation_time;
-TRUNCATE TABLE theme;
-TRUNCATE TABLE members;
+truncate table reservation_detail;
+truncate table reservation_time;
+truncate table theme;
+truncate table members;
 
-ALTER TABLE reservation_detail ALTER COLUMN ID RESTART WITH 1;
-ALTER TABLE reservation_time ALTER COLUMN ID RESTART WITH 1;
-ALTER TABLE theme ALTER COLUMN ID RESTART WITH 1;
-ALTER TABLE members ALTER COLUMN ID RESTART WITH 1;
+alter table reservation_detail
+    alter column id restart with 1;
+alter table reservation_time
+    alter column id restart with 1;
+alter table theme
+    alter column id restart with 1;
+alter table members
+    alter column id restart with 1;
 
-SET REFERENTIAL_INTEGRITY TRUE;
+set referential_integrity true;

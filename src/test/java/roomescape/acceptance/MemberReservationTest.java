@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -409,7 +408,6 @@ class MemberReservationTest {
                 .body("findAll { it.status == '1번째 예약' }.size()", is(3));
     }
 
-    @Disabled
     @DisplayName("과거의 예약과 예약 대기는 조회되지 않는다")
     @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
@@ -529,5 +527,4 @@ class MemberReservationTest {
                 .when().delete("/reservations/1")
                 .then().log().all().statusCode(400);
     }
-
 }
