@@ -19,9 +19,15 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
 
-        authService.getAuthInfo(request.getCookies());
-
-        // getAuthInfo()에서 예외가 발생하지 않으면 정상 처리
+        try {
+            if (authService.getAuthInfo(request.getCookies()) == null) {
+                response.sendRedirect("/login");
+                return false;
+            }
+        } catch (Exception e) {
+            response.sendRedirect("/login");
+            return false;
+        }
         return true;
     }
 }
