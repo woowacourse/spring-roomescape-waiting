@@ -20,6 +20,7 @@ import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -48,6 +49,7 @@ public class ReservationService {
     }
 
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
+        // TODO: 중복 메서드 처리
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservationAddRequest.date(),
                 reservationAddRequest.timeId(), reservationAddRequest.themeId(), Status.RESERVATION)) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약을 할 수 없습니다.");
@@ -130,9 +132,15 @@ public class ReservationService {
     }
 
     public void removeReservationWait(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
+        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
+
+        if (reservationOptional.isEmpty()) {
             throw new EntityNotFoundException("해당 id를 가진 예약대기가 존재하지 않습니다.");
         }
+        if (reservationOptional.get().getStatus().equals(Status.RESERVATION)) {
+            throw new IllegalArgumentException("예약은 삭제할 수 없습니다.");
+        }
+
         reservationRepository.deleteById(id);
     }
 }

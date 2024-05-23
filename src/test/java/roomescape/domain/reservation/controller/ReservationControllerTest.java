@@ -86,17 +86,26 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void should_remove_reservation_wait_when_delete_request_reservations_id() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/6")
+                .when().delete("/reservations/wait/9")
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     @DisplayName("존재하지 않는 예약대기에 대한 삭제 요청시, 404 Not Found를 응답한다.")
     @Test
-    void should_response_bad_request_when_nonExist_id() {
+    void should_response_not_found_when_nonExist_id() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/21")
+                .when().delete("/reservations/wait/21")
                 .then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value());
+    }
+
+    @DisplayName("예약 삭제 요청 시, 500 Internal Server Error를 응답한다.")
+    @Test
+    void should_response_internal_server_error_when_delete_reservation() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/wait/20")
+                .then().log().all()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 }
