@@ -119,7 +119,7 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ReservationOrWaitingResponse> findReservationsByMember(MemberRequest memberRequest) {
         return reservationRepository.findByMember(memberRequest.toMember())
                 .stream()
