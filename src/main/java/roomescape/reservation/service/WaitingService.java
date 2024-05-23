@@ -43,7 +43,7 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public CreateWaitingResponse createReservation(AuthInfo authInfo, CreateWaitingRequest createWaitingRequest) {
+    public CreateWaitingResponse createWaiting(AuthInfo authInfo, CreateWaitingRequest createWaitingRequest) {
 
         Member member = findMember(authInfo.getMemberId());
         LocalDate date = createWaitingRequest.date();

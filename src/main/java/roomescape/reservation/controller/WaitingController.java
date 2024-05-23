@@ -33,7 +33,7 @@ public class WaitingController {
             @AuthenticationPrincipal AuthInfo authInfo,
             @Valid @RequestBody CreateWaitingRequest createWaitingRequest) {
         CreateWaitingResponse createWaitingResponse =
-                waitingService.createReservation(authInfo, createWaitingRequest);
+                waitingService.createWaiting(authInfo, createWaitingRequest);
         return ResponseEntity.created(URI.create("/waitings/" + createWaitingResponse.id()))
                 .body(createWaitingResponse);
     }
