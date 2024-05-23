@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.utils.AdminGenerator;
 import roomescape.utils.DatabaseCleaner;
-import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
-import roomescape.utils.ThemeRequestGenerator;
 
 @AcceptanceTest
 class ReservationTimeControllerTest {
-    private static final String TOMORROW_DATE = TestFixture.getTomorrowDate();
+    private static final String TODAY = TestFixture.getTodayDate();
+    private static final String TOMORROW = TestFixture.getTomorrowDate();
 
     @LocalServerPort
     private int port;
@@ -26,21 +25,26 @@ class ReservationTimeControllerTest {
 
     @Autowired
     private AdminGenerator adminGenerator;
+    @Autowired
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
-        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
+        databaseCleaner.executeTruncate();
         adminGenerator.generate();
-        ThemeRequestGenerator.generateWithName("테마 1");
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
+
+        testFixture.persistTheme("테마 1");
+        testFixture.persistReservationTimeAfterMinute(1);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
     }
 
     @Test
     @DisplayName("전체 시간 목록을 조회한다.")
     void findAll() {
+        testFixture.persistReservationTimeAfterMinute(2);
+
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
@@ -51,8 +55,10 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("날짜와 테마 정보가 주어지면 예약 가능한 시간 목록을 조회한다.")
     void findBookable() {
+        testFixture.persistReservationTimeAfterMinute(2);
+
         RestAssured.given().log().all()
-                .when().get("/times?date=" + TOMORROW_DATE + "&theme=1")
+                .when().get("/times?date=" + TOMORROW + "&theme=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));

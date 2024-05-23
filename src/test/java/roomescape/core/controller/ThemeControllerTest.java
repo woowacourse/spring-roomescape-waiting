@@ -9,14 +9,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.utils.AdminGenerator;
 import roomescape.utils.DatabaseCleaner;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
-import roomescape.utils.ThemeRequestGenerator;
+import roomescape.utils.TestFixture;
 
 @AcceptanceTest
 class ThemeControllerTest {
+    private static final String TODAY = TestFixture.getTodayDate();
+
     @LocalServerPort
     private int port;
 
@@ -24,16 +23,17 @@ class ThemeControllerTest {
     private DatabaseCleaner databaseCleaner;
 
     @Autowired
-    private AdminGenerator adminGenerator;
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
-        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
-        adminGenerator.generate();
-        ThemeRequestGenerator.generateWithName("테마 1");
-        ThemeRequestGenerator.generateWithName("테마 2");
+        databaseCleaner.executeTruncate();
+
+        testFixture.persistMember();
+        testFixture.persistTheme("테마 1");
+        testFixture.persistTheme("테마 2");
     }
 
     @Test
@@ -61,13 +61,13 @@ class ThemeControllerTest {
     }
 
     private void createReservationTimes() {
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
+        testFixture.persistReservationTimeAfterMinute(1);
+        testFixture.persistReservationTimeAfterMinute(2);
     }
 
     private void createReservations() {
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(2L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 2L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 2L, 2L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
     }
 }

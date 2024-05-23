@@ -16,14 +16,13 @@ import roomescape.core.dto.theme.ThemeRequest;
 import roomescape.utils.AccessTokenGenerator;
 import roomescape.utils.AdminGenerator;
 import roomescape.utils.DatabaseCleaner;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
 import roomescape.utils.ThemeRequestGenerator;
 
 @AcceptanceTest
 class AdminControllerTest {
-    private static final String TOMORROW_DATE = TestFixture.getTomorrowDate();
+    private static final String TODAY = TestFixture.getTodayDate();
+    private static final String TOMORROW = TestFixture.getTomorrowDate();
 
     @LocalServerPort
     private int port;
@@ -35,18 +34,20 @@ class AdminControllerTest {
     private AdminGenerator adminGenerator;
 
     private String accessToken;
+    @Autowired
+    private TestFixture testFixture;
 
     @BeforeEach
     void setUp() {
-        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
+        databaseCleaner.executeTruncate();
         adminGenerator.generate();
         accessToken = AccessTokenGenerator.generate();
 
-        ThemeRequestGenerator.generateWithName("테마 1");
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
+        testFixture.persistTheme("테마 1");
+        testFixture.persistReservationTimeAfterMinute(1);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
     }
 
     @Test
@@ -130,7 +131,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("시간 삭제 시, 해당 시간을 참조하는 예약이 없으면 삭제된다.")
     void deleteTime() {
-        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
+        testFixture.persistReservationTimeAfterMinute(2);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -247,8 +248,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("예약자를 지정해서 예약을 생성할 수 있다.")
     void createReservationAsAdmin() {
-        ReservationRequest request = new ReservationRequest(1L,
-                TOMORROW_DATE, 1L, 1L);
+        ReservationRequest request = new ReservationRequest(1L, TOMORROW, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)

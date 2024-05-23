@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +23,9 @@ import roomescape.utils.TestFixture;
 
 @ServiceTest
 class WaitingServiceTest {
+    private static final String TODAY = TestFixture.getTodayDate();
+    private static final String TOMORROW = TestFixture.getTomorrowDate();
+
     @Autowired
     private WaitingService waitingService;
 
@@ -55,8 +56,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약 대기를 생성한다.")
     void create() {
-        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final WaitingRequest request = new WaitingRequest(1L, date, 1L, 1L);
+        final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
 
         final WaitingResponse response = waitingService.create(request);
 
@@ -71,10 +71,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약 대기를 생성할 때, 이미 해당 날짜, 시간, 테마에 예약한 내역이 있으면 예외가 발생한다.")
     void createWithDuplicatedReservation() {
-        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final WaitingRequest request = new WaitingRequest(1L, date, 1L, 1L);
-
-        saveReservation(date);
+        final WaitingRequest request = new WaitingRequest(1L, TODAY, 1L, 1L);
 
         assertThatThrownBy(() -> waitingService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -84,8 +81,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약 대기를 생성할 때, 이미 해당 날짜, 시간, 테마에 예약 대기한 내역이 있으면 예외가 발생한다.")
     void createWithDuplicatedWaiting() {
-        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final WaitingRequest request = new WaitingRequest(1L, date, 1L, 1L);
+        final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
 
         waitingService.create(request);
 
@@ -97,8 +93,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약 대기 목록을 조회한다.")
     void findAll() {
-        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final WaitingRequest request = new WaitingRequest(1L, date, 1L, 1L);
+        final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
 
         waitingService.create(request);
 
@@ -108,8 +103,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("예약 대기를 삭제한다.")
     void delete() {
-        final String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-        final WaitingRequest request = new WaitingRequest(1L, date, 1L, 1L);
+        final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
         final WaitingResponse response = waitingService.create(request);
 
         waitingService.delete(response.getId());

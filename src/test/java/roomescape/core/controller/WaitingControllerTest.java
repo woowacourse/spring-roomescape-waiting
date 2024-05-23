@@ -14,13 +14,11 @@ import roomescape.core.dto.waiting.MemberWaitingRequest;
 import roomescape.utils.AccessTokenGenerator;
 import roomescape.utils.AdminGenerator;
 import roomescape.utils.DatabaseCleaner;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
-import roomescape.utils.ThemeRequestGenerator;
 
 @AcceptanceTest
 class WaitingControllerTest {
+    private static final String TODAY = TestFixture.getTodayDate();
     private static final String TOMORROW = TestFixture.getTomorrowDate();
 
     private String accessToken;
@@ -34,17 +32,20 @@ class WaitingControllerTest {
     @Autowired
     private AdminGenerator adminGenerator;
 
+    @Autowired
+    private TestFixture testFixture;
+
     @BeforeEach
     void setUp() {
-        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
+        databaseCleaner.executeTruncate();
         adminGenerator.generate();
         accessToken = AccessTokenGenerator.generate();
 
-        ThemeRequestGenerator.generateWithName("테마 1");
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
+        testFixture.persistTheme("테마 1");
+        testFixture.persistReservationTimeAfterMinute(1);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
     }
 
     @Test

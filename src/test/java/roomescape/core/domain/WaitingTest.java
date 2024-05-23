@@ -8,8 +8,8 @@ import roomescape.utils.TestFixture;
 
 class WaitingTest {
     private static final Member member = TestFixture.getMember();
-    private static final Theme theme = TestFixture.getTheme();
-    private static final ReservationTime time = TestFixture.getOneMinuteAfterReservationTime();
+    private static final Theme theme = TestFixture.getTheme("테마");
+    private static final ReservationTime time = TestFixture.getReservationTimeAfterMinute(1);
 
     @Test
     @DisplayName("예약 대기 생성 시, 잘못된 예약 대기 날짜 형식이면 예외가 발생한다.")

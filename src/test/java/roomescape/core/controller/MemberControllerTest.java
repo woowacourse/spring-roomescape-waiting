@@ -34,6 +34,7 @@ class MemberControllerTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+
         databaseCleaner.executeTruncate();
         adminGenerator.generate();
     }

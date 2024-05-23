@@ -11,9 +11,9 @@ import roomescape.utils.TestFixture;
 
 class ReservationTest {
     private static final Member member = TestFixture.getMember();
-    private static final Theme theme = TestFixture.getTheme();
-    private static final ReservationTime time = TestFixture.getOneMinuteAfterReservationTime();
-    private static final ReservationTime pastTime = TestFixture.getOneMinuteBeforeReservationTime();
+    private static final Theme theme = TestFixture.getTheme("테마");
+    private static final ReservationTime time = TestFixture.getReservationTimeAfterMinute(1);
+    private static final ReservationTime pastTime = TestFixture.getReservationTimeBeforeMinute(1);
 
     @Test
     @DisplayName("예약 날짜를 저장할 때, 문자열을 LocalDate 타입으로 변환한다.")

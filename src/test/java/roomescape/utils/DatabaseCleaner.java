@@ -51,17 +51,6 @@ public class DatabaseCleaner {
         enableIntegrity();
     }
 
-    @Transactional
-    public void executeAutoIncrementRollback() {
-        entityManager.clear();
-
-        disableIntegrity();
-        for (String tableName : tableNames) {
-            resetIdColumn(tableName);
-        }
-        enableIntegrity();
-    }
-
     private void disableIntegrity() {
         entityManager.createNativeQuery(INTEGRITY_FALSE)
                 .executeUpdate();

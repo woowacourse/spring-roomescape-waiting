@@ -5,9 +5,7 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,19 +14,16 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import roomescape.core.domain.ReservationTime;
 import roomescape.core.dto.reservation.MemberReservationRequest;
-import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.dto.waiting.MemberWaitingRequest;
 import roomescape.utils.AccessTokenGenerator;
-import roomescape.utils.AdminGenerator;
 import roomescape.utils.DatabaseCleaner;
-import roomescape.utils.ReservationRequestGenerator;
-import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
-import roomescape.utils.ThemeRequestGenerator;
 
 @AcceptanceTest
 class ReservationControllerTest {
+    private static final String TODAY = TestFixture.getTodayDate();
     private static final String TOMORROW = TestFixture.getTomorrowDate();
     private static final String DAY_AFTER_TOMORROW = TestFixture.getDayAfterTomorrowDate();
 
@@ -39,7 +34,7 @@ class ReservationControllerTest {
     private DatabaseCleaner databaseCleaner;
 
     @Autowired
-    private AdminGenerator adminGenerator;
+    private TestFixture testFixture;
 
     private String accessToken;
 
@@ -47,17 +42,10 @@ class ReservationControllerTest {
     void setUp() {
         RestAssured.port = port;
 
-        adminGenerator.generate();
-        accessToken = AccessTokenGenerator.generate();
-
-        ThemeRequestGenerator.generateWithName("테마 1");
-        ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
-    }
-
-    @AfterEach
-    void tearDown() {
         databaseCleaner.executeTruncate();
+        testFixture.initTestData();
+
+        accessToken = AccessTokenGenerator.generate();
     }
 
     @ParameterizedTest
@@ -93,20 +81,11 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 생성 시, date는 오늘이고 time은 이미 지난 시간이면 예외가 발생한다.")
     void validateReservationWithTodayPastTime() {
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(
-                LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm")));
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201);
+        final ReservationTime pastTime = testFixture.persistReservationTimeBeforeMinute(1);
 
         MemberReservationRequest memberReservationRequest = new MemberReservationRequest(
                 LocalDate.now().format(DateTimeFormatter.ISO_DATE),
-                4L, 1L);
+                pastTime.getId(), 1L);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
@@ -220,25 +199,21 @@ class ReservationControllerTest {
     @Test
     @DisplayName("조건에 따라 예약을 조회한다.")
     void findReservationsByCondition() {
-        MemberReservationRequest request = new MemberReservationRequest(TOMORROW, 1L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(TOMORROW, 1L, 1L);
+        testFixture.persistReservationWithDateAndTimeAndTheme(DAY_AFTER_TOMORROW, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/reservations")
+                .queryParams(
+                        "memberId", 1L,
+                        "themeId", 1L,
+                        "dateFrom", TOMORROW,
+                        "dateTo", TOMORROW
+                )
+                .when().get("/reservations")
                 .then().log().all()
-                .statusCode(201);
-
-        MemberReservationRequest request2 = new MemberReservationRequest(DAY_AFTER_TOMORROW, 1L, 1L);
-
-        RestAssured.given().log().all()
-                .cookies("token", accessToken)
-                .contentType(ContentType.JSON)
-                .body(request2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+                .statusCode(200)
+                .body("size()", is(1));
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)

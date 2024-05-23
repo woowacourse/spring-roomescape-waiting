@@ -113,7 +113,7 @@ class ReservationServiceTest {
         final ReservationRequest request = new ReservationRequest(1L, TestFixture.getTomorrowDate(), 1L, 1L);
         reservationService.create(request);
 
-        assertThat(reservationService.findAll()).hasSize(1);
+        assertThat(reservationService.findAll()).hasSize(2);
     }
 
     @Test
@@ -123,7 +123,7 @@ class ReservationServiceTest {
         final LoginMember loginMember = new LoginMember(1L);
         reservationService.create(request);
 
-        assertThat(reservationService.findAllByMember(loginMember)).hasSize(1);
+        assertThat(reservationService.findAllByMember(loginMember)).hasSize(2);
     }
 
     @Test
@@ -133,18 +133,18 @@ class ReservationServiceTest {
         reservationService.create(request);
 
         assertThat(reservationService.findAllByMemberAndThemeAndPeriod(1L, 1L, TestFixture.getTodayDate(),
-                TestFixture.getTomorrowDate())).hasSize(1);
+                TestFixture.getTomorrowDate())).hasSize(2);
     }
 
     @Test
     @DisplayName("예약을 삭제한다.")
     void delete() {
         final ReservationRequest request = new ReservationRequest(1L, TestFixture.getTomorrowDate(), 1L, 1L);
-        final ReservationResponse response = reservationService.create(request);
+        reservationService.create(request);
 
-        reservationService.delete(response.getId());
+        reservationService.delete(2);
 
-        assertThat(reservationService.findAll()).isEmpty();
+        assertThat(reservationService.findAll()).hasSize(1);
     }
 
     @Test
@@ -164,7 +164,7 @@ class ReservationServiceTest {
 
         reservationService.delete(response.getId());
 
-        assertThat(reservationService.findAll()).hasSize(1);
+        assertThat(reservationService.findAll()).hasSize(2);
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 

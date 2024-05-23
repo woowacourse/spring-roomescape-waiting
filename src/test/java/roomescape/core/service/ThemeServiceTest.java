@@ -95,11 +95,13 @@ class ThemeServiceTest {
     }
 
     private void createReservations() {
+        final ReservationTime reservationTimeAfterOneMinute = testFixture.persistReservationTimeAfterMinute(1);
         final Reservation oneMinuteAfterReservation = new Reservation(getMember(), TestFixture.getTodayDate(),
-                createReservationTime(), getTheme());
+                reservationTimeAfterOneMinute, getTheme());
 
+        final ReservationTime reservationTimeAfterTwoMinute = testFixture.persistReservationTimeAfterMinute(2);
         final Reservation twoMinuteAfterReservation = new Reservation(getMember(), TestFixture.getTodayDate(),
-                createReservationTime(), getTheme());
+                reservationTimeAfterTwoMinute, getTheme());
 
         reservationRepository.save(oneMinuteAfterReservation);
         reservationRepository.save(twoMinuteAfterReservation);
@@ -107,10 +109,6 @@ class ThemeServiceTest {
 
     private Member getMember() {
         return memberRepository.findByEmail(TestFixture.getEmail());
-    }
-
-    private ReservationTime createReservationTime() {
-        return reservationTimeRepository.save(TestFixture.getOneMinuteAfterReservationTime());
     }
 
     private Theme getTheme() {
@@ -133,8 +131,9 @@ class ThemeServiceTest {
         final ThemeResponse response = themeService.create(request);
         final Long themeId = response.getId();
 
+        final ReservationTime reservationTime = testFixture.persistReservationTimeAfterMinute(1);
         final Reservation reservation = new Reservation(getMember(), TestFixture.getTodayDate(),
-                createReservationTime(), themeRepository.findById(themeId).orElseThrow());
+                reservationTime, themeRepository.findById(themeId).orElseThrow());
         reservationRepository.save(reservation);
 
         assertThatThrownBy(() -> themeService.delete(themeId))
