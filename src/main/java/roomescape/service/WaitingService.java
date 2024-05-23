@@ -40,7 +40,6 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
-
     public WaitingResponse createWaiting(WaitingRequest waitingRequest, Long memberId) {
         Member member = getMember(memberId);
         ReservationTime reservationTime = getReservationTime(waitingRequest.timeId());
