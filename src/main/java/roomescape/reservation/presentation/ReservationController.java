@@ -9,9 +9,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -28,7 +26,7 @@ public class ReservationController {
     private final MemberService memberService;
 
     public ReservationController(ReservationService reservationService, ReservationTimeService reservationTimeService,
-                                 ThemeService themeService, MemberService memberService) {
+                                 ThemeService themeService, MemberService memberService, final ReservationTimeRepository reservationTimeRepository) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
@@ -40,7 +38,7 @@ public class ReservationController {
                                                                  Member loginMember) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
-        Reservation newReservation = request.toModel(theme, reservationTime, loginMember);
+        Reservation newReservation = request.toModel(theme, reservationTime, loginMember, ReservationStatus.BOOKING);
         Reservation createReservation = reservationService.create(newReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationResponse.from(createReservation));
@@ -79,5 +77,16 @@ public class ReservationController {
         return ResponseEntity.ok(reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList());
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(@RequestBody @Valid ReservationSaveRequest request,
+                                                                        Member loginMember) {
+        final ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
+        final Theme theme = themeService.findById(request.themeId());
+        final Reservation newReservation = request.toModel(theme, reservationTime, loginMember, ReservationStatus.WAITING);
+        final Reservation createReservation = reservationService.createWaitingReservation(newReservation);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ReservationResponse.from(createReservation));
     }
 }

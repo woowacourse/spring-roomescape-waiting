@@ -42,6 +42,11 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public Reservation createWaitingReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
