@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.util.TokenGenerator;
 
 import java.util.Map;
 
@@ -24,8 +25,9 @@ public class ReservationTimeApiControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", TokenGenerator.makeAdminToken())
                 .body(time)
-                .when().post("/api/times")
+                .when().post("/api/admin/times")
                 .then().log().all()
                 .statusCode(201);
 
@@ -36,7 +38,8 @@ public class ReservationTimeApiControllerTest {
                 .body("size()", is(4));
 
         RestAssured.given().log().all()
-                .when().delete("/api/times/4")
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/admin/times/4")
                 .then().log().all()
                 .statusCode(204);
     }

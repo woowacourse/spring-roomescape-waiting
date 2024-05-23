@@ -73,7 +73,8 @@ public class ReservationApiControllerTest {
     @DisplayName("DB에 저장된 예약을 정상적으로 삭제한다.")
     void deleteReservation_InDatabase_Success() {
         RestAssured.given().log().all()
-                .when().delete("/api/reservations/1")
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 

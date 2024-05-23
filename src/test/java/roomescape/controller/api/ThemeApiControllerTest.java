@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.util.TokenGenerator;
 
 import java.util.Map;
 
@@ -35,8 +36,9 @@ public class ThemeApiControllerTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", TokenGenerator.makeAdminToken())
                 .body(params)
-                .when().post("/api/themes")
+                .when().post("/api/admin/themes")
                 .then().log().all()
                 .statusCode(201)
                 .body("id", is(4));
@@ -52,7 +54,8 @@ public class ThemeApiControllerTest {
     @DisplayName("테마 삭제를 정상적으로 수행한다.")
     void deleteTheme_Success() {
         RestAssured.given().log().all()
-                .when().delete("/api/themes/3")
+                .cookie("token", TokenGenerator.makeAdminToken())
+                .when().delete("/api/admin/themes/3")
                 .then().log().all()
                 .statusCode(204);
 
