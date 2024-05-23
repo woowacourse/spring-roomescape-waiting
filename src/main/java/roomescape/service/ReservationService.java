@@ -2,12 +2,14 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -16,6 +18,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.util.DateUtil;
 
 @Service
@@ -25,17 +28,20 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public Long addReservation(ReservationRequest request) {
@@ -59,8 +65,21 @@ public class ReservationService {
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
         Member member = findMember(memberId);
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream().map(UserReservationResponse::from)
+        List<Waiting> waitings = waitingRepository.findAllByMember(member);
+
+        List<UserReservationResponse> userWaitings = waitings.stream()
+                .map(UserReservationResponse::from)
                 .toList();
+
+        List<UserReservationResponse> userReservations = reservations.stream()
+                .map(UserReservationResponse::from)
+                .toList();
+
+        List<UserReservationResponse> result = new ArrayList<>();
+        result.addAll(userReservations);
+        result.addAll(userWaitings);
+
+        return result;
     }
 
     public List<ReservationResponse> getReservationsByFilter(ReservationFilter filter) {

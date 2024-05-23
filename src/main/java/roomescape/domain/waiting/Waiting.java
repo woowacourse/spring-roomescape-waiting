@@ -41,4 +41,8 @@ public class Waiting {
     public Member getMember() {
         return member;
     }
+
+    public Reservation getReservation() {
+        return reservation;
+    }
 }
