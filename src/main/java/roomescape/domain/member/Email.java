@@ -2,6 +2,7 @@ package roomescape.domain.member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Embeddable
@@ -41,7 +42,20 @@ public class Email {
         }
     }
 
-    protected String getValue() {
-        return email;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Email other = (Email) o;
+        return Objects.equals(email, other.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
 }
