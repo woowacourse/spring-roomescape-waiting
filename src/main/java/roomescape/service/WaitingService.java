@@ -56,7 +56,7 @@ public class WaitingService {
     }
 
     private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
-        if (waitingRepository.existsWaitingByDateAndAndThemeAndMember(date, theme, member)) {
+        if (waitingRepository.existsByDateAndThemeAndMember(date, theme, member)) {
             throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
         }
     }

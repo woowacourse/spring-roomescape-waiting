@@ -51,6 +51,7 @@ public class ReservationService {
         validateIsTimeSlotAlreadyReserved(reservationRequest.date(), reservationTime, theme);
         validateIsReservationInThePast(reservationRequest.date(), reservationTime);
         validateMemberAlreadyReservedThemeOnDate(reservationRequest.date(), theme, member);
+        validateMemberWaitingAlreadyExist(reservationRequest.date(), theme, member);
 
         Reservation reservation = reservationRequest.toEntity(member, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -73,6 +74,12 @@ public class ReservationService {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
             throw new CustomException(ExceptionCode.PAST_TIME_SLOT_RESERVATION);
+        }
+    }
+
+    private void validateMemberWaitingAlreadyExist(LocalDate date, Theme theme, Member member) {
+        if (waitingRepository.existsByDateAndThemeAndMember(date, theme, member)) {
+            throw new CustomException(ExceptionCode.ALREADY_WAITING_EXIST);
         }
     }
 
