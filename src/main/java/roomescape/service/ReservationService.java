@@ -12,6 +12,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
@@ -48,6 +49,7 @@ public class ReservationService {
     public ListResponse<ReservationResponse> findAll() {
         List<ReservationResponse> responses = reservationRepository.findAll()
                 .stream()
+                .filter(r -> r.getStatus() == Status.CONFIRMED)
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -55,9 +57,8 @@ public class ReservationService {
     }
 
     public ListResponse<MyReservationResponse> findMyReservations(AuthInfo authInfo) {
-        List<MyReservationResponse> responses = reservationRepository.findByMemberId(authInfo.id())
-                .stream()
-                .map(reservation -> MyReservationResponse.from(reservation, "예약"))
+        List<MyReservationResponse> responses = reservationRepository.findMyReservations(authInfo.id()).stream()
+                .map(r -> MyReservationResponse.from(r.getReservation(), r.getWaitingOrder()))
                 .toList();
 
         return new ListResponse<>(responses);
@@ -73,6 +74,7 @@ public class ReservationService {
                 .build();
 
         List<ReservationResponse> responses = reservationRepository.findAll(spec).stream()
+                .filter(r -> r.getStatus() == Status.CONFIRMED)
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -84,18 +86,15 @@ public class ReservationService {
                 .orElseThrow(
                         () -> new NotFoundException("예약시간을 찾을 수 없습니다. timeId = " + reservationCreateRequest.timeId()));
         validateOutdatedDateTime(reservationCreateRequest.date(), reservationTime.getStartAt());
-        validateDuplicatedDateTime(reservationCreateRequest.date(), reservationCreateRequest.timeId(),
-                reservationCreateRequest.themeId());
-
         Member member = memberRepository.findById(reservationCreateRequest.memberId())
                 .orElseThrow(() -> new NotFoundException(
                         "사용자를 찾을 수 없습니다. memberId = " + reservationCreateRequest.memberId()));
-
         RoomTheme roomTheme = roomThemeRepository.findById(reservationCreateRequest.themeId())
                 .orElseThrow(
                         () -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + reservationCreateRequest.themeId()));
+        Status status = getStatus(reservationCreateRequest);
 
-        Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme);
+        Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme, status);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -117,10 +116,12 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedDateTime(LocalDate date, Long timeId, Long themeId) {
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    private Status getStatus(ReservationCreateRequest request) {
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
+                request.themeId());
         if (exists) {
-            throw new BadRequestException("중복된 시간과 날짜에 대한 예약을 생성할 수 없습니다.");
+            return Status.WAITING;
         }
+        return Status.CONFIRMED;
     }
 }
