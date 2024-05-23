@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Service
 public class ReservationService {
@@ -105,6 +104,21 @@ public class ReservationService {
         return WaitingResponse.of(savedWaitingReservation, sequence);
     }
 
+    @Transactional
+    public ReservationResponse approveWaiting(Long id) {
+        Reservation waitingReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
+        if (waitingReservation.getStatus() != ReservationStatus.WAITING) {
+            throw new UnauthorizedException("예약 대기만 승인할 수 있습니다");
+        }
+
+        validateDuplicatedReservation(waitingReservation);
+        waitingReservation.setStatus(ReservationStatus.CONFIRMATION);
+        Reservation reservation = reservationRepository.save(waitingReservation);
+
+        return ReservationResponse.from(reservation);
+    }
+
     @Transactional(readOnly = true)
     public List<ReservationResponse> readReservations() {
         return reservationRepository.findAllFetchJoin().stream()
@@ -133,6 +147,12 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
+    public List<WaitingResponse> readWaitings() {
+        return reservationRepository.findAllByStatusFetchJoin(ReservationStatus.WAITING).stream()
+                .map(waiting -> WaitingResponse.of(waiting, findSequence(waiting)))
+                .toList();
+    }
+
     @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
@@ -148,6 +168,17 @@ public class ReservationService {
         if (!waitingReservation.getMember().isSameMember(member)) {
             throw new UnauthorizedException("삭제할 수 없는 예약입니다");
         }
+        if (waitingReservation.getStatus() != ReservationStatus.WAITING) {
+            throw new UnauthorizedException("예약 대기만 삭제할 수 있습니다");
+        }
+
+        deleteReservation(id);
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id) {
+        Reservation waitingReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약입니다."));
         if (waitingReservation.getStatus() != ReservationStatus.WAITING) {
             throw new UnauthorizedException("예약 대기만 삭제할 수 있습니다");
         }

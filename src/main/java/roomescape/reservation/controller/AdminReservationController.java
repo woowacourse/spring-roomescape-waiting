@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
@@ -25,6 +26,11 @@ public class AdminReservationController {
         return reservationService.createReservation(request);
     }
 
+    @PostMapping("/waitings/{id}")
+    public ReservationResponse approveWaiting(@PathVariable Long id) {
+        return reservationService.approveWaiting(id);
+    }
+
     @GetMapping
     public List<ReservationResponse> readReservations() {
         return reservationService.readReservations();
@@ -40,9 +46,20 @@ public class AdminReservationController {
         return reservationService.searchReservations(dateFrom, dateTo, memberId, themeId);
     }
 
+    @GetMapping("/waitings")
+    public List<WaitingResponse> readWaitings() {
+        return reservationService.readWaitings();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> rejectWaiting(@PathVariable Long id) {
+        reservationService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }
