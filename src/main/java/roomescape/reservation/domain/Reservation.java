@@ -72,10 +72,6 @@ public class Reservation {
         return member.getId().equals(memberId);
     }
 
-    public boolean isWaitingOrderHigherThan(Reservation other) {
-        return this.id < other.id;
-    }
-
     public Long getId() {
         return id;
     }
@@ -94,10 +90,6 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return time;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
     }
 
     public LocalTime getStartAt() {

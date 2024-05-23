@@ -39,8 +39,7 @@ public class ReservationService {
 
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
-        return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId,
-                        dateFrom, dateTo).stream()
+        return reservationRepository.findByMemberAndThemeAndPeriod(memberId, themeId, dateFrom, dateTo).stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
@@ -59,15 +58,7 @@ public class ReservationService {
     }
 
     public ReservationResponse saveMemberReservation(Long memberId, MemberReservationAddRequest request) {
-        Reservations sameSlotReservations = new Reservations(reservationRepository.findByDateAndTimeAndTheme(
-                request.date(),
-                request.timeId(),
-                request.themeId()
-        ));
-
-        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
-            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
-        }
+        validateMemberReservationNotExistInSlot(memberId, request);
 
         Reservation reservation = new Reservation(
                 memberService.findById(memberId),
@@ -78,6 +69,18 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
         return new ReservationResponse(saved);
+    }
+
+    private void validateMemberReservationNotExistInSlot(Long memberId, MemberReservationAddRequest request) {
+        Reservations sameSlotReservations = new Reservations(reservationRepository.findByDateAndTimeAndTheme(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        ));
+
+        if (sameSlotReservations.hasReservationMadeBy(memberId)) {
+            throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
+        }
     }
 
     public void removeReservation(long id) {
