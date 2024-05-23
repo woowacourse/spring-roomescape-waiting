@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
@@ -12,6 +13,7 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
+import roomescape.reservation.domain.specification.MemberReservationSpecification;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,8 +33,11 @@ public class MemberReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findMemberReservations(ReservationQueryRequest request) {
-        return memberReservationRepository.findBy(request.getMemberId(), request.getThemeId(), request.getStartDate(),
-                        request.getEndDate())
+        Specification<MemberReservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(request.getStartDate()))
+                .and(MemberReservationSpecification.lessThanOrEqualToEndDate(request.getEndDate()))
+                .and(MemberReservationSpecification.equalMemberId(request.getMemberId()))
+                .and(MemberReservationSpecification.equalThemeId(request.getThemeId()));
+        return memberReservationRepository.findAll(spec)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

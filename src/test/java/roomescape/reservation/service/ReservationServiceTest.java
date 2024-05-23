@@ -17,6 +17,7 @@ import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.fixture.ReservationTimeFixture;
@@ -28,6 +29,7 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.specification.MemberReservationSpecification;
 import roomescape.util.ServiceTest;
 
 @DisplayName("예약 로직 테스트")
@@ -184,11 +186,11 @@ class ReservationServiceTest extends ServiceTest {
 
         //when
         memberReservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
+        Specification<MemberReservation> spec = Specification.where(MemberReservationSpecification.greaterThanOrEqualToStartDate(LocalDate.now()))
+                .and(MemberReservationSpecification.lessThanOrEqualToEndDate(LocalDate.now().plusDays(1)));
 
         //then
-        assertThat(
-                memberReservationRepository.findBy(null, null, LocalDate.now(), LocalDate.now().plusDays(1))).hasSize(
-                0);
+        assertThat(memberReservationRepository.findAll(spec)).hasSize(0);
     }
 
     @DisplayName("일자와 시간 중복 시 예외가 발생한다.")
