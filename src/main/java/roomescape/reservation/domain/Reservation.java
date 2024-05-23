@@ -68,10 +68,6 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public boolean isPast() {
-        return date.isPast();
-    }
-
     public boolean isReservedBy(Long memberId) {
         return member.getId().equals(memberId);
     }

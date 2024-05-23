@@ -72,10 +72,6 @@ public class ReservationService {
                 reservationTimeService.findById(request.timeId()),
                 themeService.findById(request.themeId())
         );
-
-        if (reservation.isPast()) {
-            throw new IllegalRequestException(reservation.getDate() + ": 예약 날짜는 현재 보다 이전일 수 없습니다");
-        }
         if (sameSlotReservations.hasReservationMadeBy(memberId)) {
             throw new IllegalRequestException("해당 아이디로 진행되고 있는 예약(대기)이 이미 존재합니다");
         }
