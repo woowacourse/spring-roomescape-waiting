@@ -79,11 +79,10 @@ public class ReservationWaitingService {
     }
 
     public void delete(long memberId, long waitingId) {
-        if (canDelete(memberId, waitingId)) {
-            waitingRepository.delete(waitingId);
-        } else {
+        if (!canDelete(memberId, waitingId)) {
             throw new RoomescapeException(PERMISSION_DENIED);
         }
+        waitingRepository.delete(waitingId);
     }
 
     private boolean canDelete(long memberId, long waitingId) {
