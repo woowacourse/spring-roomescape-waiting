@@ -32,7 +32,6 @@ VALUES ('블라인드', '아무것도 보이지 않는... 알 수 없는 장소�
         '미국 플로리다주 마이애미, 여자들이 실종됐다. 오래된 정육점 근처에서 여자들의 비명소리를 들었다는 증언이 나오고 정육점 주인이 수사망에 오른다. 그러나 수사를 진행하던 요원들은 괴항의 습격으로 정신을 잃게 되는데-',
         'https://postfiles.pstatic.net/MjAxOTA4MDJfMjAx/MDAxNTY0NzQ3NzMyNjc3.DmgP1L4x-7bVsOOV3zxlV5SS-ET_8qPq57f7_FQebxQg.7YTqFWnl7sg3BR-YbSO6zP9CiFQwQeKsqgM5EeEAG_Ag.JPEG.qhfk1017/SE-0c7906e1-8eb6-4c53-bf25-c60cd2478ef6.jpg?type=w773');
 
-
 INSERT INTO reservation_time (start_at)
 VALUES ('10:00'),
        ('12:00'),
@@ -47,24 +46,36 @@ VALUES ('어드민', 'admin@admin.com', 'adminadmin', 'ADMIN'),
        ('호돌', 'hodol@admin.com', 'adminadmin', 'MEMBER'),
        ('제이', 'jay@admin.com', 'adminadmin', 'MEMBER');
 
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id)
-VALUES (2, CURRENT_DATE() - INTERVAL '1' DAY, 1, 1),
-       (2, CURRENT_DATE() - INTERVAL '3' DAY, 2, 1),
-       (2, CURRENT_DATE() - INTERVAL '7' DAY, 3, 1),
-       (2, CURRENT_DATE() - INTERVAL '1' DAY, 1, 2),
-       (2, CURRENT_DATE() - INTERVAL '3' DAY, 2, 2),
-       (2, CURRENT_DATE() - INTERVAL '7' DAY, 3, 3),
-       (3, CURRENT_DATE() - INTERVAL '1' DAY, 1, 3),
-       (3, CURRENT_DATE() - INTERVAL '3' DAY, 2, 4),
-       (3, CURRENT_DATE() - INTERVAL '7' DAY, 3, 5),
-       (4, CURRENT_DATE() - INTERVAL '1' DAY, 1, 6),
-       (4, CURRENT_DATE() - INTERVAL '2' DAY, 2, 7),
-       (4, CURRENT_DATE() - INTERVAL '3' DAY, 3, 8),
-       (5, CURRENT_DATE() - INTERVAL '4' DAY, 1, 9),
-       (5, CURRENT_DATE() - INTERVAL '5' DAY, 2, 10),
-       (5, CURRENT_DATE() - INTERVAL '7' DAY, 3, 11),
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id, reservation_status)
+VALUES (2, CURRENT_DATE() - INTERVAL '1' DAY, 1, 1, 'RESERVED'),
+       (2, CURRENT_DATE() - INTERVAL '3' DAY, 2, 1, 'RESERVED'),
+       (2, CURRENT_DATE() - INTERVAL '7' DAY, 3, 1, 'RESERVED'),
+       (2, CURRENT_DATE() - INTERVAL '1' DAY, 1, 2, 'RESERVED'),
+       (2, CURRENT_DATE() - INTERVAL '3' DAY, 2, 2, 'RESERVED'),
+       (2, CURRENT_DATE() - INTERVAL '7' DAY, 3, 3, 'RESERVED'),
+       (3, CURRENT_DATE() - INTERVAL '1' DAY, 1, 3, 'RESERVED'),
+       (3, CURRENT_DATE() - INTERVAL '3' DAY, 2, 4, 'RESERVED'),
+       (3, CURRENT_DATE() - INTERVAL '7' DAY, 3, 5, 'RESERVED'),
+       (4, CURRENT_DATE() - INTERVAL '1' DAY, 1, 6, 'RESERVED'),
+       (4, CURRENT_DATE() - INTERVAL '2' DAY, 2, 7, 'RESERVED'),
+       (4, CURRENT_DATE() - INTERVAL '3' DAY, 3, 8, 'RESERVED'),
+       (5, CURRENT_DATE() - INTERVAL '4' DAY, 1, 9, 'RESERVED'),
+       (5, CURRENT_DATE() - INTERVAL '5' DAY, 2, 10, 'RESERVED'),
+       (5, CURRENT_DATE() - INTERVAL '7' DAY, 3, 11, 'RESERVED'),
 
-       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2),
-       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2),
-       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2),
-       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2);
+       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2, 'RESERVED'),
+       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2, 'WAITING'),
+       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2, 'WAITING'),
+       (3, CURRENT_DATE() - INTERVAL '8' DAY, 3, 2, 'WAITING'),
+
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'RESERVED'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING'),
+       (1, CURRENT_DATE() + INTERVAL '1' DAY, 1, 1, 'WAITING');

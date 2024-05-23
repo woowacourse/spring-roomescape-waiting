@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.system.auth.annotation.Admin;
-import roomescape.system.auth.annotation.MemberId;
-import roomescape.system.dto.response.ApiResponse;
 import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
-import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
+import roomescape.reservation.dto.response.WaitingWithRanksResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.system.auth.annotation.Admin;
+import roomescape.system.auth.annotation.MemberId;
+import roomescape.system.dto.response.ApiResponse;
 
 @RestController
 public class ReservationController {
@@ -41,14 +41,14 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ApiResponse<MemberReservationsResponse> getMemberReservations(@MemberId final Long memberId) {
-        return ApiResponse.success(reservationService.findReservationByMemberId(memberId));
+    public ApiResponse<WaitingWithRanksResponse> getMemberReservations(@MemberId final Long memberId) {
+        return ApiResponse.success(reservationService.findWaitingWithRankById(memberId));
     }
 
     @GetMapping("/reservations/themes/{themeId}/times")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationTimeInfosResponse> getReservationTimeInfos(
-            @NotNull(message = "themeId는 null 또는 공백일 수 없습니다.") @PathVariable final Long themeId,
+            @NotNull(message = "themeId는 null일 수 없습니다.") @PathVariable final Long themeId,
             @NotNull(message = "날짜는 null일 수 없습니다.") @RequestParam final LocalDate date) {
         return ApiResponse.success(reservationService.findReservationsByDateAndThemeId(date, themeId));
     }
@@ -60,13 +60,27 @@ public class ReservationController {
             @RequestParam(required = false) final Long themeId,
             @RequestParam(required = false) final Long memberId,
             @RequestParam(required = false) final LocalDate dateFrom,
-            @RequestParam(required = false) final LocalDate dateTo
+            @RequestParam(required = false) final LocalDate dateTo,
+            @RequestParam(required = false) final Boolean waiting
     ) {
         return ApiResponse.success(
                 reservationService.findFilteredReservations(
-                        new FilteredReservationRequest(themeId, memberId, dateFrom, dateTo)
+                        new FilteredReservationRequest(themeId, memberId, dateFrom, dateTo, waiting)
                 )
         );
+    }
+
+    @Admin
+    @PostMapping("/reservations/{id}/")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ApiResponse<Void> removeReservation(
+            @MemberId final Long memberId,
+            @NotNull(message = "reservationId는 null일 수 없습니다.") @PathVariable("id") final Long reservationId,
+            @NotNull(message = "status는 null일 수 없습니다.") @RequestParam("status") final String status
+    ) {
+        reservationService.updateState(memberId, reservationId, status);
+
+        return ApiResponse.success();
     }
 
     @PostMapping("/reservations")

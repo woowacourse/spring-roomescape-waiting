@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 
 public class ReservationSpecification {
@@ -25,5 +26,10 @@ public class ReservationSpecification {
 
     public static Specification<Reservation> withDateTo(LocalDate dateTo) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), dateTo);
+    }
+
+    public static Specification<Reservation> withWaiting(final boolean waiting) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reservationStatus"),
+                waiting ? ReservationStatus.WAITING : ReservationStatus.RESERVED);
     }
 }
