@@ -6,11 +6,8 @@ import static roomescape.exception.ExceptionType.PERMISSION_DENIED;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.BaseEntity;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
@@ -50,7 +47,7 @@ public class ReservationWaitingService {
         ReservationWaiting beforeSave = new ReservationWaiting(reservation, waitingMember);
         ReservationWaiting save = waitingRepository.save(beforeSave);
 
-        int priority = calculatePriority(save, waitingRepository.findByReservation(reservation));
+        int priority = save.calculatePriority(waitingRepository.findByReservation(reservation));
         return ReservationWaitingResponseMapper.toResponse(save, priority);
     }
 
@@ -67,15 +64,6 @@ public class ReservationWaitingService {
         }
     }
 
-    private int calculatePriority(ReservationWaiting target, List<ReservationWaiting> all) {
-        List<ReservationWaiting> copyOfAll = new ArrayList<>(all);
-        copyOfAll.sort(Comparator.comparing(BaseEntity::getCreateAt));
-        if (!copyOfAll.contains(target)) {
-            throw new IllegalArgumentException("순위를 판별할 대상이 목록에 없습니다.");
-        }
-        return copyOfAll.indexOf(target) + 1;
-    }
-
     public List<ReservationWaitingResponse> findAll() {
         return waitingRepository.findAll().stream()
                 .map(ReservationWaitingResponseMapper::toResponseWithoutPriority)
@@ -86,7 +74,7 @@ public class ReservationWaitingService {
         List<ReservationWaiting> allByMemberId = waitingRepository.findAllByMemberId(memberId);
         return allByMemberId.stream()
                 .map(waiting -> {
-                    int priority = calculatePriority(waiting, allByMemberId);
+                    int priority = waiting.calculatePriority(allByMemberId);
                     return ReservationWaitingResponseMapper.toResponse(waiting, priority);
                 })
                 .map(LoginMemberReservationResponseMapper::from)

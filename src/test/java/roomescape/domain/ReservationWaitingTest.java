@@ -1,9 +1,11 @@
 package roomescape.domain;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.DEFAULT_ADMIN;
 import static roomescape.fixture.MemberFixture.DEFAULT_MEMBER;
 import static roomescape.fixture.ReservationFixture.DEFAULT_RESERVATION;
 
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,5 +36,20 @@ class ReservationWaitingTest {
         Assertions.assertThatThrownBy(() -> new ReservationWaiting(DEFAULT_RESERVATION, DEFAULT_MEMBER))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ExceptionType.WAITING_AT_ALREADY_RESERVATION.getMessage());
+    }
+
+    @Test
+    @DisplayName("우선 순위를 잘 계산하는지 확인")
+    void calculatePriority() {
+        ReservationWaiting first = new ReservationWaiting();
+        first.prePersist();
+        ReservationWaiting second = new ReservationWaiting();
+        second.prePersist();
+        assertAll(
+                () -> Assertions.assertThat(first.calculatePriority(List.of(first, second)))
+                        .isEqualTo(1),
+                () -> Assertions.assertThat(second.calculatePriority(List.of(first, second)))
+                        .isEqualTo(2)
+        );
     }
 }

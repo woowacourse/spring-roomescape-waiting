@@ -9,6 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import roomescape.exception.RoomescapeException;
 
@@ -59,6 +62,21 @@ public class ReservationWaiting extends BaseEntity {
     }
 
     protected ReservationWaiting() {
+    }
+
+    public int calculatePriority(List<ReservationWaiting> all) {
+        List<LocalDateTime> createAts = getCreateAts(all);
+        if (!createAts.contains(getCreateAt())) {
+            throw new IllegalArgumentException("순위를 판별할 대상이 목록에 없습니다.");
+        }
+        return createAts.indexOf(getCreateAt()) + 1;
+    }
+
+    private List<LocalDateTime> getCreateAts(List<ReservationWaiting> all) {
+        return all.stream()
+                .sorted(Comparator.comparing(BaseEntity::getCreateAt))
+                .map(BaseEntity::getCreateAt)
+                .toList();
     }
 
     public boolean hasIdOf(long id) {
