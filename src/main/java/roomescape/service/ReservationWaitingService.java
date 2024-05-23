@@ -8,6 +8,7 @@ import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
@@ -23,6 +24,7 @@ import roomescape.service.mapper.LoginMemberReservationResponseMapper;
 import roomescape.service.mapper.ReservationWaitingResponseMapper;
 
 @Service
+@Transactional
 public class ReservationWaitingService {
     private final ReservationWaitingRepository waitingRepository;
     private final ReservationFinder reservationFinder;
