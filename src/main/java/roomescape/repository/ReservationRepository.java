@@ -22,6 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByMember(Member member);
 
+    List<Reservation> findByStatus(ReservationStatus reservationStatus);
+
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,
@@ -30,6 +32,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     Optional<Reservation> findFirstByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
-
-
 }

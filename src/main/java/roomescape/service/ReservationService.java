@@ -10,7 +10,9 @@ import roomescape.domain.Theme;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
+import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.ReservationFailException;
 import roomescape.exception.clienterror.InvalidIdException;
 import roomescape.repository.MemberRepository;
@@ -47,6 +49,15 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
         return new ReservationResponses(reservationResponses);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponsesWrapper<ReservationWaitingResponse> findEntireWaitingReservationList() {
+        final List<ReservationWaitingResponse> reservations = reservationRepository.findByStatus(ReservationStatus.WAITING)
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+        return new ResponsesWrapper<>(reservations);
     }
 
     public ReservationResponse create(final ReservationRequest reservationRequest) {
@@ -154,11 +165,11 @@ public class ReservationService {
 
     public void deleteWaitingByMember(final Long id, final Member member) {
         if (reservationRepository.existsByIdAndMemberId(id, member.getId())) {
-            deleteWaiting(id);
+            deleteWaitingById(id);
         }
     }
 
-    private void deleteWaiting(final Long id) {
+    public void deleteWaitingById(final Long id) {
         final Optional<Reservation> reservationResult = reservationRepository.findById(id);
         if (reservationResult.isPresent() && reservationResult.get().getStatus() == ReservationStatus.WAITING) {
             reservationRepository.deleteById(id);

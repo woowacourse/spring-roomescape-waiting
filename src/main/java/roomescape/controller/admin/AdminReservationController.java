@@ -1,10 +1,19 @@
 package roomescape.controller.admin;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
+import roomescape.domain.dto.ReservationWaitingResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -24,6 +33,11 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservationService.findEntireReservationList());
     }
 
+    @GetMapping("waiting")
+    public ResponseEntity<ResponsesWrapper<ReservationWaitingResponse>> readWaiting() {
+        return ResponseEntity.ok(reservationService.findEntireWaitingReservationList());
+    }
+
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest reservationRequest) {
         ReservationResponse reservationResponse = reservationService.create(reservationRequest);
@@ -39,5 +53,11 @@ public class AdminReservationController {
     @GetMapping("/search")
     public ResponseEntity<ReservationResponses> search(@RequestParam Long themeId, @RequestParam Long memberId, @RequestParam LocalDate dateFrom, @RequestParam LocalDate dateTo) {
         return ResponseEntity.ok(reservationService.findReservations(themeId, memberId, dateFrom, dateTo));
+    }
+
+    @DeleteMapping("/wait/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+        reservationService.deleteWaitingById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -263,4 +263,26 @@ class AdminReservationTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @DisplayName("대기중인 예약 목록을 검색하면 200을 반환한다.")
+    @Test
+    void given_when_readWaiting_then_statusCodeIsOk() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .contentType(ContentType.JSON)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("대기중인 예약을 삭제에 성공하면 204를 반환한다.")
+    @Test
+    void given_when_deleteWaiting_then_statusCodeIsNoContents() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .contentType(ContentType.JSON)
+                .when().delete("/admin/reservations/wait/10")
+                .then().log().all()
+                .statusCode(204);
+    }
 }

@@ -12,7 +12,9 @@ import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationResponses;
+import roomescape.domain.dto.ReservationWaitingResponse;
 import roomescape.domain.dto.ReservationsMineResponse;
+import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
 import roomescape.repository.ReservationRepository;
@@ -43,7 +45,7 @@ class ReservationServiceTest {
     @DisplayName("예약 목록을 반환한다.")
     void given_when_findEntireReservationList_then_returnReservationResponses() {
         //when, then
-        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(8);
+        assertThat(service.findEntireReservationList().getData().size()).isEqualTo(10);
     }
 
     @Test
@@ -131,7 +133,7 @@ class ReservationServiceTest {
         //when
         final List<ReservationsMineResponse> reservationsByMember = service.findReservationsByMember(member);
         //then
-        assertThat(reservationsByMember).hasSize(7);
+        assertThat(reservationsByMember).hasSize(8);
     }
 
     @Test
@@ -172,16 +174,37 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("대기중인 예약을 제거할 수 있다.")
-    void given_when_delete_then_state() {
+    @DisplayName("회원 Id가 일치하지 않는 대기중인 예약을 제거할 수 없다.")
+    void given_differentMemberId_when_deleteByMember_then_notDeleted() {
         //given, when
         long initialSize = getReservationSize();
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "duck", Role.USER);
         //when
-        service.deleteWaitingByMember(10L, member);
+        service.deleteWaitingByMember(9L, member);
+        long afterCreateSize = getReservationSize();
+        //then
+        assertThat(afterCreateSize).isEqualTo(initialSize);
+    }
+
+    @Test
+    @DisplayName("대기중인 예약을 제거할 수 있다.")
+    void given_when_deleteWaitingById_then_deleted() {
+        //given, when
+        long initialSize = getReservationSize();
+        //when
+        service.deleteWaitingById(9L);
         long afterCreateSize = getReservationSize();
         //then
         assertThat(afterCreateSize).isEqualTo(initialSize - 1);
+    }
+
+    @Test
+    @DisplayName("예약 대기 목록을 반환한다.")
+    void given_when_findEntireWaitingReservationList_then_ReservationWaitingResponse() {
+        //given, when
+        final ResponsesWrapper<ReservationWaitingResponse> waitingReservations = service.findEntireWaitingReservationList();
+        //then
+        assertThat(waitingReservations.getData()).hasSize(2);
     }
 }

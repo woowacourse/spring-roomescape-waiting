@@ -31,7 +31,7 @@ class ReservationRepositoryTest {
     @Test
     void given_when_findAll_then_returnReservations() {
         //given, when, then
-        assertThat(reservationRepository.findAll()).hasSize(8);
+        assertThat(reservationRepository.findAll()).hasSize(10);
     }
 
     @DisplayName("Db에 예약 정보를 저장한다.")
@@ -120,7 +120,7 @@ class ReservationRepositoryTest {
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
         //when, then
-        assertThat(reservationRepository.findByMember(member)).hasSize(7);
+        assertThat(reservationRepository.findByMember(member)).hasSize(8);
     }
 
     @DisplayName("예약 날짜와 테마Id에 대한 예약을 조회할 수 있다.")
@@ -154,5 +154,12 @@ class ReservationRepositoryTest {
     void given_when_existByIdAndMemberId_then_True() {
         //given, when, then
         assertThat(reservationRepository.existsByIdAndMemberId(1L, 1L)).isTrue();
+    }
+
+    @DisplayName("예약 상태에 맞는 예약들을 반환한다.")
+    @Test
+    void given_when_findByStatus_then_True() {
+        //given, when, then
+        assertThat(reservationRepository.findByStatus(ReservationStatus.WAITING)).hasSize(2);
     }
 }
