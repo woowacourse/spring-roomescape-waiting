@@ -7,7 +7,6 @@ import jakarta.servlet.http.Cookie;
 
 public class CookieUtil {
 
-    // TODO: private -> public
     private static final String TOKEN_NAME = "token";
 
     public static Optional<String> extractToken(Cookie[] cookies) {
@@ -17,10 +16,6 @@ public class CookieUtil {
             }
         }
         return Optional.empty();
-    }
-
-    public static String makeTokenCookie(String token) {
-        return TOKEN_NAME + "=" + token;
     }
 
     public static Cookie makeCookieExpired() {
