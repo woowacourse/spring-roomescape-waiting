@@ -203,16 +203,16 @@ class ReservationRepositoryTest {
 
     @DisplayName("날짜, 시간, 테마, 회원 정보가 일치하는 Reservation을 반환한다.")
     @Test
-    void findByDateAndReservationTimeStartAtAndThemeAndMember() {
+    void findFirstByDateAndReservationTimeAndThemeAndMember() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member member = memberRepository.save(MEMBER_JOJO);
 
         reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
 
-        Optional<Reservation> savedReservation = reservationRepository.findByDateAndReservationTimeStartAtAndThemeAndMember(
+        Optional<Reservation> savedReservation = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndMember(
                 TOMORROW,
-                reservationTime.getStartAt(),
+                reservationTime,
                 theme,
                 member
         );
@@ -287,7 +287,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("날짜, 시간, 테마, 상태가 같은 Reservation을 반환한다.")
     @Test
-    void findFirstByDateAndReservationTimeStartAtAndThemeAndStatus() {
+    void findFirstByDateAndReservationTimeAndThemeAndStatus() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member member = memberRepository.save(MEMBER_JOJO);
@@ -295,9 +295,9 @@ class ReservationRepositoryTest {
         Reservation expected = reservationRepository.save(
                 new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
 
-        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeStartAtAndThemeAndStatus(
+        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndStatus(
                 TOMORROW,
-                reservationTime.getStartAt(),
+                reservationTime,
                 theme,
                 Status.SUCCESS
         );

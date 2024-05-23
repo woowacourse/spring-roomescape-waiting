@@ -1,7 +1,6 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,8 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("select r.reservationTime.id from Reservation r where r.date = :date and r.theme.id = :themeId")
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByMemberId(Long memberId);
-
     @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
             "    r, " +
             "    (SELECT COUNT(r) " +
@@ -33,6 +30,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND r.status = 'WAIT'")
     List<WaitingWithRank> findWaitingWithRanksByMemberId(Long memberId);
 
+    List<Reservation> findAllByMemberId(Long memberId);
+
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(
             Long themeId,
             Long memberId,
@@ -42,18 +41,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByStatus(Status status);
 
-    Optional<Reservation> findByDateAndReservationTimeStartAtAndThemeAndMember(
+    Optional<Reservation> findFirstByDateAndReservationTimeAndTheme(
             LocalDate date,
-            LocalTime startAt,
+            ReservationTime time,
+            Theme theme
+    );
+
+    Optional<Reservation> findFirstByDateAndReservationTimeAndThemeAndMember(
+            LocalDate date,
+            ReservationTime time,
             Theme theme,
             Member member
     );
 
-    Optional<Reservation> findFirstByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
-    Optional<Reservation> findFirstByDateAndReservationTimeStartAtAndThemeAndStatus(
+    Optional<Reservation> findFirstByDateAndReservationTimeAndThemeAndStatus(
             LocalDate date,
-            LocalTime startAt,
+            ReservationTime time,
             Theme theme,
             Status status
     );

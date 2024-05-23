@@ -75,9 +75,9 @@ public class ReservationService {
     }
 
     private void validateMemberReservation(Reservation reservation) {
-        Optional<Reservation> duplicatedReservation = reservationRepository.findByDateAndReservationTimeStartAtAndThemeAndMember(
+        Optional<Reservation> duplicatedReservation = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndMember(
                 reservation.getDate(),
-                reservation.getStartAt(),
+                reservation.getTime(),
                 reservation.getTheme(),
                 reservation.getMember()
         );
@@ -181,9 +181,9 @@ public class ReservationService {
     }
 
     private void validateUniqueReservation(Reservation reservation) {
-        Optional<Reservation> saved = reservationRepository.findFirstByDateAndReservationTimeStartAtAndThemeAndStatus(
+        Optional<Reservation> saved = reservationRepository.findFirstByDateAndReservationTimeAndThemeAndStatus(
                 reservation.getDate(),
-                reservation.getStartAt(),
+                reservation.getTime(),
                 reservation.getTheme(),
                 Status.SUCCESS
         );
