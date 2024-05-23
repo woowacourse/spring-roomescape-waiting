@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.time.dto.AvailabilityTimeRequest;
 import roomescape.controller.time.dto.AvailabilityTimeResponse;
 import roomescape.controller.time.dto.CreateTimeRequest;
@@ -29,12 +30,14 @@ public class TimeService {
         this.timeRepository = timeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReadTimeResponse> getTimes() {
         return timeRepository.findAll().stream()
                 .map(ReadTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailabilityTimeResponse> getAvailableTimes(final AvailabilityTimeRequest request) {
         final List<ReservationTime> times = timeRepository.findAll();
         final Set<ReservationTime> bookedTimes = reservationRepository
@@ -64,6 +67,7 @@ public class TimeService {
                 .toList();
     }
 
+    @Transactional
     public AvailabilityTimeResponse addTime(final CreateTimeRequest createTimeRequest) {
         final ReservationTime time = createTimeRequest.toDomain();
         validateDuplicate(time);
@@ -71,6 +75,7 @@ public class TimeService {
         return AvailabilityTimeResponse.from(savedTime, false);
     }
 
+    @Transactional
     public void deleteTime(final long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new TimeUsedException("예약된 시간은 삭제할 수 없습니다.");

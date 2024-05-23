@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
@@ -45,6 +46,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> getReservations() {
         final Set<ReservationInfo> preReservations = new HashSet<>();
 
@@ -54,16 +56,19 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationRankResponse> getMyReservation(final LoginMember member) {
         return reservationRepository.findMyReservation(member.id());
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> searchReservations(final ReservationSearchCondition condition) {
         validateDateRange(condition);
         return reservationRepository.findReservationsByCondition(condition.dateFrom(), condition.dateTo(),
                 condition.themeId(), condition.memberId());
     }
 
+    @Transactional
     public Reservation addReservation(final CreateReservationRequest request) {
         final ReservationTime time = reservationTimeRepository.fetchById(request.timeId());
         final Theme theme = themeRepository.fetchById(request.themeId());
@@ -87,11 +92,13 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservation(final long id) {
         final Reservation fetchReservation = reservationRepository.fetchById(id);
         reservationRepository.deleteById(fetchReservation.getId());
     }
 
+    @Transactional
     public void deleteWaitReservation(final long reservationId, final long memberId) {
         final Reservation fetchReservation = reservationRepository.fetchById(reservationId);
 
@@ -108,6 +115,7 @@ public class ReservationService {
         reservationRepository.deleteById(fetchReservation.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllWaiting() {
         final LocalDate date = LocalDate.now();
         final List<Reservation> reservations = reservationRepository.findAllByDateIsGreaterThanEqual(date);
@@ -118,6 +126,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public boolean isMyReservation(final IsMineRequest request, final LoginMember loginMember) {
         return reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(loginMember.id(), request.themeId(),
                 request.timeId(), request.date());

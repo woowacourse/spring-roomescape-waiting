@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.TokenResponse;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.member.dto.MemberLoginRequest;
@@ -31,10 +32,12 @@ public class MemberService {
         this.encryptionService = encryptionService;
     }
 
+    @Transactional(readOnly = true)
     public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
+    @Transactional
     public Member save(final SignupRequest request) {
         final Optional<Member> findMember = memberRepository.findByEmail(request.email());
         if (findMember.isPresent()) {
@@ -45,6 +48,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    @Transactional(readOnly = true)
     public TokenResponse createToken(final MemberLoginRequest request) {
         if (invalidPassword(request.email(), request.password())) {
             throw new InvalidRequestException("Invalid email or password");
@@ -61,6 +65,7 @@ public class MemberService {
         return new TokenResponse(accessToken);
     }
 
+    @Transactional(readOnly = true)
     public LoginMember findMemberByToken(final String token) {
         if (!jwtTokenProvider.validateToken(token)) {
             throw new InvalidTokenException("유효하지 않은 토큰입니다.");

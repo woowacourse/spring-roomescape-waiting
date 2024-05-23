@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.reservation.dto.PopularThemeResponse;
 import roomescape.controller.theme.dto.CreateThemeRequest;
 import roomescape.controller.theme.dto.ThemeResponse;
@@ -24,18 +25,21 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse addTheme(final CreateThemeRequest createThemeRequest) {
         final Theme theme = createThemeRequest.toDomain();
         final Theme savedTheme = themeRepository.save(theme);
         return ThemeResponse.from(savedTheme);
     }
 
+    @Transactional
     public void deleteTheme(final long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ThemeUsedException("예약된 테마는 삭제할 수 없습니다.");
@@ -44,6 +48,7 @@ public class ThemeService {
         themeRepository.deleteById(findTheme.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<PopularThemeResponse> getPopularThemes(final LocalDate from, final LocalDate until, final int limit) {
         if (from.isAfter(until)) {
             throw new InvalidRequestException("유효하지 않은 날짜 범위입니다.");
