@@ -1,4 +1,4 @@
-package roomescape.web.controller;
+package roomescape.web.exception;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package roomescape.web.argumentresolver;
+package roomescape.web.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;

@@ -1,4 +1,4 @@
-package roomescape.web.interceptor;
+package roomescape.web.auth;
 
 import java.io.IOException;
 import java.io.PrintWriter;

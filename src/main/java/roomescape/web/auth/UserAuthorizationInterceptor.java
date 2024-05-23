@@ -1,4 +1,4 @@
-package roomescape.web.interceptor;
+package roomescape.web.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,12 +11,12 @@ import roomescape.infrastructure.auth.AuthorizationExtractor;
 import roomescape.service.AuthService;
 
 @Component
-public class AdminAuthorizationInterceptor implements HandlerInterceptor {
+public class UserAuthorizationInterceptor implements HandlerInterceptor {
 
     private final AuthorizationExtractor authorizationExtractor;
     private final AuthService authService;
 
-    public AdminAuthorizationInterceptor(AuthorizationExtractor authorizationExtractor, AuthService authService) {
+    public UserAuthorizationInterceptor(AuthorizationExtractor authorizationExtractor, AuthService authService) {
         this.authorizationExtractor = authorizationExtractor;
         this.authService = authService;
     }
@@ -32,7 +32,7 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
         }
 
         LoginMember loginMember = authService.extractLoginMemberByToken(tokenDto);
-        if (loginMember.role() != Role.ADMIN) {
+        if (loginMember.role() != Role.USER) {
             return AuthorizationResponseHandler.responseUnauthorized(response);
         }
 
