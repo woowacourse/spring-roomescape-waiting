@@ -40,6 +40,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         if (cookies == null) {
             throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
         }
+        // TODO: review - 문구가 중복되니 예외 내부로
         String token = CookieUtil.extractToken(cookies)
                 .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
         String subject = jwtProvider.getSubject(token);

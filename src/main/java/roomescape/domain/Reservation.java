@@ -27,6 +27,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    // TODO: 접근제어자 변경
     public Reservation() {
     }
 
@@ -62,6 +63,7 @@ public class Reservation {
         return theme;
     }
 
+    // TODO: 가독성 개선
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -74,6 +76,7 @@ public class Reservation {
         return Objects.equals(id, that.id);
     }
 
+    // TODO: 다른 필드도 포함
     @Override
     public int hashCode() {
         return Objects.hash(id);

@@ -26,6 +26,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Reservation> reservations;
 
+    // TODO: 접근제어자 변경
     public Member() {
     }
 
@@ -60,4 +61,6 @@ public class Member {
     public List<Reservation> getReservations() {
         return reservations;
     }
+
+    // TODO: equals() & hashCode() 재정의
 }

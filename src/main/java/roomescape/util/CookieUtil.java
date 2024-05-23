@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 
 public class CookieUtil {
 
+    // TODO: private -> public
     private static final String TOKEN_NAME = "token";
 
     public static Optional<String> extractToken(Cookie[] cookies) {
