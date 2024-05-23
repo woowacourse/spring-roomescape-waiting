@@ -26,8 +26,11 @@
 | `MEMBER` | GET    | `/reservations/my`                                      | 내 예약 정보 조회            |                                        | `@RestController` |
 | `ADMIN`  | GET    | `/reservations/search?themeId&memberId&dateFrom&dateTo` | 예약 정보 조건 검색           |                                        | `@RestController` |
 |          | GET    | `/reservations/themes/{themeId}/reservationTimes?date`  | 특정 날짜의 특정 테마 예약 정보 조회 |                                        | `@RestController` |
-| `MEMBER` | POST   | `/reservations`                                         | 예약 추가                 |                                        | `@RestController` |
+| `MEMBER` | POST   | `/reservations`                                         | 예약 정보 추가              |                                        | `@RestController` |
 |          | DELETE | `/reservations/{id}`                                    | 예약 취소                 |                                        | `@RestController` |
+|          | DELETE | `/reservations/waitings/{reservationId}`                | 예약 대기 삭제              |                                        | `@RestController` |
+|          | POST   | `/reservations/waitings/{reservationId}`                | 예약 대기 승인              |                                        | `@RestController` |
+|          | GET    | `/reservations/waitings`                                | 예약 대기 정보 조회           |                                        | `@RestController` |
 |          | GET    | `/reservationTimes`                                     | 예약 시간 조회              |                                        | `@RestController` |
 |          | DELETE | `/reservationTimes/{id}`                                | 예약 시간 추가              |                                        | `@RestController` |
 |          | POST   | `/reservationTimes`                                     | 예약 시간 삭제              |                                        | `@RestController` |
@@ -298,7 +301,7 @@ GET /reservations/themes/1/reservationTimes?date=2024-12-31 HTTP/1.1
 
 ---
 
-### 예약 추가 API
+### 예약 정보 추가 API
 
 - Request
 
@@ -309,7 +312,8 @@ content-type: application/json
 {
     "date": "2023-08-05",
     "name": "브라운",
-    "timeId": 1
+    "timeId": 1,
+    "status": "RESERVED" (or "WAITING")
 }
 ```
 
