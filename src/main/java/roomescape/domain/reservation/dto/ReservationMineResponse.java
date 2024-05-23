@@ -7,7 +7,7 @@ import roomescape.domain.reservation.domain.Reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record ReservationMineResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {
+public record ReservationMineResponse(Long id, String theme, LocalDate date, LocalTime time, String status) {
 
     public ReservationMineResponse(Reservation reservation) {
         this(reservation.getId(), reservation.getTheme().getName(), reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus().getValue());
