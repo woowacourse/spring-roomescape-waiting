@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -18,14 +19,20 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
+
     private LocalDate date;
-    @ManyToOne
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
-    @ManyToOne
+
+    @ManyToOne(optional = false)
     private Theme theme;
-    @ManyToOne
+
+    @ManyToOne(optional = false)
     private Member member;
 
     protected Reservation() {
