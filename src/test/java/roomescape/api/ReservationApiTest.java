@@ -20,7 +20,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.UserReservationRequest;
-import roomescape.dto.waiting.WaitingRequest;
+import roomescape.dto.waiting.WaitingWebRequest;
 import roomescape.infrastructure.auth.JwtProvider;
 
 @Sql("/reservation-api-test-data.sql")
@@ -131,7 +131,7 @@ class ReservationApiTest {
     void 사용자_예약_및_예약_대기_전체_조회() {
         ReservationRequest otherUserReservationRequest = createReservationRequest(2L, 1L);
         ReservationRequest userReservationRequest = createReservationRequest(3L, 2L);
-        WaitingRequest userWaitingRequest = createWaitingRequest(3L, 1L);
+        WaitingWebRequest userWaitingRequest = createWaitingRequest(1L);
 
         addReservation(otherUserReservationRequest);
         addReservation(userReservationRequest);
@@ -181,8 +181,8 @@ class ReservationApiTest {
         return new ReservationRequest(LocalDate.now().plusDays(1), timeId, 1L, memberId);
     }
 
-    private WaitingRequest createWaitingRequest(Long memberId, Long reservationId) {
-        return new WaitingRequest(memberId, reservationId);
+    private WaitingWebRequest createWaitingRequest(Long reservationId) {
+        return new WaitingWebRequest(reservationId);
     }
 
     private void addReservation(ReservationRequest reservationRequest) {
@@ -196,7 +196,7 @@ class ReservationApiTest {
                 .when().post("/admin/reservations");
     }
 
-    private void addWaiting(WaitingRequest waitingRequest) {
+    private void addWaiting(WaitingWebRequest waitingRequest) {
         Cookie cookieByUserLogin = getCookieByLogin(port, "atom@email.com", "123456");
 
         RestAssured.given().log().all()
