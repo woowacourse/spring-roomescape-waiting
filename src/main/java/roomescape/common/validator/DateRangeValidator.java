@@ -1,4 +1,4 @@
-package roomescape.validator;
+package roomescape.common.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

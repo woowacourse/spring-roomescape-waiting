@@ -2,9 +2,9 @@ package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
 
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;

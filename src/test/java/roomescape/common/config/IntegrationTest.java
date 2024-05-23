@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.common.config;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterEach;

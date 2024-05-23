@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import roomescape.config.IntegrationTest;
-import roomescape.util.CookieUtils;
+import roomescape.common.config.IntegrationTest;
+import roomescape.common.util.CookieUtils;
 
 class AdminPageControllerTest extends IntegrationTest {
 

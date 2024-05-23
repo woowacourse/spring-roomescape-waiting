@@ -1,12 +1,12 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.THUMBNAIL;
+import static roomescape.Fixture.HORROR_DESCRIPTION;
+import static roomescape.Fixture.HORROR_THEME_NAME;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

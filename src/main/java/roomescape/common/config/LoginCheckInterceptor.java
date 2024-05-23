@@ -1,11 +1,11 @@
-package roomescape.config;
+package roomescape.common.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.util.CookieUtils;
+import roomescape.common.util.CookieUtils;
 
 @Component
 public class LoginCheckInterceptor implements HandlerInterceptor {

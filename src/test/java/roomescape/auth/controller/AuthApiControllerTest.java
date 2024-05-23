@@ -6,9 +6,9 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.config.IntegrationTest;
+import roomescape.common.config.IntegrationTest;
 import roomescape.member.dto.MemberSignUpRequest;
-import roomescape.util.CookieUtils;
+import roomescape.common.util.CookieUtils;
 
 class AuthApiControllerTest extends IntegrationTest {
 

@@ -1,14 +1,14 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import static roomescape.util.Fixture.JOJO_EMAIL;
-import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.JOJO_PASSWORD;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.MEMBER_JOJO;
-import static roomescape.util.Fixture.MEMBER_KAKI;
+import static roomescape.Fixture.JOJO_EMAIL;
+import static roomescape.Fixture.JOJO_NAME;
+import static roomescape.Fixture.JOJO_PASSWORD;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.MEMBER_JOJO;
+import static roomescape.Fixture.MEMBER_KAKI;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.auth.domain.Role;
-import roomescape.config.IntegrationTest;
+import roomescape.common.config.IntegrationTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.util.CookieUtils;
+import roomescape.common.util.CookieUtils;
 
 class WaitingReservationApiControllerTest extends IntegrationTest {
 

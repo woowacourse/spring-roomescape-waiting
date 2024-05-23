@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.common.exception;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;

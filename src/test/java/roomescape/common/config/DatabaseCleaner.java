@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.common.config;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;

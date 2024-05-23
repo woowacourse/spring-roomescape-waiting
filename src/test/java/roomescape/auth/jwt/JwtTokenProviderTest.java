@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
 import roomescape.auth.dto.LoginMember;
-import roomescape.exception.ExpiredTokenException;
-import roomescape.exception.UnauthenticatedUserException;
+import roomescape.common.exception.ExpiredTokenException;
+import roomescape.common.exception.UnauthenticatedUserException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 

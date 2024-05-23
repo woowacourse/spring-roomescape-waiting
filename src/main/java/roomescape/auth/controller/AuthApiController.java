@@ -10,7 +10,7 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.service.AuthService;
 import roomescape.member.dto.MemberResponse;
-import roomescape.util.CookieUtils;
+import roomescape.common.util.CookieUtils;
 
 @RestController
 public class AuthApiController {

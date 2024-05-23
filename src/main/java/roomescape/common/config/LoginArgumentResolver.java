@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.common.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +10,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.jwt.JwtTokenProvider;
-import roomescape.util.CookieUtils;
+import roomescape.common.util.CookieUtils;
 
 @Component
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {

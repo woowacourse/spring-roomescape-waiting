@@ -1,22 +1,22 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.util.Fixture.HORROR_DESCRIPTION;
-import static roomescape.util.Fixture.HORROR_THEME;
-import static roomescape.util.Fixture.HORROR_THEME_NAME;
-import static roomescape.util.Fixture.HOUR_10;
-import static roomescape.util.Fixture.JOJO_EMAIL;
-import static roomescape.util.Fixture.JOJO_NAME;
-import static roomescape.util.Fixture.JOJO_PASSWORD;
-import static roomescape.util.Fixture.KAKI_EMAIL;
-import static roomescape.util.Fixture.KAKI_NAME;
-import static roomescape.util.Fixture.KAKI_PASSWORD;
-import static roomescape.util.Fixture.MEMBER_JOJO;
-import static roomescape.util.Fixture.MEMBER_KAKI;
-import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
-import static roomescape.util.Fixture.THUMBNAIL;
-import static roomescape.util.Fixture.TODAY;
-import static roomescape.util.Fixture.TOMORROW;
+import static roomescape.Fixture.HORROR_DESCRIPTION;
+import static roomescape.Fixture.HORROR_THEME;
+import static roomescape.Fixture.HORROR_THEME_NAME;
+import static roomescape.Fixture.HOUR_10;
+import static roomescape.Fixture.JOJO_EMAIL;
+import static roomescape.Fixture.JOJO_NAME;
+import static roomescape.Fixture.JOJO_PASSWORD;
+import static roomescape.Fixture.KAKI_EMAIL;
+import static roomescape.Fixture.KAKI_NAME;
+import static roomescape.Fixture.KAKI_PASSWORD;
+import static roomescape.Fixture.MEMBER_JOJO;
+import static roomescape.Fixture.MEMBER_KAKI;
+import static roomescape.Fixture.RESERVATION_TIME_10_00;
+import static roomescape.Fixture.THUMBNAIL;
+import static roomescape.Fixture.TODAY;
+import static roomescape.Fixture.TOMORROW;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

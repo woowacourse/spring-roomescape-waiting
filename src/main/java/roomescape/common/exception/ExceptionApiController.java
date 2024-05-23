@@ -1,4 +1,4 @@
-package roomescape.exception;
+package roomescape.common.exception;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
