@@ -22,7 +22,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation create(Reservation reservation) {
+    public Reservation createReservation(Reservation reservation) {
         validateReservationDate(reservation);
         validateDuplicatedReservation(reservation);
         return reservationRepository.save(reservation);
@@ -45,10 +45,21 @@ public class ReservationService {
 
     @Transactional
     public Reservation createWaitingReservation(Reservation reservation) {
+        validateReservationDate(reservation);
+        validateDuplicatedWaitingReservation(reservation);
+
         Waiting waiting = new Waiting(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
         waitingRepository.save(waiting);
 
         return reservationRepository.save(reservation);
+    }
+
+    private void validateDuplicatedWaitingReservation(Reservation reservation) {
+        boolean existReservationInSameTime = reservationRepository.existsByMemberAndDateAndTimeAndTheme(
+                reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        if (existReservationInSameTime) {
+            throw new ViolationException("이미 예약 또는 대기를 신청하셨습니다.");
+        }
     }
 
     public List<Reservation> findAll() {

@@ -40,7 +40,7 @@ public class AdminReservationController {
         Theme theme = themeService.findById(request.themeId());
         Member member = memberService.findById(request.memberId());
         Reservation newReservation = request.toModel(theme, reservationTime, member);
-        Reservation createdReservation = reservationService.create(newReservation);
+        Reservation createdReservation = reservationService.createReservation(newReservation);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationResponse.from(createdReservation));
     }

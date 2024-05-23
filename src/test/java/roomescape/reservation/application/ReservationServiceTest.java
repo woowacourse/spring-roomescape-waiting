@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.TestFixture.*;
 
 class ReservationServiceTest extends ServiceTest {
@@ -55,7 +54,7 @@ class ReservationServiceTest extends ServiceTest {
         Reservation reservation = MIA_RESERVATION(miaReservationTime, wootecoTheme, mia);
 
         // when
-        Reservation createdReservation = reservationService.create(reservation);
+        Reservation createdReservation = reservationService.createReservation(reservation);
 
         // then
         assertThat(createdReservation.getId()).isNotNull();
@@ -70,7 +69,7 @@ class ReservationServiceTest extends ServiceTest {
                 USER_MIA(), invalidDate, new ReservationTime(MIA_RESERVATION_TIME), WOOTECO_THEME());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(reservation))
+        assertThatThrownBy(() -> reservationService.createReservation(reservation))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -85,12 +84,12 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("동일한 테마, 날짜, 시간에 한 팀만 예약할 수 있다.")
     void createDuplicatedReservation() {
         // given
-        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
 
         Reservation duplicatedReservation = new Reservation(tommy, MIA_RESERVATION_DATE, miaReservationTime, wootecoTheme);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(duplicatedReservation))
+        assertThatThrownBy(() -> reservationService.createReservation(duplicatedReservation))
                 .isInstanceOf(ViolationException.class);
     }
 
@@ -98,8 +97,8 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("모든 예약 목록을 조회한다.")
     void findAll() {
         // given
-        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
-        reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
+        reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        reservationService.createReservation(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
 
         // when
         List<Reservation> reservations = reservationService.findAll();
@@ -112,8 +111,8 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("예약자, 테마, 날짜로 예약 목록을 조회한다.")
     void findAllByMemberIdAndThemeIdAndDateBetween() {
         // given
-        Reservation miaReservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
-        Reservation tommyReservation = reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
+        Reservation miaReservation = reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        Reservation tommyReservation = reservationService.createReservation(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
 
         // when
         List<Reservation> reservations = reservationService.findAllByMemberAndThemeAndDateBetween(
@@ -127,7 +126,7 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("예약을 삭제한다.")
     void delete() {
         // given
-        Reservation reservation = reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        Reservation reservation = reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
 
         // when & then
         assertThatCode(() -> reservationService.delete(reservation.getId()))
@@ -138,8 +137,8 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("사용자의 예약 목록을 조회한다.")
     void findAllByMember() {
         // given
-        reservationService.create(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
-        reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
+        reservationService.createReservation(MIA_RESERVATION(miaReservationTime, wootecoTheme, mia));
+        reservationService.createReservation(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy));
 
         // when
         List<Reservation> reservations = reservationService.findAllByMember(mia);

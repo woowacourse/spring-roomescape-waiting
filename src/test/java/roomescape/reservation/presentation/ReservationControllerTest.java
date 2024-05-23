@@ -130,7 +130,7 @@ class ReservationControllerTest extends ControllerTest {
         Theme expectedTheme = WOOTECO_THEME(1L);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, expectedTheme, USER_MIA(1L));
 
-        BDDMockito.given(reservationService.create(any()))
+        BDDMockito.given(reservationService.createReservation(any()))
                 .willReturn(expectedReservation);
         BDDMockito.given(reservationTimeService.findById(anyLong()))
                 .willReturn(expectedTime);
