@@ -8,6 +8,7 @@ import static roomescape.util.Fixture.HOUR_10;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.LOCAL_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
+import roomescape.reservation.dto.request.TimeSaveRequest;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -97,6 +99,16 @@ class ReservationTimeServiceTest {
                 AvailableReservationTimeResponse.toResponse(hour10, true),
                 AvailableReservationTimeResponse.toResponse(hour11, false)
         );
+    }
+
+    @DisplayName("예약 시간 중복 저장 시 예외가 발생한다.")
+    @Test
+    void saveReservationTimeExceptionTest() {
+        TimeSaveRequest request = new TimeSaveRequest(LOCAL_TIME_10_00);
+        reservationTimeService.save(request);
+
+        assertThatThrownBy(() -> reservationTimeService.save(request))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("이미 해당 시간으로 예약 되있을 경우 삭제 시 예외가 발생한다.")

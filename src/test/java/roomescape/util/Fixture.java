@@ -24,8 +24,9 @@ public class Fixture {
     );
 
     public static final String HOUR_10 = "10:00";
+    public static final LocalTime LOCAL_TIME_10_00 = LocalTime.parse(HOUR_10);
 
-    public static final ReservationTime RESERVATION_TIME_10_00 = new ReservationTime(LocalTime.parse(HOUR_10));
+    public static final ReservationTime RESERVATION_TIME_10_00 = new ReservationTime(LOCAL_TIME_10_00);
 
     public static final String KAKI_NAME = "카키";
     public static final String KAKI_EMAIL = "kaki@email.com";

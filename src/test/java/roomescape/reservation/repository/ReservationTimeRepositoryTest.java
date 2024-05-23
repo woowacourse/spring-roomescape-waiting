@@ -7,6 +7,7 @@ import static roomescape.util.Fixture.HOUR_10;
 import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
+import static roomescape.util.Fixture.RESERVATION_TIME_10_00;
 import static roomescape.util.Fixture.THUMBNAIL;
 
 import java.time.LocalDate;
@@ -95,5 +96,13 @@ class ReservationTimeRepositoryTest {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         assertThat(reservationTimes.size()).isEqualTo(0);
+    }
+
+    @DisplayName("startAt으로 예약 시간을 조회하여 있으면 true를 반환한다.")
+    @Test
+    void existsByStartAt() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+
+        assertThat(reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())).isTrue();
     }
 }
