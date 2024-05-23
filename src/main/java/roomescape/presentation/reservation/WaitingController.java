@@ -31,7 +31,7 @@ public class WaitingController {
     public ResponseEntity<ReservationResponse> createWaiting(@LoginMemberId long memberId,
                                                              @RequestBody @Valid ReservationRequest request) {
         ReservationResponse response = waitingService.create(request.withMemberId(memberId));
-        URI location = URI.create("/reservations/waiting/" + response.id());
+        URI location = URI.create("/waiting/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 

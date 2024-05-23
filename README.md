@@ -18,7 +18,7 @@
   - [x] 어드민은 예약 대기를 취소시킬 수 있다.
 - [x] 예약 대기 승인 기능을 구현한다.
   - [x] 예약이 취소되면 가장 빠른 예약 대기가 자동으로 승인된다.
-- [ ] 화면 응답 파일을 수정한다.
+- [x] 화면 응답 파일을 수정한다.
 
 # 방탈출 API 명세
 
@@ -165,7 +165,7 @@
 ### Response
 
 - 201 Created
-- Location: /reservations/waiting/1
+- Location: /waiting/1
 - content-type: application/json
 
 ```json

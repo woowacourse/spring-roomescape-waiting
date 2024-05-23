@@ -5,7 +5,8 @@ values (1, '아루', 'test@test1.com', '12341234'),
        (4, '오리', 'test@test4.com', '12341234'),
        (5, '제이미', 'test@test5.com', '12341234'),
        (6, '비밥', 'test@test6.com', '12341234'),
-       (7, '웨지', 'test@test7.com', '12341234')
+       (7, '웨지', 'test@test7.com', '12341234'),
+       (8, '시소', 'test@test8.com', '12341234')
 ;
 
 insert into member_role (member_id, role)
@@ -15,7 +16,8 @@ values (1, 'MEMBER'),
        (4, 'MEMBER'),
        (5, 'MEMBER'),
        (6, 'MEMBER'),
-       (7, 'MEMBER')
+       (7, 'MEMBER'),
+       (8, 'ADMIN')
 ;
 
 insert into reservation_time (id, start_at)
