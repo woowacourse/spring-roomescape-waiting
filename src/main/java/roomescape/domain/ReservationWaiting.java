@@ -5,6 +5,7 @@ import static roomescape.exception.ExceptionType.WAITING_WITHOUT_MEMBER;
 import static roomescape.exception.ExceptionType.WAITING_WITHOUT_RESERVATION;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +21,9 @@ public class ReservationWaiting extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Reservation reservation;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member waitingMember;
 
     public ReservationWaiting(Reservation reservation, Member waitingMember) {
