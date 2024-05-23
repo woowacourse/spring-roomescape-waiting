@@ -100,10 +100,16 @@ public class ReservationService {
 
     private boolean canDelete(long requestMemberId, long reservationId) {
         Member requestMember = memberFinder.findById(requestMemberId);
-        boolean isReservationMember = reservationRepository.findById(reservationId)
+        if (requestMember.isAdmin()) {
+            return true;
+        }
+        return isMembersReservation(requestMemberId, reservationId);
+    }
+
+    private boolean isMembersReservation(long memberId, long reservationId) {
+        return reservationRepository.findById(reservationId)
                 .stream()
                 .map(Reservation::getReservationMember)
-                .anyMatch(member -> member.equals(requestMember));
-        return requestMember.isAdmin() || isReservationMember;
+                .anyMatch(member -> member.hasIdOf(memberId));
     }
 }
