@@ -1,7 +1,9 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialMemberFixture.NO_RESERVATION_MEMBER;
@@ -22,6 +24,7 @@ import roomescape.member.dto.MemberRequest;
 import roomescape.reservation.dto.ReservationOrWaitingResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/schema.sql", "/initial_test_data.sql"})
@@ -29,6 +32,8 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @Test
     @DisplayName("예약이 없는데 예약 대기를 신청하는 경우 예외가 발생한다.")
@@ -100,5 +105,44 @@ class WaitingServiceTest {
                         "1번째 예약대기"
                 )
         );
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 권한이 없는 회원이 예약 대기 삭제를 시도할 경우 예외를 발생시킨다.")
+    void throwExceptionIfNotRelatedMemberDeleteWaiting() {
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+
+        assertThatThrownBy(() -> waitingService.deleteWaiting(WAITING_1.getId(), memberRequest))
+                .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    @DisplayName("자신이 예약한 예약 대기는 삭제할 수 있다.")
+    void MemberWhoWaitsCanDeleteWaiting() {
+        MemberRequest memberRequest = new MemberRequest(WAITING_1.getMember());
+
+        waitingService.deleteWaiting(WAITING_1.getId(), memberRequest);
+
+        assertThat(waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
+                WAITING_1.getDate(),
+                WAITING_1.getReservationTime(),
+                WAITING_1.getTheme(),
+                WAITING_1.getMember()
+        )).isFalse();
+    }
+
+    @Test
+    @DisplayName("관리자는 모든 예약 대기를 삭제할 수 있다.")
+    void AdminCanDeleteWaiting() {
+        MemberRequest memberRequest = new MemberRequest(ADMIN);
+
+        waitingService.deleteWaiting(WAITING_1.getId(), memberRequest);
+
+        assertThat(waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
+                WAITING_1.getDate(),
+                WAITING_1.getReservationTime(),
+                WAITING_1.getTheme(),
+                WAITING_1.getMember()
+        )).isFalse();
     }
 }

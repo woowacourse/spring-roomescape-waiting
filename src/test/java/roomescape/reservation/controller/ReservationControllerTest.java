@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import static org.hamcrest.Matchers.is;
 import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialReservationFixture.INITIAL_RESERVATION_COUNT;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 import static roomescape.InitialReservationFixture.RESERVATION_4;
@@ -114,8 +115,20 @@ class ReservationControllerTest {
     @Test
     @DisplayName("Waiting을 삭제한다.")
     void deleteWaiting() {
-        //when
+        //given
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_2.getEmail().email());
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        //when & then
         RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
                 .when().delete("/reservations/waitings/1")
                 .then().log().all()
                 .statusCode(204);

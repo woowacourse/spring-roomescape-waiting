@@ -105,8 +105,19 @@ public class WaitingService {
                 .toList();
     }
 
-    // TODO: MemberRequest를 받아서 삭제 권한이 있는 멤버인지 확인 해야 할까? 어드민이거나, 본인이 예약을 가진 회원이거나
-    public void deleteWaiting(Long id) {
-        waitingRepository.deleteById(id);
+    @Transactional
+    public void deleteWaiting(Long id, MemberRequest memberRequest) {
+        waitingRepository.findById(id)
+                .ifPresent(waiting -> {
+                            validateDeleteAuth(memberRequest.toMember(), waiting);
+                            waitingRepository.deleteById(id);
+                        }
+                );
+    }
+
+    private void validateDeleteAuth(Member member, Waiting waiting) {
+        if (waiting.doesNotHaveDeleteAuth(member)) {
+            throw new RuntimeException("삭제할 권한이 없습니다.");
+        }
     }
 }
