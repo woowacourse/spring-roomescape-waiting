@@ -3,6 +3,8 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,7 +53,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
         LocalDate date = LocalDate.parse("2023-01-01");
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
 
         reservationWaitingService.enqueueWaitingList(request);
@@ -72,18 +74,18 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
         LocalDate date = LocalDate.parse("2023-01-01");
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Member member1 = memberRepository.save(MemberFixture.createMember("아루"));
-        Member member2 = memberRepository.save(MemberFixture.createMember("아루2"));
-        Reservation firstWaiting = new Reservation(member1, date, time, theme,
+        Member aru = memberRepository.save(MEMBER_ARU.create());
+        Member pk = memberRepository.save(MEMBER_PK.create());
+        Reservation firstWaiting = new Reservation(aru, date, time, theme,
                 LocalDateTime.parse("1999-01-01T00:00:00"));
-        Reservation nextWaiting = new Reservation(member2, date, time, theme,
+        Reservation nextWaiting = new Reservation(pk, date, time, theme,
                 LocalDateTime.parse("1999-01-03T00:00:00"));
         long firstId = reservationStatusRepository.save(new ReservationStatus(firstWaiting, BookStatus.WAITING))
                 .getId();
         long secondId = reservationStatusRepository.save(new ReservationStatus(nextWaiting, BookStatus.WAITING))
                 .getId();
 
-        reservationWaitingService.cancelWaitingList(member1.getId(), firstId);
+        reservationWaitingService.cancelWaitingList(aru.getId(), firstId);
 
         ReservationStatus status = reservationStatusRepository.getById(secondId);
         assertThat(status.isBooked()).isTrue();
@@ -96,7 +98,7 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
         LocalDate date = LocalDate.parse("2023-01-01");
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
         Reservation reservation = new Reservation(member, date, time, theme,
                 LocalDateTime.parse("1999-01-01T00:00:00"));
@@ -113,8 +115,8 @@ class ReservationWaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
         LocalDate date = LocalDate.parse("2023-01-01");
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
-        Member pk = memberRepository.save(MemberFixture.createMember("피케이"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
+        Member pk = memberRepository.save(MEMBER_PK.create());
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
         reservationStatusRepository.save(new ReservationStatus(
                 new Reservation(pk, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0)),

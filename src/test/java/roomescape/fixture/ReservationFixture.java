@@ -1,5 +1,7 @@
 package roomescape.fixture;
 
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,7 +40,7 @@ public class ReservationFixture {
     public Reservation saveReservation() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         Reservation reservation = new Reservation(
                 member,
                 LocalDate.of(2024, 1, 1),

@@ -2,6 +2,9 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static roomescape.fixture.MemberFixture.ADMIN_PK;
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -17,7 +20,6 @@ import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
@@ -27,7 +29,6 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.UnAuthorizedException;
-import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationFixture;
 
 @ServiceTest
@@ -60,7 +61,7 @@ class ReservationBookingServiceTest {
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
                 LocalDate.of(2024, 1, 1),
@@ -93,8 +94,7 @@ class ReservationBookingServiceTest {
     @DisplayName("다른 사람의 예약을 삭제하는 경우, 예외를 반환한다.")
     void shouldThrowExceptionWhenDeleteOtherMemberReservation() {
         Long reservationId = reservationFixture.saveReservation().getId();
-        Member member = MemberFixture.createMember("other");
-        long memberId = memberRepository.save(member).getId();
+        long memberId = memberRepository.save(MEMBER_PK.create()).getId();
         assertThatCode(() -> reservationBookingService.cancelReservation(memberId, reservationId))
                 .isInstanceOf(UnAuthorizedException.class);
     }
@@ -103,9 +103,8 @@ class ReservationBookingServiceTest {
     @DisplayName("관리자가 다른 사람의 예약을 삭제하는 경우, 예약이 삭제된다.")
     void shouldDeleteReservationWhenAdmin() {
         Reservation reservation = reservationFixture.saveReservation();
-        Member admin = new Member("admin", "admin@admin.com", "12341234", Role.ADMIN);
-        Member savedAdmin = memberRepository.save(admin);
-        reservationBookingService.cancelReservation(savedAdmin.getId(), reservation.getId());
+        Member admin = memberRepository.save(ADMIN_PK.create());
+        reservationBookingService.cancelReservation(admin.getId(), reservation.getId());
 
         List<Reservation> reservations = reservationStatusRepository.findAllBookedReservations();
         assertThat(reservations).isEmpty();

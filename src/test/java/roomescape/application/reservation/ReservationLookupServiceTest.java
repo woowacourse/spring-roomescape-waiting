@@ -1,6 +1,8 @@
 package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +26,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationFixture;
 
 @ServiceTest
@@ -66,8 +67,8 @@ class ReservationLookupServiceTest {
     @Test
     @DisplayName("한 사람의 예약 및 대기 정보를 조회한다.")
     void lookupReservationStatus() {
-        Member aru = memberRepository.save(MemberFixture.createMember("아루"));
-        Member pk = memberRepository.save(MemberFixture.createMember("피케이"));
+        Member aru = memberRepository.save(MEMBER_ARU.create());
+        Member pk = memberRepository.save(MEMBER_PK.create());
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "url"));
 

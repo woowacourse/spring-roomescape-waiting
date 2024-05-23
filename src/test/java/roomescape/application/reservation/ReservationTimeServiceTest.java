@@ -2,6 +2,7 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -22,7 +23,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.fixture.MemberFixture;
 
 @ServiceTest
 class ReservationTimeServiceTest {
@@ -87,8 +87,7 @@ class ReservationTimeServiceTest {
         ReservationTime time = createTime(10, 0);
         long timeId = time.getId();
         Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "url"));
-        Member member = MemberFixture.createMember("오리");
-        Member savedMember = memberRepository.save(member);
+        Member savedMember = memberRepository.save(MEMBER_PK.create());
         reservationRepository.save(new Reservation(
                 savedMember, LocalDate.parse("2024-01-01"), time, theme, LocalDateTime.now(clock)
         ));

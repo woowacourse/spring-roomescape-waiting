@@ -1,13 +1,13 @@
 package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Member;
-import roomescape.fixture.MemberFixture;
 
 class ReservationTest {
 
@@ -19,7 +19,7 @@ class ReservationTest {
         LocalDate date = reservationTime.toLocalDate();
         ReservationTime time = new ReservationTime(reservationTime.toLocalTime());
         Theme theme = new Theme("테마명", "설명", "url");
-        Member member = MemberFixture.createMember("아루");
+        Member member = MEMBER_ARU.create();
 
         assertThatCode(() -> new Reservation(member, date, time, theme, createdAt))
                 .isInstanceOf(IllegalArgumentException.class)

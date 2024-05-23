@@ -1,6 +1,7 @@
 package roomescape.infrastructure.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,7 +26,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.fixture.MemberFixture;
 
 @DataJpaTest
 class ReservationStatusJpaRepositoryTest {
@@ -48,7 +48,7 @@ class ReservationStatusJpaRepositoryTest {
     @Test
     @DisplayName("예약 대기 중 가장 첫 번째 예약을 가져온다.")
     void getFirstWaiting() {
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
         LocalDate date = LocalDate.of(2024, 12, 25);
@@ -73,7 +73,7 @@ class ReservationStatusJpaRepositoryTest {
     @Test
     @DisplayName("예약 순번을 올바르게 계산한다.")
     void getWaitingCount() {
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
         LocalDate date = LocalDate.of(2024, 12, 25);
@@ -94,7 +94,7 @@ class ReservationStatusJpaRepositoryTest {
     @EnumSource(value = BookStatus.class, names = {"WAITING", "BOOKED"})
     @DisplayName("하나의 예약 정보에 대해, 이미 예약/대기된 상태를 확인한다.")
     void alreadyExistsReservationOrWaitingTest(BookStatus status) {
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
         LocalDate date = LocalDate.of(2024, 12, 25);
@@ -109,7 +109,7 @@ class ReservationStatusJpaRepositoryTest {
     @Test
     @DisplayName("예약된 모든 정보를 가져온다.")
     void getAllBooked() {
-        Member member = memberRepository.save(MemberFixture.createMember("아루"));
+        Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "desc", "url"));
         LocalDate date = LocalDate.of(2024, 12, 25);

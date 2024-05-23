@@ -1,6 +1,7 @@
 package roomescape.infrastructure.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,7 +23,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.fixture.MemberFixture;
 
 @DataJpaTest
 class ReservationJpaRepositoryTest {
@@ -78,7 +78,7 @@ class ReservationJpaRepositoryTest {
     }
 
     private Reservation createReservation() {
-        Member member = memberRepository.save(MemberFixture.createMember("오리"));
+        Member member = memberRepository.save(MEMBER_PK.create());
         LocalDate date = LocalDate.of(2024, 12, 25);
         return createReservation(member, date);
     }
