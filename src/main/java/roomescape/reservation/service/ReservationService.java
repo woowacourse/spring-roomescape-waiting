@@ -1,38 +1,30 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.exception.custom.BadRequestException;
 import roomescape.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.controller.dto.*;
 import roomescape.reservation.domain.*;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.domain.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service // TODO 분리 필요
 public class ReservationService {
+
+    private final CommonFindService commonFindService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
     private final MemberReservationRepository memberReservationRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository,
-                              MemberReservationRepository memberReservationRepository) {
+    public ReservationService(CommonFindService commonFindService, ReservationRepository reservationRepository, MemberReservationRepository memberReservationRepository) {
+        this.commonFindService = commonFindService;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
         this.memberReservationRepository = memberReservationRepository;
     }
 
@@ -47,7 +39,7 @@ public class ReservationService {
 
     @Transactional
     public List<MyReservationWithStatus> findMyReservations(AuthInfo authInfo) {
-        Member member = getMember(authInfo.getId());
+        Member member = commonFindService.getMember(authInfo.getId());
         return memberReservationRepository.findAllByMember(member)
                 .stream()
                 .map(MyReservationWithStatus::from)
@@ -77,10 +69,10 @@ public class ReservationService {
     }
 
     private ReservationResponse createMemberReservation(long memberId, long timeId, long themeId, LocalDate date) {
-        ReservationTime reservationTime = getReservationTime(timeId);
-        Theme theme = getTheme(themeId);
-        Member member = getMember(memberId);
-        Reservation reservation = getReservation(date, reservationTime, theme);
+        ReservationTime reservationTime = commonFindService.getReservationTime(timeId);
+        Theme theme = commonFindService.getTheme(themeId);
+        Member member = commonFindService.getMember(memberId);
+        Reservation reservation = commonFindService.getReservation(date, reservationTime, theme);
         ReservationStatus reservationStatus = ReservationStatus.BOOKED;
 
         validateReservation(reservation, member);
@@ -104,8 +96,8 @@ public class ReservationService {
     }
 
     public void deleteMemberReservation(AuthInfo authInfo, long memberReservationId) {
-        MemberReservation memberReservation = getMemberReservation(memberReservationId);
-        Member member = getMember(authInfo.getId());
+        MemberReservation memberReservation = commonFindService.getMemberReservation(memberReservationId);
+        Member member = commonFindService.getMember(authInfo.getId());
         if (!member.isAdmin() && !memberReservation.isMember(member)) {
             throw new ForbiddenException("예약자가 아닙니다.");
         }
@@ -116,30 +108,5 @@ public class ReservationService {
     public void delete(long reservationId) {
         memberReservationRepository.deleteByReservation_Id(reservationId);
         reservationRepository.deleteById(reservationId);
-    }
-
-    private ReservationTime getReservationTime(long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 예약 시간이 없습니다."));
-    }
-
-    private Theme getTheme(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 테마가 없습니다."));
-    }
-
-    private Member getMember(long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new BadRequestException("해당 유저를 찾을 수 없습니다."));
-    }
-
-    private Reservation getReservation(LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.findByDateAndTimeAndTheme(date, time, theme)
-                .orElseGet(() -> reservationRepository.save(new Reservation(date, time, theme)));
-    }
-
-    private MemberReservation getMemberReservation(long memberReservationId) {
-        return memberReservationRepository.findById(memberReservationId)
-                .orElseThrow(() -> new BadRequestException("해당 ID에 대응되는 사용자 예약이 없습니다."));
     }
 }

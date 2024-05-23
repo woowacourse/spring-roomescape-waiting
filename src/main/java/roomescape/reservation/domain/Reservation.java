@@ -14,11 +14,14 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private LocalDate date;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Theme theme;
 
@@ -37,19 +40,14 @@ public class Reservation {
         this(null, date, time, theme);
     }
 
-    public boolean isPast() {
-        return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(LocalDateTime.now());
-    }
-
-
     private void validate(LocalDate date, ReservationTime time) {
         if (date == null || time == null) {
             throw new BadRequestException("필수 요청값이 누락되었습니다.");
         }
     }
 
-    public boolean isSame(LocalDate date, ReservationTime time, Theme theme) {
-        return this.date.equals(date) && this.time.equals(time) && this.theme.equals(theme);
+    public boolean isPast() {
+        return LocalDateTime.of(this.date, this.time.getStartAt()).isBefore(LocalDateTime.now());
     }
 
     public Long getId() {

@@ -9,6 +9,7 @@ import roomescape.reservation.domain.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberReservationRepository extends JpaRepository<MemberReservation, Long> {
 
@@ -29,6 +30,8 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
     List<MemberReservation> findAllByMember(Member member);
 
     List<MemberReservation> findAllByStatus(ReservationStatus status);
+
+    Optional<MemberReservation> findFirstByReservationOrderByCreatedTime(Reservation reservation);
 
     @Query("""
     SELECT count(*)

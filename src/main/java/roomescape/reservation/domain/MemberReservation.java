@@ -12,11 +12,15 @@ public class MemberReservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Member member;
+
     @ManyToOne
     private Reservation reservation;
+
     private LocalDateTime createdTime;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
@@ -45,6 +49,10 @@ public class MemberReservation {
 
     public boolean isMember(Member member) {
         return this.member.equals(member);
+    }
+
+    public void confirmReservation() {
+        this.status = ReservationStatus.BOOKED;
     }
 
     public Long getId() {
