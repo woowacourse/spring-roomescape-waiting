@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableJpaAuditing
 public class RoomescapeApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(RoomescapeApplication.class, args);
     }
-
 }

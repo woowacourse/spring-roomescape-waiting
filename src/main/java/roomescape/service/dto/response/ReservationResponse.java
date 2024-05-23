@@ -16,7 +16,8 @@ public record ReservationResponse(
         @NotNull
         ReservationTimeResponse time,
         @NotNull
-        ThemeResponse theme) {
+        ThemeResponse theme
+) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(

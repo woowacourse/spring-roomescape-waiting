@@ -4,6 +4,7 @@ import java.util.Arrays;
 import roomescape.exception.BadRequestException;
 
 public enum Role {
+
     ADMIN,
     MEMBER;
 

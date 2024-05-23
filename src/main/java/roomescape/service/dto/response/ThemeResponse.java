@@ -12,7 +12,9 @@ public record ThemeResponse(
         @NotBlank
         String description,
         @NotBlank
-        String thumbnail) {
+        String thumbnail
+) {
+
     public static ThemeResponse from(Theme theme) {
         return new ThemeResponse(
                 theme.getId(),
