@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방탈출 예약 페이지</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/reservation.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <img src="https://avatars.githubusercontent.com/u/141792611?s=200&v=4" alt="LOGO" style="height: 40px;">
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/reservation">Reservation</a>
+      </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+                <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="/reservation-mine">My Reservation</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
+              </div>
+            </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Content -->
+<div id="content-container" class="col-md-10 offset-md-1 p-5">
+  <h2 class="content-container-title">예약 페이지</h2>
+  <div class="d-flex" id="reservation-container" >
+    <!-- Date Section -->
+    <div class="section border rounded col-md-4 p-3" id="date-section">
+      <h3 class="fs-5 text-center mb-3">날짜 선택</h3>
+      <div class="d-flex justify-content-center p-3">
+        <div id="datepicker"></div>
+      </div>
+    </div>
+
+    <!-- Theme Section -->
+    <div class="section border rounded col-md-4 p-3 disabled" id="theme-section">
+      <h3 class="fs-5 text-center mb-3">테마 선택</h3>
+      <div class="p-3" id="theme-slots">
+        <!-- Dynamically generated theme slots will go here -->
+      </div>
+    </div>
+
+    <!-- Time Section -->
+    <div class="section border rounded col-md-4 p-3 disabled" id="time-section">
+      <h3 class="fs-5 text-center mb-3">시간 선택</h3>
+      <div class="p-3" id="time-slots">
+        <!-- Dynamically generated time slots will go here -->
+      </div>
+    </div>
+  </div>
+
+  <!--
+  TODO: [5단계] 예약 생성 기능 변경 - 사용자
+        적용 후 아래에 있는 User Name Input 삭제
+  -->
+  <!-- User Name Input -->
+<!--  <div class="input-group mb-3 mt-4">-->
+<!--    <span class="input-group-text" id="name">예약자명</span>-->
+<!--    <input id="user-name" type="text" class="form-control" aria-label="Username" aria-describedby="name">-->
+<!--  </div>-->
+
+  <!-- Reservation Button -->
+  <div class="button-group float-right">
+    <button id="reserve-button" class="btn btn-primary mt-3 disabled">예약하기</button>
+  </div>
+</div>
+</div>
+
+<script src="/js/user-scripts.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="/js/user-reservation.js"></script>
+</body>
+</html>
