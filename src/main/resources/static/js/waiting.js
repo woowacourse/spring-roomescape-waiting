@@ -42,7 +42,7 @@ function render(data) {
               예약 대기 승인/거절 버튼이 필요한 경우 활성화하여 사용
          */
         // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
-        // actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
+        actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
 
@@ -71,11 +71,11 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = '/admin/reservations/waiting/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }

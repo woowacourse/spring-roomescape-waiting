@@ -25,7 +25,7 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-    @GetMapping
+    @GetMapping // TODO: 얘도 관리자 권한이 필요하지 않을까?
     public ResponseEntity<List<WaitingResponse>> getAllWaiting() {
         List<Waiting> allWaiting = waitingService.findAllWaiting();
         List<WaitingResponse> response = allWaiting.stream()
@@ -46,7 +46,7 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id) {
-        waitingService.deleteWaiting(id);
+        waitingService.deleteWaitingOfMember(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -72,6 +72,12 @@ public class WaitingService { // TODO: 본인이 대기한 예약은 대기할 �
         return waitingRepository.findWaitingWithRankByMemberId(member.getId());
     }
 
+    public void deleteWaitingOfMember(long id) {
+        // TODO: 본인의 예약 대기가 맞는지 검증 or deleteByIdAndMemberId
+        validateExistence(id);
+        waitingRepository.deleteById(id);
+    }
+
     public void deleteWaiting(long id) {
         validateExistence(id);
         waitingRepository.deleteById(id);

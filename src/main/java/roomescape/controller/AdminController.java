@@ -1,15 +1,15 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.AdminReservationRequest;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.model.Reservation;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 
 import java.net.URI;
@@ -19,9 +19,11 @@ import java.net.URI;
 public class AdminController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminController(ReservationService reservationService) {
+    public AdminController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
@@ -32,5 +34,11 @@ public class AdminController {
         return ResponseEntity
                 .created(URI.create("/admin/reservations/" + response.getId()))
                 .body(response);
+    }
+
+    @DeleteMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }
