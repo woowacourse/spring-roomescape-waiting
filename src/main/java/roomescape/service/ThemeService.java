@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
@@ -16,9 +15,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
-@Transactional
 public class ThemeService {
-
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
