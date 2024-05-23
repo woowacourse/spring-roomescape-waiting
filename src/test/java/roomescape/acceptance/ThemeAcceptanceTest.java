@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -22,6 +23,12 @@ import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
 
 class ThemeAcceptanceTest extends BasicAcceptanceTest {
+    private String adminToken;
+
+    @BeforeEach
+    void SetUp() {
+        adminToken = LoginTokenProvider.login("admin@wooteco.com", "wootecoCrew6!", 200);
+    }
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -30,8 +37,8 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
     @DisplayName("2개의 테마를 추가한다")
     Stream<DynamicTest> themePostTest() {
         return Stream.of(
-                dynamicTest("테마를 추가한다", () -> postTheme(201)),
-                dynamicTest("테마를 추가한다", () -> postTheme(201)),
+                dynamicTest("테마를 추가한다", () -> postTheme(adminToken, 201)),
+                dynamicTest("테마를 추가한다", () -> postTheme(adminToken, 201)),
                 dynamicTest("모든 테마를 조회한다 (총 8개)", () -> getThemes(200, 8))
         );
     }
@@ -42,9 +49,9 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
         AtomicLong themeId = new AtomicLong();
 
         return Stream.of(
-                dynamicTest("테마를 추가한다 (10:00)", () -> themeId.set(postTheme(201))),
-                dynamicTest("테마를 삭제한다 (10:00)", () -> deleteTheme(themeId.longValue(), 204)),
-                dynamicTest("테마를 추가한다 (10:00)", () -> postTheme(201)),
+                dynamicTest("테마를 추가한다 (10:00)", () -> themeId.set(postTheme(adminToken, 201))),
+                dynamicTest("테마를 삭제한다 (10:00)", () -> deleteTheme(adminToken, themeId.longValue(), 204)),
+                dynamicTest("테마를 추가한다 (10:00)", () -> postTheme(adminToken, 201)),
                 dynamicTest("모든 테마를 조회한다 (총 7개)", () -> getThemes(200, 7))
         );
     }
@@ -64,11 +71,12 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
         );
     }
 
-    private Long postTheme(int expectedHttpCode) {
+    private Long postTheme(String token, int expectedHttpCode) {
         ThemeRequest themeRequest = new ThemeRequest("테마", "설명서", "썸네일");
 
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookies("token", token)
                 .body(themeRequest)
                 .when().post("/themes")
                 .then().log().all()
@@ -94,8 +102,9 @@ class ThemeAcceptanceTest extends BasicAcceptanceTest {
         assertThat(themeResponses).hasSize(expectedthemesSize);
     }
 
-    private void deleteTheme(Long themeId, int expectedHttpCode) {
+    private void deleteTheme(String token, Long themeId, int expectedHttpCode) {
         RestAssured.given().log().all()
+                .cookies("token", token)
                 .when().delete("/themes/" + themeId)
                 .then().log().all()
                 .statusCode(expectedHttpCode);

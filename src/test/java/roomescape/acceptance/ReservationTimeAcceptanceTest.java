@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -20,12 +21,19 @@ import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ReservationTimeRequest;
 
 class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
+    private String adminToken;
+
+    @BeforeEach
+    void SetUp() {
+        adminToken = LoginTokenProvider.login("admin@wooteco.com", "wootecoCrew6!", 200);
+    }
+
     @TestFactory
     @DisplayName("동일한 예약 시간을 두번 추가하면, 예외가 발생한다")
     Stream<DynamicTest> duplicateReservationTest() {
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime("10:00", 201)),
-                dynamicTest("동일한 예약 시간을 추가한다 (10:00)", () -> postReservationTime("10:00", 409))
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
+                dynamicTest("동일한 예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 409))
         );
     }
 
@@ -33,9 +41,9 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
     @DisplayName("3개의 예약 시간을 추가한다")
     Stream<DynamicTest> reservationPostTest() {
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (09:00)", () -> postReservationTime("09:00", 201)),
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime("10:00", 201)),
-                dynamicTest("예약 시간을 추가한다 (11:00)", () -> postReservationTime("11:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (09:00)", () -> postReservationTime(adminToken, "09:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (11:00)", () -> postReservationTime(adminToken, "11:00", 201)),
                 dynamicTest("모든 예약 시간을 조회한다 (총 7개)", () -> getReservationTimes(200, 7))
         );
     }
@@ -46,9 +54,9 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
         AtomicLong reservationTimeId = new AtomicLong();
 
         return Stream.of(
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> reservationTimeId.set(postReservationTime("10:00", 201))),
-                dynamicTest("예약 시간을 삭제한다 (10:00)", () -> deleteReservationTime(reservationTimeId.longValue(), 204)),
-                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime("10:00", 201)),
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> reservationTimeId.set(postReservationTime(adminToken, "10:00", 201))),
+                dynamicTest("예약 시간을 삭제한다 (10:00)", () -> deleteReservationTime(adminToken, reservationTimeId.longValue(), 204)),
+                dynamicTest("예약 시간을 추가한다 (10:00)", () -> postReservationTime(adminToken, "10:00", 201)),
                 dynamicTest("모든 예약 시간을 조회한다 (총 5개)", () -> getReservationTimes(200, 5))
         );
     }
@@ -66,11 +74,12 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
         );
     }
 
-    private Long postReservationTime(String time, int expectedHttpCode) {
+    private Long postReservationTime(String token, String time, int expectedHttpCode) {
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.parse(time));
 
         Response response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookies("token", token)
                 .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
@@ -96,8 +105,9 @@ class ReservationTimeAcceptanceTest extends BasicAcceptanceTest {
         assertThat(reservationTimeResponses).hasSize(expectedReservationTimesSize);
     }
 
-    private void deleteReservationTime(Long reservationTimeId, int expectedHttpCode) {
+    private void deleteReservationTime(String token, Long reservationTimeId, int expectedHttpCode) {
         RestAssured.given().log().all()
+                .cookies("token", token)
                 .when().delete("/times/" + reservationTimeId)
                 .then().log().all()
                 .statusCode(expectedHttpCode);
