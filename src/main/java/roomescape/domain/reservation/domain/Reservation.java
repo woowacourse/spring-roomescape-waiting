@@ -1,9 +1,9 @@
-package roomescape.domain.reservation.domain.reservation;
+package roomescape.domain.reservation.domain;
 
 import jakarta.persistence.*;
 import roomescape.domain.member.domain.Member;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
 import roomescape.domain.theme.domain.Theme;
+import roomescape.domain.time.domain.ReservationTime;
 
 import java.time.LocalDate;
 import java.util.Objects;

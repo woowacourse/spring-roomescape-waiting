@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.repository;
+package roomescape.domain.time.repository;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;

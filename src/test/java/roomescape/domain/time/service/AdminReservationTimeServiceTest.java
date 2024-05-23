@@ -1,12 +1,12 @@
-package roomescape.domain.reservation.service;
+package roomescape.domain.time.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
+import roomescape.domain.time.domain.ReservationTime;
+import roomescape.domain.time.dto.ReservationTimeAddRequest;
 import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalTime;

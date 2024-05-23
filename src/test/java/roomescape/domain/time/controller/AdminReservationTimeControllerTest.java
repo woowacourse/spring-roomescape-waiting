@@ -1,11 +1,11 @@
-package roomescape.domain.reservation.controller;
+package roomescape.domain.time.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.ControllerTest;
-import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
+import roomescape.domain.time.dto.ReservationTimeAddRequest;
 
 import java.time.LocalTime;
 

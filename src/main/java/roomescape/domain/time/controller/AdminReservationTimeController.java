@@ -1,17 +1,13 @@
-package roomescape.domain.reservation.controller;
+package roomescape.domain.time.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import roomescape.domain.time.domain.ReservationTime;
+import roomescape.domain.time.dto.ReservationTimeAddRequest;
+import roomescape.domain.time.service.AdminReservationTimeService;
 
 import java.net.URI;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.domain.reservationTime.ReservationTime;
-import roomescape.domain.reservation.dto.ReservationTimeAddRequest;
-import roomescape.domain.reservation.service.AdminReservationTimeService;
 
 @RestController
 public class AdminReservationTimeController {

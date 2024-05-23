@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.domain.reservation.dto.BookableTimeResponse;
-import roomescape.domain.reservation.dto.BookableTimesRequest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
+import roomescape.domain.time.dto.BookableTimeResponse;
+import roomescape.domain.time.dto.BookableTimesRequest;
 import roomescape.global.exception.DataConflictException;
 
 import java.time.LocalDate;
