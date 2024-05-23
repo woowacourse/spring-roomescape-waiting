@@ -41,6 +41,6 @@ public class BookService {
 
     private boolean isAlreadyBooked(TimeSlot timeSlot, List<Reservation> reservations) {
         return reservations.stream()
-                .anyMatch(reservation -> reservation.isSameTime(timeSlot));
+                .anyMatch(reservation -> reservation.hasSameTime(timeSlot));
     }
 }
