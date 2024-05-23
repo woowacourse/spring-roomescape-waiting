@@ -9,6 +9,8 @@ import roomescape.domain.reservation.dto.ReservationAddRequest;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.is;
+
 class AdminReservationControllerTest extends ControllerTest {
 
     @DisplayName("어드민의 예약을 추가를 성공할 시, 201 ok를 응답한다,")
@@ -24,7 +26,8 @@ class AdminReservationControllerTest extends ControllerTest {
                 .body(reservationAddRequest)
                 .when().post("admin/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("status", is("RESERVATION"));
     }
 
     @DisplayName("존재하는 예약에 대한 삭제 요청시, 204 no content를 응답한다.")
