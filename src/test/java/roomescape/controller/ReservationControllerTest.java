@@ -33,6 +33,7 @@ class ReservationControllerTest {
 
     private static final int INITIAL_TIME_COUNT = 5;
     private static final int INITIAL_RESERVATION_COUNT = 15;
+    private static final int INITIAL_WAITING_COUNT = 1;
     private static final AuthDto userDto = new AuthDto("treeboss@gmail.com", "treeboss123!");
 
     private final JdbcTemplate jdbcTemplate;
@@ -41,6 +42,7 @@ class ReservationControllerTest {
     private final SimpleJdbcInsert timeInsertActor;
     private final SimpleJdbcInsert memberInsertActor;
     private final SimpleJdbcInsert reservationInsertActor;
+    private final SimpleJdbcInsert waitingInsertActor;
 
     @Autowired
     public ReservationControllerTest(JdbcTemplate jdbcTemplate, AuthService authService) {
@@ -58,6 +60,9 @@ class ReservationControllerTest {
         this.reservationInsertActor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
+        this.waitingInsertActor = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
+                .usingGeneratedKeyColumns("id");
     }
 
     @BeforeEach
@@ -73,6 +78,8 @@ class ReservationControllerTest {
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 1L, 1L, 1L));
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 2L, 1L, 1L));
         IntStream.range(0, 5).forEach(i -> insertReservation(now.minusDays(i), 3L, 1L, 1L));
+
+        insertWaiting(now.minusDays(0), 1L, 1L, 2L);
     }
 
     private void initDatabase() {
@@ -116,6 +123,15 @@ class ReservationControllerTest {
         reservationInsertActor.execute(parameters);
     }
 
+    private void insertWaiting(LocalDate date, long timeId, long themeId, long memberId) {
+        Map<String, Object> parameters = new HashMap<>(4);
+        parameters.put("date", date);
+        parameters.put("time_id", timeId);
+        parameters.put("theme_id", themeId);
+        parameters.put("member_id", memberId);
+        waitingInsertActor.execute(parameters);
+    }
+
     @DisplayName("전체 예약을 조회한다.")
     @Test
     void should_get_all_reservations() {
@@ -154,7 +170,12 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(204);
 
-        assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT - 1);
+        List<ReservationResponse> reservations = RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList(".", ReservationResponse.class);
+        assertThat(reservations.stream().noneMatch(response -> response.getId() == 1)).isTrue();
     }
 
     @DisplayName("예약 삭제 - id가 1 미만일 경우 예외를 반환한다.")
@@ -247,7 +268,26 @@ class ReservationControllerTest {
         assertThat(responses).hasSize(15);
     }
 
+    @DisplayName("예약이 삭제될 경우 해당 방탈출의 가장 높은 우선순위의 예약 대기를 자동으로 승인한다.")
+    @Test
+    void should_reserve_first_waiting_when_delete_reservation() {
+        String token = authService.createToken(userDto);
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        assertThat(countAllReservations()).isEqualTo(INITIAL_RESERVATION_COUNT);
+        assertThat(countAllWaiting()).isEqualTo(INITIAL_WAITING_COUNT - 1);
+    }
+
     private Integer countAllReservations() {
         return jdbcTemplate.queryForObject("SELECT count(id) from reservation", Integer.class);
+    }
+
+    private Integer countAllWaiting() {
+        return jdbcTemplate.queryForObject("SELECT count(id) from waiting", Integer.class);
     }
 }

@@ -6,13 +6,11 @@ import roomescape.exception.DuplicatedException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.model.Waiting;
 import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.repository.*;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
@@ -30,15 +28,18 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
                               MemberRepository memberRepository,
-                              ThemeRepository themeRepository) {
+                              ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<Reservation> findAllReservations() {
@@ -78,7 +79,27 @@ public class ReservationService {
     }
 
     public void deleteReservation(long id) {
+        // TODO: 본인의 예약인지 검증
         validateExistence(id);
+        Reservation reservation = reservationRepository.findById(id) //
+                .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
+        LocalDate reservationDate = reservation.getDate();
+        ReservationTime reservationTime = reservation.getTime();
+        Theme reservationTheme = reservation.getTheme();
+        Optional<Waiting> rawWaiting = waitingRepository.findOneByDateAndTimeAndTheme(
+                reservationDate, reservationTime, reservationTheme);
+        if (rawWaiting.isPresent()) {
+            Waiting waiting = rawWaiting.get();
+            LocalDate date = waiting.getDate();
+            ReservationTime time = waiting.getTime();
+            Theme theme = waiting.getTheme();
+            Member member = waiting.getMember();
+            Waiting deletedWaiting = waitingRepository.findFirstByDateAndTimeAndTheme(date, time, theme); //
+            waitingRepository.delete(deletedWaiting);
+
+            Reservation approvedReservation = new Reservation(date, time, theme, member);
+            reservationRepository.save(approvedReservation);
+        }
         reservationRepository.deleteById(id);
     }
 
