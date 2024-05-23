@@ -29,7 +29,7 @@ public class WaitingService {
         Member waitingMember = findMemberByMemberId(waitingMemberId);
 
         Waiting waiting = request.createWaiting(reservation, waitingMember);
-        Waiting createdWaiting = waitingRepository.save(waiting);
+        Waiting createdWaiting = createWaiting(waiting);
 
         return WaitingResponse.from(createdWaiting);
     }
@@ -42,5 +42,22 @@ public class WaitingService {
     private Member findMemberByMemberId(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버가 존재하지 않습니다."));
+    }
+
+    private Waiting createWaiting(Waiting waiting) {
+        validateDuplicateWaiting(waiting);
+        return waitingRepository.save(waiting);
+    }
+
+    private void validateDuplicateWaiting(Waiting waiting) {
+        if (isDuplicateWaiting(waiting)) {
+            throw new IllegalArgumentException("중복으로 예약 대기를 할 수 없습니다.");
+        }
+    }
+
+    private boolean isDuplicateWaiting(Waiting waiting) {
+        return waitingRepository.existsByReservation_idAndMember_id(
+                waiting.getReservation().getId(),
+                waiting.getMember().getId());
     }
 }

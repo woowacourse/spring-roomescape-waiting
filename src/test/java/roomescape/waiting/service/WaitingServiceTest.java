@@ -53,7 +53,6 @@ class WaitingServiceTest {
 
         given(reservationRepository.findByDateAndTime_idAndTheme_id(date, 1L, 1L))
                 .willReturn(Optional.of(reservation));
-
         given(memberRepository.findById(2L))
                 .willReturn(Optional.of(waitingMember));
         given(waitingRepository.save(any()))
@@ -90,5 +89,30 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.createWaiting(request, waitingMember.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("존재하지 않는 예약에 대해 대기할 수 없습니다.");
+    }
+
+    @DisplayName("예약 대기시, 이미 예약 대기를 한적이 있다면 예외를 발생시킨다.")
+    @Test
+    void createWaitingTest_whenWaitingDuplicate() {
+        LocalDate date = LocalDate.now().plusDays(7);
+        WaitingCreateRequest request = new WaitingCreateRequest(date, 1L, 1L);
+        Reservation reservation = new Reservation(
+                1L,
+                new Member(1L, "브라운", "brown@abc.com"),
+                LocalDate.of(2024, 8, 15),
+                new ReservationTime(1L, LocalTime.of(19, 0)),
+                new Theme(1L, "레벨2 탈출", "레벨2 탈출하기", "https://img.jpg"));
+        Member waitingMember = new Member(2L, "낙낙", "naknak@abc.com");
+
+        given(reservationRepository.findByDateAndTime_idAndTheme_id(date, 1L, 1L))
+                .willReturn(Optional.of(reservation));
+        given(memberRepository.findById(2L))
+                .willReturn(Optional.of(waitingMember));
+        given(waitingRepository.existsByReservation_idAndMember_id(1L, 2L))
+                .willReturn(true);
+
+        assertThatThrownBy(() -> waitingService.createWaiting(request, waitingMember.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("중복으로 예약 대기를 할 수 없습니다.");
     }
 }

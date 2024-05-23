@@ -41,9 +41,16 @@ public class Waiting {
     }
 
     public Waiting(Long id, Reservation reservation, Member member) {
+        validateDuplicate(reservation, member);
         this.id = id;
         this.reservation = reservation;
         this.member = member;
+    }
+
+    private void validateDuplicate(Reservation reservation, Member member) {
+        if (member.equals(reservation.getMember())) {
+            throw new IllegalArgumentException("자신이 예약한 방탈출에 대해 예약 대기를 할 수 없습니다.");
+        }
     }
 
     public Long getId() {
