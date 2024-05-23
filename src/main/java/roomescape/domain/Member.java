@@ -65,7 +65,7 @@ public class Member {
     }
 
     public List<Waiting> getWaitings() {
-        return waitings;
+        return List.copyOf(waitings);
     }
 
     public Long getId() {

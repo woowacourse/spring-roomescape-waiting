@@ -2,16 +2,23 @@ package roomescape.service.dto.response;
 
 import roomescape.domain.Waiting;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 public record WaitingResponse(
         long id,
-        long memberId,
-        long reservationId
+        String name,
+        String theme,
+        LocalDate date,
+        LocalTime time
 ) {
-    public WaitingResponse(Waiting waiting){
+    public WaitingResponse(Waiting waiting) {
         this(
                 waiting.getId(),
-                waiting.getMember().getId(),
-                waiting.getReservation().getId()
+                waiting.getMember().getName(),
+                waiting.getReservation().getTheme().getName(),
+                waiting.getReservation().getDate(),
+                waiting.getReservation().getTime().getStartAt()
         );
     }
 }

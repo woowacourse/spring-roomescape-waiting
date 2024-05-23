@@ -22,13 +22,13 @@ public class WaitingController {
     public ResponseEntity<WaitingResponse> saveWaiting(
             @Login LoginMember member,
             @RequestBody @Valid WaitingRequest waitingRequest
-    ){
+    ) {
         WaitingResponse waitingResponse = waitingService.saveWaiting(waitingRequest, member.id());
         return ResponseEntity.ok(waitingResponse);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteWaiting(@RequestParam(name="id") long id){
+    public ResponseEntity<Void> deleteWaiting(@RequestParam(name = "id") long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
 

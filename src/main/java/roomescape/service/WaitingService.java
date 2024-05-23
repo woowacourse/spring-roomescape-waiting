@@ -2,14 +2,18 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.*;
-import roomescape.domain.repository.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.Waiting;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 import roomescape.service.dbservice.ReservationDbService;
 import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.WaitingResponse;
+import roomescape.service.dto.response.WaitingResponses;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -35,23 +39,31 @@ public class WaitingService {
         return new WaitingResponse(savedWaiting);
     }
 
+    public WaitingResponses findAllWaitings() {
+        List<WaitingResponse> waitingResponses = reservationDbService.findAllReservation().stream()
+                .flatMap(reservation -> reservation.getWaitings().stream())
+                .map(WaitingResponse::new)
+                .toList();
+        return new WaitingResponses(waitingResponses);
+    }
+
     public void deleteWaiting(long id) {
         Waiting waiting = findWaitingById(id);
         waiting.delete();
         waitingRepository.delete(waiting);
     }
 
-    private void validateAlreadyReservedMember(Waiting waiting, Reservation alreadyBookedReservation){
+    private void validateAlreadyReservedMember(Waiting waiting, Reservation alreadyBookedReservation) {
         Member requestMember = waiting.getMember();
         Member alreadyBookedMember = alreadyBookedReservation.getMember();
 
-        if(requestMember.equals(alreadyBookedMember)){
+        if (requestMember.equals(alreadyBookedMember)) {
             throw new RoomEscapeBusinessException("예약에 성공한 유저는 대기를 요청할 수 없습니다.");
         }
     }
 
     private void validateDuplicatedWaiting(Waiting waiting) {
-        if(waiting.getMember().hasWaiting(waiting)){
+        if (waiting.getMember().hasWaiting(waiting)) {
             throw new RoomEscapeBusinessException("중복 예약 대기는 불가합니다.");
         }
     }

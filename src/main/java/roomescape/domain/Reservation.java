@@ -93,6 +93,10 @@ public class Reservation {
         return theme;
     }
 
+    public List<Waiting> getWaitings() {
+        return List.copyOf(waitings);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

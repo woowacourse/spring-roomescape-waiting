@@ -69,15 +69,19 @@ public class ReservationDbService {
             Optional<LocalDate> end,
             Long themeId,
             Long memberId
-    ){
+    ) {
         return reservationRepository.findByConditions(start, end, themeId, memberId);
     }
 
-    public Reservation findById(long id){
+    public Reservation findById(long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(()-> new RoomEscapeBusinessException("예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomEscapeBusinessException("예약이 존재하지 않습니다."));
     }
 
+
+    public List<Reservation> findAllReservation() {
+        return reservationRepository.findAll();
+    }
 
     public Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -93,6 +97,5 @@ public class ReservationDbService {
         return timeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeBusinessException("존재하지 않는 예약 시간입니다."));
     }
-
 
 }
