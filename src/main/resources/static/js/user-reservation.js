@@ -189,10 +189,7 @@ function onWaitButtonClick() {
             timeId: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('/waiting', {
+        fetch('/waitings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -205,7 +202,7 @@ function onWaitButtonClick() {
             })
             .then(data => {
                 alert('Reservation waiting successful!');
-                window.location.href = "/";
+                location.reload();
             })
             .catch(error => {
                 alert("An error occurred while making the reservation waiting.");

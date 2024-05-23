@@ -75,7 +75,7 @@ Content-Type: application/json
 #### request
 
 ```http request
-POST /waiting
+POST /waitings
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 Content-Type: application/json
 
@@ -91,7 +91,7 @@ Content-Type: application/json
 ```http request
 HTTP/1.1 201
 Content-Type: application/json
-Location: /waiting/2
+Location: /waitings/2
 
 {
     "id": 2,
@@ -107,7 +107,7 @@ Location: /waiting/2
 #### request
 
 ```http request
-DELETE /waiting/2
+DELETE /waitings/2
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 ```
 

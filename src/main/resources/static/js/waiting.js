@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 endpoint 설정
-     */
     fetch('/admin/waitings') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
@@ -33,11 +29,7 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
-        /*
-        TODO: [4단계] 예약 대기 관리 기능
-              예약 대기 승인 버튼이 필요한 경우 활성화하여 사용
-         */
-        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
+        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve)); 예약 승인 버튼 필요 시 사용
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
@@ -46,10 +38,7 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 승인 API 호출
-     */
+    // 예약 대기 승인 API 필요 시 사용
     const endpoint = '' + id;
     return fetch(endpoint, {
         method: ''

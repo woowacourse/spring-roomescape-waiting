@@ -51,7 +51,7 @@ class ClientWaitingTest {
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -68,7 +68,7 @@ class ClientWaitingTest {
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -85,7 +85,7 @@ class ClientWaitingTest {
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -95,7 +95,7 @@ class ClientWaitingTest {
     void given_user_when_deleteOtherMembersWaiting_then_statusCodeIsBadRequest() {
         RestAssured.given().log().all()
                 .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getUserToken())
-                .when().delete("/waiting/2")
+                .when().delete("/waitings/2")
                 .then().log().all()
                 .statusCode(400);
     }
