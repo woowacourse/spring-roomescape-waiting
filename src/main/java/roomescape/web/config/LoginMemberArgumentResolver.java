@@ -10,8 +10,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.exception.member.AuthenticationFailureException;
-import roomescape.service.security.JwtProvider;
-import roomescape.service.dto.request.member.MemberInfo;
+import roomescape.application.security.JwtProvider;
+import roomescape.application.dto.request.member.MemberInfo;
 
 @RequiredArgsConstructor
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {

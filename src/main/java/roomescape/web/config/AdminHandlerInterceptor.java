@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Role;
 import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.member.AuthorizationFailureException;
-import roomescape.service.security.JwtProvider;
+import roomescape.application.security.JwtProvider;
 
 @RequiredArgsConstructor
 public class AdminHandlerInterceptor implements HandlerInterceptor {

@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
-import roomescape.service.ReservationService;
-import roomescape.service.dto.request.member.MemberInfo;
-import roomescape.service.dto.request.reservation.ReservationRequest;
-import roomescape.service.dto.request.reservation.UserReservationRequest;
-import roomescape.service.dto.response.reservation.ReservationResponse;
-import roomescape.service.dto.response.reservation.UserReservationResponse;
+import roomescape.application.ReservationService;
+import roomescape.application.dto.request.member.MemberInfo;
+import roomescape.application.dto.request.reservation.ReservationRequest;
+import roomescape.application.dto.request.reservation.UserReservationRequest;
+import roomescape.application.dto.response.reservation.ReservationResponse;
+import roomescape.application.dto.response.reservation.UserReservationResponse;
 
 @RestController
 @RequiredArgsConstructor

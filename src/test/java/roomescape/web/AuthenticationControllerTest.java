@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.member.MemberRepository;
-import roomescape.service.security.JwtProvider;
+import roomescape.application.security.JwtProvider;
 
 class AuthenticationControllerTest extends ControllerTest {
 

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.service.MemberService;
-import roomescape.service.dto.request.member.SignupRequest;
-import roomescape.service.dto.response.member.MemberResponse;
+import roomescape.application.MemberService;
+import roomescape.application.dto.request.member.SignupRequest;
+import roomescape.application.dto.response.member.MemberResponse;
 
 @RestController
 @RequiredArgsConstructor

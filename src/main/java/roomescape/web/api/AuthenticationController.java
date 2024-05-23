@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.service.MemberService;
-import roomescape.service.dto.request.member.LoginRequest;
-import roomescape.service.dto.response.member.MemberResponse;
-import roomescape.service.security.JwtProvider;
+import roomescape.application.MemberService;
+import roomescape.application.dto.request.member.LoginRequest;
+import roomescape.application.dto.response.member.MemberResponse;
+import roomescape.application.security.JwtProvider;
 
 @RestController
 @RequiredArgsConstructor
