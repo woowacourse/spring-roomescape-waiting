@@ -3,9 +3,8 @@ package roomescape.domain.reservationdetail;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.Repository;
 
-public interface ReservationDetailRepository extends Repository<ReservationDetail, Long> {
+public interface ReservationDetailRepository {
     ReservationDetail save(ReservationDetail reservationDetail);
 
     default ReservationDetail getByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {

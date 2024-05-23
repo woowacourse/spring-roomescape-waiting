@@ -12,7 +12,7 @@ import roomescape.domain.reservation.ReservationFactory;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.ReservationWithRank;
+import roomescape.domain.dto.ReservationWithRank;
 import roomescape.exception.reservation.ReservationException;
 import roomescape.service.dto.request.member.MemberInfo;
 import roomescape.service.dto.request.reservation.ReservationRequest;

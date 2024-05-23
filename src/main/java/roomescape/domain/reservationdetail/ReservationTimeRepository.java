@@ -4,12 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
-import org.springframework.data.repository.query.Param;
 import roomescape.exception.time.NotFoundReservationTimeException;
 
-public interface ReservationTimeRepository extends Repository<ReservationTime, LocalTime> {
+public interface ReservationTimeRepository {
     ReservationTime save(ReservationTime time);
 
     default ReservationTime getById(Long id) {
@@ -21,20 +18,7 @@ public interface ReservationTimeRepository extends Repository<ReservationTime, L
 
     List<ReservationTime> findAll();
 
-    @Query("""
-            select d.time from ReservationDetail d
-            where d.date = :date
-            and d.theme.id = :themeId
-            and exists (
-                select 1 from Reservation r
-                where r.detail.id = d.id
-                and r.status = 'RESERVED'
-            )
-            """)
-    List<ReservationTime> findAllReservedTimeByDateAndThemeId(
-            @Param("date") LocalDate date,
-            @Param("themeId") Long themeId
-    );
+    List<ReservationTime> findAllReservedTimeByDateAndThemeId(LocalDate date, Long themeId);
 
     boolean existsByStartAt(LocalTime startAt);
 
