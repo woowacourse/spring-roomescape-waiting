@@ -31,7 +31,6 @@ import roomescape.service.dto.reservation.ReservationSearchParams;
 import roomescape.service.helper.QueryGenerator;
 
 @Service
-@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -71,17 +70,21 @@ public class ReservationService {
         return myReservations;
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationCreate createInfo) {
         LocalDate date = createInfo.getDate();
         Member member = memberRepository.findByEmail(createInfo.getEmail()).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.fetchById(createInfo.getThemeId());
         ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
+
         validateDuplicatedReservation(member, theme, date, time);
+        
         Reservation reservation = generateReservation(member, theme, date, time);
         reservationRepository.save(reservation);
         return new ReservationResponse(reservation);
     }
 
+    @Transactional
     public void memberCancelWaitingReservation(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
@@ -89,6 +92,7 @@ public class ReservationService {
         reservation.updateStatus(CANCELED);
     }
 
+    @Transactional
     public void adminRejectConfirmedReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
@@ -101,6 +105,7 @@ public class ReservationService {
         first.ifPresent(value -> value.updateStatus(CONFIRMED));
     }
 
+    @Transactional
     public void adminRejectWaitingReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);

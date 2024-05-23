@@ -16,7 +16,6 @@ import roomescape.service.dto.time.ReservationTimeRequest;
 import roomescape.service.dto.time.ReservationTimeResponse;
 
 @Service
-@Transactional
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -47,6 +46,7 @@ public class ReservationTimeService {
                 .toList());
     }
 
+    @Transactional
     public ReservationTimeResponse createReservationTime(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
@@ -56,6 +56,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(savedTime);
     }
 
+    @Transactional
     public void deleteReservationTime(long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new TimeUsingException();

@@ -12,7 +12,6 @@ import roomescape.service.dto.theme.ThemeRequest;
 import roomescape.service.dto.theme.ThemeResponse;
 
 @Service
-@Transactional
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -40,11 +39,13 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse createTheme(ThemeRequest request) {
         Theme theme = themeRepository.save(request.toTheme());
         return new ThemeResponse(theme);
     }
 
+    @Transactional
     public void deleteTheme(long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ThemeUsingException();

@@ -16,7 +16,6 @@ import roomescape.service.dto.member.MemberResponse;
 import roomescape.service.helper.Encryptor;
 
 @Service
-@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -29,6 +28,7 @@ public class MemberService {
         this.encryptor = encryptor;
     }
 
+    @Transactional
     public void signup(MemberCreateRequest request) {
         validateAlreadyExistsEmail(request);
         MemberPassword encryptPassword = encryptor.encryptPassword(request.getPassword());
