@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.reservation.domain.Date;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.Time;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {
 
@@ -35,7 +37,9 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     )
     List<Theme> findAllByDateOrderByThemeIdCountLimit(LocalDate startDate, LocalDate endDate, int limitCount);
 
+    int countByThemeAndDateAndTimeAndIdLessThan(Theme theme, Date date, Time time, long waitingId);
+
     void deleteById(long reservationId);
 
-    List<Reservation> findAllByMemberId(long id);
+    List<Reservation> findAllByMemberIdAndReservationStatus(long id, ReservationStatus reservationStatus);
 }

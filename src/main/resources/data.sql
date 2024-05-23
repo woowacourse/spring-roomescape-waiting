@@ -15,4 +15,5 @@ VALUES ('polla', '폴라 방탈출', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, reservation_status)
 VALUES ('2024-04-30', 1, 1, 1, 'RESERVED'),
-       ('2024-05-01', 2, 2, 2, 'WAITING');
+       ('2024-04-30', 1, 1, 2, 'WAITING'),
+       ('2024-05-01', 2, 2, 2, 'RESERVED');

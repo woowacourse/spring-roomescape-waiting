@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.Time;
 import roomescape.time.exception.model.TimeNotFoundException;
 import roomescape.time.repository.TimeRepository;
+import roomescape.waiting.domain.Waiting;
 
 @Service
 public class ReservationService {
@@ -100,11 +103,32 @@ public class ReservationService {
     }
 
     public List<ReservationWaitingResponse> findMemberReservations(long id) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(id);
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndReservationStatus(id,
+                ReservationStatus.RESERVED);
 
-        return reservations.stream()
-                .map(ReservationWaitingResponse::from)
+        List<Reservation> waitingReservations = reservationRepository.findAllByMemberIdAndReservationStatus(id,
+                ReservationStatus.WAITING);
+        List<Waiting> waitingRanks = findWaitingWithRank(waitingReservations);
+
+        List<ReservationWaitingResponse> reservationWaitingResponses = makeResponse(
+                reservations, waitingRanks);
+
+        return reservationWaitingResponses.stream()
+                .sorted(Comparator.comparing(ReservationWaitingResponse::date))
                 .toList();
+    }
+
+    private static List<ReservationWaitingResponse> makeResponse(List<Reservation> reservations,
+                                                                 List<Waiting> waitingRanks) {
+        List<ReservationWaitingResponse> reservationWaitingResponses = new ArrayList<>();
+
+        reservations.forEach(reservation -> reservationWaitingResponses
+                .add(ReservationWaitingResponse.from(reservation)));
+
+        waitingRanks.forEach(waiting -> reservationWaitingResponses
+                .add(ReservationWaitingResponse.from(waiting)));
+
+        return reservationWaitingResponses;
     }
 
     public void removeReservations(long reservationId) {
@@ -113,6 +137,18 @@ public class ReservationService {
 
     public void removeWaitingReservations(long waitingId) {
         reservationRepository.deleteById(waitingId);
+    }
+
+    public List<Waiting> findWaitingWithRank(List<Reservation> reservations) {
+        List<Waiting> waitings = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            int rank = reservationRepository.countByThemeAndDateAndTimeAndIdLessThan(reservation.getTheme(),
+                    Date.dateFrom(reservation.getDate()), reservation.getReservationTime(), reservation.getId());
+
+            waitings.add(new Waiting(reservation, rank));
+        }
+        return waitings;
     }
 
     private Reservation makeReservation(ReservationRequest reservationRequest, long memberId,
