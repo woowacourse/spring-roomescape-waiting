@@ -83,26 +83,26 @@ public class ReservationService {
     }
 
     private void validateReservation(Reservation reservation) {
-        List<Reservation> duplicatedReservations = reservationRepository.findAllByDateAndReservationTimeAndTheme(
+        List<Reservation> savedReservations = reservationRepository.findAllByDateAndReservationTimeAndTheme(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme()
         );
-        validateSameMember(duplicatedReservations, reservation);
+        validateSameMember(savedReservations, reservation);
 
-        if (!duplicatedReservations.isEmpty()) {
+        if (!savedReservations.isEmpty()) {
             throw new IllegalArgumentException("예약이 다 찼습니다. 예약 대기를 걸어주세요.");
         }
     }
 
-    private void validateSameMember(List<Reservation> duplicatedReservations, Reservation reservation) {
-        duplicatedReservations.stream()
+    private void validateSameMember(List<Reservation> savedReservations, Reservation reservation) {
+        savedReservations.stream()
                 .filter(duplicatedReservation -> duplicatedReservation.isSameMember(reservation.getMember()))
                 .findFirst()
-                .ifPresent(ReservationService::throwExceptionByStatus);
+                .ifPresent(this::throwExceptionByStatus);
     }
 
-    private static void throwExceptionByStatus(Reservation memberReservation) {
+    private void throwExceptionByStatus(Reservation memberReservation) {
         Status status = memberReservation.getStatus();
 
         if (status.isWait()) {
@@ -127,13 +127,6 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservationResponse> findReservationsAndWaitingsByMember(LoginMember loginMember) {
-        return reservationRepository.findReservationWithRanksByMemberId(loginMember.id())
-                .stream()
-                .map(MemberReservationResponse::toResponse)
-                .toList();
-    }
-
     public List<ReservationResponse> findAllBySearchCond(ReservationSearchCondRequest request) {
         return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetweenAndStatus(
                         request.themeId(),
@@ -143,6 +136,13 @@ public class ReservationService {
                         Status.SUCCESS
                 ).stream()
                 .map(ReservationResponse::toResponse)
+                .toList();
+    }
+
+    public List<MemberReservationResponse> findReservationsAndWaitingsByMember(LoginMember loginMember) {
+        return reservationRepository.findReservationWithRanksByMemberId(loginMember.id())
+                .stream()
+                .map(MemberReservationResponse::toResponse)
                 .toList();
     }
 

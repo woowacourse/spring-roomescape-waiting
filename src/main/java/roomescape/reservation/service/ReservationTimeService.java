@@ -49,6 +49,13 @@ public class ReservationTimeService {
         return TimeResponse.toResponse(reservationTime);
     }
 
+    public List<TimeResponse> findAll() {
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(TimeResponse::toResponse)
+                .toList();
+    }
+
     public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
 
@@ -58,27 +65,21 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private static AvailableReservationTimeResponse createResponse(
+    private AvailableReservationTimeResponse createResponse(
             ReservationTime reservationTime,
             List<Long> bookedTimeIds
     ) {
         return AvailableReservationTimeResponse.toResponse(reservationTime, isBooked(reservationTime, bookedTimeIds));
     }
 
-    private static boolean isBooked(ReservationTime reservationTime, List<Long> bookedTimeIds) {
+    private boolean isBooked(ReservationTime reservationTime, List<Long> bookedTimeIds) {
         return bookedTimeIds.contains(reservationTime.getId());
-    }
-
-    public List<TimeResponse> findAll() {
-        return reservationTimeRepository.findAll().stream()
-                .map(TimeResponse::toResponse)
-                .toList();
     }
 
     @Transactional
     public void delete(Long id) {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findReservationTimesThatReservationReferById(id);
-        if (!reservationTimes.isEmpty()) {
+        List<ReservationTime> times = reservationTimeRepository.findReservationTimesThatReservationReferById(id);
+        if (!times.isEmpty()) {
             throw new IllegalArgumentException("해당 시간으로 예약된 내역이 있습니다.");
         }
         reservationTimeRepository.deleteById(id);

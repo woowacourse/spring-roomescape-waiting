@@ -40,8 +40,8 @@ public class ReservationTimeController {
             @RequestParam("date") LocalDate date,
             @RequestParam("theme-id") Long themeId
     ) {
-        List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
-        ResourcesResponse<AvailableReservationTimeResponse> response = new ResourcesResponse<>(availableTimes);
+        List<AvailableReservationTimeResponse> times = reservationTimeService.findAvailableTimes(date, themeId);
+        ResourcesResponse<AvailableReservationTimeResponse> response = new ResourcesResponse<>(times);
 
         return ResponseEntity.ok(response);
     }

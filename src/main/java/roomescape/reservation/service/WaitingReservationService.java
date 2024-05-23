@@ -78,10 +78,10 @@ public class WaitingReservationService {
         savedReservations.stream()
                 .filter(savedReservation -> savedReservation.isSameMember(reservation.getMember()))
                 .findFirst()
-                .ifPresent(WaitingReservationService::throwExceptionByStatus);
+                .ifPresent(this::throwExceptionByStatus);
     }
 
-    private static void throwExceptionByStatus(Reservation memberReservation) {
+    private void throwExceptionByStatus(Reservation memberReservation) {
         Status status = memberReservation.getStatus();
 
         if (status.isWait()) {
