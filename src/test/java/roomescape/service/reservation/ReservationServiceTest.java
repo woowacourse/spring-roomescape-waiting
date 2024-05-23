@@ -246,32 +246,6 @@ class ReservationServiceTest {
                 .hasMessage("이미 지난 예약은 삭제할 수 없습니다.");
     }
 
-    @DisplayName("사용자가 예약 대기를 삭제하려고 할 때 예약으로 바뀌었다면 예외가 발생한다.")
-    @Test
-    void cannotDeleteWaitingByIdIfReserved() {
-        //given
-        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.RESERVED);
-        Reservation target = reservationRepository.save(reservation);
-
-        //when
-        assertThatThrownBy(() -> reservationService.deleteWaitingById(target.getId(), member.getId()))
-                .isInstanceOf(InvalidReservationException.class)
-                .hasMessage("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요.");
-    }
-
-    @DisplayName("사용자가 본인 외 예약 대기를 삭제하려고 하면 예외가 발생한다.")
-    @Test
-    void cannotDeleteWaitingByIdIfNotOwner() {
-        //given
-        Reservation reservation = new Reservation(member, reservationDetail, ReservationStatus.WAITING);
-        Reservation target = reservationRepository.save(reservation);
-
-        //when
-        assertThatThrownBy(() -> reservationService.deleteWaitingById(target.getId(), anotherMember.getId()))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessage("예약 대기를 삭제할 권한이 없습니다.");
-    }
-
     @DisplayName("존재하지 않는 시간으로 예약을 추가하면 예외를 발생시킨다.")
     @Test
     void cannotCreateByUnknownTime() {

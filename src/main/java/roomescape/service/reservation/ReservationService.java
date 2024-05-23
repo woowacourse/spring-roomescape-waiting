@@ -117,28 +117,6 @@ public class ReservationService {
                 .ifPresent(Reservation::reserved);
     }
 
-    @Transactional
-    public void deleteWaitingById(long reservationId, long memberId) {
-        reservationRepository.findById(reservationId)
-                .ifPresent(reservation -> {
-                    validateStatus(reservation);
-                    validateAuthority(reservation, memberId);
-                });
-        reservationRepository.deleteById(reservationId);
-    }
-
-    private void validateStatus(Reservation reservation) {
-        if (reservation.getMember().isGuest() && reservation.isReserved()) {
-            throw new InvalidReservationException("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요.");
-        }
-    }
-
-    private void validateAuthority(Reservation reservation, long memberId) {
-        if (reservation.getMember().isGuest() && !reservation.isReservationOf(memberId)) {
-            throw new ForbiddenException("예약 대기를 삭제할 권한이 없습니다.");
-        }
-    }
-
     public List<ReservationResponse> findByCondition(ReservationFilterRequest reservationFilterRequest) {
         ReservationDate dateFrom = ReservationDate.of(reservationFilterRequest.dateFrom());
         ReservationDate dateTo = ReservationDate.of(reservationFilterRequest.dateTo());
