@@ -156,4 +156,111 @@ class AdminReservationControllerTest {
                 .statusCode(200)
                 .body("size()", is(8));
     }
+
+    @DisplayName("어드민 예약 컨트롤러는 기존 예약이 있으면 예약 대기를 승인할 수 없다.")
+    @Test
+    void approveWaitingWhenReservationExists() {
+        // given
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", "2099-05-03");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+        makeReservation(reservation);
+
+        Long id = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .queryParam("type", "member")
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getLong("id");
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().post("/admin/waitings/" + id)
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 기존 예약이 없으면 예약 대기를 승인할 수 있다.")
+    @Test
+    void approveWaiting() {
+        // given
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", "2099-05-03");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+        Long reservationId = makeReservation(reservation);
+
+        Long waitingId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .queryParam("type", "member")
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getLong("id");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .queryParam("type", "member")
+                .when().delete("/admin/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        String status = RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().post("/admin/waitings/" + waitingId)
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getString("status");
+
+        assertThat(status).isEqualTo("예약");
+    }
+
+    @DisplayName("어드민 예약 컨트롤러는 예약 대기를 거절할 수 있다.")
+    @Test
+    void rejectWaiting() {
+        // given
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", "2099-05-03");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+         makeReservation(reservation);
+
+        Long id = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .queryParam("type", "member")
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .jsonPath().getLong("id");
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .when().delete("/admin/waitings/" + id)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    Long makeReservation(Map<String, Object> reservation) {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, accessToken)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .extract()
+                .jsonPath().getLong("id");
+    }
 }
