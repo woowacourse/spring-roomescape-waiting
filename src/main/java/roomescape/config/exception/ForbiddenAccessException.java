@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.config.exception;
 
 import roomescape.controller.exception.BaseException;
 

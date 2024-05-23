@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import roomescape.config.ForbiddenAccessException;
-import roomescape.config.TokenValidationFailureException;
+import roomescape.config.exception.ForbiddenAccessException;
+import roomescape.config.exception.TokenValidationFailureException;
 import roomescape.dto.exception.InputNotAllowedException;
 import roomescape.service.exception.OperationNotAllowedException;
 import roomescape.service.exception.ResourceNotFoundException;
