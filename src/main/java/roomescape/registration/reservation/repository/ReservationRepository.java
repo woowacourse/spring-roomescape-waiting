@@ -9,7 +9,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     Reservation save(Reservation reservation);
 
-    List<Reservation> findAllByOrderByDateAscTimeAsc();
+    List<Reservation> findAllByOrderByDateAscReservationTimeAsc();
 
     List<Reservation> findAllByThemeIdAndDate(long themeId, LocalDate date);
 
@@ -20,11 +20,13 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
             LocalDate toDate
     );
 
-    List<Reservation> findByTimeId(long timeId);
+    List<Reservation> findByReservationTimeId(long timeId);
 
     List<Reservation> findByThemeId(long themeId);
 
     void deleteById(long reservationId);
 
     List<Reservation> findAllByMemberId(long id);
+
+    boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(LocalDate date, long themeId, long reservationTimeId, long memberId);
 }

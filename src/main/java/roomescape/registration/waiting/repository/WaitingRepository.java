@@ -1,5 +1,6 @@
 package roomescape.registration.waiting.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -7,8 +8,6 @@ import roomescape.registration.waiting.Waiting;
 import roomescape.registration.waiting.WaitingWithRank;
 
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
-
-    List<Waiting> findAllByMemberId(long memberId);
 
     List<Waiting> findAll();
 
@@ -25,4 +24,11 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(long memberId);
 
     void deleteById(long id);
+
+    boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
+            LocalDate date,
+            long themeId,
+            long reservationTimeId,
+            long memberId
+    );
 }
