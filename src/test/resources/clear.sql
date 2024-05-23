@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS reservation
     time_id   BIGINT NOT NULL,
     theme_id  BIGINT NOT NULL,
     member_id BIGINT NOT NULL,
+    created_at DATETIME NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

@@ -30,15 +30,15 @@ class LoginServiceTest extends FixtureUsingTest {
     void createTokenTest() {
         //when
         String createdToken = loginService.getLoginToken(new LoginRequest(
-                USER.getEmail().getValue(),
-                USER.getPassword().getValue()
+                USER1.getEmail().getValue(),
+                USER1.getPassword().getValue()
         ));
 
         //then
         Claims payload = JWT_GENERATOR.getClaims(createdToken);
         assertAll(
-                () -> assertThat(payload.get("id", Long.class)).isEqualTo(USER.getId()),
-                () -> assertThat(payload.get("name")).isEqualTo(USER.getName().getValue())
+                () -> assertThat(payload.get("id", Long.class)).isEqualTo(USER1.getId()),
+                () -> assertThat(payload.get("name")).isEqualTo(USER1.getName().getValue())
         );
     }
 
@@ -47,7 +47,7 @@ class LoginServiceTest extends FixtureUsingTest {
     void notFoundEmailGetTokenTest() {
         assertThatThrownBy(() -> loginService.getLoginToken(new LoginRequest(
                 "wrongEmail@email.com",
-                USER.getPassword().getValue()
+                USER1.getPassword().getValue()
         )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(NOT_FOUND_MEMBER.getMessage());
@@ -57,8 +57,8 @@ class LoginServiceTest extends FixtureUsingTest {
     @Test
     void illegalPasswordGetTokenTest() {
         assertThatThrownBy(() -> loginService.getLoginToken(new LoginRequest(
-                USER.getEmail().getValue(),
-                USER.getPassword() + " wrong"
+                USER1.getEmail().getValue(),
+                USER1.getPassword() + " wrong"
         )))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(WRONG_PASSWORD.getMessage());
@@ -69,9 +69,9 @@ class LoginServiceTest extends FixtureUsingTest {
     void loginTokenContainsUserNameTest() {
         //given
         String token = JWT_GENERATOR.generateWith(Map.of(
-                "id", USER.getId(),
-                "name", USER.getName().getValue(),
-                "role", USER.getRole().getTokenValue()
+                "id", USER1.getId(),
+                "name", USER1.getName().getValue(),
+                "role", USER1.getRole().getTokenValue()
         ));
 
         //when
@@ -79,6 +79,6 @@ class LoginServiceTest extends FixtureUsingTest {
 
         //then
         assertThat(loginMemberRequest.name())
-                .isEqualTo(USER.getName());
+                .isEqualTo(USER1.getName());
     }
 }

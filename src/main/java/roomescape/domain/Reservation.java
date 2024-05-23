@@ -30,6 +30,8 @@ public class Reservation implements Comparable<Reservation> {
     private Theme theme;
     @ManyToOne
     private Member member;
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
     protected Reservation() {
 
@@ -48,6 +50,11 @@ public class Reservation implements Comparable<Reservation> {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        this(id, date, time, theme, member, LocalDateTime.now());
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member,
+                       LocalDateTime createdAt) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -57,6 +64,7 @@ public class Reservation implements Comparable<Reservation> {
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.createdAt = createdAt;
     }
 
     private void validateTheme(Theme theme) {
@@ -137,6 +145,10 @@ public class Reservation implements Comparable<Reservation> {
 
     public Member getMember() {
         return member;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

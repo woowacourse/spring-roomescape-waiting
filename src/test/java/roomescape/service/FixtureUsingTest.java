@@ -35,7 +35,9 @@ public class FixtureUsingTest {
 
     protected Member ADMIN = new Member(new Name("ADMIN"), Role.ADMIN, new Email("email@email.com"),
             new Password("password"));
-    protected Member USER = new Member(new Name("USER"), Role.USER, new Email("user@user.com"),
+    protected Member USER1 = new Member(new Name("USER"), Role.USER, new Email("user@user.com"),
+            new Password("password"));
+    protected Member USER2 = new Member(new Name("제이미"), Role.USER, new Email("jamie9504@wooteco.com"),
             new Password("password"));
 
     protected long reservationTimeIdNotExists;
@@ -57,7 +59,8 @@ public class FixtureUsingTest {
     @BeforeEach
     void saveDefaultData() {
         ADMIN = memberRepository.save(ADMIN);
-        USER = memberRepository.save(USER);
+        USER1 = memberRepository.save(USER1);
+        USER2 = memberRepository.save(USER2);
 
         reservationTime_10_0 = reservationTimeRepository.save(reservationTime_10_0);
         reservationTime_11_0 = reservationTimeRepository.save(reservationTime_11_0);

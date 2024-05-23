@@ -45,30 +45,30 @@ class ThemeServiceTest extends FixtureUsingTest {
         reservationTime = reservationTimeRepository.save(reservationTime);
 
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme1, USER));
+                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme1, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, USER));
+                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme1, USER));
+                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme1, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(4), reservationTime, theme1, USER));
+                new Reservation(LocalDate.now().minusDays(4), reservationTime, theme1, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(5), reservationTime, theme1, USER));
+                new Reservation(LocalDate.now().minusDays(5), reservationTime, theme1, USER1));
 
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme3, USER));
+                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme3, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme3, USER));
+                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme3, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme3, USER));
+                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme3, USER1));
 
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme2, USER));
+                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme2, USER1));
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme2, USER));
+                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme2, USER1));
 
         reservationRepository.save(
-                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme4, USER));
+                new Reservation(LocalDate.now().minusDays(3), reservationTime, theme4, USER1));
 
         //when
         List<ThemeResponse> popularThemes = themeService.findAndOrderByPopularity(5);

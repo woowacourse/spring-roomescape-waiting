@@ -42,8 +42,8 @@ class ReservationTimeServiceTest extends FixtureUsingTest {
         //given
         LocalDate selectedDate = LocalDate.of(2024, 1, 1);
 
-        reservationRepository.save(new Reservation(selectedDate, reservationTime_10_0, theme1,USER));
-        reservationRepository.save(new Reservation(selectedDate, reservationTime_12_0, theme1,USER));
+        reservationRepository.save(new Reservation(selectedDate, reservationTime_10_0, theme1, USER1));
+        reservationRepository.save(new Reservation(selectedDate, reservationTime_12_0, theme1, USER1));
 
         //when
         List<AvailableTimeResponse> availableTimeResponses = reservationTimeService.findByThemeAndDate(selectedDate,
@@ -91,7 +91,7 @@ class ReservationTimeServiceTest extends FixtureUsingTest {
     @Test
     void usedReservationTimeDeleteTest() {
         //given
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime_10_0, theme1, USER));
+        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime_10_0, theme1, USER1));
 
         //when & then
         assertThatCode(() -> reservationTimeService.delete(reservationTime_10_0.getId()))

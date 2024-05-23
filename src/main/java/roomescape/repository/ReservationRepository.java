@@ -1,11 +1,13 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -37,4 +39,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(long timeId);
 
     boolean existsByThemeId(long themeId);
+
+    default long calculateIndexOf(Reservation reservation) {
+        return countByDateAndThemeAndTimeAndCreatedAtLessThanEqual(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getReservationTime(),
+                reservation.getCreatedAt()
+        );
+    }
+
+    long countByDateAndThemeAndTimeAndCreatedAtLessThanEqual(
+            LocalDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt
+    );
+
 }

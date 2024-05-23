@@ -143,8 +143,6 @@ public class ReservationControllerTest {
                     .body("size()", is(10));
         }
 
-        //todo API 변경에 따른 테스트 임시 제외
-        @Disabled
         @DisplayName("예약을 하나 생성할 수 있다.")
         @Test
         void createReservationTest() {
@@ -165,8 +163,7 @@ public class ReservationControllerTest {
                             "member.name", is(defaultMember.getName().getValue()),
                             "date", is(reservationParam.get("date")),
                             "time.startAt", is(defaultTime.getStartAt().toString()),
-                            "theme.name", is(defaultTheme1.getName()),
-                            "status", "예약");
+                            "theme.name", is(defaultTheme1.getName()));
 
             RestAssured.given().log().all()
                     .when().get("/reservations")
@@ -192,29 +189,6 @@ public class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(400)
                     .body("message", is(PAST_TIME_RESERVATION.getMessage()));
-        }
-
-        //todo API 변경에 따른 테스트 임시 제외
-        @Disabled
-        @DisplayName("중복된 예약을 요청하면 자동으로 예약 대기가 된다.")
-        @Test
-        void duplicatedReservationTest() {
-            RestAssured.given().log().all()
-                    .when()
-                    .cookie("token", token)
-                    .contentType(ContentType.JSON)
-                    .body(Map.of(
-                            "date", reservation6.getDate().toString(),
-                            "timeId", reservation6.getReservationTime().getId(),
-                            "themeId", reservation6.getTheme().getId()))
-                    .post("/reservations")
-                    .then().log().all()
-                    .statusCode(201)
-                    .body("id", is(11),
-                            "member.name", is(defaultMember.getName().getValue()),
-                            "time.startAt", is(defaultTime.getStartAt().toString()),
-                            "theme.name", is(defaultTheme1.getName()),
-                            "state", "예약 대기");
         }
 
         @DisplayName("예약을 하나 삭제할 수 있다.")
