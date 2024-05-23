@@ -55,9 +55,9 @@ public class ReservationService {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 있으면 예약을 할 수 없습니다.");
         }
 
-        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(reservationAddRequest.memberId(),
-                reservationAddRequest.date(), reservationAddRequest.timeId(), reservationAddRequest.themeId(), Status.RESERVATION_WAIT)) {
-            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기가 있으면 예약을 할 수 없습니다.");
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(reservationAddRequest.memberId(),
+                reservationAddRequest.date(), reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
+            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약 및 예약대기가 있으면 예약을 할 수 없습니다.");
         }
 
         ReservationTime reservationTime = getReservationTime(reservationAddRequest.timeId());
@@ -118,9 +118,9 @@ public class ReservationService {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약이 없으면 예약대기를 할 수 없습니다.");
         }
 
-        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(reservationWaitAddRequest.memberId(),
-                reservationWaitAddRequest.date(), reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId(), Status.RESERVATION_WAIT)) {
-            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기가 있으면 예약대기를 할 수 없습니다.");
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(reservationWaitAddRequest.memberId(),
+                reservationWaitAddRequest.date(), reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId())) {
+            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약 및 예약대기가 있으면 예약대기를 할 수 없습니다.");
         }
 
         ReservationTime reservationTime = getReservationTime(reservationWaitAddRequest.timeId());
