@@ -25,14 +25,14 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
-    Waiting findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
     @Query("""
             SELECT w
             FROM Waiting w
             WHERE w.date = ?1
                 AND w.time = ?2
                 AND w.theme = ?3
+            ORDER BY w.id ASC
+            LIMIT 1
             """)
-    Optional<Waiting> findOneByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Waiting> findFirstByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 }

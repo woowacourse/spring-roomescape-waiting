@@ -81,26 +81,24 @@ public class ReservationService {
     public void deleteReservation(long id) {
         // TODO: 본인의 예약인지 검증
         validateExistence(id);
-        Reservation reservation = reservationRepository.findById(id) //
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
         LocalDate reservationDate = reservation.getDate();
         ReservationTime reservationTime = reservation.getTime();
         Theme reservationTheme = reservation.getTheme();
-        Optional<Waiting> rawWaiting = waitingRepository.findOneByDateAndTimeAndTheme(
-                reservationDate, reservationTime, reservationTheme);
-        if (rawWaiting.isPresent()) {
-            Waiting waiting = rawWaiting.get();
-            LocalDate date = waiting.getDate();
-            ReservationTime time = waiting.getTime();
-            Theme theme = waiting.getTheme();
-            Member member = waiting.getMember();
-            Waiting deletedWaiting = waitingRepository.findFirstByDateAndTimeAndTheme(date, time, theme); //
-            waitingRepository.delete(deletedWaiting);
-
-            Reservation approvedReservation = new Reservation(date, time, theme, member);
-            reservationRepository.save(approvedReservation);
-        }
+        waitingRepository.findFirstByDateAndTimeAndTheme(reservationDate, reservationTime, reservationTheme)
+                .ifPresent(this::approveReservation);
         reservationRepository.deleteById(id);
+    }
+
+    private void approveReservation(Waiting waiting) {
+        waitingRepository.delete(waiting);
+        LocalDate date = waiting.getDate();
+        ReservationTime time = waiting.getTime();
+        Theme theme = waiting.getTheme();
+        Member member = waiting.getMember();
+        Reservation reservation = new Reservation(date, time, theme, member);
+        reservationRepository.save(reservation);
     }
 
     public ReservationTimeInfoDto findReservationTimesInformation(LocalDate date, long themeId) {
