@@ -33,7 +33,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
 
         guestToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("lini123", "lini@email.com"))
+                .body(new LoginRequest("guest123", "guest@email.com"))
                 .when().post("/login")
                 .then().log().all().extract().cookie("token");
     }
@@ -108,6 +108,28 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                             .when().get("/themes")
                             .then().log().all()
                             .assertThat().statusCode(200).body("size()", is(0));
+                })
+        );
+    }
+
+    @DisplayName("일반 사용자는 테마를 삭제할 수 없다.")
+    @TestFactory
+    Stream<DynamicTest> cannotDeleteThemeByGuest() {
+        ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        return Stream.of(
+                DynamicTest.dynamicTest("테마를 생성한다.", () -> {
+                    themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+                            .when().post("/themes")
+                            .then().extract().response().jsonPath().get("id");
+                }),
+                DynamicTest.dynamicTest("테마를 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guestToken)
+                            .when().delete("/themes/" + themeId)
+                            .then().log().all()
+                            .assertThat().statusCode(403).body("message",is("권한이 없습니다. 관리자에게 문의해주세요."));
+
                 })
         );
     }

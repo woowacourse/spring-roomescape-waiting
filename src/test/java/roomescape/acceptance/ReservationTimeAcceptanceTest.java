@@ -33,7 +33,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
 
         guestToken = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(new LoginRequest("lini123", "lini@email.com"))
+                .body(new LoginRequest("guest123", "guest@email.com"))
                 .when().post("/login")
                 .then().log().all().extract().cookie("token");
     }
@@ -91,7 +91,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         );
     }
 
-    @DisplayName("시간 정보를 id로 삭제한다.")
+    @DisplayName("어드민이 시간 정보를 id로 삭제한다.")
     @TestFactory
     Stream<DynamicTest> deleteReservationTimeById() {
         return Stream.of(
@@ -118,6 +118,28 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         );
     }
 
+    @DisplayName("일반 사용자는 시간 정보를 삭제할 수 없다.")
+    @TestFactory
+    Stream<DynamicTest> cannotDeleteReservationTimeByIdByGuest() {
+        return Stream.of(
+                DynamicTest.dynamicTest("시간을 추가한다", () -> {
+                    timeId = (int) RestAssured.given().log().all()
+                            .contentType(ContentType.JSON)
+                            .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
+                            .when().post("/times")
+                            .then().log().all().extract().response().jsonPath().get("id");
+                    ;
+                }),
+                DynamicTest.dynamicTest("시간을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guestToken)
+                            .when().delete("/times/" + timeId)
+                            .then().log().all()
+                            .assertThat().statusCode(403).body("message",is("권한이 없습니다. 관리자에게 문의해주세요."));
+                })
+        );
+    }
+
     @DisplayName("시간 삭제 실패 테스트 - 이미 예약이 존재하는 시간(timeId = 1) 삭제 시도 오류")
     @Test
     @Sql("/insert-time-with-reservation.sql")
@@ -140,21 +162,6 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                             .assertThat().statusCode(400).body("message", is("해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다."));
                 })
         );
-    }
-
-    @DisplayName("시간 삭제 실패 테스트 - 관리자 외 삭제 시도 오류")
-    @Test
-    @Sql("/insert-time-with-reservation.sql")
-    void cannotDeleteReservationTimeByGuest() {
-        //given
-        int timeId = 1;
-
-        //when&then
-        RestAssured.given().log().all()
-                .cookie("token", guestToken)
-                .when().delete("/times/" + timeId)
-                .then().log().all()
-                .assertThat().statusCode(403).body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
     }
 
     @DisplayName("예약 가능한 시간 조회 테스트 - 10:00: 예약 존재, (11:00,12:00): 예약 미존재.")
