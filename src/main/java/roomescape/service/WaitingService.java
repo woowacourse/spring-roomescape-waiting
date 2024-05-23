@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -9,6 +10,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
 import roomescape.dto.login.LoginMember;
 import roomescape.dto.waiting.WaitingRequest;
+import roomescape.dto.waiting.WaitingResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -29,6 +31,14 @@ public class WaitingService {
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
+    }
+
+    public List<WaitingResponse> getAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return waitings
+                .stream().map(WaitingResponse::from)
+                .toList();
     }
 
     public Long addWaiting(WaitingRequest waitingRequest) {

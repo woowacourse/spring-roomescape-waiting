@@ -1,5 +1,6 @@
 package roomescape.api;
 
+import static org.hamcrest.Matchers.is;
 import static roomescape.LoginTestSetting.getCookieByLogin;
 
 import java.time.LocalDate;
@@ -26,6 +27,20 @@ class WaitingApiTest {
 
     @LocalServerPort
     int port;
+
+    @Test
+    void 전체_예약_대기_조회() {
+        UserWaitingRequest waitingRequest = createUserWaitingRequest(1L, 1L);
+
+        RestAssured.given().log().all()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
 
     @Test
     void 예약_대기_추가() {
