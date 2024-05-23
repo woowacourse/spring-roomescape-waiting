@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.domain.Theme;
@@ -17,7 +16,6 @@ import roomescape.exception.reservation.InvalidDateTimeReservationException;
 import roomescape.exception.reservation.NotFoundReservationException;
 import roomescape.exception.theme.NotFoundThemeException;
 import roomescape.exception.time.NotFoundTimeException;
-import roomescape.service.dto.ReservationRequest;
 import roomescape.service.dto.WaitingRequest;
 import roomescape.service.dto.WaitingResponse;
 
@@ -44,7 +42,7 @@ public class WaitingService {
         Theme theme = findThemeById(waitingRequest.getThemeId());
         Waiting waiting = waitingRequest.toWaiting(member, reservationTime, theme);
 
-        validateDuplicateWaiting(waitingRequest);
+        validateDuplicateWaiting(waitingRequest, member);
         validateDateTimeWaiting(waitingRequest, reservationTime);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
@@ -57,9 +55,9 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    private void validateDuplicateWaiting(WaitingRequest request) {
-        if (waitingRepository.existsByDateAndTimeIdAndThemeId(
-                request.getDate(), request.getTimeId(), request.getThemeId())) {
+    private void validateDuplicateWaiting(WaitingRequest request, Member member) {
+        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+                request.getDate(), request.getTimeId(), request.getThemeId(), member.getId())) {
             throw new DuplicatedReservationException();
         }
     }

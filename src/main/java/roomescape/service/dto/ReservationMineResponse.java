@@ -30,12 +30,12 @@ public class ReservationMineResponse {
         );
     }
 
-    public ReservationMineResponse(Waiting waiting) {
+    public ReservationMineResponse(Waiting waiting, Long rank) {
         this(waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
                 waiting.getTime().getStartAt(),
-                waiting.getStatus().getDescription()
+                rank + "번째 " + waiting.getStatus().getDescription()
         );
     }
 

@@ -13,14 +13,14 @@ public class WaitingRequest {
     private final Long timeId;
     private final Long themeId;
 
-    public WaitingRequest(String date, String timeId, String themeId) {
+    public WaitingRequest(String date, Long timeId, Long themeId) {
         validate(date, timeId, themeId);
         this.date = LocalDate.parse(date);
-        this.timeId = Long.parseLong(timeId);
-        this.themeId = Long.parseLong(themeId);
+        this.timeId = timeId;
+        this.themeId = themeId;
     }
 
-    private void validate(String date, String timeId, String themeId) {
+    private void validate(String date, Long timeId, Long themeId) {
         if (date == null || timeId == null || themeId == null) {
             throw new IllegalArgumentException();
         }

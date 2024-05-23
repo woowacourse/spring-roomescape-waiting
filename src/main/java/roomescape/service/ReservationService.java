@@ -47,15 +47,16 @@ public class ReservationService {
 
     public List<ReservationMineResponse> findMyReservation(Member member) {
         List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
-        List<Waiting> waitings = waitingRepository.findByMemberId(member.getId());
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
         List<ReservationMineResponse> responses = new ArrayList<>();
 
         for(Reservation reservation : reservations) {
             responses.add(new ReservationMineResponse(reservation));
         }
 
-        for(Waiting waiting : waitings) {
-            responses.add(new ReservationMineResponse(waiting));
+        for(WaitingWithRank waitingWithRank : waitingWithRanks) {
+            Long rank = waitingWithRank.getRank();
+            responses.add(new ReservationMineResponse(waitingWithRank.getWaiting(), rank + 1));
         }
 
         return responses;
