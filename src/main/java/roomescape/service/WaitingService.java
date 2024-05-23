@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +12,6 @@ import roomescape.dto.waiting.WaitingResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.util.DateUtil;
 
 @Service
 public class WaitingService {
@@ -44,8 +41,6 @@ public class WaitingService {
     public Long addWaiting(WaitingRequest waitingRequest) {
         Member member = findMember(waitingRequest.memberId());
         Reservation reservation = findReservation(waitingRequest);
-        validateUnPassedDate(reservation.getDate(), reservation.getTime().getStartAt());
-
         Waiting waiting = new Waiting(member, reservation);
         waitingRepository.save(waiting);
 
@@ -96,15 +91,6 @@ public class WaitingService {
             throw new IllegalArgumentException(
                     "[ERROR] 자신의 예약 대기만 삭제할 수 있습니다.",
                     new Throwable("waiting_id : " + waiting.getId())
-            );
-        }
-    }
-
-    private void validateUnPassedDate(LocalDate date, LocalTime time) {
-        if (DateUtil.isPastDateTime(date, time)) {
-            throw new IllegalArgumentException(
-                    "[ERROR] 지나간 날짜와 시간은 예약 대기가 불가능합니다.",
-                    new Throwable("생성 예약 대기 시간 : " + date + " " + time)
             );
         }
     }
