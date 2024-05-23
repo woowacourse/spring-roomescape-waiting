@@ -17,7 +17,7 @@ public class ReservationStatus {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "reservation_id")
+    @JoinColumn(name = "id")
     @MapsId
     private Reservation reservation;
 

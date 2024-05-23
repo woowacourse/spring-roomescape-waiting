@@ -5,9 +5,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.config.TestConfig;
+import roomescape.support.DatabaseCleanerExtension;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,6 +16,6 @@ import roomescape.application.config.TestConfig;
         classes = TestConfig.class,
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
-@Sql("/truncate.sql")
+@ExtendWith(DatabaseCleanerExtension.class)
 public @interface ServiceTest {
 }
