@@ -6,7 +6,7 @@ import static roomescape.domain.reservation.ReservationStatus.REJECTED;
 import static roomescape.domain.reservation.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
@@ -66,7 +66,9 @@ public class ReservationService {
     public List<ReservationRankResponse> findMyReservations(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         List<ReservationRankResponse> myReservations = reservationRepository.findReservationRankByMember(member);
-        Collections.sort(myReservations);
+        myReservations.sort(Comparator
+                .comparing(ReservationRankResponse::getDate)
+                .thenComparing(ReservationRankResponse::getTime));
         return myReservations;
     }
 
@@ -78,7 +80,7 @@ public class ReservationService {
         ReservationTime time = reservationTimeRepository.fetchById(createInfo.getTimeId());
 
         validateDuplicatedReservation(member, theme, date, time);
-        
+
         Reservation reservation = generateReservation(member, theme, date, time);
         reservationRepository.save(reservation);
         return new ReservationResponse(reservation);

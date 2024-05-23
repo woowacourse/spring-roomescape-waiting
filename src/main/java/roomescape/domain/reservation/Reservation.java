@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import roomescape.domain.member.Member;
 import roomescape.exception.reservation.DateTimePassedException;
 
@@ -83,6 +84,10 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return time;
+    }
+
+    public LocalTime getStartAt() {
+        return time.getStartAt();
     }
 
     public String memberEmail() {
