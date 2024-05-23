@@ -7,24 +7,33 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import roomescape.utils.AdminGenerator;
+import roomescape.utils.DatabaseCleaner;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
+import roomescape.utils.ThemeRequestGenerator;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class ThemeControllerTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private AdminGenerator adminGenerator;
+
     @BeforeEach
     void setUp() {
+        databaseCleaner.executeTruncate();
         RestAssured.port = port;
+
+        adminGenerator.generate();
+        ThemeRequestGenerator.generateWithName("테마 1");
+        ThemeRequestGenerator.generateWithName("테마 2");
     }
 
     @Test
@@ -34,7 +43,7 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(5));
+                .body("size()", is(2));
     }
 
     @Test
@@ -48,7 +57,7 @@ class ThemeControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("name", is(List.of("테마2", "테마1")));
+                .body("name", is(List.of("테마 2", "테마 1")));
     }
 
     private void createReservationTimes() {
@@ -57,8 +66,8 @@ class ThemeControllerTest {
     }
 
     private void createReservations() {
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(5L, 2L);
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 2L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(2L, 2L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
     }
 }

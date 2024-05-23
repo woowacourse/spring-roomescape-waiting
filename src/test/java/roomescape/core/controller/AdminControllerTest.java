@@ -8,46 +8,45 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
 import roomescape.core.dto.theme.ThemeRequest;
+import roomescape.utils.AccessTokenGenerator;
+import roomescape.utils.AdminGenerator;
+import roomescape.utils.DatabaseCleaner;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
+import roomescape.utils.ThemeRequestGenerator;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class AdminControllerTest {
     private static final String TOMORROW_DATE = TestFixture.getTomorrowDate();
-    private static final String EMAIL = TestFixture.getEmail();
-    private static final String PASSWORD = TestFixture.getPassword();
-
-    private String accessToken;
 
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private AdminGenerator adminGenerator;
+
+    private String accessToken;
+
     @BeforeEach
     void setUp() {
+        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        adminGenerator.generate();
+        accessToken = AccessTokenGenerator.generate();
 
+        ThemeRequestGenerator.generateWithName("테마 1");
         ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
     }
 
     @Test
@@ -123,7 +122,7 @@ class AdminControllerTest {
     void validateTimeDelete() {
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .when().delete("/admin/times/4")
+                .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -135,7 +134,7 @@ class AdminControllerTest {
 
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
-                .when().delete("/admin/times/5")
+                .when().delete("/admin/times/2")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -236,6 +235,8 @@ class AdminControllerTest {
     @Test
     @DisplayName("테마 삭제 시, 해당 테마를 참조하는 예약이 없으면 테마가 삭제된다.")
     void deleteTheme() {
+        ThemeRequestGenerator.generateWithName("테마 2");
+
         RestAssured.given().log().all()
                 .cookies("token", accessToken)
                 .when().delete("/admin/themes/2")
@@ -246,7 +247,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("예약자를 지정해서 예약을 생성할 수 있다.")
     void createReservationAsAdmin() {
-        ReservationRequest request = new ReservationRequest(2L,
+        ReservationRequest request = new ReservationRequest(1L,
                 TOMORROW_DATE, 1L, 1L);
 
         RestAssured.given().log().all()

@@ -7,45 +7,44 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.core.dto.auth.TokenRequest;
 import roomescape.core.dto.reservation.MemberReservationRequest;
 import roomescape.core.dto.waiting.MemberWaitingRequest;
+import roomescape.utils.AccessTokenGenerator;
+import roomescape.utils.AdminGenerator;
+import roomescape.utils.DatabaseCleaner;
 import roomescape.utils.ReservationRequestGenerator;
 import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
+import roomescape.utils.ThemeRequestGenerator;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class WaitingControllerTest {
     private static final String TOMORROW = TestFixture.getTomorrowDate();
-    private static final String EMAIL = TestFixture.getEmail();
-    private static final String PASSWORD = TestFixture.getPassword();
 
     private String accessToken;
 
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private AdminGenerator adminGenerator;
+
     @BeforeEach
     void setUp() {
+        databaseCleaner.executeTruncate();
         RestAssured.port = port;
 
-        accessToken = RestAssured
-                .given().log().all()
-                .body(new TokenRequest(EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().cookies().extract().cookie("token");
+        adminGenerator.generate();
+        accessToken = AccessTokenGenerator.generate();
 
+        ThemeRequestGenerator.generateWithName("테마 1");
         ReservationTimeRequestGenerator.generateOneMinuteAfter();
-        ReservationRequestGenerator.generateWithTimeAndTheme(4L, 1L);
+        ReservationRequestGenerator.generateWithTimeAndTheme(1L, 1L);
     }
 
     @Test

@@ -6,24 +6,36 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
+import roomescape.utils.AdminGenerator;
+import roomescape.utils.DatabaseCleaner;
+import roomescape.utils.ReservationTimeRequestGenerator;
 import roomescape.utils.TestFixture;
+import roomescape.utils.ThemeRequestGenerator;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestPropertySource(properties = {"spring.config.location = classpath:application-test.yml"})
+@AcceptanceTest
 class ReservationTimeControllerTest {
     private static final String TOMORROW_DATE = TestFixture.getTomorrowDate();
 
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private AdminGenerator adminGenerator;
+
     @BeforeEach
     void setUp() {
+        databaseCleaner.executeTruncate();
         RestAssured.port = port;
+
+        adminGenerator.generate();
+        ThemeRequestGenerator.generateWithName("테마 1");
+        ReservationTimeRequestGenerator.generateOneMinuteAfter();
+        ReservationTimeRequestGenerator.generateTwoMinutesAfter();
     }
 
     @Test
@@ -33,7 +45,7 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(2));
     }
 
     @Test
@@ -43,6 +55,6 @@ class ReservationTimeControllerTest {
                 .when().get("/times?date=" + TOMORROW_DATE + "&theme=1")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(2));
     }
 }
