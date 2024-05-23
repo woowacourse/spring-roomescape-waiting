@@ -5,18 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 
 /*
  * 예약 대기 초기 데이터
  * {ID=1, DATE='2024-04-30', TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
  * {ID=2, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
+ * {ID=3, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=3, STATUS=WAITING}
  */
 @DataJpaTest
 class WaitingRepositoryTest {
@@ -45,5 +48,18 @@ class WaitingRepositoryTest {
                 () -> assertThat(waitings).hasSize(2),
                 () -> assertThat(waitings.get(0).getRank()).isEqualTo(1)
         );
+    }
+
+    @Test
+    @DisplayName("동일한 날짜, 시간, 테마의 예약 대기 중 첫번째 대기 내역을 조회한다.")
+    void given_dateAndTimeIdAndThemeId_when_find_then_getFirst() {
+        //given
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        //when
+        Waiting waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeId(date,
+                1L, 1L).orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기가 없습니다."));
+        //then
+        assertThat(waiting.getMember().getId()).isEqualTo(2L);
     }
 }

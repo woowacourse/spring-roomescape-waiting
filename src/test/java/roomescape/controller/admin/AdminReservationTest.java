@@ -1,6 +1,7 @@
 package roomescape.controller.admin;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -20,6 +21,16 @@ import roomescape.TestDataInitExtension;
 import roomescape.auth.AuthorizationExtractor;
 import roomescape.controller.TestAccessToken;
 
+/*
+ * 예약 대기 관련 초기 데이터
+ * 예약 테이블
+ * {ID=9, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=1, STATUS=RESERVED}
+ * {ID=10, DATE=내일일자, TIME_ID=2, THEME_ID=1, MEMBER_ID=1, STATUS=RESERVED}
+ * 예약 대기 테이블
+ * {ID=1, DATE='2024-04-30', TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
+ * {ID=2, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=2, STATUS=WAITING}
+ * {ID=2, DATE=내일일자, TIME_ID=1, THEME_ID=1, MEMBER_ID=3, STATUS=WAITING}
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(TestDataInitExtension.class)
 class AdminReservationTest {
@@ -69,6 +80,21 @@ class AdminReservationTest {
                 .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("예약 삭제 시 예약 대기가 있는 경우 예약으로 전환한다.")
+    @Test
+    void given_when_existWaiting_then_convertWaitingToReservation() {
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .when().delete("/admin/reservations/9")
+                .then().log().all();
+
+        RestAssured.given().log().all()
+                .cookie(AuthorizationExtractor.TOKEN_NAME, testAccessToken.getAdminToken())
+                .when().get("/admin/waitings")
+                .then().log().all()
+                .body("size()", is(2));
     }
 
     @DisplayName("등록되지 않은 시간으로 예약하는 경우 400 오류를 반환한다.")

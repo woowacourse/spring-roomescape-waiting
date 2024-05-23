@@ -13,7 +13,8 @@ VALUES ('레벨1 탈출', '우테코 레벨2를 탈출하는 내용입니다.', 
 -- member
 INSERT INTO member(email, password, salt, name, role)
 VALUES ('user@email.com', 'IebTDq8qNH5Z43RTP4ZLgXw8ZmdkdrASk6IsYWJ4Wp4=', 'XvAa9NlQEVXpoBT6OpnaRw==', '사용자', 'USER'),
-       ('admin@email.com', 'B0vwCRkw/edMXT+zS4pqHdaEFq+zW3oQNnSp9EVuqS4=', 'qjZBbdKE2lKEd++JtyOD3w==', '관리자', 'ADMIN');
+       ('admin@email.com', 'B0vwCRkw/edMXT+zS4pqHdaEFq+zW3oQNnSp9EVuqS4=', 'qjZBbdKE2lKEd++JtyOD3w==', '관리자', 'ADMIN'),
+       ('user2@email.com', 'IebTDq8qNH5Z43RTP4ZLgXw8ZmdkdrASk6IsYWJ4Wp4=', 'XvAa9NlQEVXpoBT6OpnaRw==', '사용자2', 'USER');
 -- reservation
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2024-05-01', 3, 2, 1, 'RESERVED'),
@@ -29,4 +30,5 @@ VALUES ('2024-05-01', 3, 2, 1, 'RESERVED'),
 -- waiting
 INSERT INTO waiting(date, time_id, theme_id, member_id, status)
 VALUES ('2024-04-30', 1, 1, 2, 'WAITING'),
-       (DATEADD(DAY, 1, current_date), 1, 1, 2, 'WAITING');
+       (DATEADD(DAY, 1, current_date), 1, 1, 2, 'WAITING'),
+       (DATEADD(DAY, 1, current_date), 1, 1, 3, 'WAITING');

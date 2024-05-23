@@ -58,7 +58,8 @@ public class TestDataInitializer {
         entityManager.createNativeQuery("""
                 INSERT INTO member(email, password, salt, name, role)
                 VALUES ('user@test.com', 'hashedpassword', 'salt', 'poke', 'USER'),
-                       ('admin@test.com', 'yAD5RFQKSwFkOImAX+hDr1RSlsR7MBBSFr/xni5sGOE=', 'SZj5iqlnmc4cLvpOAS0a1g==', 'wedge', 'ADMIN')
+                       ('admin@test.com', 'yAD5RFQKSwFkOImAX+hDr1RSlsR7MBBSFr/xni5sGOE=', 'SZj5iqlnmc4cLvpOAS0a1g==', 'wedge', 'ADMIN'),
+                       ('user2@email.com', 'IebTDq8qNH5Z43RTP4ZLgXw8ZmdkdrASk6IsYWJ4Wp4=', 'XvAa9NlQEVXpoBT6OpnaRw==', '사용자2', 'USER')
                        """).executeUpdate();
 
         entityManager.createNativeQuery("""
@@ -78,7 +79,8 @@ public class TestDataInitializer {
         entityManager.createNativeQuery("""
                 INSERT INTO waiting(date, time_id, theme_id, member_id, status)
                 VALUES ('2024-04-30', 1, 1, 2, 'WAITING'),
-                       (DATEADD(DAY, 1, current_date), 1, 1, 2, 'WAITING')
+                       (DATEADD(DAY, 1, current_date), 1, 1, 2, 'WAITING'),
+                       (DATEADD(DAY, 1, current_date), 1, 1, 3, 'WAITING')
                        """).executeUpdate();
     }
 }
