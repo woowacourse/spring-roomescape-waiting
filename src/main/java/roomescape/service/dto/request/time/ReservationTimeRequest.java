@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationdetail.ReservationTime;
 
 public record ReservationTimeRequest(
         @NotNull(message = "시간은 빈값을 허용하지 않습니다.") LocalTime startAt) {

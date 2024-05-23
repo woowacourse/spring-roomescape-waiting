@@ -3,12 +3,12 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import roomescape.domain.ReservationDetailFactory;
-import roomescape.domain.ReservationFactory;
-import roomescape.domain.repository.ReservationDetailRepository;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.reservationdetail.ReservationDetailFactory;
+import roomescape.domain.reservation.ReservationFactory;
+import roomescape.domain.reservationdetail.ReservationDetailRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationdetail.ReservationTimeRepository;
+import roomescape.domain.reservationdetail.ThemeRepository;
 
 @Configuration
 @RequiredArgsConstructor

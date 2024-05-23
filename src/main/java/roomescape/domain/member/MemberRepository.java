@@ -1,9 +1,8 @@
-package roomescape.domain.repository;
+package roomescape.domain.member;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
-import roomescape.domain.Member;
 import roomescape.exception.member.AuthenticationFailureException;
 
 public interface MemberRepository extends Repository<Member, Long> {

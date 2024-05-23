@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.web.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

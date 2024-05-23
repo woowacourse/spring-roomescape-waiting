@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.domain.converter.RoleConverter;
 
 @Entity(name = "members")
 @Getter

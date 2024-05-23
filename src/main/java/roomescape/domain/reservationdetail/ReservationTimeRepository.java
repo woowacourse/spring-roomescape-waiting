@@ -1,4 +1,4 @@
-package roomescape.domain.repository;
+package roomescape.domain.reservationdetail;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.ReservationTime;
 import roomescape.exception.time.NotFoundReservationTimeException;
 
 public interface ReservationTimeRepository extends Repository<ReservationTime, LocalTime> {

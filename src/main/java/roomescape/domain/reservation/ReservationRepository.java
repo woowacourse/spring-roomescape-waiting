@@ -1,4 +1,4 @@
-package roomescape.domain.repository;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,10 +6,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationDetail;
-import roomescape.domain.Status;
+import roomescape.domain.ReservationWithRank;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.member.Member;
 import roomescape.exception.reservation.NotFoundReservationException;
 
 public interface ReservationRepository extends Repository<Reservation, Long> {

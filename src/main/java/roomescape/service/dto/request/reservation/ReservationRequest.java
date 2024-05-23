@@ -5,9 +5,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.Builder;
-import roomescape.domain.ReservationDetail;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.reservationdetail.ReservationTime;
+import roomescape.domain.reservationdetail.Theme;
 
 @Builder
 public record ReservationRequest(

@@ -1,10 +1,9 @@
-package roomescape.domain.repository;
+package roomescape.domain.reservationdetail;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-import roomescape.domain.Theme;
 import roomescape.exception.theme.NotFoundThemeException;
 
 public interface ThemeRepository extends Repository<Theme, Long> {
@@ -30,5 +29,5 @@ public interface ThemeRepository extends Repository<Theme, Long> {
 
     List<Theme> findAll();
 
-    void delete(Theme theme);
+    void deleteById(Long themeId);
 }

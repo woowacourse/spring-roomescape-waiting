@@ -3,7 +3,7 @@ package roomescape.service.dto.response.time;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.time.LocalTime;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationdetail.ReservationTime;
 
 public record ReservationTimeResponse(Long id, LocalTime startAt) {
 

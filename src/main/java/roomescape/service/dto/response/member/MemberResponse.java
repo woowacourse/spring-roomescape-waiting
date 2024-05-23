@@ -1,6 +1,6 @@
 package roomescape.service.dto.response.member;
 
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 
 public record MemberResponse(Long id, String name) {
     public static MemberResponse from(Member member) {

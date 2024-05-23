@@ -5,13 +5,12 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Theme;
-import roomescape.domain.policy.RankingPolicy;
-import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.theme.NotFoundThemeException;
+import roomescape.domain.reservationdetail.Theme;
+import roomescape.domain.reservationdetail.ThemeRepository;
 import roomescape.exception.theme.ReservationReferencedThemeException;
 import roomescape.service.dto.request.theme.ThemeRequest;
 import roomescape.service.dto.response.theme.ThemeResponse;
+import roomescape.service.policy.RankingPolicy;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +36,7 @@ public class ThemeService {
         int limit = rankingPolicy.exposureSize();
 
         List<Theme> themes = themeRepository.findThemesByPeriodWithLimit(
-                startDate.toString(),
-                endDate.toString(),
-                limit);
+                startDate.toString(), endDate.toString(), limit);
 
         return themes.stream()
                 .map(ThemeResponse::from)
@@ -47,16 +44,10 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        Theme theme = findThemeById(id);
         try {
-            themeRepository.delete(theme);
+            themeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationReferencedThemeException();
         }
-    }
-
-    private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(NotFoundThemeException::new);
     }
 }

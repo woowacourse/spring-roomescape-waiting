@@ -1,4 +1,4 @@
-package roomescape.config;
+package roomescape.web.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.Role;
+import roomescape.domain.member.Role;
 import roomescape.exception.member.AuthenticationFailureException;
 import roomescape.exception.member.AuthorizationFailureException;
 import roomescape.service.security.JwtProvider;

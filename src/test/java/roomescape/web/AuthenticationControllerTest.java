@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.domain.member.MemberRepository;
 import roomescape.service.security.JwtProvider;
 
 class AuthenticationControllerTest extends ControllerTest {

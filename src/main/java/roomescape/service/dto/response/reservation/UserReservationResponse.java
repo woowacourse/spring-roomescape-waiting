@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 
 public record UserReservationResponse(
         @NotNull(message = "예약 아이디는 빈값이 올 수 없습니다.") Long reservationId,

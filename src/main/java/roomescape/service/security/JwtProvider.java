@@ -4,8 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.exception.member.AuthenticationFailureException;
 
 @Component

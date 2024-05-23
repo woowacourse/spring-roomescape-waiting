@@ -1,8 +1,7 @@
-package roomescape.domain.converter;
+package roomescape.domain.member;
 
 import jakarta.persistence.AttributeConverter;
 import lombok.Getter;
-import roomescape.domain.Role;
 
 @Getter
 public class RoleConverter implements AttributeConverter<Role, String> {

@@ -1,10 +1,7 @@
-package roomescape.domain;
+package roomescape.domain.reservationdetail;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import roomescape.domain.repository.ReservationDetailRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
 
 @RequiredArgsConstructor
 public class ReservationDetailFactory {

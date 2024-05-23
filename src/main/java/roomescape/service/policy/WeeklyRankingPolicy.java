@@ -1,4 +1,4 @@
-package roomescape.domain.policy;
+package roomescape.service.policy;
 
 import java.time.LocalDate;
 

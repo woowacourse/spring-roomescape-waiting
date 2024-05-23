@@ -1,7 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import lombok.RequiredArgsConstructor;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.member.Member;
 import roomescape.exception.reservation.DuplicatedReservationException;
 
 @RequiredArgsConstructor

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.doReturn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import roomescape.config.AdminHandlerInterceptor;
+import roomescape.web.config.AdminHandlerInterceptor;
 
 abstract class ExcludeInterceptorTest extends ControllerTest {
 
