@@ -26,19 +26,14 @@ public class AdminTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> addTime(@RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.addReservationTime(
-                request);
+        ReservationTimeResponse response = reservationTimeService.addReservationTime(request);
         URI location = URI.create("/times/" + response.id());
-
-        return ResponseEntity.created(location)
-                .body(response);
+        return ResponseEntity.created(location).body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTime(@PathVariable("id") Long id) {
         reservationTimeService.deleteReservationTimeById(id);
-
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

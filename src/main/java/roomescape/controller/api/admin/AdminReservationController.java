@@ -31,17 +31,14 @@ public class AdminReservationController {
     @PostMapping
     private ResponseEntity<ReservationResponse> addAdminReservation(@RequestBody AdminReservationRequest request) {
         ReservationResponse reservationResponse = reservationService.addAdminReservation(request);
-
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
-                .body(reservationResponse);
+        URI uri = URI.create("/reservations/" + reservationResponse.id());
+        return ResponseEntity.created(uri).body(reservationResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations() {
         List<ReservationResponse> responses = reservationService.getAllReservations();
-
-        return ResponseEntity.ok()
-                .body(responses);
+        return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/filter")
@@ -51,9 +48,8 @@ public class AdminReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<ReservationResponse> response = reservationService.getFilteredReservations(themeId, memberId, dateFrom,
-                dateTo);
-
+        List<ReservationResponse> response = reservationService
+                .getFilteredReservations(themeId, memberId, dateFrom, dateTo);
         return ResponseEntity.ok(response);
     }
 
@@ -61,8 +57,6 @@ public class AdminReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteById(id);
-
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

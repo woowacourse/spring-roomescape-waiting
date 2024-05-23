@@ -23,16 +23,12 @@ public class ThemeController {
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getAllThemes() {
         List<ThemeResponse> responses = themeService.getAllThemes();
-
-        return ResponseEntity.ok()
-                .body(responses);
+        return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/rankings")
     public ResponseEntity<List<ThemeResponse>> getMostReservedThemes() {
         List<ThemeResponse> responses = themeService.getMostReservedThemes();
-
-        return ResponseEntity.ok()
-                .body(responses);
+        return ResponseEntity.ok().body(responses);
     }
 }

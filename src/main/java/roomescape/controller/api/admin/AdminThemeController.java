@@ -28,16 +28,12 @@ public class AdminThemeController {
     public ResponseEntity<ThemeResponse> addTheme(@RequestBody ThemeRequest request) {
         ThemeResponse response = themeService.addTheme(request);
         URI location = URI.create("/themes/" + response.id());
-
-        return ResponseEntity.created(location)
-                .body(response);
+        return ResponseEntity.created(location).body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
         themeService.deleteThemeById(id);
-
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseEntity.noContent().build();
     }
 }

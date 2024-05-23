@@ -26,19 +26,16 @@ public class TimeController {
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getTimes() {
         List<ReservationTimeResponse> responses = reservationTimeService.getAllReservationTimes();
-
-        return ResponseEntity.ok()
-                .body(responses);
+        return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/available") // todo: rest 한 api 이름으로 바꾸기
     public ResponseEntity<List<AvailableReservationTimeResponse>> getReservationTimeBookedStatus(
             @RequestParam LocalDate date,
-            @RequestParam Long themeId) {
-        List<AvailableReservationTimeResponse> responses = reservationTimeService.getReservationTimeBookedStatus(
-                date, themeId);
-
-        return ResponseEntity.ok()
-                .body(responses);
+            @RequestParam Long themeId
+    ) {
+        List<AvailableReservationTimeResponse> responses = reservationTimeService
+                .getReservationTimeBookedStatus(date, themeId);
+        return ResponseEntity.ok().body(responses);
     }
 }

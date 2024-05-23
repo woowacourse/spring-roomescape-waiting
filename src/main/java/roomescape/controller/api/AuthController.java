@@ -36,8 +36,7 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<MemberPreviewResponse> loginCheck(Member member) {
         MemberPreviewResponse name = MemberPreviewResponse.from(member);
-        return ResponseEntity.ok()
-                .body(name);
+        return ResponseEntity.ok().body(name);
     }
 
     @PostMapping("/logout")

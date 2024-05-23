@@ -38,11 +38,10 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody MemberReservationRequest request,
-            Member member) {
+            Member member
+    ) {
         ReservationResponse response = reservationService.addMemberReservation(request, member);
         URI location = URI.create("/reservations/" + response.id());
-
-        return ResponseEntity.created(location)
-                .body(response);
+        return ResponseEntity.created(location).body(response);
     }
 }
