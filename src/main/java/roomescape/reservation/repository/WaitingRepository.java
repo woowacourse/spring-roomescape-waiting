@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.member.dto.response.FindWaitingResponse;
+import roomescape.member.dto.response.FindWaitingRankResponse;
 import roomescape.reservation.model.Waiting;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
@@ -14,7 +14,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                                                                   Long memberId);
 
     @Query("""
-                SELECT new roomescape.member.dto.response.FindWaitingResponse(
+                SELECT new roomescape.member.dto.response.FindWaitingRankResponse(
                     myWaiting.id AS waitingId,
                     myWaiting.theme.name AS theme,
                     myWaiting.date AS date,
@@ -26,5 +26,5 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 WHERE myWaiting.member.id = :memberId AND otherWaiting.id <= myWaiting.id
                 GROUP BY otherWaiting.date, otherWaiting.reservationTime, otherWaiting.theme
             """)
-    List<FindWaitingResponse> findAllWaitingResponses(Long memberId);
+    List<FindWaitingRankResponse> findAllWaitingResponses(Long memberId);
 }

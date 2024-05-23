@@ -1,7 +1,6 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
-import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.Waiting;
 
 public record FindWaitingResponse(
@@ -9,15 +8,17 @@ public record FindWaitingResponse(
         FindMemberOfWaitingResponse member,
         LocalDate date,
         FindTimeOfWaitingResponse time,
-        FindThemeOfWaitingResponse theme) {
+        FindThemeOfWaitingResponse theme,
+        boolean isFirst) {
 
-    public static FindWaitingResponse from(final Waiting waiting) {
+    public static FindWaitingResponse from(final Waiting waiting, boolean isFirst) {
         return new FindWaitingResponse(
                 waiting.getId(),
                 FindMemberOfWaitingResponse.from(waiting.getMember()),
                 waiting.getDate(),
                 FindTimeOfWaitingResponse.from(waiting.getReservationTime()),
-                FindThemeOfWaitingResponse.from(waiting.getTheme())
+                FindThemeOfWaitingResponse.from(waiting.getTheme()),
+                isFirst
         );
     }
 }

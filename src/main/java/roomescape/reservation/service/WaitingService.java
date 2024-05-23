@@ -3,7 +3,9 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
@@ -12,6 +14,7 @@ import roomescape.reservation.dto.request.CreateWaitingRequest;
 import roomescape.reservation.dto.response.CreateWaitingResponse;
 import roomescape.reservation.dto.response.FindWaitingResponse;
 import roomescape.reservation.model.ReservationTime;
+import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
 import roomescape.reservation.model.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
@@ -109,14 +112,20 @@ public class WaitingService {
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
     }
 
-
     public List<FindWaitingResponse> getWaitings() {
-        return mapToFindWaitingResponse(waitingRepository.findAll());
-    }
+        Map<Slot, List<Waiting>> waitingsGroupBySlot = waitingRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Waiting::getSlot));
 
-    private List<FindWaitingResponse> mapToFindWaitingResponse(final List<Waiting> waitings) {
-        return waitings.stream()
-                .map(FindWaitingResponse::from)
+        return waitingsGroupBySlot.values().stream()
+                .map(waitingList -> {
+                    Long minId = waitingList.stream()
+                            .mapToLong(Waiting::getId)
+                            .min()
+                            .orElseThrow(() -> new IllegalStateException("대기 식별자가 존재하지 않습니다."));
+                    return waitingList.stream()
+                            .map(waiting -> FindWaitingResponse.from(waiting, minId.equals(waiting.getId())))
+                            .toList();
+                }).flatMap(List::stream)
                 .toList();
     }
 

@@ -123,6 +123,10 @@ public class Waiting {
         return this.reservationTime.isSameTo(reservationTime.getId());
     }
 
+    public Slot getSlot() {
+        return new Slot(date, reservationTime, theme);
+    }
+
     public Long getId() {
         return id;
     }

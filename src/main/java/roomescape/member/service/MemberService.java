@@ -4,11 +4,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.member.dto.response.FindReservationResponse;
-import roomescape.member.dto.response.FindWaitingResponse;
+import roomescape.member.dto.response.FindWaitingRankResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.FindMembersResponse;
 import roomescape.reservation.model.Reservation;
-import roomescape.reservation.model.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
@@ -40,11 +39,7 @@ public class MemberService {
                 .toList();
     }
 
-    public List<FindWaitingResponse> getWaitingsByMember(AuthInfo authInfo) {
+    public List<FindWaitingRankResponse> getWaitingsByMember(AuthInfo authInfo) {
         return waitingRepository.findAllWaitingResponses(authInfo.getMemberId());
-//        List<Waiting> waitings = waitingRepository.findAllByMemberId(authInfo.getMemberId());
-//        return waitings.stream()
-//                .map(FindWaitingResponse::from)
-//                .toList();
     }
 }
