@@ -45,8 +45,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByThemeId(Long id);
 
-    boolean existsByMemberId(Long memberId);
-
     @EntityGraph(attributePaths = {"member", "time", "theme"})
     List<Reservation> findAllByMemberId(Long id);
 

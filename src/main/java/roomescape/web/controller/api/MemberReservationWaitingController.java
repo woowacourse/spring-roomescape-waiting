@@ -20,11 +20,11 @@ import roomescape.web.controller.response.ReservationWaitingWebResponse;
 
 @RestController
 @RequestMapping("/reservations/waiting")
-public class ReservationWaitingController {
+public class MemberReservationWaitingController {
 
     private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationWaitingController(ReservationWaitingService reservationWaitingService) {
+    public MemberReservationWaitingController(ReservationWaitingService reservationWaitingService) {
         this.reservationWaitingService = reservationWaitingService;
     }
 

@@ -15,9 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.web.controller.request.ReservationWaitingWebRequest;
 
-class ReservationWaitingControllerTest extends ControllerTest {
-
-
+class MemberReservationWaitingControllerTest extends ControllerTest {
+    
     @BeforeEach
     void setInitialData() {
         reservationTimeRepository.save(VALID_RESERVATION_TIME);
