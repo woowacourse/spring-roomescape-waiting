@@ -47,22 +47,20 @@ public class Theme {
         return thumbnail;
     }
 
-    // TODO: 가독성 개선
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Theme that = (Theme) o;
-        return Objects.equals(id, that.id);
+        return object instanceof Theme theme
+                && Objects.equals(id, theme.id)
+                && Objects.equals(name, theme.name)
+                && Objects.equals(description, theme.description)
+                && Objects.equals(thumbnail, theme.thumbnail);
     }
 
-    // TODO: 다른 필드도 포함
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, name, description, thumbnail);
     }
 }

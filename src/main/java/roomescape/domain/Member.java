@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -61,5 +62,21 @@ public class Member {
         return reservations;
     }
 
-    // TODO: equals() & hashCode() 재정의
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        return object instanceof Member member
+                && Objects.equals(id, member.id)
+                && Objects.equals(name, member.name)
+                && Objects.equals(email, member.email)
+                && Objects.equals(password, member.password)
+                && role == member.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email, password, role);
+    }
 }

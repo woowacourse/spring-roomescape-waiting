@@ -62,22 +62,21 @@ public class Reservation {
         return theme;
     }
 
-    // TODO: 가독성 개선
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        return object instanceof Reservation reservation
+                && Objects.equals(id, reservation.id)
+                && Objects.equals(member, reservation.member)
+                && Objects.equals(date, reservation.date)
+                && Objects.equals(reservationTime, reservation.reservationTime)
+                && Objects.equals(theme, reservation.theme);
     }
 
-    // TODO: 다른 필드도 포함
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, member, date, reservationTime, theme);
     }
 }
