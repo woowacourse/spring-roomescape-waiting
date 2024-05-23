@@ -25,6 +25,9 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
@@ -47,6 +50,9 @@ class AdminReservationControllerTest extends BaseControllerTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @Test
     @DisplayName("조건에 맞는 예약들(예약 대기 제외)을 조회하고 성공할 경우 200을 반환한다.")
     void getReservationsByConditions() {
@@ -57,8 +63,8 @@ class AdminReservationControllerTest extends BaseControllerTest {
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "유저", Role.USER));
         Member member1 = memberRepository.save(new Member("ex2@gmail.com", "password", "유저2", Role.USER));
-        reservationRepository.save(new Reservation(date, member, reservationTime, theme, ReservationStatus.RESERVED));
-        reservationRepository.save(new Reservation(date, member1, reservationTime, theme, ReservationStatus.WAITING));
+        reservationRepository.save(new Reservation(new ReservationDetail(date, reservationTime, theme), member));
+        waitingRepository.save(new Waiting(new ReservationDetail(date, reservationTime, theme), member1));
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
@@ -161,11 +167,12 @@ class AdminReservationControllerTest extends BaseControllerTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "유저", Role.USER));
-        reservationRepository.save(new Reservation(date, member, reservationTime, theme, ReservationStatus.RESERVED));
+        ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
+        Reservation savedReservation = reservationRepository.save(new Reservation(detail, member));
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().delete("/admin/reservations/1")
+                .when().delete("/admin/reservations/" + savedReservation.getId())
                 .then().log().all()
                 .extract();
 

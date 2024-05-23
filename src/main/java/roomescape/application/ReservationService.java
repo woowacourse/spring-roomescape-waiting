@@ -106,7 +106,7 @@ public class ReservationService {
         boolean waitingExists = waitingRepository.existsByDetail(reservation.getDetail());
 
         if (waitingExists) {
-            throw new BadRequestException("이미 대기 중인 예약이 존재합니다.");
+            throw new BadRequestException("예약 대기가 존재하여 예약을 할 수 없습니다.");
         }
     }
 }

@@ -1,6 +1,5 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservation.detail;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -12,24 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.exception.DomainNotFoundException;
-import roomescape.domain.reservation.detail.Theme;
-import roomescape.domain.reservation.detail.ThemeRepository;
 
 @DataJpaTest
 class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Test
-    @DisplayName("이름으로 테마가 존재하는지 확인한다.")
-    void existsByName() {
-        themeRepository.save(new Theme("테마1", "테마1 설명", "https://example1.com"));
-
-        boolean exists = themeRepository.existsByName("테마1");
-
-        assertThat(exists).isTrue();
-    }
 
     @Test
     @Sql("/popular-themes.sql")

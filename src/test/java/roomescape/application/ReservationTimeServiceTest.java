@@ -2,6 +2,8 @@ package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.Fixture.MEMBER_1;
+import static roomescape.fixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,8 +13,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.request.ReservationTimeRequest;
+import roomescape.application.dto.response.AvailableReservationTimeResponse;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.member.Member;
@@ -20,11 +22,11 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
 import roomescape.domain.reservation.detail.ThemeRepository;
-import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
 import roomescape.exception.BadRequestException;
 
 class ReservationTimeServiceTest extends BaseServiceTest {
@@ -72,33 +74,37 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    @Sql("/available-reservation-times.sql")
     @DisplayName("이용 가능한 시간들을 조회한다.")
     void getAvailableReservationTimes() {
-        LocalDate date = LocalDate.of(2024, 4, 9);
-        Long themeId = 1L;
+        // given
+        LocalDateTime now = LocalDateTime.of(2024, 4, 8, 10, 0);
+        LocalDate date = LocalDate.of(2024, 4, 10);
+        Theme theme = themeRepository.save(THEME_1);
 
-        List<AvailableReservationTimeDto> response = reservationTimeRepository
-                .findAvailableReservationTimes(date, themeId);
+        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
+        ReservationDetail detail = new ReservationDetail(date, time1, theme);
+
+        Member member = memberRepository.save(MEMBER_1);
+
+        reservationRepository.save(Reservation.create(now, detail, member));
+
+        // when
+        List<AvailableReservationTimeResponse> responses = reservationTimeService
+                .getAvailableReservationTimes(date, theme.getId());
+
+        // then
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response).hasSize(4);
+            softly.assertThat(responses).hasSize(2);
 
-            softly.assertThat(response.get(0).id()).isEqualTo(1L);
-            softly.assertThat(response.get(0).startAt()).isEqualTo("09:00");
-            softly.assertThat(response.get(0).alreadyBooked()).isFalse();
+            softly.assertThat(responses.get(0).timeId()).isEqualTo(time1.getId());
+            softly.assertThat(responses.get(0).startAt()).isEqualTo("09:00");
+            softly.assertThat(responses.get(0).alreadyBooked()).isTrue();
 
-            softly.assertThat(response.get(1).id()).isEqualTo(2L);
-            softly.assertThat(response.get(1).startAt()).isEqualTo("12:00");
-            softly.assertThat(response.get(1).alreadyBooked()).isTrue();
-
-            softly.assertThat(response.get(2).id()).isEqualTo(3L);
-            softly.assertThat(response.get(2).startAt()).isEqualTo("17:00");
-            softly.assertThat(response.get(2).alreadyBooked()).isFalse();
-
-            softly.assertThat(response.get(3).id()).isEqualTo(4L);
-            softly.assertThat(response.get(3).startAt()).isEqualTo("21:00");
-            softly.assertThat(response.get(3).alreadyBooked()).isTrue();
+            softly.assertThat(responses.get(1).timeId()).isEqualTo(time2.getId());
+            softly.assertThat(responses.get(1).startAt()).isEqualTo("10:00");
+            softly.assertThat(responses.get(1).alreadyBooked()).isFalse();
         });
     }
 
@@ -127,14 +133,11 @@ class ReservationTimeServiceTest extends BaseServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
 
-        reservationRepository.save(Reservation.create(
-                LocalDateTime.of(2024, 4, 6, 10, 30),
-                LocalDate.of(2024, 4, 7),
-                member,
-                reservationTime,
-                theme,
-                ReservationStatus.RESERVED
-        ));
+        LocalDateTime now = LocalDateTime.of(2024, 4, 6, 10, 30);
+        LocalDate reservationDate = LocalDate.of(2024, 4, 8);
+        ReservationDetail detail = new ReservationDetail(reservationDate, reservationTime, theme);
+
+        reservationRepository.save(Reservation.create(now, detail, member));
 
         Long reservationTimeId = reservationTime.getId();
 

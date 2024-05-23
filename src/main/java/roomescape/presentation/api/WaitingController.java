@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.WaitingService;
-import roomescape.application.dto.request.ReservationWaitingRequest;
+import roomescape.application.dto.request.WaitingRequest;
 import roomescape.application.dto.response.WaitingResponse;
 import roomescape.presentation.Auth;
 import roomescape.presentation.dto.Accessor;
-import roomescape.presentation.dto.request.ReservationWaitingWebRequest;
+import roomescape.presentation.dto.request.WaitingWebRequest;
 
 @RestController
 @RequestMapping("/waitings")
@@ -27,19 +27,19 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<WaitingResponse> addReservationWaiting(
-            @RequestBody @Valid ReservationWaitingWebRequest request,
+    public ResponseEntity<WaitingResponse> addWaiting(
+            @RequestBody @Valid WaitingWebRequest request,
             @Auth Accessor accessor
     ) {
-        ReservationWaitingRequest reservationWaitingRequest = request.toReservationWaitingRequest(accessor.id());
-        WaitingResponse waitingResponse = waitingService.addWaiting(reservationWaitingRequest);
+        WaitingRequest waitingRequest = request.toWaitingRequest(accessor.id());
+        WaitingResponse waitingResponse = waitingService.addWaiting(waitingRequest);
 
         return ResponseEntity.created(URI.create("/waitings/" + waitingResponse.id()))
                 .body(waitingResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationWaiting(
+    public ResponseEntity<Void> deleteWaiting(
             @PathVariable Long id,
             @Auth Accessor accessor
     ) {

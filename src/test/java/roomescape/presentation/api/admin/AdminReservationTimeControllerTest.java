@@ -22,6 +22,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
@@ -144,9 +145,9 @@ class AdminReservationTimeControllerTest extends BaseControllerTest {
             Member member = memberRepository.save(new Member("member@gmail.com", "password", "member", Role.USER));
             ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
             Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
-            reservationRepository.save(
-                    new Reservation(LocalDate.of(2024, 4, 9), member, reservationTime, theme,
-                            ReservationStatus.RESERVED));
+            LocalDate date = LocalDate.of(2024, 4, 9);
+            ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
+            reservationRepository.save(new Reservation(detail, member));
 
             ExtractableResponse<Response> response = RestAssured.given().log().all()
                     .cookie("token", token)

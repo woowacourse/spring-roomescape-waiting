@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
@@ -9,6 +8,11 @@ import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.dto.WaitingWithRankDto;
 
 public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
+
+    boolean existsByDetail(ReservationDetail detail);
+
+    boolean existsByDetailAndMemberId(ReservationDetail detail, long memberId);
+
     @Query("""
             SELECT
                 new roomescape.domain.reservation.dto.WaitingWithRankDto(
@@ -23,10 +27,6 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
             GROUP BY w.id
             """)
     List<WaitingWithRankDto> findWaitingsWithRankByMemberId(Long memberId);
-
-    boolean existsByDetail(ReservationDetail detail);
-
-    boolean existsByDetailAndMemberId(ReservationDetail detail, long memberId);
 
     default Waiting getById(Long id) {
         return findById(id)

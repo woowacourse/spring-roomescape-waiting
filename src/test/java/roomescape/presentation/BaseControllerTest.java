@@ -7,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.support.config.TestConfig;
 import roomescape.application.dto.request.LoginRequest;
+import roomescape.support.config.TestConfig;
 import roomescape.support.extension.DatabaseClearExtension;
 
 @SpringBootTest(

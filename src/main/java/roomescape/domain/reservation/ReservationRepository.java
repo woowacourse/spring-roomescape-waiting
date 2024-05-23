@@ -26,8 +26,8 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                 JOIN FETCH r.detail
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
                 AND (:themeId IS NULL OR r.detail.theme.id = :themeId)
-                AND (:dateFrom IS NULL OR r.detail.time.id >= :dateFrom)
-                AND (:dateTo IS NULL OR r.detail.time.id <= :dateTo)
+                AND (:dateFrom IS NULL OR r.detail.date >= :dateFrom)
+                AND (:dateTo IS NULL OR r.detail.date <= :dateTo)
             """)
     List<Reservation> findAllByConditions(
             @Param("memberId") Long memberId,

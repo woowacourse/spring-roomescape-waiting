@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.exception.DomainValidationException;
 
 @Embeddable
 public class ReservationDetail {
@@ -36,22 +37,22 @@ public class ReservationDetail {
 
     private void validate(LocalDate date, ReservationTime time, Theme theme) {
         if (date == null) {
-            throw new IllegalArgumentException("예약 날짜는 필수 값입니다.");
+            throw new DomainValidationException("예약 날짜는 필수 값입니다.");
         }
 
         if (time == null) {
-            throw new IllegalArgumentException("예약 시간은 필수 값입니다.");
+            throw new DomainValidationException("예약 시간은 필수 값입니다.");
         }
 
         if (theme == null) {
-            throw new IllegalArgumentException("테마는 필수 값입니다.");
+            throw new DomainValidationException("테마는 필수 값입니다.");
         }
     }
 
-    public boolean isBefore(LocalDateTime now) {
+    public boolean isBefore(LocalDateTime currentDateTime) {
         LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
 
-        return dateTime.isBefore(now);
+        return dateTime.isBefore(currentDateTime);
     }
 
     @Override

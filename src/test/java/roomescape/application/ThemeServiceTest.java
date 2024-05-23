@@ -20,6 +20,7 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
@@ -144,20 +145,16 @@ class ThemeServiceTest extends BaseServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 30)));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
 
-        reservationRepository.save(Reservation.create(
-                LocalDateTime.of(2024, 4, 6, 10, 30),
-                LocalDate.of(2024, 4, 7),
-                member,
-                reservationTime,
-                theme,
-                ReservationStatus.RESERVED
-        ));
+        LocalDateTime now = LocalDateTime.of(2024, 4, 6, 10, 30);
+        LocalDate reservationDate = LocalDate.of(2024, 4, 8);
+        ReservationDetail detail = new ReservationDetail(reservationDate, reservationTime, theme);
+
+        reservationRepository.save(Reservation.create(now, detail, member));
 
         Long themeId = theme.getId();
 
         assertThatThrownBy(() -> themeService.deleteThemeById(themeId))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("해당 테마를 사용하는 예약이 존재합니다.");
-
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.application.dto.response.MemberResponse;
 import roomescape.application.dto.response.MyReservationResponse;
 import roomescape.application.dto.response.ReservationResponse;
+import roomescape.application.dto.response.ReservationStatus;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.member.Role;
@@ -48,21 +49,24 @@ class ReservationControllerTest extends BaseControllerTest {
                 .then().log().all()
                 .extract();
 
-        List<MyReservationResponse> reservationResponses = response.jsonPath()
+        List<MyReservationResponse> responses = response.jsonPath()
                 .getList(".", MyReservationResponse.class);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(reservationResponses).hasSize(3);
+            softly.assertThat(responses).hasSize(3);
 
-            softly.assertThat(reservationResponses.get(0).id()).isEqualTo(1);
-            softly.assertThat(reservationResponses.get(0).rank()).isEqualTo(0);
+            softly.assertThat(responses.get(0).id()).isEqualTo(1);
+            softly.assertThat(responses.get(0).rank()).isEqualTo(0);
+            softly.assertThat(responses.get(0).status()).isEqualTo(ReservationStatus.RESERVED);
 
-            softly.assertThat(reservationResponses.get(1).id()).isEqualTo(7);
-            softly.assertThat(reservationResponses.get(1).rank()).isEqualTo(1);
+            softly.assertThat(responses.get(1).id()).isEqualTo(5);
+            softly.assertThat(responses.get(1).rank()).isEqualTo(1);
+            softly.assertThat(responses.get(1).status()).isEqualTo(ReservationStatus.WAITING);
 
-            softly.assertThat(reservationResponses.get(2).id()).isEqualTo(8);
-            softly.assertThat(reservationResponses.get(2).rank()).isEqualTo(0);
+            softly.assertThat(responses.get(2).id()).isEqualTo(3);
+            softly.assertThat(responses.get(2).rank()).isEqualTo(0);
+            softly.assertThat(responses.get(2).status()).isEqualTo(ReservationStatus.RESERVED);
         });
     }
 

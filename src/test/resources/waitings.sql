@@ -19,17 +19,16 @@ VALUES (1, '09:00'),
        (3, '17:00'),
        (4, '21:00');
 
-INSERT INTO reservation (id, date, member_id, time_id, theme_id, status)
-VALUES (1, '2024-04-5', 1, 1, 1, 'RESERVED'),
-       (2, '2024-04-5', 2, 1, 1, 'WAITING'),
-       (3, '2024-04-5', 3, 1, 1, 'WAITING'),
-       (4, '2024-04-5', 4, 1, 1, 'WAITING'),
-       (5, '2024-04-5', 5, 1, 1, 'WAITING'),
+INSERT INTO reservation (id, date, member_id, time_id, theme_id)
+VALUES (1, '2024-04-5', 1, 1, 1),
+       (2, '2024-04-6', 4, 1, 1),
+       (3, '2024-04-7', 1, 1, 1);
 
-       (6, '2024-04-6', 4, 1, 1, 'RESERVED'),
-       (7, '2024-04-6', 1, 1, 1, 'WAITING'),
-
-       (8, '2024-04-7', 1, 1, 1, 'RESERVED'),
-       (9, '2024-04-7', 4, 1, 1, 'WAITING');
-
+INSERT INTO waiting (id, date, member_id, time_id, theme_id)
+VALUES (1, '2024-04-5', 2, 1, 1),
+       (2, '2024-04-5', 3, 1, 1),
+       (3, '2024-04-5', 4, 1, 1),
+       (4, '2024-04-5', 5, 1, 1),
+       (5, '2024-04-6', 1, 1, 1),
+       (6, '2024-04-7', 4, 1, 1);
 

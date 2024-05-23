@@ -49,6 +49,7 @@ public class Reservation {
             ReservationDetail detail,
             Member member
     ) {
+        System.out.println(detail.isBefore(currentDateTime));
         if (detail.isBefore(currentDateTime)) {
             String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)",
                     detail.getDate(), detail.getTime().getStartAt());

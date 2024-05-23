@@ -21,6 +21,9 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.detail.ReservationTime;
 import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.detail.Theme;
@@ -43,6 +46,9 @@ class WaitingControllerTest extends BaseControllerTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @Test
     @DisplayName("예약 대기를 추가하고 성공할 경우 201을 반환한다.")
     void addReservationWaiting() {
@@ -51,14 +57,10 @@ class WaitingControllerTest extends BaseControllerTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
         Member member = memberRepository.save(new Member("ex@gmail.com", "password", "ex", Role.USER));
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
 
-        reservationRepository.save(new Reservation(
-                LocalDate.of(2024, 4, 9),
-                member,
-                reservationTime,
-                theme,
-                ReservationStatus.RESERVED
-        ));
+        reservationRepository.save(new Reservation(detail, member));
 
         ReservationWebRequest request = new ReservationWebRequest(LocalDate.of(2024, 4, 9), 1L, 1L);
 
@@ -66,7 +68,7 @@ class WaitingControllerTest extends BaseControllerTest {
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/reservations/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .extract();
 
@@ -77,7 +79,7 @@ class WaitingControllerTest extends BaseControllerTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-            softly.assertThat(response.header("Location")).isEqualTo("/reservations/2/waiting");
+            softly.assertThat(response.header("Location")).isEqualTo("/waitings/" + reservationResponse.id());
 
             softly.assertThat(reservationResponse.date()).isEqualTo(LocalDate.of(2024, 4, 9));
             softly.assertThat(reservationTimeResponse).isEqualTo(ReservationTimeResponse.from(reservationTime));
@@ -94,23 +96,20 @@ class WaitingControllerTest extends BaseControllerTest {
         Theme theme = themeRepository.save(new Theme("테마 이름", "테마 설명", "https://example.com"));
         Member member = memberRepository.getById(2L);
 
-        reservationRepository.save(new Reservation(
-                LocalDate.of(2024, 4, 9),
-                member,
-                reservationTime,
-                theme,
-                ReservationStatus.WAITING
-        ));
+        LocalDate date = LocalDate.of(2024, 4, 9);
+        ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
+
+        Waiting savedWaiting = waitingRepository.save(new Waiting(detail, member));
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .cookie("token", token)
-                .when().delete("/reservations/waiting/1")
+                .when().delete("/waitings/" + savedWaiting.getId())
                 .then().log().all()
                 .extract();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(response.statusCode()).isEqualTo(HttpStatus.NO_CONTENT.value());
-            softly.assertThat(reservationRepository.findById(1L)).isEmpty();
+            softly.assertThat(waitingRepository.findById(1L)).isEmpty();
         });
     }
 }

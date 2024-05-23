@@ -1,9 +1,7 @@
 package roomescape.domain.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,26 +14,6 @@ class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Test
-    @DisplayName("이메일로 회원을 찾는다.")
-    void findByEmail() {
-        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
-
-        Optional<Member> memberOptional = memberRepository.findByEmail("ex@gmail.com");
-
-        assertThat(memberOptional).isPresent();
-    }
-
-    @Test
-    @DisplayName("이메일로 회원이 존재하는지 확인한다.")
-    void existsByEmail() {
-        memberRepository.save(new Member("ex@gmail.com", "password", "구름", Role.USER));
-
-        boolean exists = memberRepository.existsByEmail("ex@gmail.com");
-
-        assertThat(exists).isTrue();
-    }
 
     @Test
     @DisplayName("아이디로 회원을 조회한다.")

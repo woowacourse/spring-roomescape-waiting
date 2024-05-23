@@ -18,9 +18,9 @@ import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.exception.AccessDeniedException;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ErrorResponse;
 import roomescape.exception.TokenException;
 import roomescape.exception.UnauthorizedException;
-import roomescape.exception.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {

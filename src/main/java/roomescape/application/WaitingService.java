@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.dto.request.ReservationWaitingRequest;
+import roomescape.application.dto.request.WaitingRequest;
 import roomescape.application.dto.response.ReservationResponse;
 import roomescape.application.dto.response.WaitingResponse;
 import roomescape.domain.member.Member;
@@ -51,7 +51,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public WaitingResponse addWaiting(ReservationWaitingRequest request) {
+    public WaitingResponse addWaiting(WaitingRequest request) {
         Waiting waiting = createWaiting(request.date(), request.memberId(), request.timeId(), request.themeId());
 
         validateReservationNotExists(waiting);
@@ -72,8 +72,19 @@ public class WaitingService {
     }
 
     @Transactional
-    public ReservationResponse approveWaitingToReservation(Long id) {
-        Waiting waiting = waitingRepository.getById(id);
+    public void deleteWaitingById(Long waitingId, Long memberId) {
+        Waiting waiting = waitingRepository.getById(waitingId);
+
+        if (!waiting.isOwnedBy(memberId)) {
+            throw new UnauthorizedException("자신의 예약 대기만 취소할 수 있습니다.");
+        }
+
+        waitingRepository.delete(waiting);
+    }
+
+    @Transactional
+    public ReservationResponse approveWaitingToReservation(Long waitingId) {
+        Waiting waiting = waitingRepository.getById(waitingId);
 
         validateReservationAlreadyExists(waiting);
 
@@ -87,17 +98,6 @@ public class WaitingService {
         waitingRepository.delete(waiting);
 
         return ReservationResponse.from(savedReservation);
-    }
-
-    @Transactional
-    public void deleteWaitingById(Long waitingId, Long memberId) {
-        Waiting waiting = waitingRepository.getById(waitingId);
-
-        if (!waiting.isOwnedBy(memberId)) {
-            throw new UnauthorizedException("자신의 예약 대기만 취소할 수 있습니다.");
-        }
-
-        waitingRepository.delete(waiting);
     }
 
     @Transactional
