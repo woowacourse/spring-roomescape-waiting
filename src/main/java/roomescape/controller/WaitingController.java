@@ -18,7 +18,7 @@ public class WaitingController {
     }
 
     @GetMapping
-    public List<ReservationResponse> findAllReservations() {
+    public List<ReservationResponse> findAll() {
         return waitingService.findAll();
     }
 
