@@ -1,8 +1,8 @@
-package roomescape.auth.service;
+package roomescape.system.auth.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.auth.dto.LoginCheckResponse;
-import roomescape.auth.dto.LoginRequest;
+import roomescape.system.auth.dto.LoginCheckResponse;
+import roomescape.system.auth.dto.LoginRequest;
 import roomescape.system.auth.jwt.JwtHandler;
 import roomescape.system.auth.jwt.dto.TokenDto;
 import roomescape.system.exception.error.ErrorType;
