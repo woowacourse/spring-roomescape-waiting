@@ -37,6 +37,11 @@ public class Waiting {
     }
 
     public Waiting(Reservation reservation, Member member) {
+        this(null, reservation, member);
+    }
+
+    public Waiting(Long id, Reservation reservation, Member member) {
+        this.id = id;
         this.reservation = reservation;
         this.member = member;
     }
