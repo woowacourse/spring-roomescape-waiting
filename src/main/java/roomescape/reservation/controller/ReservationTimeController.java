@@ -47,10 +47,10 @@ public class ReservationTimeController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<TimeResponse> save(@Valid @RequestBody TimeSaveRequest timeSaveRequest) {
-        TimeResponse timeResponse = reservationTimeService.save(timeSaveRequest);
+    public ResponseEntity<TimeResponse> save(@Valid @RequestBody TimeSaveRequest saveRequest) {
+        TimeResponse response = reservationTimeService.save(saveRequest);
 
-        return ResponseEntity.created(URI.create("/times/" + timeResponse.id())).body(timeResponse);
+        return ResponseEntity.created(URI.create("/times/" + response.id())).body(response);
     }
 
     @DeleteMapping("/times/{id}")
