@@ -1,12 +1,14 @@
 package roomescape.reservation.domain;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class PopularThemes {
+
+    private static final int FIRST_THEME_INDEX = 1;
 
     private final List<Theme> themes;
 
@@ -15,14 +17,14 @@ public class PopularThemes {
     }
 
     public List<Theme> findPopularThemesTopOf(int count) {
-        Map<Theme, Integer> popularThemes = new HashMap<>();
-        for (Theme theme : themes) {
-            popularThemes.put(theme, popularThemes.getOrDefault(theme, 0) + 1);
-        }
+        Map<String, Long> themeNames = themes.stream()
+                .collect(Collectors.groupingBy(Theme::getName, Collectors.counting()));
 
-        return popularThemes.entrySet().stream()
+        return themeNames.entrySet().stream()
                 .sorted(Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(Entry::getKey)
+                .flatMap(entry -> themes.stream()
+                        .filter(theme -> theme.getName().equals(entry.getKey()))
+                        .limit(FIRST_THEME_INDEX))
                 .limit(count)
                 .toList();
     }
