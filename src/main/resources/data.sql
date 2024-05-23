@@ -33,11 +33,19 @@ INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values 
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-04-25', 3, 1);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-04-26', 4, 1);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-27', 5, 2);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-04-28', 1, 2);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-04-29', 2, 2);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-04-30', 3, 3);
 INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-05-01', 4, 3);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-05-02', 5, 4);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-05-03', 1, 4);
-INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-05-04', 2, 5);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-05-28', 1, 2);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-05-29', 2, 2);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-05-30', 3, 3);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 1, '2024-11-02', 5, 4);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 2, '2024-11-03', 1, 4);
+INSERT INTO reservation (member_id, date, reservation_time_id, theme_id) values ( 3, '2024-11-04', 2, 5);
 
+INSERT INTO waiting (reservation_id, member_id) VALUES (1, 1);
+INSERT INTO waiting (reservation_id, member_id) VALUES (1, 2);
+INSERT INTO waiting (reservation_id, member_id) VALUES (2, 2);
+INSERT INTO waiting (reservation_id, member_id) VALUES (3, 2);
+INSERT INTO waiting (reservation_id, member_id) VALUES (5, 2);
+INSERT INTO waiting (reservation_id, member_id) VALUES (1, 3);
+INSERT INTO waiting (reservation_id, member_id) VALUES (2, 3);
+INSERT INTO waiting (reservation_id, member_id) VALUES (3, 3);
