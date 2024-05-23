@@ -34,7 +34,9 @@ public class ReservationTimeService {
         ReservationTime reservationTime = reservationTimeRequest.toReservationTime();
 
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
-            throw new BadRequestException("해당 시간은 이미 존재합니다.");
+            String message = String.format("해당 시간의 예약 시간이 이미 존재합니다. (시작 시간: %s)", reservationTime.getStartAt());
+
+            throw new BadRequestException(message);
         }
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -62,11 +64,11 @@ public class ReservationTimeService {
     @Transactional
     public void deleteReservationTimeById(Long id) {
         if (!reservationTimeRepository.existsById(id)) {
-            throw new DomainNotFoundException("해당 id의 시간이 존재하지 않습니다.");
+            throw new DomainNotFoundException(String.format("해당 id의 예약 시간이 존재하지 않습니다. (id: %d)", id));
         }
 
         if (reservationRepository.existsByTimeId(id)) {
-            throw new BadRequestException("해당 시간을 사용하는 예약이 존재합니다.");
+            throw new BadRequestException(String.format("해당 예약 시간을 사용하는 예약이 존재합니다. (예약 시간 id: %d)", id));
         }
 
         reservationTimeRepository.deleteById(id);

@@ -3,11 +3,11 @@ package roomescape.application;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.dto.request.SignupRequest;
+import roomescape.application.dto.response.MemberResponse;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
-import roomescape.application.dto.request.SignupRequest;
-import roomescape.application.dto.response.MemberResponse;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -32,7 +32,7 @@ public class MemberService {
         );
 
         if (memberRepository.existsByEmail(member.getEmail())) {
-            throw new BadRequestException("해당 이메일은 이미 존재합니다.");
+            throw new BadRequestException(String.format("해당 이메일의 회원이 이미 존재합니다. (email: %s)", member.getEmail()));
         }
 
         Member savedMember = memberRepository.save(member);

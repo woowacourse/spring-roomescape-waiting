@@ -118,7 +118,7 @@ class ReservationTimeServiceTest extends BaseServiceTest {
     void deleteReservationTimeByIdFailWhenReservationTimeNotFound() {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(-1L))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 id의 시간이 존재하지 않습니다.");
+                .hasMessage(String.format("해당 id의 예약 시간이 존재하지 않습니다. (id: %d)", -1L));
     }
 
     @Test
@@ -141,6 +141,6 @@ class ReservationTimeServiceTest extends BaseServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(reservationTimeId))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("해당 시간을 사용하는 예약이 존재합니다.");
+                .hasMessage(String.format("해당 예약 시간을 사용하는 예약이 존재합니다. (예약 시간 id: %d)", reservationTimeId));
     }
 }

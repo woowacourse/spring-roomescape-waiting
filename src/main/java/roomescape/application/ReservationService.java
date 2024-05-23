@@ -117,7 +117,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservationById(Long id) {
         if (!reservationRepository.existsById(id)) {
-            throw new DomainNotFoundException("해당 id의 예약이 존재하지 않습니다.");
+            throw new DomainNotFoundException(String.format("해당 id의 예약이 존재하지 않습니다. (id: %d)", id));
         }
 
         reservationRepository.deleteById(id);

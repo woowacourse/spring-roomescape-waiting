@@ -33,6 +33,6 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
     default Theme getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new DomainNotFoundException("해당 id의 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(String.format("해당 id의 테마가 존재하지 않습니다. (id: %d)", id)));
     }
 }

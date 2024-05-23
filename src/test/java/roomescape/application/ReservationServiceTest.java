@@ -280,7 +280,7 @@ class ReservationServiceTest extends BaseServiceTest {
         void failWhenReservationNotExists() {
             assertThatThrownBy(() -> reservationService.deleteReservationById(-1L))
                     .isInstanceOf(DomainNotFoundException.class)
-                    .hasMessage("해당 id의 예약이 존재하지 않습니다.");
+                    .hasMessage(String.format("해당 id의 예약이 존재하지 않습니다. (id: %d)", -1L));
         }
     }
 

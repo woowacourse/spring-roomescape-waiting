@@ -86,6 +86,6 @@ class MemberRepositoryTest {
 
         assertThatThrownBy(() -> memberRepository.getByEmail("not-exists"))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 이메일의 회원이 존재하지 않습니다.");
+                .hasMessage(String.format("해당 이메일의 회원이 존재하지 않습니다. (email: %s)", "not-exists"));
     }
 }

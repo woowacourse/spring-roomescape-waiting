@@ -105,6 +105,7 @@ class ReservationTest {
 
         assertThatThrownBy(() -> Reservation.create(currentDateTime, pastDate, MEMBER, RESERVATION_TIME, THEME, STATUS))
                 .isInstanceOf(DomainValidationException.class)
-                .hasMessage("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+                .hasMessage(String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)", pastDate,
+                        RESERVATION_TIME.getStartAt()));
     }
 }

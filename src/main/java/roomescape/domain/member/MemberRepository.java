@@ -16,7 +16,9 @@ public interface MemberRepository extends ListCrudRepository<Member, Long> {
     }
 
     default Member getByEmail(String email) {
+        String message = String.format("해당 이메일의 회원이 존재하지 않습니다. (email: %s)", email);
+
         return findByEmail(email)
-                .orElseThrow(() -> new DomainNotFoundException("해당 이메일의 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(message));
     }
 }

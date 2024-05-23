@@ -85,12 +85,14 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     default Reservation getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new DomainNotFoundException("해당 id의 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(String.format("해당 id의 예약이 존재하지 않습니다. (id: %d)", id)));
     }
 
     default Reservation getByIdAndStatus(long id, ReservationStatus status) {
+        String message = String.format("해당 id와 예약 상태의 예약이 존재하지 않습니다. (id: %d, status: %s)", id, status);
+
         return findByIdAndStatus(id, status)
-                .orElseThrow(() -> new DomainNotFoundException("해당 id와 예약 상태의 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(message));
     }
 
     default boolean existsByReservation(LocalDate date, long timeId, long themeId, ReservationStatus status) {

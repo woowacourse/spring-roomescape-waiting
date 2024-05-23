@@ -29,7 +29,9 @@ public class ThemeService {
         Theme theme = themeRequest.toTheme();
 
         if (themeRepository.existsByName(theme.getName())) {
-            throw new BadRequestException("해당 이름의 테마는 이미 존재합니다.");
+            String message = String.format("해당 이름의 테마는 이미 존재합니다. (이름: %s)", theme.getName());
+
+            throw new BadRequestException(message);
         }
 
         Theme savedTheme = themeRepository.save(theme);
@@ -56,7 +58,7 @@ public class ThemeService {
     @Transactional
     public void deleteThemeById(Long id) {
         if (!themeRepository.existsById(id)) {
-            throw new DomainNotFoundException("해당 id의 테마가 존재하지 않습니다.");
+            throw new DomainNotFoundException(String.format("해당 id의 테마가 존재하지 않습니다. (id: %d)", id));
         }
 
         if (reservationRepository.existsByThemeId(id)) {

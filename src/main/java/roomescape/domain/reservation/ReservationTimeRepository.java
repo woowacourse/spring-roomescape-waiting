@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
@@ -33,6 +32,6 @@ public interface ReservationTimeRepository extends ListCrudRepository<Reservatio
 
     default ReservationTime getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new DomainNotFoundException("해당 id의 예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new DomainNotFoundException(String.format("해당 id의 예약 시간이 존재하지 않습니다. (id: %d)", id)));
     }
 }

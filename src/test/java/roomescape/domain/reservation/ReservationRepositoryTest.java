@@ -204,7 +204,7 @@ class ReservationRepositoryTest {
 
         assertThatThrownBy(() -> reservationRepository.getById(-1L))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 id의 예약이 존재하지 않습니다.");
+                .hasMessage(String.format("해당 id의 예약이 존재하지 않습니다. (id: %d)", -1L));
     }
 
     @Test
@@ -242,6 +242,7 @@ class ReservationRepositoryTest {
 
         assertThatThrownBy(() -> reservationRepository.getByIdAndStatus(-1L, ReservationStatus.RESERVED))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 id와 예약 상태의 예약이 존재하지 않습니다.");
+                .hasMessage("해당 id와 예약 상태의 예약이 존재하지 않습니다. (id: %d, status: %s)", -1L,
+                        ReservationStatus.RESERVED);
     }
 }

@@ -45,7 +45,7 @@ class MemberServiceTest extends BaseServiceTest {
 
         assertThatThrownBy(() -> memberService.createMember(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("해당 이메일은 이미 존재합니다.");
+                .hasMessage(String.format("해당 이메일의 회원이 이미 존재합니다. (email: %s)", request.email()));
     }
 
     @Test

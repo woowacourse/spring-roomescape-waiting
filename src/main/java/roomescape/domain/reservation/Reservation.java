@@ -84,7 +84,9 @@ public class Reservation {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
 
         if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new DomainValidationException("지나간 날짜/시간에 대한 예약은 불가능합니다.");
+            String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)", date, time.getStartAt());
+
+            throw new DomainValidationException(message);
         }
 
         return new Reservation(date, member, time, theme, status);

@@ -71,7 +71,7 @@ class ThemeServiceTest extends BaseServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThatThrownBy(() -> themeService.addTheme(request))
                     .isInstanceOf(BadRequestException.class)
-                    .hasMessage("해당 이름의 테마는 이미 존재합니다.");
+                    .hasMessage(String.format("해당 이름의 테마는 이미 존재합니다. (이름: %s)", name));
         });
     }
 
@@ -135,7 +135,7 @@ class ThemeServiceTest extends BaseServiceTest {
     void deleteThemeByIdFailWhenThemeNotFound() {
         assertThatThrownBy(() -> themeService.deleteThemeById(-1L))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 id의 테마가 존재하지 않습니다.");
+                .hasMessage(String.format("해당 id의 테마가 존재하지 않습니다. (id: %d)", -1L));
     }
 
     @Test

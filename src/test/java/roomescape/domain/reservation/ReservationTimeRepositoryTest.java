@@ -80,6 +80,6 @@ class ReservationTimeRepositoryTest {
     void getByIdWhenNotExist() {
         assertThatThrownBy(() -> reservationTimeRepository.getById(-1L))
                 .isInstanceOf(DomainNotFoundException.class)
-                .hasMessage("해당 id의 예약 시간이 존재하지 않습니다.");
+                .hasMessage(String.format("해당 id의 예약 시간이 존재하지 않습니다. (id: %d)", -1L));
     }
 }
