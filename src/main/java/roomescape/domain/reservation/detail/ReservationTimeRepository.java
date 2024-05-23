@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservation.detail;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,7 +22,7 @@ public interface ReservationTimeRepository extends ListCrudRepository<Reservatio
                   )
             FROM ReservationTime rt
             LEFT JOIN Reservation r
-            ON r.time.id = rt.id AND r.date = :date AND r.theme.id = :themeId
+            ON r.detail.date = :date AND r.detail.time.id = rt.id AND r.detail.theme.id = :themeId
             GROUP BY rt.id, rt.startAt
             """)
     List<AvailableReservationTimeDto> findAvailableReservationTimes(

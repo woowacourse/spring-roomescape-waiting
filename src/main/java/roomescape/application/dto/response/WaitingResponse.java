@@ -14,10 +14,10 @@ public record WaitingResponse(
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                waiting.getDate(),
+                waiting.getDetail().getDate(),
                 MemberResponse.from(waiting.getMember()),
-                ReservationTimeResponse.from(waiting.getTime()),
-                ThemeResponse.from(waiting.getTheme())
+                ReservationTimeResponse.from(waiting.getDetail().getTime()),
+                ThemeResponse.from(waiting.getDetail().getTheme())
         );
     }
 }

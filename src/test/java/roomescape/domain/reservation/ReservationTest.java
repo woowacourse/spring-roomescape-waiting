@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.Theme;
 
 class ReservationTest {
 

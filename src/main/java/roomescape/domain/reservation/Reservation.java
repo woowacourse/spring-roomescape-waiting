@@ -1,6 +1,6 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,11 +8,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.detail.ReservationDetail;
 
 @Entity
 public class Reservation {
@@ -21,87 +21,51 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Embedded
+    private ReservationDetail detail;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private ReservationTime time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private Theme theme;
 
     protected Reservation() {
     }
 
-    public Reservation(
-            LocalDate date,
-            Member member,
-            ReservationTime time,
-            Theme theme
-    ) {
-        this(null, date, member, time, theme);
+    public Reservation(ReservationDetail detail, Member member) {
+        this(null, detail, member);
     }
 
-    public Reservation(
-            Long id,
-            LocalDate date,
-            Member member,
-            ReservationTime time,
-            Theme theme
-    ) {
-        validate(date, member, time, theme);
+    public Reservation(Long id, ReservationDetail detail, Member member) {
+        validate(detail, member);
 
         this.id = id;
-        this.date = date;
+        this.detail = detail;
         this.member = member;
-        this.time = time;
-        this.theme = theme;
     }
 
     public static Reservation create(
             LocalDateTime currentDateTime,
-            LocalDate date,
-            Member member,
-            ReservationTime time,
-            Theme theme
+            ReservationDetail detail,
+            Member member
     ) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        if (reservationDateTime.isBefore(currentDateTime)) {
-            String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)", date, time.getStartAt());
+        if (detail.isBefore(currentDateTime)) {
+            String message = String.format("지나간 날짜/시간에 대한 예약은 불가능합니다. (예약 날짜: %s, 예약 시간: %s)",
+                    detail.getDate(), detail.getTime().getStartAt());
 
             throw new DomainValidationException(message);
         }
 
-        return new Reservation(date, member, time, theme);
+        return new Reservation(detail, member);
     }
 
-    private void validate(
-            LocalDate date,
-            Member member,
-            ReservationTime time,
-            Theme theme
-    ) {
-        if (date == null) {
-            throw new DomainValidationException("날짜는 필수 값입니다.");
+    private void validate(ReservationDetail reservationDetail, Member member) {
+        if (reservationDetail == null) {
+            throw new DomainValidationException("예약 상세는 필수 값입니다.");
         }
 
         if (member == null) {
             throw new DomainValidationException("회원은 필수 값입니다.");
-        }
-
-        if (time == null) {
-            throw new DomainValidationException("예약 시간은 필수 값입니다.");
-        }
-
-        if (theme == null) {
-            throw new DomainValidationException("테마는 필수 값입니다.");
         }
     }
 
@@ -130,19 +94,11 @@ public class Reservation {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public ReservationDetail getDetail() {
+        return detail;
     }
 
     public Member getMember() {
         return member;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 }

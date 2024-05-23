@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.exception.DomainNotFoundException;
+import roomescape.domain.reservation.detail.ReservationDetail;
 import roomescape.domain.reservation.dto.WaitingWithRankDto;
 
 public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
@@ -16,18 +17,16 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
                 )
             FROM Waiting w
             JOIN Waiting w2
-            ON w2.theme = w.theme AND w2.time = w.time AND w2.date = w.date
-            JOIN FETCH w.member
-            JOIN FETCH w.time
-            JOIN FETCH w.theme
+            ON w2.detail = w.detail
+            JOIN FETCH w.detail
             WHERE w.member.id = :memberId AND w2.id <= w.id
             GROUP BY w.id
             """)
     List<WaitingWithRankDto> findWaitingsWithRankByMemberId(Long memberId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
+    boolean existsByDetail(ReservationDetail detail);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDetailAndMemberId(ReservationDetail detail, long memberId);
 
     default Waiting getById(Long id) {
         return findById(id)

@@ -8,8 +8,8 @@ import roomescape.application.dto.request.ThemeRequest;
 import roomescape.application.dto.response.ThemeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.detail.Theme;
+import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -61,7 +61,7 @@ public class ThemeService {
             throw new DomainNotFoundException(String.format("해당 id의 테마가 존재하지 않습니다. (id: %d)", id));
         }
 
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByDetail_TimeId(id)) {
             throw new BadRequestException("해당 테마를 사용하는 예약이 존재합니다.");
         }
 

@@ -18,9 +18,9 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getTheme().getName(),
+                reservation.getDetail().getDate(),
+                reservation.getDetail().getTime().getStartAt(),
+                reservation.getDetail().getTheme().getName(),
                 ReservationStatus.RESERVED,
                 0L
         );
@@ -32,9 +32,9 @@ public record MyReservationResponse(
 
         return new MyReservationResponse(
                 waiting.getId(),
-                waiting.getDate(),
-                waiting.getTime().getStartAt(),
-                waiting.getTheme().getName(),
+                waiting.getDetail().getDate(),
+                waiting.getDetail().getTime().getStartAt(),
+                waiting.getDetail().getTheme().getName(),
                 ReservationStatus.WAITING,
                 rank
         );

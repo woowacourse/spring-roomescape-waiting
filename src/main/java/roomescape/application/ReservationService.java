@@ -12,11 +12,12 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
 import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.ReservationTimeRepository;
+import roomescape.domain.reservation.detail.Theme;
+import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -88,15 +89,13 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         Theme theme = themeRepository.getById(themeId);
 
-        return Reservation.create(LocalDateTime.now(clock), date, member, reservationTime, theme);
+        ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
+
+        return Reservation.create(LocalDateTime.now(clock), detail, member);
     }
 
     private void validateReservationExists(Reservation reservation) {
-        boolean reservationExists = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
+        boolean reservationExists = reservationRepository.existsByDetail(reservation.getDetail());
 
         if (reservationExists) {
             throw new BadRequestException("이미 예약이 존재합니다.");
@@ -104,11 +103,7 @@ public class ReservationService {
     }
 
     private void validateWaitingExists(Reservation reservation) {
-        boolean waitingExists = waitingRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
+        boolean waitingExists = waitingRepository.existsByDetail(reservation.getDetail());
 
         if (waitingExists) {
             throw new BadRequestException("이미 대기 중인 예약이 존재합니다.");

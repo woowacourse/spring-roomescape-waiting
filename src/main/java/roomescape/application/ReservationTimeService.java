@@ -9,8 +9,8 @@ import roomescape.application.dto.response.AvailableReservationTimeResponse;
 import roomescape.application.dto.response.ReservationTimeResponse;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.ReservationTimeRepository;
 import roomescape.domain.reservation.dto.AvailableReservationTimeDto;
 import roomescape.exception.BadRequestException;
 
@@ -67,7 +67,7 @@ public class ReservationTimeService {
             throw new DomainNotFoundException(String.format("해당 id의 예약 시간이 존재하지 않습니다. (id: %d)", id));
         }
 
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByDetail_TimeId(id)) {
             throw new BadRequestException(String.format("해당 예약 시간을 사용하는 예약이 존재합니다. (예약 시간 id: %d)", id));
         }
 

@@ -14,10 +14,10 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
+                reservation.getDetail().getDate(),
                 MemberResponse.from(reservation.getMember()),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme())
+                ReservationTimeResponse.from(reservation.getDetail().getTime()),
+                ThemeResponse.from(reservation.getDetail().getTheme())
         );
     }
 }

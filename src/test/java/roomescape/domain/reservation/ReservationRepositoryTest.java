@@ -13,10 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.application.dto.response.ReservationStatus;
 import roomescape.domain.exception.DomainNotFoundException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.ReservationTimeRepository;
+import roomescape.domain.reservation.detail.Theme;
+import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.domain.reservation.dto.WaitingWithRankDto;
 
 @DataJpaTest

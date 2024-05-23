@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.exception.DomainNotFoundException;
+import roomescape.domain.reservation.detail.Theme;
+import roomescape.domain.reservation.detail.ThemeRepository;
 
 @DataJpaTest
 class ThemeRepositoryTest {

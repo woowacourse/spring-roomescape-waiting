@@ -6,29 +6,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.exception.DomainNotFoundException;
+import roomescape.domain.reservation.detail.ReservationDetail;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
     List<Reservation> findByMemberId(long memberId);
 
-    boolean existsByTimeId(long id);
+    boolean existsByDetail_TimeId(long timeId);
 
-    boolean existsByThemeId(long id);
+    boolean existsByDetail_ThemeId(long id);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDetail(ReservationDetail detail);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
+    boolean existsByDetailAndMemberId(ReservationDetail detail, long memberId);
 
     @Query("""
                 SELECT r
                 FROM Reservation r
-                JOIN FETCH r.member m
-                JOIN FETCH r.time t
-                JOIN FETCH r.theme th
+                JOIN FETCH r.detail
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
-                AND (:themeId IS NULL OR r.theme.id = :themeId)
-                AND (:dateFrom IS NULL OR r.date >= :dateFrom)
-                AND (:dateTo IS NULL OR r.date <= :dateTo)
+                AND (:themeId IS NULL OR r.detail.theme.id = :themeId)
+                AND (:dateFrom IS NULL OR r.detail.time.id >= :dateFrom)
+                AND (:dateTo IS NULL OR r.detail.time.id <= :dateTo)
             """)
     List<Reservation> findAllByConditions(
             @Param("memberId") Long memberId,

@@ -13,12 +13,13 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
-import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingRepository;
+import roomescape.domain.reservation.detail.ReservationDetail;
+import roomescape.domain.reservation.detail.ReservationTime;
+import roomescape.domain.reservation.detail.ReservationTimeRepository;
+import roomescape.domain.reservation.detail.Theme;
+import roomescape.domain.reservation.detail.ThemeRepository;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.UnauthorizedException;
 
@@ -78,10 +79,8 @@ public class WaitingService {
 
         Reservation reservation = Reservation.create(
                 LocalDateTime.now(clock),
-                waiting.getDate(),
-                waiting.getMember(),
-                waiting.getTime(),
-                waiting.getTheme()
+                waiting.getDetail(),
+                waiting.getMember()
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -113,15 +112,13 @@ public class WaitingService {
         ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         Theme theme = themeRepository.getById(themeId);
 
-        return Waiting.create(LocalDateTime.now(clock), date, member, reservationTime, theme);
+        ReservationDetail detail = new ReservationDetail(date, reservationTime, theme);
+
+        return Waiting.create(LocalDateTime.now(clock), detail, member);
     }
 
     private void validateReservationNotExists(Waiting waiting) {
-        boolean reservationNotExists = !reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
-        );
+        boolean reservationNotExists = !reservationRepository.existsByDetail(waiting.getDetail());
 
         if (reservationNotExists) {
             throw new BadRequestException("예약이 존재하지 않아 예약 대기를 할 수 없습니다.");
@@ -129,11 +126,7 @@ public class WaitingService {
     }
 
     private void validateReservationAlreadyExists(Waiting waiting) {
-        boolean reservationExists = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
-        );
+        boolean reservationExists = reservationRepository.existsByDetail(waiting.getDetail());
 
         if (reservationExists) {
             throw new BadRequestException("이미 예약이 존재합니다.");
@@ -141,10 +134,8 @@ public class WaitingService {
     }
 
     private void validateCurrentMemberAlreadyReserved(Waiting waiting) {
-        boolean currentMemberAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId(),
+        boolean currentMemberAlreadyReserved = reservationRepository.existsByDetailAndMemberId(
+                waiting.getDetail(),
                 waiting.getMember().getId()
         );
 
@@ -154,10 +145,8 @@ public class WaitingService {
     }
 
     private void validateCurrentMemberAlreadyWaiting(Waiting waiting) {
-        boolean currentMemberAlreadyWaiting = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId(),
+        boolean currentMemberAlreadyWaiting = waitingRepository.existsByDetailAndMemberId(
+                waiting.getDetail(),
                 waiting.getMember().getId()
         );
 
