@@ -113,7 +113,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
+                            .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(204);
                 }),
@@ -125,6 +125,72 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                             .when().post("/reservations")
                             .then().log().all()
                             .assertThat().statusCode(201).body("status", is("예약"));
+                })
+        );
+    }
+
+    @DisplayName("어드민이 예약을 취소한다.")
+    @TestFactory
+    Stream<DynamicTest> deleteReservationByAdmin() {
+        return Stream.of(
+                DynamicTest.dynamicTest("예약을 저장하고, 식별자를 가져온다.", () -> {
+                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
+                            .cookie("token", guest1Token)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().extract().body().jsonPath().get("id");
+                }),
+                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().delete("/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(204);
+                }),
+                DynamicTest.dynamicTest("남은 예약 개수는 총 0개이다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().get("/reservations")
+                            .then().log().all()
+                            .assertThat().body("size()", is(0));
+                })
+        );
+    }
+
+    @DisplayName("어드민은 이미 일정이 지난 예약을 삭제할 수 없다.")
+    @TestFactory
+    @Sql(value = {"/truncate-with-admin-and-guest.sql", "/insert-past-reservation.sql"})
+    Stream<DynamicTest> cannotDeletePastReservation() {
+        return Stream.of(
+                DynamicTest.dynamicTest("관리자가 일정이 지난 예약을 삭제하려고 하면 예외가 발생한다.", () -> {
+                    long reservationId = 1;
+                    RestAssured.given().log().all()
+                            .cookie("token", adminToken)
+                            .when().delete("/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(400).body("message", is("이미 지난 예약은 삭제할 수 없습니다."));
+                })
+        );
+    }
+
+    @DisplayName("사용자는 예약을 취소할 수 없다.")
+    @TestFactory
+    Stream<DynamicTest> cannotDeleteReservationByGuest() {
+        return Stream.of(
+                DynamicTest.dynamicTest("예약을 저장하고, 식별자를 가져온다.", () -> {
+                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
+                            .cookie("token", guest1Token)
+                            .body(new ReservationRequest(date, timeId, themeId))
+                            .when().post("/reservations")
+                            .then().extract().body().jsonPath().get("id");
+                }),
+                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
+                    RestAssured.given().log().all()
+                            .cookie("token", guest1Token)
+                            .when().delete("/reservations/" + reservationId)
+                            .then().log().all()
+                            .assertThat().statusCode(403)
+                            .body("message", is("예약을 삭제할 권한이 없습니다."));
                 })
         );
     }
@@ -153,7 +219,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
+                            .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(204);
                 }),

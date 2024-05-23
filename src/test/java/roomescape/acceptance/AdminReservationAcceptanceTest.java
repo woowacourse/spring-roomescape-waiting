@@ -56,34 +56,6 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
                 .assertThat().statusCode(201).body("id", is(greaterThan(0)));
     }
 
-    @DisplayName("예약 취소 성공 테스트")
-    @TestFactory
-    Stream<DynamicTest> deleteReservationSuccess() {
-        return Stream.of(
-                DynamicTest.dynamicTest("예약을 저장하고, 식별자를 가져온다.", () -> {
-                    reservationId = (int) RestAssured.given().contentType(ContentType.JSON)
-                            .cookie("token", guestToken)
-                            .body(new ReservationRequest(date, timeId, themeId))
-                            .when().post("/reservations")
-                            .then().extract().body().jsonPath().get("id");
-                }),
-                DynamicTest.dynamicTest("예약을 삭제한다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
-                            .then().log().all()
-                            .assertThat().statusCode(204);
-                }),
-                DynamicTest.dynamicTest("남은 예약 개수는 총 3개이다.", () -> {
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().get("/reservations")
-                            .then().log().all()
-                            .assertThat().body("size()", is(3));
-                })
-        );
-    }
-
     @DisplayName("조건별 예약 내역 조회 테스트 - 사용자, 테마")
     @Test
     void findByMemberAndTheme() {
@@ -119,21 +91,5 @@ class AdminReservationAcceptanceTest extends AcceptanceTest {
                 .when().get("/admin/reservations/search")
                 .then().log().all()
                 .assertThat().statusCode(200).body("size()", is(1));
-    }
-
-    @DisplayName("이미 일정이 지난 예약을 삭제할 수 없다.")
-    @TestFactory
-    @Sql(value = {"/truncate-with-admin-and-guest.sql", "/insert-past-reservation.sql"})
-    Stream<DynamicTest> cannotDeletePastReservation() {
-        return Stream.of(
-                DynamicTest.dynamicTest("관리자가 일정이 지난 예약을 삭제하려고 하면 예외가 발생한다.", () -> {
-                    long reservationId = 1;
-                    RestAssured.given().log().all()
-                            .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
-                            .then().log().all()
-                            .assertThat().statusCode(400).body("message", is("이미 지난 예약은 삭제할 수 없습니다."));
-                })
-        );
     }
 }

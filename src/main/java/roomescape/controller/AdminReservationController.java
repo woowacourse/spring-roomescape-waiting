@@ -28,12 +28,6 @@ public class AdminReservationController {
                 .body(reservationResponse);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") long id) {
-        reservationService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/search")
     public List<ReservationResponse> findReservations(
             @ModelAttribute("ReservationFindRequest") ReservationFilterRequest reservationFilterRequest) {

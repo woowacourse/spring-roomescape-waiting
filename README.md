@@ -272,7 +272,8 @@
 
 ### 예약 삭제 - 어드민
 - http method: DELETE
-- uri: /admin/reservations/{id}
+- cookie: token={token}
+- uri: /reservations/{id}
   - path variable
     - id: 예약 정보 식별자
 - response
@@ -288,9 +289,18 @@
     "message": "이미 지난 예약은 삭제할 수 없습니다."
     }
     ```
+  - 삭제 실패: 관리자 외 예약 삭제 시도
+    ```
+    HTTP/1.1 403
+
+    {
+    "message": "예약 대기를 삭제할 권한이 없습니다."
+    }
+    ```
     
 ### 예약 대기 삭제
 - http method: DELETE
+- cookie: token={token}
 - uri: /waitings/{id}
   - path variable
     - id: 예약 정보 식별자
@@ -304,12 +314,12 @@
     HTTP/1.1 400
 
     {
-    "message": "예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."
+    "message": "예약은 삭제할 수 없습니다\. 관리자에게 문의해주세요."
     }
     ```
   - 삭제 실패: 일반 사용자가 본인 예약 대기 외의 것을 삭제 시도
     ```
-    HTTP/1.1 401
+    HTTP/1.1 403
 
     {
     "message": "예약 대기를 삭제할 권한이 없습니다."

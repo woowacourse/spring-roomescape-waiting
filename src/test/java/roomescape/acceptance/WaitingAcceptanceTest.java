@@ -137,7 +137,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
+                            .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(204);
                 }),
@@ -185,7 +185,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
+                            .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(204);
                 }),
@@ -242,7 +242,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                 DynamicTest.dynamicTest("어드민이 guest1의 예약을 취소한다.", () -> {
                     RestAssured.given().log().all()
                             .cookie("token", adminToken)
-                            .when().delete("/admin/reservations/" + reservationId)
+                            .when().delete("/reservations/" + reservationId)
                             .then().log().all()
                             .assertThat().statusCode(204);
                 }),
