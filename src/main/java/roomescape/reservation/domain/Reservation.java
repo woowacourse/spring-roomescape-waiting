@@ -26,7 +26,7 @@ public class Reservation extends AuditedEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    private ReservationStatus reservationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -43,22 +43,22 @@ public class Reservation extends AuditedEntity {
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
+    public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime, ReservationStatus reservationStatus) {
         validateLastDate(date);
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
-        this.status = status;
+        this.reservationStatus = reservationStatus;
     }
 
-    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime, Status status) {
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime, ReservationStatus reservationStatus) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.theme = theme;
         this.reservationTime = reservationTime;
-        this.status = status;
+        this.reservationStatus = reservationStatus;
     }
 
     private void validateLastDate(LocalDate date) {
@@ -83,8 +83,8 @@ public class Reservation extends AuditedEntity {
         return date.isAfter(LocalDate.now()) || date.isEqual(LocalDate.now());
     }
 
-    public void updateStatus(Status status) {
-        this.status = status;
+    public void updateStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
     }
 
     public Long getId() {
@@ -115,11 +115,11 @@ public class Reservation extends AuditedEntity {
         return reservationTime.getStartAt();
     }
 
-    public Status getStatus() {
-        return status;
+    public ReservationStatus getReservationsStatus() {
+        return reservationStatus;
     }
 
     public String getStatusDisplayName() {
-        return status.getDisplayName();
+        return reservationStatus.getDisplayName();
     }
 }

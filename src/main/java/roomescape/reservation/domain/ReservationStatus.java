@@ -2,7 +2,7 @@ package roomescape.reservation.domain;
 
 import java.util.Arrays;
 
-public enum Status {
+public enum ReservationStatus {
     SUCCESS("예약"),
     CANCEL("취소"),
     WAIT("대기"),
@@ -10,11 +10,11 @@ public enum Status {
 
     private final String displayName;
 
-    Status(String displayName) {
+    ReservationStatus(String displayName) {
         this.displayName = displayName;
     }
 
-    public static Status from(String inputStatus) {
+    public static ReservationStatus from(String inputStatus) {
         return Arrays.stream(values())
                 .filter(status -> status.name().equals(inputStatus))
                 .findAny()

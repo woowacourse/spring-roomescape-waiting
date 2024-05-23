@@ -25,8 +25,8 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
@@ -78,7 +78,7 @@ class ReservationTimeServiceTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation reservation = reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
+        Reservation reservation = reservationRepository.save(new Reservation(member, TODAY, theme, hour10, ReservationStatus.SUCCESS));
 
         List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(
                 reservation.getDate(),
@@ -101,7 +101,7 @@ class ReservationTimeServiceTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, hour10, ReservationStatus.SUCCESS));
 
         assertThatThrownBy(() -> reservationTimeService.delete(hour10.getId()))
                 .isInstanceOf(IllegalArgumentException.class);

@@ -29,7 +29,7 @@ class ReservationTest {
                         LocalDate.now().minusDays(1),
                         theme,
                         reservationTime,
-                        Status.SUCCESS
+                        ReservationStatus.SUCCESS
                 )
         ).isInstanceOf(IllegalArgumentException.class);
     }

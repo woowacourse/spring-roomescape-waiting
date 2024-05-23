@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -48,15 +48,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findReservationsOfLastWeek(LocalDate dateFrom);
 
     @EntityGraph(attributePaths = {"member", "theme", "reservationTime"})
-    List<Reservation> findAllByStatus(Status status);
+    List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
 
     @EntityGraph(attributePaths = {"reservationTime"})
-    boolean existsByDateAndReservationTimeStartAtAndStatus(LocalDate date, LocalTime startAt, Status status);
+    boolean existsByDateAndReservationTimeStartAtAndReservationStatus(LocalDate date, LocalTime startAt, ReservationStatus reservationStatus);
 
     @Query("""
-           select r.status from Reservation r
+           select r.reservationStatus from Reservation r
            join ReservationTime rt on r.reservationTime.id = rt.id
            where r.member.id = :memberId and r.date = :date and rt.startAt = :startAt
             """)
-    List<Status> findStatusesByMemberIdAndDateAndReservationTimeStartAt(Long memberId, LocalDate date, LocalTime startAt);
+    List<ReservationStatus> findStatusesByMemberIdAndDateAndReservationTimeStartAt(Long memberId, LocalDate date, LocalTime startAt);
 }

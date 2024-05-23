@@ -51,7 +51,7 @@ public class ReservationApiController {
     ) {
         List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
 
-        return ResponseEntity.ok(new MultipleResponses(reservationResponses));
+        return ResponseEntity.ok(new MultipleResponses<>(reservationResponses));
     }
 
     @GetMapping("/admin/reservations/waiting")

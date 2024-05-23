@@ -27,8 +27,8 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.ReservationSearchConditionRequest;
@@ -63,7 +63,7 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
         List<Reservation> reservations = reservationRepository.findAll();
 
@@ -86,8 +86,8 @@ public class ReservationRepositoryTest {
         Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
         Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
 
@@ -109,7 +109,7 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
         Reservation findReservation = reservationRepository.findById(savedReservation.getId()).get();
 
         assertThat(findReservation.getMember().getEmail()).isEqualTo(savedReservation.getMember().getEmail());
@@ -130,7 +130,7 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
         List<Long> timeIds = reservationRepository.findTimeIdsByDateAndThemeId(savedReservation.getDate(), theme.getId());
 
@@ -152,8 +152,8 @@ public class ReservationRepositoryTest {
 
         Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, TOMORROW, theme1, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme1, reservationTime, ReservationStatus.SUCCESS));
 
         LocalDate dateFrom = LocalDate.now().minusWeeks(1);
         List<Reservation> reservations = reservationRepository.findReservationsOfLastWeek(dateFrom);
@@ -176,16 +176,16 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.WAIT));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.WAIT));
 
-        List<Status> statuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
+        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
                 member.getId(),
                 TODAY,
                 reservationTime.getStartAt()
         );
 
-        assertThat(statuses).containsExactly(Status.SUCCESS, Status.WAIT);
+        assertThat(reservationStatuses).containsExactly(ReservationStatus.SUCCESS, ReservationStatus.WAIT);
     }
 
     @DisplayName("예약 상태 별로 동일한 예약이 있을 경우 true를 반환한다.")
@@ -203,18 +203,18 @@ public class ReservationRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        Reservation savedReservation = reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
-        boolean success = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+        boolean success = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
                 savedReservation.getDate(),
                 savedReservation.getStartAt(),
-                Status.SUCCESS
+                ReservationStatus.SUCCESS
         );
 
-        boolean waiting = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+        boolean waiting = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
                 savedReservation.getDate(),
                 savedReservation.getStartAt(),
-                Status.WAIT
+                ReservationStatus.WAIT
         );
 
         assertAll(
@@ -240,8 +240,8 @@ public class ReservationRepositoryTest {
 
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         LocalDate oneWeekLater = LocalDate.now().plusWeeks(1);
-        reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, tomorrow, theme, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(member, oneWeekLater, theme, reservationTime, ReservationStatus.SUCCESS));
 
         ReservationSearchConditionRequest request = new ReservationSearchConditionRequest(
                 theme.getId(),
@@ -276,7 +276,7 @@ public class ReservationRepositoryTest {
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS)
+                new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS)
         );
         reservationRepository.deleteById(savedReservation.getId());
 

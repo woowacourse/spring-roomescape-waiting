@@ -49,7 +49,7 @@ VALUES
 ALTER TABLE theme ALTER COLUMN id RESTART WITH 16;
 
 -- 예약
-INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at)
+INSERT INTO reservation (member_id, date, time_id, theme_id, reservation_status, created_at)
 VALUES
 (1, CURRENT_DATE, 1, 1, 'SUCCESS', CURRENT_TIMESTAMP),
 (2, CURRENT_DATE, 1, 2, 'SUCCESS', CURRENT_TIMESTAMP),

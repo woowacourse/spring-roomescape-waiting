@@ -31,8 +31,8 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.MemberReservationResponse;
@@ -183,10 +183,10 @@ class ReservationServiceTest {
         Member jojo = memberRepository.save(
                 Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour11, Status.WAIT);
-        Reservation reservation2 = new Reservation(kaki, TODAY, theme, hour10, Status.WAIT);
-        Reservation reservation3 = new Reservation(kaki, TODAY, theme, hour11, Status.WAIT);
-        Reservation reservation4 = new Reservation(jojo, TOMORROW, theme, hour10, Status.WAIT);
+        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour11, ReservationStatus.WAIT);
+        Reservation reservation2 = new Reservation(kaki, TODAY, theme, hour10, ReservationStatus.WAIT);
+        Reservation reservation3 = new Reservation(kaki, TODAY, theme, hour11, ReservationStatus.WAIT);
+        Reservation reservation4 = new Reservation(jojo, TOMORROW, theme, hour10, ReservationStatus.WAIT);
 
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -236,8 +236,8 @@ class ReservationServiceTest {
         Member jojo = memberRepository.save(
                 Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour10, Status.SUCCESS);
-        Reservation reservation2 = new Reservation(jojo, TOMORROW, theme, hour10, Status.WAIT);
+        Reservation reservation1 = new Reservation(kaki, TOMORROW, theme, hour10, ReservationStatus.SUCCESS);
+        Reservation reservation2 = new Reservation(jojo, TOMORROW, theme, hour10, ReservationStatus.WAIT);
 
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -245,6 +245,6 @@ class ReservationServiceTest {
         reservationService.cancelById(kaki.getId());
         Reservation jojoReservation = reservationRepository.findById(jojo.getId()).get();
 
-        assertThat(jojoReservation.getStatus()).isEqualTo(Status.SUCCESS);
+        assertThat(jojoReservation.getReservationsStatus()).isEqualTo(ReservationStatus.SUCCESS);
     }
 }

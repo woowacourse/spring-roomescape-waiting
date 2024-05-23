@@ -29,8 +29,8 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 import roomescape.reservation.dto.PopularThemeResponse;
@@ -106,9 +106,9 @@ class ThemeServiceTest {
         Member kaki = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
         Member jojo = memberRepository.save(Member.createMemberByUserRole(new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD));
 
-        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
-        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme1, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, ReservationStatus.SUCCESS));
 
         List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(2);
         assertAll(
@@ -128,7 +128,7 @@ class ThemeServiceTest {
         Member member = memberRepository.save(
                 Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, TODAY, theme, hour10, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, hour10, ReservationStatus.SUCCESS));
 
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
                 .isInstanceOf(IllegalArgumentException.class);

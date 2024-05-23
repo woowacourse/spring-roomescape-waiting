@@ -10,8 +10,6 @@ import static roomescape.util.Fixture.KAKI_PASSWORD;
 import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +21,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Description;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
 
@@ -76,7 +74,7 @@ class ReservationTimeRepositoryTest {
 
         Member member = memberRepository.save(Member.createMemberByUserRole(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
 
-        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(member, TODAY, theme, reservationTime, ReservationStatus.SUCCESS));
 
         boolean exist = !reservationTimeRepository.findReservationTimesThatReservationReferById(reservationTime.getId())
                 .isEmpty();

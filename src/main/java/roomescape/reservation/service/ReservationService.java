@@ -10,8 +10,8 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waitings;
 import roomescape.reservation.dto.MemberReservationResponse;
@@ -48,7 +48,7 @@ public class ReservationService {
             ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember
     ) {
-        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.SUCCESS);
+        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, ReservationStatus.SUCCESS);
         validateDuplicatedReservationSuccess(reservation);
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -59,7 +59,7 @@ public class ReservationService {
             ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember
     ) {
-        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, Status.WAIT);
+        Reservation reservation = createValidatedReservationOfStatus(reservationSaveRequest, loginMember, ReservationStatus.WAIT);
         validateDuplicatedReservationWaiting(reservation, loginMember);
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -69,7 +69,7 @@ public class ReservationService {
     private Reservation createValidatedReservationOfStatus(
             ReservationSaveRequest reservationSaveRequest,
             LoginMember loginMember,
-            Status status
+            ReservationStatus reservationStatus
     ) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationSaveRequest.getTimeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 시간입니다."));
@@ -80,14 +80,14 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        return reservationSaveRequest.toReservation(member, theme, reservationTime, status);
+        return reservationSaveRequest.toReservation(member, theme, reservationTime, reservationStatus);
     }
 
     private void validateDuplicatedReservationSuccess(Reservation reservation) {
-        boolean existsReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndStatus(
+        boolean existsReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndReservationStatus(
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getStatus()
+                reservation.getReservationsStatus()
         );
 
         if (existsReservation) {
@@ -96,13 +96,13 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservationWaiting(Reservation reservation, LoginMember loginMember) {
-        List<Status> statuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
+        List<ReservationStatus> reservationStatuses = reservationRepository.findStatusesByMemberIdAndDateAndReservationTimeStartAt(
                 loginMember.id(),
                 reservation.getDate(),
                 reservation.getStartAt()
         );
 
-        if (statuses.contains(Status.SUCCESS) || statuses.contains(Status.WAIT)) {
+        if (reservationStatuses.contains(ReservationStatus.SUCCESS) || reservationStatuses.contains(ReservationStatus.WAIT)) {
             throw new IllegalArgumentException("예약이 완료되었거나, 대기 상태로 등록된 예약입니다.");
         }
     }
@@ -117,7 +117,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByStatus(String status) {
-        return reservationRepository.findAllByStatus(Status.from(status)).stream()
+        return reservationRepository.findAllByReservationStatus(ReservationStatus.from(status)).stream()
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartAt))
                 .map(ReservationResponse::toResponse)
@@ -126,7 +126,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
-        List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT);
 
         Waitings waitings = waitingReservations.stream()
                 .sorted(Comparator.comparing(Reservation::getDate)
@@ -143,7 +143,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationWaitingResponse> findWaitingReservations() {
-        List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
+        List<Reservation> waitingReservations = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT);
 
         return waitingReservations.stream()
                 .filter(Reservation::isAfterToday)
@@ -184,19 +184,19 @@ public class ReservationService {
         if (successReservation.getDate().equals(LocalDate.now())) {
             throw new IllegalArgumentException("당일 예약은 취소할 수 없습니다.");
         }
-        successReservation.updateStatus(Status.CANCEL);
+        successReservation.updateStatus(ReservationStatus.CANCEL);
 
         return successReservation;
     }
 
     private void updateFirstWaitingReservation(Reservation canceledReservation) {
-        Waitings waitings = reservationRepository.findAllByStatus(Status.WAIT).stream()
+        Waitings waitings = reservationRepository.findAllByReservationStatus(ReservationStatus.WAIT).stream()
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartAt)
                         .thenComparing(Reservation::getCreatedAt))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Waitings::new));
 
         waitings.findFirstWaitingReservationByCanceledReservation(canceledReservation)
-                .ifPresent(reservation -> reservation.updateStatus(Status.SUCCESS));
+                .ifPresent(reservation -> reservation.updateStatus(ReservationStatus.SUCCESS));
     }
 }

@@ -36,10 +36,10 @@ class WaitingsTest {
         Member kaki = new Member(1L, Role.USER, new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member jojo = new Member(2L, Role.USER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);
 
-        Reservation kakiReservation1 = new Reservation(kaki, TODAY, theme, hourTen, Status.WAIT);
-        Reservation kakiReservation2 = new Reservation(kaki, TOMORROW, theme, hourTen, Status.WAIT);
-        Reservation jojoReservation1 = new Reservation(jojo, TODAY, theme, hourTen, Status.WAIT);
-        Reservation jojoReservation2 = new Reservation(jojo, TODAY, theme, hourEleven, Status.WAIT);
+        Reservation kakiReservation1 = new Reservation(kaki, TODAY, theme, hourTen, ReservationStatus.WAIT);
+        Reservation kakiReservation2 = new Reservation(kaki, TOMORROW, theme, hourTen, ReservationStatus.WAIT);
+        Reservation jojoReservation1 = new Reservation(jojo, TODAY, theme, hourTen, ReservationStatus.WAIT);
+        Reservation jojoReservation2 = new Reservation(jojo, TODAY, theme, hourEleven, ReservationStatus.WAIT);
 
         Waitings waitings = new Waitings(List.of(kakiReservation1, kakiReservation2, jojoReservation1, jojoReservation2));
 
@@ -61,9 +61,9 @@ class WaitingsTest {
         Member kaki = new Member(1L, Role.USER, new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member jojo = new Member(2L, Role.USER, new MemberName(JOJO_NAME), JOJO_EMAIL, JOJO_PASSWORD);
 
-        Reservation cancelReservation = new Reservation(kaki, TODAY, theme, hourTen, Status.CANCEL);
-        Reservation jojoReservation = new Reservation(jojo, TODAY, theme, hourTen, Status.WAIT);
-        Reservation kakiReservation = new Reservation(kaki, TODAY, theme, hourTen, Status.WAIT);
+        Reservation cancelReservation = new Reservation(kaki, TODAY, theme, hourTen, ReservationStatus.CANCEL);
+        Reservation jojoReservation = new Reservation(jojo, TODAY, theme, hourTen, ReservationStatus.WAIT);
+        Reservation kakiReservation = new Reservation(kaki, TODAY, theme, hourTen, ReservationStatus.WAIT);
 
         Waitings waitings = new Waitings(List.of(jojoReservation, kakiReservation));
         Reservation reservation = waitings.findFirstWaitingReservationByCanceledReservation(cancelReservation).get();
