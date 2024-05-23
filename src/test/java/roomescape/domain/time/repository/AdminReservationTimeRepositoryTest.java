@@ -11,7 +11,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class AdminReservationTimeRepositoryTest extends RepositoryTest {
+class AdminReservationTimeRepositoryTest extends RepositoryTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
