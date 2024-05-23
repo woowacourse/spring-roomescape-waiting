@@ -54,6 +54,10 @@ public class Reservation {
         return date.isBefore(today) || date.equals(today);
     }
 
+    public boolean isBooked() {
+        return status.isBooking();
+    }
+
     public String getMemberName() {
         return member.getName();
     }

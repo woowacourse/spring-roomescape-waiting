@@ -12,11 +12,12 @@ public record MyReservationResponse(
         LocalDate date,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
         LocalTime time,
-        String status
+        String status,
+        Long rank
 ) {
 
-    public static MyReservationResponse from(Reservation reservation) {
+    public static MyReservationResponse of(Reservation reservation, Long rank) {
         return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus().getStatus());
+                reservation.getDate(), reservation.getTime().getStartAt(), reservation.getStatus().getStatus(), rank);
     }
 }

@@ -9,7 +9,11 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.ThemeService;
-import roomescape.reservation.domain.*;
+import roomescape.reservation.application.WaitingService;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -24,13 +28,15 @@ public class ReservationController {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationController(ReservationService reservationService, ReservationTimeService reservationTimeService,
-                                 ThemeService themeService, MemberService memberService, final ReservationTimeRepository reservationTimeRepository) {
+                                 ThemeService themeService, MemberService memberService, WaitingService waitingService) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -75,7 +81,7 @@ public class ReservationController {
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(Member loginMember) {
         List<Reservation> reservations = reservationService.findAllByMember(loginMember);
         return ResponseEntity.ok(reservations.stream()
-                .map(MyReservationResponse::from)
+                .map(reservation -> MyReservationResponse.of(reservation, waitingService.findLankByReservation(reservation)))
                 .toList());
     }
 

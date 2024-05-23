@@ -10,6 +10,10 @@ public enum ReservationStatus {
         this.status = status;
     }
 
+    public boolean isBooking() {
+        return this == BOOKING;
+    }
+
     public String getStatus() {
         return status;
     }

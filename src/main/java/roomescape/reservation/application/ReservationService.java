@@ -4,9 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ViolationException;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,9 +13,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -44,6 +44,9 @@ public class ReservationService {
 
     @Transactional
     public Reservation createWaitingReservation(Reservation reservation) {
+        Waiting waiting = new Waiting(reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        waitingRepository.save(waiting);
+
         return reservationRepository.save(reservation);
     }
 
