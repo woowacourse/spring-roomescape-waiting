@@ -64,7 +64,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.findBookableTimes(new BookableTimesRequest(date, themeId)));
     }
 
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/all")
     public ResponseEntity<List<ReservationMineResponse>> findSpecificMemberReservation(@MemberResolver Member member) {
         return ResponseEntity.ok(reservationService.findReservationByMemberId(member.getId()));
     }

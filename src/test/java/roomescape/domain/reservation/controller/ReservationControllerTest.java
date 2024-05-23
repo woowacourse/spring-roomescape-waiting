@@ -24,6 +24,19 @@ class ReservationControllerTest extends ControllerTest {
                 .body("size()", is(20));
     }
 
+    @DisplayName("특정 멤버의 예약 및 예약대기 목록을 불러올 수 있다.")
+    @Test
+    void should_response_reservation_list_specific_member_when_request_reservations() {
+        String cookie = getMemberCookie();
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .when().get("/reservations/all")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(6));
+    }
+
     @DisplayName("필터링된 예약 목록을 불러올 수 있다.")
     @Test
     void should_response_filtering_reservation_list_when_request_reservations() {
