@@ -27,7 +27,6 @@ public class ReservationTimeController {
         this.reservationTimeService = reservationTimeService;
     }
 
-    @Admin
     @GetMapping("/times")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<ReservationTimesResponse> getAllTimes() {
