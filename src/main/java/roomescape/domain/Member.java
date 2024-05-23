@@ -5,7 +5,6 @@ import org.hibernate.Hibernate;
 import org.springframework.lang.NonNull;
 import roomescape.exception.customexception.RoomEscapeBusinessException;
 
-import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +43,7 @@ public class Member {
         return new Member(name, email, password, Role.USER);
     }
 
-    public int getReservationRanking(Reservation reservation){
+    public int getWaitingRanking(Reservation reservation){
         return waitings.stream()
                 .filter(waiting -> waiting.isSameReservationWaiting(reservation))
                 .findAny()
