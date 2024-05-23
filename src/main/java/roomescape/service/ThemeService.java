@@ -55,7 +55,7 @@ public class ThemeService {
         LocalDate from = to.minusDays(7);        // todo: 상수화
         int limit = 10;
 
-        List<Reservation> mostReserved = reservationRepository.findMostReserved(from, to);
+        List<Reservation> mostReserved = reservationRepository.findByDateBetweenOrderByThemeCountDesc(from, to);
 
         return mostReserved.stream()
                 .limit(limit)

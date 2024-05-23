@@ -75,6 +75,7 @@ public class ReservationService {
         findValidatedReservation(id);
         reservationRepository.deleteById(id);
     }
+
     // todo: 이거 삭제
     private Reservation findValidatedReservation(Long id) {
         return reservationRepository.findById(id)
@@ -109,9 +110,10 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate dateFrom,
-                                                             LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.filter(themeId, memberId, dateFrom, dateTo);
+    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate from,
+                                                             LocalDate to) {
+        List<Reservation> reservations = reservationRepository
+                .findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, from, to);
 
         return reservations.stream()
                 .map(ReservationResponse::from)
