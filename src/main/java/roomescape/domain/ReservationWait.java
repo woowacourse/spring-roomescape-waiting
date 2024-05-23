@@ -32,4 +32,11 @@ public class ReservationWait {
     private int priority;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+
+    public ReservationWait(Member member, Reservation reservation, int priority, ReservationStatus status) {
+        this.member = member;
+        this.reservation = reservation;
+        this.priority = priority;
+        this.status = status;
+    }
 }
