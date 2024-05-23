@@ -10,6 +10,8 @@ import roomescape.reservation.exception.ReservationExceptionCode;
 @Embeddable
 public class Date {
 
+    private static final int CANCEL_MIN_DATE = 2;
+
     @Column(nullable = false)
     private LocalDate date;
 
@@ -31,6 +33,10 @@ public class Date {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public boolean isAfterCancelDate(LocalDate now) {
+        return now.isAfter(date.minusDays(CANCEL_MIN_DATE));
     }
 
     private static void validateAtSave(LocalDate date) {

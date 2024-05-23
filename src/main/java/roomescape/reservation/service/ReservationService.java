@@ -139,6 +139,10 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(ReservationNotFoundException::new);
 
+        if (reservation.isAfterCancelDate(LocalDate.now())) {
+            throw new RoomEscapeException(ReservationExceptionCode.CAN_NOT_CANCEL_AFTER_MIN_CANCEL_DATE);
+        }
+
         reservationRepository.deleteById(reservationId);
         waitingToReservation(reservation);
     }

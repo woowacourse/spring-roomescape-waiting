@@ -90,6 +90,10 @@ public class Reservation {
         this.reservationStatus = reservationStatus;
     }
 
+    public boolean isAfterCancelDate(LocalDate now) {
+        return date.isAfterCancelDate(now);
+    }
+
     private static void validateAtSaveDateAndTime(LocalDate date, Time time) {
         if (date.equals(LocalDate.now())) {
             validateTime(time);
