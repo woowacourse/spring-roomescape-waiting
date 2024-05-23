@@ -36,6 +36,19 @@ public class WaitingService {
                 .toList();
     }
 
+    public List<MyReservationResponse> findWaitingsByMemberId(Long memberId) {
+        return waitingRepository.findByMemberId(memberId)
+                .stream()
+                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
+                .toList();
+
+    }
+
+    private Long countOrderOfWaiting(Waiting waiting) {
+        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
+                waiting.getReservation(), waiting.getCreatedAt());
+    }
+
     public Optional<WaitingResponse> findHighPriorityWaiting(Long reservationId) {
         return waitingRepository.findTopByReservationIdOrderByCreatedAtAsc(reservationId)
                 .map(WaitingResponse::from);
@@ -79,19 +92,6 @@ public class WaitingService {
     private boolean isAlreadyWaited(Reservation reservation, Member member) {
         return reservation.getMember().equals(member)
                 || waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId());
-    }
-
-    public List<MyReservationResponse> findWaitingsByMemberId(Long memberId) {
-        return waitingRepository.findByMemberId(memberId)
-                .stream()
-                .map(waiting -> MyReservationResponse.from(waiting, countOrderOfWaiting(waiting)))
-                .toList();
-
-    }
-
-    private Long countOrderOfWaiting(Waiting waiting) {
-        return waitingRepository.countByReservationAndCreatedAtLessThanEqual(
-                waiting.getReservation(), waiting.getCreatedAt());
     }
 
     public void confirmReservation(Long waitingId) {

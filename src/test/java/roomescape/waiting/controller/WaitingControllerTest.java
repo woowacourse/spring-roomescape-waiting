@@ -61,7 +61,6 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(204);
 
-
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from waiting", Integer.class);
         assertThat(countAfterDelete).isEqualTo(COUNT_OF_WAITING - 1);
     }

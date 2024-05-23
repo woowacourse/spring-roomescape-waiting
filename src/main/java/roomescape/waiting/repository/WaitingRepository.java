@@ -11,7 +11,10 @@ import roomescape.waiting.domain.Waiting;
 @Repository
 public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
     List<Waiting> findByMemberId(Long memberId);
+
     Optional<Waiting> findTopByReservationIdOrderByCreatedAtAsc(Long reservationId);
+
     Long countByReservationAndCreatedAtLessThanEqual(Reservation reservation, LocalDateTime dateTime);
+
     boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
 }

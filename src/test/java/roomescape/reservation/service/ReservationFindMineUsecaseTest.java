@@ -21,14 +21,14 @@ class ReservationFindMineUsecaseTest {
             1L, "테마1", LocalDate.of(2024, 5, 5), LocalTime.of(11, 0), "예약", null);
     private final MyReservationResponse WAITING = new MyReservationResponse(
             2L, "테마2", LocalDate.of(2024, 5, 6), LocalTime.of(11, 0), "1번째 예약 대기", 3L);
-    
+
     @Mock
     private ReservationFindService reservationFindService;
     @Mock
     private WaitingService waitingService;
     @InjectMocks
     private ReservationFindMineUsecase reservationFindMineUsecase;
-    
+
     @DisplayName("내 예약 및 예약 대기를 시간 순서로 조회할 수 있다.")
     @Test
     void findMyReservationsTest() {

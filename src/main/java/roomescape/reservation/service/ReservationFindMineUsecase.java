@@ -9,8 +9,8 @@ import roomescape.waiting.service.WaitingService;
 
 @Component
 public class ReservationFindMineUsecase {
-    private static final Comparator<MyReservationResponse> RESERVATION_SORTING_COMPARATOR = Comparator.comparing(
-            MyReservationResponse::date).thenComparing(MyReservationResponse::startAt);
+    private static final Comparator<MyReservationResponse> RESERVATION_SORTING_COMPARATOR = Comparator
+            .comparing(MyReservationResponse::date).thenComparing(MyReservationResponse::startAt);
 
     private final ReservationFindService reservationFindService;
     private final WaitingService waitingService;

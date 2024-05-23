@@ -32,8 +32,8 @@ public class ReservationFindService {
 
     public List<ReservationResponse> findReservations(ReservationSearchRequest request) {
         ReservationSearch search = request.createReservationSearch();
-        return reservationRepository.findByCondition(search.memberId(), search.themeId(), search.startDate(),
-                        search.endDate())
+        return reservationRepository.findByCondition(
+                        search.memberId(), search.themeId(), search.startDate(), search.endDate())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
