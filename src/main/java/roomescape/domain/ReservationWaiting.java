@@ -42,8 +42,8 @@ public class ReservationWaiting {
     }
 
     private void validate(long priority) {
-        if (priority <= FIRST_PRIORITY) {
-            throw new IllegalArgumentException("우선 순위는 0이상의 수 입니다.");
+        if (priority < FIRST_PRIORITY) {
+            throw new IllegalArgumentException("우선 순위는 1 이상의 숫자입니다.");
         }
     }
 

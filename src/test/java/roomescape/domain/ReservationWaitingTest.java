@@ -17,10 +17,10 @@ class ReservationWaitingTest {
                 .doesNotThrowAnyException();
     }
 
-    @DisplayName("대기 번호가 0 이하일 경우 예외가 발생한다.")
+    @DisplayName("대기 번호가 0 미만일 경우 예외가 발생한다.")
     @Test
     void createFail_NegativePriority() {
-        assertThatThrownBy(() -> new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, 0L))
+        assertThatThrownBy(() -> new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, -1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
