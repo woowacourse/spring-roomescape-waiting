@@ -1,14 +1,17 @@
 package roomescape.domain;
 
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
@@ -33,6 +36,8 @@ public class Member {
     @Column(name = "role", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Role role;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member")
+    private List<ReservationWait> waits;
 
     public Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
