@@ -41,7 +41,7 @@ public class AdminWaitingApiController {
     public ResponseEntity<Void> deleteReservation(@AuthenticatedMember Member member,
                                                   @PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
-        reservationDeleteService.deleteReservation(id);
+        reservationDeleteService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

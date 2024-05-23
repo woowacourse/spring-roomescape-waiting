@@ -85,6 +85,10 @@ public class Reservation extends BaseTime {
         return reservationStatus.isReserved();
     }
 
+    public boolean isNotOwnedBy(Member member) {
+        return !this.member.equals(member);
+    }
+
     public void changeWaitingToReserved() {
         this.reservationStatus = ReservationStatus.RESERVED;
     }

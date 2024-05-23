@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.AuthenticatedMember;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.service.dto.request.ReservationAdminSaveRequest;
 import roomescape.service.dto.response.ReservationResponse;
@@ -59,10 +61,11 @@ public class AdminReservationApiController {
 
 
     @DeleteMapping("/api/admin/reservations/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable
+    public ResponseEntity<Void> deleteReservation(@AuthenticatedMember Member member,
+                                                  @PathVariable
                                                   @Positive(message = "1 이상의 값만 입력해주세요.")
                                                   long id) {
-        reservationDeleteService.deleteReservation(id);
+        reservationDeleteService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

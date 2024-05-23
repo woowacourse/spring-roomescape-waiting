@@ -25,7 +25,6 @@ public class WaitingApiController {
     private final ReservationCreateService reservationCreateService;
     private final ReservationDeleteService reservationDeleteService;
 
-
     public WaitingApiController(ReservationCreateService reservationCreateService,
                                 ReservationDeleteService reservationDeleteService) {
         this.reservationCreateService = reservationCreateService;
@@ -33,9 +32,9 @@ public class WaitingApiController {
     }
 
     @PostMapping("/api/waitings")
-    public ResponseEntity<ReservationResponse> addWaiting(@RequestBody @Valid
-                                                          ReservationSaveRequest request,
-                                                          @AuthenticatedMember Member member) {
+    public ResponseEntity<ReservationResponse> addWaiting(@AuthenticatedMember Member member,
+                                                          @RequestBody @Valid
+                                                          ReservationSaveRequest request) {
         Reservation newReservation = reservationCreateService.createReservation(
                 request,
                 member,
@@ -46,10 +45,11 @@ public class WaitingApiController {
     }
 
     @DeleteMapping("/api/waitings/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable
+    public ResponseEntity<Void> deleteWaiting(@AuthenticatedMember Member member,
+                                              @PathVariable
                                               @Positive(message = "1 이상의 값만 입력해주세요.")
                                               long id) {
-        reservationDeleteService.deleteReservation(id);
+        reservationDeleteService.deleteReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }
