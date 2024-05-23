@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +21,7 @@ import roomescape.reservation.domain.Status;
 @DataJpaTest
 class ReservationRepositoryTest {
 
-    private static final int DEFAULT_RESERVATION_COUNT = 3;
+    private static final int DEFAULT_RESERVATION_COUNT = 4;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -132,16 +133,17 @@ class ReservationRepositoryTest {
                 .containsExactly(1L);
     }
 
-    @DisplayName("테마 id, 멤버 id, 날짜 사이로 얘약을 조회한다.")
+    @DisplayName("테마 id, 멤버 id, 상태, 날짜 사이로 예약을 조회한다.")
     @ParameterizedTest
-    @MethodSource("getThemeIdAndMemberIdAndDateBetween")
-    void findByThemeIdAndMemberIdAndDateBetween(Long themeId,
-                                                Long memberId,
-                                                LocalDate dateFrom,
-                                                LocalDate dateTo,
-                                                int size) {
-        final var result = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
-                themeId, memberId, dateFrom, dateTo
+    @MethodSource("getThemeIdAndMemberIdAndStatusDateBetween")
+    void findByThemeIdAndMemberIdAndStatusAndDateBetween(Long themeId,
+                                                         Long memberId,
+                                                         Optional<Status> status,
+                                                         LocalDate dateFrom,
+                                                         LocalDate dateTo,
+                                                         int size) {
+        final var result = reservationRepository.findByThemeIdAndMemberIdAndStatusAndDateBetween(
+                themeId, memberId, status, dateFrom, dateTo
         );
 
         assertThat(result)
@@ -149,18 +151,19 @@ class ReservationRepositoryTest {
                 .allMatch(matchCondition(themeId, memberId, dateFrom, dateTo));
     }
 
-    private static Stream<Arguments> getThemeIdAndMemberIdAndDateBetween() {
+    private static Stream<Arguments> getThemeIdAndMemberIdAndStatusDateBetween() {
         LocalDate dateFrom = LocalDate.parse("2024-12-13");
         LocalDate dateTo = LocalDate.parse("2024-12-24");
 
         return Stream.of(
-                Arguments.of(null, null, null, null, DEFAULT_RESERVATION_COUNT),
-                Arguments.of(1L, null, null, null, 1),
-                Arguments.of(null, 1L, null, null, 2),
-                Arguments.of(null, null, dateFrom, null, 2),
-                Arguments.of(null, null, null, dateTo, 2),
-                Arguments.of(null, null, dateFrom, dateTo, 1),
-                Arguments.of(3L, 2L, dateFrom, dateTo, 0)
+                Arguments.of(null, null, Optional.empty(), null, null, DEFAULT_RESERVATION_COUNT),
+                Arguments.of(1L, null, Optional.empty(), null, null, 1),
+                Arguments.of(null, 1L, Optional.empty(), null, null, 2),
+                Arguments.of(null, null, Optional.empty(), dateFrom, null, 2),
+                Arguments.of(null, null, Optional.empty(), null, dateTo, 3),
+                Arguments.of(null, null, Optional.empty(), dateFrom, dateTo, 1),
+                Arguments.of(3L, 2L, Optional.empty(), dateFrom, dateTo, 0),
+                Arguments.of(null, null, Optional.of(Status.WAITING), null, null, 1)
         );
     }
 

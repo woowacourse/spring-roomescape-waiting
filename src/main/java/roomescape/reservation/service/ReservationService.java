@@ -73,10 +73,15 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findByFilter(final Long memberId, final Long themeId,
-                                                  final LocalDate dateFrom, final LocalDate dateTo) {
-        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, dateFrom, dateTo)
-                .stream()
+    public List<ReservationResponse> findByFilter(final Long memberId,
+                                                  final Long themeId,
+                                                  final String status,
+                                                  final LocalDate dateFrom,
+                                                  final LocalDate dateTo
+    ) {
+        return reservationRepository.findByThemeIdAndMemberIdAndStatusAndDateBetween(
+                        themeId, memberId, Status.from(status), dateFrom, dateTo
+                ).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }

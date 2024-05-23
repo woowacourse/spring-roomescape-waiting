@@ -38,11 +38,12 @@ public class AdminReservationController {
     public ResponseEntity<List<ReservationResponse>> findByFilter(
             @RequestParam(required = false) final Long memberId,
             @RequestParam(required = false) final Long themeId,
+            @RequestParam(required = false) final String status,
             @RequestParam(required = false) final LocalDate dateFrom,
             @RequestParam(required = false) final LocalDate dateTo
     ) {
         List<ReservationResponse> reservationResponses =
-                reservationService.findByFilter(memberId, themeId, dateFrom, dateTo);
+                reservationService.findByFilter(memberId, themeId, status, dateFrom, dateTo);
         return ResponseEntity.ok(reservationResponses);
     }
 }

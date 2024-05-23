@@ -14,4 +14,5 @@ values ('제리', 'jerry@gmail.com', 'password', 'ADMIN'),
 insert into reservation(date, time_id, theme_id, member_id, status)
 values ('2024-12-12', 1, 1, 1, 'RESERVATION'),
        ('2024-12-23', 2, 3, 1, 'RESERVATION'),
-       ('2024-12-25', 3, 2, 2, 'RESERVATION');
+       ('2024-12-25', 3, 2, 2, 'RESERVATION'),
+       ('2024-06-30', 1, 2, 2, 'WAITING');

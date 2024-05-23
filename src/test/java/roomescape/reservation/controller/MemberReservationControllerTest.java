@@ -63,7 +63,7 @@ class MemberReservationControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(4));
+                .body("size()", is(5));
     }
 
     @DisplayName("동일한 날짜, 시간, 테마에 예약 내역이 이미 있다면 예약할 수 없다.")
@@ -71,10 +71,10 @@ class MemberReservationControllerTest {
     void cannotSaveDuplicatedReservation() {
         // given
         Map<String, Object> reservations = new HashMap<>();
-        reservations.put("date", "2024-12-12");
-        reservations.put("timeId", 1);
-        reservations.put("themeId", 1);
-        reservations.put("memberId", 1);
+        reservations.put("date", "2024-12-25");
+        reservations.put("timeId", 3);
+        reservations.put("themeId", 2);
+        reservations.put("memberId", 2);
 
         // when & then
         RestAssured.given().log().all()
@@ -145,6 +145,6 @@ class MemberReservationControllerTest {
 
         // then
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(2);
+        assertThat(countAfterDelete).isEqualTo(3);
     }
 }

@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [4단계] 예약 대기 관리 기능
-          예약 대기 목록 조회 endpoint 설정
-     */
-    fetch('') // 내 예약 목록 조회 API 호출
+    const status = 'WAITING';
+    fetch(`/admin/reservations?status=${status}`) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -19,15 +16,11 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [4단계] 예약 대기 관리 기능
-              예약 대기 목록 조회 response 명세에 맞춰 값 설정
-         */
-        const id = '';
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const id = item.id;
+        const name = item.member.name;
+        const theme = item.theme.name;
+        const date = item.date;
+        const startAt = item.time.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
