@@ -54,6 +54,23 @@ class ReservationControllerTest extends ControllerTest {
                 .body("status", is("RESERVATION"));
     }
 
+    @DisplayName("멤버의 예약대기를 추가를 성공할 시, 201 ok를 응답한다,")
+    @Test
+    void should_add_reservation_wait_when_post_request_member_reservations() {
+        String cookie = getMemberCookie();
+
+        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
+                LocalDate.MAX, 1L, 1L, null);
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .contentType(ContentType.JSON)
+                .body(reservationAddRequest)
+                .when().post("/reservations/wait")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", is("RESERVATION_WAIT"));
+    }
+
     @DisplayName("예약 가능 시각 목록을 불러올 수 있다. (200 OK)")
     @Test
     void should_response_bookable_time() {

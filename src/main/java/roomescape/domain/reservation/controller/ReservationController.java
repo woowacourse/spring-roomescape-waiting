@@ -5,10 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.domain.login.controller.MemberResolver;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.reservation.domain.Reservation;
-import roomescape.domain.reservation.dto.ReservationAddRequest;
-import roomescape.domain.reservation.dto.ReservationFindRequest;
-import roomescape.domain.reservation.dto.ReservationMineResponse;
-import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.reservation.dto.*;
 import roomescape.domain.reservation.service.ReservationService;
 import roomescape.domain.time.dto.BookableTimeResponse;
 import roomescape.domain.time.dto.BookableTimesRequest;
@@ -76,5 +73,19 @@ public class ReservationController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<ReservationMineResponse>> findSpecificMemberReservation(@MemberResolver Member member) {
         return ResponseEntity.ok(reservationService.findReservationByMemberId(member.getId()));
+    }
+
+    @PostMapping("/reservations/wait")
+    public ResponseEntity<ReservationResponse> addReservationWait(@RequestBody ReservationWaitAddRequest reservationWaitAddRequest,
+                                                                  @MemberResolver Member member) {
+        reservationWaitAddRequest = new ReservationWaitAddRequest(
+                reservationWaitAddRequest.date(),
+                reservationWaitAddRequest.timeId(),
+                reservationWaitAddRequest.themeId(),
+                member.getId()
+        );
+        Reservation reservation = reservationService.addReservationWait(reservationWaitAddRequest);
+        ReservationResponse reservationResponse = ReservationResponse.from(reservation);
+        return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
 }

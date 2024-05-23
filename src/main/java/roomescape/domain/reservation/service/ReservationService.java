@@ -8,6 +8,7 @@ import roomescape.domain.reservation.domain.Reservation;
 import roomescape.domain.reservation.domain.Status;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.reservation.dto.ReservationMineResponse;
+import roomescape.domain.reservation.dto.ReservationWaitAddRequest;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.domain.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
@@ -107,5 +108,24 @@ public class ReservationService {
         return reservationRepository.findByMemberId(memberId).stream()
                 .map(ReservationMineResponse::new)
                 .toList();
+    }
+
+    public Reservation addReservationWait(ReservationWaitAddRequest reservationWaitAddRequest) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservationWaitAddRequest.date(),
+                reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId(), Status.RESERVATION)) {
+            throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
+        }
+
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(reservationWaitAddRequest.memberId(),
+                reservationWaitAddRequest.date(), reservationWaitAddRequest.timeId(), reservationWaitAddRequest.themeId(), Status.RESERVATION_WAIT)) {
+            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기는 할 수 없습니다.");
+        }
+
+        ReservationTime reservationTime = getReservationTime(reservationWaitAddRequest.timeId());
+        Theme theme = getTheme(reservationWaitAddRequest.themeId());
+        Member member = getMember(reservationWaitAddRequest.memberId());
+
+        Reservation reservation = reservationWaitAddRequest.toEntity(reservationTime, theme, member);
+        return reservationRepository.save(reservation);
     }
 }
