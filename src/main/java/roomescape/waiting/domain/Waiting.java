@@ -32,6 +32,13 @@ public class Waiting {
         this.createdAt = LocalDateTime.now();
     }
 
+    public Waiting(Long id, Reservation reservation, Member member, LocalDateTime createdAt) {
+        this.id = Objects.requireNonNull(id);
+        this.reservation = Objects.requireNonNull(reservation);
+        this.member = Objects.requireNonNull(member);
+        this.createdAt = Objects.requireNonNull(createdAt);
+    }
+
     protected Waiting() {
     }
 
