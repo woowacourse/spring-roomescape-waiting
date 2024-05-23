@@ -206,14 +206,11 @@ public class ReservationService {
     }
 
     private Long findSequence(Reservation reservation) {
-        List<Reservation> reservations = reservationRepository.findByDateAndThemeAndTime(
+        List<Reservation> reservations = reservationRepository.findByDateAndThemeAndTimeOrderByCreatedAt(
                 reservation.getDate(),
                 reservation.getTheme(),
                 reservation.getTime()
         );
-
-        reservations.sort((r1, r2) -> r1.getCreatedAt().isBefore(r2.getCreatedAt()) ? -1 :
-                r1.getCreatedAt().isEqual(r2.getCreatedAt()) ? 0 : 1);
 
         return (long) reservations.indexOf(reservation);
     }
