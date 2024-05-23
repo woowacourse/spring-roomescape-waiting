@@ -73,6 +73,28 @@ class ReservationWaitingServiceTest {
         assertThat(responses.size()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("대기가 없는 경우, 예약을 삭제한다.")
+    void deleteByIdWhenNotExistWaiting() {
+        reservationWaitingService.deleteById(member.getId(), reservation.getId());
 
+        assertThat(reservationRepository.findAll().size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("대기가 있는 경우, 예약을 업데이트한다.")
+    void deleteByIdWhenExistWaiting() {
+        Member updatedMember = memberRepository.save(MemberFixture.createMember("시소"));
+        waitingRepository.save(new Waiting(reservation, updatedMember, LocalDateTime.now(clock)));
+
+        reservationWaitingService.deleteById(member.getId(), reservation.getId());
+
+        List<Reservation> reservations = reservationRepository.findAll();
+        assertAll(
+                () -> assertThat(reservations.size()).isEqualTo(1),
+                () -> assertThat(reservations.get(0).getMember().getName()).isEqualTo("시소"),
+                () -> assertThat(waitingRepository.findAll().size()).isEqualTo(0)
+        );
+    }
 
 }

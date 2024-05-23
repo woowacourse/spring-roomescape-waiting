@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -135,7 +136,7 @@ class WaitingServiceTest {
         Member newMember = memberRepository.save(MemberFixture.createMember("시소"));
         Waiting waiting = waitingRepository.save(new Waiting(reservation, newMember, LocalDateTime.now(clock)));
 
-        waitingService.deleteById(newMember.getId(), waiting.getId());
+        waitingService.deleteByIdWhenAuthorization(newMember.getId(), waiting.getId());
 
         List<Waiting> waitings = waitingRepository.findAll();
         assertThat(waitings).isEmpty();
@@ -171,5 +172,21 @@ class WaitingServiceTest {
 
         List<ReservationResponse> responses = waitingService.findAll();
         assertThat(responses.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("예약 Id에 대한 가장 빠른 대기를 조회한다.")
+    void findFirstByReservationId() {
+        Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
+        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+
+        Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
+        Waiting firstWaiting = waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+
+        Optional<Waiting> waiting = waitingService.findFirstByReservationId(reservation.getId());
+        assertAll(
+                () -> assertThat(waiting.isPresent()).isTrue(),
+                () -> assertThat(waiting.get()).isEqualTo(firstWaiting)
+        );
     }
 }

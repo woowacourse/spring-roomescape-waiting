@@ -3,6 +3,7 @@ package roomescape.application.reservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,8 @@ import roomescape.exception.UnAuthorizedException;
 
 @Service
 public class WaitingService {
-    private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final RoleRepository roleRepository;
@@ -68,13 +69,17 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteById(long memberId, long id) {
+    public void deleteByIdWhenAuthorization(long memberId, long id) {
         Waiting waiting = waitingRepository.getById(id);
         if (roleRepository.isAdminByMemberId(memberId) || waiting.isOwnedBy(memberId)) {
-            waitingRepository.deleteById(waiting.getId());
+            deleteById(id);
             return;
         }
         throw new UnAuthorizedException();
+    }
+
+    public void deleteById(Long id) {
+        waitingRepository.deleteById(id);
     }
 
     private void validateCreateWaiting(ReservationRequest reservationRequest, Reservation reservation) {
@@ -117,5 +122,10 @@ public class WaitingService {
             return ReservationStatusResponse.of(waiting, sameReservationWaitings.indexOf(waiting) + 1);
         }
         return ReservationStatusResponse.from(waiting);
+    }
+
+    public Optional<Waiting> findFirstByReservationId(long id) {
+        List<Waiting> waitings = waitingRepository.findByReservationIdOrderByCreatedAtAsc(id);
+        return waitings.stream().findFirst();
     }
 }

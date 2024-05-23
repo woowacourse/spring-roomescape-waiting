@@ -63,6 +63,11 @@ public class Reservation {
         return member.hasId(memberId);
     }
 
+    public void updateMember(Member member, LocalDateTime createdAt) {
+        this.member = member;
+        this.createdAt = createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

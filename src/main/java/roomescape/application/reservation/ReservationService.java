@@ -77,13 +77,28 @@ public class ReservationService {
                 .map(ReservationStatusResponse::from)
                 .toList();
     }
+
     @Transactional
     public void deleteById(long memberId, long id) {
         Reservation reservation = reservationRepository.getById(id);
-        if (roleRepository.isAdminByMemberId(memberId) || reservation.isOwnedBy(memberId)) {
+        if (isAuthorization(memberId, reservation)) {
             reservationRepository.deleteById(reservation.getId());
             return;
         }
         throw new UnAuthorizedException();
+    }
+
+    @Transactional
+    public void updateMemberById(long id, long memberId, Member member) {
+        Reservation reservation = reservationRepository.getById(id);
+        if (isAuthorization(memberId, reservation)) {
+            reservation.updateMember(member, LocalDateTime.now(clock));
+            return;
+        }
+        throw new UnAuthorizedException();
+    }
+
+    private boolean isAuthorization(long memberId, Reservation reservation) {
+        return roleRepository.isAdminByMemberId(memberId) || reservation.isOwnedBy(memberId);
     }
 }
