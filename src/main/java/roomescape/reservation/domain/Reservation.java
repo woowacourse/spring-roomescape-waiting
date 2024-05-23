@@ -15,7 +15,7 @@ import java.time.LocalTime;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation extends BaseDateTime {
+public class Reservation extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
