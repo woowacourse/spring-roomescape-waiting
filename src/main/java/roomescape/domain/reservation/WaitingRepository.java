@@ -27,6 +27,8 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
 
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
     default Waiting getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new DomainNotFoundException(String.format("해당 id의 예약 대기가 존재하지 않습니다. (id: %d)", id)));

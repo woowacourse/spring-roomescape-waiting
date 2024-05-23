@@ -16,6 +16,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.WaitingRepository;
 import roomescape.exception.BadRequestException;
 
 @Service
@@ -26,6 +27,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
     private final Clock clock;
 
     public ReservationService(
@@ -33,12 +35,14 @@ public class ReservationService {
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository,
+            WaitingRepository waitingRepository,
             Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
         this.clock = clock;
     }
 
@@ -52,6 +56,7 @@ public class ReservationService {
         );
 
         validateReservationExists(reservation);
+        validateWaitingExists(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -95,6 +100,18 @@ public class ReservationService {
 
         if (reservationExists) {
             throw new BadRequestException("이미 예약이 존재합니다.");
+        }
+    }
+
+    private void validateWaitingExists(Reservation reservation) {
+        boolean waitingExists = waitingRepository.existsByDateAndTimeIdAndThemeId(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+
+        if (waitingExists) {
+            throw new BadRequestException("이미 대기 중인 예약이 존재합니다.");
         }
     }
 }
