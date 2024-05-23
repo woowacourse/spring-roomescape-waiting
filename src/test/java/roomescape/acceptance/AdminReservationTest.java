@@ -41,6 +41,95 @@ class AdminReservationTest {
                 .extract().cookie("token");
     }
 
+    @DisplayName("어드민이 예약을 추가하면, 예약이 추가된다")
+    @Test
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_adminAddReservation_then_reservationAdded() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Long themeId = 1L;
+        Long timeId = 1L;
+        Long memberId = 2L;
+        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d, \"memberId\":%d}",
+                themeId, tomorrow, timeId, memberId);
+
+        // when
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .body(requestBody).contentType("application/json")
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .assertThat()
+                .statusCode(201)
+                .body("status", equalTo("RESERVED"));
+    }
+
+    @DisplayName("예약 대기가 있는 상태에서, 어드민이 예약으로 전환 요청을 보내면, 예약 상태로 바뀐다")
+    @Test
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
+    void when_adminApproveWaiting_then_reservation() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        Long themeId = 1L;
+        Long timeId = 1L;
+        Long memberId = 2L;
+        String requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d, \"memberId\":%d}",
+                themeId, tomorrow, timeId, memberId);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .body(requestBody).contentType("application/json")
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .assertThat()
+                .statusCode(201)
+                .body("status", equalTo("RESERVED"));
+
+        memberId = 1L;
+        requestBody = String.format("{\"themeId\":%d, \"date\":\"%s\", \"timeId\":%d, \"memberId\":%d}",
+                themeId, tomorrow, timeId, memberId);
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .body(requestBody).contentType("application/json")
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .assertThat()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"));
+
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().delete("/admin/reservations/" + 1)
+                .then().log().all()
+                .assertThat()
+                .statusCode(204);
+
+        // when, then
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().post("/admin/reservations/" + 2)
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .body("status", equalTo("RESERVED"));
+    }
+
+    @DisplayName("어드민이 예약을 조회하면, 예약 목록을 조회할 수 있다")
+    @Test
+    @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql",
+            "/test-data/reservations-details.sql", "/test-data/reservations.sql"})
+    void when_adminGetReservations_then_reservations() {
+        // when, then
+        given().log().all()
+                .cookie("token", getToken("mrmrmrmr@woowa.net", "password"))
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .assertThat()
+                .statusCode(200)
+                .body("size()", equalTo(14));
+    }
+
     @DisplayName("멤버가 예약한 상태에서, 어드민이 취소하면 요청을 보내면, 예약은 취소된다")
     @Test
     @Sql(value = {"/test-data/members.sql", "/test-data/themes.sql", "/test-data/times.sql"})
