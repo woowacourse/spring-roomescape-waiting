@@ -37,9 +37,9 @@ public class ReservationTimeService {
     }
 
     private void validateUniqueStartAt(LocalTime startAt) {
-        if (reservationTimeRepository.existsByStartAt(startAt)) {
+        reservationTimeRepository.findFirstByStartAt(startAt).ifPresent(time -> {
             throw new IllegalArgumentException("이미 시간이 존재합니다.");
-        }
+        });
     }
 
     public TimeResponse findById(Long id) {

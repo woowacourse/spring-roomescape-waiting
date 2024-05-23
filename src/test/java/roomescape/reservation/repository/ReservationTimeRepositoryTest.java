@@ -98,11 +98,11 @@ class ReservationTimeRepositoryTest {
         assertThat(reservationTimes.size()).isEqualTo(0);
     }
 
-    @DisplayName("startAt으로 예약 시간을 조회하여 있으면 true를 반환한다.")
+    @DisplayName("startAt으로 예약 시간을 조회한다.")
     @Test
-    void existsByStartAt() {
+    void findFirstByStartAt() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
 
-        assertThat(reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())).isTrue();
+        assertThat(reservationTimeRepository.findFirstByStartAt(reservationTime.getStartAt())).isPresent();
     }
 }
