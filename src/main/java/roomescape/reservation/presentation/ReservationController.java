@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Authenticated;
 import roomescape.auth.dto.Accessor;
-import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -45,7 +45,7 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/my")
-    public ResponseEntity<List<MemberReservation>> findMemberReservation(
+    public ResponseEntity<List<MemberReservationResponse>> findMemberReservation(
             @Authenticated Accessor accessor) {
         return ResponseEntity.ok(reservationService.findMemberReservationWithWaitingStatus(accessor.id()));
     }

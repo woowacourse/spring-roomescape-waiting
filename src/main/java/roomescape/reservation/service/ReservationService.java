@@ -9,8 +9,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationWithWaiting;
 import roomescape.reservation.domain.Reservations;
-import roomescape.reservation.dto.MemberReservation;
 import roomescape.reservation.dto.MemberReservationAddRequest;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.theme.service.ThemeService;
@@ -45,10 +45,10 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MemberReservation> findMemberReservationWithWaitingStatus(Long memberId) {
+    public List<MemberReservationResponse> findMemberReservationWithWaitingStatus(Long memberId) {
         return reservationRepository.findByMemberId(memberId).stream()
                 .map(reservation -> new ReservationWithWaiting(reservation, countEarlierReservation(reservation)))
-                .map(MemberReservation::new)
+                .map(MemberReservationResponse::new)
                 .toList();
     }
 

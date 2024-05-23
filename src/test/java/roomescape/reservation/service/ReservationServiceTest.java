@@ -25,7 +25,7 @@ import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationWithWaiting;
-import roomescape.reservation.dto.MemberReservation;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.ReservationTimeService;
@@ -67,7 +67,7 @@ class ReservationServiceTest {
                 .thenReturn(0);
 
         assertThat(reservationService.findMemberReservationWithWaitingStatus(1L))
-                .containsExactly(new MemberReservation(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1)));
+                .containsExactly(new MemberReservationResponse(new ReservationWithWaiting(MEMBER_ID_1_RESERVATION, 1)));
     }
 
     @DisplayName("예약을 추가하고 응답을 반환할 수 있다")

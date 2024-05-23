@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.ReservationWithWaiting;
 
-public record MemberReservation(
+public record MemberReservationResponse(
         Long id,
         String themeName,
         LocalDate date,
         LocalTime time,
         String status) {
 
-    public MemberReservation(ReservationWithWaiting reservation) {
+    public MemberReservationResponse(ReservationWithWaiting reservation) {
         this(
                 reservation.getReservationId(),
                 reservation.getThemeName(),
