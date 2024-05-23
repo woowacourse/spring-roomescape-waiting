@@ -328,10 +328,12 @@
     
 ### 시간 추가
 - http method: POST
+- cookie: token={token}
 - uri: /times
 - request
   ```
   POST /times HTTP/1.1
+  cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
   Content-Type: application/json
    
   {
@@ -364,6 +366,14 @@
   
     {
       "message": "이미 같은 시간이 존재합니다."
+    }
+    ```  
+  - 추가 실패: 관리자 외 추가 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+    "message": "권한이 없습니다. 관리자에게 문의해주세요."
     }
     ```
 
@@ -408,6 +418,7 @@
 
 ### 시간 삭제
 - http method: DELETE
+- cookie: token = {token}
 - uri: /times/{id}
   - path variable
     - id: 시간 정보 식별자
@@ -423,14 +434,24 @@
     {
       "message": "해당 시간에 예약(대기)이 존재해서 삭제할 수 없습니다."
     }
+    ```  
+  - 삭제 실패: 관리자 외 삭제 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
+    }
     ```
 
 ### 테마 추가
 - http method: POST
+- cookie: token={token}
 - uri: /themes
 - request
   ```
   POST /themes HTTP/1.1
+  cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
   content-type: application/json
   
   {
@@ -485,6 +506,14 @@
     {
       "message": "설명은 100자를 초과할 수 없습니다."
     }
+    ```  
+  - 추가 실패: 관리자 외 추가 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
+    }
     ```
 
 ### 테마 조회
@@ -524,6 +553,7 @@
 
 ### 테마 삭제
 - http method: DELETE
+- cookie: token={token}
 - uri: /themes/{id}
   - path variable
     - id: 테마 정보 식별자
@@ -540,7 +570,15 @@
       "message": "해당 테마로 예약(대기)이 존재해서 삭제할 수 없습니다."
     }
     ```
-    
+  - 삭제 실패: 관리자 외 삭제 시도 오류
+    ```
+    HTTP/1.1 403
+
+    {
+      "message": "권한이 없습니다. 관리자에게 문의해주세요."
+    }
+    ```
+      
 ### 사용자 회원가입
 - http method: POST
 - uri: /members
