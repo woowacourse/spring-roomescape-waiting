@@ -84,7 +84,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByMemberAndThemeBetweenDates(ReservationSearchCondition condition) {
-        List<Reservation> reservations = reservationRepository.findByReservationMember_IdAndTheme_IdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 condition.memberId(), condition.themeId(), condition.start(), condition.end());
         
         return reservations
@@ -94,7 +94,7 @@ public class ReservationService {
     }
 
     public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
-        return reservationRepository.findAllByReservationMember_Id(memberId)
+        return reservationRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(LoginMemberReservationResponse::from)
                 .toList();

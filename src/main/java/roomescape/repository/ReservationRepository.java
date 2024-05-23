@@ -14,11 +14,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.time
             JOIN FETCH r.theme
             JOIN FETCH r.reservationMember
-            WHERE r.reservationMember.id = :memberId 
-                AND r.theme.id = :themeId 
+            WHERE r.reservationMember.id = :memberId
+                AND r.theme.id = :themeId
                 AND r.date BETWEEN :start AND :end
             """)
-    List<Reservation> findByReservationMember_IdAndTheme_IdAndDateBetween(
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
             long memberId,
             long themeId,
             LocalDate start,
@@ -32,7 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.reservationMember
             WHERE r.reservationMember.id = :memberId
             """)
-    List<Reservation> findAllByReservationMember_Id(long memberId);
+    List<Reservation> findAllByMemberId(long memberId);
 
     @Query("""
             SELECT r FROM Reservation r 

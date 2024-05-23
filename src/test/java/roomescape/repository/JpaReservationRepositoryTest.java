@@ -126,7 +126,7 @@ class JpaReservationRepositoryTest {
     void findByMemberId() {
         Reservation reservation = reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<Reservation> reservations = reservationRepository.findAllByReservationMember_Id(member.getId());
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
 
         assertThat(reservations)
                 .extracting(Reservation::getId)
@@ -145,7 +145,7 @@ class JpaReservationRepositoryTest {
         Reservation onPeriodreservation = reservationRepository.save(new Reservation(member, onPeriodDate, time, theme));
         Reservation notOnPeriodreservation = reservationRepository.save(new Reservation(member, notOnPeriodDate, time, theme));
 
-        List<Reservation> reservations = reservationRepository.findByReservationMember_IdAndTheme_IdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 member.getId(), theme.getId(), startDate, endDate);
 
         assertThat(reservations)
