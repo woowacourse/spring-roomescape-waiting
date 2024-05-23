@@ -22,12 +22,12 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
-            LocalDate date, long timeId, long themeId, long memberId, Status status
-    );
-
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(
             LocalDate date, long timeId, long themeId, Status status
+    );
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeIdAndMemberId(
+            LocalDate date, long timeId, long themeId, long memberId
     );
 
     List<Reservation> findByStatus(Status status);

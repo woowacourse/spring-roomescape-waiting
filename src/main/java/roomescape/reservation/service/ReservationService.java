@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
@@ -58,11 +59,18 @@ public class ReservationService {
     public ReservationResponse registerWaiting(final ReservationSaveRequest saveRequest, final Member member) {
         ReservationTime reservationTime = findReservationTimeById(saveRequest.timeId());
         Theme theme = findThemeById(saveRequest.themeId());
-        validateAlreadyRegistered(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId(), member.getId());
-        validateAlreadyReserved(saveRequest.date(), saveRequest.timeId(), saveRequest.themeId(), member.getId());
+        validateAlreadyEnrolled(saveRequest, member);
 
         Reservation reservation = saveRequest.toEntity(member, reservationTime, theme, Status.PENDING);
         return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private void validateAlreadyEnrolled(final ReservationSaveRequest saveRequest, final Member member) {
+        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeIdAndThemeIdAndMemberId(
+                saveRequest.date(), saveRequest.timeId(),
+                saveRequest.themeId(), member.getId()
+        );
+        reservation.ifPresent(Reservation::throwAlreadyEnrolled);
     }
 
     private ReservationTime findReservationTimeById(final long timeId) {
@@ -73,30 +81,6 @@ public class ReservationService {
     private Theme findThemeById(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 잘못된 테마 번호를 입력하였습니다."));
-    }
-
-    private void validateAlreadyRegistered(
-            final LocalDate date, final long timeId,
-            final long themeId, final long memberId
-    ) {
-        boolean alreadyRegistered = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
-                date, timeId, themeId, memberId, Status.PENDING
-        );
-        if (alreadyRegistered) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약 대기를 등록하였습니다.");
-        }
-    }
-
-    private void validateAlreadyReserved(
-            final LocalDate date, final long timeId,
-            final long themeId, final long memberId
-    ) {
-        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
-                date, timeId, themeId, memberId, Status.RESERVED
-        );
-        if (alreadyReserved) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약 완료한 예약 대기 요청입니다.");
-        }
     }
 
     public List<ReservationResponse> getAllResponses() {
