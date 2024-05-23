@@ -40,6 +40,19 @@ public class ReservationController {
                 authInfo.id(),
                 Status.CREATED);
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
-        return ResponseEntity.created(URI.create("admin/reservation")).body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservation")).body(reservationResponse);
+    }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<ReservationResponse> createReservationWaiting(
+            @Valid @RequestBody ReservationCreateMemberRequest memberRequest,
+            AuthInfo authInfo)
+    {
+        ReservationCreateRequest reservationCreateRequest = ReservationCreateRequest.of(
+                memberRequest,
+                authInfo.id(),
+                Status.WAITING);
+        ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
+        return ResponseEntity.created(URI.create("/reservation")).body(reservationResponse);
     }
 }

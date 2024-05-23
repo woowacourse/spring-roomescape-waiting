@@ -80,11 +80,12 @@ public class Reservation {
                 && this.time.getStartAt().equals(reservationTime.getStartAt());
     }
 
-    public void validateDuplicatedDateTime(Reservation reservation) {
+    public void validateDuplication(Reservation reservation) {
         if (date.equals(reservation.date)
                 && time.equals(reservation.time)
-                && theme.equals(reservation.theme)) {
-            throw new BadRequestException("중복된 시간과 날짜에 대한 예약을 생성할 수 없습니다.");
+                && theme.equals(reservation.theme)
+                && member.equals(reservation.member)) {
+            throw new BadRequestException("중복된 예약이 존재합니다.");
         }
     }
 

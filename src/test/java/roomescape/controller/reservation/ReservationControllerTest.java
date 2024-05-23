@@ -97,6 +97,24 @@ class ReservationControllerTest {
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
     }
 
+    @DisplayName("예약 대기 성공 테스트")
+    @Test
+    void createReservationWaiting() {
+        // given
+        String accessToken = getTokenByLoginRequest(MEMBER_BROWN);
+        Map<String, Object> reservationRequest = createReservationRequest(
+                MEMBER_BROWN, VALID_STRING_DATE,
+                RESERVATION_TIME_10AM, ROOM_THEME1);
+
+        // then
+        RestAssured.given().log().all()
+                .header("cookie", accessToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations/waiting")
+                .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());
+    }
+
     @DisplayName("내 예약 조회 성공 테스트")
     @Test
     void findMyReservations() {

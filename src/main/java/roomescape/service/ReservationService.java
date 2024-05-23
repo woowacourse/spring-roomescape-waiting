@@ -82,7 +82,7 @@ public class ReservationService {
         Reservation reservation = reservationCreateRequest.toReservation(member, reservationTime, roomTheme);
 
         validateOutdatedDateTime(reservation.getDate(), reservationTime.getStartAt());
-        validateDuplicatedDateTime(reservation);
+        validateDuplication(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
@@ -105,11 +105,12 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedDateTime(Reservation reservation) {
-        reservationRepository.findByDateAndTimeAndTheme(
+    private void validateDuplication(Reservation reservation) {
+        reservationRepository.findByDateAndTimeAndThemeAndMember(
                         reservation.getDate(),
                         reservation.getTime(),
-                        reservation.getTheme())
-                .ifPresent(reservation::validateDuplicatedDateTime);
+                        reservation.getTheme(),
+                        reservation.getMember())
+                .ifPresent(reservation::validateDuplication);
     }
 }
