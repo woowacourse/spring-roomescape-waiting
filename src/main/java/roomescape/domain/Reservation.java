@@ -66,4 +66,8 @@ public class Reservation {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
+    }
 }

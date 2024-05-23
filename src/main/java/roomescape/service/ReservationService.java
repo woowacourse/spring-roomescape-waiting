@@ -21,6 +21,7 @@ import roomescape.repository.ThemeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 @Service
@@ -97,8 +98,24 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
-        reservationRepository.deleteById(id);
+        final Optional<Reservation> reservationResult = reservationRepository.findById(id);
+        if (reservationResult.isPresent() && reservationResult.get().getStatus() == ReservationStatus.RESERVED) {
+            updateWaitReservation(reservationResult.get());
+            reservationRepository.deleteById(id);
+        }
+    }
+
+    private void updateWaitReservation(final Reservation reservation) {
+        final LocalDate date = reservation.getDate();
+        final Long timeId = reservation.getTime().getId();
+        final Long themeId = reservation.getTheme().getId();
+        final Optional<Reservation> waitReservationResult = reservationRepository.findFirstByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, ReservationStatus.WAITING);
+        if (!waitReservationResult.isEmpty()) {
+            final Reservation waitReservation = waitReservationResult.get();
+            waitReservation.setStatus(ReservationStatus.RESERVED);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -133,5 +150,18 @@ public class ReservationService {
                 .filter(index -> reservations.get(index).getMember().getId().equals(member.getId()))
                 .findFirst()
                 .orElseThrow(() -> new ReservationFailException("대기중인 예약을 찾을 수 없습니다."));
+    }
+
+    public void deleteWaitingByMember(final Long id, final Member member) {
+        if (reservationRepository.existsByIdAndMemberId(id, member.getId())) {
+            deleteWaiting(id);
+        }
+    }
+
+    private void deleteWaiting(final Long id) {
+        final Optional<Reservation> reservationResult = reservationRepository.findById(id);
+        if (reservationResult.isPresent() && reservationResult.get().getStatus() == ReservationStatus.WAITING) {
+            reservationRepository.deleteById(id);
+        }
     }
 }

@@ -14,7 +14,7 @@ function render(data) {
 
     data.forEach(item => {
         const row = tableBody.insertRow();
-
+        const id = item.id;
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
@@ -31,7 +31,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.id).then(() => window.location.reload());
+                requestDeleteWaiting(id).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
@@ -41,7 +41,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    const endpoint = '';
+    const endpoint = `/reservations-mine/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

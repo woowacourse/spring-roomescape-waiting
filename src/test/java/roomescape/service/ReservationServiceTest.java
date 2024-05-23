@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Member;
 import roomescape.domain.Password;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
@@ -14,6 +15,7 @@ import roomescape.domain.dto.ReservationResponses;
 import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
+import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,10 +27,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationServiceTest {
     private final ReservationService service;
+    private final ReservationRepository repository;
 
     @Autowired
-    public ReservationServiceTest(final ReservationService service) {
+    public ReservationServiceTest(final ReservationService service, final ReservationRepository repository) {
         this.service = service;
+        this.repository = repository;
     }
 
     private long getReservationSize() {
@@ -142,5 +146,42 @@ class ReservationServiceTest {
         final ReservationResponses reservationResponses = service.findReservations(themeId, memberId, dateFrom, dateTo);
         //then
         assertThat(reservationResponses.getData()).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("이미 예약이 되어있는 날짜와 시간 및 테마에 다른 사용자가 예약 등록을 할 경우 예약이 저장된다.")
+    void given_reservationRequest_when_createAlreadyReservedWithDifferentMemberId_then_createdWithStatusIsWaiting() {
+        //given
+        long initialSize = getReservationSize();
+        final ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("2099-04-30"), 1L, 1L, 2L);
+        //when
+        final ReservationResponse reservationResponse = service.create(reservationRequest);
+        long afterCreateSize = getReservationSize();
+        //then
+        assertThat(reservationResponse.id()).isEqualTo(afterCreateSize);
+        assertThat(afterCreateSize).isEqualTo(initialSize + 1);
+    }
+
+    @Test
+    @DisplayName("예약이 제거되면 우선 대기중인 상태의 예약이 예약 상태가 된다.")
+    void given_when_deleteReservationHasWaitingReservation_then_stateChangedToReserved() {
+        //given, when
+        service.delete(8L);
+        //then
+        assertThat(repository.findById(9L).get().getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
+    @DisplayName("대기중인 예약을 제거할 수 있다.")
+    void given_when_delete_then_state() {
+        //given, when
+        long initialSize = getReservationSize();
+        Password password = new Password("hashedpassword", "salt");
+        Member member = new Member(1L, "user@test.com", password, "duck", Role.USER);
+        //when
+        service.deleteWaitingByMember(10L, member);
+        long afterCreateSize = getReservationSize();
+        //then
+        assertThat(afterCreateSize).isEqualTo(initialSize - 1);
     }
 }

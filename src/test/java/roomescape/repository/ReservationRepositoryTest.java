@@ -125,7 +125,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("예약 날짜와 테마Id에 대한 예약을 조회할 수 있다.")
     @Test
-    void given_dateAndThemeId_When_findByDateAndThemeId_then_Reservations() {
+    void given_dateAndThemeId_when_findByDateAndThemeId_then_Reservations() {
         //given, when, then
         assertThat(reservationRepository.findByDateAndThemeId(LocalDate.parse("2024-05-01"), 2L))
                 .hasSize(2);
@@ -133,9 +133,26 @@ class ReservationRepositoryTest {
 
     @DisplayName("예약 날짜, 시간Id, 테마Id에 대한 예약을 조회할 수 있다.")
     @Test
-    void given_dateAndTimeIdAndThemeId_When_findByDateAndTimeIdAndThemeId_then_Reservations() {
+    void given_dateAndTimeIdAndThemeId_when_findByDateAndTimeIdAndThemeId_then_Reservations() {
         //given, when, then
         assertThat(reservationRepository.findByDateAndTimeIdAndThemeId(LocalDate.parse("2999-04-30"), 1L, 1L))
-                .hasSize(2);
+                .hasSize(3);
+    }
+
+    @DisplayName("예약 날짜, 시간Id, 테마Id에 대해 우선 대기중인 예약을 조회할 수 있다.")
+    @Test
+    void given_when_findFirstByDateAndTimeIdAndThemeIdAndStatus_then_Reservation() {
+        //given, when
+        final Reservation reservation = reservationRepository
+                .findFirstByDateAndTimeIdAndThemeIdAndStatus(LocalDate.parse("2999-04-30"), 1L, 1L, ReservationStatus.WAITING).get();
+        //then
+        assertThat(reservation.getId()).isEqualTo(9);
+    }
+
+    @DisplayName("예약 Id가 회원의 소유자인지 검증한다.")
+    @Test
+    void given_when_existByIdAndMemberId_then_True() {
+        //given, when, then
+        assertThat(reservationRepository.existsByIdAndMemberId(1L, 1L)).isTrue();
     }
 }
