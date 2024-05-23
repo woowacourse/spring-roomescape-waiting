@@ -22,11 +22,11 @@ public class ThemeRepositoryTest extends RepositoryTest {
     @MethodSource
     static Stream<Arguments> themeProvider() {
         return Stream.of(
-                Arguments.of(LocalDate.of(2024, 5, 9), LocalDate.of(2024, 5, 10), List.of(4L)),
-                Arguments.of(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12), List.of(3L, 4L)),
-                Arguments.of(LocalDate.of(2024, 5, 11), LocalDate.of(2024, 5, 13), List.of(3L, 2L)),
-                Arguments.of(LocalDate.of(2024, 5, 13), LocalDate.of(2024, 5, 13), List.of(2L)),
-                Arguments.of(LocalDate.of(2024, 5, 14), LocalDate.of(2024, 5, 17), List.of(1L))
+                Arguments.of(LocalDate.of(2025, 5, 9), LocalDate.of(2025, 5, 10), List.of(4L)),
+                Arguments.of(LocalDate.of(2025, 5, 10), LocalDate.of(2025, 5, 12), List.of(3L, 4L)),
+                Arguments.of(LocalDate.of(2025, 5, 11), LocalDate.of(2025, 5, 13), List.of(1L, 3L, 2L)),
+                Arguments.of(LocalDate.of(2025, 5, 13), LocalDate.of(2025, 5, 13), List.of(1L, 2L)),
+                Arguments.of(LocalDate.of(2025, 5, 14), LocalDate.of(2025, 5, 17), List.of(4L, 2L, 1L))
         );
     }
 

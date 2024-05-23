@@ -46,7 +46,7 @@ class AdminReservationControllerTest extends ControllerTest {
 
         RestAssured.given().log().all()
                 .header("Cookie", cookie)
-                .when().delete("/admin/reservations/6")
+                .when().delete("/admin/reservations/21")
                 .then().log().all()
                 .statusCode(404);
     }

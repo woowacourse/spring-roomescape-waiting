@@ -2,10 +2,19 @@ insert into member(name, email, password, role)
 values ('어드민', 'admin@gmail.com', '123', 'ADMIN');
 
 insert into member(name, email, password, role)
-values ('도도', 'dodo@gmail.com', '123', 'MEMBER');
+values ('멤버1', 'one@gmail.com', '123', 'MEMBER');
 
 insert into member(name, email, password, role)
-values ('폭포', 'pokpo@gmail.com', '123', 'MEMBER');
+values ('멤버2', 'two@gmail.com', '123', 'MEMBER');
+
+insert into member(name, email, password, role)
+values ('멤버3', 'three@gmail.com', '123', 'MEMBER');
+
+insert into member(name, email, password, role)
+values ('멤버4', 'four@gmail.com', '123', 'MEMBER');
+
+insert into member(name, email, password, role)
+values ('멤버5', 'five@gmail.com', '123', 'MEMBER');
 
 
 insert into theme(name, description, thumbnail)
@@ -41,16 +50,62 @@ values ('19:00:00');
 
 
 insert into reservation(date, status, time_id, theme_id, member_id)
-values ('2024-05-10', 'RESERVATION', '1', '4', '2');
+values ('2025-05-10', 'RESERVATION', '1', '4', '2');
 
 insert into reservation(date, status, time_id, theme_id, member_id)
-values ('2024-05-11', 'RESERVATION', '2', '3', '2');
+values ('2025-05-11', 'RESERVATION', '2', '3', '2');
 
 insert into reservation(date, status, time_id, theme_id, member_id)
-values ('2024-05-12', 'RESERVATION', '3', '3', '2');
+values ('2025-05-12', 'RESERVATION', '3', '3', '2');
 
 insert into reservation(date, status, time_id, theme_id, member_id)
-values ('2024-05-13', 'RESERVATION', '3', '2', '3');
+values ('2025-05-13', 'RESERVATION', '3', '2', '3');
 
 insert into reservation(date, status, time_id, theme_id, member_id)
-values ('2024-05-14', 'RESERVATION', '4', '1', '3');
+values ('2025-05-13', 'RESERVATION', '4', '1', '3');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION', '2', '1', '4');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION', '4', '4', '4');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION', '1', '2', '5');
+
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-10', 'RESERVATION_WAIT', '1', '4', '3');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-10', 'RESERVATION_WAIT', '1', '4', '4');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-10', 'RESERVATION_WAIT', '1', '4', '5');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-11', 'RESERVATION_WAIT', '2', '3', '3');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-11', 'RESERVATION_WAIT', '2', '3', '5');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-13', 'RESERVATION_WAIT', '3', '2', '4');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-13', 'RESERVATION_WAIT', '4', '1', '2');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-13', 'RESERVATION_WAIT', '4', '1', '4');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-13', 'RESERVATION_WAIT', '4', '1', '5');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION_WAIT', '4', '4', '2');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION_WAIT', '4', '4', '3');
+
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2025-05-14', 'RESERVATION_WAIT', '1', '2', '2');

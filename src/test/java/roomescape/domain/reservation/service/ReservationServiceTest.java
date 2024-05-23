@@ -26,7 +26,7 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("존재 하지 않는 멤버로 예약 시 예외를 발생합니다.")
     @Test
     void should_throw_exception_when_reserve_with_non_exist_member() {
-        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 4L);
+        ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 7L);
 
         assertThatThrownBy(() -> reservationService.addReservation(reservationAddRequest))
                 .isInstanceOf(EntityNotFoundException.class)
@@ -57,13 +57,13 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void should_know_bookable_times() {
         List<BookableTimeResponse> bookableTimes = reservationService.findBookableTimes(
-                new BookableTimesRequest(LocalDate.of(2024, 5, 14), 1L));
+                new BookableTimesRequest(LocalDate.of(2025, 5, 14), 1L));
 
         assertAll(
                 () -> assertThat(bookableTimes.get(0).alreadyBooked()).isFalse(),
-                () -> assertThat(bookableTimes.get(1).alreadyBooked()).isFalse(),
+                () -> assertThat(bookableTimes.get(1).alreadyBooked()).isTrue(),
                 () -> assertThat(bookableTimes.get(2).alreadyBooked()).isFalse(),
-                () -> assertThat(bookableTimes.get(3).alreadyBooked()).isTrue(),
+                () -> assertThat(bookableTimes.get(3).alreadyBooked()).isFalse(),
                 () -> assertThat(bookableTimes.get(4).alreadyBooked()).isFalse()
         );
     }
@@ -110,7 +110,7 @@ class ReservationServiceTest extends ServiceTest {
     @DisplayName("없는 id의 예약을 삭제하면 예외를 발생합니다.")
     @Test
     void should_throw_EntityNotFoundException_when_remove_reservation_with_non_exist_id() {
-        assertThatThrownBy(() -> reservationService.removeReservation(6L))
+        assertThatThrownBy(() -> reservationService.removeReservation(21L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("해당 id를 가진 예약이 존재하지 않습니다.");
     }

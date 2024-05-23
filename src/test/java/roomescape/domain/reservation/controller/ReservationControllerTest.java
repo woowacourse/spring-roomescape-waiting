@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import roomescape.ControllerTest;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 
@@ -20,7 +21,7 @@ class ReservationControllerTest extends ControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(5));
+                .body("size()", is(20));
     }
 
     @DisplayName("필터링된 예약 목록을 불러올 수 있다.")
@@ -29,8 +30,8 @@ class ReservationControllerTest extends ControllerTest {
         RestAssured.given().log().all()
                 .queryParam("themeId", 4)
                 .queryParam("memberId", 2)
-                .queryParam("dateFrom", "2024-05-10")
-                .queryParam("dateTo", "2024-05-11")
+                .queryParam("dateFrom", "2025-05-10")
+                .queryParam("dateTo", "2025-05-12")
                 .when().get("/reservations/search")
                 .then().log().all()
                 .statusCode(200)
@@ -60,7 +61,7 @@ class ReservationControllerTest extends ControllerTest {
         String cookie = getMemberCookie();
 
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(
-                LocalDate.MAX, 1L, 1L, null);
+                LocalDate.of(2025, 5, 13), 3L, 2L, null);
         RestAssured.given().log().all()
                 .header("Cookie", cookie)
                 .contentType(ContentType.JSON)
@@ -79,5 +80,23 @@ class ReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(5));
+    }
+
+    @DisplayName("존재하는 예약대기에 대한 삭제 요청시, 204 no content를 응답한다.")
+    @Test
+    void should_remove_reservation_wait_when_delete_request_reservations_id() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/6")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @DisplayName("존재하지 않는 예약대기에 대한 삭제 요청시, 404 Not Found를 응답한다.")
+    @Test
+    void should_response_bad_request_when_nonExist_id() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/21")
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }

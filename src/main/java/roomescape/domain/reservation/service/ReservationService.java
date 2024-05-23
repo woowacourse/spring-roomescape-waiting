@@ -128,4 +128,11 @@ public class ReservationService {
         Reservation reservation = reservationWaitAddRequest.toEntity(reservationTime, theme, member);
         return reservationRepository.save(reservation);
     }
+
+    public void removeReservationWait(Long id) {
+        if (reservationRepository.findById(id).isEmpty()) {
+            throw new EntityNotFoundException("해당 id를 가진 예약대기가 존재하지 않습니다.");
+        }
+        reservationRepository.deleteById(id);
+    }
 }

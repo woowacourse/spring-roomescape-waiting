@@ -22,7 +22,7 @@ class ThemeServiceTest extends ServiceTest {
     @DisplayName("인기 테마를 알 수 있습니다.")
     @Test
     void should_get_theme_ranking() {
-        LocalDate now = LocalDate.of(2024, 5, 15);
+        LocalDate now = LocalDate.of(2025, 5, 14);
 
         assertThat(themeService.getThemeRanking(now)).hasSize(4);
     }

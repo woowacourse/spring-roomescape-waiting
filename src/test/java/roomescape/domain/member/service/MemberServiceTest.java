@@ -21,7 +21,7 @@ class MemberServiceTest extends ServiceTest {
     @DisplayName("모든 유저를 찾을 수 있습니다.")
     @Test
     void should_find_all_user() {
-        assertThat(memberService.findAll()).hasSize(3);
+        assertThat(memberService.findAll()).hasSize(6);
     }
 
     @DisplayName("원하는 id의 유저를 찾을 수 있습니다.")
@@ -35,7 +35,7 @@ class MemberServiceTest extends ServiceTest {
     @DisplayName("없는 id의 유저를 찾으면 예외가 발생합니다.")
     @Test
     void should_throw_exception_when_find_by_non_exist_id() {
-        assertThatThrownBy(() -> memberService.findMemberById(4L))
+        assertThatThrownBy(() -> memberService.findMemberById(7L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("없는 member를 조회 했습니다.");
     }

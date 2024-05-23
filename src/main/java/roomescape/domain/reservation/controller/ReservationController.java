@@ -82,4 +82,10 @@ public class ReservationController {
         ReservationResponse reservationResponse = ReservationResponse.from(reservation);
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> removeReservationWait(@PathVariable("id") Long id) {
+        reservationService.removeReservationWait(id);
+        return ResponseEntity.noContent().build();
+    }
 }
