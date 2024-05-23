@@ -116,8 +116,7 @@ public class ReservationService {
         if (!reservation.getStatus().isPending()) {
             Optional<Reservation> pendingReservation = reservationRepository.findFirstByDateAndTimeAndThemeAndStatusOrderById(
                     reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.PENDING);
-            pendingReservation.ifPresentOrElse(Reservation::updateStatusBooked, () -> {
-            });
+            pendingReservation.ifPresent(Reservation::updateStatusBooked);
         }
         reservationRepository.deleteById(id);
     }
