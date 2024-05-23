@@ -57,12 +57,6 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservation/" + reservation.getId())).body(reservationResponse);
     }
 
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
-        reservationService.removeReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/bookable-times")
     public ResponseEntity<List<BookableTimeResponse>> getTimesWithStatus(
             @RequestParam("date") LocalDate date,

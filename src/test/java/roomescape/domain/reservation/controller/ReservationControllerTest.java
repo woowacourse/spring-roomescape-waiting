@@ -80,22 +80,4 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200)
                 .body("size()", is(5));
     }
-
-    @DisplayName("존재하는 리소스에 대한 삭제 요청시, 204 no content를 응답한다.")
-    @Test
-    void should_remove_reservation_when_delete_request_reservations_id() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
-    }
-
-    @DisplayName("존재하지 않는 리소스에 대한 삭제 요청시, 404 Not Found를 응답한다.")
-    @Test
-    void should_response_bad_request_when_nonExist_id() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/6")
-                .then().log().all()
-                .statusCode(404);
-    }
 }
