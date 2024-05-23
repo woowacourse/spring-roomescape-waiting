@@ -2,11 +2,11 @@
 
 GET http://localhost:8080/reservations
 
-### 테마 아이디, 회원 아이디, 기간 조건 별 조회 API (dateFrom과 dateTo 파라미터 값 설정 필요)
+### 테마 아이디, 회원 아이디, 기간 조건 별 예약 조회 API (dateFrom과 dateTo 파라미터 값 설정 필요)
 
 GET http://localhost:8080/reservations/search?themeId=1&memberId=1&dateFrom=?&dateTo=?
 
-### 사용자 별 예약 조회 API
+### 사용자 예약 조회 API
 
 GET http://localhost:8080/reservations/mine
 
@@ -33,7 +33,15 @@ Content-Type: application/json
   "memberId": 1
 }
 
-### 대기 예약 추가 API
+### 예약 삭제 API
+
+DELETE http://localhost:8080/reservations/1
+
+### 예약 대기 승인 API
+
+PATCH http://localhost:8080/reservations/wait/1
+
+### 예약 대기 추가 API
 
 POST http://localhost:8080/reservations/wait
 Content-Type: application/json
@@ -44,14 +52,6 @@ Content-Type: application/json
   "themeId": 1
 }
 
-### 대기 예약 조회 API
+### 예약 대기 조회 API
 
 GET http://localhost:8080/reservations/wait
-
-### 예약 삭제 API
-
-DELETE http://localhost:8080/reservations/1
-
-### 예약 대기 승인 API
-
-PATCH http://localhost:8080/reservations/wait/1
