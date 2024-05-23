@@ -38,17 +38,36 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 .then().log().all().extract().cookie("token");
     }
 
-    @DisplayName("테마 추가 성공 테스트")
+    @DisplayName("관리자가 테마를 추가한다.")
     @Test
-    void createTheme() {
+    void createThemeByAdmin() {
         //given
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
 
         //when&then
-        RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+        RestAssured.given().log().all()
+                .cookie("token",adminToken)
+                .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
+    }
+
+    @DisplayName("일반 사용자가 테마를 추가한다.")
+    @Test
+    void createThemeByMember() {
+        //given
+        ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+
+        //when&then
+        RestAssured.given().log().all()
+                .cookie("token",guestToken)
+                .contentType(ContentType.JSON).body(themeRequest)
+                .when().post("/themes")
+                .then().log().all()
+                .assertThat().statusCode(403)
+                .body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
     }
 
     @DisplayName("테마 추가 실패 테스트 - 썸네일 형식 오류")
@@ -58,7 +77,9 @@ class ThemeAcceptanceTest extends AcceptanceTest {
         ThemeRequest themeRequest = new ThemeRequest("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "//i.pinimg.com/236x/6e/bc/4");
 
         //when&then
-        RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+        RestAssured.given().log().all()
+                .cookie("token",adminToken)
+                .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
                 .then().log().all().statusCode(400).body("message", is("올바르지 않은 썸네일 형식입니다."));
     }
@@ -70,7 +91,9 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
-                    RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+                    RestAssured.given().log().all()
+                            .cookie("token",adminToken)
+                            .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
                 }),
@@ -92,7 +115,9 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
-                    themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+                    themeId = (int) RestAssured.given().log().all()
+                            .cookie("token",adminToken)
+                            .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
                 }),
@@ -119,7 +144,9 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
-                    themeId = (int) RestAssured.given().contentType(ContentType.JSON).body(themeRequest)
+                    themeId = (int) RestAssured.given().log().all()
+                            .cookie("token",adminToken)
+                            .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
                 }),
