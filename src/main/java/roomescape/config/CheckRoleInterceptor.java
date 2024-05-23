@@ -1,7 +1,5 @@
 package roomescape.config;
 
-import java.util.Optional;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,19 +25,9 @@ public class CheckRoleInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new TokenValidationFailureException();
-        }
-        Optional<String> token = CookieUtil.extractToken(cookies);
-
-        token.ifPresentOrElse(
-                this::validateAdmin,
-                () -> {
-                    throw new TokenValidationFailureException();
-                }
-        );
-
+        Cookie[] cookies = CookieUtil.requireNonnull(request.getCookies(), TokenValidationFailureException::new);
+        String token = CookieUtil.extractToken(cookies).orElseThrow(TokenValidationFailureException::new);
+        validateAdmin(token);
         return true;
     }
 

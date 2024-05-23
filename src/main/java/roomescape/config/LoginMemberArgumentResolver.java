@@ -36,13 +36,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Member resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class));
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new TokenValidationFailureException();
-        }
-        String token = CookieUtil.extractToken(cookies)
-                .orElseThrow(TokenValidationFailureException::new);
-        // TODO: review - 문구가 중복되니 예외 내부로
+        Cookie[] cookies = CookieUtil.requireNonnull(request.getCookies(), TokenValidationFailureException::new);
+        String token = CookieUtil.extractToken(cookies).orElseThrow(TokenValidationFailureException::new);
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
         return memberService.findValidatedSiteUserById(memberId);
