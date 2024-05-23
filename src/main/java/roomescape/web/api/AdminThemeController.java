@@ -18,13 +18,13 @@ import roomescape.service.dto.response.theme.ThemeResponse;
 public class AdminThemeController {
     private final ThemeService themeService;
 
-    @PostMapping("/themes")
+    @PostMapping("/admin/themes")
     public ResponseEntity<ThemeResponse> saveTheme(@RequestBody @Valid ThemeRequest request) {
         ThemeResponse response = themeService.saveTheme(request);
         return ResponseEntity.created(URI.create("/themes/" + response.id())).body(response);
     }
 
-    @DeleteMapping("/themes/{idTheme}")
+    @DeleteMapping("/admin/themes/{idTheme}")
     public ResponseEntity<Void> deleteTheme(@PathVariable(value = "idTheme") Long themeId) {
         themeService.deleteTheme(themeId);
         return ResponseEntity.noContent().build();

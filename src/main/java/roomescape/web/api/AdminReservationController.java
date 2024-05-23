@@ -49,6 +49,18 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservations);
     }
 
+    @GetMapping("/admin/waitings")
+    public ResponseEntity<List<ReservationResponse>> findAllWaitings() {
+        List<ReservationResponse> waitings = reservationService.findAllWaitings();
+        return ResponseEntity.ok(waitings);
+    }
+
+    @DeleteMapping("/admin/waiting/{idWaiting}")
+    public ResponseEntity<Void> cancelWaiting(@PathVariable("idWaiting") Long waitingId) {
+        reservationService.cancelReservation(waitingId);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/admin/reservations/{idReservation}")
     public ResponseEntity<Void> cancelReservation(@PathVariable("idReservation") Long reservationId) {
         reservationService.cancelReservation(reservationId);

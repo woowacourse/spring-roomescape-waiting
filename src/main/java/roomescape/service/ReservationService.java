@@ -99,6 +99,12 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> findAllWaitings() {
+        return reservationRepository.findAllByStatus(Status.WAITING).stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     @Transactional
     public Reservation approveReservation(Long reservationId) {
         Reservation reservation = reservationRepository.getById(reservationId);
