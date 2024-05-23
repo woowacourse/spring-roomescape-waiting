@@ -21,15 +21,32 @@ public class ReservationCreateService {
         this.reservationRepository = reservationRepository;
     }
 
-    public Reservation createReservation(ReservationSaveRequest request, Member member, ReservationStatus reservationStatus) {
-        ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
+    public Reservation createReservation(ReservationSaveRequest request,
+                                         Member member,
+                                         ReservationStatus reservationStatus) {
+        ReservationTime reservationTime =
+                reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
-        reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId(), reservationStatus);
-        reservationCreateValidator.validateOwnReservationExist(member, theme, reservationTime, request.date());
+        reservationCreateValidator.validateAlreadyBooked(
+                request.date(),
+                request.timeId(),
+                request.themeId(),
+                reservationStatus
+        );
+        reservationCreateValidator.validateOwnReservationExist(
+                member,
+                theme,
+                reservationTime,
+                request.date()
+        );
 
-        Reservation reservation = request.toEntity(reservationTime, theme, member, reservationStatus);
-
+        Reservation reservation = request.toEntity(
+                reservationTime,
+                theme,
+                member,
+                reservationStatus
+        );
         return reservationRepository.save(reservation);
     }
 }

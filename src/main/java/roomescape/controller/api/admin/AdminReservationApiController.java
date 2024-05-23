@@ -33,8 +33,7 @@ public class AdminReservationApiController {
     public ResponseEntity<List<ReservationResponse>> getSearchingReservations(@RequestParam long memberId,
                                                                               @RequestParam long themeId,
                                                                               @RequestParam LocalDate dateFrom,
-                                                                              @RequestParam LocalDate dateTo
-    ) {
+                                                                              @RequestParam LocalDate dateTo) {
         List<Reservation> reservations = reservationFindService.searchReservations(memberId, themeId, dateFrom, dateTo);
         return ResponseEntity.ok(
                 reservations.stream()
@@ -44,7 +43,8 @@ public class AdminReservationApiController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid ReservationAdminSaveRequest request) {
+    public ResponseEntity<ReservationResponse> addReservationByAdmin(@RequestBody @Valid
+                                                                     ReservationAdminSaveRequest request) {
         Reservation newReservation = adminReservationCreateService.createReservation(request);
         return ResponseEntity.created(URI.create("/admin/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));

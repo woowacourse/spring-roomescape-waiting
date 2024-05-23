@@ -33,8 +33,12 @@ public class Reservation extends BaseTime {
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime reservationTime,
-                       Theme theme, ReservationStatus reservationStatus) {
+    public Reservation(Long id,
+                       Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
+                       Theme theme,
+                       ReservationStatus reservationStatus) {
         validate(member, date, reservationTime, theme, reservationStatus);
         this.id = id;
         this.member = member;
@@ -44,16 +48,22 @@ public class Reservation extends BaseTime {
         this.reservationStatus = reservationStatus;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime reservationTime,
-                       Theme theme, ReservationStatus reservationStatus) {
+    public Reservation(Member member,
+                       LocalDate date,
+                       ReservationTime reservationTime,
+                       Theme theme,
+                       ReservationStatus reservationStatus) {
         this(null, member, date, reservationTime, theme, reservationStatus);
     }
 
     protected Reservation() {
     }
 
-    private void validate(Member member, LocalDate date, ReservationTime reservationTime,
-                          Theme theme, ReservationStatus reservationStatus) {
+    private void validate(Member member,
+                          LocalDate date,
+                          ReservationTime reservationTime,
+                          Theme theme,
+                          ReservationStatus reservationStatus) {
         if (member == null) {
             throw new IllegalArgumentException("예약하려는 사용자를 선택해주세요.");
         }

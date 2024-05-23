@@ -14,11 +14,13 @@ public record UserReservationResponse(Long reservationId,
                                       String status) {
 
     public UserReservationResponse(ReservationWaitingWithRank reservationWaitingWithRank) {
-        this(reservationWaitingWithRank.getReservation().getId(),
+        this(
+                reservationWaitingWithRank.getReservation().getId(),
                 reservationWaitingWithRank.getReservation().getTheme().getName(),
                 reservationWaitingWithRank.getReservation().getDate(),
                 reservationWaitingWithRank.getReservation().getReservationTime().getStartAt(),
-                reservationStatusToString(reservationWaitingWithRank));
+                reservationStatusToString(reservationWaitingWithRank)
+        );
     }
 
     private static String reservationStatusToString(ReservationWaitingWithRank reservationWaitingWithRank) {

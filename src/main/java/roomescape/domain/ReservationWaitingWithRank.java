@@ -5,7 +5,8 @@ public class ReservationWaitingWithRank {
     private final Reservation reservation;
     private final Long rank;
 
-    public ReservationWaitingWithRank(Reservation reservation, Long rank) {
+    public ReservationWaitingWithRank(Reservation reservation,
+                                      Long rank) {
         this.reservation = reservation;
         this.rank = rank;
     }

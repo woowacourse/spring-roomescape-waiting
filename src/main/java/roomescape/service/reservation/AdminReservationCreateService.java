@@ -15,7 +15,8 @@ public class AdminReservationCreateService {
     private final ReservationRepository reservationRepository;
     private final ReservationCreateValidator reservationCreateValidator;
 
-    public AdminReservationCreateService(ReservationRepository reservationRepository, ReservationCreateValidator reservationCreateValidator) {
+    public AdminReservationCreateService(ReservationRepository reservationRepository,
+                                         ReservationCreateValidator reservationCreateValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationCreateValidator = reservationCreateValidator;
     }
@@ -24,11 +25,25 @@ public class AdminReservationCreateService {
         ReservationTime reservationTime = reservationCreateValidator.getValidReservationTime(request.timeId());
         reservationCreateValidator.validateDateIsFuture(request.date(), reservationTime);
         Theme theme = reservationCreateValidator.getValidTheme(request.themeId());
-        reservationCreateValidator.validateAlreadyBooked(request.date(), request.timeId(), request.themeId(), ReservationStatus.RESERVED);
+        reservationCreateValidator.validateAlreadyBooked(
+                request.date(),
+                request.timeId(),
+                request.themeId(),
+                ReservationStatus.RESERVED
+        );
         Member member = reservationCreateValidator.getValidMember(request.memberId());
-        reservationCreateValidator.validateOwnReservationExist(member, theme, reservationTime, request.date());
-
-        Reservation reservation = request.toEntity(request, reservationTime, theme, member);
+        reservationCreateValidator.validateOwnReservationExist(
+                member,
+                theme,
+                reservationTime,
+                request.date()
+        );
+        Reservation reservation = request.toEntity(
+                request,
+                reservationTime,
+                theme,
+                member
+        );
         return reservationRepository.save(reservation);
     }
 }

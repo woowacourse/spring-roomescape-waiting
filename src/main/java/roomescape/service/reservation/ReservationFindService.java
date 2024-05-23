@@ -22,9 +22,16 @@ public class ReservationFindService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> searchReservations(long memberId, long themeId,
-                                                LocalDate dateFrom, LocalDate dateTo) {
-        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo);
+    public List<Reservation> searchReservations(long memberId,
+                                                long themeId,
+                                                LocalDate dateFrom,
+                                                LocalDate dateTo) {
+        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(
+                memberId,
+                themeId,
+                dateFrom,
+                dateTo
+        );
     }
 
     public List<ReservationWaitingWithRank> findMemberReservations(long memberId) {

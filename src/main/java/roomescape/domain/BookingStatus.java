@@ -13,7 +13,8 @@ public class BookingStatus {
         this.reservationStatus = reservationStatus;
     }
 
-    public static BookingStatus of(List<ReservationTime> reservedTimes, List<ReservationTime> reservationTimes) {
+    public static BookingStatus of(List<ReservationTime> reservedTimes,
+                                   List<ReservationTime> reservationTimes) {
         Map<ReservationTime, Boolean> reservationStatus = new HashMap<>();
         for (ReservationTime reservationTime : reservationTimes) {
             reservationStatus.put(reservationTime, isReserved(reservedTimes, reservationTime));
@@ -21,7 +22,8 @@ public class BookingStatus {
         return new BookingStatus(reservationStatus);
     }
 
-    private static boolean isReserved(List<ReservationTime> reservedTimes, ReservationTime reservationTime) {
+    private static boolean isReserved(List<ReservationTime> reservedTimes,
+                                      ReservationTime reservationTime) {
         return reservedTimes.stream()
                 .anyMatch(reservedTime -> reservedTime.equals(reservationTime));
     }

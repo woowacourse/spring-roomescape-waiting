@@ -20,7 +20,8 @@ public class ReservationTime extends BaseTime {
         this.startAt = startAt;
     }
 
-    public ReservationTime(Long id, LocalTime startAt) {
+    public ReservationTime(Long id,
+                           LocalTime startAt) {
         validate(startAt);
         this.id = id;
         this.startAt = startAt;

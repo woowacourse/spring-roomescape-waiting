@@ -17,21 +17,28 @@ public class Theme extends BaseTime {
     private String description;
     private String thumbnail;
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    public Theme(Long id,
+                 String name,
+                 String description,
+                 String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public Theme(String name, String description, String thumbnail) {
+    public Theme(String name,
+                 String description,
+                 String thumbnail) {
         this(null, name, description, thumbnail);
     }
 
     protected Theme() {
     }
 
-    private void validate(String name, String description, String thumbnail) {
+    private void validate(String name,
+                          String description,
+                          String thumbnail) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("테마 이름을 선택해주세요");
         }

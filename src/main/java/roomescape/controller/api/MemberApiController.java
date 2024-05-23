@@ -22,7 +22,8 @@ public class MemberApiController {
     }
 
     @PostMapping("/members")
-    public ResponseEntity<MemberIdAndNameResponse> signup(@RequestBody @Valid SignupRequest request) {
+    public ResponseEntity<MemberIdAndNameResponse> signup(@RequestBody @Valid
+                                                          SignupRequest request) {
         Member member = memberService.signUp(request);
         return ResponseEntity.created(URI.create("/members/" + member.getId()))
                 .body(new MemberIdAndNameResponse(member.getId(), member.getName()));

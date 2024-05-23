@@ -53,7 +53,8 @@ public class ReservationApiController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<UserReservationResponse>> getUserReservations(@AuthenticatedMember Member member) {
-        List<ReservationWaitingWithRank> reservationWaitingWithRanks = reservationFindService.findMemberReservations(member.getId());
+        List<ReservationWaitingWithRank> reservationWaitingWithRanks =
+                reservationFindService.findMemberReservations(member.getId());
         return ResponseEntity.ok(
                 reservationWaitingWithRanks.stream()
                         .map(UserReservationResponse::new)
@@ -62,16 +63,22 @@ public class ReservationApiController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> addReservationByUser(@RequestBody @Valid ReservationSaveRequest request,
+    public ResponseEntity<ReservationResponse> addReservationByUser(@RequestBody @Valid
+                                                                    ReservationSaveRequest request,
                                                                     @AuthenticatedMember Member member) {
-        Reservation newReservation = reservationCreateService.createReservation(request, member, ReservationStatus.RESERVED);
+        Reservation newReservation = reservationCreateService.createReservation(
+                request,
+                member,
+                ReservationStatus.RESERVED
+        );
         return ResponseEntity.created(URI.create("/reservations/" + newReservation.getId()))
                 .body(new ReservationResponse(newReservation));
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable
-                                                  @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
+                                                  @Positive(message = "1 이상의 값만 입력해주세요.")
+                                                  long id) {
         reservationDeleteService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }

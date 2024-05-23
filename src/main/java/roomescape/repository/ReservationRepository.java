@@ -20,10 +20,14 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     boolean existsByThemeId(long themeId);
 
-    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(long memberId, long themeId,
-                                                             LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(long memberId,
+                                                             long themeId,
+                                                             LocalDate dateFrom,
+                                                             LocalDate dateTo);
 
-    boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    boolean existsByDateAndReservationTimeIdAndThemeId(LocalDate date,
+                                                       long timeId,
+                                                       long themeId);
 
     boolean existsByReservationTimeId(long timeId);
 
@@ -38,11 +42,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             AND r.reservationTime = :reservationTime 
             AND r.date = :date
             """)
-    boolean hasBookedReservation(
-            @Param("member") Member member,
-            @Param("theme") Theme theme,
-            @Param("reservationTime") ReservationTime reservationTime,
-            @Param("date") LocalDate date);
+    boolean hasBookedReservation(@Param("member") Member member,
+                                 @Param("theme") Theme theme,
+                                 @Param("reservationTime") ReservationTime reservationTime,
+                                 @Param("date") LocalDate date);
 
     @Query("""
             SELECT new roomescape.domain.ReservationWaitingWithRank(

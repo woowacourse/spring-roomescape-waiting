@@ -19,7 +19,8 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
     private final AuthService authService;
     private final TokenProvider tokenProvider;
 
-    public AuthenticatedMemberArgumentResolver(AuthService authService, TokenProvider tokenProvider) {
+    public AuthenticatedMemberArgumentResolver(AuthService authService,
+                                               TokenProvider tokenProvider) {
         this.authService = authService;
         this.tokenProvider = tokenProvider;
     }
@@ -27,7 +28,7 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthenticatedMember.class)
-                && Member.class.isAssignableFrom(parameter.getParameterType());
+               && Member.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override

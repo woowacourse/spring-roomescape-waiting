@@ -51,9 +51,10 @@ public class ReservationTimeApiController {
     }
 
     @GetMapping("/times/available")
-    public ResponseEntity<List<BookingStatusResponse>> getReservationTimesIsBooked(
-            @RequestParam LocalDate date,
-            @RequestParam @Positive(message = "1 이상의 값만 입력해주세요.") long themeId) {
+    public ResponseEntity<List<BookingStatusResponse>> getReservationTimesIsBooked(@RequestParam LocalDate date,
+                                                                                   @RequestParam
+                                                                                   @Positive(message = "1 이상의 값만 입력해주세요.")
+                                                                                   long themeId) {
         BookingStatus bookingStatus = reservationTimeFindService.findIsBooked(date, themeId);
         return ResponseEntity.ok(
                 bookingStatus.getReservationStatus()
@@ -77,7 +78,8 @@ public class ReservationTimeApiController {
 
     @DeleteMapping("/times/{id}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable
-                                                      @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
+                                                      @Positive(message = "1 이상의 값만 입력해주세요.")
+                                                      long id) {
         reservationTimeDeleteService.deleteReservationTime(id);
         return ResponseEntity.noContent().build();
     }

@@ -12,6 +12,11 @@ public record SignupRequest(@Email(message = "잘못된 이메일 형식입니�
                             @NotBlank(message = "이름을 입력해주세요.") String name) {
 
     public Member toEntity(SignupRequest request) {
-        return new Member(request.name(), request.email(), request.password(), Role.USER);
+        return new Member(
+                request.name(),
+                request.email(),
+                request.password(),
+                Role.USER
+        );
     }
 }

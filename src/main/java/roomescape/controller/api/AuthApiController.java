@@ -29,7 +29,9 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody @Valid
+                                      LoginRequest request,
+                                      HttpServletResponse response) {
         String accessToken = authService.login(request);
         Cookie cookie = new Cookie("token", accessToken);
         cookie.setHttpOnly(true);

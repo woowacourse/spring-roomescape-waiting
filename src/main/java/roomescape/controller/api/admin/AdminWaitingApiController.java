@@ -38,10 +38,9 @@ public class AdminWaitingApiController {
     }
 
     @DeleteMapping("/admin/waitings/{id}")
-    public ResponseEntity<Void> deleteReservation(
-            @AuthenticatedMember Member member,
-            @PathVariable
-            @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
+    public ResponseEntity<Void> deleteReservation(@AuthenticatedMember Member member,
+                                                  @PathVariable
+                                                  @Positive(message = "1 이상의 값만 입력해주세요.") long id) {
         reservationDeleteService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
