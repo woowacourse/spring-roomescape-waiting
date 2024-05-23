@@ -30,7 +30,7 @@ class AdminPageApiTest {
     int port;
 
     static List<String> provideUrls() {
-        return List.of("/admin", "/admin/reservation", "/admin/time", "admin/theme");
+        return List.of("/admin", "/admin/reservation", "/admin/time", "/admin/theme", "/admin/waiting");
     }
 
     @ParameterizedTest
