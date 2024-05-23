@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.core.AuthenticationPrincipal;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.reservation.dto.request.CreateWaitingRequest;
+import roomescape.reservation.dto.response.ConfirmReservationResponse;
 import roomescape.reservation.dto.response.CreateWaitingResponse;
 import roomescape.reservation.dto.response.FindWaitingResponse;
 import roomescape.reservation.service.WaitingService;
@@ -36,6 +37,15 @@ public class WaitingController {
                 waitingService.createReservation(authInfo, createWaitingRequest);
         return ResponseEntity.created(URI.create("/waitings/" + createWaitingResponse.id()))
                 .body(createWaitingResponse);
+    }
+
+    @PostMapping("/{id}/confirmation")
+    public ResponseEntity<ConfirmReservationResponse> confirmWaiting(
+            @AuthenticationPrincipal AuthInfo authInfo, @PathVariable Long id) {
+        
+        ConfirmReservationResponse confirmReservationResponse = waitingService.confirmWaiting(id);
+        return ResponseEntity.created(URI.create("/waitings/" + confirmReservationResponse.id()))
+                .body(confirmReservationResponse);
     }
 
     @GetMapping

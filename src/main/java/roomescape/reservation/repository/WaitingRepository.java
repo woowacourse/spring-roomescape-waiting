@@ -27,4 +27,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 GROUP BY otherWaiting.date, otherWaiting.reservationTime, otherWaiting.theme
             """)
     List<FindWaitingRankResponse> findAllWaitingResponses(Long memberId);
+
+    boolean existsByDateAndReservationTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long reservationTimeId,
+                                                                    Long themeId, Long id);
 }

@@ -11,8 +11,10 @@ import roomescape.auth.domain.AuthInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.CreateWaitingRequest;
+import roomescape.reservation.dto.response.ConfirmReservationResponse;
 import roomescape.reservation.dto.response.CreateWaitingResponse;
 import roomescape.reservation.dto.response.FindWaitingResponse;
+import roomescape.reservation.model.Reservation;
 import roomescape.reservation.model.ReservationTime;
 import roomescape.reservation.model.Slot;
 import roomescape.reservation.model.Theme;
@@ -110,6 +112,36 @@ public class WaitingService {
     private Member findMember(final Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 회원이 존재하지 않아 예약을 생성할 수 없습니다."));
+    }
+
+    public ConfirmReservationResponse confirmWaiting(Long id) {
+        Waiting waiting = findWaiting(id);
+        checkReservationExists(waiting);
+        checkFirstWaiting(waiting);
+
+        Reservation reservation = new Reservation(waiting.getMember(), waiting.getDate(), waiting.getReservationTime(),
+                waiting.getTheme());
+        waitingRepository.deleteById(id);
+        return ConfirmReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private void checkReservationExists(Waiting waiting) {
+        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(
+                waiting.getDate(), waiting.getReservationTime().getId(), waiting.getTheme().getId())) {
+            throw new IllegalArgumentException("이미 예약이 존재하여 대기를 예약으로 변경할 수 없습니다.");
+        }
+    }
+
+    private void checkFirstWaiting(Waiting waiting) {
+        if (waitingRepository.existsByDateAndReservationTimeIdAndThemeIdAndIdLessThan(
+                waiting.getDate(), waiting.getReservationTime().getId(), waiting.getTheme().getId(), waiting.getId())) {
+            throw new IllegalArgumentException(waiting.getId() + "보다 앞선 대기가 존재하여 예약으로 변경할 수 없습니다.");
+        }
+    }
+
+    private Waiting findWaiting(Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("식별자 " + id + "에 해당하는 대기가 존재하지 않아 예약으로 변경할 수 없습니다."));
     }
 
     public List<FindWaitingResponse> getWaitings() {
