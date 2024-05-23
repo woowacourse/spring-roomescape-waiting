@@ -39,6 +39,12 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+    private static void validateDoesNotAlreadyReservateMember(Reservation reservation, Member member) {
+        if (reservation.isSameMember(member)) {
+            throw new DuplicationException("이미 예약에 성공하셨습니다.");
+        }
+    }
+
     @Transactional
     public WaitingResponse addWaiting(WaitingRequest waitingRequest, MemberRequest memberRequest) {
         Reservation reservation = getReservationByWaiting(waitingRequest);
@@ -69,12 +75,6 @@ public class WaitingService {
     private void validateIsNotDuplicatedMember(Reservation reservation, Member member) {
         validateDoesNotAlreadyReservateMember(reservation, member);
         validateIsNotAlreadyWaitingMember(reservation, member);
-    }
-
-    private static void validateDoesNotAlreadyReservateMember(Reservation reservation, Member member) {
-        if (reservation.isSameMember(member)) {
-            throw new DuplicationException("이미 예약에 성공하셨습니다.");
-        }
     }
 
     private void validateIsNotAlreadyWaitingMember(Reservation reservation, Member member) {

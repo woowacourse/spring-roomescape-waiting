@@ -7,12 +7,12 @@ import static roomescape.InitialMemberFixture.COMMON_PASSWORD;
 import static roomescape.InitialMemberFixture.MEMBER_1;
 import static roomescape.InitialMemberFixture.NOT_SAVED_MEMBER;
 
-import javax.naming.AuthenticationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.login.dto.LoginRequest;
 import roomescape.login.dto.TokenResponse;
@@ -45,12 +45,12 @@ class LoginServiceTest {
         );
 
         assertThatThrownBy(() -> loginService.createMemberToken(loginRequest))
-                .isInstanceOf(AuthenticationException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @Test
     @DisplayName("로그인에 성공하면 토큰을 발행한다.")
-    void getTokenIfLoginSucceeds() throws AuthenticationException {
+    void getTokenIfLoginSucceeds() {
         LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), ADMIN.getEmail().email());
 
         TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);

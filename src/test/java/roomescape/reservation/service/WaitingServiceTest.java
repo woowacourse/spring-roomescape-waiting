@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.MEMBER_1;

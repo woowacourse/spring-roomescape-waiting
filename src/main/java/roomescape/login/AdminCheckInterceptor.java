@@ -2,9 +2,9 @@ package roomescape.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import javax.naming.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.exceptions.AuthException;
 import roomescape.login.dto.TokenResponse;
 import roomescape.login.service.LoginService;
 import roomescape.member.dto.MemberRequest;
@@ -23,14 +23,13 @@ public class AdminCheckInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-            throws AuthenticationException {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         TokenResponse tokenResponse = TokenExtractor.extractTokenFromCookie(request.getCookies());
         MemberRequest memberRequest = loginService.getMemberRequestByToken(tokenResponse);
 
         if (memberService.isAdmin(memberRequest)) {
             return true;
         }
-        throw new AuthenticationException("접근 권한이 없습니다.");
+        throw new AuthException("접근 권한이 없습니다.");
     }
 }

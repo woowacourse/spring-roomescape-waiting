@@ -1,6 +1,5 @@
 package roomescape.login.controller;
 
-import javax.naming.AuthenticationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) throws AuthenticationException {
+    public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest) {
         TokenResponse tokenResponse = loginService.createMemberToken(loginRequest);
         ResponseCookie responseCookie = ResponseCookie.from(TOKEN, tokenResponse.token())
                 .httpOnly(true)
