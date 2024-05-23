@@ -24,6 +24,7 @@ public class DatabaseInitializer {
         ReservationTime time = createTime();
         Theme theme = createTheme();
         Reservation reservation = createReservation(member, time, theme);
+        Waiting waiting = createWaiting(member, time, theme);
     }
 
     private Member createMember() {
@@ -49,5 +50,11 @@ public class DatabaseInitializer {
         Reservation reservation = new Reservation(LocalDate.of(2024, 8, 5), member, time, theme, ReservationStatus.BOOKED);
         entityManager.persist(reservation);
         return reservation;
+    }
+
+    private Waiting createWaiting(Member member, ReservationTime time, Theme theme) {
+        Waiting waiting = new Waiting(LocalDate.of(2024, 8, 5), member, time, theme);
+        entityManager.persist(waiting);
+        return waiting;
     }
 }

@@ -7,6 +7,4 @@ import java.util.Optional;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
     boolean existsByStartAt(LocalTime startAt);
-
-    ReservationTime findReservationTimeById(Long timeId);
 }

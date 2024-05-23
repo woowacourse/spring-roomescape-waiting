@@ -17,6 +17,7 @@ public class DatabaseCleaner {
 
     public void execute() {
         clearReservation();
+        clearWaiting();
         clearMember();
         clearTime();
         clearTheme();
@@ -40,5 +41,10 @@ public class DatabaseCleaner {
     private void clearReservation() {
         entityManager.createNativeQuery("DELETE FROM reservation").executeUpdate();
         entityManager.createNativeQuery("ALTER TABLE reservation ALTER COLUMN id RESTART").executeUpdate();
+    }
+
+    private void clearWaiting() {
+        entityManager.createNativeQuery("DELETE FROM waiting").executeUpdate();
+        entityManager.createNativeQuery("ALTER TABLE waiting ALTER COLUMN id RESTART").executeUpdate();
     }
 }

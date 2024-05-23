@@ -23,7 +23,7 @@ public class ReservationRequest {
         this.themeId = request.getThemeId();
     }
 
-    public void validate(String date, String timeId, String themeId) {
+    private void validate(String date, String timeId, String themeId) {
         if (date == null || timeId == null || themeId == null) {
             throw new IllegalArgumentException();
         }
