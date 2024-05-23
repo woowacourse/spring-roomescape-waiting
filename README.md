@@ -16,7 +16,7 @@
 ## 3단계 - 예약 대기 기능
 
 - [x] 예약 대기 도메인을 추가한다
-- [ ] `예약 대기` 추가 API를 구현한다
+- [x] `예약 대기` 추가 API를 구현한다
 - [ ] `예약 대기` 취소 API를 구현한다
 - [ ] `내 예약 목록` 조회 API 응답에 `예약 대기 목록`도 포함한다
     - 예약 대기 상태에 몇 번째 대기인지도 함께 표시한다 (같은 테마, 날짜, 시간의 예약 대기 중 내 예약 대기보다 빨리 생성된 갯수를 함께 응답)
@@ -314,6 +314,29 @@ Response
 
 ```
 HTTP/1.1 204
+```
+
+## 예약 대기
+
+### 예약 대기 추가 API
+
+Request
+
+```
+POST /waitings
+Cookie: token=hello.example.token
+Content-Type: application/json
+
+{
+  "reservationId": 1
+}
+```
+
+Response
+
+```
+HTTP/1.1 201
+Content-Type: application/json
 ```
 
 ## 예약 시간

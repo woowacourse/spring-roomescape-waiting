@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberPassword;
 import roomescape.domain.member.MemberRole;
 import roomescape.exception.login.UnauthorizedEmailException;
 import roomescape.exception.login.UnauthorizedPasswordException;
@@ -103,7 +101,7 @@ class LoginServiceTest extends ServiceTest {
 
         @Test
         void 토큰으로_사용자_정보를_조회할_수_있다() {
-            Member member = new Member(1L, new MemberName("사용자"), email, new MemberPassword("1234567890"), role);
+            Member member = memberService.findById(1L);
 
             assertThat(loginService.findMemberByToken(token))
                     .isEqualTo(member);
