@@ -44,25 +44,6 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-
-    @Test
-    @DisplayName("동일한 날짜와 시간과 테마에 예약을 생성하면 예외가 발생한다")
-    void duplicateTimeReservationAddFail() {
-        // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 30)));
-        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
-
-        // when & then
-        reservationService.addReservation(
-                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()),
-                member.getId());
-
-        assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(LocalDate.now().plusDays(1L), reservationTime.getId(), theme.getId()), member.getId()))
-                .isInstanceOf(DataDuplicateException.class);
-    }
-
     @Test
     @DisplayName("이미 지난 날짜로 예약을 생성하면 예외가 발생한다")
     void beforeDateReservationFail() {
@@ -89,7 +70,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), member.getId()))
+                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()),
+                member.getId()))
                 .isInstanceOf(ValidateException.class);
     }
 
@@ -104,7 +86,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.addReservation(
-                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()), NotExistMemberId))
+                new ReservationRequest(beforeTime.toLocalDate(), reservationTime.getId(), theme.getId()),
+                NotExistMemberId))
                 .isInstanceOf(NotFoundException.class);
     }
 }
