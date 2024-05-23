@@ -67,9 +67,9 @@ class ReservationServiceTest extends ServiceTest {
         );
     }
 
-    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 경우 예외를 발생합니다.")
+    @DisplayName("예약 날짜와 예약시각 그리고 테마 아이디가 같은 예약인 경우 예외를 발생합니다.")
     @Test
-    void should_throw_DataConflictException_when_reserve_date_and_time_duplicated() {
+    void should_throw_DataConflictException_when_reserve_date_and_time__and_theme_and_status_duplicated() {
         ReservationAddRequest reservationAddRequest = new ReservationAddRequest(LocalDate.MAX, 1L, 1L, 1L);
         reservationService.addReservation(reservationAddRequest);
 

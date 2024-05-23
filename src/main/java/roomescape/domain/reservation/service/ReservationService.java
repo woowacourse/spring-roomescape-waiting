@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.domain.Member;
 import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.reservation.domain.Reservation;
+import roomescape.domain.reservation.domain.Status;
 import roomescape.domain.reservation.dto.ReservationAddRequest;
 import roomescape.domain.reservation.dto.ReservationMineResponse;
 import roomescape.domain.reservation.repository.ReservationRepository;
@@ -46,8 +47,8 @@ public class ReservationService {
     }
 
     public Reservation addReservation(ReservationAddRequest reservationAddRequest) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservationAddRequest.date(),
-                reservationAddRequest.timeId(), reservationAddRequest.themeId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservationAddRequest.date(),
+                reservationAddRequest.timeId(), reservationAddRequest.themeId(), Status.RESERVATION)) {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
         }
 
