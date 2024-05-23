@@ -116,4 +116,11 @@ public class Reservation {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public void updateStatus(Status status) {
+        if (status == null) {
+            throw new BadRequestException("예약 상태가 입력되지 않았습니다.");
+        }
+        this.status = status;
+    }
 }

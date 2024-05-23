@@ -48,7 +48,7 @@ public class ReservationService {
     }
 
     public ReservationResponse save(ReservationCreateRequest request) {
-        validateIsReservationExist(request);
+        validateIsReservationExist(request.themeId(), request.timeId(), request.date());
         Reservation reservation = getReservationForSave(request, Status.CONFIRMED);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
@@ -107,6 +107,18 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    public void approveWaiting(Long id) {
+        Reservation reservation = findAllByStatus(Status.WAITING).stream()
+                .filter(r -> r.getId().equals(id))
+                .findAny()
+                .orElseThrow(() -> new NotFoundException("대기중인 예약을 찾을 수 없습니다. id = " + id));
+
+        validateIsReservationExist(reservation.getTheme().getId(), reservation.getTime().getId(),
+                reservation.getDate());
+
+        reservation.updateStatus(Status.CONFIRMED);
+    }
+
     private List<Reservation> findAllByStatus(Status status) {
         Specification<Reservation> spec = new ReservationSearchSpecification()
                 .sameStatus(status)
@@ -147,16 +159,16 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + request.themeId()));
     }
 
-    private void validateIsReservationExist(ReservationCreateRequest request) {
+    private void validateIsReservationExist(Long themeId, Long timeId, LocalDate date) {
         Specification<Reservation> spec = new ReservationSearchSpecification()
-                .sameThemeId(request.themeId())
-                .sameTimeId(request.timeId())
-                .sameDate(request.date())
+                .sameThemeId(themeId)
+                .sameTimeId(timeId)
+                .sameDate(date)
                 .sameStatus(Status.CONFIRMED)
                 .build();
 
         if (reservationRepository.exists(spec)) {
-            throw new BadRequestException("이미 예약된 시간입니다.");
+            throw new BadRequestException("이미 예약된 시간입니다.(대기중인 예약을 승인하는 경우 같은 에약이 취소되었는지 확인해주세요)");
         }
     }
 

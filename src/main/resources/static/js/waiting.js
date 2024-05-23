@@ -54,9 +54,9 @@ function approve(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
      */
-    const endpoint = '' + id;
+    const endpoint = '/admin/reservations/waiting/approve/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'POST'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
@@ -71,7 +71,7 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '/admin/reservations/waiting/' + id;
+    const endpoint = '/admin/reservations/waiting/deny/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
