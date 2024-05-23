@@ -19,6 +19,10 @@ public class Reservation {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
+
     @ManyToOne
     @JoinColumn(name = "time_id")
     private ReservationTime time;
@@ -35,12 +39,13 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, Status status, ReservationTime time, Theme theme, Member member) {
         this.id = id;
-        this.member = member;
         this.date = date;
+        this.status = status;
         this.time = time;
         this.theme = theme;
+        this.member = member;
     }
 
     public Long getId() {
@@ -49,6 +54,10 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public ReservationTime getTime() {
@@ -65,21 +74,15 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme)
-                && Objects.equals(member, that.member);
+        return Objects.equals(id, that.id) && Objects.equals(date, that.date) && status == that.status && Objects.equals(time, that.time) && Objects.equals(theme, that.theme) && Objects.equals(member, that.member);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme, member);
+        return Objects.hash(id, date, status, time, theme, member);
     }
 
     @Override
@@ -87,6 +90,7 @@ public class Reservation {
         return "Reservation{" +
                 "id=" + id +
                 ", date=" + date +
+                ", status=" + status +
                 ", time=" + time +
                 ", theme=" + theme +
                 ", member=" + member +

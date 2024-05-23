@@ -40,17 +40,17 @@ insert into reservation_time(start_at)
 values ('19:00:00');
 
 
-insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-10', '1', '4', '2');
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2024-05-10', 'RESERVATION', '1', '4', '2');
 
-insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-11', '2', '3', '2');
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2024-05-11', 'RESERVATION', '2', '3', '2');
 
-insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-12', '3', '3', '2');
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2024-05-12', 'RESERVATION', '3', '3', '2');
 
-insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-13', '3', '2', '3');
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2024-05-13', 'RESERVATION', '3', '2', '3');
 
-insert into reservation(date, time_id, theme_id, member_id)
-values ('2024-05-14', '4', '1', '3');
+insert into reservation(date, status, time_id, theme_id, member_id)
+values ('2024-05-14', 'RESERVATION', '4', '1', '3');
