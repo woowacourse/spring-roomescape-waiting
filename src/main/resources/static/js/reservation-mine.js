@@ -73,7 +73,7 @@ function requestDeleteWaiting(id) {
 function requestDelete(id) {
     const endpoint = `${RESERVATION_API_ENDPOINT}/${id}`;
     return fetch(endpoint, {
-        method: 'POST'
+        method: 'PATCH'
     }).then(response => {
         if (!response.ok) {
             return response.text().then(errorResponse => {
