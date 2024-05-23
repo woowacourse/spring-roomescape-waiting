@@ -29,7 +29,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> saveReservation(@Authenticated LoginMemberRequest loginMemberRequest,
                                                                @RequestBody ReservationRequest reservationRequest) {
-        ReservationResponse savedReservationResponse = reservationService.save(loginMemberRequest, reservationRequest);
+        ReservationResponse savedReservationResponse = reservationService.saveByUser(loginMemberRequest, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + savedReservationResponse.id()))
                 .body(savedReservationResponse);
     }

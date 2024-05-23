@@ -65,7 +65,7 @@ class ReservationServiceTest {
     @Test
     void createFutureReservationTest() {
         //when
-        ReservationResponse saved = reservationService.save(
+        ReservationResponse saved = reservationService.saveByUser(
                 loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
@@ -84,7 +84,7 @@ class ReservationServiceTest {
     @DisplayName("지난 시간에 대해 예약을 시도할 경우 예외가 발생한다.")
     @Test
     void createPastReservationFailTest() {
-        assertThatThrownBy(() -> reservationService.save(
+        assertThatThrownBy(() -> reservationService.saveByUser(
                 loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
@@ -98,7 +98,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 시간에 대해 예약을 생성하면 예외가 발생한다.")
     @Test
     void createReservationWithTimeNotExistsTest() {
-        assertThatThrownBy(() -> reservationService.save(
+        assertThatThrownBy(() -> reservationService.saveByUser(
                 loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().minusDays(1),
@@ -112,7 +112,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 테마에 대해 예약을 생성하면 예외가 발생한다.")
     @Test
     void createReservationWithThemeNotExistsTest() {
-        assertThatThrownBy(() -> reservationService.save(
+        assertThatThrownBy(() -> reservationService.saveByUser(
                 loginMemberRequest,
                 new ReservationRequest(
                         LocalDate.now().plusDays(1),
@@ -159,7 +159,7 @@ class ReservationServiceTest {
         @DisplayName("이미 예약된 시간, 테마의 예약을 또 생성할 수 없다.")
         @Test
         void duplicatedReservationFailTest() {
-            assertThatThrownBy(() -> reservationService.save(
+            assertThatThrownBy(() -> reservationService.saveByUser(
                     loginMemberRequest,
                     new ReservationRequest(defaultDate, defaultTime.getId(), defaultTheme.getId())))
                     .isInstanceOf(RoomescapeException.class)

@@ -42,27 +42,17 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse save(LoginMemberRequest loginMemberRequest,
-                                    ReservationRequest reservationRequest) {
-
+    public ReservationResponse saveByUser(LoginMemberRequest loginMemberRequest,
+                                          ReservationRequest reservationRequest) {
         ReservationTime requestedTime = reservationTimeRepository.findById(reservationRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_RESERVATION_TIME));
         Theme requestedTheme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
         Member requestedMember = memberRepository.findById(loginMemberRequest.id())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
-        Reservation beforeSaveReservation = reservationRequest.toReservation(requestedMember, requestedTime,
-                requestedTheme);
 
-        List<Reservation> reservations = reservationRepository.findAll();
-        if (hasSameReservation(reservations, beforeSaveReservation)) {
-            throw new RoomescapeException(DUPLICATE_RESERVATION);
-        }
-        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
-
-        return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
+        return save(reservationRequest.toReservation(
+                requestedMember, requestedTime, requestedTheme));
     }
 
     public ReservationResponse saveByAdmin(AdminReservationRequest reservationRequest) {
@@ -73,9 +63,11 @@ public class ReservationService {
         Member requestedMember = memberRepository.findById(reservationRequest.memberId())
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_MEMBER));
 
-        Reservation beforeSaveReservation = new Reservation(reservationRequest.date(), requestedTime, requestedTheme,
-                requestedMember);
+        return save(new Reservation(
+                reservationRequest.date(), requestedTime, requestedTheme, requestedMember));
+}
 
+    private ReservationResponse save(Reservation beforeSaveReservation) {
         List<Reservation> reservations = reservationRepository.findAll();
         if (hasSameReservation(reservations, beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
