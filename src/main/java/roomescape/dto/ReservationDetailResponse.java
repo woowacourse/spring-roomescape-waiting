@@ -12,13 +12,14 @@ public record ReservationDetailResponse(
         LocalTime time,
         String status
 ) {
-    public static ReservationDetailResponse from(Reservation reservation) {
+    public static ReservationDetailResponse from(Reservation reservation, ReservationStatus status) {
         return new ReservationDetailResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
-                getStatusName(reservation.getStatus()));
+                getStatusName(status)
+        );
     }
 
     private static String getStatusName(ReservationStatus status) {

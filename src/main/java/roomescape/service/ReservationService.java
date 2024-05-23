@@ -12,6 +12,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.AdminReservationRequest;
@@ -65,18 +66,19 @@ public class ReservationService {
 
         return save(new Reservation(
                 reservationRequest.date(), requestedTime, requestedTheme, requestedMember));
-}
+    }
 
     private ReservationResponse save(Reservation beforeSaveReservation) {
+        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
+            throw new RoomescapeException(PAST_TIME_RESERVATION);
+        }
         List<Reservation> reservations = reservationRepository.findAll();
         if (hasSameReservation(reservations, beforeSaveReservation)) {
             throw new RoomescapeException(DUPLICATE_RESERVATION);
         }
-        if (beforeSaveReservation.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(PAST_TIME_RESERVATION);
-        }
 
-        return ReservationResponse.from(reservationRepository.save(beforeSaveReservation));
+        Reservation savedReservation = reservationRepository.save(beforeSaveReservation);
+        return ReservationResponse.from(savedReservation);
     }
 
     private boolean hasSameReservation(List<Reservation> reservations, Reservation beforeSaveReservation) {
@@ -117,7 +119,7 @@ public class ReservationService {
 
     public List<ReservationDetailResponse> findAllByMemberId(long userId) {
         return reservationRepository.findAllByMemberId(userId).stream()
-                .map(ReservationDetailResponse::from)
+                .map(reservation -> ReservationDetailResponse.from(reservation, ReservationStatus.BOOKED))
                 .toList();
     }
 }
