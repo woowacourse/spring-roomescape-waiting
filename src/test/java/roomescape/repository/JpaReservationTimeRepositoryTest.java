@@ -99,8 +99,8 @@ class JpaReservationTimeRepositoryTest {
         Reservation reservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now().plusDays(1), time, theme));
 
-        List<ReservationTime> response = reservationRepository.findAllByDateAndTheme_Id(
-                        reservation.getDate(), reservation.getTheme().getId())
+        List<ReservationTime> response = reservationRepository.findAllByDateAndTheme(
+                        reservation.getDate(), reservation.getTheme())
                 .stream()
                 .map(Reservation::getReservationTime)
                 .toList();

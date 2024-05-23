@@ -39,9 +39,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.time 
             JOIN FETCH r.theme
             JOIN FETCH r.reservationMember
-            WHERE r.date = :date AND r.theme.id = :themeId
+            WHERE r.date = :date AND r.theme = :theme
             """)
-    List<Reservation> findAllByDateAndTheme_Id(LocalDate date, long themeId);
+    List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
     boolean existsByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 

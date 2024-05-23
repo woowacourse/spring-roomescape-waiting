@@ -38,7 +38,7 @@ public class AvailableTimeService {
                 .orElseThrow(() -> new RoomescapeException(NOT_FOUND_THEME));
 
         HashSet<ReservationTime> alreadyUsedTimes = new HashSet<>(
-                reservationRepository.findAllByDateAndTheme_Id(date, theme.getId())
+                reservationRepository.findAllByDateAndTheme(date, theme)
                         .stream()
                         .map(Reservation::getReservationTime)
                         .toList());
