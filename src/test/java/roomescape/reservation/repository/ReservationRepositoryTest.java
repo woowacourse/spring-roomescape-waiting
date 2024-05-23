@@ -285,20 +285,25 @@ class ReservationRepositoryTest {
         assertThat(reservations).isEmpty();
     }
 
-    @DisplayName("확정된 예약 내역이 있으면 true를 반환한다.")
+    @DisplayName("날짜, 시간, 테마, 상태가 같은 Reservation을 반환한다.")
     @Test
-    void existsByDateAndReservationTimeStartAtAndThemeAndStatus() {
+    void findFirstByDateAndReservationTimeStartAtAndThemeAndStatus() {
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
         Theme theme = themeRepository.save(HORROR_THEME);
         Member member = memberRepository.save(MEMBER_JOJO);
-        reservationRepository.save(new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
 
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAtAndThemeAndStatus(
+        Reservation expected = reservationRepository.save(
+                new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeStartAtAndThemeAndStatus(
                 TOMORROW,
                 reservationTime.getStartAt(),
                 theme,
                 Status.SUCCESS
         );
-        assertThat(exist).isTrue();
+        assertThat(actual).isNotEmpty()
+                .get()
+                .extracting(Reservation::getId)
+                .isEqualTo(expected.getId());
     }
 }

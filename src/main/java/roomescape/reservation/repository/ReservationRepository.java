@@ -51,7 +51,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Optional<Reservation> findFirstByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    boolean existsByDateAndReservationTimeStartAtAndThemeAndStatus(
+    Optional<Reservation> findFirstByDateAndReservationTimeStartAtAndThemeAndStatus(
             LocalDate date,
             LocalTime startAt,
             Theme theme,
