@@ -26,14 +26,11 @@ public class Reservation {
     }
 
     public Reservation(Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
-        validateLastDate(date);
-        this.member = member;
-        this.date = date;
-        this.theme = theme;
-        this.reservationTime = reservationTime;
+        this(null, member, date, theme, reservationTime);
     }
 
     public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime reservationTime) {
+        validateLastDate(date);
         this.id = id;
         this.member = member;
         this.date = date;

@@ -51,14 +51,10 @@ public class ReservationService {
         Theme theme = themeRepository.findById(reservationCreateRequest.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
 
-        Member member = getValidatedMemberByRole(loginMemberInToken);
+        Member member = memberRepository.findById(loginMemberInToken.id())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return reservationCreateRequest.toReservation(member, theme, reservationTime);
-    }
-
-    private Member getValidatedMemberByRole(LoginMemberInToken loginMemberInToken) {
-        return memberRepository.findById(loginMemberInToken.id())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
