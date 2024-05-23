@@ -10,6 +10,11 @@ public class AdminPageController {
         return "admin/index";
     }
 
+    @GetMapping("/admin/waiting")
+    public String getWaitingPage() {
+        return "admin/waiting";
+    }
+
     @GetMapping("/admin/reservation")
     public String getReservationPage() {
         return "admin/reservation-new";
