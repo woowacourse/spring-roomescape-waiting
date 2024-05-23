@@ -100,7 +100,6 @@ public class ReservationService {
     }
 
     public void deleteStandby(Long id, Member member) {
-        reservationRepository.existsById(id);
         Reservation reservation = reservationRepository.findByIdAndStatus(id, STANDBY)
             .orElseThrow(() -> new RoomescapeException("예약대기가 존재하지 않아 삭제할 수 없습니다."));
 
