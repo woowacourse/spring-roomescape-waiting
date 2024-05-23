@@ -64,6 +64,27 @@ class ReservationWaitServiceTest {
     }
 
     @Test
+    @DisplayName("예약이 존재하지 않는 예약대기 신청")
+    void saveReservationWait_ShouldStorePersistence_WhenReservationDoesNotExists() {
+        // given
+        Member member = new Member("aa", "aa@aa.aa", "aa");
+        Theme theme = new Theme("n", "d", "t");
+        ReservationTime time = new ReservationTime(LocalTime.of(1, 0));
+        memberRepository.save(member);
+        themeRepository.save(theme);
+        timeRepository.save(time);
+
+        // when
+        waitService.saveReservationWait(new WaitRequest(LocalDate.of(2017, 12, 11), time.getId(),
+                theme.getId()), member.getId());
+
+        // then
+        Assertions.assertThat(waitRepository.findAll())
+                .hasSize(1);
+
+    }
+
+    @Test
     @DisplayName("예약 대기를 삭제한다")
     void deleteReservation_ShouldRemoveReservationWaitPersistence() {
         // given

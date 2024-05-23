@@ -39,8 +39,6 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     List<ReservationWait> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
-    long countByReservation(Reservation reservation);
-
     @Query("""
             SELECT w.priority
             FROM ReservationWait w
@@ -49,8 +47,10 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
             """)
     Optional<Long> findPriorityIndex();
 
+    List<ReservationWait> findByMemberAndReservation(Member member, Reservation reservation);
+
     void deleteById(Long id);
-    
+
     void deleteByMemberId(Long memberId);
 
     void deleteByReservationId(Long reservationId);

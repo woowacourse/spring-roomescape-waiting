@@ -213,4 +213,19 @@ class ReservationWaitRepositoryTest {
                 .hasSize(1)
                 .containsExactlyInAnyOrder(wait2);
     }
+
+    @Test
+    @DisplayName("회원과 예약 정보를 바탕으로 예약대기를 찾는다")
+    void findByMemberAndReservation_ShouldGetSpecificReservationWait() {
+        // given
+        ReservationWait savedWaits = waitRepository.save(new ReservationWait(dummyMember, dummyReservation, 1));
+
+        // when
+        List<ReservationWait> foundWaits = waitRepository.findByMemberAndReservation(dummyMember,
+                dummyReservation);
+
+        // then
+        Assertions.assertThat(foundWaits).hasSize(1)
+                .containsExactlyInAnyOrder(savedWaits);
+    }
 }

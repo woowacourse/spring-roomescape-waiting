@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -17,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.exception.wait.DuplicatedReservationException;
 
 @Entity
 @Getter
@@ -46,6 +48,13 @@ public class ReservationWait {
         this.reservation = reservation;
         this.priority = priority;
         this.status = ReservationStatus.valueOf(priority);
+    }
+
+    public void validateDuplicateWait(List<ReservationWait> waits) {
+        if (waits.isEmpty()) {
+            return;
+        }
+        throw new DuplicatedReservationException();
     }
 
     @Override
