@@ -31,11 +31,10 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservationByClient(
-            @Valid @RequestBody MemberReservationRequest memberRequest,
-            LoginMember member) {
-        ReservationRequest reservationRequest = new ReservationRequest(member.id(), memberRequest.date(),
-                memberRequest.timeId(), memberRequest.themeId());
+            @Valid @RequestBody MemberReservationRequest memberRequest, LoginMember member) {
+        ReservationRequest reservationRequest = ReservationRequest.from(member.id(), memberRequest);
         ReservationResponse reservationResponse = reservationService.create(reservationRequest);
+
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

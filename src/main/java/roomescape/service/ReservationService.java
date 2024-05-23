@@ -77,7 +77,7 @@ public class ReservationService {
 
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme) {
         validateReservation(date, timeSlot);
-        validateDuplicatedReservation(date, timeSlot.getId(), theme.getId());
+        validateDuplicatedReservation(date, timeSlot, theme);
     }
 
     private void validateReservation(LocalDate date, TimeSlot time) {
@@ -86,9 +86,7 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
-        TimeSlot timeSlot = findTimeSlotById(timeId);
-        Theme theme = findThemeById(themeId);
+    private void validateDuplicatedReservation(LocalDate date, TimeSlot timeSlot, Theme theme) {
         if (reservationRepository.existsByDateAndTimeAndTheme(date, timeSlot, theme)) {
             throw new IllegalArgumentException("[ERROR] 예약이 종료되었습니다");
         }
