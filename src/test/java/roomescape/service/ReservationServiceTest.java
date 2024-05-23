@@ -36,40 +36,42 @@ class ReservationServiceTest extends BaseServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
+
     private Member member;
+
     private Theme theme;
+
     private ReservationTime time;
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(MemberFixture.ADMIN);
-        theme = themeRepository.save(ThemeFixture.THEME);
-        time = reservationTimeRepository.save(ReservationTimeFixture.TEN);
+        member = memberRepository.save(MemberFixture.create());
+        theme = themeRepository.save(ThemeFixture.create());
+        time = reservationTimeRepository.save(ReservationTimeFixture.create());
     }
 
     @Test
-    @DisplayName("예약들을 조회한다.")
+    @DisplayName("멤버, 테마, 예약 날짜 범위로 예약들을 조회한다.")
     void getReservations() {
-        Reservation reservation = ReservationFixture.create("2024-04-09", member, time, theme);
-        reservationRepository.save(reservation);
+        reservationRepository.save(ReservationFixture.create("2024-04-09", member, time, theme));
+        reservationRepository.save(ReservationFixture.create("2024-04-10", member, time, theme));
+        reservationRepository.save(ReservationFixture.create("2024-04-11", member, time, theme));
 
         List<ReservationResponse> responses = reservationService.getReservationsByConditions(
                 member.getId(),
                 theme.getId(),
                 LocalDate.of(2024, 4, 9),
-                LocalDate.of(2024, 4, 9)
+                LocalDate.of(2024, 4, 10)
         );
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(responses).hasSize(1);
+            softly.assertThat(responses).hasSize(2);
             softly.assertThat(responses.get(0).date()).isEqualTo("2024-04-09");
-            softly.assertThat(responses.get(0).member().id()).isEqualTo(member.getId());
-            softly.assertThat(responses.get(0).theme().id()).isEqualTo(theme.getId());
-            softly.assertThat(responses.get(0).time().id()).isEqualTo(time.getId());
+            softly.assertThat(responses.get(1).date()).isEqualTo("2024-04-10");
         });
     }
 
@@ -94,30 +96,29 @@ class ReservationServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("id로 예약을 삭제한다.")
     void deleteReservationById() {
-        Reservation savedReservation = reservationRepository.save(ReservationFixture.DEFAULT);
+        Reservation reservation = reservationRepository.save(ReservationFixture.create(member, time, theme));
+        long id = reservation.getId();
 
-        reservationService.deleteReservationById(savedReservation.getId());
+        reservationService.deleteReservationById(id);
 
-        List<Reservation> reservations = reservationRepository.findAll();
-        assertThat(reservations).isEmpty();
+        assertThat(reservationRepository.findById(id)).isEmpty();
     }
 
     @Test
     @DisplayName("나의 예약들을 조회한다.")
     void getReservationsByMemberId() {
-        Reservation reservation = ReservationFixture.create("2024-04-09", member, time, theme);
-        reservationRepository.save(reservation);
+        reservationRepository.save(ReservationFixture.create("2024-04-09", member, time, theme));
+        reservationRepository.save(ReservationFixture.create("2024-04-10", member, time, theme));
+        reservationRepository.save(ReservationFixture.create("2024-04-11", member, time, theme));
 
         List<PersonalReservationResponse> responses = reservationService.getReservationsByMemberId(member.getId());
 
         SoftAssertions.assertSoftly(
                 softly -> {
-                    softly.assertThat(responses).hasSize(1);
+                    softly.assertThat(responses).hasSize(3);
                     softly.assertThat(responses.get(0).date()).isEqualTo("2024-04-09");
-                    softly.assertThat(responses.get(0).member().id()).isEqualTo(member.getId());
-                    softly.assertThat(responses.get(0).theme().id()).isEqualTo(theme.getId());
-                    softly.assertThat(responses.get(0).time().id()).isEqualTo(time.getId());
-                    softly.assertThat(responses.get(0).status()).isEqualTo("예약 대기");
+                    softly.assertThat(responses.get(1).date()).isEqualTo("2024-04-10");
+                    softly.assertThat(responses.get(2).date()).isEqualTo("2024-04-11");
                 }
         );
     }

@@ -2,15 +2,13 @@ package roomescape.domain.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.BaseRepositoryTest;
 import roomescape.support.fixture.MemberFixture;
 
-@DataJpaTest
-class MemberRepositoryTest {
+class MemberRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -18,22 +16,28 @@ class MemberRepositoryTest {
     @Test
     @DisplayName("이메일로 회원을 조회한다.")
     void findByEmail() {
-        Member member = MemberFixture.email("example@gmail.com");
-        memberRepository.save(member);
+        String rawEmail = "example@gmail.com";
+        save(MemberFixture.create(rawEmail));
 
-        Optional<Member> memberOptional = memberRepository.findByEmail(new Email("example@gmail.com"));
+        Email email = new Email(rawEmail);
+        Member member = memberRepository.findByEmail(email).orElseThrow();
 
-        assertThat(memberOptional).isPresent();
-        assertThat(memberOptional.get().getEmail().getValue()).isEqualTo("example@gmail.com");
+        assertThat(member.getEmail()).isEqualTo(email);
     }
 
     @Test
-    @DisplayName("이메일에 해당하는 회원이 존재하는지 확인한다.")
-    void existsByEmail() {
-        Member member = MemberFixture.email("example@gmail.com");
-        memberRepository.save(member);
+    @DisplayName("이메일에 해당하는 회원이 존재하면 true를 반환한다.")
+    void existsByValidEmail() {
+        save(MemberFixture.create("example@gmail.com"));
 
         assertThat(memberRepository.existsByEmail(new Email("example@gmail.com"))).isTrue();
+    }
+
+    @Test
+    @DisplayName("이메일에 해당하는 회원이 존재하지 않으면 false를 반환한다.")
+    void existsByInvalidEmail() {
+        save(MemberFixture.create("example@gmail.com"));
+
         assertThat(memberRepository.existsByEmail(new Email("nothing@gmail.com"))).isFalse();
     }
 }

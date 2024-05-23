@@ -35,26 +35,15 @@ class MemberServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("모든 회원을 조회한다.")
     void getAllMembers() {
-        Member member = MemberFixture.ADMIN;
-        Member save = memberRepository.save(member);
+        Member jamie = memberRepository.save(MemberFixture.create("jamie@email.com"));
+        Member prin = memberRepository.save(MemberFixture.create("prin@email.com"));
 
         List<MemberResponse> memberResponses = memberService.getAllMembers();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(memberResponses).hasSize(1);
-            softly.assertThat(memberResponses.get(0).id()).isEqualTo(save.getId());
-        });
-    }
-
-    @Test
-    @DisplayName("id로 회원을 조회한다.")
-    void getById() {
-        Member savedMember = memberRepository.save(MemberFixture.ADMIN);
-
-        MemberResponse memberResponse = memberService.getById(savedMember.getId());
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(memberResponse.id()).isEqualTo(savedMember.getId());
+            softly.assertThat(memberResponses).hasSize(2);
+            softly.assertThat(memberResponses.get(0).id()).isEqualTo(jamie.getId());
+            softly.assertThat(memberResponses.get(1).id()).isEqualTo(prin.getId());
         });
     }
 }

@@ -5,42 +5,73 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.BaseRepositoryTest;
+import roomescape.domain.member.Member;
+import roomescape.domain.theme.Theme;
+import roomescape.support.fixture.MemberFixture;
+import roomescape.support.fixture.ReservationFixture;
 import roomescape.support.fixture.ReservationTimeFixture;
+import roomescape.support.fixture.ThemeFixture;
 
-@DataJpaTest
-class ReservationTimeRepositoryTest {
+class ReservationTimeRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Test
     @DisplayName("예약 가능한 시간들을 조회한다.")
-    @Sql("/reservation.sql")
     void findAvailableReservationTimes() {
-        LocalDate date = LocalDate.of(2024, 4, 9);
-        List<AvailableReservationTimeDto> availableReservationTimes = reservationTimeRepository
-                .findAvailableReservationTimes(date, 1L);
+        Member member = save(MemberFixture.create());
+        Theme theme = save(ThemeFixture.create());
+        ReservationTime nine = save(ReservationTimeFixture.create("09:00"));
+        ReservationTime twelve = save(ReservationTimeFixture.create("12:00"));
+        ReservationTime seventeen = save(ReservationTimeFixture.create("17:00"));
+        ReservationTime twentyOne = save(ReservationTimeFixture.create("21:00"));
+        String date = "2024-04-09";
+        save(ReservationFixture.create(date, member, twelve, theme));
+        save(ReservationFixture.create(date, member, twentyOne, theme));
 
-        assertThat(availableReservationTimes).containsExactly(
-                new AvailableReservationTimeDto(1L, LocalTime.of(9, 0), false),
-                new AvailableReservationTimeDto(2L, LocalTime.of(12, 0), true),
-                new AvailableReservationTimeDto(3L, LocalTime.of(17, 0), false),
-                new AvailableReservationTimeDto(4L, LocalTime.of(21, 0), true)
-        );
+        List<AvailableReservationTimeDto> availableReservationTimes = reservationTimeRepository
+                .findAvailableReservationTimes(LocalDate.parse(date), theme.getId());
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(availableReservationTimes).hasSize(4);
+
+            softly.assertThat(availableReservationTimes.get(0).id()).isEqualTo(nine.getId());
+            softly.assertThat(availableReservationTimes.get(0).startAt()).isEqualTo(nine.getStartAt());
+            softly.assertThat(availableReservationTimes.get(0).alreadyBooked()).isFalse();
+
+            softly.assertThat(availableReservationTimes.get(1).id()).isEqualTo(twelve.getId());
+            softly.assertThat(availableReservationTimes.get(1).startAt()).isEqualTo(twelve.getStartAt());
+            softly.assertThat(availableReservationTimes.get(1).alreadyBooked()).isTrue();
+
+            softly.assertThat(availableReservationTimes.get(2).id()).isEqualTo(seventeen.getId());
+            softly.assertThat(availableReservationTimes.get(2).startAt()).isEqualTo(seventeen.getStartAt());
+            softly.assertThat(availableReservationTimes.get(2).alreadyBooked()).isFalse();
+
+            softly.assertThat(availableReservationTimes.get(3).id()).isEqualTo(twentyOne.getId());
+            softly.assertThat(availableReservationTimes.get(3).startAt()).isEqualTo(twentyOne.getStartAt());
+            softly.assertThat(availableReservationTimes.get(3).alreadyBooked()).isTrue();
+        });
     }
 
     @Test
-    @DisplayName("startAt에 해당하는 예약 시간이 존재하는지 확인한다.")
-    void existsByStartAt() {
-        ReservationTime time = ReservationTimeFixture.startAt("10:00");
-        reservationTimeRepository.save(time);
+    @DisplayName("startAt에 해당하는 예약 시간이 존재하면 true를 반환한다.")
+    void existsByValidStartAt() {
+        save(ReservationTimeFixture.create("10:00"));
 
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).isTrue();
+    }
+
+    @Test
+    @DisplayName("startAt에 해당하는 예약 시간이 존재하지 않으면 false를 반환한다.")
+    void existsByInvalidStartAt() {
+        save(ReservationTimeFixture.create("10:00"));
+
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0))).isFalse();
     }
 }

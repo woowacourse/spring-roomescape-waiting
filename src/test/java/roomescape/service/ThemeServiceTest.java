@@ -1,16 +1,25 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.support.fixture.MemberFixture;
+import roomescape.support.fixture.ReservationFixture;
+import roomescape.support.fixture.ReservationTimeFixture;
 import roomescape.support.fixture.ThemeFixture;
 
 class ThemeServiceTest extends BaseServiceTest {
@@ -21,17 +30,27 @@ class ThemeServiceTest extends BaseServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
     @DisplayName("모든 테마들을 조회한다.")
     void getAllThemes() {
-        Theme savedTheme = themeRepository.save(ThemeFixture.name("테마"));
+        Theme theme1 = themeRepository.save(ThemeFixture.create("테마1"));
+        Theme theme2 = themeRepository.save(ThemeFixture.create("테마2"));
 
         List<ThemeResponse> themeResponses = themeService.getAllThemes();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(themeResponses).hasSize(1);
-            softly.assertThat(themeResponses.get(0).id()).isEqualTo(savedTheme.getId());
-            softly.assertThat(themeResponses.get(0).name()).isEqualTo("테마");
+            softly.assertThat(themeResponses).hasSize(2);
+            softly.assertThat(themeResponses.get(0).id()).isEqualTo(theme1.getId());
+            softly.assertThat(themeResponses.get(1).id()).isEqualTo(theme2.getId());
         });
     }
 
@@ -52,42 +71,45 @@ class ThemeServiceTest extends BaseServiceTest {
     @Test
     @DisplayName("id로 테마를 삭제한다.")
     void deleteThemeById() {
-        Theme savedTheme = themeRepository.save(ThemeFixture.THEME);
+        Theme theme = themeRepository.save(ThemeFixture.create());
+        long id = theme.getId();
 
-        themeService.deleteThemeById(savedTheme.getId());
+        themeService.deleteThemeById(id);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(themeRepository.findById(savedTheme.getId())).isEmpty();
-        });
+        assertThat(themeRepository.findById(id)).isEmpty();
     }
 
     @Test
-    @DisplayName("인기있는 테마들을 조회한다.")
-    @Sql("/popular-themes.sql")
+    @DisplayName("인기있는 테마를 내림차순으로 3개 조회한다.")
     void getPopularThemes() {
+        Member member = memberRepository.save(MemberFixture.create());
+        ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.create());
+        Theme theme1 = themeRepository.save(ThemeFixture.create("우주 탐험"));
+        Theme theme2 = themeRepository.save(ThemeFixture.create("시간여행"));
+        Theme theme3 = themeRepository.save(ThemeFixture.create("마법의 숲"));
+        reservationRepository.save(ReservationFixture.create("2024-04-04", member, time, theme1));
+        reservationRepository.save(ReservationFixture.create("2024-04-05", member, time, theme1));
+        reservationRepository.save(ReservationFixture.create("2024-04-06", member, time, theme1));
+        reservationRepository.save(ReservationFixture.create("2024-04-07", member, time, theme2));
+        reservationRepository.save(ReservationFixture.create("2024-04-08", member, time, theme2));
+        reservationRepository.save(ReservationFixture.create("2024-04-11", member, time, theme2));
+        reservationRepository.save(ReservationFixture.create("2024-04-08", member, time, theme3));
+        reservationRepository.save(ReservationFixture.create("2024-04-09", member, time, theme3));
+        reservationRepository.save(ReservationFixture.create("2024-04-10", member, time, theme3));
+
         LocalDate stateDate = LocalDate.of(2024, 4, 6);
         LocalDate endDate = LocalDate.of(2024, 4, 10);
         int limit = 3;
-
         List<ThemeResponse> popularThemes = themeService.getPopularThemes(stateDate, endDate, limit);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(popularThemes).hasSize(3);
-
-            softly.assertThat(popularThemes.get(0).id()).isEqualTo(4);
+            softly.assertThat(popularThemes.get(0).id()).isEqualTo(3);
             softly.assertThat(popularThemes.get(0).name()).isEqualTo("마법의 숲");
-            softly.assertThat(popularThemes.get(0).description()).isEqualTo("요정과 마법사들이 사는 신비로운 숲 속으로!");
-            softly.assertThat(popularThemes.get(0).thumbnail()).isEqualTo("https://via.placeholder.com/150/30f9e7");
-
-            softly.assertThat(popularThemes.get(1).id()).isEqualTo(3);
+            softly.assertThat(popularThemes.get(1).id()).isEqualTo(2);
             softly.assertThat(popularThemes.get(1).name()).isEqualTo("시간여행");
-            softly.assertThat(popularThemes.get(1).description()).isEqualTo("과거와 미래를 오가며 역사의 비밀을 밝혀보세요.");
-            softly.assertThat(popularThemes.get(1).thumbnail()).isEqualTo("https://via.placeholder.com/150/24f355");
-
-            softly.assertThat(popularThemes.get(2).id()).isEqualTo(2);
+            softly.assertThat(popularThemes.get(2).id()).isEqualTo(1);
             softly.assertThat(popularThemes.get(2).name()).isEqualTo("우주 탐험");
-            softly.assertThat(popularThemes.get(2).description()).isEqualTo("끝없는 우주에 숨겨진 비밀을 파헤치세요.");
-            softly.assertThat(popularThemes.get(2).thumbnail()).isEqualTo("https://via.placeholder.com/150/771796");
         });
     }
 }
