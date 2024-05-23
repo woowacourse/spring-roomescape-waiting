@@ -28,9 +28,9 @@ public class MemberService {
     }
 
     private void validateUniqueEmail(String email) {
-        if (memberRepository.existsByEmail(email)) {
+        memberRepository.findFirstByEmail(email).ifPresent(member -> {
             throw new IllegalArgumentException("중복된 이메일이 존재합니다.");
-        }
+        });
     }
 
     public List<MemberResponse> findAll() {

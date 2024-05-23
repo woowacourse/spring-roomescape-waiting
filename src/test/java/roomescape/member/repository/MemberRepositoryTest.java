@@ -6,6 +6,7 @@ import static roomescape.util.Fixture.KAKI_EMAIL;
 import static roomescape.util.Fixture.KAKI_NAME;
 import static roomescape.util.Fixture.KAKI_PASSWORD;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,18 +44,20 @@ class MemberRepositoryTest {
         memberRepository.save(kaki);
 
         Member newMember = new Member(new MemberName(name), email, "1234");
-        boolean existNameOrEmail = memberRepository.existsByEmail(newMember.getEmail());
+        Optional<Member> savedMember = memberRepository.findFirstByEmail(newMember.getEmail());
 
-        assertThat(existNameOrEmail).isEqualTo(exist);
+        assertThat(savedMember.isPresent()).isEqualTo(exist);
     }
 
     @DisplayName("이메일과 비밀번호가 일치하는 회원을 찾는다.")
     @Test
-    void findByEmailAndPassword() {
+    void findFirstByEmailAndPassword() {
         Member kaki = new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD);
         Member savedMember = memberRepository.save(kaki);
-        Member findMember = memberRepository.findByEmailAndPassword(savedMember.getEmail(), savedMember.getPassword())
-                .get();
+        Member findMember = memberRepository.findFirstByEmailAndPassword(
+                savedMember.getEmail(),
+                savedMember.getPassword()
+        ).get();
 
         assertAll(
                 () -> assertThat(findMember.getName()).isEqualTo(KAKI_NAME),

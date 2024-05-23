@@ -29,7 +29,7 @@ public class AuthService {
     }
 
     public Member findByEmailAndPassword(LoginRequest loginRequest) {
-        return memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password())
+        return memberRepository.findFirstByEmailAndPassword(loginRequest.email(), loginRequest.password())
                 .orElseThrow(() -> new IllegalArgumentException("일치하지 않는 이메일 또는 비밀번호입니다."));
     }
 
