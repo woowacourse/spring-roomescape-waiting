@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static roomescape.fixture.MemberFixture.ADMIN_PK;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 import static roomescape.fixture.MemberFixture.MEMBER_PK;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.TEN_AM;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -59,8 +61,8 @@ class ReservationBookingServiceTest {
     @Test
     @DisplayName("중복된 예약을 하는 경우 예외를 반환한다.")
     void shouldReturnIllegalStateExceptionWhenDuplicatedReservationCreate() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
+        ReservationTime time = reservationTimeRepository.save(TEN_AM.create());
+        Theme theme = themeRepository.save(TEST_THEME.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         ReservationRequest request = new ReservationRequest(
                 member.getId(),
@@ -117,5 +119,4 @@ class ReservationBookingServiceTest {
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
-
 }

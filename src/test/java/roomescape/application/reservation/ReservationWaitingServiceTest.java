@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 import static roomescape.fixture.MemberFixture.MEMBER_PK;
+import static roomescape.fixture.ThemeFixture.TEST_THEME;
+import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,11 +114,11 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("대기 인원이 가득 찼을 때 대기 요청하는 경우 예외를 발생한다.")
     void fullWaitingList() {
-        Theme theme = themeRepository.save(new Theme("테마 1", "desc", "url"));
-        LocalDate date = LocalDate.parse("2023-01-01");
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Theme theme = themeRepository.save(TEST_THEME.create());
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Member member = memberRepository.save(MEMBER_ARU.create());
         Member pk = memberRepository.save(MEMBER_PK.create());
+        LocalDate date = LocalDate.parse("2023-01-01");
         ReservationRequest request = new ReservationRequest(member.getId(), date, time.getId(), theme.getId());
         reservationStatusRepository.save(new ReservationStatus(
                 new Reservation(pk, date, time, theme, LocalDateTime.of(1999, 1, 1, 12, 0)),

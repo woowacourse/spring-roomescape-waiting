@@ -3,6 +3,7 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
 import static roomescape.fixture.MemberFixture.MEMBER_PK;
+import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,7 +70,7 @@ class ReservationLookupServiceTest {
     void lookupReservationStatus() {
         Member aru = memberRepository.save(MEMBER_ARU.create());
         Member pk = memberRepository.save(MEMBER_PK.create());
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime time = reservationTimeRepository.save(TWELVE_PM.create());
         Theme theme = themeRepository.save(new Theme("테마명", "설명", "url"));
 
         Reservation reservation = new Reservation(
