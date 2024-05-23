@@ -16,8 +16,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    // TODO: 접근제어자 변경
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(LocalTime startAt) {

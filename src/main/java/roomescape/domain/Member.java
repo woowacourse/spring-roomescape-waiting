@@ -26,8 +26,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Reservation> reservations;
 
-    // TODO: 접근제어자 변경
-    public Member() {
+    protected Member() {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {

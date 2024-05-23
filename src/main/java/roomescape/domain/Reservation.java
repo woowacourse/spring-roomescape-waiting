@@ -27,8 +27,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    // TODO: 접근제어자 변경
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {

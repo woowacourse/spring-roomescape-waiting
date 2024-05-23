@@ -17,8 +17,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    // TODO: 접근제어자 변경
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(String name, String description, String thumbnail) {
