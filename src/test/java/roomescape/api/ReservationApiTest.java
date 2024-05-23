@@ -146,7 +146,7 @@ class ReservationApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("status", contains("예약", "예약 대기"));
+                .body("status", contains("예약", "1번째 예약 대기"));
     }
 
     @Sql("/reservation-filter-api-test-data.sql")

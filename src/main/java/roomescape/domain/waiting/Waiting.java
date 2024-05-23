@@ -25,6 +25,7 @@ public class Waiting {
     protected Waiting() {
     }
 
+    // TODO : isNotOwner를 생성자 내부로 이동
     public Waiting(Member member, Reservation reservation) {
         this.member = member;
         this.reservation = reservation;

@@ -9,7 +9,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
-import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithSequence;
 import roomescape.dto.reservation.ReservationFilter;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -65,7 +65,7 @@ public class ReservationService {
     public List<UserReservationResponse> getReservationByMemberId(Long memberId) {
         Member member = findMember(memberId);
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        List<Waiting> waitings = waitingRepository.findAllByMember(member);
+        List<WaitingWithSequence> waitings = waitingRepository.findWaitingsWithSequenceByMember(member);
 
         List<UserReservationResponse> userWaitings = waitings.stream()
                 .map(UserReservationResponse::from)
