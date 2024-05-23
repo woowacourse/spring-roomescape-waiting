@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationOrder;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -46,4 +47,11 @@ public interface MemberReservationRepository extends JpaRepository<MemberReserva
             WHERE mr.status = :status
             """)
     List<MemberReservation> findByStatus(ReservationStatus status);
+
+    @Query("""
+            SELECT mr
+            FROM MemberReservation mr JOIN FETCH mr.reservation r JOIN FETCH r.reservationTime rt JOIN FETCH r.theme t
+            WHERE mr.status = :status AND mr.order = :order
+            """)
+    List<MemberReservation> findByStatusAndOrder(ReservationStatus status, ReservationOrder order);
 }

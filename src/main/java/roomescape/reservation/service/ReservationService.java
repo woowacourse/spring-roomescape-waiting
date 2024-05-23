@@ -11,6 +11,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationOrder;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.MemberReservationRepository;
@@ -61,11 +62,10 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
-    // TODO: Stream 로직 SQL로 해결하도록 변경
     public ReservationsResponse findFirstOrderWaitingReservations() {
-        List<MemberReservation> waitingMemberReservations = memberReservationRepository.findByStatus(ReservationStatus.WAITING);
-        List<ReservationResponse> response = waitingMemberReservations.stream()
-                .filter(MemberReservation::isFirstWaitingOrder)
+        List<MemberReservation> firstOrderWaitingReservations = memberReservationRepository
+                .findByStatusAndOrder(ReservationStatus.WAITING, new ReservationOrder(1L));
+        List<ReservationResponse> response = firstOrderWaitingReservations.stream()
                 .map(memberReservation -> ReservationResponse.from(memberReservation.getReservation()))
                 .toList();
 

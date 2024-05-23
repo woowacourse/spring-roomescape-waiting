@@ -481,7 +481,7 @@ public class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("관리자는 전체 예약 대기 정보 조회 시, 첫 번째 순서로 대기중인 예약 정보를 조회할 수 있다.")
+    @DisplayName("관리자는 전체 예약 대기 정보 조회 시, 첫 번째 순서로 대기중인 예약 정보를 조회한다.")
     void findFirstOrderWaitingReservationsWithAdminRole() {
         // given
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
