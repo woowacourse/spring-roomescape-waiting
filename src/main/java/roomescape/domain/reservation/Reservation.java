@@ -59,6 +59,10 @@ public class Reservation {
         this.state = state;
     }
 
+    public void changeOwner(Member member) {
+        this.member = member;
+    }
+
     public boolean isOwner(Member member) {
         return this.member.equals(member);
     }

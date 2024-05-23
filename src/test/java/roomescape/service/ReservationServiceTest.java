@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class ReservationServiceTest {
 
     @Autowired
     ThemeService themeService;
+
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     void 잘못된_예약_시간대_id로_예약을_추가할_경우_예외_발생() {
@@ -105,6 +109,36 @@ class ReservationServiceTest {
         //when, then
         assertThatThrownBy(() -> reservationService.deleteReservation(notExistIdToFind))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_예약_대기가_존재한다면_우선순위가_제일_높은_예약_대기를_자동_승인() {
+        // given
+        List<ReservationResponse> beforeReservations = reservationService.getAllReservations();
+        ReservationResponse beforeFirstReservation = beforeReservations.get(0);
+
+        // when
+        reservationService.deleteReservation(beforeFirstReservation.id());
+
+        // then
+        List<ReservationResponse> afterReservations = reservationService.getAllReservations();
+        ReservationResponse afterFirstReservation = afterReservations.get(0);
+        assertThat(beforeFirstReservation).isNotEqualTo(afterFirstReservation);
+    }
+
+    @Test
+    void 예약_삭제_시_예약_대기가_존재하지_않으면_예약_정상_삭제() {
+        // given
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
+        ReservationResponse firstReservations = reservations.get(0);
+        reservationService.deleteReservation(firstReservations.id());
+
+        // when
+        reservationService.deleteReservation(firstReservations.id());
+
+        // then
+        List<ReservationResponse> afterReservations = reservationService.getAllReservations();
+        assertThat(afterReservations).isEmpty();
     }
 
     @Sql("/reservation-filter-api-test-data.sql")

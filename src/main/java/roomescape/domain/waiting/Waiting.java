@@ -31,6 +31,10 @@ public class Waiting {
         this.reservation = reservation;
     }
 
+    public void approve() {
+        reservation.changeOwner(member);
+    }
+
     public boolean isNotOwner(Member member) {
         return !this.member.equals(member);
     }
