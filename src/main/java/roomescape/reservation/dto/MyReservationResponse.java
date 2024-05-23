@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.vo.WaitingWithRank;
 
 public class MyReservationResponse {
 
@@ -14,32 +14,32 @@ public class MyReservationResponse {
     private final LocalTime time;
     private final String status;
 
-    public MyReservationResponse(final Long id, final LocalDate date, final LocalTime time, final String status,
-            final String theme) {
+    public MyReservationResponse(final Long id, final LocalDate date, final LocalTime time, final String theme,
+            final String status) {
         this.id = id;
-        this.theme = theme;
         this.date = date;
         this.time = time;
+        this.theme = theme;
         this.status = status;
     }
 
-    public MyReservationResponse(final Reservation reservation, ReservationStatus status) {
+    public MyReservationResponse(final Reservation reservation) {
         this(
                 reservation.getId(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                status.getStatus(),
-                reservation.getTheme().getName()
+                reservation.getTheme().getName(),
+                ReservationStatus.RESERVATION.getStatus()
         );
     }
 
-    public MyReservationResponse(final Waiting waiting, ReservationStatus status) {
+    public MyReservationResponse(final WaitingWithRank waitingWithRank) {
         this(
-                waiting.getId(),
-                waiting.getDate(),
-                waiting.getReservationTime().getStartAt(),
-                status.getStatus(),
-                waiting.getTheme().getName()
+                waitingWithRank.waiting().getId(),
+                waitingWithRank.waiting().getDate(),
+                waitingWithRank.waiting().getReservationTime().getStartAt(),
+                waitingWithRank.waiting().getTheme().getName(),
+                ReservationStatus.WAITING.formatRankWithSuffix(waitingWithRank.rank())
         );
     }
 

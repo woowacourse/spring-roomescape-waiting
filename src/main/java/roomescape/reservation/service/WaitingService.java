@@ -6,7 +6,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
@@ -79,9 +78,9 @@ public class WaitingService {
         }
     }
 
-    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
-        return waitingRepository.findAllByMemberId(memberId).stream()
-                .map(waiting -> new MyReservationResponse(waiting, ReservationStatus.WAITING))
+    public List<MyReservationResponse> findWaitingWithRanksByMemberId(Long memberId) {
+        return waitingRepository.findWaitingWithRanksByMemberId(memberId).stream()
+                .map(MyReservationResponse::new)
                 .toList();
     }
 
