@@ -113,12 +113,12 @@
 
 #### 그 외
 
-| HTTP Method | URI                     | Description       |
-|-------------|-------------------------|-------------------|
-| GET         | `/reservations`          | 사용자가 예약한 예약 목록 조회 |
-| POST        | `/reservations`         | 예약 추가             |
-| GET         | `/times`                | 예약 시간 목록 조회       |
-| GET         | `/themes`               | 테마 목록 조회          |
-| POST        | `/login`                | 로그인 요청            |
-| GET         | `/login/check`          | 로그인 정보 조회         |
-| POST        | `/logout`               | 로그아웃 요청           |
+| HTTP Method | URI             | Description       |
+|-------------|-----------------|-------------------|
+| GET         | `/reservations` | 사용자가 예약한 예약 목록 조회 |
+| POST        | `/reservations` | 예약 추가             |
+| GET         | `/times`        | 예약 시간 목록 조회       |
+| GET         | `/themes`       | 테마 목록 조회          |
+| POST        | `/login`        | 로그인 요청            |
+| GET         | `/login/check`  | 로그인 정보 조회         |
+| POST        | `/logout`       | 로그아웃 요청           |
