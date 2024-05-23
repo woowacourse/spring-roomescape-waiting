@@ -10,6 +10,7 @@ import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.service.ReservationService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 public class AdminReservationController {
@@ -34,5 +35,12 @@ public class AdminReservationController {
     public ResponseEntity<Void> removeReservation(@PathVariable("id") Long id) {
         reservationService.removeReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/reservations/all")
+    public ResponseEntity<List<ReservationResponse>> getReservationList() {
+        List<Reservation> reservations = reservationService.findAllReservation();
+        List<ReservationResponse> reservationResponses = ReservationResponse.fromList(reservations);
+        return ResponseEntity.ok(reservationResponses);
     }
 }
