@@ -35,6 +35,8 @@ class ReservationServiceTest extends ServiceTest {
     @Autowired
     ReservationRepository reservationRepository;
     @Autowired
+    MemberReservationService memberReservationService;
+    @Autowired
     ReservationTimeRepository reservationTimeRepository;
     @Autowired
     ThemeRepository themeRepository;
@@ -57,7 +59,7 @@ class ReservationServiceTest extends ServiceTest {
         ReservationRequest reservationRequest = new ReservationRequest(date, time.getId(), theme.getId());
 
         //when
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(AuthInfo.of(member),
+        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(AuthInfo.of(member),
                 reservationRequest);
 
         //then
@@ -82,7 +84,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberClover, reservation2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(theme1.getId(), memberChoco.getId(), LocalDate.now(),
                         LocalDate.now().plusDays(1)));
 
@@ -108,7 +110,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberClover, reservation));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(null, memberChoco.getId(), LocalDate.now(), LocalDate.now().plusDays(1)));
 
         //then
@@ -133,7 +135,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(theme1.getId(), null, LocalDate.now(), LocalDate.now().plusDays(1)));
 
         //then
@@ -158,7 +160,7 @@ class ReservationServiceTest extends ServiceTest {
         memberReservationRepository.save(new MemberReservation(memberChoco, reservation2));
 
         //when
-        List<ReservationResponse> reservations = reservationService.findMemberReservations(
+        List<ReservationResponse> reservations = memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(theme1.getId(), null, LocalDate.now(), LocalDate.now().plusDays(2)));
 
         //then
@@ -181,7 +183,7 @@ class ReservationServiceTest extends ServiceTest {
                 new MemberReservation(member, reservation));
 
         //when
-        reservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
+        memberReservationService.deleteMemberReservation(AuthInfo.of(member), memberReservation.getId());
 
         //then
         assertThat(
@@ -203,7 +205,7 @@ class ReservationServiceTest extends ServiceTest {
                 theme.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.createMemberReservation(AuthInfo.of(member), reservationRequest))
+        assertThatThrownBy(() -> memberReservationService.createMemberReservation(AuthInfo.of(member), reservationRequest))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -221,7 +223,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.delete(reservation.getId());
 
         //then
-        assertThat(reservationService.findMemberReservations(
+        assertThat(memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(theme.getId(), member.getId(), LocalDate.now(),
                         LocalDate.now().plusDays(1)))).hasSize(0);
     }
@@ -262,7 +264,7 @@ class ReservationServiceTest extends ServiceTest {
         MemberReservation save = memberReservationRepository.save(new MemberReservation(choco, reservation));
 
         //when
-        ReservationResponse memberReservation1 = reservationService.createMemberReservation(new MemberReservationRequest(
+        ReservationResponse memberReservation1 = memberReservationService.createMemberReservation(new MemberReservationRequest(
                 tacan.getId(),
                 reservation.getDate().format(DateTimeFormatter.ISO_DATE),
                 reservation.getTime().getId(),

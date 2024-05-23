@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.controller.dto.MemberReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingReservationService;
 
@@ -19,17 +20,19 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final MemberReservationService memberReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService, WaitingReservationService waitingReservationService) {
+    public AdminReservationController(ReservationService reservationService, MemberReservationService memberReservationService, WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.memberReservationService = memberReservationService;
         this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping()
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid MemberReservationRequest memberReservationRequest) {
-        ReservationResponse reservationResponse = reservationService.createMemberReservation(memberReservationRequest);
+        ReservationResponse reservationResponse = memberReservationService.createMemberReservation(memberReservationRequest);
         return ResponseEntity.created(URI.create("/admin/reservations/" + reservationResponse.memberReservationId()))
                 .body(reservationResponse);
     }

@@ -3,13 +3,18 @@ package roomescape.reservation.controller.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.MemberReservation;
-// TODO reservationId 보다는 memberReservationId 가 맞지 않나?
+import roomescape.reservation.domain.Reservation;
+
 public record MyReservationResponse(long reservationId, String themeName, LocalDate date, LocalTime time,
                                     String status) {
     public static MyReservationResponse from(MemberReservation memberReservation) {
-        return new MyReservationResponse(memberReservation.getId(),
-                memberReservation.getReservation().getTheme().getName(), memberReservation.getReservation().getDate(),
-                memberReservation.getReservation().getTime().getStartAt(), memberReservation.getStatus().getStatus());
+        Reservation reservation = memberReservation.getReservation();
+        return new MyReservationResponse(
+                memberReservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                memberReservation.getStatus().getStatus());
     }
 
     public static MyReservationResponse from(MyReservationWithStatus myReservationWithStatus) {

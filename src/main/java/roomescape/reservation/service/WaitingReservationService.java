@@ -48,6 +48,7 @@ public class WaitingReservationService {
         return MyReservationResponse.from(myReservationWithStatus);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByWaitingReservation() { // TODO 어드민만 호출할 수 있는 메서드를 분리하지 않아도 될까??
         List<MemberReservation> memberReservations = memberReservationRepository.findAllByStatus(ReservationStatus.WAITING);
         return memberReservations.stream()

@@ -18,7 +18,9 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
@@ -38,6 +40,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTimeRepository.save(reservationTime));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
@@ -45,7 +48,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    @Transactional
     public void delete(long timeId) {
         List<ReservationTime> list = reservationRepository.findAll()
                 .stream()
@@ -57,6 +59,7 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(timeId);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> findAvailableTimes(LocalDate date, long themeId) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
         Set<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTime(date, themeId);

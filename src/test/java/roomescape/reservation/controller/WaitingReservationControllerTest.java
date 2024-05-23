@@ -38,7 +38,7 @@ class WaitingReservationControllerTest extends ControllerTest {
     @DisplayName("예약이 존재하는 경우에도 사용자가 다르면 예약이 된다")
     void waiting() {
         //given
-        MemberReservation bookedMemberReservation = MemberReservationFixture.getMemberReservation1();
+        MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
         Reservation alreadBookedReservation = bookedMemberReservation.getReservation();
         ReservationRequest reservationRequest = new ReservationRequest(
                 alreadBookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),
@@ -60,7 +60,7 @@ class WaitingReservationControllerTest extends ControllerTest {
     @Test
     void delete() {
         //given
-        MemberReservation bookedMemberReservation = MemberReservationFixture.getMemberReservation1();
+        MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
         Reservation bookedReservation = bookedMemberReservation.getReservation();
         ReservationRequest reservationRequest = new ReservationRequest(
                 bookedReservation.getDate().format(DateTimeFormatter.ISO_DATE),

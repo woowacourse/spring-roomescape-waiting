@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.global.annotation.LoginUser;
 import roomescape.reservation.controller.dto.*;
+import roomescape.reservation.service.MemberReservationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingReservationService;
 
@@ -19,10 +20,12 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final MemberReservationService memberReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(ReservationService reservationService, WaitingReservationService waitingReservationService) {
+    public ReservationController(ReservationService reservationService, MemberReservationService memberReservationService, WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.memberReservationService = memberReservationService;
         this.waitingReservationService = waitingReservationService;
     }
 
@@ -33,14 +36,14 @@ public class ReservationController {
             @RequestParam(value = "dateFrom", required = false) LocalDate startDate,
             @RequestParam(value = "dateTo", required = false) LocalDate endDate
     ) {
-        return reservationService.findMemberReservations(
+        return memberReservationService.findMemberReservations(
                 new ReservationQueryRequest(themeId, memberId, startDate, endDate));
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(@LoginUser AuthInfo authInfo,
                                                       @RequestBody @Valid ReservationRequest reservationRequest) {
-        ReservationResponse response = reservationService.createMemberReservation(authInfo, reservationRequest);
+        ReservationResponse response = memberReservationService.createMemberReservation(authInfo, reservationRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.memberReservationId())).body(response);
     }
 

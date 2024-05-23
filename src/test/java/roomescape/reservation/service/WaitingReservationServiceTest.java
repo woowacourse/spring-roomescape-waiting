@@ -6,14 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.auth.domain.AuthInfo;
 import roomescape.fixture.MemberFixture;
 import roomescape.fixture.MemberReservationFixture;
-import roomescape.reservation.controller.dto.MyReservationResponse;
 import roomescape.reservation.controller.dto.MyReservationWithStatus;
-import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.util.ServiceTest;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,18 +23,21 @@ class WaitingReservationServiceTest extends ServiceTest {
     @Autowired
     WaitingReservationService waitingReservationService;
 
-    @DisplayName("예약이 존재하는 경우 대기 순서를 확인할 수 있다.")
+    @DisplayName("예약 대기 변겅 성공 : 예약 삭제 시 대기 번호가 빠른 예약이 BOOKED 처리된다.")
     @Test
-    void waitingOrder() {
-//        //given
-        AuthInfo authInfo = AuthInfo.of(MemberFixture.getMemberTacan());
+    void waitingReservationConfirm() {
+        MemberReservation bookedMemberReservation = MemberReservationFixture.getBookedMemberReservation();
+        waitingReservationService.deleteMemberReservation(AuthInfo.of(bookedMemberReservation.getMember()), bookedMemberReservation.getId());
+        Reservation reservation = bookedMemberReservation.getReservation();
 
-        //when
-        List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(authInfo);
-        List<MyReservationResponse> myReservationResponses = waitingReservationService.handleWaitingOrder(myReservations);
+        List<MyReservationWithStatus> myReservations = reservationService.findMyReservations(AuthInfo.of(MemberFixture.getMemberAdmin()));
+        MyReservationWithStatus nextReservationWithStatus = myReservations.stream()
+                .filter(myReservationWithStatus -> myReservationWithStatus.themeName().equals(reservation.getTheme().getName()))
+                .filter(myReservationWithStatus -> myReservationWithStatus.time().equals(reservation.getTime().getStartAt()))
+                .filter(myReservationWithStatus -> myReservationWithStatus.date().equals(reservation.getDate()))
+                .findAny()
+                .get();
 
-        //then
-//        MyReservationResponse myReservationResponse = myReservationResponses.get(myReservations.size() - 1);
-//        assertThat(myReservationResponse.status()).isEqualTo("2번째 대기");
+        assertThat(nextReservationWithStatus.status()).isEqualTo(ReservationStatus.BOOKED);
     }
 }
