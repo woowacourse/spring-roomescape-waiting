@@ -1,20 +1,21 @@
 package roomescape.reservation.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.reservation.model.Reservation;
 
 public record FindReservationResponse(Long id,
-                                      FindMemberOfReservationResponse member,
+                                      String theme,
                                       LocalDate date,
-                                      FindTimeOfReservationsResponse time,
-                                      FindThemeOfReservationResponse theme) {
+                                      LocalTime time,
+                                      String status) {
     public static FindReservationResponse from(final Reservation reservation) {
         return new FindReservationResponse(
                 reservation.getId(),
-                FindMemberOfReservationResponse.from(reservation.getMember()),
+                reservation.getTheme().getName(),
                 reservation.getDate(),
-                FindTimeOfReservationsResponse.from(reservation.getReservationTime()),
-                FindThemeOfReservationResponse.from(reservation.getTheme())
+                reservation.getReservationTime().getStartAt(),
+                "예약"
         );
     }
 }

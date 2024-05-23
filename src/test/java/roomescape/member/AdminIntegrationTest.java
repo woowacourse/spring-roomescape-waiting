@@ -1,11 +1,16 @@
 package roomescape.member;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,23 +23,38 @@ import roomescape.auth.dto.request.LoginRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.dto.response.FindReservationResponse;
+import roomescape.reservation.model.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
+import roomescape.waiting.dto.response.FindWaitingResponse;
+import roomescape.waiting.model.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @IntegrationTest
 class AdminIntegrationTest {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
+    AdminIntegrationTest(final MemberRepository memberRepository,
+                         final ReservationTimeRepository reservationTimeRepository,
+                         final ThemeRepository themeRepository, final WaitingRepository waitingRepository,
+                         final ReservationRepository reservationRepository) {
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
+    }
 
     @LocalServerPort
     private int port;
@@ -54,6 +74,11 @@ class AdminIntegrationTest {
                 .then().log().cookies().extract().cookie("token");
     }
 
+    private void saveTimeThemeMemberForReservation() {
+        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+    }
 
     @Test
     @DisplayName("관리자 권한으로 예약을 생성한다.")
@@ -314,4 +339,66 @@ class AdminIntegrationTest {
                 .statusCode(404)
                 .body("detail", equalTo("식별자 2에 해당하는 회원이 존재하지 않습니다."));
     }
+
+    @Test
+    @DisplayName("방탈출 예약 목록 조회.")
+    void getReservations() {
+        // given
+        saveTimeThemeMemberForReservation();
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+
+        // when
+        List<FindReservationResponse> findReservationResponses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when().get("/admin/reservations")
+                .then().log().all()
+
+                .statusCode(200)
+                .extract().jsonPath()
+                .getList(".", FindReservationResponse.class);
+
+        // then
+        assertThat(findReservationResponses).containsExactly(
+                FindReservationResponse.from(reservation1),
+                FindReservationResponse.from(reservation2)
+        );
+    }
+
+    @Test
+    @DisplayName("방탈출 예약 대기 목록 조회.")
+    void getWaitings() {
+        // given
+        saveTimeThemeMemberForReservation();
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+
+        Waiting waiting1 = waitingRepository.save(new Waiting(reservation1, memberRepository.getById(1L)));
+        Waiting waiting2 = waitingRepository.save(new Waiting(reservation2, memberRepository.getById(1L)));
+        // when
+        List<FindWaitingResponse> findReservationResponses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin())
+                .when().get("/admin/waitings")
+                .then().log().all()
+
+                .statusCode(200)
+                .extract().jsonPath()
+                .getList(".", FindWaitingResponse.class);
+
+        // then
+        assertThat(findReservationResponses).containsExactly(
+                FindWaitingResponse.from(waiting1),
+                FindWaitingResponse.from(waiting2));
+    }
+
 }

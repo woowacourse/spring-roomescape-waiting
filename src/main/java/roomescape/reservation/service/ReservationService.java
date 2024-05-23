@@ -75,6 +75,12 @@ public class ReservationService {
         return FindReservationResponse.from(reservation);
     }
 
+    public List<FindReservationResponse> getReservationsByMember(final AuthInfo authInfo) {
+        return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
+                .map(FindReservationResponse::from)
+                .toList();
+    }
+
     public List<FindAvailableTimesResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
@@ -120,13 +126,5 @@ public class ReservationService {
         Waiting waiting = waitingRepository.getFirstByReservation(reservation);
         reservation.updateMember(waiting.getMember());
         waitingRepository.delete(waiting);
-    }
-
-    // TODO: dto 이름 변경
-    public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(
-            final AuthInfo authInfo) {
-        return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()
-                .map(roomescape.member.dto.response.FindReservationResponse::from)
-                .toList();
     }
 }

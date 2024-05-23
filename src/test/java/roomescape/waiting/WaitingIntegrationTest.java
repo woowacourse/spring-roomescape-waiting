@@ -25,7 +25,7 @@ import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
 import roomescape.waiting.dto.request.CreateWaitingRequest;
-import roomescape.waiting.dto.response.FindWaitingResponse;
+import roomescape.waiting.dto.response.FindWaitingWithRankingResponse;
 import roomescape.waiting.model.Waiting;
 import roomescape.waiting.model.WaitingWithRanking;
 import roomescape.waiting.repository.WaitingRepository;
@@ -152,16 +152,18 @@ class WaitingIntegrationTest {
         Waiting waiting2 = waitingRepository.save(new Waiting(otherReservation, member));
         Waiting waiting3 = waitingRepository.save(new Waiting(reservation, member));
 
-        List<FindWaitingResponse> findWaitingResponses = RestAssured.given().log().all()
+        List<FindWaitingWithRankingResponse> findWaitingWithRankingRespons = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", getTokenByLogin(member))
                 .when().get("/members/waitings")
                 .then().log().all()
 
                 .statusCode(200).extract().jsonPath()
-                .getList(".", FindWaitingResponse.class);
-        assertTrue(findWaitingResponses.contains(FindWaitingResponse.of(new WaitingWithRanking(waiting2, 0L))));
-        assertTrue(findWaitingResponses.contains(FindWaitingResponse.of(new WaitingWithRanking(waiting3, 1L))));
+                .getList(".", FindWaitingWithRankingResponse.class);
+        assertTrue(findWaitingWithRankingRespons.contains(
+                FindWaitingWithRankingResponse.of(new WaitingWithRanking(waiting2, 0L))));
+        assertTrue(findWaitingWithRankingRespons.contains(
+                FindWaitingWithRankingResponse.of(new WaitingWithRanking(waiting3, 1L))));
     }
 
     @DisplayName("방탈출 예약 대기를 삭제한다.")

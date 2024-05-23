@@ -11,6 +11,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.dto.request.CreateWaitingRequest;
 import roomescape.waiting.dto.response.CreateWaitingResponse;
 import roomescape.waiting.dto.response.FindWaitingResponse;
+import roomescape.waiting.dto.response.FindWaitingWithRankingResponse;
 import roomescape.waiting.model.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -20,7 +21,6 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
-    // TODO: authInfo -> Member로 변경하기
 
     public WaitingService(final WaitingRepository waitingRepository,
                           final ReservationRepository reservationRepository, final MemberRepository memberRepository) {
@@ -46,11 +46,18 @@ public class WaitingService {
         }
     }
 
-    public List<FindWaitingResponse> getWaitings(final AuthInfo authInfo) {
+    public List<FindWaitingWithRankingResponse> getWaitingsByMember(final AuthInfo authInfo) {
         Member member = memberRepository.getById(authInfo.getMemberId());
         return waitingRepository.findWaitingsWithRankByMember(member)
                 .stream()
-                .map(FindWaitingResponse::of)
+                .map(FindWaitingWithRankingResponse::of)
+                .toList();
+    }
+
+    public List<FindWaitingResponse> getWaitings() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(FindWaitingResponse::from)
                 .toList();
     }
 

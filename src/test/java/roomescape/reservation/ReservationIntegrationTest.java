@@ -319,25 +319,6 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 예약 목록을 조회한다.")
-    void getReservationTimes() {
-        saveTimeThemeMemberForReservation();
-        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-12-23"),
-                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().get("/reservations")
-                .then().log().all()
-
-                .statusCode(200)
-                .body("id", hasItems(1, 2))
-                .body("size()", equalTo(2));
-    }
-
-    @Test
     @DisplayName("방탈출 예약 하나를 조회한다.")
     void getReservationTime() {
         saveTimeThemeMemberForReservation();
