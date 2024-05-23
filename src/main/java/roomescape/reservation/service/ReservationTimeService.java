@@ -44,12 +44,21 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
 
-        return reservationTimeRepository.findAll().stream()
-                .map(reservationTime -> AvailableReservationTimeResponse.toResponse(
-                                reservationTime,
-                                bookedTimeIds.contains(reservationTime.getId())
-                        )
-                ).toList();
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(reservationTime -> createResponse(reservationTime, bookedTimeIds))
+                .toList();
+    }
+
+    private static AvailableReservationTimeResponse createResponse(
+            ReservationTime reservationTime,
+            List<Long> bookedTimeIds
+    ) {
+        return AvailableReservationTimeResponse.toResponse(reservationTime, isBooked(reservationTime, bookedTimeIds));
+    }
+
+    private static boolean isBooked(ReservationTime reservationTime, List<Long> bookedTimeIds) {
+        return bookedTimeIds.contains(reservationTime.getId());
     }
 
     public List<TimeResponse> findAll() {
