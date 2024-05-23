@@ -23,7 +23,7 @@ public class Reservation {
     @ManyToOne
     private ReservationTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Theme theme;
 
     protected Reservation() {

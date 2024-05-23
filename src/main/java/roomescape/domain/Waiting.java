@@ -23,7 +23,7 @@ public class Waiting {
     @ManyToOne
     private ReservationTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Theme theme;
 
     public Waiting(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
