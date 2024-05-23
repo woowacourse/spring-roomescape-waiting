@@ -84,4 +84,16 @@ public class WaitingService {
                 .map(waiting -> new MyReservationResponse(waiting, ReservationStatus.WAITING))
                 .toList();
     }
+
+    public void delete(final Long id, final LoginMemberInToken loginMemberInToken) {
+        final Waiting target = waitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약 대기 입니다."));
+
+        final Long MemberIdOfTarget = target.getMember().getId();
+        if (!loginMemberInToken.role().isAdmin() && !MemberIdOfTarget.equals(loginMemberInToken.id())) {
+            throw new IllegalArgumentException("본인의 예약 대기만 취소할 수 있습니다.");
+        }
+
+        waitingRepository.delete(target);
+    }
 }

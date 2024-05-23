@@ -34,4 +34,13 @@ public class WaitingController {
 
         return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(waitingResponse);
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(
+            @PathVariable Long id,
+            @Login LoginMemberInToken loginMemberInToken
+    ) {
+        waitingService.delete(id, loginMemberInToken);
+        return ResponseEntity.noContent().build();
+    }
 }
