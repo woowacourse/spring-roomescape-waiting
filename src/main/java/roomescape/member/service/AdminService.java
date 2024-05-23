@@ -11,6 +11,7 @@ import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class AdminService {

@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,5 +49,11 @@ public class AdminController {
     @GetMapping("/waitings")
     public ResponseEntity<List<FindWaitingResponse>> getWaitings() {
         return ResponseEntity.ok(waitingService.getWaitings());
+    }
+
+    @DeleteMapping("/waitings/reject/{waitingId}")
+    public ResponseEntity<Void> rejectWaiting(@PathVariable Long waitingId) {
+        waitingService.rejectWaiting(waitingId);  // TODO: admin??
+        return ResponseEntity.noContent().build();
     }
 }

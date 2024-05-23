@@ -204,7 +204,7 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("식별자 1에 해당하는 예약 대기가 존재하지 않습니다."));
     }
 
-    @DisplayName("방탈출 예약 대기 삭제 시, 회원의 권한이 없는 경우 예외를 반환한다.")
+    @DisplayName("방탈출 예약 대기 삭제 실패: 회원의 권한이 없는 경우")
     @Test
     void deleteWaiting_WhenMember() {
         Member member = memberRepository.save(MemberFixture.getOne("asdf12@navv.com"));
@@ -226,4 +226,23 @@ class WaitingIntegrationTest {
                 .body("detail", equalTo("회원의 권한이 없어, 식별자 2인 예약 대기를 삭제할 수 없습니다."));
     }
 
+    @DisplayName("방탈출 예약 대기 거절 성공")
+    @Test
+    void rejectWaiting() {
+        Member admin = memberRepository.save(MemberFixture.getAdmin());
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        Theme theme = themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(admin, LocalDate.parse("2024-11-30"), reservationTime, theme));
+
+        waitingRepository.save(new Waiting(reservation, admin));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getTokenByLogin(admin))
+                .when().delete("/admin/waitings/reject/1")
+                .then().log().all()
+
+                .statusCode(204);
+    }
 }
