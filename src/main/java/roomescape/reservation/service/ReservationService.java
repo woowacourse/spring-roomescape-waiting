@@ -6,6 +6,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -36,11 +37,11 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public Long save(ReservationCreateRequest reservationCreateRequest, LoginMemberInToken loginMemberInToken) {
+    public Reservation save(ReservationCreateRequest reservationCreateRequest, LoginMemberInToken loginMemberInToken) {
         Reservation reservation = getValidatedReservation(reservationCreateRequest, loginMemberInToken);
         validateDuplicateReservation(reservation);
 
-        return reservationRepository.save(reservation).getId();
+        return reservationRepository.save(reservation);
     }
 
     private Reservation getValidatedReservation(ReservationCreateRequest reservationCreateRequest,
@@ -64,13 +65,6 @@ public class ReservationService {
         }
     }
 
-    public ReservationResponse findById(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
-
-        return new ReservationResponse(reservation);
-    }
-
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::new)
@@ -90,7 +84,7 @@ public class ReservationService {
 
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MyReservationResponse::new)
+                .map(reservation -> new MyReservationResponse(reservation, ReservationStatus.RESERVATION))
                 .toList();
     }
 

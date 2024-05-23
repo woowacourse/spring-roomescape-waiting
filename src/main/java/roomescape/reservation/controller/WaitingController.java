@@ -3,11 +3,14 @@ package roomescape.reservation.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Login;
 import roomescape.member.dto.LoginMemberInToken;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.WaitingCreateRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.WaitingService;
@@ -26,9 +29,9 @@ public class WaitingController {
             @Valid @RequestBody WaitingCreateRequest waitingCreateRequest,
             @Login LoginMemberInToken loginMemberInToken
     ) {
-        Long id = waitingService.save(waitingCreateRequest, loginMemberInToken);
-        WaitingResponse waitingResponse = waitingService.findById(id);
+        Waiting waiting = waitingService.save(waitingCreateRequest, loginMemberInToken);
+        WaitingResponse waitingResponse = new WaitingResponse(waiting);
 
-        return ResponseEntity.created(URI.create("/waiting/" + id)).body(waitingResponse);
+        return ResponseEntity.created(URI.create("/waiting/" + waiting.getId())).body(waitingResponse);
     }
 }

@@ -85,13 +85,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 아이디로 조회 시 존재하지 않는 아이디면 예외가 발생한다.")
-    void findByIdExceptionTest() {
-        assertThatThrownBy(() -> reservationService.findById(1L))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void findByMemberAndThemeAndDateBetweenTest() {
         Theme theme = new Theme("공포", "호러 방탈출", "http://asdf.jpg");
         Long themeId = themeRepository.save(theme).getId();

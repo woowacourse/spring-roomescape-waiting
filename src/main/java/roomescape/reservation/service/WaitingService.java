@@ -1,15 +1,17 @@
 package roomescape.reservation.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginMemberInToken;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.WaitingCreateRequest;
-import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
@@ -38,10 +40,10 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public Long save(WaitingCreateRequest WaitingCreateRequest, LoginMemberInToken loginMemberInToken) {
+    public Waiting save(WaitingCreateRequest WaitingCreateRequest, LoginMemberInToken loginMemberInToken) {
         Waiting waiting = getValidatedWaiting(WaitingCreateRequest, loginMemberInToken);
 
-        return waitingRepository.save(waiting).getId();
+        return waitingRepository.save(waiting);
     }
 
     private Waiting getValidatedWaiting(WaitingCreateRequest waitingCreateRequest,
@@ -66,7 +68,8 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("예약이 없어 예약 대기를 할 수 없습니다."));
 
         final Long memberId = waiting.getMember().getId();
-        if (memberId.equals(reservation.getId())) {
+        final Long reservationMemberId = reservation.getMember().getId();
+        if (memberId.equals(reservationMemberId)) {
             throw new IllegalArgumentException("이미 예약 중 입니다.");
         }
 
@@ -76,37 +79,9 @@ public class WaitingService {
         }
     }
 
-    public WaitingResponse findById(Long id) {
-        Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
-
-        return new WaitingResponse(waiting);
+    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
+        return waitingRepository.findAllByMemberId(memberId).stream()
+                .map(waiting -> new MyReservationResponse(waiting, ReservationStatus.WAITING))
+                .toList();
     }
-
-//    public List<ReservationResponse> findAll() {
-//        return reservationRepository.findAll().stream()
-//                .map(ReservationResponse::new)
-//                .toList();
-//    }
-//
-//    public List<ReservationResponse> findAllBySearch(ReservationSearchRequest reservationSearchRequest) {
-//        Member member = memberRepository.findById(reservationSearchRequest.memberId()).get();
-//        Theme theme = themeRepository.findById(reservationSearchRequest.themeId()).get();
-//
-//        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member,
-//                        theme,
-//                        reservationSearchRequest.dateFrom(), reservationSearchRequest.dateTo()).stream()
-//                .map(ReservationResponse::new)
-//                .toList();
-//    }
-//
-//    public List<MyReservationResponse> findAllByMemberId(Long memberId) {
-//        return reservationRepository.findAllByMemberId(memberId).stream()
-//                .map(MyReservationResponse::new)
-//                .toList();
-//    }
-//
-//    public void delete(Long id) {
-//        reservationRepository.deleteById(id);
-//    }
 }
