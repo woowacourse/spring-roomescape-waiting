@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.is;
 
 class AdminReservationControllerTest extends ControllerTest {
 
-    @DisplayName("예약 목록을 불러올 수 있다.")
+    @DisplayName("예약 및 예약대기 목록을 불러올 수 있다.")
     @Test
     void should_response_reservation_list_when_request_reservations() {
         String cookie = getAdminCookie();
@@ -24,6 +24,19 @@ class AdminReservationControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(20));
+    }
+
+    @DisplayName("예약대기 목록을 불러올 수 있다.")
+    @Test
+    void should_response_reservation_wait_list_when_request_reservations() {
+        String cookie = getAdminCookie();
+
+        RestAssured.given().log().all()
+                .header("Cookie", cookie)
+                .when().get("/admin/reservations/wait")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(12));
     }
 
     @DisplayName("어드민의 예약을 추가를 성공할 시, 201 ok를 응답한다,")

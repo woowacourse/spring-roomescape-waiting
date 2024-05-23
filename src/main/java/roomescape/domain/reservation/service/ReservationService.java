@@ -24,8 +24,8 @@ import java.util.Optional;
 
 @Service
 public class ReservationService {
-
     private final ReservationRepository reservationRepository;
+
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
@@ -41,6 +41,10 @@ public class ReservationService {
 
     public List<Reservation> findAllReservation() {
         return reservationRepository.findAll();
+    }
+
+    public List<Reservation> findReservationByStatus(Status status) {
+        return reservationRepository.findByStatus(status);
     }
 
     public List<Reservation> findFilteredReservationList(Long themeId, Long memberId,
