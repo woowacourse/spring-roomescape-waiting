@@ -113,7 +113,8 @@ class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.WAIT));
         reservationRepository.save(new Reservation(kaki, TODAY, theme, reservationTime, Status.WAIT));
 
-        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRanksByMemberId(jojo.getId());
+        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRanksByMemberId(
+                jojo.getId());
 
         assertAll(
                 () -> assertThat(reservationWithRanks).hasSize(2),
@@ -181,6 +182,27 @@ class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAllByStatus(Status.WAIT);
         assertThat(reservations).hasSize(1);
+    }
+
+    @DisplayName("날짜, 시간, 테마가 일치하는 예약 목록을 조회한다.")
+    @Test
+    void findAllByDateAndReservationTimeAndTheme() {
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member jojo = memberRepository.save(MEMBER_JOJO);
+        Member kaki = memberRepository.save(MEMBER_KAKI);
+
+        reservationRepository.save(new Reservation(jojo, TOMORROW, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(kaki, TOMORROW, theme, reservationTime, Status.SUCCESS));
+        reservationRepository.save(new Reservation(jojo, TODAY, theme, reservationTime, Status.SUCCESS));
+
+        List<Reservation> reservations = reservationRepository.findAllByDateAndReservationTimeAndTheme(
+                TOMORROW,
+                reservationTime,
+                theme
+        );
+
+        assertThat(reservations).hasSize(2);
     }
 
     @DisplayName("날짜, 시간, 테마가 일치하는 Reservation을 반환한다.")

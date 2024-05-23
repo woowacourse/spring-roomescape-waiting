@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.dto.ResourcesResponse;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationSearchCondRequest;
 import roomescape.reservation.dto.response.MemberReservationResponse;
@@ -37,47 +36,35 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/reservations/mine")
-    public ResponseEntity<ResourcesResponse<MemberReservationResponse>> findMemberReservations(
-            LoginMember loginMember
-    ) {
-        List<MemberReservationResponse> memberReservations = reservationService.findMemberReservations(loginMember);
-        ResourcesResponse<MemberReservationResponse> response = new ResourcesResponse<>(memberReservations);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/reservations/success")
-    public ResponseEntity<ResourcesResponse<ReservationResponse>> findSuccessReservations() {
-        List<ReservationResponse> reservations = reservationService.findSuccessReservations();
-        ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/reservations/success/search")
-    public ResponseEntity<ResourcesResponse<ReservationResponse>> findSuccessReservationsBySearchCond(
+    @GetMapping("/reservations/search")
+    public ResponseEntity<ResourcesResponse<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchCondRequest searchCondRequest
     ) {
-        List<ReservationResponse> reservations = reservationService.findSuccessReservationsBySearchCond(searchCondRequest);
+        List<ReservationResponse> reservations = reservationService.findAllBySearchCond(searchCondRequest);
         ResourcesResponse<ReservationResponse> response = new ResourcesResponse<>(reservations);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reservations/mine")
+    public ResponseEntity<ResourcesResponse<MemberReservationResponse>> findReservationsAndWaitingsByMember(
+            LoginMember loginMember
+    ) {
+        List<MemberReservationResponse> reservations = reservationService.findReservationsAndWaitingsByMember(loginMember);
+        ResourcesResponse<MemberReservationResponse> response = new ResourcesResponse<>(reservations);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-            @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
+    public ResponseEntity<ReservationResponse> save(
+            @Valid @RequestBody ReservationSaveRequest saveRequest,
             LoginMember loginMember
     ) {
-        ReservationResponse reservationResponse = reservationService.saveByLoginMember(
-                reservationSaveRequest,
-                loginMember,
-                Status.SUCCESS
-        );
+        ReservationResponse response = reservationService.saveByLoginMember(saveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
-                .body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id()))
+                .body(response);
     }
 
     @DeleteMapping("/reservations/{id}")

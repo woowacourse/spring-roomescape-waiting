@@ -27,14 +27,14 @@ class ReservationControllerTest extends IntegrationTest {
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
                 .when()
-                .get("/reservations/success")
+                .get("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("회원별 예약 목록 조회에 성공하면 200 응답을 받는다.")
     @Test
-    void findMemberReservations() {
+    void findReservationsAndWaitingsByMember() {
         RestAssured.given().log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .accept(ContentType.JSON)
@@ -46,7 +46,7 @@ class ReservationControllerTest extends IntegrationTest {
 
     @DisplayName("테마 아이디, 회원 아이디, 기간 조건 조회에 성공하면 200 응답을 받는다.")
     @Test
-    void findSuccessReservationsBySearchCond() {
+    void findAllBySearchCond() {
         saveAdminMember();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
@@ -62,7 +62,7 @@ class ReservationControllerTest extends IntegrationTest {
                 .log().all()
                 .cookie(CookieUtils.TOKEN_KEY, getMemberToken())
                 .when()
-                .get("/reservations/success/search")
+                .get("/reservations/search")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .contentType(ContentType.JSON)

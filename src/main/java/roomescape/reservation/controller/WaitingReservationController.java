@@ -12,46 +12,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.dto.ResourcesResponse;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 @RestController
 public class WaitingReservationController {
 
-    private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public WaitingReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public WaitingReservationController(WaitingReservationService waitingReservationService) {
+        this.waitingReservationService = waitingReservationService;
     }
 
     @GetMapping("/reservations/wait")
-    public ResponseEntity<ResourcesResponse<WaitingResponse>> findWaitingReservations() {
-        List<WaitingResponse> reservations = reservationService.findWaitingReservations();
+    public ResponseEntity<ResourcesResponse<WaitingResponse>> findAll() {
+        List<WaitingResponse> reservations = waitingReservationService.findAll();
         ResourcesResponse<WaitingResponse> response = new ResourcesResponse<>(reservations);
+
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reservations/wait")
-    public ResponseEntity<ReservationResponse> createMemberWaitingReservation(
-            @Valid @RequestBody ReservationSaveRequest reservationSaveRequest,
+    public ResponseEntity<ReservationResponse> save(
+            @Valid @RequestBody ReservationSaveRequest saveRequest,
             LoginMember loginMember
     ) {
-        ReservationResponse reservationResponse = reservationService.saveByLoginMember(
-                reservationSaveRequest,
-                loginMember,
-                Status.WAIT
-        );
+        ReservationResponse response = waitingReservationService.saveByLoginMember(saveRequest, loginMember);
 
-        return ResponseEntity.created(URI.create("/reservations/wait/" + reservationResponse.id()))
-                .body(reservationResponse);
+        return ResponseEntity.created(URI.create("/reservations/wait/" + response.id()))
+                .body(response);
     }
 
     @PatchMapping("/reservations/wait/{id}")
-    public ResponseEntity<Void> updateSuccess(@PathVariable("id") Long id) {
-        reservationService.updateSuccess(id);
+    public ResponseEntity<Void> updateSuccessStatus(@PathVariable("id") Long id) {
+        waitingReservationService.updateSuccessStatus(id);
 
         return ResponseEntity.noContent().build();
     }

@@ -21,10 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import roomescape.auth.domain.Role;
 import roomescape.common.config.IntegrationTest;
+import roomescape.common.util.CookieUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
-import roomescape.common.util.CookieUtils;
 
 class WaitingReservationControllerTest extends IntegrationTest {
 
@@ -33,7 +33,7 @@ class WaitingReservationControllerTest extends IntegrationTest {
 
     @DisplayName("예약 대기 목록 조회에 성공하면 200 응답을 받는다.")
     @Test
-    void findWaitingReservations() {
+    void findAll() {
         saveMemberAsKaki();
         saveThemeAsHorror();
         saveReservationTimeAsTen();
@@ -87,7 +87,7 @@ class WaitingReservationControllerTest extends IntegrationTest {
 
     @DisplayName("예약 대기을 성공적으로 승인하면 204 응답을 받는다.")
     @Test
-    void updateSuccess() {
+    void updateSuccessStatus() {
         saveMember(MEMBER_KAKI);
         saveThemeAsHorror();
         saveReservationTimeAsTen();
