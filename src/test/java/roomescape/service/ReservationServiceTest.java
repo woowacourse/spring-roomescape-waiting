@@ -83,7 +83,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date1, time1, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.findMyReservations("t1@t1.com"))
+        assertThatThrownBy(() -> reservationService.findAllMyReservations("t1@t1.com"))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 new ReservationRankResponse(2L, theme.getName(), date2, time2.getStartAt(), CONFIRMED, 1)
         );
 
-        List<ReservationRankResponse> actual = reservationService.findMyReservations(member.getEmail());
+        List<ReservationRankResponse> actual = reservationService.findAllMyReservations(member.getEmail());
 
         assertThat(actual).usingRecursiveComparison()
                 .isEqualTo(expected);
@@ -215,7 +215,7 @@ class ReservationServiceTest {
     @DisplayName("대기 상태인 예약 취소 시 회원 이메일이 DB에 존재하지 않으면 예외를 발생시킨다.")
     @Test
     void throw_exception_when_delete_reservation_waiting_not_saved_reservation_id() {
-        assertThatThrownBy(() -> reservationService.memberCancelWaitingReservation("t1@t1.com", 1L))
+        assertThatThrownBy(() -> reservationService.cancelWaitingReservation("t1@t1.com", 1L))
                 .isInstanceOf(MemberNotFoundException.class);
     }
 
@@ -228,7 +228,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date1, time1, CONFIRMED);
         reservationRepository.save(reservation);
 
-        assertThatThrownBy(() -> reservationService.memberCancelWaitingReservation("tt@tt.com", 1L))
+        assertThatThrownBy(() -> reservationService.cancelWaitingReservation("tt@tt.com", 1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -243,7 +243,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         assertThatNoException()
-                .isThrownBy(() -> reservationService.memberCancelWaitingReservation("tt@tt.com", 1L));
+                .isThrownBy(() -> reservationService.cancelWaitingReservation("tt@tt.com", 1L));
     }
 
     @DisplayName("거절하려는 예약이 DB에 존재하지 않으면 예외를 발생시킨다.")
@@ -253,7 +253,7 @@ class ReservationServiceTest {
         reservationTimeRepository.save(time1);
         themeRepository.save(theme);
 
-        assertThatThrownBy(() -> reservationService.adminRejectConfirmedReservation(1L))
+        assertThatThrownBy(() -> reservationService.rejectConfirmedReservation(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -270,7 +270,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
 
-        reservationService.adminRejectConfirmedReservation(1L);
+        reservationService.rejectConfirmedReservation(1L);
         Reservation reservation = reservationRepository.findById(2L).get();
 
         assertThat(reservation.getReservationStatus()).isEqualTo(CONFIRMED);
@@ -283,7 +283,7 @@ class ReservationServiceTest {
         reservationTimeRepository.save(time1);
         themeRepository.save(theme);
 
-        assertThatThrownBy(() -> reservationService.adminRejectWaitingReservation(1L))
+        assertThatThrownBy(() -> reservationService.rejectWaitingReservation(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -296,7 +296,7 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(member, theme, date1, time1, WAITING);
         reservationRepository.save(reservation);
 
-        reservationService.adminRejectWaitingReservation(1L);
+        reservationService.rejectWaitingReservation(1L);
 
         Reservation savedReservation = reservationRepository.findById(1L).get();
         assertThat(savedReservation.getReservationStatus()).isEqualTo(REJECTED);

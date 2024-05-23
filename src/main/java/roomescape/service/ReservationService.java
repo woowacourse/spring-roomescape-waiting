@@ -63,7 +63,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationRankResponse> findMyReservations(String email) {
+    public List<ReservationRankResponse> findAllMyReservations(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         List<ReservationRankResponse> myReservations = reservationRepository.findReservationRankByMember(member);
         myReservations.sort(Comparator
@@ -87,7 +87,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void memberCancelWaitingReservation(String email, long id) {
+    public void cancelWaitingReservation(String email, long id) {
         Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
         Reservation reservation = reservationRepository.findByIdAndMemberAndStatus(id, member, WAITING)
                 .orElseThrow(ReservationNotFoundException::new);
@@ -95,7 +95,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void adminRejectConfirmedReservation(long id) {
+    public void rejectConfirmedReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
         Optional<Reservation> first = reservationRepository.findFirstByThemeAndDateAndTimeAndStatus(
@@ -108,7 +108,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void adminRejectWaitingReservation(long id) {
+    public void rejectWaitingReservation(long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservation.updateStatus(REJECTED);
     }
