@@ -61,4 +61,8 @@ public class Member {
     public Role getRole() {
         return role;
     }
+
+    public boolean isNotAdmin() {
+        return role != Role.ADMIN;
+    }
 }

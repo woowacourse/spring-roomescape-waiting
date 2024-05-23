@@ -34,6 +34,7 @@ public class TestFixture {
 
     @Transactional
     public void initTestData() {
+        persistAdmin();
         persistMember();
         persistTheme("테마");
         persistReservationTimeAfterMinute(1);
@@ -42,12 +43,21 @@ public class TestFixture {
     }
 
     @Transactional
+    public void persistAdmin() {
+        memberRepository.save(getAdmin());
+    }
+
+    @Transactional
     public void persistMember() {
         memberRepository.save(getMember());
     }
 
+    public static Member getAdmin() {
+        return new Member("리건", TestFixture.getAdminEmail(), TestFixture.getPassword(), Role.ADMIN);
+    }
+
     public static Member getMember() {
-        return new Member("리건", "test@email.com", "password", Role.ADMIN);
+        return new Member("사용자", TestFixture.getMemberEmail(), TestFixture.getPassword(), Role.USER);
     }
 
     @Transactional
@@ -108,8 +118,12 @@ public class TestFixture {
                 .format(DateTimeFormatter.ISO_DATE);
     }
 
-    public static String getEmail() {
+    public static String getAdminEmail() {
         return "test@email.com";
+    }
+
+    public static String getMemberEmail() {
+        return "user@email.com";
     }
 
     public static String getPassword() {

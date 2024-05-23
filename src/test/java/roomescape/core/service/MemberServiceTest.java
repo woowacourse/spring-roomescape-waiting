@@ -40,17 +40,17 @@ class MemberServiceTest {
     @Test
     @DisplayName("로그인이 성공하면 토큰을 생성한다.")
     void createToken() {
-        final TokenRequest request = new TokenRequest(TestFixture.getEmail(), TestFixture.getPassword());
+        final TokenRequest request = new TokenRequest(TestFixture.getAdminEmail(), TestFixture.getPassword());
 
         final TokenResponse response = memberService.createToken(request);
 
-        assertThat(tokenProvider.getPayload(response.getAccessToken())).isEqualTo(TestFixture.getEmail());
+        assertThat(tokenProvider.getPayload(response.getAccessToken())).isEqualTo(TestFixture.getAdminEmail());
     }
 
     @Test
     @DisplayName("토큰을 통해 회원을 조회할 수 있다.")
     void findMemberByToken() {
-        final TokenRequest request = new TokenRequest(TestFixture.getEmail(), TestFixture.getPassword());
+        final TokenRequest request = new TokenRequest(TestFixture.getAdminEmail(), TestFixture.getPassword());
         final TokenResponse tokenResponse = memberService.createToken(request);
         final String token = tokenResponse.getAccessToken();
 
@@ -62,7 +62,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("토큰을 통해 로그인한 회원을 조회할 수 있다.")
     void findLoginMemberByToken() {
-        final TokenRequest request = new TokenRequest(TestFixture.getEmail(), TestFixture.getPassword());
+        final TokenRequest request = new TokenRequest(TestFixture.getAdminEmail(), TestFixture.getPassword());
         final TokenResponse tokenResponse = memberService.createToken(request);
         final String token = tokenResponse.getAccessToken();
 
@@ -76,7 +76,7 @@ class MemberServiceTest {
     void findAll() {
         final List<MemberResponse> responses = memberService.findAll();
 
-        assertThat(responses).hasSize(1);
+        assertThat(responses).hasSize(2);
     }
 
     @Test
@@ -92,7 +92,7 @@ class MemberServiceTest {
     @Test
     @DisplayName("이미 사용 중인 이메일로 회원 가입을 할 수 없다.")
     void createWithAlreadyUsedEmail() {
-        final MemberRequest request = new MemberRequest(TestFixture.getEmail(), TestFixture.getPassword(), "리건");
+        final MemberRequest request = new MemberRequest(TestFixture.getAdminEmail(), TestFixture.getPassword(), "리건");
 
         assertThatThrownBy(() -> memberService.create(request))
                 .isInstanceOf(IllegalArgumentException.class)

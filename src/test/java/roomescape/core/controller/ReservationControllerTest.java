@@ -23,9 +23,9 @@ import roomescape.utils.TestFixture;
 
 @AcceptanceTest
 class ReservationControllerTest {
-    private static final String TODAY = TestFixture.getTodayDate();
     private static final String TOMORROW = TestFixture.getTomorrowDate();
     private static final String DAY_AFTER_TOMORROW = TestFixture.getDayAfterTomorrowDate();
+    private static final String RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약만 취소할 수 있습니다.";
 
     @LocalServerPort
     private int port;
@@ -45,7 +45,7 @@ class ReservationControllerTest {
         databaseCleaner.executeTruncate();
         testFixture.initTestData();
 
-        accessToken = AccessTokenGenerator.generate();
+        accessToken = AccessTokenGenerator.adminTokenGenerate();
     }
 
     @ParameterizedTest
@@ -262,5 +262,18 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
+    }
+
+    @Test
+    @DisplayName("내 예약이 아닌 다른 회원의 예약을 삭제하면 예외가 발생한다.")
+    void validateDeleteOtherMemberReservation() {
+        testFixture.persistReservationWithDateAndTimeAndTheme(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.memberTokenGenerate())
+                .when().delete("/reservations/2")
+                .then().log().all()
+                .statusCode(400)
+                .body("detail", is(RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE));
     }
 }

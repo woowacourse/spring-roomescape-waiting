@@ -8,6 +8,7 @@ import roomescape.core.domain.Member;
 import roomescape.core.domain.ReservationTime;
 import roomescape.core.domain.Theme;
 import roomescape.core.domain.Waiting;
+import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.waiting.WaitingRequest;
 import roomescape.core.dto.waiting.WaitingResponse;
 import roomescape.core.repository.MemberRepository;
@@ -23,6 +24,9 @@ public class WaitingService {
     public static final String MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 회원입니다.";
     public static final String TIME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약 시간입니다.";
     public static final String THEME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 테마입니다.";
+    public static final String ALLOWED_TO_ADMIN_ONLY_EXCEPTION_MESSAGE = "관리자만 삭제할 수 있습니다.";
+    public static final String WAITING_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약 대기만 취소할 수 있습니다.";
+    public static final String WAITING_NOT_FOUND_EXCEPTION_MESSAGE = "존재하지 않는 예약 대기입니다.";
 
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
@@ -109,7 +113,28 @@ public class WaitingService {
     }
 
     @Transactional
-    public void delete(final long id) {
+    public void delete(final long id, final LoginMember loginMember) {
+        final Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
+
+        final Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(WAITING_NOT_FOUND_EXCEPTION_MESSAGE));
+
+        if (waiting.isNotOwner(member)) {
+            throw new IllegalArgumentException(WAITING_IS_NOT_YOURS_EXCEPTION_MESSAGE);
+        }
+
+        waitingRepository.delete(waiting);
+    }
+
+    @Transactional
+    public void deleteByAdmin(final long id, final LoginMember loginMember) {
+        final Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
+
+        if (member.isNotAdmin()) {
+            throw new IllegalArgumentException(ALLOWED_TO_ADMIN_ONLY_EXCEPTION_MESSAGE);
+        }
         waitingRepository.deleteById(id);
     }
 }

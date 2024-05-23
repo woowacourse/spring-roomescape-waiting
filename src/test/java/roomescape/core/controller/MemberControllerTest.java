@@ -19,7 +19,7 @@ import roomescape.utils.TestFixture;
 
 @AcceptanceTest
 class MemberControllerTest {
-    private static final String EMAIL = TestFixture.getEmail();
+    private static final String EMAIL = TestFixture.getAdminEmail();
     private static final String PASSWORD = TestFixture.getPassword();
 
     @LocalServerPort

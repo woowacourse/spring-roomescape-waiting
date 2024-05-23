@@ -8,16 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.core.domain.Member;
-import roomescape.core.domain.Reservation;
-import roomescape.core.domain.ReservationTime;
-import roomescape.core.domain.Theme;
+import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.waiting.WaitingRequest;
 import roomescape.core.dto.waiting.WaitingResponse;
-import roomescape.core.repository.MemberRepository;
-import roomescape.core.repository.ReservationRepository;
-import roomescape.core.repository.ReservationTimeRepository;
-import roomescape.core.repository.ThemeRepository;
 import roomescape.utils.DatabaseCleaner;
 import roomescape.utils.TestFixture;
 
@@ -28,18 +21,6 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
@@ -105,17 +86,10 @@ class WaitingServiceTest {
     void delete() {
         final WaitingRequest request = new WaitingRequest(1L, TOMORROW, 1L, 1L);
         final WaitingResponse response = waitingService.create(request);
+        final LoginMember loginMember = new LoginMember(1L);
 
-        waitingService.delete(response.getId());
+        waitingService.delete(response.getId(), loginMember);
 
         assertThat(waitingService.findAll()).isEmpty();
-    }
-
-    private void saveReservation(final String date) {
-        final Member member = memberRepository.findById(1L).orElseThrow();
-        final ReservationTime time = reservationTimeRepository.findById(1L).orElseThrow();
-        final Theme theme = themeRepository.findById(1L).orElseThrow();
-
-        reservationRepository.save(new Reservation(member, date, time, theme));
     }
 }

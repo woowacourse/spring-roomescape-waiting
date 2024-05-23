@@ -49,7 +49,7 @@ class ReservationTimeServiceTest {
     void setUp() {
         databaseCleaner.executeTruncate();
         testFixture.initTestData();
-        
+
         request = new ReservationTimeRequest(START_AT);
     }
 
@@ -111,7 +111,7 @@ class ReservationTimeServiceTest {
     }
 
     private Member getMember() {
-        return memberRepository.findByEmail(TestFixture.getEmail());
+        return memberRepository.findByEmail(TestFixture.getAdminEmail());
     }
 
     private Theme getTheme() {

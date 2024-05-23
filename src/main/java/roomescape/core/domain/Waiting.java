@@ -71,4 +71,8 @@ public class Waiting {
     public Theme getTheme() {
         return theme;
     }
+
+    public boolean isNotOwner(final Member member) {
+        return !this.member.equals(member);
+    }
 }

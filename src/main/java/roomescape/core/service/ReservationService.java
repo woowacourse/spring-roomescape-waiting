@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.core.domain.Member;
 import roomescape.core.domain.Reservation;
 import roomescape.core.domain.ReservationTime;
+import roomescape.core.domain.Role;
 import roomescape.core.domain.Theme;
 import roomescape.core.domain.Waiting;
 import roomescape.core.dto.member.LoginMember;
@@ -28,6 +29,8 @@ public class ReservationService {
     protected static final String THEME_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 테마입니다.";
     protected static final String ALREADY_BOOKED_TIME_EXCEPTION_MESSAGE = "해당 시간에 이미 예약 내역이 존재합니다.";
     protected static final String RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE = "존재하지 않는 예약입니다.";
+    protected static final String RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약만 취소할 수 있습니다.";
+    protected static final String NOT_ALLOWED_TO_MEMBER_EXCEPTION_MESSAGE = "관리자만 예약을 취소할 수 있습니다.";
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -138,9 +141,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(final long id) {
+    public void delete(final long id, final LoginMember loginMember) {
         final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE));
+        final Long reservationMemberId = reservation.getMember().getId();
+        final Long loginMemberId = loginMember.getId();
+
+        if (!reservationMemberId.equals(loginMemberId)) {
+            throw new IllegalArgumentException(RESERVATION_IS_NOT_YOURS_EXCEPTION_MESSAGE);
+        }
 
         reservationRepository.delete(reservation);
         changeFirstWaitingToReservation(reservation);
@@ -161,5 +170,20 @@ public class ReservationService {
             waitingRepository.delete(waiting);
             reservationRepository.save(nextReservation);
         }
+    }
+
+    @Transactional
+    public void deleteByAdmin(final long id, final LoginMember loginMember) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE));
+        final Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new IllegalArgumentException(MEMBER_NOT_EXISTS_EXCEPTION_MESSAGE));
+
+        if (member.getRole() != Role.ADMIN) {
+            throw new IllegalArgumentException(NOT_ALLOWED_TO_MEMBER_EXCEPTION_MESSAGE);
+        }
+
+        reservationRepository.delete(reservation);
+        changeFirstWaitingToReservation(reservation);
     }
 }

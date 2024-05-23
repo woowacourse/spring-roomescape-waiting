@@ -42,12 +42,9 @@ class AdminControllerTest {
         RestAssured.port = port;
 
         databaseCleaner.executeTruncate();
-        adminGenerator.generate();
-        accessToken = AccessTokenGenerator.generate();
+        testFixture.initTestData();
 
-        testFixture.persistTheme("테마 1");
-        testFixture.persistReservationTimeAfterMinute(1);
-        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
+        accessToken = AccessTokenGenerator.adminTokenGenerate();
     }
 
     @Test
@@ -68,6 +65,26 @@ class AdminControllerTest {
                 .when().get("/admin/reservation")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("사용자가 어드민이면 예약을 삭제할 수 있다.")
+    void deleteReservationByAdmin() {
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.adminTokenGenerate())
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 시, 삭제를 시도한 사용자가 어드민이 아니라면 예외가 발생한다.")
+    void deleteReservationByNonAdmin() {
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.memberTokenGenerate())
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(401);
     }
 
     @Test
@@ -267,5 +284,25 @@ class AdminControllerTest {
                 .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("사용자가 어드민이면 예약 대기를 삭제할 수 있다.")
+    void deleteWaitingByAdmin() {
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.adminTokenGenerate())
+                .when().delete("/admin/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 시, 삭제를 시도한 사용자가 어드민이 아니라면 예외가 발생한다.")
+    void deleteWaitingByNonAdmin() {
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.memberTokenGenerate())
+                .when().delete("/admin/waitings/1")
+                .then().log().all()
+                .statusCode(401);
     }
 }

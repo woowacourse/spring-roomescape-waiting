@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.utils.TestFixture;
 
 class ReservationTest {
-    private static final Member member = TestFixture.getMember();
+    private static final Member member = TestFixture.getAdmin();
     private static final Theme theme = TestFixture.getTheme("테마");
     private static final ReservationTime time = TestFixture.getReservationTimeAfterMinute(1);
     private static final ReservationTime pastTime = TestFixture.getReservationTimeBeforeMinute(1);

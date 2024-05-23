@@ -31,7 +31,7 @@ class ThemeControllerTest {
 
         databaseCleaner.executeTruncate();
 
-        testFixture.persistMember();
+        testFixture.persistAdmin();
         testFixture.persistTheme("테마 1");
         testFixture.persistTheme("테마 2");
     }

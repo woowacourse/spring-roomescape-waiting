@@ -15,7 +15,7 @@ public class AdminGenerator {
 
     @Transactional
     public void generate() {
-        final Member member = TestFixture.getMember();
+        final Member member = TestFixture.getAdmin();
 
         entityManager.persist(member);
         entityManager.flush();

@@ -8,7 +8,7 @@ public class ThemeRequestGenerator {
     private static final String ACCESS_TOKEN;
 
     static {
-        ACCESS_TOKEN = AccessTokenGenerator.generate();
+        ACCESS_TOKEN = AccessTokenGenerator.adminTokenGenerate();
     }
 
     public static void generateWithName(final String name) {

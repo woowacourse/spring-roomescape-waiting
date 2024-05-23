@@ -18,6 +18,7 @@ import roomescape.utils.TestFixture;
 
 @AcceptanceTest
 class WaitingControllerTest {
+    public static final String WAITING_IS_NOT_YOURS_EXCEPTION_MESSAGE = "본인의 예약 대기만 취소할 수 있습니다.";
     private static final String TODAY = TestFixture.getTodayDate();
     private static final String TOMORROW = TestFixture.getTomorrowDate();
 
@@ -40,12 +41,9 @@ class WaitingControllerTest {
         RestAssured.port = port;
 
         databaseCleaner.executeTruncate();
-        adminGenerator.generate();
-        accessToken = AccessTokenGenerator.generate();
+        testFixture.initTestData();
 
-        testFixture.persistTheme("테마 1");
-        testFixture.persistReservationTimeAfterMinute(1);
-        testFixture.persistReservationWithDateAndTimeAndTheme(TODAY, 1L, 1L);
+        accessToken = AccessTokenGenerator.adminTokenGenerate();
     }
 
     @Test
@@ -147,5 +145,26 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    @DisplayName("내 예약 대기가 아닌 다른 회원의 예약 대기를 삭제하면 예외가 발생한다.")
+    void deleteWaitingByOtherMember() {
+        MemberWaitingRequest waitingRequest = new MemberWaitingRequest(TOMORROW, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .cookies("token", accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .cookies("token", AccessTokenGenerator.memberTokenGenerate())
+                .when().delete("/waitings/1")
+                .then().log().all()
+                .statusCode(400)
+                .body("detail", is(WAITING_IS_NOT_YOURS_EXCEPTION_MESSAGE));
     }
 }

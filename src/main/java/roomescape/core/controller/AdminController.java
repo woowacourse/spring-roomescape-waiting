@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import roomescape.core.dto.member.LoginMember;
 import roomescape.core.dto.reservation.ReservationRequest;
 import roomescape.core.dto.reservation.ReservationResponse;
 import roomescape.core.dto.reservationtime.ReservationTimeRequest;
@@ -19,20 +20,24 @@ import roomescape.core.dto.theme.ThemeResponse;
 import roomescape.core.service.ReservationService;
 import roomescape.core.service.ReservationTimeService;
 import roomescape.core.service.ThemeService;
+import roomescape.core.service.WaitingService;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    private final ReservationService adminReservationService;
+    private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final WaitingService waitingService;
 
-    public AdminController(final ReservationService adminReservationService,
+    public AdminController(final ReservationService reservationService,
                            final ReservationTimeService reservationTimeService,
-                           final ThemeService themeService) {
-        this.adminReservationService = adminReservationService;
+                           final ThemeService themeService,
+                           final WaitingService waitingService) {
+        this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -48,9 +53,15 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationAsAdmin(
             @Valid @RequestBody final ReservationRequest request) {
-        final ReservationResponse response = adminReservationService.create(request);
+        final ReservationResponse response = reservationService.create(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.getId()))
                 .body(response);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final long id, final LoginMember loginMember) {
+        reservationService.deleteByAdmin(id, loginMember);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/time")
@@ -93,5 +104,11 @@ public class AdminController {
     @GetMapping("/waiting")
     public String waiting() {
         return "admin/waiting";
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") final long id, final LoginMember loginMember) {
+        waitingService.deleteByAdmin(id, loginMember);
+        return ResponseEntity.noContent().build();
     }
 }

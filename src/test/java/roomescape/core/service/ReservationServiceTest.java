@@ -141,8 +141,9 @@ class ReservationServiceTest {
     void delete() {
         final ReservationRequest request = new ReservationRequest(1L, TestFixture.getTomorrowDate(), 1L, 1L);
         reservationService.create(request);
+        final LoginMember loginMember = new LoginMember(1L);
 
-        reservationService.delete(2);
+        reservationService.delete(2, loginMember);
 
         assertThat(reservationService.findAll()).hasSize(1);
     }
@@ -150,7 +151,9 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 삭제할 때, 존재하지 않는 예약이면 예외가 발생한다.")
     void deleteWithInvalidReservation() {
-        assertThatThrownBy(() -> reservationService.delete(0L))
+        final LoginMember loginMember = new LoginMember(1L);
+
+        assertThatThrownBy(() -> reservationService.delete(0L, loginMember))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(ReservationService.RESERVATION_NOT_EXISTS_EXCEPTION_MESSAGE);
     }
@@ -161,8 +164,9 @@ class ReservationServiceTest {
         final ReservationRequest request = new ReservationRequest(1L, TestFixture.getTomorrowDate(), 1L, 1L);
         final ReservationResponse response = reservationService.create(request);
         saveWaiting(TestFixture.getTomorrowDate());
+        final LoginMember loginMember = new LoginMember(1L);
 
-        reservationService.delete(response.getId());
+        reservationService.delete(response.getId(), loginMember);
 
         assertThat(reservationService.findAll()).hasSize(2);
         assertThat(waitingRepository.findAll()).isEmpty();
