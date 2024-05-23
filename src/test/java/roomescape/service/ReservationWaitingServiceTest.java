@@ -35,6 +35,7 @@ import roomescape.infrastructure.ReservationWaitingRepository;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
+import roomescape.service.response.ReservationWaitingAppResponseWithRank;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceTest {
@@ -58,18 +59,18 @@ class ReservationWaitingServiceTest {
     @DisplayName("회원 ID를 가진 예약 대기 정보를 불러온다.")
     @Test
     void findAllByMemberId() {
-        ReservationWaiting data = new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, 1L);
-        when(reservationWaitingRepository.findAllByMemberId(VALID_MEMBER.getId()))
+        long memberId = 1L;
+        ReservationWaiting data = new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, 3L);
+        when(reservationWaitingRepository.findAllByMemberId(memberId))
                 .thenReturn(List.of(data));
-
-        List<ReservationWaitingAppResponse> actual = reservationWaitingService.findAllByMemberId(
-                VALID_MEMBER.getId());
-
-        List<ReservationWaitingAppResponse> expected = List.of(ReservationWaitingAppResponse.from(data));
+        when(reservationWaitingRepository.getRankByReservationAndPriority(reservationId, priority))
+                .thenReturn(1L);
+        List<ReservationWaitingAppResponseWithRank> actual = reservationWaitingService.findAllByMemberId(memberId);
 
         assertAll(
                 () -> assertEquals(1, actual.size()),
-                () -> assertEquals(expected.get(0).id(), actual.get(0).id())
+                () -> assertEquals(3L, actual.get(0).priority()),
+                () -> assertEquals(1L, actual.get(0).rank())
         );
     }
 

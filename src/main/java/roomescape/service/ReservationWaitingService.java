@@ -14,6 +14,7 @@ import roomescape.infrastructure.ReservationWaitingRepository;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.request.ReservationWaitingAppRequest;
 import roomescape.service.response.ReservationWaitingAppResponse;
+import roomescape.service.response.ReservationWaitingAppResponseWithRank;
 
 @Service
 public class ReservationWaitingService {
@@ -36,9 +37,10 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public List<ReservationWaitingAppResponse> findAllByMemberId(Long memberId) {
+    public List<ReservationWaitingAppResponseWithRank> findAllByMemberId(Long memberId) {
         return reservationWaitingRepository.findAllByMemberId(memberId).stream()
-                .map(ReservationWaitingAppResponse::from)
+                .map(reservationWaiting -> ReservationWaitingAppResponseWithRank.of(reservationWaiting,
+                        getRank(reservationWaiting)))
                 .toList();
     }
 
@@ -52,7 +54,7 @@ public class ReservationWaitingService {
         );
         validateDuplication(newReservationWaiting.getReservation().getId(), newReservationWaiting.getMember().getId());
         validatePast(newReservationWaiting);
-        ;
+
         ReservationWaiting savedreservationWaiting = reservationWaitingRepository.save(newReservationWaiting);
 
         return ReservationWaitingAppResponse.from(savedreservationWaiting);
@@ -83,5 +85,15 @@ public class ReservationWaitingService {
         return reservationRepository.findByDateAndTimeIdAndThemeId(new ReservationDate(date.toString()), timeId,
                         themeId)
                 .orElseThrow(() -> new NoSuchElementException("해당 예약이 없습니다. 예약해주세요."));
+    }
+
+    public void deleteBy(Long id) {
+        reservationWaitingRepository.deleteById(id);
+    }
+
+    private long getRank(ReservationWaiting target) {
+        return reservationWaitingRepository.getRankByReservationAndPriority(
+                target.getReservation().getId(),
+                target.getPriority());
     }
 }
