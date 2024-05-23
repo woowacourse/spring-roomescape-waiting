@@ -140,11 +140,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationsMineResponse> findReservationsByMember(final Member member) {
-        return reservationRepository.findByMember(member)
+    public ResponsesWrapper<ReservationsMineResponse> findReservationsByMember(final Member member) {
+        final List<ReservationsMineResponse> reservationsMineResponses = reservationRepository.findByMember(member)
                 .stream()
                 .map(reservation -> buildReservationMineResponse(reservation, member))
                 .toList();
+        return new ResponsesWrapper<>(reservationsMineResponses);
     }
 
     private ReservationsMineResponse buildReservationMineResponse(final Reservation reservation, final Member member) {

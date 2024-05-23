@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error fetching reservations:', error));
 });
 
-function render(data) {
+function render(response) {
+    const data = response.data;
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 

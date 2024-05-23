@@ -12,14 +12,12 @@ import roomescape.domain.Role;
 import roomescape.domain.dto.ReservationRequest;
 import roomescape.domain.dto.ReservationResponse;
 import roomescape.domain.dto.ReservationWaitingResponse;
-import roomescape.domain.dto.ReservationsMineResponse;
 import roomescape.domain.dto.ResponsesWrapper;
 import roomescape.exception.InvalidClientFieldWithValueException;
 import roomescape.exception.ReservationFailException;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -129,10 +127,8 @@ class ReservationServiceTest {
         //given
         Password password = new Password("hashedpassword", "salt");
         Member member = new Member(1L, "user@test.com", password, "poke", Role.USER);
-        //when
-        final List<ReservationsMineResponse> reservationsByMember = service.findReservationsByMember(member);
-        //then
-        assertThat(reservationsByMember).hasSize(8);
+        //when, then
+        assertThat(service.findReservationsByMember(member).getData()).hasSize(8);
     }
 
     @Test

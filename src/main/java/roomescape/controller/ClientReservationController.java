@@ -18,7 +18,6 @@ import roomescape.service.ReservationTimeService;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 public class ClientReservationController {
@@ -47,10 +46,8 @@ public class ClientReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<ReservationsMineResponse>> readByMember(Member member) {
-        final List<ReservationsMineResponse> reservationsMineResponses =
-                reservationService.findReservationsByMember(member);
-        return ResponseEntity.ok(reservationsMineResponses);
+    public ResponseEntity<ResponsesWrapper<ReservationsMineResponse>> readByMember(Member member) {
+        return ResponseEntity.ok(reservationService.findReservationsByMember(member));
     }
 
     @DeleteMapping("/reservations-mine/{id}")
