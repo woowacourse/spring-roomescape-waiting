@@ -65,8 +65,12 @@ public class Reservation {
         }
     }
 
-    public boolean isNotOwnedBy(long memberId) {
-        return !member.hasId(memberId);
+    public boolean isNotModifiableBy(Member member) {
+        return member.isNotAdmin() && isNotOwnedBy(member);
+    }
+
+    private boolean isNotOwnedBy(Member member) {
+        return !member.equals(this.member);
     }
 
     @Override

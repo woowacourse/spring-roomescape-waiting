@@ -42,10 +42,4 @@ public class ReservationService {
         Reservation reservation = request.toReservation(member, time, theme, LocalDateTime.now(clock));
         return reservationRepository.save(reservation);
     }
-
-    public boolean hasNoAccessToReservation(long memberId, long reservationId) {
-        Reservation reservation = reservationRepository.getById(reservationId);
-        Member member = memberRepository.getById(memberId);
-        return member.isNotAdmin() && reservation.isNotOwnedBy(memberId);
-    }
 }

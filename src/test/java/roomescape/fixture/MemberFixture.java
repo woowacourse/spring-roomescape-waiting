@@ -26,8 +26,12 @@ public enum MemberFixture {
     }
 
     public Member create() {
+        return createWithId(null);
+    }
+
+    public Member createWithId(Long id) {
         return new Member(
-                null,
+                id,
                 new PlayerName(name),
                 new Email(email),
                 new Password(password),

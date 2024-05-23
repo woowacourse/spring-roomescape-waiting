@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
 import roomescape.application.reservation.dto.response.ReservationWaitingResponse;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
@@ -16,11 +18,14 @@ public class ReservationWaitingService {
     private static final long MAX_WAITING_COUNT = 5;
 
     private final ReservationService reservationService;
+    private final MemberRepository memberRepository;
     private final ReservationStatusRepository reservationStatusRepository;
 
     public ReservationWaitingService(ReservationService reservationService,
+                                     MemberRepository memberRepository,
                                      ReservationStatusRepository reservationStatusRepository) {
         this.reservationService = reservationService;
+        this.memberRepository = memberRepository;
         this.reservationStatusRepository = reservationStatusRepository;
     }
 
@@ -46,7 +51,9 @@ public class ReservationWaitingService {
     @Transactional
     public void cancelWaitingList(long memberId, long id) {
         ReservationStatus reservationStatus = reservationStatusRepository.getById(id);
-        if (reservationService.hasNoAccessToReservation(memberId, id)) {
+        Reservation reservation = reservationStatus.getReservation();
+        Member member = memberRepository.getById(memberId);
+        if (reservation.isNotModifiableBy(member)) {
             throw new UnAuthorizedException();
         }
         reservationStatus.cancelWaiting();

@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -14,13 +16,16 @@ import roomescape.exception.UnAuthorizedException;
 @Service
 public class ReservationBookingService {
     private final ReservationService reservationService;
+    private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationStatusRepository reservationStatusRepository;
 
     public ReservationBookingService(ReservationService reservationService,
+                                     MemberRepository memberRepository,
                                      ReservationRepository reservationRepository,
                                      ReservationStatusRepository reservationStatusRepository) {
         this.reservationService = reservationService;
+        this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
         this.reservationStatusRepository = reservationStatusRepository;
     }
@@ -39,7 +44,9 @@ public class ReservationBookingService {
 
     @Transactional
     public void cancelReservation(long memberId, long id) {
-        if (reservationService.hasNoAccessToReservation(memberId, id)) {
+        Reservation reservation = reservationRepository.getById(id);
+        Member member = memberRepository.getById(memberId);
+        if (reservation.isNotModifiableBy(member)) {
             throw new UnAuthorizedException();
         }
         ReservationStatus reservationStatus = reservationStatusRepository.getById(id);

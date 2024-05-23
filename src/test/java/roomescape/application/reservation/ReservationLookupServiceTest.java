@@ -7,7 +7,6 @@ import static roomescape.fixture.TimeFixture.TWELVE_PM;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

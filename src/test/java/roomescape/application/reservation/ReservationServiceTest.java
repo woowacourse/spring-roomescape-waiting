@@ -2,12 +2,9 @@ package roomescape.application.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.MEMBER_ARU;
-import static roomescape.fixture.MemberFixture.MEMBER_PK;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -111,27 +108,4 @@ class ReservationServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("현재 시간보다 과거로 예약할 수 없습니다.");
     }
-
-    @Test
-    @DisplayName("예약을 조작할 수 있는 권한을 확인한다.")
-    void permissionCheck() {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        Theme theme = themeRepository.save(new Theme("themeName", "desc", "url"));
-        Member member = memberRepository.save(MEMBER_ARU.create());
-        Member otherMember = memberRepository.save(MEMBER_PK.create());
-        Reservation reservation = reservationRepository.save(new Reservation(
-                member,
-                LocalDate.of(2024, 1, 1),
-                time,
-                theme,
-                LocalDateTime.parse("2023-01-01T12:00:00"))
-        );
-        assertAll(
-                () -> assertThat(reservationService.hasNoAccessToReservation(member.getId(), reservation.getId()))
-                        .isFalse(),
-                () -> assertThat(reservationService.hasNoAccessToReservation(otherMember.getId(), reservation.getId()))
-                        .isTrue()
-        );
-    }
-
 }
