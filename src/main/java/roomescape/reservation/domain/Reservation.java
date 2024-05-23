@@ -71,6 +71,14 @@ public class Reservation {
         return Objects.equals(this.member, member);
     }
 
+    public boolean isDeletableMemeber(Member member) {
+        return member.isAdmin() || Objects.equals(this.member, member);
+    }
+
+    public boolean isNotDeletableMemeber(Member member) {
+        return !isDeletableMemeber(member);
+    }
+
     public Long getId() {
         return id;
     }

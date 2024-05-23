@@ -1,7 +1,9 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.InitialMemberFixture.ADMIN;
 import static roomescape.InitialMemberFixture.MEMBER_1;
+import static roomescape.InitialMemberFixture.MEMBER_2;
 import static roomescape.InitialReservationFixture.RESERVATION_1;
 import static roomescape.InitialReservationFixture.RESERVATION_2;
 
@@ -22,5 +24,29 @@ class ReservationTest {
         );
 
         assertThat(RESERVATION_1).isEqualTo(reservation);
+    }
+
+    @Test
+    @DisplayName("예약을 건 회원은 예약을 삭제할 권한이 있다.")
+    void MemberWhoReservatedHasDeleteAuth() {
+        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(MEMBER_1);
+
+        assertThat(hasDeleteAuth).isTrue();
+    }
+
+    @Test
+    @DisplayName("관리자는 모든 예약에 대해 삭제할 권한이 있다.")
+    void AdminHasDeleteAuth() {
+        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(ADMIN);
+
+        assertThat(hasDeleteAuth).isTrue();
+    }
+
+    @Test
+    @DisplayName("관련 없는 회원은 예약을 삭제할 권한이 없다.")
+    void NotRelatedMemberCanNotDeleteReservation() {
+        boolean hasDeleteAuth = RESERVATION_1.isDeletableMemeber(MEMBER_2);
+
+        assertThat(hasDeleteAuth).isFalse();
     }
 }

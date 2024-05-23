@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.member.domain.Member;
@@ -117,7 +118,7 @@ public class WaitingService {
 
     private void validateDeleteAuth(Member member, Waiting waiting) {
         if (waiting.doesNotHaveDeleteAuth(member)) {
-            throw new RuntimeException("삭제할 권한이 없습니다.");
+            throw new AuthException("예약 대기를 삭제할 권한이 없습니다.");
         }
     }
 }

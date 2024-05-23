@@ -108,7 +108,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("id에 맞는 예약을 삭제한다.")
     void deleteReservation() {
-        reservationService.deleteReservation(RESERVATION_2.getId());
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+        reservationService.deleteReservation(RESERVATION_2.getId(), memberRequest);
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class);
         assertThat(count).isEqualTo(INITIAL_RESERVATION_COUNT - 1);
@@ -117,7 +118,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("특정 예약에 대기가 있을 때, 예약을 삭제하면 1번째 예약 대기가 자동으로 예약된다.")
     void makeFirstWaitingToReservationIfReservationDeleted() {
-        reservationService.deleteReservation(RESERVATION_1.getId());
+        MemberRequest memberRequest = new MemberRequest(MEMBER_1);
+        reservationService.deleteReservation(RESERVATION_1.getId(), memberRequest);
 
         waitingRepository.existsByDateAndReservationTimeAndThemeAndMember(
                 WAITING_1.getDate(),

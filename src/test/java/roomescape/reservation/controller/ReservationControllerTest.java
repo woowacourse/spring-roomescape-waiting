@@ -19,6 +19,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.login.dto.LoginRequest;
 import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.WaitingRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -77,7 +78,7 @@ class ReservationControllerTest {
                 .statusCode(200)
                 .extract().cookie("token");
 
-        ReservationRequest reservationRequest = new ReservationRequest(
+        WaitingRequest waitingRequest = new WaitingRequest(
                 RESERVATION_4.getDate(),
                 RESERVATION_4.getReservationTime().getId(),
                 RESERVATION_4.getTheme().getId()
@@ -87,7 +88,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .contentType(ContentType.JSON)
-                .body(reservationRequest)
+                .body(waitingRequest)
                 .when().post("/reservations/waitings")
                 .then().log().all()
                 .statusCode(201)
@@ -98,8 +99,21 @@ class ReservationControllerTest {
     @Test
     @DisplayName("Reservation을 삭제한다.")
     void deleteReservation() {
+        //given
+        LoginRequest loginRequest = new LoginRequest(COMMON_PASSWORD.password(), MEMBER_1.getEmail().email());
+
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract().cookie("token");
+
         //when
         RestAssured.given().log().all()
+                .cookie("token", token)
+                .contentType(ContentType.JSON)
                 .when().delete("/reservations/" + RESERVATION_2.getId())
                 .then().log().all()
                 .statusCode(204);

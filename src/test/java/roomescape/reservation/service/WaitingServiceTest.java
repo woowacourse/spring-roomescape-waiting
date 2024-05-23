@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.NotFoundException;
 import roomescape.member.dto.MemberRequest;
@@ -112,7 +113,7 @@ class WaitingServiceTest {
         MemberRequest memberRequest = new MemberRequest(MEMBER_1);
 
         assertThatThrownBy(() -> waitingService.deleteWaiting(WAITING_1.getId(), memberRequest))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(AuthException.class);
     }
 
     @Test

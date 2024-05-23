@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
+import roomescape.exceptions.AuthException;
 import roomescape.exceptions.DuplicationException;
 import roomescape.exceptions.ValidationException;
 import roomescape.member.domain.Member;
@@ -126,11 +127,23 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteReservation(Long id) {
-        Reservation reservation = reservationRepository.getById(id);
-        reservationRepository.deleteById(id);
+    @Transactional
+    public void deleteReservation(Long id, MemberRequest memberRequest) {
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> {
+                            validateDeleteAuth(memberRequest.toMember(), reservation);
+                            reservationRepository.deleteById(id);
+                            reorderWaitings(reservation);
 
-        reorderWaitings(reservation);
+                        }
+
+                );
+    }
+
+    private void validateDeleteAuth(Member member, Reservation reservation) {
+        if (reservation.isNotDeletableMemeber(member)) {
+            throw new AuthException("예약을 삭제할 권한이 없습니다.");
+        }
     }
 
     private void reorderWaitings(Reservation reservation) {
