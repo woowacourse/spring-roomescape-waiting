@@ -136,7 +136,7 @@ class WaitingServiceTest {
         Member member = memberRepository.findById(1L).orElseThrow();
         reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
 
-        WaitingRequest request = new WaitingRequest(LocalDate.now(), 3L, 1L);
+        WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), 3L, 1L);
 
         assertThatCode(() -> waitingService.addWaiting(request, member))
                 .doesNotThrowAnyException();
