@@ -13,7 +13,7 @@ public class ReservationSearchSpecification {
         this.spec = Specification.where(null);
     }
 
-    public ReservationSearchSpecification themeId(Long themeId) {
+    public ReservationSearchSpecification sameThemeId(Long themeId) {
         if (themeId != null) {
             this.spec = this.spec.and(
                     (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("theme").get("id"), themeId));
@@ -21,7 +21,7 @@ public class ReservationSearchSpecification {
         return this;
     }
 
-    public ReservationSearchSpecification memberId(Long memberId) {
+    public ReservationSearchSpecification sameMemberId(Long memberId) {
         if (memberId != null) {
             this.spec = this.spec.and(
                     (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("member").get("id"), memberId));
@@ -29,7 +29,31 @@ public class ReservationSearchSpecification {
         return this;
     }
 
-    public ReservationSearchSpecification startFrom(LocalDate dateFrom) {
+    public ReservationSearchSpecification sameTimeId(Long timeId) {
+        if (timeId != null) {
+            this.spec = this.spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("time").get("id"), timeId));
+        }
+        return this;
+    }
+
+    public ReservationSearchSpecification sameDate(LocalDate date) {
+        if (date != null) {
+            this.spec = this.spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("date"), date));
+        }
+        return this;
+    }
+
+    public ReservationSearchSpecification sameStatus(Status status) {
+        if (status != null) {
+            this.spec = this.spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
+        }
+        return this;
+    }
+
+    public ReservationSearchSpecification dateStartFrom(LocalDate dateFrom) {
         if (dateFrom != null) {
             this.spec = this.spec.and(
                     (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("date"), dateFrom));
@@ -37,18 +61,10 @@ public class ReservationSearchSpecification {
         return this;
     }
 
-    public ReservationSearchSpecification endAt(LocalDate toDate) {
+    public ReservationSearchSpecification dateEndAt(LocalDate toDate) {
         if (toDate != null) {
             this.spec = this.spec.and(
                     (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), toDate));
-        }
-        return this;
-    }
-
-    public ReservationSearchSpecification status(Status status) {
-        if (status != null) {
-            this.spec = this.spec.and(
-                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
         return this;
     }

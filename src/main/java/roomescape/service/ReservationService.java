@@ -16,7 +16,6 @@ import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationExistSpecification;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationSearchSpecification;
 import roomescape.repository.ReservationTimeRepository;
@@ -88,14 +87,14 @@ public class ReservationService {
     public ListResponse<ReservationResponse> findBy(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
         validateDateCondition(dateFrom, dateTo);
         Specification<Reservation> spec = new ReservationSearchSpecification()
-                .themeId(themeId)
-                .memberId(memberId)
-                .startFrom(dateFrom)
-                .endAt(dateTo)
+                .sameThemeId(themeId)
+                .sameMemberId(memberId)
+                .dateStartFrom(dateFrom)
+                .dateEndAt(dateTo)
+                .sameStatus(Status.CONFIRMED)
                 .build();
 
         List<ReservationResponse> responses = reservationRepository.findAll(spec).stream()
-                .filter(r -> r.getStatus() == Status.CONFIRMED)
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -108,7 +107,7 @@ public class ReservationService {
 
     private List<Reservation> findAllByStatus(Status status) {
         Specification<Reservation> spec = new ReservationSearchSpecification()
-                .status(status)
+                .sameStatus(status)
                 .build();
 
         return reservationRepository.findAll(spec);
@@ -140,10 +139,11 @@ public class ReservationService {
     }
 
     private void validateIsReservationExist(ReservationCreateRequest request) {
-        Specification<Reservation> spec = new ReservationExistSpecification()
-                .themeId(request.themeId())
-                .timeId(request.timeId())
-                .date(request.date())
+        Specification<Reservation> spec = new ReservationSearchSpecification()
+                .sameThemeId(request.themeId())
+                .sameTimeId(request.timeId())
+                .sameDate(request.date())
+                .sameStatus(Status.CONFIRMED)
                 .build();
 
         if (reservationRepository.exists(spec)) {
@@ -152,14 +152,14 @@ public class ReservationService {
     }
 
     private void validateDuplicate(ReservationCreateRequest request) {
-        Specification<Reservation> specification = new ReservationExistSpecification()
-                .memberId(request.memberId())
-                .themeId(request.themeId())
-                .timeId(request.timeId())
-                .date(request.date())
+        Specification<Reservation> spec = new ReservationSearchSpecification()
+                .sameMemberId(request.memberId())
+                .sameThemeId(request.themeId())
+                .sameTimeId(request.timeId())
+                .sameDate(request.date())
                 .build();
 
-        if (reservationRepository.exists(specification)) {
+        if (reservationRepository.exists(spec)) {
             throw new BadRequestException("같은 시간,테마에 대한 예약(대기)은 한 번만 가능합니다.");
         }
     }
@@ -179,5 +179,4 @@ public class ReservationService {
             throw new BadRequestException("종료 날짜가 시작 날짜 이전일 수 없습니다.");
         }
     }
-
 }
