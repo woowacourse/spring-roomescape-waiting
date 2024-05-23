@@ -1,5 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
 const RESERVATION_TIME_AVAILABLE_API_ENDPOINT = '/times/available';
+const RESERVATION_API_ENDPOINT = '/reservations';
 
 document.addEventListener('DOMContentLoaded', () => {
   requestRead(THEME_API_ENDPOINT)
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+  document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -55,9 +57,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -178,7 +177,7 @@ function onReservationButtonClick() {
       timeId: selectedTimeId
     };
 
-    fetch('/reservations', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -212,14 +211,14 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch(RESERVATION_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,7 +226,9 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) return response.json().then(data => {
+            throw new Error(data.message || 'Reservation Waiting failed');
+          });
           return response.json();
         })
         .then(data => {
@@ -235,7 +236,7 @@ function onWaitButtonClick() {
           window.location.href = "/";
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
+          alert(error.message);
           console.error(error);
         });
   } else {

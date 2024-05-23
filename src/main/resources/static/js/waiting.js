@@ -1,9 +1,10 @@
+const WAITING_API_ENDPOINT = '/waitings';
 document.addEventListener('DOMContentLoaded', () => {
     /*
     TODO: [4단계] 예약 대기 관리 기능
           예약 대기 목록 조회 endpoint 설정
      */
-    fetch('') // 내 예약 목록 조회 API 호출
+    fetch(WAITING_API_ENDPOINT) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -23,11 +24,11 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = '';
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const id = item.id;
+        const name = item.name;
+        const theme = item.theme.name;
+        const date = item.date;
+        const startAt = item.time.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
@@ -45,15 +46,15 @@ function render(data) {
         // actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
-
+/*
 function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
+    /!*
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
-     */
+     *!/
     const endpoint = '' + id;
     return fetch(endpoint, {
         method: ''
@@ -67,10 +68,10 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
+    /!*
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
-     */
+     *!/
     const endpoint = '' + id;
     return fetch(endpoint, {
         method: ''
@@ -78,7 +79,7 @@ function deny(event) {
         if (response.status === 200) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
-}
+}*/
 
 function createActionButton(label, className, eventListener) {
     const button = document.createElement('button');
