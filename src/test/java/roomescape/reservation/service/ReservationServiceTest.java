@@ -43,6 +43,7 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
     @Mock
     private ReservationRepository reservationRepository;
 
@@ -54,9 +55,6 @@ class ReservationServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
-
-    @Mock
-    private Name name;
 
     @Test
     @DisplayName("예약을 추가한다.")

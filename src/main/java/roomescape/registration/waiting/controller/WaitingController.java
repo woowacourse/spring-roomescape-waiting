@@ -41,6 +41,7 @@ public class WaitingController {
     @DeleteMapping("/waitings/{waitingId}")
     public ResponseEntity<WaitingResponse> waitingRemove(@PathVariable long waitingId) {
         waitingService.removeWaiting(waitingId);
+
         return ResponseEntity.noContent().build();
     }
 }

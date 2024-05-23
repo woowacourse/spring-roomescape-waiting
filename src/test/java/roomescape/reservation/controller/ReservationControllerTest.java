@@ -40,6 +40,7 @@ class ReservationControllerTest extends ControllerTest {
             new Theme(1L, new Name("polla"), "폴라 방탈출", "이미지~"),
             new Member(1L, new Name("polla"), "kyunellroll@gmail.com", "polla99", MemberRole.MEMBER)
     );
+
     private final String expectedStartAt = "10:00:00";
 
     @Autowired
@@ -47,7 +48,6 @@ class ReservationControllerTest extends ControllerTest {
 
     @MockBean
     private ReservationService reservationService;
-
 
     @Test
     @DisplayName("예약 정보를 잘 불러오는지 확인한다.")
