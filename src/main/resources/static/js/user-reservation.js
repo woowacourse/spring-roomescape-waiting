@@ -219,7 +219,12 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('예약 대기 실패');
+          if (!response.ok) {
+            response.text().then(text => {
+              alert('ERROR! ' + text);
+              throw new Error('예약 대기 실패');
+            });
+          }
           return response.json();
         })
         .then(data => {
@@ -227,11 +232,11 @@ function onWaitButtonClick() {
           window.location.href = "/";
         })
         .catch(error => {
-          alert("예약 대기 생성 중 에러가 발생하였습니다.");
+          alert('예약 대기 생성 중 에러가 발생하였습니다.');
           console.error(error);
         });
   } else {
-    alert("예약 대기를 신청하기 전 날짜, 테마, 시간을 모두 선택해 주세요.");
+    alert('예약 대기를 신청하기 전 날짜, 테마, 시간을 모두 선택해 주세요.');
   }
 }
 
