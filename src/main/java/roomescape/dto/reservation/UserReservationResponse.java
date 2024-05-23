@@ -7,7 +7,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.waiting.Waiting;
 
 public record UserReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
