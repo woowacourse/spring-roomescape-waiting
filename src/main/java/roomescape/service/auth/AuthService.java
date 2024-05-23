@@ -66,7 +66,7 @@ public class AuthService {
     public void validateAdmin(long memberId) {
         memberRepository.findById(memberId).ifPresent(member -> {
             if (member.isGuest()) {
-                throw new ForbiddenException("예약을 삭제할 권한이 없습니다.");
+                throw new ForbiddenException("권한이 없습니다. 관리자에게 문의해주세요.");
             }
         });
     }
