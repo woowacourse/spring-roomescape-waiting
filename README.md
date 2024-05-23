@@ -29,7 +29,7 @@
     - [x] 인증 정보 확인 기능 추가
 - [x] 테마 검색 기능 추가
 - [x] 자신의 예약 목록 조회 기능 추가
-  - [ ] 예약 목록에 예약 대기 목록도 포함하도록 변경
+  - [x] 예약 목록에 예약 대기 목록도 포함하도록 변경
 
 - [ ] 예약 대기 기능 추가
   - [ ] 이미 예약이 존재하는 날짜, 테마, 시간에 대해 예약 대기 가능 추가
@@ -393,7 +393,7 @@ API 응답 예시
 
 ### request
 
-> GET /reservations-mine HTTP/1.1
+> GET /reservations/mine HTTP/1.1
 > cookie:token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 > host: localhost:8080
 
@@ -416,7 +416,7 @@ API 응답 예시
     "theme": "테마2",
     "date": "2024-03-01",
     "time": "12:00",
-    "status": "예약"
+    "status": "1번째 예약대기"
   },
   {
     "reservationId": 3,
