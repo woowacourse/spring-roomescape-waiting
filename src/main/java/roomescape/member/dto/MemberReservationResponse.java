@@ -1,21 +1,21 @@
-package roomescape.reservation.dto;
+package roomescape.member.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.waiting.domain.Waiting;
 
-public record ReservationWaitingResponse(long id, String themeName, LocalDate date, LocalTime time, String status) {
+public record MemberReservationResponse(long id, String themeName, LocalDate date, LocalTime time, String status) {
 
-    public static ReservationWaitingResponse from(Reservation reservation) {
-        return new ReservationWaitingResponse(reservation.getId(), reservation.getTheme().getName(),
+    public static MemberReservationResponse from(Reservation reservation) {
+        return new MemberReservationResponse(reservation.getId(), reservation.getTheme().getName(),
                 reservation.getDate(), reservation.getReservationTime().getStartAt(),
                 reservation.getReservationStatus());
     }
 
-    public static ReservationWaitingResponse from(Waiting waiting) {
+    public static MemberReservationResponse from(Waiting waiting) {
         Reservation reservation = waiting.getReservation();
-        return new ReservationWaitingResponse(reservation.getId(), reservation.getTheme().getName(),
+        return new MemberReservationResponse(reservation.getId(), reservation.getTheme().getName(),
                 reservation.getDate(), reservation.getReservationTime().getStartAt(),
                 waiting.getCount() + reservation.getReservationStatus());
     }

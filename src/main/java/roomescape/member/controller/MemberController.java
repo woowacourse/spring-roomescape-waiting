@@ -4,9 +4,9 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
+import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.dto.ReservationWaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -26,7 +26,7 @@ public class MemberController {
     }
 
     @GetMapping("/members/reservations")
-    public List<ReservationWaitingResponse> memberReservationList(@LoginMemberId long id) {
+    public List<MemberReservationResponse> memberReservationList(@LoginMemberId long id) {
         return reservationService.findMemberReservations(id);
     }
 }
