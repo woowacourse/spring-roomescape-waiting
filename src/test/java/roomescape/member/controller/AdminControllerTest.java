@@ -154,7 +154,7 @@ class AdminControllerTest extends ControllerTest {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .when().post("/admin/waiting/approve/" + waiting.memberReservationId())
+                .when().post(String.format("/admin/reservations/%d/waiting/approve",  waiting.memberReservationId()))
                 .then().log().all()
                 .statusCode(200);
     }
@@ -195,7 +195,7 @@ class AdminControllerTest extends ControllerTest {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
-                .when().post("/admin/waiting/deny/" + waiting.memberReservationId())
+                .when().post(String.format("/admin/reservations/%d/waiting/deny",  waiting.memberReservationId()))
                 .then().log().all()
                 .statusCode(200);
     }

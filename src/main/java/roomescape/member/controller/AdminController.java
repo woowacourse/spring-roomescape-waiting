@@ -58,14 +58,14 @@ public class AdminController {
         return ResponseEntity.ok().body(memberService.findAll());
     }
 
-    @PostMapping("/waiting/approve/{id}")
+    @PostMapping("/reservations/{id}/waiting/approve")
     public ResponseEntity<Void> approve(@LoginUser AuthInfo authInfo,
                                         @PathVariable("id") @Min(1) long memberReservationId) {
         waitingReservationService.approveWaiting(authInfo, memberReservationId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/waiting/deny/{id}")
+    @PostMapping("/reservations/{id}/waiting/deny")
     public ResponseEntity<Void> deny(@LoginUser AuthInfo authInfo,
                                      @PathVariable("id") @Min(1) long memberReservationId) {
         waitingReservationService.denyWaiting(authInfo, memberReservationId);
