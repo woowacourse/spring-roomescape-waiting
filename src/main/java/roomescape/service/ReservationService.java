@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,7 @@ public class ReservationService {
     public ListResponse<ReservationResponse> findAllWaiting() {
         List<ReservationResponse> responses = findAllByStatus(Status.WAITING).stream()
                 .map(ReservationResponse::from)
+                .sorted(getWaitingComparator())
                 .toList();
 
         return new ListResponse<>(responses);
@@ -111,6 +113,13 @@ public class ReservationService {
                 .build();
 
         return reservationRepository.findAll(spec);
+    }
+
+    private Comparator<ReservationResponse> getWaitingComparator() {
+        return Comparator.comparing(ReservationResponse::date)
+                .thenComparing(response -> response.time().startAt())
+                .thenComparing(response -> response.theme().name())
+                .thenComparing(ReservationResponse::id);
     }
 
     private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {
