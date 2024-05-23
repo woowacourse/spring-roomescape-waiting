@@ -8,6 +8,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationWait;
 
@@ -37,11 +38,11 @@ public interface ReservationWaitRepository extends Repository<ReservationWait, L
 
     List<ReservationWait> findByMemberIdAndStatus(Long memberId, ReservationStatus status);
 
+    long countByReservation(Reservation reservation);
+
     void deleteByMemberId(Long memberId);
 
     void deleteByReservationId(Long reservationId);
 
     void deleteAll();
-
-    void deleteByMemberName(String name);
 }

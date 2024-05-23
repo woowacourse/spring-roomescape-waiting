@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import static roomescape.domain.ReservationStatus.RESERVED;
+
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -24,6 +26,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationWait {
+    @Column(insertable = false)
+    private static final int RESERVED_PRIORITY_NUMBER = 0;
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,10 +47,20 @@ public class ReservationWait {
     private ReservationStatus status;
 
     public ReservationWait(Member member, Reservation reservation, int priority, ReservationStatus status) {
+        validatePriority(priority, status);
         this.member = member;
         this.reservation = reservation;
         this.priority = priority;
         this.status = status;
+    }
+
+    private void validatePriority(int priority, ReservationStatus status) {
+        if (priority != RESERVED_PRIORITY_NUMBER && status == RESERVED) {
+            throw new IllegalArgumentException("잘못된 생성자 인자입니다");
+        }
+        if (priority == RESERVED_PRIORITY_NUMBER && status != RESERVED) {
+            throw new IllegalArgumentException("잘못된 생성자 인자입니다");
+        }
     }
 
     @Override
