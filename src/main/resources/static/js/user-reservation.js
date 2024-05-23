@@ -121,11 +121,39 @@ function checkDateAndThemeAndTime() {
   const reserveButton = document.getElementById("reserve-button");
   const waitButton = document.getElementById("wait-button");
 
+  const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+  const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+  let isMine = false;
+  if (selectedDate && selectedThemeId && selectedTimeId) {
+    fetch(`/reservations/is-mine?date=${selectedDate}&themeId=${selectedThemeId}&timeId=${selectedTimeId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+        .then(response => {
+          if (!response.ok) throw new Error('잘못된 요청입니다.');
+          return response.json();
+        })
+        .then(data => {
+          isMine = data;
+        })
+        .catch(error => {
+          alert("An error occurred get mine");
+          console.error(error);
+        });
+  }
+
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
       // 선택된 시간이 이미 예약된 경우
       reserveButton.classList.add("disabled");
-      waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
+      if (isMine) {
+        waitButton.classList.add("disabled"); // 예약 대기 버튼 활성화
+      } else {
+        waitButton.classList.remove("disabled");
+      }
     } else {
       // 선택된 시간이 예약 가능한 경우
       reserveButton.classList.remove("disabled");

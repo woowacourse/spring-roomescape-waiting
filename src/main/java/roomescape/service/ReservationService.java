@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.controller.member.dto.LoginMember;
 import roomescape.controller.reservation.dto.CreateReservationRequest;
 import roomescape.controller.reservation.dto.ReservationSearchCondition;
+import roomescape.controller.time.dto.IsMineRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -115,6 +116,11 @@ public class ReservationService {
         return reservations.stream()
                 .filter(reservation -> !preReservations.add(ReservationInfo.from(reservation)))
                 .toList();
+    }
+
+    public boolean isMyReservation(final IsMineRequest request, final LoginMember loginMember) {
+        return reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(loginMember.id(), request.themeId(),
+                request.timeId(), request.date());
     }
 
     private void validateBeforeDay(final LocalDateTime reservationDateTime) {
