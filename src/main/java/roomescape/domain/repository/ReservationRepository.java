@@ -32,6 +32,8 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     List<Reservation> findAll();
 
+    List<Reservation> findAllByMemberId(Long memberId);
+
     @Query("SELECT r.time.id FROM Reservation r WHERE r.date = :date AND r.theme.id = :themeId")
     List<Long> findTimeIdByDateAndThemeId(@Param("date") LocalDate date, @Param("themeId") Long themeId);
 
