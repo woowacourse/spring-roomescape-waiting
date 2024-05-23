@@ -78,6 +78,8 @@ class ReservationServiceTest extends ServiceTest {
                 .hasMessage("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
     }
 
+    // TODO: (멤버, 날짜, 테마, 시간, "예약대기")의 예약이 있으면 실패하는 테스트 작성 (예약대기 생성 메서드 필요)
+
     @DisplayName("없는 id의 예약을 삭제하면 예외를 발생합니다.")
     @Test
     void should_throw_EntityNotFoundException_when_remove_reservation_with_non_exist_id() {

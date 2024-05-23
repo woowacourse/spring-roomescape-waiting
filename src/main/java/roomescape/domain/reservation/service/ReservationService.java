@@ -52,6 +52,11 @@ public class ReservationService {
             throw new DataConflictException("예약 날짜와 예약시간 그리고 테마가 겹치는 예약은 할 수 없습니다.");
         }
 
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStatus(reservationAddRequest.memberId(),
+                reservationAddRequest.date(), reservationAddRequest.timeId(), reservationAddRequest.themeId(), Status.RESERVATION_WAIT)) {
+            throw new DataConflictException("멤버와 예약 날짜 그리고 예약시간, 테마가 겹치는 예약대기는 할 수 없습니다.");
+        }
+
         ReservationTime reservationTime = getReservationTime(reservationAddRequest.timeId());
         Theme theme = getTheme(reservationAddRequest.themeId());
         Member member = getMember(reservationAddRequest.memberId());
