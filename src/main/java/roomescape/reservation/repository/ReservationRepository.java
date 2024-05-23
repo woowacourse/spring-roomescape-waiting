@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.WaitingWithRank;
@@ -48,7 +49,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Member member
     );
 
-    boolean existsByDateAndReservationTimeStartAtAndTheme(LocalDate date, LocalTime startAt, Theme theme);
+    Optional<Reservation> findFirstByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     boolean existsByDateAndReservationTimeStartAtAndThemeAndStatus(
             LocalDate date,

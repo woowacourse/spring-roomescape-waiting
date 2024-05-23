@@ -87,16 +87,15 @@ public class ReservationService {
 
     private void validateReservationWithStatus(Reservation reservation) {
         Status reservationStatus = reservation.getStatus();
-        boolean existReservation = reservationRepository.existsByDateAndReservationTimeStartAtAndTheme(
-                // TODO : reservationTime ID로 중복 검사
+        Optional<Reservation> savedReservation = reservationRepository.findFirstByDateAndReservationTimeAndTheme(
                 reservation.getDate(),
-                reservation.getStartAt(),
+                reservation.getTime(),
                 reservation.getTheme()
         );
-        if (reservationStatus.isSuccess() && existReservation) {
+        if (reservationStatus.isSuccess() && savedReservation.isPresent()) {
             throw new IllegalArgumentException("중복된 예약이 있습니다. 예약 대기를 걸어주세요.");
         }
-        if (reservationStatus.isWait() && !existReservation) {
+        if (reservationStatus.isWait() && savedReservation.isEmpty()) {
             throw new IllegalArgumentException("추가된 예약이 없습니다. 예약을 추가해 주세요.");
         }
     }

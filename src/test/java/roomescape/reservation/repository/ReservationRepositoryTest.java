@@ -72,7 +72,7 @@ class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations.size()).isEqualTo(1);
+        assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("회원 id로 예약 목록을 조회한다.")
@@ -96,7 +96,7 @@ class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAllByMemberId(kaki.getId());
 
-        assertThat(reservations.size()).isEqualTo(1);
+        assertThat(reservations).hasSize(1);
     }
 
     @DisplayName("회원 id로 예약 대기 순번 목록을 조회한다.")
@@ -179,31 +179,26 @@ class ReservationRepositoryTest {
         assertThat(reservations).hasSize(1);
     }
 
-    @DisplayName("같은 테마, 날짜, 시간에 예약이 있을 경우 true를 반환한다.")
+    @DisplayName("날짜, 시간, 테마가 일치하는 Reservation을 반환한다.")
     @Test
     void existReservationTest() {
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.parse(HOUR_10)));
+        ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10_00);
+        Theme theme = themeRepository.save(HORROR_THEME);
+        Member member = memberRepository.save(MEMBER_JOJO);
 
-        Theme theme = themeRepository.save(
-                new Theme(
-                        new ThemeName(HORROR_THEME_NAME),
-                        new Description(HORROR_DESCRIPTION),
-                        THUMBNAIL
-                )
+        Reservation expected = reservationRepository.save(
+                new Reservation(member, TOMORROW, theme, reservationTime, Status.SUCCESS));
+
+        Optional<Reservation> actual = reservationRepository.findFirstByDateAndReservationTimeAndTheme(
+                TOMORROW,
+                reservationTime,
+                theme
         );
 
-        Member member = memberRepository.save(new Member(new MemberName(KAKI_NAME), KAKI_EMAIL, KAKI_PASSWORD));
-
-        Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(), theme, reservationTime, Status.SUCCESS));
-
-        boolean exist = reservationRepository.existsByDateAndReservationTimeStartAtAndTheme(
-                savedReservation.getDate(),
-                savedReservation.getStartAt(),
-                savedReservation.getTheme()
-        );
-
-        assertThat(exist).isTrue();
+        assertThat(actual).isNotEmpty()
+                .get()
+                .extracting(Reservation::getId)
+                .isEqualTo(expected.getId());
     }
 
     @DisplayName("날짜, 시간, 테마, 회원 정보가 일치하는 Reservation을 반환한다.")
@@ -287,7 +282,7 @@ class ReservationRepositoryTest {
 
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations.size()).isEqualTo(0);
+        assertThat(reservations).isEmpty();
     }
 
     @DisplayName("확정된 예약 내역이 있으면 true를 반환한다.")
