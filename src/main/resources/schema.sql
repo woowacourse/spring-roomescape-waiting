@@ -36,3 +36,11 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (reservation_time_id) REFERENCES reservation_time (id)
 );
+
+CREATE TABLE waiting
+(
+    id             BIGINT NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT,
+    member_id      BIGINT,
+    create_at      DATETIME
+);
