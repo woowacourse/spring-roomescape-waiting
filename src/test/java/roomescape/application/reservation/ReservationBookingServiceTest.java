@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import roomescape.application.ServiceTest;
 import roomescape.application.reservation.dto.request.ReservationRequest;
-import roomescape.application.reservation.fixture.ReservationFixture;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.BookStatus;
@@ -29,6 +27,8 @@ import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.exception.UnAuthorizedException;
+import roomescape.fixture.MemberFixture;
+import roomescape.fixture.ReservationFixture;
 
 @ServiceTest
 @Import(ReservationFixture.class)

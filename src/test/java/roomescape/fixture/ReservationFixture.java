@@ -1,4 +1,4 @@
-package roomescape.application.reservation.fixture;
+package roomescape.fixture;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;

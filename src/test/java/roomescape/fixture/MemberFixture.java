@@ -1,4 +1,9 @@
-package roomescape.domain.member;
+package roomescape.fixture;
+
+import roomescape.domain.member.Email;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Password;
+import roomescape.domain.member.PlayerName;
 
 public class MemberFixture {
 

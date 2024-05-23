@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberFixture;
+import roomescape.fixture.MemberFixture;
 
 class ReservationTest {
 

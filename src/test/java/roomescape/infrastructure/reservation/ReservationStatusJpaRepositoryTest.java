@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberFixture;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
@@ -26,6 +25,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.fixture.MemberFixture;
 
 @DataJpaTest
 class ReservationStatusJpaRepositoryTest {
