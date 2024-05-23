@@ -15,9 +15,6 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("SELECT r FROM Reservation r JOIN FETCH r.time JOIN FETCH r.theme JOIN FETCH r.member")
-    List<Reservation> findAllWithDetails();
-
     @Query("""
             SELECT r FROM Reservation r
             JOIN FETCH r.time

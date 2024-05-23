@@ -162,7 +162,7 @@ class ReservationServiceTest extends ServiceTest {
         reservationService.create(TOMMY_RESERVATION(miaReservationTime, wootecoTheme, tommy, BOOKING));
 
         // when
-        List<Reservation> reservations = reservationService.findAll();
+        List<Reservation> reservations = reservationService.findReservations();
 
         // then
         assertSoftly(softly -> {

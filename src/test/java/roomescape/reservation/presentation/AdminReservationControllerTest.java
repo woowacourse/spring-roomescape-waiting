@@ -99,7 +99,7 @@ class AdminReservationControllerTest extends ControllerTest {
         ReservationTime expectedTime = new ReservationTime(1L, MIA_RESERVATION_TIME);
         Reservation expectedReservation = MIA_RESERVATION(expectedTime, WOOTECO_THEME(), USER_MIA(), BOOKING);
 
-        BDDMockito.given(reservationService.findAll())
+        BDDMockito.given(reservationService.findReservations())
                 .willReturn(List.of(expectedReservation));
 
         // when & then

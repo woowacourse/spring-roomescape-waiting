@@ -65,8 +65,8 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAllWithDetails();
+    public List<Reservation> findReservations() {
+        return reservationRepository.findAllByStatusWithDetails(ReservationStatus.BOOKING);
     }
 
     public List<Reservation> findReservationsByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId,

@@ -58,7 +58,7 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findReservations() {
-        List<Reservation> reservations = reservationService.findAll();
+        List<Reservation> reservations = reservationService.findReservations();
         return ResponseEntity.ok(reservations.stream()
                 .map(ReservationResponse::from)
                 .toList());
