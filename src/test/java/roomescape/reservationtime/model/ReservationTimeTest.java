@@ -27,14 +27,16 @@ class ReservationTimeTest {
         void isSameTo() {
             long sameTimeId = 1L;
             ReservationTime reservationTime = new ReservationTime(sameTimeId, LocalTime.parse("10:00"));
-            assertTrue(reservationTime.isSameTo(sameTimeId));
+            ReservationTime sameTime = new ReservationTime(sameTimeId, LocalTime.parse("20:00"));
+            assertTrue(reservationTime.isSameTo(sameTime));
         }
 
         @Test
         @DisplayName("주어진 id값이 시간 객체의 id와 동일하지 않는 경우 거짓을 반환한다.")
         void isSameTo_WhenNotSame() {
             ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
-            assertFalse(reservationTime.isSameTo(2L));
+            ReservationTime sameTime = new ReservationTime(2L, LocalTime.parse("20:00"));
+            assertFalse(reservationTime.isSameTo(sameTime));
         }
     }
 }

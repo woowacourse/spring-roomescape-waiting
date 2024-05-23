@@ -1,9 +1,12 @@
 package roomescape.reservation.model;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,6 +14,7 @@ import roomescape.fixture.MemberFixture;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ReservationTimeFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.member.domain.Member;
 import roomescape.reservationtime.model.ReservationTime;
 
 class ReservationTest {
@@ -90,5 +94,43 @@ class ReservationTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(now.minusHours(1) + "는 현재보다 동일하거나 지나간 시간임으로 예약 생성이 불가능합니다. 현재 이후 날짜로 재예약해주세요.");
         }
+    }
+
+    @Test
+    @DisplayName("같은 예약 시간 확인: 참")
+    void isSameTime() {
+        ReservationTime sameTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        Reservation reservation = new Reservation(MemberFixture.getOne(), LocalDate.parse("2099-10-11"),
+                sameTime, ThemeFixture.getOne());
+        assertTrue(reservation.isSameTime(sameTime));
+    }
+
+    @Test
+    @DisplayName("같은 예약 시간 확인: 거짓")
+    void isSameTime_WhenNotSame() {
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        ReservationTime otherTime = new ReservationTime(2L, LocalTime.parse("20:00"));
+        Reservation reservation = new Reservation(MemberFixture.getOne(), LocalDate.parse("2099-10-11"),
+                reservationTime, ThemeFixture.getOne());
+        assertFalse(reservation.isSameTime(otherTime));
+    }
+
+    @Test
+    @DisplayName("같은 예약 시간 확인: 참")
+    void isOwnedBy() {
+        Member member = MemberFixture.getOneWithId(1L);
+        Reservation reservation = new Reservation(member, LocalDate.parse("2099-10-11"),
+                ReservationTimeFixture.getOne(), ThemeFixture.getOne());
+        assertTrue(reservation.isOwnedBy(member));
+    }
+
+    @Test
+    @DisplayName("같은 예약 시간 확인: 거짓")
+    void isOwnedBy_WhenNotSame() {
+        Member member = MemberFixture.getOneWithId(1L);
+        Member otherMember = MemberFixture.getOneWithId(2L);
+        Reservation reservation = new Reservation(member, LocalDate.parse("2099-10-11"),
+                ReservationTimeFixture.getOne(), ThemeFixture.getOne());
+        assertFalse(reservation.isOwnedBy(otherMember));
     }
 }

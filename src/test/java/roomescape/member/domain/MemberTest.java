@@ -12,14 +12,14 @@ class MemberTest {
     @DisplayName("해당하는 id가 동일하지 않은 경우, 참을 반환한다.")
     void isNotSameUser() {
         Member member = new Member(1L, "몰리", Role.USER, "asdf@asdf.com", "pass");
-        assertTrue(member.isNotSameUser(member.getId() + 1));
+        assertTrue(member.isNotSameMember(member.getId() + 1));
     }
 
     @Test
     @DisplayName("해당하는 id가 동일한 경우, 거짓을 반환한다.")
     void isNotSameUser_WhenIsSame() {
         Member member = new Member(1L, "몰리", Role.USER, "asdf@asdf.com", "pass");
-        assertFalse(member.isNotSameUser(member.getId()));
+        assertFalse(member.isNotSameMember(member.getId()));
     }
 
     @Test

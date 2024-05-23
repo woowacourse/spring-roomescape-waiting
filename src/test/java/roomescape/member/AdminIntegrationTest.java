@@ -266,7 +266,7 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않습니다."));
     }
 
     @Test
@@ -289,7 +289,7 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않습니다."));
     }
 
     @Test
@@ -312,6 +312,6 @@ class AdminIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 2에 해당하는 사용자가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 2에 해당하는 회원이 존재하지 않습니다."));
     }
 }

@@ -2,6 +2,7 @@ package roomescape.waiting.repository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
@@ -14,6 +15,13 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     default Waiting getById(Long id) {
         return findById(id).orElseThrow(
                 () -> new NoSuchElementException("식별자 " + id + "에 해당하는 예약 대기가 존재하지 않습니다."));
+    }
+
+    Optional<Waiting> findFirstByReservation(Reservation reservation);
+
+    default Waiting getFirstByReservation(Reservation reservation) {
+        return findFirstByReservation(reservation)
+                .orElseThrow(() -> new NoSuchElementException(reservation + "에 해당하는 예약 대기가 존재하지 않습니다."));
     }
 
     @Query("""
@@ -32,4 +40,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     // TODO: 대처하기
     boolean existsByMemberAndReservation(Member member, Reservation reservation);
+
+    boolean existsByReservation(Reservation reservation);
 }

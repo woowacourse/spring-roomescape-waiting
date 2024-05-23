@@ -123,7 +123,15 @@ public class Reservation extends BaseEntity {
     }
 
     public boolean isSameTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameTo(reservationTime.getId());
+        return this.reservationTime.isSameTo(reservationTime);
+    }
+
+    public boolean isOwnedBy(final Member member) {
+        return !this.member.isNotSameMember(member.getId());
+    }
+
+    public void updateMember(final Member member) {
+        this.member = member;
     }
 
     public Long getId() {

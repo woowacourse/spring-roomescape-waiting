@@ -38,8 +38,8 @@ public class ReservationTime extends BaseEntity {
         }
     }
 
-    public boolean isSameTo(final Long timeId) {
-        return Objects.equals(this.id, timeId);
+    public boolean isSameTo(final ReservationTime reservationTime) {
+        return Objects.equals(this, reservationTime);
     }
 
     public Long getId() {

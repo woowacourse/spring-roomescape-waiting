@@ -38,7 +38,7 @@ public class Waiting extends BaseEntity {
     }
 
     public boolean isNotSameMember(final Long memberId) {
-        return member.isNotSameUser(memberId);
+        return member.isNotSameMember(memberId);
     }
 
     public Long getId() {

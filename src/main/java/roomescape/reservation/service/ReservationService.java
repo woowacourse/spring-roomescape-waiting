@@ -3,9 +3,9 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthInfo;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.CreateReservationRequest;
@@ -18,6 +18,8 @@ import roomescape.reservationtime.model.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.model.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -26,15 +28,17 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+                              final MemberRepository memberRepository, final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public CreateReservationResponse createReservation(final AuthInfo authInfo,
@@ -94,13 +98,31 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteReservation(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("식별자 " + id + "에 해당하는 예약이 존재하지 않습니다. 삭제가 불가능합니다.");
+    public void cancelReservation(final AuthInfo authInfo, final Long id) {
+        Reservation reservation = reservationRepository.getById(id);
+        checkCancelAuthorization(reservation, authInfo.getMemberId());
+
+        if (waitingRepository.existsByReservation(reservation)) {
+            updateReservationByMember(reservation);
+            return;
         }
         reservationRepository.deleteById(id);
     }
 
+    private void checkCancelAuthorization(final Reservation reservation, final Long requesterId) {
+        Member member = memberRepository.getById(requesterId);
+        if (reservation.isOwnedBy(member) || member.isNotAdmin()) {
+            throw new ForbiddenException("식별자 " + reservation.getId() + "인 예약에 대해 권한이 존재하지 않아, 삭제가 불가능합니다.");
+        }
+    }
+
+    private void updateReservationByMember(Reservation reservation) {
+        Waiting waiting = waitingRepository.getFirstByReservation(reservation);
+        reservation.updateMember(waiting.getMember());
+        waitingRepository.delete(waiting);
+    }
+
+    // TODO: dto 이름 변경
     public List<roomescape.member.dto.response.FindReservationResponse> getReservationsByMember(
             final AuthInfo authInfo) {
         return reservationRepository.findAllByMemberId(authInfo.getMemberId()).stream()

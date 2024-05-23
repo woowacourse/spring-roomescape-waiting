@@ -65,9 +65,10 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.searchBy(themeId, memberId, dateFrom, dateTo));
     }
 
-    @DeleteMapping("/{id}") // TODO: member 정보가 필요할듯함
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal AuthInfo authInfo,
+                                                  @PathVariable Long id) {
+        reservationService.cancelReservation(authInfo, id);
         return ResponseEntity.noContent().build();
     }
 }

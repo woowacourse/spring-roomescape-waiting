@@ -139,7 +139,7 @@ class ReservationTimeIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않아 시간을 조회할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않습니다."));
     }
 
     @Test

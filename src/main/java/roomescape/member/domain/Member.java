@@ -68,7 +68,11 @@ public class Member extends BaseEntity {
         }
     }
 
-    public boolean isNotSameUser(final Long memberId) {
+    public boolean isNotAdmin() {
+        return this.role != Role.ADMIN;
+    }
+
+    public boolean isNotSameMember(final Long memberId) {
         return !Objects.equals(id, memberId);
     }
 

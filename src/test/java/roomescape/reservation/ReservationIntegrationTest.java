@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -19,7 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.request.LoginRequest;
+import roomescape.fixture.MemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -31,6 +34,8 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.model.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.util.IntegrationTest;
+import roomescape.waiting.model.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @IntegrationTest
 class ReservationIntegrationTest {
@@ -44,10 +49,14 @@ class ReservationIntegrationTest {
     @Autowired
     private ThemeRepository themeRepository;
 
-    @LocalServerPort
-    private int port;
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @LocalServerPort
+    private int port;
 
     @BeforeEach
     void init() {
@@ -55,10 +64,20 @@ class ReservationIntegrationTest {
     }
 
     private String getTokenByLogin() {
-        memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
+        Member member = memberRepository.save(new Member("몰리", Role.USER, "login@naver.com", "hihi"));
         return RestAssured
                 .given().log().all()
-                .body(new LoginRequest("login@naver.com", "hihi"))
+                .body(new LoginRequest(member.getEmail().getEmail(), member.getPassword()))
+                .contentType(ContentType.JSON)
+                .when().post("/login")
+                .then().log().cookies().extract().cookie("token");
+    }
+
+    private String getAdminTokenByLogin() {
+        Member member = memberRepository.save(new Member("파랑", Role.ADMIN, "admin@naver.com", "hihi"));
+        return RestAssured
+                .given().log().all()
+                .body(new LoginRequest(member.getEmail().getEmail(), member.getPassword()))
                 .contentType(ContentType.JSON)
                 .when().post("/login")
                 .then().log().cookies().extract().cookie("token");
@@ -249,7 +268,7 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 테마가 존재하지 않습니다."));
     }
 
     @Test
@@ -270,7 +289,7 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않아 예약을 생성할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 시간이 존재하지 않습니다."));
     }
 
     @Test
@@ -347,7 +366,7 @@ class ReservationIntegrationTest {
                 .then().log().all()
 
                 .statusCode(404)
-                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않아 예약을 조회할 수 없습니다."));
+                .body("detail", equalTo("식별자 1에 해당하는 예약이 존재하지 않습니다."));
     }
 
     @Test
@@ -402,23 +421,106 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @DisplayName("방탈출 예약 하나를 삭제한다.")
-    void deleteReservationTime() {
-        saveTimeThemeMemberForReservation();
-        reservationRepository.save(new Reservation(memberRepository.getById(1L), LocalDate.parse("2024-11-23"),
-                reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+    @Transactional
+    @DisplayName("방탈출 예약 취소 성공: 대기가 있는 경우")
+    void cancelReservation_WhenWaitingExists() {
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Member reservationMember = memberRepository.save(MemberFixture.getOne("reservationMember@naver.com"));
+        Member waitingMember = memberRepository.save(MemberFixture.getOne("mmmember@naver.com"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(reservationMember, LocalDate.parse("2024-11-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+
+        String token = getAdminTokenByLogin();
+        waitingRepository.save(new Waiting(reservation, waitingMember));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", token)
                 .when().delete("/reservations/1")
                 .then().log().all()
 
                 .statusCode(204);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/reservations/1")
+                .then().log().all()
+
+                .statusCode(200)
+                .body("member.id", equalTo(waitingMember.getId().intValue()))
+                .body("member.name", equalTo(waitingMember.getName()));
     }
 
     @Test
-    @DisplayName("방탈출 예약 조회 시, 조회하려는 예약이 없는 경우 예외를 반환한다.")
-    void deleteReservationTime_WhenTimeNotExist() {
+    @Transactional
+    @DisplayName("방탈출 예약 취소 성공: 대기가 없는 경우")
+    void cancelReservation_WhenWaitingNotExists() {
+        reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+        themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+        Member reservationMember = memberRepository.save(MemberFixture.getOne("reservationMember@naver.com"));
+        Member waitingMember = memberRepository.save(MemberFixture.getOne("mmmember@naver.com"));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(reservationMember, LocalDate.parse("2024-11-23"),
+                        reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+
+        waitingRepository.save(new Waiting(reservation, waitingMember));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getAdminTokenByLogin())
+                .when().delete("/reservations/1")
+                .then().log().all()
+
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", getAdminTokenByLogin())
+                .when().get("/reservations/1")
+                .then().log().all()
+
+                .statusCode(404);
+    }
+
+//    @DisplayName("대기가 존재하는 예약을 삭제한다.")
+//    @TestFactory
+//    Stream<DynamicTest> cancelReservation() {
+//        return Stream.of(
+//                dynamicTest("예약에 대해 대기가 있는 경우", () -> {
+//                            reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+//                            themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+//                            Member reservationMember = memberRepository.save(
+//                                    MemberFixture.getOne("reservationMember@naver.com"));
+//                            Member waitingMember = memberRepository.save(MemberFixture.getOne("mmmember@naver.com"));
+//                            Reservation reservation = reservationRepository.save(
+//                                    new Reservation(reservationMember, LocalDate.parse("2024-11-23"),
+//                                            reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+//
+//                            waitingRepository.save(new Waiting(reservation, waitingMember));
+//                        }),
+//
+//                dynamicTest("예약에 대해 대기가 있는 경우", () -> {
+//                            reservationTimeRepository.save(new ReservationTime(LocalTime.parse("20:00")));
+//                            themeRepository.save(new Theme("테마이름", "설명", "썸네일"));
+//                            Member reservationMember = memberRepository.save(
+//                                    MemberFixture.getOne("reservationMember@naver.com"));
+//                            Member waitingMember = memberRepository.save(MemberFixture.getOne("mmmember@naver.com"));
+//                            Reservation reservation = reservationRepository.save(
+//                                    new Reservation(reservationMember, LocalDate.parse("2024-11-23"),
+//                                            reservationTimeRepository.getById(1L), themeRepository.getById(1L)));
+//
+//                            waitingRepository.save(new Waiting(reservation, waitingMember));
+//                        }),
+//
+//        )
+//    }
+
+    @Test
+    @DisplayName("방탈출 예약 취소 실패: 예약 없음")
+    void cancelReservation_WhenTimeNotExist() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")

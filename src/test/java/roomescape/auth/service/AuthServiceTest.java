@@ -87,6 +87,6 @@ class AuthServiceTest {
         // when & then
         assertThatThrownBy(() -> authService.getMemberAuthInfo(authInfo))
                 .isInstanceOf(UnAuthorizationException.class)
-                .hasMessage("회원 정보가 올바르지 않습니다. 회원가입 후 로그인해주세요.");
+                .hasMessage("식별자 1에 해당하는 회원이 존재하지 않습니다.");
     }
 }
