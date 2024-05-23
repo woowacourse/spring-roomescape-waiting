@@ -74,6 +74,21 @@ class WaitingApiTest {
                 .statusCode(204);
     }
 
+    @Test
+    void 관리자_대기_거절() {
+        Cookie cookieByUserLogin = getCookieByLogin(port, "admin@email.com", "123456");
+        UserWaitingRequest waitingRequest = createUserWaitingRequest(1L, 1L);
+        addWaiting(waitingRequest);
+
+        RestAssured.given().log().all()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .cookie(cookieByUserLogin)
+                .when().delete("/admin/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
     private UserWaitingRequest createUserWaitingRequest(Long timeId, Long themeId) {
         return new UserWaitingRequest(LocalDate.now().plusDays(1), timeId, themeId);
     }

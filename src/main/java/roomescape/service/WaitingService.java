@@ -62,6 +62,12 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public void deleteWaitingByAdmin(Long id) {
+        Waiting waiting = findWaiting(id);
+
+        waitingRepository.delete(waiting);
+    }
+
     private Reservation findReservation(WaitingRequest waitingRequest) {
         return reservationRepository.findByDateAndTimeIdAndThemeId(
                 waitingRequest.date(),
