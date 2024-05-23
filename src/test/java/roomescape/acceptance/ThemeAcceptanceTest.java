@@ -47,7 +47,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
 
         //when&then
         RestAssured.given().log().all()
-                .cookie("token",adminToken)
+                .cookie("token", adminToken)
                 .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
                 .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
@@ -62,7 +62,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
 
         //when&then
         RestAssured.given().log().all()
-                .cookie("token",guestToken)
+                .cookie("token", guestToken)
                 .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
                 .then().log().all()
@@ -78,7 +78,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
 
         //when&then
         RestAssured.given().log().all()
-                .cookie("token",adminToken)
+                .cookie("token", adminToken)
                 .contentType(ContentType.JSON).body(themeRequest)
                 .when().post("/themes")
                 .then().log().all().statusCode(400).body("message", is("올바르지 않은 썸네일 형식입니다."));
@@ -92,7 +92,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
                     RestAssured.given().log().all()
-                            .cookie("token",adminToken)
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
@@ -116,7 +116,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
                     themeId = (int) RestAssured.given().log().all()
-                            .cookie("token",adminToken)
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
@@ -145,7 +145,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("테마를 생성한다.", () -> {
                     themeId = (int) RestAssured.given().log().all()
-                            .cookie("token",adminToken)
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON).body(themeRequest)
                             .when().post("/themes")
                             .then().extract().response().jsonPath().get("id");
@@ -155,7 +155,7 @@ class ThemeAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guestToken)
                             .when().delete("/themes/" + themeId)
                             .then().log().all()
-                            .assertThat().statusCode(403).body("message",is("권한이 없습니다. 관리자에게 문의해주세요."));
+                            .assertThat().statusCode(403).body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
 
                 })
         );

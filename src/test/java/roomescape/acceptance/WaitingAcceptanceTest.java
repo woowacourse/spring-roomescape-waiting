@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.acceptance.AcceptanceTest;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 
@@ -108,7 +107,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guest1Token)
                             .when().delete("/waitings/" + reservationId)
                             .then().log().all()
-                            .assertThat().statusCode(403).body("message",is("예약 대기를 삭제할 권한이 없습니다."));
+                            .assertThat().statusCode(403).body("message", is("예약 대기를 삭제할 권한이 없습니다."));
                 })
         );
     }
@@ -156,7 +155,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                             .cookie("token", guest2Token)
                             .when().delete("/waitings/" + reservationId)
                             .then().log().all()
-                            .assertThat().statusCode(400).body("message",is("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."));
+                            .assertThat().statusCode(400).body("message", is("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."));
                 })
         );
     }
@@ -204,7 +203,7 @@ class WaitingAcceptanceTest extends AcceptanceTest {
                             .cookie("token", adminToken)
                             .when().delete("/waitings/" + reservationId)
                             .then().log().all()
-                            .assertThat().statusCode(400).body("message",is("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."));
+                            .assertThat().statusCode(400).body("message", is("예약은 삭제할 수 없습니다. 관리자에게 문의해주세요."));
                 })
         );
     }

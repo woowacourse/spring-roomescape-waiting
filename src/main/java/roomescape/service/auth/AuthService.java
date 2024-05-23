@@ -67,7 +67,7 @@ public class AuthService {
 
     public void validateAdmin(long memberId) {
         Optional<Member> member = memberRepository.findById(memberId);
-        if(member.isEmpty() || !member.get().isAdmin()) {
+        if (member.isEmpty() || !member.get().isAdmin()) {
             throw new ForbiddenException("권한이 없습니다. 관리자에게 문의해주세요.");
         }
     }

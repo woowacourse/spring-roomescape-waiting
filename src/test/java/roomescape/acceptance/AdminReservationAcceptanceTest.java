@@ -2,14 +2,14 @@ package roomescape.acceptance;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.AdminReservationRequest;
-import roomescape.service.reservation.dto.ReservationRequest;
 
 import java.time.LocalDate;
-import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;

@@ -1,6 +1,5 @@
 package roomescape.service.member;
 
-import org.apache.catalina.Store;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +70,7 @@ class MemberServiceTest {
 
     @DisplayName("사용자 본인의 모든 예약 및 대기 정보를 조회한다.")
     @Test
-    void findReservations(){
+    void findReservations() {
         //given
         Member member = memberRepository.save(new Member("lini", "lini@email.com", "lini123", Role.GUEST));
         Member member2 = memberRepository.save(new Member("pedro", "pedro@email.com", "pedro123", Role.GUEST));
@@ -87,7 +86,7 @@ class MemberServiceTest {
 
     private ReservationDetail createReservationDetail() {
         ReservationDate reservationDate = ReservationDate.of(LocalDate.now().plusDays(1));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10,0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         return reservationDetailRepository.save(new ReservationDetail(new Schedule(reservationDate, reservationTime), theme));

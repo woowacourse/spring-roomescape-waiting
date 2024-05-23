@@ -1,7 +1,6 @@
 package roomescape.domain.member;
 
 import jakarta.persistence.*;
-import roomescape.domain.theme.Theme;
 
 import java.util.Objects;
 
@@ -49,15 +48,15 @@ public class Member {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Member other)) return false;
         return Objects.equals(id, other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     public Long getId() {

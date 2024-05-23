@@ -1,7 +1,6 @@
 package roomescape.service.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWithRank;
 
 import java.time.LocalDate;

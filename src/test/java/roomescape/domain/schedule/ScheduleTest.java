@@ -15,7 +15,7 @@ class ScheduleTest {
     void invalidSchedule() {
         //given
         ReservationDate pastDate = ReservationDate.of(LocalDate.MIN);
-        ReservationTime time = new ReservationTime(LocalTime.of(10,0));
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
 
         //when & then
         assertThatThrownBy(() -> new Schedule(pastDate, time))

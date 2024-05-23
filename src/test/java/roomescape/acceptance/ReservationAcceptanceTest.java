@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.service.auth.dto.LoginRequest;
 import roomescape.service.reservation.dto.ReservationRequest;
 
@@ -103,7 +102,7 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     Stream<DynamicTest> deleteAndCreateReservation() {
         return Stream.of(
                 DynamicTest.dynamicTest("guest1이 요청한 일정과 테마로 예약이 존재하지 않아서 예약 상태로 생성한다.", () -> {
-                   reservationId = (int) RestAssured.given().log().all()
+                    reservationId = (int) RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", guest1Token)
                             .body(new ReservationRequest(date, timeId, themeId))

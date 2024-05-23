@@ -28,5 +28,7 @@ public class AdminPageController {
     }
 
     @GetMapping("/waiting")
-    public String findAdminWaitingPage(){return "/admin/waiting";}
+    public String findAdminWaitingPage() {
+        return "/admin/waiting";
+    }
 }

@@ -46,6 +46,6 @@ public class Schedule {
     }
 
     public boolean isBeforeNow() {
-        return LocalDateTime.of(date.getValue(),time.getStartAt()).isBefore(LocalDateTime.now());
+        return LocalDateTime.of(date.getValue(), time.getStartAt()).isBefore(LocalDateTime.now());
     }
 }

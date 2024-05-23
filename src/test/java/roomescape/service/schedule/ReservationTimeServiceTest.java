@@ -24,7 +24,6 @@ import roomescape.service.schedule.dto.ReservationTimeResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +50,8 @@ class ReservationTimeServiceTest {
     @Test
     void create() {
         //given
-        LocalTime startAt = LocalTime.of(10,0);;
+        LocalTime startAt = LocalTime.of(10, 0);
+        ;
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(startAt);
 
         //when
@@ -68,7 +68,7 @@ class ReservationTimeServiceTest {
     @Test
     void findAll() {
         //given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10,0)));
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
         //when
         List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
@@ -81,7 +81,8 @@ class ReservationTimeServiceTest {
     @Test
     void duplicatedTime() {
         //given
-        LocalTime time = LocalTime.of(10,0);;
+        LocalTime time = LocalTime.of(10, 0);
+        ;
         reservationTimeRepository.save(new ReservationTime(time));
 
         ReservationTimeCreateRequest reservationTimeCreateRequest = new ReservationTimeCreateRequest(time);
@@ -97,7 +98,7 @@ class ReservationTimeServiceTest {
     void cannotDeleteTime() {
         //given
         ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10,0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
         Member member = memberRepository.save(new Member("lily", "lily@email.com", "lily123", Role.GUEST));
@@ -117,7 +118,7 @@ class ReservationTimeServiceTest {
     void findAvailableTimes() {
         //given
         ReservationDate reservationDate = ReservationDate.of(LocalDate.MAX);
-        LocalTime time = LocalTime.of(10,0);
+        LocalTime time = LocalTime.of(10, 0);
         ReservationTime bookedReservationTime = reservationTimeRepository.save(new ReservationTime(time));
         ReservationTime notBookedReservationTime = reservationTimeRepository.save(
                 new ReservationTime(time.plusHours(5)));
