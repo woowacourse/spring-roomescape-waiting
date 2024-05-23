@@ -21,7 +21,7 @@ values (1, '꿈나라', 'zZZ',
        (3, '이불', '난이도 ★★★★★',
         'https://bit.ly/3WSqOGy');
 
-INSERT INTO reservation (id, member_id, theme_id, date, reservation_time_id, reservation_status)
+INSERT INTO reservation (id, member_id, theme_id, date, reservation_time_id, status)
 values (1, 1, 1, '2024-05-16', 2, 'CONFIRMED'),
        (2, 2, 1, '2024-05-17', 2, 'CONFIRMED'),
        (3, 3, 3, '2024-05-17', 1, 'CONFIRMED'),

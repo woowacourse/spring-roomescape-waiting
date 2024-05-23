@@ -37,7 +37,7 @@ public class Reservation {
     private ReservationTime time;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reservation_status")
+    @Column(name = "status")
     private ReservationStatus status;
 
     public Reservation(Member member, Theme theme, LocalDate date, ReservationTime time, ReservationStatus status) {
