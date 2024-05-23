@@ -38,11 +38,11 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         HttpServletRequest request = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class));
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            throw new TokenValidationFailureException("토큰이 존재하지 않습니다.");
+            throw new TokenValidationFailureException();
         }
-        // TODO: review - 문구가 중복되니 예외 내부로
         String token = CookieUtil.extractToken(cookies)
-                .orElseThrow(() -> new TokenValidationFailureException("토큰이 존재하지 않습니다."));
+                .orElseThrow(TokenValidationFailureException::new);
+        // TODO: review - 문구가 중복되니 예외 내부로
         String subject = jwtProvider.getSubject(token);
         long memberId = Long.parseLong(subject);
         return memberService.findValidatedSiteUserById(memberId);
