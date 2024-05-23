@@ -16,6 +16,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByMemberId(Long memberId);
 
+    List<Reservation> findAllByStatus(Status status);
+
     @Query("""
             SELECT count (r.id) FROM Reservation AS r
             WHERE r.date.value = :date

@@ -46,6 +46,12 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> findAllWaitingReservation() {
+        return reservationRepository.findAllByStatus(Status.WAITING).stream()
+                .map(ReservationResponse::new)
+                .toList();
+    }
+
     public List<ReservationResponse> findAllByMemberAndThemeAndPeriod(Long memberId, Long themeId, LocalDate dateFrom,
                                                                       LocalDate dateTo) {
         return reservationRepository.findByMemberIdAndThemeIdAndDateValueBetween(memberId, themeId,
