@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.domain.reservation.BookStatus;
 import roomescape.domain.reservation.Reservation;
@@ -23,7 +24,7 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
 
     @Override
     default Optional<ReservationStatus> findFirstWaiting(Reservation reservation) {
-        return getFirstByReservationThemeAndReservationDateAndReservationTimeAndStatusOrderByReservationCreatedAtAsc(
+        return findFirstWaiting(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime(),
@@ -31,13 +32,23 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
         );
     }
 
-    Optional<ReservationStatus> getFirstByReservationThemeAndReservationDateAndReservationTimeAndStatusOrderByReservationCreatedAtAsc(
+    @Query("""
+            select rs from ReservationStatus rs
+            left join rs.reservation r on rs.reservation.id = r.id
+            where r.theme = :theme
+            and r.date = :date
+            and r.time = :time
+            and rs.status = :status
+            order by rs.reservation.createdAt asc
+            limit 1
+             """)
+    Optional<ReservationStatus> findFirstWaiting(
             Theme theme, LocalDate date, ReservationTime time, BookStatus status
     );
 
     @Override
     default long getWaitingCount(Reservation reservation) {
-        return countByReservationThemeAndReservationDateAndReservationTimeAndStatusInAndReservationCreatedAtLessThan(
+        return getWaitingCount(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime(),
@@ -46,7 +57,16 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
         );
     }
 
-    long countByReservationThemeAndReservationDateAndReservationTimeAndStatusInAndReservationCreatedAtLessThan(
+    @Query("""
+            select count(rs) from ReservationStatus rs
+            left join rs.reservation r on rs.reservation.id = r.id
+            where r.theme = :theme
+            and r.date = :date
+            and r.time = :time
+            and rs.status in :statuses
+            and rs.reservation.createdAt < :createdAt
+            """)
+    long getWaitingCount(
             Theme theme, LocalDate date, ReservationTime time, List<BookStatus> statuses, LocalDateTime createdAt
     );
 
@@ -59,7 +79,7 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
 
     @Override
     default boolean existsAlreadyWaitingOrBooked(Reservation reservation) {
-        return existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTimeAndStatusIn(
+        return existsAlreadyWaitingOrBooked(
                 reservation.getMember().getId(),
                 reservation.getTheme(),
                 reservation.getDate(),
@@ -68,7 +88,16 @@ public interface ReservationStatusJpaRepository extends ReservationStatusReposit
         );
     }
 
-    boolean existsByReservationMemberIdAndReservationThemeAndReservationDateAndReservationTimeAndStatusIn(
+    @Query("""
+            select count(rs) > 0 from ReservationStatus rs
+            left join rs.reservation r on rs.reservation.id = r.id
+            where r.member.id = :id
+            and r.theme = :theme
+            and r.date = :date
+            and r.time = :time
+            and rs.status in :statuses
+            """)
+    boolean existsAlreadyWaitingOrBooked(
             Long id, Theme theme, LocalDate date, ReservationTime time, List<BookStatus> statuses
     );
 
