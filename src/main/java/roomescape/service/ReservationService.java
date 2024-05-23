@@ -30,15 +30,15 @@ public class ReservationService {
 
     private final MemberRepository memberRepository;
     private final TimeSlotRepository timeSlotRepository;
-    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public ReservationService(MemberRepository memberRepository, TimeSlotRepository timeSlotRepository,
-                              ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+                              ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.memberRepository = memberRepository;
         this.timeSlotRepository = timeSlotRepository;
-        this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ReservationResponse> findEntireReservationList() {
@@ -74,7 +74,7 @@ public class ReservationService {
         Member member = memberRepository.getMemberById(request.memberId());
         TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
         Theme theme = themeRepository.getThemeById(request.themeId());
-        Reservation reservation = request.toEntity(member, timeSlot, theme);
+        Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
@@ -85,18 +85,7 @@ public class ReservationService {
         Member member = memberRepository.getMemberById(loginMember.id());
         TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
         Theme theme = themeRepository.getThemeById(request.themeId());
-        Reservation reservation = request.toBookingEntity(member, timeSlot, theme);
-        reservation.validatePast(now);
-        validateDuplicatedReservation(member, request.date(), timeSlot, theme);
-        Reservation createdReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(createdReservation);
-    }
-
-    public ReservationResponse createPending(LoginMember loginMember, ReservationRequest request, LocalDateTime now) {
-        Member member = memberRepository.getMemberById(loginMember.id());
-        TimeSlot timeSlot = timeSlotRepository.getTimeSlotById(request.timeId());
-        Theme theme = themeRepository.getThemeById(request.themeId());
-        Reservation reservation = request.toPendingEntity(member, timeSlot, theme);
+        Reservation reservation = getReservation(request, member, timeSlot, theme);
         reservation.validatePast(now);
         validateDuplicatedReservation(member, request.date(), timeSlot, theme);
         Reservation createdReservation = reservationRepository.save(reservation);
@@ -125,5 +114,25 @@ public class ReservationService {
         if (reservationRepository.existsByMemberAndDateAndTimeAndTheme(member, date, timeSlot, theme)) {
             throw new IllegalArgumentException("이미 예약을 시도 하였습니다.");
         }
+    }
+
+    private Reservation getReservation(AdminReservationRequest request,
+                                       Member member,
+                                       TimeSlot timeSlot,
+                                       Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), timeSlot, theme)) {
+            return request.toEntity(member, timeSlot, theme, ReservationStatus.PENDING);
+        }
+        return request.toEntity(member, timeSlot, theme, ReservationStatus.BOOKING);
+    }
+
+    private Reservation getReservation(ReservationRequest request,
+                                       Member member,
+                                       TimeSlot timeSlot,
+                                       Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), timeSlot, theme)) {
+            return request.toEntity(member, timeSlot, theme, ReservationStatus.PENDING);
+        }
+        return request.toEntity(member, timeSlot, theme, ReservationStatus.BOOKING);
     }
 }

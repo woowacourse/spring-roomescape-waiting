@@ -23,6 +23,14 @@ public class Member {
     protected Member() {
     }
 
+    public Member(Long id, String name, String email, String password, MemberRole role) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public boolean isAdmin() {
         return role.isAdmin();
     }

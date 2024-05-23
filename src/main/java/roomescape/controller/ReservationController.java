@@ -32,7 +32,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createPendingReservation(LoginMember loginMember,
                                                                         @Valid @RequestBody ReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
-        ReservationResponse reservationResponse = reservationService.createPending(loginMember, request, now);
+        ReservationResponse reservationResponse = reservationService.create(loginMember, request, now);
         return ResponseEntity.created(URI.create("/reservations/" + reservationResponse.id()))
                 .body(reservationResponse);
     }

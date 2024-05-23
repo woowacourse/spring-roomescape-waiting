@@ -11,8 +11,4 @@ public class MemberFixtures {
     public static Member createAdminMember(String name, String email) {
         return new Member(null, name, email, "default", MemberRole.ADMIN);
     }
-
-    public static Member createUserMember(String name, String email, String password) {
-        return new Member(null, name, email, password, MemberRole.USER);
-    }
 }
