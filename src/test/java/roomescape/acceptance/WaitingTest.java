@@ -84,7 +84,7 @@ class WaitingTest extends AcceptanceTest {
                 dynamicTest("사용자 asd가 예약 대기를 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookies("token", userToken)
-                            .when().delete("/reservations/mine/1")
+                            .when().delete("/waitings/1")
                             .then().log().all()
                             .statusCode(204);
 
@@ -123,7 +123,7 @@ class WaitingTest extends AcceptanceTest {
                 dynamicTest("사용자 qwe가 예약 대기를 삭제한다.", () -> {
                     RestAssured.given().log().all()
                             .cookies("token", otherUserToken)
-                            .when().delete("/reservations/mine/1")
+                            .when().delete("/waitings/1")
                             .then().log().all()
                             .statusCode(204);
                 }),

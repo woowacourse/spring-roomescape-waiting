@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import roomescape.infrastructure.MemberId;
 import roomescape.service.ReservationService;
-import roomescape.service.WaitingService;
 import roomescape.service.dto.request.ReservationConditionRequest;
 import roomescape.service.dto.request.ReservationRequest;
 import roomescape.service.dto.request.UserReservationRequest;
@@ -28,11 +27,9 @@ import roomescape.service.dto.response.ReservationResponse;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService, final WaitingService waitingService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -71,13 +68,6 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.noContent()
-                .build();
-    }
-
-    @DeleteMapping("/mine/{id}")
-    public ResponseEntity<Void> deleteMyWaiting(@PathVariable Long id) {
-        waitingService.deleteWaiting(id);
         return ResponseEntity.noContent()
                 .build();
     }
