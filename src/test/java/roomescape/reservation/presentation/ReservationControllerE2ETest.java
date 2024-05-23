@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -186,6 +187,109 @@ class ReservationControllerE2ETest {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON).body(reservationParams2)
                             .when().cookie("token", token).post("/reservations")
+                            .then().log().all()
+                            .statusCode(400);
+                })
+        );
+    }
+
+    @DisplayName("예약 대기 추가와 삭제의 작동을 확인한다")
+    @TestFactory
+    Stream<DynamicTest> checkWaitingReservationCreateAndDelete() {
+        Map<String, String> loginParams = Map.of("email", "mason@test.com", "password", "123");
+
+        Map<String, String> reservationParams = Map.of(
+                "date", LocalDate.now().plusDays(1).toString(),
+                "timeId", "1",
+                "themeId", "1",
+                "memberId", "1"
+        );
+
+        token = RestAssured.given().log().all()
+                .when().body(loginParams)
+                .contentType(ContentType.JSON).post("/login")
+                .then().log().all()
+                .extract().cookie("token");
+
+        return Stream.of(
+                dynamicTest("현재 예약 개수를 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(5));
+                }),
+
+                dynamicTest("예약 대기를 추가한다", () ->{
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON).body(reservationParams)
+                            .when().cookie("token", token).post("/reservations/waiting")
+                            .then().log().all()
+                            .statusCode(201)
+                            .header("Location", "/reservations/6");
+                }),
+
+                dynamicTest("예약이 정상적으로 추가되었는지 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(6));
+                }),
+
+                dynamicTest("id가 6인 예약을 삭제한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).delete("/reservations/6")
+                            .then().log().all()
+                            .statusCode(204);
+                }),
+
+                dynamicTest("예약이 정상적으로 삭제되었는지 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(5));
+                })
+        );
+    }
+
+    @DisplayName("동일 회원이 같은 날짜, 시각, 테마에 중복 대기가 불가능한지 확인한다")
+    @TestFactory
+    Stream<DynamicTest> checkDuplicatedWaitingReservation() {
+        Map<String, String> loginParams = Map.of("email", "mason@test.com", "password", "123");
+
+        Map<String, String> reservationParams = Map.of(
+                "date", LocalDate.now().plusDays(1).toString(),
+                "timeId", "1",
+                "themeId", "1",
+                "memberId", "1"
+        );
+
+        token = RestAssured.given().log().all()
+                .when().body(loginParams)
+                .contentType(ContentType.JSON).post("/login")
+                .then().log().all()
+                .extract().cookie("token");
+
+        return Stream.of(
+                dynamicTest("예약 대기를 추가한다", () ->{
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON).body(reservationParams)
+                            .when().cookie("token", token).post("/reservations/waiting")
+                            .then().log().all()
+                            .statusCode(201)
+                            .header("Location", "/reservations/6");
+                }),
+
+                dynamicTest("예약이 정상적으로 추가되었는지 확인한다", () -> {
+                    RestAssured.given().log().all()
+                            .when().cookie("token", token).get("/reservations")
+                            .then().log().all()
+                            .statusCode(200).body("size()", is(6));
+                }),
+
+                dynamicTest("중복된 날짜, 시각, 테마에 예약 대기를 추가한다", () ->{
+                    RestAssured.given().log().all()
+                            .contentType(ContentType.JSON).body(reservationParams)
+                            .when().cookie("token", token).post("/reservations/waiting")
                             .then().log().all()
                             .statusCode(400);
                 })

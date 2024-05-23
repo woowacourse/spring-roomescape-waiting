@@ -127,4 +127,16 @@ class ReservationServiceTest {
                 () -> reservationService.saveMemberReservation(1L, RESERVATION_REQUEST_1))
                 .isInstanceOf(DuplicateSaveException.class);
     }
+
+    @DisplayName("이미 대기하고 있는 날짜, 시각, 테마에 같은 멤버가 예약 대기를 추가하는 경우 예외가 발생한다")
+    @Test
+    void should_throw_exception_when_waiting_date_and_time_and_theme_duplicated_by_same_member() {
+        when(reservationRepository.existsByDateValueAndTimeIdAndThemeIdAndMemberId(
+                TOMORROW, 1L, 1L, 1L))
+                .thenReturn(true);
+
+        assertThatThrownBy(
+                () -> reservationService.saveMemberWaitingReservation(1L, RESERVATION_REQUEST_1))
+                .isInstanceOf(DuplicateSaveException.class);
+    }
 }
