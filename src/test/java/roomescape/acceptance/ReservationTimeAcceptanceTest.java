@@ -38,15 +38,29 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
                 .then().log().all().extract().cookie("token");
     }
 
-    @DisplayName("시간 정보를 추가한다.")
+    @DisplayName("어드민이 시간 정보를 추가한다.")
     @Test
-    void createReservationTime() {
+    void createReservationTimeByAdmin() {
         RestAssured.given().log().all()
                 .cookie("token", adminToken)
                 .contentType(ContentType.JSON)
                 .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                 .when().post("/times")
-                .then().log().all().statusCode(201).body("id", is(greaterThan(0)));
+                .then().log().all()
+                .assertThat().statusCode(201).body("id", is(greaterThan(0)));
+    }
+
+    @DisplayName("일반 사용자가 시간 정보를 추가하려고 하면 예외가 발생한다.")
+    @Test
+    void createReservationTimeByGuest() {
+        RestAssured.given().log().all()
+                .cookie("token", guestToken)
+                .contentType(ContentType.JSON)
+                .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
+                .when().post("/times")
+                .then().log().all()
+                .assertThat().statusCode(403)
+                .body("message", is("권한이 없습니다. 관리자에게 문의해주세요."));
     }
 
     @DisplayName("시간 추가 실패 테스트 - 중복 시간 오류")
@@ -79,6 +93,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                             .when().post("/times");
@@ -97,6 +112,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     timeId = (int) RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                             .when().post("/times")
@@ -124,6 +140,7 @@ class ReservationTimeAcceptanceTest extends AcceptanceTest {
         return Stream.of(
                 DynamicTest.dynamicTest("시간을 추가한다", () -> {
                     timeId = (int) RestAssured.given().log().all()
+                            .cookie("token", adminToken)
                             .contentType(ContentType.JSON)
                             .body(new ReservationTimeCreateRequest(LocalTime.of(10, 0)))
                             .when().post("/times")
