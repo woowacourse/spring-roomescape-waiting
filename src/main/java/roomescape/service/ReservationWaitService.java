@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import static roomescape.domain.ReservationStatus.RESERVED;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,7 @@ public class ReservationWaitService {
                 .orElseThrow(AuthenticationFailureException::new);
 
         long waitCount = waitRepository.findPriorityIndex()
-                .orElse(0L);
+                .orElse(RESERVED.getStartIndex());
         waitRepository.save(new ReservationWait(member, reservation, waitCount + 1L));
     }
 
