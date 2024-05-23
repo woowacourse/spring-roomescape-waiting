@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.auth.dto.LoginRequest;
+import roomescape.fixture.CookieProvider;
 import roomescape.reservation.dto.ReservationCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -49,7 +49,7 @@ class ReservationControllerTest {
     @DisplayName("로그인한 사용자의 예약 목록을 읽을 수 있다.")
     @Test
     void findMyReservations() {
-        Cookies userCookies = makeUserCookie();
+        Cookies userCookies = CookieProvider.makeUserCookie();
 
         int size = RestAssured.given().log().all()
                 .cookies(userCookies)
@@ -67,7 +67,7 @@ class ReservationControllerTest {
         ReservationCreateRequest params = new ReservationCreateRequest(
                 null, LocalDate.of(2040, 8, 5), 1L, 1L);
         long expectedId = COUNT_OF_RESERVATION + 1;
-        Cookies userCookies = makeUserCookie();
+        Cookies userCookies = CookieProvider.makeUserCookie();
 
         RestAssured.given().log().all()
                 .cookies(userCookies)
@@ -84,7 +84,7 @@ class ReservationControllerTest {
     void createReservation_whenNameIsNull() {
         ReservationCreateRequest params = new ReservationCreateRequest
                 (null, null, 1L, 1L);
-        Cookies userCookies = makeUserCookie();
+        Cookies userCookies = CookieProvider.makeUserCookie();
 
         RestAssured.given().log().all()
                 .cookies(userCookies)
@@ -94,18 +94,6 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(400)
                 .body("errorMessage", is("인자 중 null 값이 존재합니다."));
-    }
-
-    private Cookies makeUserCookie() {
-        LoginRequest request = new LoginRequest("bri@abc.com", "1234");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract().detailedCookies();
     }
 
     @DisplayName("삭제할 id를 받아서 DB에서 해당 예약을 삭제 할 수 있다.")
