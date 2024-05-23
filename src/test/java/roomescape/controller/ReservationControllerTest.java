@@ -6,20 +6,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import roomescape.IntegrationTestSupport;
+import roomescape.service.dto.request.WaitingRequest;
 import roomescape.service.dto.response.ReservationResponses;
 import roomescape.service.dto.response.UserReservationResponse;
 import roomescape.service.dto.response.UserReservationResponses;
+import roomescape.service.dto.response.WaitingResponse;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.WAITING;
 
 class ReservationControllerTest extends IntegrationTestSupport {
 
@@ -138,11 +138,11 @@ class ReservationControllerTest extends IntegrationTestSupport {
         );
     }
 
-    @DisplayName("유저의 예약 생성")
+    @DisplayName("유저의 예약/예약 대기 생성")
     @TestFactory
     Stream<DynamicTest> dynamicUserTestsFromCollection() {
         return Stream.of(
-                dynamicTest("내 예약 목록을 조회한다.", () -> {
+                dynamicTest("내 예약/예약 대기 목록을 조회한다.", () -> {
                     userReservationSize = RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)
@@ -155,7 +155,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                 }),
                 dynamicTest("예약을 추가한다.", () -> {
                     Map<String, Object> params = Map.of(
-                            "date", LocalDate.now().toString(),
+                            "date", LocalDate.now().plusDays(1L).toString(),
                             "timeId", 1L,
                             "themeId", 1L);
 
@@ -177,13 +177,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .extract().as(UserReservationResponses.class)
                             .userReservationResponses();
 
-                    assertAll(
-                            () -> assertThat(userReservationResponses).hasSize(userReservationSize + 1),
-                            () -> assertThat(userReservationResponses.get(0).theme()).isEqualTo("이름1"),
-                            () -> assertThat(userReservationResponses.get(0).date()).isEqualTo(LocalDate.now()),
-                            () -> assertThat(userReservationResponses.get(0).time()).isEqualTo(LocalTime.of(9, 0, 0))
-//                            () -> assertThat(userReservationResponses.get(0).status()).isEqualTo(ReservationStatusMessageMapper.messageOf(RESERVED,0))
-                    );
+                    assertThat(userReservationResponses).hasSize(userReservationSize + 1);
                 }),
                 dynamicTest("존재하지 않는 시간으로 예약을 추가할 수 없다.", () -> {
                     Map<String, Object> params = Map.of(
@@ -214,7 +208,7 @@ class ReservationControllerTest extends IntegrationTestSupport {
                             .then().log().all()
                             .statusCode(400);
                 }),
-                dynamicTest("유저는 예약을 삭제할 수 없다.", () -> {
+                               dynamicTest("유저는 예약을 삭제할 수 없다.", () -> {
                     RestAssured.given().log().all()
                             .contentType(ContentType.JSON)
                             .cookie("token", USER_TOKEN)

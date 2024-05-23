@@ -10,15 +10,19 @@ import java.util.Objects;
 public class Waiting implements Comparable<Waiting> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
+    @Column(name = "create_at")
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createAt;
 
+    @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    @JoinColumn
     @ManyToOne(fetch = FetchType.LAZY)
     private Reservation reservation;
 
@@ -39,12 +43,12 @@ public class Waiting implements Comparable<Waiting> {
     }
 
     public boolean isSameReservationWaiting(Reservation otherReservation) {
-        return this.reservation.getDate() == otherReservation.getDate()
+        return this.reservation.getDate().equals(otherReservation.getDate())
                 && this.reservation.getTime().equals(otherReservation.getTime())
                 && this.reservation.getTheme().equals(otherReservation.getTheme());
     }
 
-    public void delete(){
+    public void delete() {
         reservation.removeWaiting(this);
         member.removeWaiting(this);
     }

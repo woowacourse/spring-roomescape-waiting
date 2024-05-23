@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.Hibernate;
 
 import java.util.Objects;
 
@@ -47,11 +48,11 @@ public class Theme {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
         Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return Objects.equals(this.getId(), theme.getId());
     }
 
     @Override

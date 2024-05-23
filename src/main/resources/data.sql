@@ -32,5 +32,7 @@ INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2024-05
                                                                     (1, '2024-05-13', 1, 1),
                                                                     (2, '2024-05-13', 2, 2),
                                                                     (2, '2024-05-13', 3, 2),
-                                                                    (2, '2024-05-13', 4, 2)
-;
+                                                                    (2, '2024-05-13', 4, 2);
+
+INSERT INTO waiting (create_at, reservation_id, member_id) VALUES ('2024-05-04 11.11.11', 1,2),
+                                                                  ('2024-05-05 11.11.11', 3,2);

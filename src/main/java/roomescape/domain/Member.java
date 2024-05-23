@@ -43,12 +43,12 @@ public class Member {
         return new Member(name, email, password, Role.USER);
     }
 
-    public int getWaitingRanking(Reservation reservation){
+    public int getWaitingRanking(Reservation reservation) {
         return waitings.stream()
                 .filter(waiting -> waiting.isSameReservationWaiting(reservation))
                 .findAny()
-                .orElseThrow(()-> new RoomEscapeBusinessException("조회한 예약 대기를 가지고 있지 않습니다."))
-                .getRank();
+                .orElseThrow(() -> new RoomEscapeBusinessException("조회한 예약 대기를 가지고 있지 않습니다."))
+                .getRank() + 1;
     }
 
     public boolean hasWaiting(Waiting otherWaiting) {

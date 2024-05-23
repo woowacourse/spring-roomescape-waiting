@@ -15,6 +15,10 @@ public enum ReservationStatus {
         if (reservation.isOwn(member)) {
             return RESERVED.message;
         }
-        return member.getWaitingRanking(reservation) + "번째 " + WAITING.message;
+        return member.getWaitingRanking(reservation)+ "번째 " + WAITING.message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }
