@@ -82,4 +82,7 @@ public class TestFixture {
     public static Theme THEME_DETECTIVE(final Long id) {
         return new Theme(id, THEME_DETECTIVE_NAME, THEME_DETECTIVE_DESCRIPTION, THEME_DETECTIVE_THUMBNAIL);
     }
+
+    private TestFixture() {
+    }
 }
