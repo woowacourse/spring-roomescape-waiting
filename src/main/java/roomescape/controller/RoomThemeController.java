@@ -1,17 +1,10 @@
 package roomescape.controller;
 
-import jakarta.validation.Valid;
-import java.net.URI;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.service.RoomThemeService;
-import roomescape.service.dto.request.RoomThemeCreateRequest;
 import roomescape.service.dto.response.ListResponse;
 import roomescape.service.dto.response.RoomThemeResponse;
 
@@ -32,19 +25,5 @@ public class RoomThemeController {
     @GetMapping("/ranking")
     public ResponseEntity<ListResponse<RoomThemeResponse>> findAllRoomThemesRanking() {
         return ResponseEntity.ok(roomThemeService.findByRanking());
-    }
-
-    @PostMapping
-    public ResponseEntity<RoomThemeResponse> createRoomTheme(
-            @RequestBody @Valid RoomThemeCreateRequest roomThemeCreateRequest) {
-        RoomThemeResponse roomThemeResponse = roomThemeService.save(roomThemeCreateRequest);
-        return ResponseEntity.created(URI.create("/themes" + roomThemeResponse.id()))
-                .body(roomThemeResponse);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoomTheme(@PathVariable Long id) {
-        roomThemeService.deleteById(id);
-        return ResponseEntity.notFound().build();
     }
 }
