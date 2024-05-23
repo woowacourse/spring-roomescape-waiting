@@ -27,7 +27,7 @@ public class Reservation {
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
-    private RoomTheme theme;
+    private Theme theme;
     @Enumerated(value = EnumType.STRING)
     private Status status;
     @CreatedDate
@@ -36,11 +36,11 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, RoomTheme theme, Status status) {
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
         this(null, member, date, time, theme, status);
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, RoomTheme theme, Status status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Status status) {
         validateMember(member);
         validateDate(date);
         validateReservationTime(time);
@@ -54,7 +54,7 @@ public class Reservation {
         this.status = status;
     }
 
-    private void validateRoomTheme(RoomTheme theme) {
+    private void validateRoomTheme(Theme theme) {
         if (theme == null) {
             throw new BadRequestException("테마에 빈값을 입력할 수 없습니다.");
         }
@@ -105,7 +105,7 @@ public class Reservation {
         return time;
     }
 
-    public RoomTheme getTheme() {
+    public Theme getTheme() {
         return theme;
     }
 

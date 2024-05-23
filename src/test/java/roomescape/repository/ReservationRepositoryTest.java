@@ -16,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ReservationRepositoryTest {
@@ -26,7 +26,7 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -40,9 +40,9 @@ class ReservationRepositoryTest {
         for (ReservationTime reservationTime : reservationTimes) {
             reservationTimeRepository.deleteById(reservationTime.getId());
         }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {
@@ -63,15 +63,15 @@ class ReservationRepositoryTest {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme savedTheme = themeRepository.save(ROOM_THEME1);
         boolean existsFalse
                 = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedRoomTheme.getId());
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+                savedTheme.getId());
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedTheme));
         // when
         boolean existsTrue
                 = reservationRepository.existsByDateAndTimeIdAndThemeId(DATE_AFTER_1DAY, savedReservationTime.getId(),
-                savedRoomTheme.getId());
+                savedTheme.getId());
         // then
         assertAll(
                 () -> assertThat(existsFalse).isFalse(),
@@ -85,9 +85,9 @@ class ReservationRepositoryTest {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme theme = themeRepository.save(ROOM_THEME1);
         // when
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, reservationTime, theme));
         // then
         assertThat(reservationRepository.findAll()).hasSize(1);
     }
@@ -98,9 +98,9 @@ class ReservationRepositoryTest {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme theme = themeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, reservationTime, roomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, reservationTime, theme));
         // when
         reservationRepository.deleteById(savedReservation.getId());
         // then

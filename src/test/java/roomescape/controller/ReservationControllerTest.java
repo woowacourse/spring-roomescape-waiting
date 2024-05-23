@@ -24,11 +24,11 @@ import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.RoomThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,7 +42,7 @@ class ReservationControllerTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -61,9 +61,9 @@ class ReservationControllerTest {
         for (ReservationTime reservationTime : reservationTimes) {
             reservationTimeRepository.deleteById(reservationTime.getId());
         }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {
@@ -227,9 +227,9 @@ class ReservationControllerTest {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime savedReservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme savedTheme = themeRepository.save(ROOM_THEME1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedRoomTheme));
+                new Reservation(member, DATE_AFTER_1DAY, savedReservationTime, savedTheme));
 
         String accessToken = TestFixture.getAdminToken(memberRepository);
 
@@ -257,15 +257,15 @@ class ReservationControllerTest {
     }
 
     private Map<String, Object> createReservationRequest(Member member, String date, ReservationTime time,
-                                                         RoomTheme theme) {
+                                                         Theme theme) {
         Member savedMember = memberRepository.save(member);
         ReservationTime savedReservationTime = reservationTimeRepository.save(time);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
 
         return Map.of(
                 "memberId", savedMember.getId(),
                 "date", date,
                 "timeId", savedReservationTime.getId(),
-                "themeId", savedRoomTheme.getId());
+                "themeId", savedTheme.getId());
     }
 }

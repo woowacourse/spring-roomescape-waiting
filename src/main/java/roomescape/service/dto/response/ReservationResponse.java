@@ -16,7 +16,7 @@ public record ReservationResponse(
         @NotNull
         ReservationTimeResponse time,
         @NotNull
-        RoomThemeResponse theme) {
+        ThemeResponse theme) {
 
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
@@ -24,6 +24,6 @@ public record ReservationResponse(
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
-                RoomThemeResponse.from(reservation.getTheme()));
+                ThemeResponse.from(reservation.getTheme()));
     }
 }

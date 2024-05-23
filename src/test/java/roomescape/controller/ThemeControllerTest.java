@@ -13,13 +13,13 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.RoomThemeRepository;
-import roomescape.service.dto.request.RoomThemeCreateRequest;
+import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.request.ThemeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class RoomThemeControllerTest {
+class ThemeControllerTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -28,7 +28,7 @@ class RoomThemeControllerTest {
     private int port;
 
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
 
     @BeforeEach
     void setUp() {
@@ -37,9 +37,9 @@ class RoomThemeControllerTest {
 
     @AfterEach
     void tearDown() {
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {
@@ -55,7 +55,7 @@ class RoomThemeControllerTest {
         RestAssured.given().log().all()
                 .header("cookie", accessToken)
                 .contentType(ContentType.JSON)
-                .body(new RoomThemeCreateRequest("레벨2 탈출", "우테코 레벨2",
+                .body(new ThemeCreateRequest("레벨2 탈출", "우테코 레벨2",
                         "https://i.pinimg.com/236x/6e"))
                 .when().post("/themes")
                 .then().log().all().assertThat().statusCode(HttpStatus.CREATED.value());

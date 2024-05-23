@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.domain.Status;
 
 public record ReservationCreateRequest(
@@ -24,8 +24,8 @@ public record ReservationCreateRequest(
                 adminRequest.themeId());
     }
 
-    public Reservation toReservation(Member member, ReservationTime reservationTime, RoomTheme roomTheme,
+    public Reservation toReservation(Member member, ReservationTime reservationTime, Theme theme,
                                      Status status) {
-        return new Reservation(member, date, reservationTime, roomTheme, status);
+        return new Reservation(member, date, reservationTime, theme, status);
     }
 }

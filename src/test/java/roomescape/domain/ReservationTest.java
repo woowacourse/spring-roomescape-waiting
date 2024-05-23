@@ -44,7 +44,7 @@ class ReservationTest {
     @DisplayName("테마에 null이 들어가면 예외를 발생시킨다.")
     @ParameterizedTest
     @NullSource
-    void nullEmptyTheme(RoomTheme value) {
+    void nullEmptyTheme(Theme value) {
         Assertions.assertThatThrownBy(
                         () -> new Reservation(MEMBER_BROWN, DATE_AFTER_1DAY, RESERVATION_TIME_10AM, value))
                 .isInstanceOf(BadRequestException.class)

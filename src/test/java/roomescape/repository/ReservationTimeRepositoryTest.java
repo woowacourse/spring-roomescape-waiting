@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.exception.NotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -25,7 +25,7 @@ class ReservationTimeRepositoryTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -39,9 +39,9 @@ class ReservationTimeRepositoryTest {
         for (ReservationTime reservationTime : reservationTimes) {
             reservationTimeRepository.deleteById(reservationTime.getId());
         }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {

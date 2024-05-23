@@ -22,12 +22,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.RoomThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.MyReservationResponse;
@@ -43,7 +43,7 @@ class ReservationServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -57,9 +57,9 @@ class ReservationServiceTest {
         for (ReservationTime reservationTime : reservationTimes) {
             reservationTimeRepository.deleteById(reservationTime.getId());
         }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {
@@ -73,9 +73,9 @@ class ReservationServiceTest {
         // given
         Member member = memberRepository.save(MEMBER_BROWN);
         ReservationTime reservationTime = reservationTimeRepository.save(RESERVATION_TIME_10AM);
-        RoomTheme roomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme theme = themeRepository.save(ROOM_THEME1);
         ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(member.getId(),
-                LocalDate.parse(VALID_STRING_DATE), reservationTime.getId(), roomTheme.getId());
+                LocalDate.parse(VALID_STRING_DATE), reservationTime.getId(), theme.getId());
         ReservationResponse reservationResponse = reservationService.save(reservationCreateRequest);
         AuthInfo authInfo = new AuthInfo(member.getId(), member.getEmail(), member.getRole());
 
@@ -151,11 +151,11 @@ class ReservationServiceTest {
     }
 
     private ReservationCreateRequest createReservationRequest(Member member, ReservationTime reservationTime,
-                                                              RoomTheme roomTheme, String date) {
+                                                              Theme theme, String date) {
         Member savedMember = memberRepository.save(member);
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        RoomTheme savedRoomTheme = roomThemeRepository.save(roomTheme);
+        Theme savedTheme = themeRepository.save(theme);
         return new ReservationCreateRequest(savedMember.getId(), LocalDate.parse(date),
-                savedReservationTime.getId(), savedRoomTheme.getId());
+                savedReservationTime.getId(), savedTheme.getId());
     }
 }

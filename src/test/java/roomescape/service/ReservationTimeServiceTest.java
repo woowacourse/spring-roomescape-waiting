@@ -21,12 +21,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.exception.BadRequestException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.RoomThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ReservationAvailabilityTimeRequest;
 import roomescape.service.dto.request.ReservationTimeRequest;
 import roomescape.service.dto.response.ReservationAvailabilityTimeResponse;
@@ -42,7 +42,7 @@ class ReservationTimeServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private RoomThemeRepository roomThemeRepository;
+    private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
 
@@ -56,9 +56,9 @@ class ReservationTimeServiceTest {
         for (ReservationTime reservationTime : reservationTimes) {
             reservationTimeRepository.deleteById(reservationTime.getId());
         }
-        List<RoomTheme> roomThemes = roomThemeRepository.findAll();
-        for (RoomTheme roomTheme : roomThemes) {
-            roomThemeRepository.deleteById(roomTheme.getId());
+        List<Theme> themes = themeRepository.findAll();
+        for (Theme theme : themes) {
+            themeRepository.deleteById(theme.getId());
         }
         List<Member> members = memberRepository.findAll();
         for (Member member : members) {
@@ -82,13 +82,13 @@ class ReservationTimeServiceTest {
         Member member = memberRepository.save(MEMBER_BROWN);
 
         // 테마 저장
-        RoomTheme savedRoomTheme = roomThemeRepository.save(ROOM_THEME1);
+        Theme savedTheme = themeRepository.save(ROOM_THEME1);
 
         // 예약 저장
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedTheme));
 
         ReservationAvailabilityTimeRequest timeRequest = new ReservationAvailabilityTimeRequest(
-                DATE_AFTER_1DAY, savedRoomTheme.getId());
+                DATE_AFTER_1DAY, savedTheme.getId());
 
         // when
         List<ReservationAvailabilityTimeResponse> timeResponses =
@@ -117,14 +117,14 @@ class ReservationTimeServiceTest {
         Member member = memberRepository.save(MEMBER_BROWN);
 
         // 테마 저장
-        RoomTheme savedRoomTheme1 = roomThemeRepository.save(ROOM_THEME1);
-        RoomTheme savedRoomTheme2 = roomThemeRepository.save(ROOM_THEME2);
+        Theme savedTheme1 = themeRepository.save(ROOM_THEME1);
+        Theme savedTheme2 = themeRepository.save(ROOM_THEME2);
 
         // 예약 저장
-        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedRoomTheme1));
+        reservationRepository.save(new Reservation(member, DATE_AFTER_1DAY, savedReservationTime10AM, savedTheme1));
 
         ReservationAvailabilityTimeRequest timeRequest = new ReservationAvailabilityTimeRequest(
-                DATE_AFTER_1DAY, savedRoomTheme2.getId());
+                DATE_AFTER_1DAY, savedTheme2.getId());
 
         // when
         List<ReservationAvailabilityTimeResponse> timeResponses =

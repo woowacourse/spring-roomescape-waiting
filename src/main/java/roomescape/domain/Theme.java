@@ -8,8 +8,7 @@ import jakarta.persistence.Table;
 import roomescape.exception.BadRequestException;
 
 @Entity
-@Table(name = "theme")
-public class RoomTheme {
+public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,14 +17,14 @@ public class RoomTheme {
     private String description;
     private String thumbnail;
 
-    protected RoomTheme() {
+    protected Theme() {
     }
 
-    public RoomTheme(String name, String description, String thumbnail) {
+    public Theme(String name, String description, String thumbnail) {
         this(null, name, description, thumbnail);
     }
 
-    public RoomTheme(Long id, String name, String description, String thumbnail) {
+    public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);

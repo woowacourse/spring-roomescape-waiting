@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.RoomTheme;
+import roomescape.domain.Theme;
 import roomescape.domain.Status;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
@@ -20,7 +20,7 @@ import roomescape.repository.ReservationExistSpecification;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationSearchSpecification;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.RoomThemeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.AuthInfo;
 import roomescape.service.dto.request.ReservationCreateRequest;
 import roomescape.service.dto.response.ListResponse;
@@ -33,17 +33,17 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final RoomThemeRepository roomThemeRepository;
+    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            RoomThemeRepository roomThemeRepository,
+            ThemeRepository themeRepository,
             MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.roomThemeRepository = roomThemeRepository;
+        this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
@@ -103,8 +103,8 @@ public class ReservationService {
     private Reservation getReservationForSave(ReservationCreateRequest request, Status status) {
         ReservationTime reservationTime = getValidatedTime(request);
         Member member = getValidatedMember(request);
-        RoomTheme roomTheme = getValidatedTheme(request);
-        return new Reservation(member, request.date(), reservationTime, roomTheme, status);
+        Theme theme = getValidatedTheme(request);
+        return new Reservation(member, request.date(), reservationTime, theme, status);
     }
 
     private ReservationTime getValidatedTime(ReservationCreateRequest request) {
@@ -120,8 +120,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다. memberId = " + request.memberId()));
     }
 
-    private RoomTheme getValidatedTheme(ReservationCreateRequest request) {
-        return roomThemeRepository.findById(request.themeId())
+    private Theme getValidatedTheme(ReservationCreateRequest request) {
+        return themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. themeId = " + request.themeId()));
     }
 
