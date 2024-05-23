@@ -13,7 +13,6 @@ import roomescape.dto.LoginRequest;
 import roomescape.dto.MemberInfo;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.MemberRepository;
-import roomescape.service.mapper.MemberInfoMapper;
 
 @Service
 public class MemberService {
@@ -39,13 +38,13 @@ public class MemberService {
     public MemberInfo findByMemberId(long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RoomescapeException(INVALID_TOKEN));
-        return MemberInfoMapper.toResponse(member);
+        return MemberInfo.from(member);
     }
 
     public List<MemberInfo> findAll() {
         return memberRepository.findAll()
                 .stream()
-                .map(MemberInfoMapper::toResponse)
+                .map(MemberInfo::from)
                 .toList();
     }
 }

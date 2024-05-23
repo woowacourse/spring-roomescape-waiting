@@ -24,8 +24,6 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.mapper.LoginMemberReservationResponseMapper;
-import roomescape.service.mapper.ReservationResponseMapper;
 
 @Service
 @Transactional
@@ -63,7 +61,7 @@ public class ReservationService {
         validatePastTimeReservation(beforeSave);
 
         Reservation saved = reservationRepository.save(beforeSave);
-        return ReservationResponseMapper.toResponse(saved);
+        return ReservationResponse.from(saved);
     }
 
     private void validateDuplicateReservation(ReservationTime requestedTime, Theme requestedTheme, LocalDate date) {
@@ -81,7 +79,7 @@ public class ReservationService {
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
-                .map(ReservationResponseMapper::toResponse)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -91,14 +89,14 @@ public class ReservationService {
         
         return reservations
                 .stream()
-                .map(ReservationResponseMapper::toResponse)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<LoginMemberReservationResponse> findByMemberId(long memberId) {
         return reservationRepository.findAllByReservationMember_Id(memberId)
                 .stream()
-                .map(LoginMemberReservationResponseMapper::toResponse)
+                .map(LoginMemberReservationResponse::from)
                 .toList();
     }
 

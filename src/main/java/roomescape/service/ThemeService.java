@@ -14,7 +14,6 @@ import roomescape.dto.ThemeResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.mapper.ThemeResponseMapper;
 
 @Service
 @Transactional
@@ -40,20 +39,20 @@ public class ThemeService {
         Theme saved = themeRepository.save(
                 new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail()));
 
-        return ThemeResponseMapper.toResponse(saved);
+        return ThemeResponse.from(saved);
     }
 
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll()
                 .stream()
-                .map(ThemeResponseMapper::toResponse)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> findAndOrderByPopularity(LocalDate start, LocalDate end, int count) {
         return themeRepository.findAndOrderByPopularityFirstTheme(start, end, PageRequest.of(0, count))
                 .stream()
-                .map(ThemeResponseMapper::toResponse)
+                .map(ThemeResponse::from)
                 .toList();
     }
 

@@ -12,7 +12,6 @@ import roomescape.dto.ReservationTimeResponse;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.service.mapper.ReservationTimeResponseMapper;
 
 @Service
 @Transactional
@@ -34,13 +33,13 @@ public class ReservationTimeService {
         }
         ReservationTime reservationTime = new ReservationTime(reservationTimeRequest.startAt());
         ReservationTime saved = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponseMapper.toResponse(saved);
+        return ReservationTimeResponse.from(saved);
     }
 
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(ReservationTimeResponseMapper::toResponse)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 

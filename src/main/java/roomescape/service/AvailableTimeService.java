@@ -15,7 +15,6 @@ import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.mapper.AvailableTimeResponseMapper;
 
 @Service
 @Transactional
@@ -46,7 +45,7 @@ public class AvailableTimeService {
 
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(reservationTime -> AvailableTimeResponseMapper.toResponse(
+                .map(reservationTime -> AvailableTimeResponse.of(
                         reservationTime, alreadyUsedTimes.contains(reservationTime)))
                 .toList();
     }
