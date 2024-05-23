@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationdetail;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.schedule.ReservationDate;

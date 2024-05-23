@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservationdetail.ReservationDetail;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.theme.Theme;
 

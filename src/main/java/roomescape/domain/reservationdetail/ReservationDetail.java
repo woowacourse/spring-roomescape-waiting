@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationdetail;
 
 import jakarta.persistence.*;
 import roomescape.domain.schedule.ReservationTime;

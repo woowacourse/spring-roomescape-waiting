@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.dto.ReservationWithRank;
 import roomescape.domain.schedule.ReservationDate;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByStatus(ReservationStatus status);
 
     @Query("""
-            select new roomescape.domain.reservation.ReservationWithRank(r,
+            select new roomescape.domain.dto.ReservationWithRank(r,
             (select count(*) from Reservation as cr
             where cr.detail.id = r.detail.id and cr.createdAt < r.createdAt))
             from Reservation r

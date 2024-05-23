@@ -2,9 +2,9 @@ package roomescape.service.schedule;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.ReservationDetail;
-import roomescape.domain.reservation.ReservationDetailRepository;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservationdetail.ReservationDetail;
+import roomescape.domain.reservationdetail.ReservationDetailRepository;
 import roomescape.domain.schedule.ReservationDate;
 import roomescape.domain.schedule.ReservationTime;
 import roomescape.domain.schedule.ReservationTimeRepository;

@@ -1,4 +1,6 @@
-package roomescape.domain.reservation;
+package roomescape.domain.dto;
+
+import roomescape.domain.reservation.Reservation;
 
 public class ReservationWithRank {
     private Reservation reservation;
