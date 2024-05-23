@@ -18,15 +18,18 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -57,6 +60,9 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> findMyReservations(LoginMember loginMember) {
         List<ReservationMineResponse> myReservations = reservationService.findMyReservations(loginMember);
+        List<ReservationMineResponse> myWaitings = waitingService.findMyWaitings(loginMember);
+
+        myReservations.addAll(myWaitings);
         return ResponseEntity.ok(myReservations);
     }
 

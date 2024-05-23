@@ -2,11 +2,14 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.*;
+import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.repository.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class WaitingService {
@@ -38,7 +41,15 @@ public class WaitingService {
         return WaitingResponse.from(createdWaiting);
     }
 
-    private void validate(LocalDate date, TimeSlot timeSlot, Member member) {
+    public List<ReservationMineResponse> findMyWaitings(LoginMember loginMember) {
+        Member member = findMemberById(loginMember.id());
+        List<Waiting> waitings = waitingRepository.findAllByMemberOrderByDateAsc(member);
+        return waitings.stream()
+                .map(ReservationMineResponse::from)
+                .toList();
+    }
+
+    private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
         validateReservation(date, timeSlot);
         validateDuplicatedReservation(date, timeSlot, theme, member);
     }
