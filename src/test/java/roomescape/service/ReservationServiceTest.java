@@ -130,7 +130,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원의 예약 목록을 반환한다.")
+    @DisplayName("지나간 날짜의 예약을 생성 시 예외가 발생한다.")
     void given_reservationRequestWithPastDate_when_save_then_throwException() {
         //given
         ReservationRequest reservationRequest = new ReservationRequest(LocalDate.parse("1999-01-01"), 1L, 1L, 1L);

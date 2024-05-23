@@ -43,6 +43,13 @@ public class WaitingService {
         return waitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
+    @Transactional(readOnly = true)
+    public List<WaitingResponse> findEntireWaitingList() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
     @Transactional
     public WaitingResponse create(final WaitingRequest waitingRequest) {
         validateExistingReservation(waitingRequest);
@@ -97,7 +104,7 @@ public class WaitingService {
     public void delete(final Long waitingId, final Member member) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기 내역이 없습니다."));
-        if (waiting.getMember() != member) {
+        if (!waiting.getMember().equals(member)) {
             throw new DeleteNotAllowException("예약 대기는 본인만 취소할 수 있습니다.");
         }
         waitingRepository.deleteById(waitingId);
@@ -105,12 +112,8 @@ public class WaitingService {
 
     @Transactional
     public void deleteByAdmin(final Long id) {
+        waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당되는 예약 대기 내역이 없습니다."));
         waitingRepository.deleteById(id);
-    }
-
-    public List<WaitingResponse> findEntireWaitingList() {
-        return waitingRepository.findAll().stream()
-                .map(WaitingResponse::from)
-                .toList();
     }
 }
