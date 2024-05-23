@@ -1,4 +1,25 @@
-# API 명세
+# 방탈출 예약 대기 시스템
+
+## DB 테이블 설계
+
+![db-table.svg](db-table.svg)
+
+- Reservation Detail: 예약 정보
+- Reservation: 예약과 예약 대기 정보
+- Member: 사용자 정보
+- Reservation Time: 예약 시간 정보
+- Theme: 테마 정보
+
+## 시스템 정책
+
+- 예약 정보(Reservation Detail) 당 1개의 예약만 가능하다. 
+- 예약 대기는 여러 명이 할 수 있다. 
+- 한 명의 사용자는 예약 대기와 에약을 동시에 할 수 없다. 
+- 관리자는 수동으로 예약 대기를 예약으로 전환할 수 있다. 
+- 예약 취소와 예약 대기 취소 요청이 발생하면 Reservation의 Status는 CANCELED로 변경된다.
+
+
+## API 명세
 
 ---
 
