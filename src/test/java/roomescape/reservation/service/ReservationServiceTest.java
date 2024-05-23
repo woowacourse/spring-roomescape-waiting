@@ -10,10 +10,12 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.Fixtures;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.ForbiddenException;
+import roomescape.reservation.domain.MemberReservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MemberReservationCreateRequest;
 import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationCreateRequest;
+import roomescape.reservation.repository.MemberReservationRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,14 +30,17 @@ import static org.assertj.core.api.Assertions.*;
 class ReservationServiceTest {
 
     private final ReservationService reservationService;
+    private final MemberReservationRepository memberReservationRepository;
 
     private final Long id;
     private final String name;
     private final LocalDate date;
 
     @Autowired
-    public ReservationServiceTest(ReservationService reservationService) {
+    public ReservationServiceTest(ReservationService reservationService,
+                                  MemberReservationRepository memberReservationRepository) {
         this.reservationService = reservationService;
+        this.memberReservationRepository = memberReservationRepository;
         this.id = 1L;
         this.name = "클로버";
         this.date = LocalDate.now().plusMonths(6);
@@ -137,5 +142,21 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteReservation(id, loginMember))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("본인의 예약 대기만 삭제할 수 있습니다.");
+    }
+
+    @DisplayName("예약 서비스는 다음 대기가 있는 경우 예약 삭제 시 대기를 자동으로 승인한다.")
+    @Test
+    void confirmFirstWaitingReservation() {
+        // given
+        Long deleteId = 13L;
+        Long firstWaitingId = 14L;
+        MemberReservation firstWaiting = memberReservationRepository.findById(firstWaitingId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자 예약입니다."));
+
+        // when
+        reservationService.deleteReservation(deleteId);
+
+        // then
+        assertThat(firstWaiting.getStatus()).isEqualTo(ReservationStatus.CONFIRMATION);
     }
 }

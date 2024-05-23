@@ -120,33 +120,33 @@ VALUES ('2024-12-31', 4, 4);
 INSERT INTO reservation (date, time_id, theme_id)
 VALUES ('2025-12-31', 4, 4);
 
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- pk: 1
 VALUES (1, 2);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 2
 VALUES (2, 1);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 3
 VALUES (1, 3);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 4
 VALUES (3, 4);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 5
 VALUES (4, 5);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 6
 VALUES (5, 6);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 7
 VALUES (6, 7);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 8
 VALUES (4, 8);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 9
 VALUES (5, 9);
-INSERT INTO member_reservation (member_id, reservation_id)
+INSERT INTO member_reservation (member_id, reservation_id) -- 10
 VALUES (6, 10);
 
-INSERT INTO member_reservation (member_id, reservation_id, status, created_at)
+INSERT INTO member_reservation (member_id, reservation_id, status, created_at) -- 11
 VALUES (4, 11, 'WAITING', CURRENT_TIMESTAMP());
-INSERT INTO member_reservation (member_id, reservation_id, status, created_at)
+INSERT INTO member_reservation (member_id, reservation_id, status, created_at) -- 12
 VALUES (3, 11, 'WAITING', DATEADD(DAY, 1, CURRENT_TIMESTAMP()));
 
-INSERT INTO member_reservation(member_id, reservation_id)
+INSERT INTO member_reservation(member_id, reservation_id) -- 13
 VALUES (3, 12);
-INSERT INTO member_reservation(member_id, reservation_id, status)
+INSERT INTO member_reservation(member_id, reservation_id, status) -- 14
 VALUES (3, 12, 'WAITING');
