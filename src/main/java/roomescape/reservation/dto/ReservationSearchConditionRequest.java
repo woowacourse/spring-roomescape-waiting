@@ -8,4 +8,3 @@ import roomescape.validator.ValidDateRange;
 @NotNull
 public record ReservationSearchConditionRequest(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo) {
 }
-
