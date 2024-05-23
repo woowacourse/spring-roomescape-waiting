@@ -63,7 +63,7 @@ class ThemeRepositoryTest {
     void findByIdNameTest() {
         Theme theme = new Theme(new ThemeName(HORROR_THEME_NAME), new Description(HORROR_DESCRIPTION), THUMBNAIL);
         Theme savedTheme = themeRepository.save(theme);
-        Theme findTheme = themeRepository.findByThemeName(new ThemeName(savedTheme.getName())).get();
+        Theme findTheme = themeRepository.findFirstByThemeName(new ThemeName(savedTheme.getName())).get();
 
         assertAll(
                 () -> assertThat(findTheme.getName()).isEqualTo(HORROR_THEME_NAME),
@@ -79,7 +79,7 @@ class ThemeRepositoryTest {
         themeRepository.save(theme);
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes.size()).isEqualTo(1);
+        assertThat(themes).hasSize(1);
     }
 
     @DisplayName("테마 ID로 예약이 참조된 테마들을 찾는다.")
@@ -136,7 +136,7 @@ class ThemeRepositoryTest {
 
         assertAll(
                 () -> assertThat(themes.get(0).getName()).isEqualTo("액션"),
-                () -> assertThat(themes.size()).isEqualTo(2)
+                () -> assertThat(themes).hasSize(2)
         );
     }
 
@@ -153,6 +153,6 @@ class ThemeRepositoryTest {
         themeRepository.deleteById(theme.getId());
         List<Theme> themes = themeRepository.findAll();
 
-        assertThat(themes.size()).isEqualTo(0);
+        assertThat(themes).isEmpty();
     }
 }

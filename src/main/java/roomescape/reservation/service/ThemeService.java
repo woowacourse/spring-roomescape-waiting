@@ -32,7 +32,7 @@ public class ThemeService {
 
     private void validateUniqueThemeName(ThemeSaveRequest themeSaveRequest) {
         ThemeName name = new ThemeName(themeSaveRequest.name());
-        themeRepository.findByThemeName(name).ifPresent(empty -> {
+        themeRepository.findFirstByThemeName(name).ifPresent(empty -> {
             throw new IllegalArgumentException("이미 존재하는 테마 이름입니다.");
         });
     }

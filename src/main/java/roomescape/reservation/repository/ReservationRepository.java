@@ -14,7 +14,12 @@ import roomescape.reservation.domain.WaitingWithRank;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("select r.reservationTime.id from Reservation r where r.date = :date and r.theme.id = :themeId")
+    @Query("""
+            select r.reservationTime.id
+            from Reservation r
+            where r.date = :date
+            and r.theme.id = :themeId
+            """)
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
