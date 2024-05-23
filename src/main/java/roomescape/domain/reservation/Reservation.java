@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import org.hibernate.annotations.ColumnDefault;
 import roomescape.domain.member.Member;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
@@ -32,6 +33,7 @@ public class Reservation {
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @ColumnDefault("'RESERVED'")
     private ReservationState state;
 
     protected Reservation() {
