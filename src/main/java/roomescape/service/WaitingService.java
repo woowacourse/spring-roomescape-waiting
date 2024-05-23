@@ -48,7 +48,8 @@ public class WaitingService {
         Theme theme = themeRepository.findById(reservationRequest.themeId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_THEME));
 
-        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(), theme)) {
+        if (waitingRepository.existsByMemberAndTimeAndDateAndTheme(member, reservationTime, reservationRequest.date(),
+                theme)) {
             throw new CustomException(ExceptionCode.DUPLICATE_WAITING);
         }
         if (reservationRepository.existsByMemberAndTimeAndDate(member, reservationTime, reservationRequest.date())) {
@@ -58,11 +59,13 @@ public class WaitingService {
 
         Waiting waiting = reservationRequest.toWaiting(member, reservationTime, theme);
         Waiting savedWaiting = waitingRepository.save(waiting);
+
         return WaitingResponse.from(savedWaiting);
     }
 
     private void validateIsPastTime(LocalDate date, ReservationTime time) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+
         if (LocalDateTime.now().isAfter(reservationDateTime)) {
             throw new CustomException(ExceptionCode.PAST_TIME_SLOT_WAITING);
         }
@@ -70,6 +73,7 @@ public class WaitingService {
 
     public List<WaitingResponse> findAllWaitings() {
         List<Waiting> waitings = waitingRepository.findAll();
+
         return waitings.stream()
                 .map(WaitingResponse::from)
                 .toList();
@@ -81,6 +85,7 @@ public class WaitingService {
 
     public List<WaitingWithRank> findAllWithRankByMember(final Member member) {
         List<Waiting> waitings = waitingRepository.findAllByMember(member);
+
         return waitings.stream()
                 .map(waiting -> {
                     Long rank = waitingRepository.countAllByDateAndTimeAndThemeAndIdLessThanEqual(
@@ -102,7 +107,9 @@ public class WaitingService {
                     .orElseThrow(() -> new CustomException(ExceptionCode.NOT_FOUND_RESERVATION));
 
             waitingRepository.delete(waiting);
-            reservationRepository.save(new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+            reservationRepository.save(
+                    new Reservation(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme())
+            );
         }
     }
 }
