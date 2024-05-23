@@ -43,6 +43,14 @@ public class AdminReservationController {
     }
 
     @GetMapping("/admin/reservations")
+    public List<ReservationResponse> getReservations() {
+        return reservationService.getReservations()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    @GetMapping("/admin/reservations-search")
     public List<ReservationResponse> searchReservations(@ModelAttribute SearchReservationsRequest request) {
         return reservationService.searchReservations(request)
                 .stream()
