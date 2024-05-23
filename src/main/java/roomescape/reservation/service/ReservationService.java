@@ -61,6 +61,7 @@ public class ReservationService {
         return new ReservationsResponse(response);
     }
 
+    // TODO: Stream 로직 SQL로 해결하도록 변경
     public ReservationsResponse findFirstOrderWaitingReservations() {
         List<MemberReservation> waitingMemberReservations = memberReservationRepository.findByStatus(ReservationStatus.WAITING);
         List<ReservationResponse> response = waitingMemberReservations.stream()
@@ -110,6 +111,18 @@ public class ReservationService {
         }
     }
 
+    private void changeOrdersStatus(final Reservation reservation) {
+        List<MemberReservation> waitingReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(
+                reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
+        for (MemberReservation waitingReservation : waitingReservations) {
+            waitingReservation.increaseOrder();
+            if (waitingReservation.isReserveOrder()) {
+                waitingReservation.changeStatusToReserve();
+            }
+        }
+    }
+
+    //TODO: 승인하려는 예약 정보가 Waiting 상태가 맞는 지 확인
     @Transactional
     public void approveWaitingReservation(final Long reservationId) {
         Reservation reservation = reservationRepository.getById(reservationId);
@@ -119,16 +132,7 @@ public class ReservationService {
         memberReservation.changeStatusToReserve();
     }
 
-    private void changeOrdersStatus(final Reservation reservation) {
-        List<MemberReservation> waitingReservations = memberReservationRepository.findByReservationTimeAndDateAndThemeOrderByIdAsc(reservation.getReservationTime(), reservation.getDate(), reservation.getTheme());
-        for (MemberReservation waitingReservation : waitingReservations) {
-            waitingReservation.increaseOrder();
-            if (waitingReservation.isReserveOrder()) {
-                waitingReservation.changeStatusToReserve();
-            }
-        }
-    }
-
+    //TODO: 삭제하려는 예약 정보가 Waiting 상태가 맞는 지 확인
     @Transactional
     public void removeWaitingReservationById(final Long reservationId, final Long memberId) {
         Member member = memberRepository.getById(memberId);

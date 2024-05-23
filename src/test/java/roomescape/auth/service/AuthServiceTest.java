@@ -10,6 +10,7 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.jwt.JwtHandler;
 import roomescape.global.auth.jwt.dto.TokenDto;
 import roomescape.global.exception.model.NotFoundException;
+import roomescape.global.exception.model.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -67,5 +68,17 @@ class AuthServiceTest {
         // when & then
         Assertions.assertThatThrownBy(() -> authService.checkLogin(notExistMemberId))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 JWT로 토큰 갱신 요청을 보내면 예외를 발생한다.")
+    void failRefreshTokenByInvalidToken() {
+        // given
+        String invalidAccessToken = "hihihihihihihihihihihihihihihihihihi";
+        String invalidRefreshToken = "hihihihihihihihihihihihihihihihihihi";
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> authService.reissueToken(invalidAccessToken, invalidRefreshToken))
+                .isInstanceOf(UnauthorizedException.class);
     }
 }

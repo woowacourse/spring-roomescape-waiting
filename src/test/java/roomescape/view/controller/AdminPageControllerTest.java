@@ -42,7 +42,7 @@ class AdminPageControllerTest {
     }
 
     @Test
-    @DisplayName("관리자 권한이 없는 유저가 /admin 으로 GET 요청을 보내면 어드민 페이지와 200 OK 를 받는다.")
+    @DisplayName("관리자 권한이 없는 유저가 /admin 으로 GET 요청을 보내면 403 Forbidden을 받는다.")
     void getAdminPageHasNotRole() {
         // given
         String accessTokenCookie = getAccessTokenCookieByLogin("member@member.com", "12341234");
@@ -142,6 +142,36 @@ class AdminPageControllerTest {
                 .port(port)
                 .header(new Header("Cookie", accessTokenCookie))
                 .when().get("/admin/theme")
+                .then().log().all()
+                .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("관리자 권한이 있는 유저가 '예약 대기 관리 페이지'로 GET 요청을 보내면 어드민 테마 관리 페이지와 200 OK 를 받는다.")
+    void getAdminReservationWaitingPageHasRole() {
+        // given
+        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+
+        // when & then
+        RestAssured.given().log().all()
+                .port(port)
+                .header(new Header("Cookie", adminAccessTokenCookie))
+                .when().get("/admin/reservation/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("관리자 권한이 없는 유저가 '예약 대기 관리 페이지' 으로 GET 요청을 보내면 403 Forbidden 을 받는다.")
+    void getAdminReservationWaitingHasNotRole() {
+        // given
+        String accessTokenCookie = getAccessTokenCookieByLogin("member@member.com", "12341234");
+
+        // when & then
+        RestAssured.given().log().all()
+                .port(port)
+                .header(new Header("Cookie", accessTokenCookie))
+                .when().get("/admin/reservation/waiting")
                 .then().log().all()
                 .statusCode(403);
     }

@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,13 +24,17 @@ import roomescape.reservation.domain.repository.MemberReservationRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.is;
@@ -101,7 +106,7 @@ public class ReservationControllerTest {
         memberReservationRepository.save(new MemberReservation(reservation1, member, ReservationStatus.RESERVED, 0L));
         memberReservationRepository.save(new MemberReservation(reservation2, member, ReservationStatus.RESERVED, 0L));
         memberReservationRepository.save(new MemberReservation(reservation3, member, ReservationStatus.RESERVED, 0L));
-        
+
         // then
         RestAssured.given().log().all()
                 .port(port)
@@ -113,7 +118,7 @@ public class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("본인의 예약 정보를 조회한다.")
+    @DisplayName("본인의 예약, 예약대기 정보를 조회할 수 있다.")
     void findMemberReservation() {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
@@ -129,7 +134,7 @@ public class ReservationControllerTest {
         LocalDate date = LocalDate.now().plusDays(1);
         reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
         reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme1.getId(), ReservationStatus.RESERVED), member.getId());
-        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme2.getId(), ReservationStatus.RESERVED), member.getId());
+        reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme2.getId(), ReservationStatus.WAITING), member.getId());
         reservationService.addReservation(new ReservationRequest(date, reservationTime2.getId(), theme2.getId(), ReservationStatus.RESERVED), anotherMember.getId());
         reservationService.addReservation(new ReservationRequest(date, reservationTime1.getId(), theme3.getId(), ReservationStatus.RESERVED), anotherMember.getId());
 
@@ -297,6 +302,233 @@ public class ReservationControllerTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("이미 예약이 존재하는 날짜/시간/테마로 예약 생성 요청 시, 409 에러를 발생한다.")
+    void validateDateTimeTheme() {
+        // given
+        String accessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+
+        Map<String, String> reservationParams = Map.of(
+                "name", "썬",
+                "date", LocalDate.now().plusDays(1L).toString(),
+                "timeId", "1",
+                "themeId", "1",
+                "status", ReservationStatus.RESERVED.name()
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", accessTokenCookie)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("data.id", is(1))
+                .header("Location", "/reservations/1");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", accessTokenCookie)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(409);
+    }
+
+    @Test
+    @DisplayName("다른 회원의 예약 대기 정보를 삭제 요청 시, 403 Forbidden 이 발생한다.")
+    void failToRemoveAnotherMemberWaiting() {
+        // given
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
+        Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
+        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        String anotherAccessTokenCookie = getAccessTokenCookieByLogin(anotherMember.getEmail(), anotherMember.getPassword());
+
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+
+        Map<String, String> reservationParams = Map.of(
+                "name", "썬",
+                "date", LocalDate.now().plusDays(1L).toString(),
+                "timeId", "1",
+                "themeId", "1",
+                "status", ReservationStatus.RESERVED.name()
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", accessTokenCookie)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("data.id", is(1))
+                .header("Location", "/reservations/1");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", anotherAccessTokenCookie)
+                .body(reservationParams)
+                .when().delete("/reservations/waitings/1")
+                .then().log().all()
+                .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("관리자는 모든 회원의 예약 대기 정보를 삭제할 수 있다.")
+    void canRemoveAnotherMemberWaitingByAdminRole() {
+        // given
+        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        Member member = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
+        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+
+        Map<String, String> reservationParams = Map.of(
+                "name", "썬",
+                "date", LocalDate.now().plusDays(1L).toString(),
+                "timeId", "1",
+                "themeId", "1",
+                "status", ReservationStatus.RESERVED.name()
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", memberAccessTokenCookie)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("data.id", is(1))
+                .header("Location", "/reservations/1");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", adminAccessTokenCookie)
+                .body(reservationParams)
+                .when().delete("/reservations/waitings/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("관리자가 회원의 예약 대기를 승인하면 순서가 한칸씩 앞당겨지고, 승인된 예약은 대기 상태에서 예약 상태로 변경된다.")
+    void canApproveMemberWaitingByAdminRole() {
+        // given
+        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+        Member member1 = memberRepository.save(new Member("name", "another1@email.com", "password", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member("name", "another2@email.com", "password", Role.MEMBER));
+        Member member3 = memberRepository.save(new Member("name", "another3@email.com", "password", Role.MEMBER));
+
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
+
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member2.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member3.getId());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", adminAccessTokenCookie)
+                .when().patch("/reservations/waitings/2")
+                .then().log().all()
+                .statusCode(200);
+
+        Optional<MemberReservation> optionalMember2Reservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(member2, time, tomorrow, theme);
+        Optional<MemberReservation> optionalMember3Reservation = memberReservationRepository.findByMemberAndReservationTimeAndDateAndTheme(member3, time, tomorrow, theme);
+
+        Assertions.assertThat(optionalMember2Reservation).isNotEmpty();
+        Assertions.assertThat(optionalMember3Reservation).isNotEmpty();
+        Assertions.assertThat(optionalMember2Reservation.get().isReserved()).isTrue();
+
+        Assertions.assertThat(optionalMember2Reservation.get().getOrder()).isEqualTo(0L);
+        Assertions.assertThat(optionalMember3Reservation.get().getOrder()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("관리자가 아니라면 예약대기를 승인해줄 수 없으며, 403 Forbidden 이 발생한다.")
+    void cannotApproveMemberWaitingByMemberRole() {
+        // given
+        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
+        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", memberAccessTokenCookie)
+                .when().patch("/reservations/waitings/1")
+                .then().log().all()
+                .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("관리자는 전체 예약 대기 정보 조회 시, 첫 번째 순서로 대기중인 예약 정보를 조회할 수 있다.")
+    void findFirstOrderWaitingReservationsWithAdminRole() {
+        // given
+        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
+
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1L);
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(tomorrow.toLocalTime()));
+        Theme theme1 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Theme theme2 = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        Member member1 = memberRepository.save(new Member("name1", "email1@email.com", "password", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member("name2", "email2@email.com", "password", Role.MEMBER));
+        Member member3 = memberRepository.save(new Member("name3", "email3@email.com", "password", Role.MEMBER));
+
+        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId(), ReservationStatus.RESERVED), member1.getId());
+        ReservationResponse firstWaitingOrder1 = reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme1.getId(), ReservationStatus.WAITING), member2.getId());
+        reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId(), ReservationStatus.RESERVED), member2.getId());
+        ReservationResponse firstWaitingOrder2 = reservationService.addReservation(new ReservationRequest(tomorrow.toLocalDate(), time.getId(), theme2.getId(), ReservationStatus.WAITING), member3.getId());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", adminAccessTokenCookie)
+                .when().get("/reservations/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("data.reservations.size()", is(2));
+
+        List<ReservationResponse> firstOrderWaitingReservations = reservationService.findFirstOrderWaitingReservations().reservations();
+        Assertions.assertThat(firstOrderWaitingReservations.get(0).id()).isEqualTo(firstWaitingOrder1.id());
+        Assertions.assertThat(firstOrderWaitingReservations.get(1).id()).isEqualTo(firstWaitingOrder2.id());
+    }
+
+    @Test
+    @DisplayName("관리자가 아니면 전체 예약 대기 정보를 조회할 수 없고, 403 Forbidden 이 발생한다.")
+    void cannotFindFirstOrderWaitingReservationsWithMemberRole() {
+        // given
+        Member member = memberRepository.save(new Member("name", "member1@email.com", "password", Role.MEMBER));
+        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", memberAccessTokenCookie)
+                .when().get("/reservations/waitings")
+                .then().log().all()
+                .statusCode(403);
     }
 
     private String getAdminAccessTokenCookieByLogin(final String email, final String password) {

@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -108,7 +109,7 @@ public class ReservationController {
     }
 
     @Admin
-    @PostMapping("/reservations/waitings/{reservationId}")
+    @PatchMapping("/reservations/waitings/{reservationId}")
     @ResponseStatus(HttpStatus.OK)
     public ApiResponse<Void> approveWaitingReservation(
             @NotNull(message = "reservationId는 null 일 수 없습니다.") @PathVariable("reservationId") final Long reservationId

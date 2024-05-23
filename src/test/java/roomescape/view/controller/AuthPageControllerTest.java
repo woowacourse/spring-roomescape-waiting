@@ -14,10 +14,20 @@ class AuthPageControllerTest {
 
     @Test
     @DisplayName("/login 으로 GET 요청을 보내면 login 페이지와 200 OK 를 받는다.")
-    void getMainPage() {
+    void getLoginPage() {
         RestAssured.given().log().all()
                 .port(port)
                 .when().get("/login")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("/login 으로 GET 요청을 보내면 login 페이지와 200 OK 를 받는다.")
+    void getSignupPage() {
+        RestAssured.given().log().all()
+                .port(port)
+                .when().get("/signup")
                 .then().log().all()
                 .statusCode(200);
     }

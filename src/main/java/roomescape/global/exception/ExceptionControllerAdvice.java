@@ -23,7 +23,7 @@ import roomescape.global.exception.model.ValidateException;
 public class ExceptionControllerAdvice {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @ExceptionHandler(value = {NotFoundException.class, ValidateException.class})
+    @ExceptionHandler(value = {ValidateException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleNotFoundException(final CustomException e) {
         logger.error(e.getMessage(), e);
@@ -54,6 +54,13 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(value = ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbiddenException(final ForbiddenException e) {
+        logger.error(e.getMessage(), e);
+        return ErrorResponse.of(e.getErrorType(), e.getMessage());
+    }
+
+    @ExceptionHandler(value = NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         logger.error(e.getMessage(), e);
         return ErrorResponse.of(e.getErrorType(), e.getMessage());
     }

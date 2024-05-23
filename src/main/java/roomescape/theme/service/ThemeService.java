@@ -52,6 +52,7 @@ public class ThemeService {
 
     @Transactional
     public void removeThemeById(final Long id) {
-        themeRepository.deleteById(id);
+        Theme theme = themeRepository.getById(id);
+        themeRepository.delete(theme);
     }
 }

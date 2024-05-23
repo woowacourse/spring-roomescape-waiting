@@ -108,6 +108,22 @@ class ThemeControllerTest {
                 .statusCode(204);
     }
 
+    @Test
+    @DisplayName("존재하지 않는 테마ID로 삭제를 요청하면 예외를 발생한다.")
+    void failDeleteThemeByNotExistThemeId() {
+        String email = "admin@test.com";
+        String password = "12341234";
+        String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin(email, password);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .header(new Header("Cookie", adminAccessTokenCookie))
+                .port(port)
+                .when().delete("/themes/1")
+                .then().log().all()
+                .statusCode(404);
+    }
+
     /*
      *  reservationData DataSet ThemeID 별 reservation 개수
      *  5,4,2,5,2,3,1,1,1,1,1

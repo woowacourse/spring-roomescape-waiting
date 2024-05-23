@@ -160,6 +160,7 @@ public class AuthControllerTest {
                 .port(port)
                 .when().post("/logout")
                 .then().log().all().extract().cookie("accessToken");
+        expiredAccessToken = null; // 웹 상에서는 JWT Cookie MaxAge를 0으로 만들어서 response 해주기 때문에 사라짐
 
         // then
         RestAssured.given().log().all()

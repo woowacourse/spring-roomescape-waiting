@@ -40,10 +40,6 @@ public class Member {
         this(null, name, email, password, role);
     }
 
-    public Member(final Long id, final Member member) {
-        this(id, member.name, member.email, member.password, member.role);
-    }
-
     public Member(final Long id, final String name, final String email, final String password, final Role role) {
         this(id, new MemberName(name), new Email(email), new Password(password), role);
     }
