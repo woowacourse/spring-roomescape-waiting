@@ -7,24 +7,21 @@ import java.time.LocalTime;
 import roomescape.domain.Reservation;
 
 public record MyReservationResponse(
-        @NotNull
-        Long reservationId,
-        @NotBlank
-        String theme,
-        @NotNull
-        LocalDate date,
-        @NotNull
-        LocalTime time,
-        @NotBlank
-        String status
+        @NotNull Long id,
+        @NotBlank String theme,
+        @NotNull LocalDate date,
+        @NotNull LocalTime time,
+        @NotBlank String status,
+        @NotNull Long rank
 ) {
 
-    public static MyReservationResponse from(Reservation reservation, String status) {
+    public static MyReservationResponse from(Reservation reservation, Long rank) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                status);
+                reservation.getStatus().getName(),
+                rank);
     }
 }

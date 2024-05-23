@@ -6,6 +6,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.RoomTheme;
+import roomescape.domain.Status;
 
 public record ReservationCreateRequest(
         @NotNull
@@ -23,7 +24,8 @@ public record ReservationCreateRequest(
                 adminRequest.themeId());
     }
 
-    public Reservation toReservation(Member member, ReservationTime reservationTime, RoomTheme roomTheme) {
-        return new Reservation(member, date, reservationTime, roomTheme);
+    public Reservation toReservation(Member member, ReservationTime reservationTime, RoomTheme roomTheme,
+                                     Status status) {
+        return new Reservation(member, date, reservationTime, roomTheme, status);
     }
 }
