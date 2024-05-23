@@ -4,15 +4,17 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.system.auth.annotation.MemberId;
 import roomescape.system.auth.dto.LoginCheckResponse;
 import roomescape.system.auth.dto.LoginRequest;
-import roomescape.system.auth.service.AuthService;
-import roomescape.system.auth.annotation.MemberId;
 import roomescape.system.auth.jwt.dto.TokenDto;
+import roomescape.system.auth.service.AuthService;
 import roomescape.system.dto.response.ApiResponse;
 
 @RestController
@@ -28,9 +30,9 @@ public class AuthController {
             @Valid @RequestBody final LoginRequest loginRequest,
             final HttpServletResponse response
     ) {
-        final TokenDto tokenDto = authService.login(loginRequest);
-        addTokensToCookie(tokenDto, response);
-
+        final TokenDto tokenInfo = authService.login(loginRequest);
+        addCookieToResponse(new Cookie("accessToken", tokenInfo.accessToken()), response);
+        addCookieToResponse(new Cookie("refreshToken", tokenInfo.refreshToken()), response);
         return ApiResponse.success();
     }
 
@@ -38,6 +40,22 @@ public class AuthController {
     public ApiResponse<LoginCheckResponse> checkLogin(@MemberId final Long memberId) {
         final LoginCheckResponse response = authService.checkLogin(memberId);
         return ApiResponse.success(response);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<Void> logout(
+            final HttpServletRequest request,
+            final HttpServletResponse response
+    ) {
+        TokenDto tokenInfo = getTokenFromCookie(request);
+        Cookie cookie = new Cookie("accessToken", tokenInfo.accessToken());
+        Cookie cookie2 = new Cookie("refreshToken", tokenInfo.refreshToken());
+        cookie.setMaxAge(0);
+        cookie2.setMaxAge(0);
+        addCookieToResponse(cookie, response);
+        addCookieToResponse(cookie2, response);
+        return ApiResponse.success();
     }
 
     @GetMapping("/token-reissue")
@@ -48,12 +66,12 @@ public class AuthController {
         final TokenDto requestToken = getTokenFromCookie(request);
 
         final TokenDto tokenInfo = authService.reissueToken(requestToken.accessToken(), requestToken.refreshToken());
-        addTokensToCookie(tokenInfo, response);
+        addCookieToResponse(new Cookie("accessToken", tokenInfo.accessToken()), response);
+        addCookieToResponse(new Cookie("refreshToken", tokenInfo.refreshToken()), response);
 
         return ApiResponse.success();
     }
 
-    // TODO: 로그아웃, 회원가입 구현
     private TokenDto getTokenFromCookie(final HttpServletRequest request) {
         String accessToken = "";
         String refreshToken = "";
@@ -67,21 +85,10 @@ public class AuthController {
                 cookie.setMaxAge(0);
             }
         }
-
         return new TokenDto(accessToken, refreshToken);
     }
 
-    private void addTokensToCookie(final TokenDto tokenInfo, final HttpServletResponse response) {
-        addTokenToCookie("accessToken", tokenInfo.accessToken(), response);
-        addTokenToCookie("refreshToken", tokenInfo.refreshToken(), response);
-    }
-
-    private void addTokenToCookie(
-            final String cookieName,
-            final String token,
-            final HttpServletResponse response
-    ) {
-        final Cookie cookie = new Cookie(cookieName, token);
+    private void addCookieToResponse(Cookie cookie, final HttpServletResponse response) {
         cookie.setHttpOnly(true);
 
         response.addCookie(cookie);

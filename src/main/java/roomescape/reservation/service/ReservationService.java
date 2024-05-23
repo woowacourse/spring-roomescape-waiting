@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import roomescape.system.exception.error.ErrorType;
-import roomescape.system.exception.model.DataDuplicateException;
-import roomescape.system.exception.model.ForbiddenException;
-import roomescape.system.exception.model.NotFoundException;
-import roomescape.system.exception.model.ValidateException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
@@ -22,12 +17,16 @@ import roomescape.reservation.domain.repository.ReservationSpecification;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.dto.request.FilteredReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
-import roomescape.reservation.dto.response.MemberReservationResponse;
-import roomescape.reservation.dto.response.MemberReservationsResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfoResponse;
 import roomescape.reservation.dto.response.ReservationTimeInfosResponse;
 import roomescape.reservation.dto.response.ReservationsResponse;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
+import roomescape.reservation.dto.response.WaitingWithRanksResponse;
+import roomescape.system.exception.error.ErrorType;
+import roomescape.system.exception.model.ForbiddenException;
+import roomescape.system.exception.model.NotFoundException;
+import roomescape.system.exception.model.ValidateException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -97,44 +96,33 @@ public class ReservationService {
         final Member requestMember = memberService.findMemberById(myMemberId);
         final Reservation requestReservation = findReservationById(targetReservationId);
 
-        /*
-        TODO: 주석 삭제
-            1. 예약된 예약이 있으면 삭제한다.
-                1.1 내가 삭제하려는 예약이 이미 예약된 경우
-                    1.1.1 대기중인 예약이 있다면, 삭제 후 가장 처음 대기 예약의 상태를 예약됨으로 바꿔준다.
-                    1.1.2 아니라면, 그냥 삭제한다.
-                1.2 내가 삭제하려는 예약이 대기중인 예약인 경우
-                    1.2.1 대기중인 예약이 있어도, 그냥 지워주기만 하면 된다.
-
-         */
-
-        if (requestMember.isAdmin() || requestReservation.getMemberId().equals(myMemberId)) {
-            reservationRepository.delete(requestReservation);
-            Optional<Reservation> waitingOptional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
-                    requestReservation.getReservationTime(),
-                    requestReservation.getDate(),
-                    requestReservation.getTheme(),
-                    ReservationStatus.WAITING
+        if (!requestMember.isAdmin() && !requestReservation.getMemberId().equals(myMemberId)) {
+            throw new ForbiddenException(
+                    ErrorType.PERMISSION_DOES_NOT_EXIST,
+                    "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
             );
-
-            if (requestReservation.isReserved() && waitingOptional.isPresent()) {
-                Reservation waitingReservation = waitingOptional.get();
-                reservationRepository.delete(waitingReservation);
-                reservationRepository.save(new Reservation(
-                        waitingReservation.getDate(),
-                        waitingReservation.getReservationTime(),
-                        waitingReservation.getTheme(),
-                        waitingReservation.getMember(),
-                        ReservationStatus.RESERVED
-                ));
-            }
-            return;
         }
 
-        throw new ForbiddenException(
-                ErrorType.PERMISSION_DOES_NOT_EXIST,
-                "예약(Reservation) 정보에 대한 삭제 권한이 존재하지 않습니다."
+        reservationRepository.delete(requestReservation);
+        final Optional<Reservation> waitingOptional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
+                requestReservation.getReservationTime(),
+                requestReservation.getDate(),
+                requestReservation.getTheme(),
+                ReservationStatus.WAITING
         );
+
+        if (requestReservation.isReserved() && waitingOptional.isPresent()) {
+            final Reservation waitingReservation = waitingOptional.get();
+            reservationRepository.delete(waitingReservation);
+            reservationRepository.save(new Reservation(
+                    waitingReservation.getDate(),
+                    waitingReservation.getReservationTime(),
+                    waitingReservation.getTheme(),
+                    waitingReservation.getMember(),
+                    ReservationStatus.RESERVED
+            ));
+        }
+
     }
 
     public ReservationResponse addReservation(final ReservationRequest request, final Long memberId) {
@@ -146,30 +134,12 @@ public class ReservationService {
         final Member member = memberService.findMemberById(memberId);
 
         validateDateAndTime(requestDate, requestTime, now);
-//        validateReservationDuplicate(request, requestTheme);
 
-        // TODO: 예약대기 추가 시, ReservationStatus 값 설정 로직 추가
-
-        /*
-            TODO: 주석 삭제
-            1. 예약 추가
-            2. reservationRepository에서 (X일,Y시간,Z테마)인 예약을 가져온다.
-                2.1 예약이 있고 요청이 예약 대기라면 예약을 저장소에 추가한다.
-                2.2 예약이 없고 요청이 예약이라면 상태를 예약됨으로 바꾸고 저장소에 추가한다.
-                2.3 예약이 있고 요청이 예약이라면 예외가 발생한다. <- 불가능한 경우, API가 유효하지 않은 것으로 간주
-                2.4 예약이 없고 요청이 예약 대기라면 예외가 발생한다. <- 불가능한 경우, API가 유효하지 않은 것으로 간주
-
-           3. 요청에서 예약과 예약 대기를 구분하지 못하도록 했는데 위에는 무슨 경우니?
-                3.1 예약은 항상 대기상태다.
-                3.2 예약저장소에 예약이 있으면 예약을 그대로 집어넣는다.
-                3.3 예약저장소에 예약이 없으면 예약을 예약됨으로 바꾸고 집어넣는다.
-         */
-
-        Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
+        final Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
                 requestTime, requestDate, requestTheme, ReservationStatus.RESERVED
         );
-        ReservationStatus state = optional.isEmpty() ? ReservationStatus.RESERVED : ReservationStatus.WAITING;
-        Reservation saved = reservationRepository.save(
+        final ReservationStatus state = optional.isEmpty() ? ReservationStatus.RESERVED : ReservationStatus.WAITING;
+        final Reservation saved = reservationRepository.save(
                 new Reservation(requestDate, requestTime, requestTheme, member, state));
         return ReservationResponse.from(saved);
     }
@@ -202,21 +172,6 @@ public class ReservationService {
         return requestDate.isEqual(today) && requestReservationTime.getStartAt().isBefore(nowTime);
     }
 
-    private void validateReservationDuplicate(
-            final ReservationRequest reservationRequest,
-            final Theme theme
-    ) {
-        final ReservationTime time = reservationTimeService.findTimeById(reservationRequest.timeId());
-
-        Optional<Reservation> optional = reservationRepository.findFirstByReservationTimeAndDateAndThemeAndReservationStatusOrderById(
-                time, reservationRequest.date(), theme, ReservationStatus.RESERVED);
-
-        if (optional.isPresent()) {
-            throw new DataDuplicateException(ErrorType.RESERVATION_DUPLICATED,
-                    String.format("이미 해당 날짜/시간/테마에 예약이 존재합니다. [values: %s]", reservationRequest));
-        }
-    }
-
     public ReservationsResponse findFilteredReservations(final FilteredReservationRequest request) {
         final Specification<Reservation> specification = getReservationSpecification(request);
 
@@ -247,15 +202,25 @@ public class ReservationService {
         if (request.dateTo() != null) {
             specification = specification.and(ReservationSpecification.withDateTo(request.dateTo()));
         }
+        if (request.waiting() != null) {
+            specification = specification.and(ReservationSpecification.withWaiting(request.waiting()));
+        }
         return specification;
     }
 
-    public MemberReservationsResponse findReservationByMemberId(final Long memberId) {
-        final Member member = memberService.findMemberById(memberId);
-        final List<Reservation> reservations = reservationRepository.findByMember(member);
-        final List<MemberReservationResponse> responses = reservations.stream()
-                .map(MemberReservationResponse::from)
+    public WaitingWithRanksResponse findWaitingWithRankById(final Long myId) {
+        final List<WaitingWithRankResponse> waitingWithRanks = reservationRepository.findWaitingsWithRankByMemberId(myId)
+                .stream()
+                .map(WaitingWithRankResponse::from)
                 .toList();
-        return new MemberReservationsResponse(responses);
+        return new WaitingWithRanksResponse(waitingWithRanks);
+    }
+
+    public void updateState(final Long myId, final Long targetReservationId, final String status) {
+        String STATUS_DECLINE = "decline";
+        if (!status.equals(STATUS_DECLINE)) {
+            return;
+        }
+        removeReservationById(targetReservationId, myId);
     }
 }
