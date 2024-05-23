@@ -36,9 +36,9 @@ CREATE TABLE reservation
 (
     id   BIGINT       NOT NULL AUTO_INCREMENT,
     date VARCHAR(255) NOT NULL,
-    reservation_time_id BIGINT,
-    theme_id BIGINT,
-    member_id BIGINT,
+    reservation_time_id BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
+    member_id BIGINT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
