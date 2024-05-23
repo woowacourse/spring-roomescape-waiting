@@ -49,6 +49,10 @@ public class WaitingService {
                 .toList();
     }
 
+    public void delete(Long id) {
+        waitingRepository.deleteById(id);
+    }
+
     private void validate(LocalDate date, TimeSlot timeSlot, Theme theme, Member member) {
         validateReservation(date, timeSlot);
         validateDuplicatedReservation(date, timeSlot, theme, member);

@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
 
-public record ReservationMineResponse(long reservationId,
+public record ReservationMineResponse(long id,
                                       String theme,
                                       LocalDate date,
                                       @JsonFormat(pattern = "HH:mm") LocalTime time,
