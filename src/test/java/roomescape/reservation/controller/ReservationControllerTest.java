@@ -349,40 +349,48 @@ public class ReservationControllerTest {
         // given
         Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
         Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
-        String accessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
-        String anotherAccessTokenCookie = getAccessTokenCookieByLogin(anotherMember.getEmail(), anotherMember.getPassword());
+        String myAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
 
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
-        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
 
-        Map<String, String> reservationParams = Map.of(
-                "name", "썬",
-                "date", LocalDate.now().plusDays(1L).toString(),
-                "timeId", "1",
-                "themeId", "1",
-                "status", ReservationStatus.RESERVED.name()
-        );
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .header("Cookie", accessTokenCookie)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("data.id", is(1))
-                .header("Location", "/reservations/1");
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member.getId());
+        ReservationResponse anotherMemberWaitingReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), anotherMember.getId());
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
-                .header("Cookie", anotherAccessTokenCookie)
-                .body(reservationParams)
-                .when().delete("/reservations/waitings/1")
+                .header("Cookie", myAccessTokenCookie)
+                .when().delete("/reservations/waitings/" + anotherMemberWaitingReservation.id())
                 .then().log().all()
                 .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("자신의 예약 대기 정보를 삭제할 수 있다.")
+    void removeAnotherMemberWaiting() {
+        // given
+        Member member = memberRepository.save(new Member("name", "email@email.com", "password", Role.MEMBER));
+        Member anotherMember = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
+        String myAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
+
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), anotherMember.getId());
+        ReservationResponse myWaitingReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member.getId());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .port(port)
+                .header("Cookie", myAccessTokenCookie)
+                .when().delete("/reservations/waitings/" + myWaitingReservation.id())
+                .then().log().all()
+                .statusCode(204);
     }
 
     @Test
@@ -390,38 +398,21 @@ public class ReservationControllerTest {
     void canRemoveAnotherMemberWaitingByAdminRole() {
         // given
         String adminAccessTokenCookie = getAdminAccessTokenCookieByLogin("admin@admin.com", "12341234");
-        Member member = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
-        String memberAccessTokenCookie = getAccessTokenCookieByLogin(member.getEmail(), member.getPassword());
+        Member member1 = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
+        Member member2 = memberRepository.save(new Member("name", "another@email.com", "password", Role.MEMBER));
 
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
-        themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
-
-        Map<String, String> reservationParams = Map.of(
-                "name", "썬",
-                "date", LocalDate.now().plusDays(1L).toString(),
-                "timeId", "1",
-                "themeId", "1",
-                "status", ReservationStatus.RESERVED.name()
-        );
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .port(port)
-                .header("Cookie", memberAccessTokenCookie)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("data.id", is(1))
-                .header("Location", "/reservations/1");
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(17, 30)));
+        Theme theme = themeRepository.save(new Theme("테마명", "설명", "썸네일URL"));
+        LocalDate tomorrow = LocalDate.now().plusDays(1L);
+        reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.RESERVED), member1.getId());
+        ReservationResponse waitingStatusReservation = reservationService.addReservation(new ReservationRequest(tomorrow, time.getId(), theme.getId(), ReservationStatus.WAITING), member2.getId());
 
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .port(port)
                 .header("Cookie", adminAccessTokenCookie)
-                .body(reservationParams)
-                .when().delete("/reservations/waitings/1")
+                .when().delete("/reservations/waitings/" + waitingStatusReservation.id())
                 .then().log().all()
                 .statusCode(204);
     }

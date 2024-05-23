@@ -122,25 +122,25 @@ public class ReservationService {
         }
     }
 
-    //TODO: 승인하려는 예약 정보가 Waiting 상태가 맞는 지 확인
     @Transactional
     public void approveWaitingReservation(final Long reservationId) {
         Reservation reservation = reservationRepository.getById(reservationId);
         MemberReservation memberReservation = findMemberReservationByReservation(reservation);
+        validateIsWaitingStatus(memberReservation);
+
         changeWaitingOrdersStatus(reservation);
 
         memberReservation.changeStatusToReserve();
     }
 
-    //TODO: 삭제하려는 예약 정보가 Waiting 상태가 맞는 지 확인
     @Transactional
     public void removeWaitingReservationById(final Long reservationId, final Long memberId) {
         Member member = memberRepository.getById(memberId);
         Reservation reservation = reservationRepository.getById(reservationId);
         MemberReservation memberReservation = findMemberReservationByReservation(reservation);
+        validateIsWaitingStatus(memberReservation);
 
         Long reservationMemberId = reservation.getMember().getId();
-
         if (member.isAdmin() || reservationMemberId.equals(memberId)) {
             memberReservationRepository.deleteById(memberReservation.getId());
             reservationRepository.deleteById(reservation.getId());
@@ -149,6 +149,12 @@ public class ReservationService {
             throw new ForbiddenException(ErrorType.PERMISSION_DOES_NOT_EXIST,
                     String.format("예약 정보에 대한 삭제 권한이 존재하지 않습니다. [reservationId: %d, memberReservationId: %d]"
                             , reservationId, memberReservation.getId()));
+        }
+    }
+
+    private void validateIsWaitingStatus(final MemberReservation memberReservation) {
+        if (memberReservation.isReserved()) {
+            throw new ValidateException(ErrorType.INVALID_REQUEST_DATA, "'예약대기(WAITING)' 상태의 예약만 예약 승인이 가능합니다.");
         }
     }
 
