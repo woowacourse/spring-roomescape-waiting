@@ -9,27 +9,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminController {
 
     @GetMapping
-    public String readAdmin() {
+    public String readIndexPage() {
         return "admin/index";
     }
 
     @GetMapping("/reservation")
-    public String readReservations() {
+    public String readReservationPage() {
         return "admin/reservation-new";
     }
 
     @GetMapping("/time")
-    public String readTimes() {
+    public String readTimePage() {
         return "admin/time";
     }
 
     @GetMapping("/theme")
-    public String readTheme() {
+    public String readThemePage() {
         return "admin/theme";
     }
 
     @GetMapping("/waiting")
-    public String readWaiting() {
+    public String readWaitingPage() {
         return "admin/waiting";
     }
 }
