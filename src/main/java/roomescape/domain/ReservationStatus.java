@@ -13,4 +13,8 @@ public enum ReservationStatus {
     public String getMessage() {
         return message;
     }
+
+    public String getMessage(Long rank) {
+        return rank + "번째 " + message;
+    }
 }
