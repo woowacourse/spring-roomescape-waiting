@@ -60,7 +60,7 @@ class ReservationControllerTest extends ControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(1));
     }
 
     @DisplayName("실패: 예약 날짜가 잘못될 경우 -> 400")

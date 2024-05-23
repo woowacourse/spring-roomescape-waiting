@@ -47,6 +47,10 @@ public class ReservationWaiting {
         }
     }
 
+    public boolean isPast() {
+        return reservation.isPast();
+    }
+
     public Long getId() {
         return id;
     }

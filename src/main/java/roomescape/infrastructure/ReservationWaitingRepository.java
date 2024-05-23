@@ -11,4 +11,8 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
     List<ReservationWaiting> findAllByMemberId(Long memberId);
 
     List<ReservationWaiting> findAll();
+
+    boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
+
+    long countByReservationId(Long reservationId);
 }

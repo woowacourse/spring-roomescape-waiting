@@ -147,7 +147,7 @@ function onReservationButtonClick() {
 
 
   if (selectedDate && selectedThemeId && selectedTimeId) {
-    
+
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
@@ -190,12 +190,12 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
+      TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
     fetch('/reservations/waiting', {
       method: 'POST',
@@ -205,7 +205,12 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
+          if (!response.ok) {
+            response.text().then(text => {
+              alert(text);
+            });
+            throw new Error('Reservation waiting failed');
+          }
           return response.json();
         })
         .then(data => {
@@ -213,7 +218,7 @@ function onWaitButtonClick() {
           window.location.href = "/";
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
+          //alert("An error occurred while making the reservation waiting.");
           console.error(error);
         });
   } else {

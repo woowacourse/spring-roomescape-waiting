@@ -8,6 +8,7 @@ import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 
 public class Fixture {
@@ -29,6 +30,8 @@ public class Fixture {
             MemberRole.ADMIN);
     public static final Reservation VALID_RESERVATION = new Reservation(VALID_MEMBER, VALID_RESERVATION_DATE,
             VALID_RESERVATION_TIME, VALID_THEME);
+
+    public static final ReservationWaiting VALID_WAITING = new ReservationWaiting(VALID_MEMBER, VALID_RESERVATION, 2L);
     public static final String COOKIE_NAME = "token";
 
 }
