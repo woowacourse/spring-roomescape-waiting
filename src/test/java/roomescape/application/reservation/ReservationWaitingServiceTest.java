@@ -1,0 +1,78 @@
+package roomescape.application.reservation;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.application.ServiceTest;
+import roomescape.application.reservation.dto.response.ReservationResponse;
+import roomescape.application.reservation.dto.response.ReservationStatusResponse;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberFixture;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.Theme;
+import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingRepository;
+
+@ServiceTest
+class ReservationWaitingServiceTest {
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private Clock clock;
+
+    private LocalDate date;
+    private ReservationTime time;
+    private Theme theme;
+    private Member member;
+    private Reservation reservation;
+
+    @BeforeEach
+    void setData() {
+        date = LocalDate.of(2024, 1, 1);
+        time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        theme = themeRepository.save(new Theme("themeName", "desc", "url"));
+        member = memberRepository.save(MemberFixture.createMember("아루"));
+        reservation = reservationRepository.save(new Reservation(member, date, time, theme, LocalDateTime.now(clock)));
+    }
+
+    @Test
+    @DisplayName("예약과 예약 대기를 모두 조회한다")
+    void readAllReservationAndWaiting() {
+        Member member1 = memberRepository.save(MemberFixture.createMember("시소"));
+        waitingRepository.save(new Waiting(reservation, member1, LocalDateTime.now(clock)));
+
+        Member member2 = memberRepository.save(MemberFixture.createMember("호돌"));
+        waitingRepository.save(new Waiting(reservation, member2, LocalDateTime.now(clock).minusHours(1)));
+
+        List<ReservationStatusResponse> responses = reservationWaitingService.findAllByMemberId(member1.getId());
+        assertThat(responses.size()).isEqualTo(1);
+    }
+
+
+
+}

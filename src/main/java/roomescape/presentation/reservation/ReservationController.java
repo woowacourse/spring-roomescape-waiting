@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
+import roomescape.application.reservation.ReservationWaitingService;
 import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.request.ReservationRequest;
 import roomescape.application.reservation.dto.response.ReservationResponse;
@@ -23,12 +24,13 @@ import roomescape.presentation.auth.LoginMemberId;
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
+    private final ReservationWaitingService reservationWaitingService;
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService,
+                                 ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping
@@ -39,13 +41,8 @@ public class ReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<List<ReservationStatusResponse>> findMyReservations(@LoginMemberId long memberId) {
-        List<ReservationStatusResponse> reservationResponses = reservationService.findAllByMemberId(memberId);
-        List<ReservationStatusResponse> waitingResponses = waitingService.findAllByMemberId(memberId);
-
-        return ResponseEntity.ok(
-                Stream.concat(reservationResponses.stream(), waitingResponses.stream())
-                        .collect(Collectors.toList())
-        );
+        List<ReservationStatusResponse> responses = reservationWaitingService.findAllByMemberId(memberId);
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping

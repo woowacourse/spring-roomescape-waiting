@@ -16,6 +16,9 @@ public record ReservationStatusResponse(
         LocalTime time,
         String status
 ) {
+
+    public static final String COUNT_WAITING = "번째 ";
+
     public static ReservationStatusResponse from(Reservation reservation) {
         Theme theme = reservation.getTheme();
         ReservationTime time = reservation.getTime();
@@ -51,7 +54,7 @@ public record ReservationStatusResponse(
                 theme.getName(),
                 waiting.getReservation().getDate(),
                 time.getStartAt(),
-                index + "번째 " + status.getStatus()
+                index + COUNT_WAITING + status.getStatus()
         );
     }
 }
