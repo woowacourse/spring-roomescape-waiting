@@ -2,7 +2,7 @@
 
 ## ERD
 
-<img width="896" alt="image" src="https://github.com/PgmJun/spring-roomescape-waiting/assets/84304802/e050da11-0193-4512-bd18-530755f3e767">
+<img width="954" alt="image" src="https://github.com/woowacourse/spring-roomescape-waiting/assets/84304802/91fff11e-1ace-446e-a878-404a83487f2e">
 
 ## API 명세
 
