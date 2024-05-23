@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,16 +30,16 @@ public class ThemeApiController {
     public ResponseEntity<MultipleResponses<PopularThemeResponse>> findTopTenThemesOfLastWeek(
             @RequestParam(value = "limitCount", defaultValue = "10") int limitCount
     ) {
-        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(limitCount);
+        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(limitCount);
 
-        return ResponseEntity.ok(popularThemeResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(popularThemeResponses));
     }
 
     @GetMapping("/themes")
     public ResponseEntity<MultipleResponses<ThemeResponse>> findAll() {
-        MultipleResponses<ThemeResponse> themeResponses = themeService.findAll();
+        List<ThemeResponse> themeResponses = themeService.findAll();
 
-        return ResponseEntity.ok(themeResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(themeResponses));
     }
 
     @PostMapping("/themes")

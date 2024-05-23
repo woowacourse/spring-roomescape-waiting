@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,32 +32,32 @@ public class ReservationApiController {
 
     @GetMapping("/reservations")
     public ResponseEntity<MultipleResponses<ReservationResponse>> findAll(@RequestParam(defaultValue = "SUCCESS") String status) {
-        MultipleResponses<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
+        List<ReservationResponse> reservationResponses = reservationService.findAllByStatus(status);
 
-        return ResponseEntity.ok(reservationResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(reservationResponses));
     }
 
     @GetMapping("/reservations/mine")
     public ResponseEntity<MultipleResponses<MemberReservationResponse>> findMemberReservations(LoginMember loginMember) {
-        MultipleResponses<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
+        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember);
 
-        return ResponseEntity.ok(memberReservationResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(memberReservationResponses));
     }
 
     @GetMapping("/reservations/search")
     public ResponseEntity<MultipleResponses<ReservationResponse>> findAllBySearchCond(
             @Valid @ModelAttribute ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
-        MultipleResponses<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
+        List<ReservationResponse> reservationResponses = reservationService.findAllBySearchCondition(reservationSearchConditionRequest);
 
-        return ResponseEntity.ok(reservationResponses);
+        return ResponseEntity.ok(new MultipleResponses(reservationResponses));
     }
 
     @GetMapping("/admin/reservations/waiting")
     public ResponseEntity<MultipleResponses<ReservationWaitingResponse>> findWaitingReservations() {
-        MultipleResponses<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
+        List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
 
-        return ResponseEntity.ok(waitingReservations);
+        return ResponseEntity.ok(new MultipleResponses<>(waitingReservations));
     }
 
     @PostMapping(path = {"/reservations", "/admin/reservations"})

@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +29,9 @@ public class ReservationTimeApiController {
 
     @GetMapping("/times")
     public ResponseEntity<MultipleResponses<TimeResponse>> findAll() {
-        MultipleResponses<TimeResponse> times = reservationTimeService.findAll();
+        List<TimeResponse> times = reservationTimeService.findAll();
 
-        return ResponseEntity.ok(times);
+        return ResponseEntity.ok(new MultipleResponses<>(times));
     }
 
     @GetMapping("/times/available")
@@ -38,9 +39,9 @@ public class ReservationTimeApiController {
             @RequestParam("date") LocalDate date,
             @RequestParam("theme-id") Long themeId
     ) {
-        MultipleResponses<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
+        List<AvailableReservationTimeResponse> availableTimes = reservationTimeService.findAvailableTimes(date, themeId);
 
-        return ResponseEntity.ok(availableTimes);
+        return ResponseEntity.ok(new MultipleResponses<>(availableTimes));
     }
 
     @PostMapping("/times")

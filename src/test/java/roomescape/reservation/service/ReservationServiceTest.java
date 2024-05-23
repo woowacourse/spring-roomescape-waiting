@@ -16,6 +16,7 @@ import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 import static roomescape.util.Fixture.TOMORROW;
 
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.auth.domain.Role;
 import roomescape.auth.dto.LoginMember;
-import roomescape.common.dto.MultipleResponses;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -163,9 +163,9 @@ class ReservationServiceTest {
         LoginMember loginMember2 = new LoginMember(jojo.getId(), Role.USER, JOJO_NAME, JOJO_EMAIL);
         reservationService.saveReservationWaiting(reservationSaveRequest, loginMember2);
 
-        MultipleResponses<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember2);
+        List<MemberReservationResponse> memberReservationResponses = reservationService.findMemberReservations(loginMember2);
 
-        assertThat(memberReservationResponses.responses()).extracting(MemberReservationResponse::rank)
+        assertThat(memberReservationResponses).extracting(MemberReservationResponse::rank)
                 .containsExactly(2);
     }
 
@@ -193,9 +193,9 @@ class ReservationServiceTest {
         reservationRepository.save(reservation3);
         reservationRepository.save(reservation4);
 
-        MultipleResponses<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
+        List<ReservationWaitingResponse> waitingReservations = reservationService.findWaitingReservations();
 
-        assertThat(waitingReservations.responses()).extracting(ReservationWaitingResponse::id)
+        assertThat(waitingReservations).extracting(ReservationWaitingResponse::id)
                 .containsExactly(reservation2.getId(), reservation3.getId(), reservation4.getId(),
                         reservation1.getId());
     }

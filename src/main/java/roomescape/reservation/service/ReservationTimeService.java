@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.dto.MultipleResponses;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.TimeResponse;
@@ -43,28 +42,24 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
+    public List<AvailableReservationTimeResponse> findAvailableTimes(LocalDate date, Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndThemeId(date, themeId);
-        List<AvailableReservationTimeResponse> availableReservationTimeResponses = reservationTimeRepository.findAll().stream()
+
+        return reservationTimeRepository.findAll().stream()
                 .sorted(Comparator.comparing(ReservationTime::getStartAt))
                 .map(reservationTime -> AvailableReservationTimeResponse.toResponse(
                                 reservationTime,
                                 bookedTimeIds.contains(reservationTime.getId())
                         )
-                )
-                .toList();
-
-        return new MultipleResponses<>(availableReservationTimeResponses);
+                ).toList();
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<TimeResponse> findAll() {
-        List<TimeResponse> timeResponses = reservationTimeRepository.findAll().stream()
+    public List<TimeResponse> findAll() {
+        return reservationTimeRepository.findAll().stream()
                 .sorted(Comparator.comparing(ReservationTime::getStartAt))
                 .map(TimeResponse::toResponse)
                 .toList();
-
-        return new MultipleResponses<>(timeResponses);
     }
 
     public void delete(Long id) {

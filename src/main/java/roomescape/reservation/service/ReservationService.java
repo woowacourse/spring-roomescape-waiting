@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
-import roomescape.common.dto.MultipleResponses;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -117,18 +116,16 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<ReservationResponse> findAllByStatus(String status) {
-        List<ReservationResponse> reservationResponses = reservationRepository.findAllByStatus(Status.from(status)).stream()
+    public List<ReservationResponse> findAllByStatus(String status) {
+        return reservationRepository.findAllByStatus(Status.from(status)).stream()
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartAt))
                 .map(ReservationResponse::toResponse)
                 .toList();
-
-        return new MultipleResponses<>(reservationResponses);
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
+    public List<MemberReservationResponse> findMemberReservations(LoginMember loginMember) {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
         Waitings waitings = waitingReservations.stream()
@@ -137,33 +134,29 @@ public class ReservationService {
                         .thenComparing(Reservation::getCreatedAt))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Waitings::new));
 
-        List<MemberReservationResponse> memberReservationResponses = reservationRepository.findAllByMemberId(loginMember.id()).stream()
+        return reservationRepository.findAllByMemberId(loginMember.id()).stream()
                 .map(reservation -> MemberReservationResponse.toResponse(
                         reservation,
                         waitings.findMemberRank(reservation, loginMember.id())
                 )).toList();
-
-        return new MultipleResponses<>(memberReservationResponses);
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<ReservationWaitingResponse> findWaitingReservations() {
+    public List<ReservationWaitingResponse> findWaitingReservations() {
         List<Reservation> waitingReservations = reservationRepository.findAllByStatus(Status.WAIT);
 
-        List<ReservationWaitingResponse> waitingResponses = waitingReservations.stream()
+        return waitingReservations.stream()
                 .filter(Reservation::isAfterToday)
                 .sorted(Comparator.comparing(Reservation::getDate)
                         .thenComparing(Reservation::getStartAt)
                         .thenComparing(Reservation::getCreatedAt))
                 .map(ReservationWaitingResponse::toResponse)
                 .toList();
-
-        return new MultipleResponses<>(waitingResponses);
     }
 
     @Transactional(readOnly = true)
-    public MultipleResponses<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
-        List<ReservationResponse> reservationResponses = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+    public List<ReservationResponse> findAllBySearchCondition(ReservationSearchConditionRequest request) {
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
                         request.themeId(),
                         request.memberId(),
                         request.dateFrom(),
@@ -173,8 +166,6 @@ public class ReservationService {
                         .thenComparing(Reservation::getStartAt))
                 .map(ReservationResponse::toResponse)
                 .toList();
-
-        return new MultipleResponses<>(reservationResponses);
     }
 
     public void delete(Long id) {

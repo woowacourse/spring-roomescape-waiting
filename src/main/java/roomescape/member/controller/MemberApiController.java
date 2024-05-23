@@ -31,8 +31,8 @@ public class MemberApiController {
 
     @GetMapping("/members")
     public ResponseEntity<MultipleResponses<MemberResponse>> findAll() {
-        MultipleResponses<MemberResponse> memberResponses = memberService.findAll();
+        List<MemberResponse> memberResponses = memberService.findAll();
 
-        return ResponseEntity.ok(memberResponses);
+        return ResponseEntity.ok(new MultipleResponses<>(memberResponses));
     }
 }

@@ -16,13 +16,13 @@ import static roomescape.util.Fixture.THUMBNAIL;
 import static roomescape.util.Fixture.TODAY;
 
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import roomescape.common.dto.MultipleResponses;
 import roomescape.config.DatabaseCleaner;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -110,11 +110,10 @@ class ThemeServiceTest {
         reservationRepository.save(new Reservation(kaki, TODAY, theme2, reservationTime, Status.SUCCESS));
         reservationRepository.save(new Reservation(jojo, TODAY, theme2, reservationTime, Status.SUCCESS));
 
-        MultipleResponses<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(2);
-
+        List<PopularThemeResponse> popularThemeResponses = themeService.findThemesDescOfLastWeekTopOf(2);
         assertAll(
-                () -> assertThat(popularThemeResponses.responses().get(0).name()).isEqualTo("액션"),
-                () -> assertThat(popularThemeResponses.responses()).hasSize(2)
+                () -> assertThat(popularThemeResponses.get(0).name()).isEqualTo("액션"),
+                () -> assertThat(popularThemeResponses).hasSize(2)
         );
     }
 
