@@ -11,8 +11,10 @@ import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.controller.response.ReservationTimeInfoResponse;
 import roomescape.model.Reservation;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 import roomescape.service.dto.ReservationTimeInfoDto;
 
@@ -26,9 +28,11 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -78,10 +82,9 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MemberReservationResponse>> getReservationsOfMember(LoginMember member) {
+        List<WaitingWithRank> waitingWithRank = waitingService.findWaitingByMember(member);
         List<Reservation> reservations = reservationService.findReservationsByMember(member);
-        List<MemberReservationResponse> response = reservations.stream()
-                .map((MemberReservationResponse::new))
-                .toList();
+        List<MemberReservationResponse> response = MemberReservationResponse.from(reservations, waitingWithRank);
         return ResponseEntity.ok(response);
     }
 }

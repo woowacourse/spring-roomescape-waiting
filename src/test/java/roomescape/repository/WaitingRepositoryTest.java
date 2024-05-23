@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
 import roomescape.model.theme.Theme;
@@ -46,9 +47,9 @@ class WaitingRepositoryTest {
     @Test
     @Transactional // TODO: study about transaction
     void should_find_by_memberId() {
-        List<Waiting> waiting = waitingRepository.findByMemberId(2L);
+        List<WaitingWithRank> waiting = waitingRepository.findWaitingWithRankByMemberId(2L);
         assertAll(
                 () -> assertThat(waiting).hasSize(1),
-                () -> assertThat(waiting.get(0).getId()).isEqualTo(2L));
+                () -> assertThat(waiting.get(0).getWaiting().getId()).isEqualTo(2L));
     }
 }

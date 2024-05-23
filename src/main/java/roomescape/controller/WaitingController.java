@@ -13,7 +13,6 @@ import roomescape.service.WaitingService;
 import roomescape.service.dto.ReservationDto;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/reservations/waiting")
@@ -39,14 +38,5 @@ public class WaitingController {
     public ResponseEntity<Void> deleteWaiting(@NotNull @Min(1) @PathVariable("id") Long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<WaitingResponse>> getReservationsOfMember(LoginMember member) {
-        List<Waiting> waiting = waitingService.findWaitingByMember(member);
-        List<WaitingResponse> response = waiting.stream()
-                .map(WaitingResponse::from)
-                .toList();
-        return ResponseEntity.ok(response);
     }
 }

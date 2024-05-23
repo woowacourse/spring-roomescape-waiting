@@ -5,6 +5,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.theme.Theme;
@@ -63,8 +64,8 @@ public class WaitingService {
         return member.orElseThrow(() -> new BadRequestException("[ERROR] 존재하지 않는 데이터입니다."));
     }
 
-    public List<Waiting> findWaitingByMember(LoginMember member) {
-        return waitingRepository.findByMemberId(member.getId());
+    public List<WaitingWithRank> findWaitingByMember(LoginMember member) {
+        return waitingRepository.findWaitingWithRankByMemberId(member.getId());
     }
 
     public void deleteWaiting(long id) {

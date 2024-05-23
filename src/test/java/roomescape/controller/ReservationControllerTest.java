@@ -81,6 +81,7 @@ class ReservationControllerTest {
         jdbcTemplate.execute("TRUNCATE TABLE theme RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time RESTART IDENTITY");
         jdbcTemplate.execute("TRUNCATE TABLE reservation RESTART IDENTITY");
+        jdbcTemplate.execute("TRUNCATE TABLE waiting RESTART IDENTITY");
     }
 
     private void insertTheme(String name, String description, String thumbnail) {
@@ -230,7 +231,7 @@ class ReservationControllerTest {
                 .extract().jsonPath().getList(".", ReservationResponse.class);
     }
 
-    @DisplayName("자신의 예약을 조회한다.")
+    @DisplayName("자신의 예약을 조회한다.") // TODO: add waiting test case
     @Test
     void should_find_reservations_of_member() {
         String token = authService.createToken(userDto);

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.NotFoundException;
 import roomescape.model.ReservationTime;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.model.member.LoginMember;
 import roomescape.model.member.Member;
 import roomescape.model.member.Role;
@@ -90,9 +91,9 @@ class WaitingServiceTest {
     @Test
     void should_find_all_reservation_waiting_of_member() {
         LoginMember member = new LoginMember(1L);
-        List<Waiting> waiting = waitingService.findWaitingByMember(member);
+        List<WaitingWithRank> waiting = waitingService.findWaitingByMember(member);
         assertAll(
                 () -> assertThat(waiting).hasSize(1),
-                () -> assertThat(waiting.get(0).getId()).isEqualTo(1L));
+                () -> assertThat(waiting.get(0).getWaiting().getId()).isEqualTo(1L));
     }
 }

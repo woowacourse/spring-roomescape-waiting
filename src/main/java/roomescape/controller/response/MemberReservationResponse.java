@@ -2,9 +2,13 @@ package roomescape.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.model.Reservation;
+import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class MemberReservationResponse {
 
@@ -22,9 +26,34 @@ public class MemberReservationResponse {
         this.status = status;
     }
 
-    public MemberReservationResponse(Reservation reservation) {
-        this(reservation.getId(), reservation.getTheme().getName(),
-                reservation.getDate(), reservation.getTime().getStartAt(), "예약");
+    public static MemberReservationResponse from(Reservation reservation) {
+        return new MemberReservationResponse(
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                "예약"); // TODO: 프론트에서?
+    }
+
+    private static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
+        Waiting waiting = waitingWithRank.getWaiting();
+        Long rank = waitingWithRank.getRank();
+        return new MemberReservationResponse(
+                waiting.getId(),
+                waiting.getTheme().getName(),
+                waiting.getDate(),
+                waiting.getTime().getStartAt(),
+                rank + "번째 예약대기");
+    }
+
+    public static List<MemberReservationResponse> from(List<Reservation> reservations, List<WaitingWithRank> waitingWithRank) {
+        List<MemberReservationResponse> reservationResponses = reservations.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
+        List<MemberReservationResponse> waitingResponses = waitingWithRank.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
+        return Stream.concat(reservationResponses.stream(), waitingResponses.stream()).toList();
     }
 
     public long getReservationId() {
